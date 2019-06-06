@@ -72,50 +72,62 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Retirer_upsDB: Elimination d'un ups                                                                                        */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: false si probleme                                                                                                  */
+/* Ups_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                          */
+/* Entrée: le status du GSM                                                                                                   */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Retirer_upsDB ( struct UPSDB *ups )
-  { gchar requete[200];
-    gboolean retour;
+ static void Ups_send_status_to_master ( struct MODULE_UPS *ups, gboolean status )
+  { /*if (Config.instance_is_master==TRUE)                                                        /* si l'instance est Maitre */
+     { Dls_data_set_bool ( ups->tech_id, "COMM", &ups->bit_comm, status ); }                              /* Communication OK */
+/*    else
+     { struct ZMQ_SET_BIT bit;
+       bit.type = 0;
+       bit.num = -1;
+       g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", ups->tech_id );
+       g_snprintf( bit.acronyme, sizeof(bit.acronyme), "COMM" );
+       Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv",
+                           (status ? "SET_BIT_TO_1" : "SET_BIT_TO_0"),
+                           &bit, sizeof(struct ZMQ_SET_BIT) );
+     }*/
+    ups->comm_status = status;
+  }
+/******************************************************************************************************************************/
+/* Recuperer_liste_id_MODULE_UPS: Recupération de la liste des ids des upss                                                        */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
+ static struct DB *Recuperer_ups ( void )
+  { gchar requete[512];
     struct DB *db;
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
-       return(FALSE);
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(NULL);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_UPS, ups->id );
+                "SELECT id,tech_id,host,ups,username,password,enable,map_EA,map_E,map_A "
+                " FROM %s ORDER BY host,ups", NOM_TABLE_UPS );
 
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL( &db );
-    Cfg_ups.lib->Thread_reload = TRUE;                                /* Rechargement des modules RS en mémoire de travaille */
-    return(retour);
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+     { Libere_DB_SQL (&db);
+       return(NULL);
+     }
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+    return(db);
   }
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_upsDB: Recupération de la liste des ids des upss                                                        */
+/* Recuperer_liste_id_MODULE_UPS: Recupération de la liste des ids des upss                                                        */
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
- static gboolean Recuperer_upsDB ( struct DB *db )
-  { gchar requete[512];
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,host,ups,bit_comm,enable,map_EA,map_E,map_A,username,password "
-                " FROM %s WHERE instance_id='%s' ORDER BY host,ups", NOM_TABLE_UPS, g_get_host_name() );
-
-    return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
-  }
-/******************************************************************************************************************************/
-/* Recuperer_liste_id_upsDB: Recupération de la liste des ids des upss                                                        */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: une GList                                                                                                          */
-/******************************************************************************************************************************/
- static struct UPSDB *Recuperer_upsDB_suite( struct DB *db )
-  { struct UPSDB *ups;
+ static struct MODULE_UPS *Recuperer_ups_suite( struct DB *db )
+  { struct MODULE_UPS *ups;
 
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -123,138 +135,21 @@
        return(NULL);
      }
 
-    ups = (struct UPSDB *)g_try_malloc0( sizeof(struct UPSDB) );
+    ups = (struct MODULE_UPS *)g_try_malloc0( sizeof(struct MODULE_UPS) );
     if (!ups) Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
-     { memcpy( &ups->host,     db->row[1],  sizeof(ups->host   ) );
-       memcpy( &ups->ups,      db->row[2],  sizeof(ups->ups    ) );
-       memcpy( &ups->username, db->row[8],  sizeof(ups->username) );
-       memcpy( &ups->password, db->row[9], sizeof(ups->password) );
+     { g_snprintf( ups->tech_id,  sizeof(ups->tech_id),  "%s", db->row[1] );
+       g_snprintf( ups->host,     sizeof(ups->host),     "%s", db->row[2] );
+       g_snprintf( ups->ups,      sizeof(ups->ups),      "%s", db->row[3] );
+       g_snprintf( ups->username, sizeof(ups->username), "%s", db->row[4] );
+       g_snprintf( ups->password, sizeof(ups->password), "%s", db->row[5] );
+       ups->enable            = atoi(db->row[6]);
+       ups->map_EA            = atoi(db->row[7]);
+       ups->map_E             = atoi(db->row[8]);
+       ups->map_A             = atoi(db->row[9]);
        ups->id                = atoi(db->row[0]);
-       ups->bit_comm          = atoi(db->row[3]);
-       ups->enable            = atoi(db->row[4]);
-       ups->map_EA            = atoi(db->row[5]);
-       ups->map_E             = atoi(db->row[6]);
-       ups->map_A             = atoi(db->row[7]);
      }
     return(ups);
-  }
-/******************************************************************************************************************************/
-/* Modifier_upsDB: Modification d'un ups Watchdog                                                                             */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
-/* Sortie: -1 si pb, id sinon                                                                                                 */
-/******************************************************************************************************************************/
- static gint Ajouter_modifier_upsDB( struct UPSDB *ups, gboolean ajout )
-  { gchar *host, *name, *username, *password;
-    gboolean retour_sql;
-    gchar requete[2048];
-    struct DB *db;
-    gint retour;
-
-    host = Normaliser_chaine ( ups->host );                                                  /* Formatage correct des chaines */
-    if (!host)
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Normalisation host impossible", __func__ );
-       return(-1);
-     }
-    name = Normaliser_chaine ( ups->ups );                                                   /* Formatage correct des chaines */
-    if (!name)
-     { g_free(host);
-       Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Normalisation name impossible", __func__ );
-       return(-1);
-     }
-    username = Normaliser_chaine ( ups->username );                                          /* Formatage correct des chaines */
-    if (!username)
-     { g_free(host);
-       g_free(name);
-       Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Normalisation username impossible", __func__ );
-       return(-1);
-     }
-    password = Normaliser_chaine ( ups->password );                                          /* Formatage correct des chaines */
-    if (!password)
-     { g_free(host);
-       g_free(name);
-       g_free(username);
-       Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Normalisation password impossible", __func__ );
-       return(-1);
-     }
-
-    if (ajout == TRUE)
-     { g_snprintf( requete, sizeof(requete),
-                   "INSERT INTO %s"
-                   "(instance_id,host,ups,bit_comm,enable,map_EA,map_E,map_A,username,password) "
-                   "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d,'%s','%s')",
-                   NOM_TABLE_UPS, g_get_host_name(), host, name, ups->bit_comm, ups->enable,
-                   ups->map_EA, ups->map_E, ups->map_A, username, password
-                 );
-     }
-    else
-     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE %s SET "
-                   "host='%s',ups='%s',bit_comm=%d,enable=%d,"
-                   "map_EA=%d,map_E=%d,map_A=%d,"
-                   "username='%s',password='%s' "
-                   "WHERE id=%d",
-                   NOM_TABLE_UPS, host, name, ups->bit_comm, ups->enable,
-                   ups->map_EA, ups->map_E, ups->map_A,
-                   username, password,
-                   ups->id );
-     }
-    g_free(host);
-    g_free(name);
-    g_free(username);
-    g_free(password);
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
-       return(-1);
-     }
-
-    retour_sql = Lancer_requete_SQL ( db, requete );                                               /* Lancement de la requete */
-    if ( retour_sql == TRUE )                                                                              /* Si pas d'erreur */
-     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL ( db );                                   /* Retourne le nouvel ID ups */
-       else retour = 0;
-     }
-    else retour = -1;
-    Libere_DB_SQL( &db );
-    return ( retour );                                                                /* Pas d'erreur lors de la modification */
-  }
-/******************************************************************************************************************************/
-/* Modifier_upsDB: Modification d'un ups Watchdog                                                                             */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
-/* Sortie: -1 si pb, id sinon                                                                                                 */
-/******************************************************************************************************************************/
- gboolean Modifier_upsDB( struct UPSDB *ups )
-  { return ( (Ajouter_modifier_upsDB( ups, FALSE ) > 0 ? TRUE : FALSE) );
-  }
-/******************************************************************************************************************************/
-/* Modifier_upsDB: Modification d'un ups Watchdog                                                                             */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
-/* Sortie: -1 si pb, id sinon                                                                                                 */
-/******************************************************************************************************************************/
- gint Ajouter_upsDB( struct UPSDB *ups )
-  { return ( Ajouter_modifier_upsDB( ups, TRUE ) );
-  }
-/******************************************************************************************************************************/
-/* Charger_tous_Requete la DB pour charger les modules ups                                                                    */
-/* Entrée: rien                                                                                                               */
-/* Sortie: le nombre de modules trouvé                                                                                        */
-/******************************************************************************************************************************/
- struct MODULE_UPS *Chercher_module_ups_by_id ( gint id )
-  { struct MODULE_UPS *module;
-    GSList *liste;
-    module = NULL;
-    pthread_mutex_lock ( &Cfg_ups.lib->synchro );
-    liste = Cfg_ups.Modules_UPS;
-    while ( liste )
-     { module = ((struct MODULE_UPS *)liste->data);
-       if (module->ups.id == id) break;
-       liste = liste->next;
-     }
-    pthread_mutex_unlock ( &Cfg_ups.lib->synchro );
-    if (liste) return(module);
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "%s: UPS %d not found", __func__, id );
-    return(NULL);
   }
 /******************************************************************************************************************************/
 /* Charger_tous_ups: Requete la DB pour charger les modules ups                                                               */
@@ -262,49 +157,27 @@
 /* Sortie: le nombre de modules trouvé                                                                                        */
 /******************************************************************************************************************************/
  static gboolean Charger_tous_ups ( void  )
-  { struct DB *db;
+  { struct MODULE_UPS *module;
+    struct DB *db;
     gint cpt;
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
-       return(FALSE);
-     }
-
 /**************************************************** Chargement des modules **************************************************/
-    if ( ! Recuperer_upsDB( db ) )
-     { Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_ups Failed", __func__ );
+    if ( (db = Recuperer_ups()) == NULL )
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_ups Failed", __func__ );
        return(FALSE);
      }
 
     Cfg_ups.Modules_UPS = NULL;
     cpt = 0;
-    for ( ; ; )
-     { struct MODULE_UPS *module;
-       struct UPSDB *ups;
-
-       ups = Recuperer_upsDB_suite( db );
-       if (!ups) break;
-
-       module = (struct MODULE_UPS *)g_try_malloc0( sizeof(struct MODULE_UPS) );
-       if (!module)                                                                       /* Si probleme d'allocation mémoire */
-        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR,
-                   "%s: Erreur allocation mémoire struct MODULE_UPS", __func__ );
-          g_free(ups);
-          Libere_DB_SQL( &db );
-          return(FALSE);
-        }
-       memcpy( &module->ups, ups, sizeof(struct UPSDB) );
-       g_free(ups);
-       cpt++;                                                                  /* Nous avons ajouté un module dans la liste ! */
+    while ( (module = Recuperer_ups_suite( db )) != NULL )
+     { cpt++;                                                                  /* Nous avons ajouté un module dans la liste ! */
                                                                                             /* Ajout dans la liste de travail */
        pthread_mutex_lock( &Cfg_ups.lib->synchro );
        Cfg_ups.Modules_UPS = g_slist_prepend ( Cfg_ups.Modules_UPS, module );
        pthread_mutex_unlock( &Cfg_ups.lib->synchro );
        Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
-                "%s: id = %03d, host=%s, name=%s", __func__,
-                 module->ups.id, module->ups.host, module->ups.ups );
+                "%s: tech_id='%s', host=%s, name=%s", __func__,
+                 module->tech_id, module->host, module->ups );
      }
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "%s: %03d UPS found  !", __func__, cpt );
 
@@ -312,7 +185,7 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Rechercher_upsDB: Recupération du ups dont le num est en parametre                                                         */
+/* Rechercher_MODULE_UPS: Recupération du ups dont le num est en parametre                                                         */
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
@@ -349,10 +222,10 @@
        module->started = FALSE;
      }
 
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "%s: Deconnecter_module %d", __func__, module->ups.id );
-    if (module->ups.bit_comm) SB( module->ups.bit_comm, 0 );                      /* Mise a zero du bit interne lié au module */
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "%s: Deconnecter_module %s", __func__, module->tech_id );
+    Ups_send_status_to_master ( module, FALSE );
 
-    num_ea = module->ups.map_EA;
+    num_ea = module->map_EA;
     SEA_range( num_ea++, 0);                                                                 /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 0);                                                                 /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 0);                                                                 /* Numéro de l'EA pour la valeur */
@@ -374,18 +247,18 @@
     gint num_ea;
     int connexion;
 
-    if ( (connexion = upscli_connect( &module->upsconn, module->ups.host,
+    if ( (connexion = upscli_connect( &module->upsconn, module->host,
                                       UPS_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: connexion refused by module %d (%s)", __func__,
-                 module->ups.id, (char *)upscli_strerror(&module->upsconn) );
+                "%s: connexion refused by module '%s' (host '%s' -> %s)", __func__,
+                 module->tech_id, module->host, (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
 
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Connecter_ups: %s", module->ups.host );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Connecter_ups: %s", module->host );
 
 /********************************************************* UPSDESC ************************************************************/
-    g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->ups.ups );
+    g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->ups );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "%s: Sending GET UPSDESC failed (%s)", __func__,
@@ -398,14 +271,14 @@
                    (char *)upscli_strerror(&module->upsconn) );
         }
        else
-        { g_snprintf( module->libelle, sizeof(module->libelle), "%s", buffer + strlen(module->ups.ups) + 9 );
+        { g_snprintf( module->libelle, sizeof(module->libelle), "%s", buffer + strlen(module->ups) + 9 );
           Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                    "%s: Reading GET UPSDESC %s", __func__,
                    module->libelle );
         }
      }
 /**************************************************** USERNAME ****************************************************************/
-    g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", module->ups.username );
+    g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", module->username );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "%s: Sending USERNAME failed %s", __func__,
@@ -425,7 +298,7 @@
      }
 
 /******************************************************* PASSWORD *************************************************************/
-    g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", module->ups.password );
+    g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", module->password );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "%s: Sending PASSWORD failed %s", __func__,
@@ -446,8 +319,8 @@
 
     module->date_next_connexion = 0;
     module->started = TRUE;
-    if (module->ups.bit_comm) SB( module->ups.bit_comm, 1 );                        /* Mise a un du bit interne lié au module */
-    num_ea = module->ups.map_EA;
+    Ups_send_status_to_master ( module, TRUE );
+    num_ea = module->map_EA;
     SEA_range( num_ea++, 1);                                                                 /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 1);                                                                 /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 1);                                                                 /* Numéro de l'EA pour la valeur */
@@ -470,9 +343,9 @@
 
     if (module->started != TRUE) return(FALSE);
 
-    g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->ups.ups, nom_cmd );
+    g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->ups, nom_cmd );
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-             "%s: Sending '%s' to %s", __func__, buffer, module->ups.ups );
+             "%s: Sending '%s' to %s", __func__, buffer, module->ups );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                  "%s: Sending INSTCMD failed (%s) error %s", __func__,
@@ -490,7 +363,7 @@
      }
     else
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-                "%s: Sending '%s' to %s OK", __func__, buffer, module->ups.ups );
+                "%s: Sending '%s' to %s OK", __func__, buffer, module->ups );
      }
     return(TRUE);
   }
@@ -506,7 +379,7 @@
 
     if (module->started != TRUE) return(NULL);
 
-    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->ups.ups, nom_var );
+    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->ups, nom_var );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "%s: Sending GET VAR failed (%s) error=%s", __func__,
@@ -529,7 +402,7 @@
     if ( ! strncmp ( buffer, "VAR", 3 ) )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                 "%s: Reading GET VAR %s OK = %s", __func__, nom_var, buffer );
-       return(buffer + 6 + strlen(module->ups.ups) + strlen(nom_var));
+       return(buffer + 6 + strlen(module->ups) + strlen(nom_var));
      }
 
     if ( ! strcmp ( buffer, "ERR VAR-NOT-SUPPORTED" ) )
@@ -549,7 +422,7 @@
  static gboolean Envoyer_sortie_ups( struct MODULE_UPS *module )
   { gint num_a;
 
-    num_a = module->ups.map_A;
+    num_a = module->map_A;
     if (A(num_a)) { if (Onduleur_set_instcmd ( module, "load.off" ) == FALSE) return(FALSE); SA(num_a,0); }
     num_a++;
     if (A(num_a)) { if (Onduleur_set_instcmd ( module, "load.on" ) == FALSE) return(FALSE); SA(num_a,0); }
@@ -576,65 +449,90 @@
 /******************************************************************************************************************************/
  static gboolean Interroger_ups( struct MODULE_UPS *module )
   { gchar *reponse;
-    gfloat valeur;
     gint num_e, num_ea;
 
-    num_ea = module->ups.map_EA;
+    num_ea = module->map_EA;
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
-
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
+       Dls_data_set_AI ( module->tech_id, "LOAD", module->ai_load, atof(reponse+1) );
+     }
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
+       Dls_data_set_AI ( module->tech_id, "REALPOWER", module->ai_realpower, atof(reponse+1) );
+     }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
+       Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", module->ai_battery_charge, atof(reponse+1) );
+     }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
+       Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", module->ai_input_voltage, atof(reponse+1) );
+     }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
+       Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", module->ai_battery_runtime, atof(reponse+1) );
+     }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
+       Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", module->ai_battery_voltage, atof(reponse+1) );
+     }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
+       Dls_data_set_AI ( module->tech_id, "INPUT_HZ", module->ai_input_frequency, atof(reponse+1) );
+     }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
+       Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", module->ai_output_current, atof(reponse+1) );
+     }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
+       Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", module->ai_output_frequency, atof(reponse+1) );
+     }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
+       Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", module->ai_output_voltage, atof(reponse+1) );
+     }
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
-    num_e  = module->ups.map_E;
+    num_e  = module->map_E;
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
-     { SE( num_e, !strcmp(reponse, "\"on\"") ); }                                             /* Numéro de l'E pour la valeur */
-
+     { SE( num_e, !strcmp(reponse, "\"on\"") );                                               /* Numéro de l'E pour la valeur */
+       Dls_data_set_bool ( module->tech_id, "OUTLET1_STATUS", module->di_outlet_1_status, !strcmp(reponse, "\"on\"") );
+     }
     num_e++;
     if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
-     { SE( num_e, !strcmp(reponse, "\"on\"") ); }                                             /* Numéro de l'E pour la valeur */
+     { SE( num_e, !strcmp(reponse, "\"on\"") );                                               /* Numéro de l'E pour la valeur */
+       Dls_data_set_bool ( module->tech_id, "OUTLET2_STATUS", module->di_outlet_2_status, !strcmp(reponse, "\"on\"") );
+     }
 
     num_e++;
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { SE( num_e, !strcmp(reponse, "\"OL CHRG\"") ); }                                        /* Numéro de l'E pour la valeur */
+     { SE( num_e, !strcmp(reponse, "\"OL CHRG\"") );                                          /* Numéro de l'E pour la valeur */
+       Dls_data_set_bool ( module->tech_id, "UPS_OL_CHRG", module->di_ups_ol_charging, !strcmp(reponse, "\"OL CHRG\"") );
+     }
 
     num_e++;
     if (reponse != NULL)
-     { SE( num_e, !strcmp(reponse, "\"OB\"") ); }                                             /* Numéro de l'E pour la valeur */
+     { SE( num_e, !strcmp(reponse, "\"OB\"") );                                               /* Numéro de l'E pour la valeur */
+       Dls_data_set_bool ( module->tech_id, "UPS_ON_BATT", module->di_ups_on_batt, !strcmp(reponse, "\"OB\"") );
+     }
 
     return(TRUE);
   }
@@ -685,24 +583,24 @@
           lib->Thread_reload = FALSE;
         }
 
-       if (Cfg_ups.admin_start)
+/*       if (Cfg_ups.admin_start)
         { module = Chercher_module_ups_by_id ( Cfg_ups.admin_start );
-          if (module) { module->ups.enable = TRUE;
+          if (module) { module->enable = TRUE;
                         module->date_next_connexion = 0;
-                        Modifier_upsDB( &module->ups );
+                        Modifier_MODULE_UPS( &module->ups );
                       }
           Cfg_ups.admin_start = 0;
         }
 
        if (Cfg_ups.admin_stop)
         { module = Chercher_module_ups_by_id ( Cfg_ups.admin_stop );
-          if (module) { module->ups.enable = FALSE;
+          if (module) { module->enable = FALSE;
                         Deconnecter_module  ( module );
                         module->date_next_connexion = 0;                                         /* RAZ de la date de retente */
-                        Modifier_upsDB( &module->ups );
+  /*                      Modifier_MODULE_UPS( &module->ups );
                       }
           Cfg_ups.admin_stop = 0;
-        }
+        }*/
 
        if (Cfg_ups.Modules_UPS == NULL)                                             /* Si pas de module référencés, on attend */
         { sleep(2); continue; }
@@ -711,30 +609,30 @@
        liste = Cfg_ups.Modules_UPS;
        while (liste && (lib->Thread_run == TRUE))
         { module = (struct MODULE_UPS *)liste->data;
-          if ( module->ups.enable != TRUE ||                            /* si le module n'est pas enable, on ne le traite pas */
+          if ( module->enable != TRUE ||                            /* si le module n'est pas enable, on ne le traite pas */
                Partage->top < module->date_next_connexion )                        /* Si attente retente, on change de module */
-           { liste = liste->next;                                          /* On prépare le prochain accès au prochain module */
+           { liste = g_slist_next(liste);                                  /* On prépare le prochain accès au prochain module */
              continue;
            }
 /******************************************** Début de l'interrogation du module **********************************************/
           if ( ! module->started )                                                               /* Communication OK ou non ? */
            { if ( ! Connecter_ups( module ) )                                                 /* Demande de connexion a l'ups */
               { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                         "%s: Module %03d DOWN", __func__, module->ups.id );
+                         "%s: Module '%s' DOWN", __func__, module->tech_id );
                 Deconnecter_module ( module );                                         /* Sur erreur, on deconnecte le module */
                 module->date_next_connexion = Partage->top + UPS_RETRY;
               }
            }
           else
            { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                      "%s: Envoi des sorties ups ID%03d", __func__, module->ups.id );
+                      "%s: Envoi des sorties ups '%s'", __func__, module->tech_id );
              if ( Envoyer_sortie_ups ( module ) == FALSE )
               { Deconnecter_module ( module );                                         /* Sur erreur, on deconnecte le module */
                 module->date_next_connexion = Partage->top + UPS_RETRY;                          /* On retente dans longtemps */
               }
              else
               { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                         "%s: Interrogation ups ID%03d", __func__, module->ups.id );
+                         "%s: Interrogation ups '%s'", __func__, module->tech_id );
                 if ( Interroger_ups ( module ) == FALSE )
                  { Deconnecter_module ( module );
                    module->date_next_connexion = Partage->top + UPS_RETRY;                       /* On retente dans longtemps */
@@ -749,8 +647,7 @@
 
     Decharger_tous_UPS();
 end:
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-              "%s: Down . . . TID = %p", __func__, pthread_self() );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_ups.lib->Thread_run = FALSE;                                                            /* Le thread ne tourne plus ! */
     Cfg_ups.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

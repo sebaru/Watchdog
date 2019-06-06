@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/time.h>
  #include <sys/prctl.h>
@@ -49,7 +49,7 @@
      {                               /* Si erreur, c'est peut etre parce que la table n'existe pas, on tente donc de la créer */
        g_snprintf( table, sizeof(table),                                                                       /* Requete SQL */
                    "CREATE TABLE `%s_%03d_%06d`("
-                   "`date_time` datetime(6) DEFAULT NULL,"
+                   "`date_time` datetime(1) DEFAULT NULL,"
                    "`valeur` float NOT NULL DEFAULT '0',"
                    "KEY `index_date` (`date_time`)"
                    ") ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
@@ -79,7 +79,7 @@
      {                               /* Si erreur, c'est peut etre parce que la table n'existe pas, on tente donc de la créer */
        g_snprintf( table, sizeof(table),                                                                       /* Requete SQL */
                    "CREATE TABLE `%s_%s_%s`("
-                   "`date_time` datetime(6) DEFAULT NULL,"
+                   "`date_time` datetime(1) DEFAULT NULL,"
                    "`valeur` float NOT NULL DEFAULT '0',"
                    "KEY `index_date` (`date_time`)"
                    ") ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
@@ -97,9 +97,7 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch )
-  { gchar requete[512], table[512];
-
-    if (arch->num == -1) Ajouter_archDB_by_nom ( db, arch );
+  { if (arch->num == -1) Ajouter_archDB_by_nom ( db, arch );
                     else Ajouter_archDB_by_num ( db, arch );
   }
 /******************************************************************************************************************************/
@@ -114,7 +112,7 @@
     prctl(PR_SET_NAME, "W-ArchSQL", 0, 0, 0 );
     Liste_tables = NULL;
 
-    db = Init_ArchDB_SQL();      
+    db = Init_ArchDB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_arch, LOG_ERR,
                 "%s: Unable to open database %s", __func__, Partage->com_arch.archdb_database );
@@ -138,7 +136,7 @@
      { Liste_tables = g_slist_prepend ( Liste_tables, strdup(db->row[0]) ); }
     Libere_DB_SQL(&db);
 
-    db = Init_ArchDB_SQL();      
+    db = Init_ArchDB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_arch, LOG_ERR,
                 "%s: Unable to open database %s for deleting", __func__, Partage->com_arch.archdb_database );

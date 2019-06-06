@@ -1,42 +1,40 @@
 #!/bin/sh
 
 echo "Creating systemd service"
-if [ "$1" = "server" ]
-then
-        wtd_home=/home/watchdog
-        wtd_user=watchdog
-	echo "Installation in standalone mode in $wtd_home for $wtd_user"
-        sleep 4
-        sudo cp /usr/local/etc/Watchdogd.service.system /etc/systemd/system/Watchdogd.service
-        sudo systemctl daemon-reload
-        sudo systemctl enable Watchdogd.service
-        sudo usermod -a -G audio,dialout $wtd_user
-        sudo loginctl enable-linger $wtd_user
-else
-	wtd_home=~/.watchdog
-        wtd_user=`whoami`
-	echo "Installation in user mode in $wtd_home for $wtd_user"
-        sleep 4
-        sudo cp /usr/local/etc/Watchdogd.service.user /etc/systemd/user/Watchdogd.service
-        sudo systemctl daemon-reload
-        systemctl --user enable Watchdogd.service
-        sudo usermod -a -G audio,dialout $wtd_user
+
+echo "Quel user fera tourner Watchdog ?"
+read -p "User: " wtd_user
+
+echo "Dois-je installer la Database (oui/non) ?"
+read -p "Création DB: " database
+
+if [ "$wtd_user" = "watchdog" ]
+	then
+		wtd_home=~$wtd_user
+	else
+		wtd_home=~$wtd_user/.watchdog
 fi
+
+echo "Installation in standalone mode in $wtd_home for $wtd_user"
+sleep 5
+sudo cp /usr/local/etc/Watchdogd.service.system /etc/systemd/system/Watchdogd.service
+sudo systemctl daemon-reload
+sudo systemctl enable Watchdogd.service
+sudo usermod -a -G audio,dialout $wtd_user
+sudo loginctl enable-linger $wtd_user
 sudo systemctl daemon-reload
 echo "done."
 sleep 2
 
 echo "Copying data files"
-mkdir -p $wtd_home
-mkdir -p $wtd_home/Son
-mkdir -p $wtd_home/Dls
-cp -r Son/* $wtd_home/Son
-mkdir -p $wtd_home/.pulse/
+sudo mkdir -p $wtd_home
+sudo mkdir -p $wtd_home/Son
+sudo mkdir -p $wtd_home/Dls
+sudo cp -r Son/* $wtd_home/Son
+sudo chown -R $wtd_user:users $wtd_home
 echo "done."
 sleep 2
 
-if [ "$1" = "server" ]
-then
 echo "Create Database and conf file"
 sudo systemctl restart mariadb
 CONFFILE=/etc/watchdogd.conf
@@ -45,22 +43,18 @@ if [ ! -f $CONFFILE ]
     echo "Creating New watchdog database passwd"
     NEWPASSWORD=`openssl rand -base64 32`
     sed "/usr/local/etc/watchdogd.conf.sample" -e "s#dbpasstobechanged#$NEWPASSWORD#g" | \
-    sed -e "s#hometobechanged#$wtd_home#g" | \
     sed -e "s#usertobechanged#$wtd_user#g" | \
     sudo tee "$CONFFILE" > /dev/null
-   /usr/bin/mysqladmin -u root create WatchdogDB
-   echo "CREATE USER 'watchdog' IDENTIFIED BY '$NEWPASSWORD'; GRANT ALL PRIVILEGES ON WatchdogDB.* TO watchdog; FLUSH PRIVILEGES; source /usr/local/share/Watchdog/init_db.sql;" | mysql -u root WatchdogDB
-   /usr/bin/mysql_secure_installation
+    if [ "$database" = "oui" ]
+    then
+     /usr/bin/mysqladmin -u root create WatchdogDB
+     echo "CREATE USER 'watchdog' IDENTIFIED BY '$NEWPASSWORD'; GRANT ALL PRIVILEGES ON WatchdogDB.* TO watchdog; FLUSH PRIVILEGES; source /usr/local/share/Watchdog/init_db.sql;" | mysql -u root WatchdogDB
+     /usr/bin/mysql_secure_installation
+    fi
 fi
 echo "done."
-fi
 
 echo "Starting Watchdog"
-if [ "$1" = "server" ]
-then
 	sudo systemctl start Watchdogd.service
-else
-	systemctl --user start Watchdogd.service
-fi
 echo "done."
 

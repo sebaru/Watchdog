@@ -47,7 +47,7 @@
     Cfg_audio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_audio.enable            = FALSE;
     g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", AUDIO_DEFAUT_LANGUAGE );
-    g_snprintf( Cfg_audio.device,   sizeof(Cfg_audio.device), "default" );
+    g_snprintf( Cfg_audio.device,   sizeof(Cfg_audio.device), "plughw" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,

@@ -21,14 +21,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _UPS_H_
  #define _UPS_H_
+ #include <json-glib/json-glib.h>
  #include <upsclient.h>
- #include "Reseaux.h"
 
  #define NOM_THREAD      "ups"
  #define NOM_TABLE_UPS   "ups"
@@ -41,8 +41,7 @@
   { struct LIBRAIRIE *lib;
     GSList *Modules_UPS;
     gboolean enable;                                                           /* Thread enable at boot ? */
-    guint admin_start;                                                          /* Demande de deconnexion */
-    guint admin_stop;                                                           /* Demande de deconnexion */
+    gchar tech_id[32];                                                                                /* Tech_id du telephone */
   } Cfg_ups;
 
  #define NBR_CARAC_HOST_UPS           32
@@ -60,35 +59,41 @@
  #define NBR_CARAC_PASSWORD_UPS        20
  #define NBR_CARAC_PASSWORD_UPS_UTF8   (2*NBR_CARAC_PASSWORD_UPS)
 
- struct UPSDB
-  { gint id;                                                  /* Numéro du module dans la base de données */
-    gboolean enable;                                               /* Le module doit-il tourner au boot ? */
-    gchar host[NBR_CARAC_HOST_UPS_UTF8+1];                                   /* Adresses IP du module UPS */
-    gchar ups[NBR_CARAC_UPS_UPS_UTF8+1];                                      /* Nom de l'UPS sur le HOST */
-    gchar username[NBR_CARAC_USERNAME_UPS_UTF8+1];                                    /* Username associé */
-    gchar password[NBR_CARAC_PASSWORD_UPS_UTF8+1];                                    /* Password associé */
-    guint bit_comm;                                  /* Bit interne B d'etat communication avec le module */
-    guint map_EA;                                                    /* Numéro de la premiere EA impactée */
-    guint map_E;                                                      /* Numéro de la premiere E impactée */
-    guint map_A;                                                      /* Numéro de la premiere A impactée */
-  };
-
  struct MODULE_UPS
-  { struct UPSDB ups;
-    gchar libelle[NBR_CARAC_LIBELLE_UPS_UTF8+1];                                       /* Libelle associé */
-
-    UPSCONN_t upsconn;                                                           /* Connexion UPS à l'ups */
-    gboolean started;                                                                  /* Est-il actif ?? */
+  { gboolean enable;                                                                   /* Le module doit-il tourner au boot ? */
+    gint  id;
+    gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];                                                          /* Tech_id du module */
+    gchar libelle[NBR_CARAC_LIBELLE_UPS_UTF8+1];                                                           /* Libelle associé */
+    gchar host[NBR_CARAC_HOST_UPS_UTF8+1];                                                       /* Adresses IP du module UPS */
+    gchar ups[NBR_CARAC_UPS_UPS_UTF8+1];                                                          /* Nom de l'UPS sur le HOST */
+    gchar username[NBR_CARAC_USERNAME_UPS_UTF8+1];                                                        /* Username associé */
+    gchar password[NBR_CARAC_PASSWORD_UPS_UTF8+1];                                                        /* Password associé */
+    guint map_EA;                                                                        /* Numéro de la premiere EA impactée */
+    guint map_E;                                                                          /* Numéro de la premiere E impactée */
+    guint map_A;                                                                          /* Numéro de la premiere A impactée */
+    gpointer bit_comm;                                                            /* Pointer de raccourci pour le bit de comm */
+    gboolean comm_status;                                                /* Bit interne B d'etat communication avec le module */
+    UPSCONN_t upsconn;                                                                               /* Connexion UPS à l'ups */
+    gboolean started;                                                                                      /* Est-il actif ?? */
     time_t date_next_connexion;
+    gpointer ai_load;
+    gpointer ai_realpower;
+    gpointer ai_battery_charge;
+    gpointer ai_battery_runtime;
+    gpointer ai_battery_voltage;
+    gpointer ai_input_voltage;
+    gpointer ai_input_frequency;
+    gpointer ai_output_current;
+    gpointer ai_output_voltage;
+    gpointer ai_output_frequency;
+    gpointer di_outlet_1_status;
+    gpointer di_outlet_2_status;
+    gpointer di_ups_ol_charging;
+    gpointer di_ups_on_batt;
   };
 
-/*********************************************** Déclaration des prototypes *******************************/
- extern gboolean Ups_Lire_config ( void );
- extern gboolean Retirer_upsDB ( struct UPSDB *ups );
- extern gint Ajouter_upsDB ( struct UPSDB *ups );
- extern gboolean Modifier_upsDB( struct UPSDB *ups );
- extern struct MODULE_UPS *Chercher_module_ups_by_id ( gint id );
+/************************************************* Déclaration des prototypes *************************************************/
 
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
 

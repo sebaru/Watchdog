@@ -677,7 +677,8 @@
     Smsg_disconnect();                                                                                	/* Free up used memory */
     if (found) Traiter_commande_sms ( from, texte );
 
-    Smsg_send_status_to_master( (error == ERR_NONE ? TRUE : FALSE ) );
+    if ( error == ERR_NONE || error == ERR_EMPTY ) { Smsg_send_status_to_master( TRUE  ); }
+                                              else { Smsg_send_status_to_master( FALSE ); }
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -757,12 +758,12 @@
                     histo->msg.num, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
         }
      }
+    Smsg_send_status_to_master( FALSE );
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_from_bus );
     Close_zmq ( Cfg_smsg.zmq_to_master );
 
 end:
-    Smsg_send_status_to_master( FALSE );
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_smsg.lib->Thread_run = FALSE;
     Cfg_smsg.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */

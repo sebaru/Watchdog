@@ -104,7 +104,7 @@ INSERT INTO `syns` (`id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUE
 
 CREATE TABLE IF NOT EXISTS `dls` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` VARCHAR(25) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
+  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
   `package` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT "custom",
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `name` text COLLATE utf8_unicode_ci NOT NULL,
@@ -619,16 +619,16 @@ CREATE TABLE IF NOT EXISTS `histo_msgs` (
 
 CREATE TABLE IF NOT EXISTS `ups` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `instance_id` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT "NEW",
   `enable` tinyint(1) NOT NULL,
   `host` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `ups` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `username` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `password` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `bit_comm` int(11) NOT NULL,
   `map_EA` int(11) NOT NULL,
   `map_E` int(11) NOT NULL,
   `map_A` int(11) NOT NULL,
+  `date_create` DATETIME NOT NULL DEFAULT NOW(),
 
   PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
