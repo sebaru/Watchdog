@@ -157,7 +157,7 @@
 
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "histo",
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "histo",
                        &histo, sizeof(struct CMD_TYPE_HISTO) );
   }
 /******************************************************************************************************************************/
