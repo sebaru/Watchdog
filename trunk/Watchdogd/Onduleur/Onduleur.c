@@ -40,9 +40,9 @@
  #include "Onduleur.h"
 
 /******************************************************************************************************************************/
-/* Ups_Lire_config : Lit la config Watchdog et rempli la structure mÈmoire                                                    */
-/* EntrÈe: le pointeur sur la LIBRAIRIE                                                                                       */
-/* Sortie: NÈant                                                                                                              */
+/* Ups_Lire_config : Lit la config Watchdog et rempli la structure m√©moire                                                    */
+/* Entr√©e: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: N√©ant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Ups_Lire_config ( void )
   { gchar *nom, *valeur;
@@ -51,13 +51,13 @@
     Cfg_ups.lib->Thread_debug = FALSE;                                                         /* Settings default parameters */
     Cfg_ups.enable            = FALSE;
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de donnÈes */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de donn√©es */
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* RÈcupÈration d'une config dans la DB */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* R√©cup√©ration d'une config dans la DB */
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,                                             /* Print Config */
                 "Ups_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
@@ -73,8 +73,8 @@
   }
 /******************************************************************************************************************************/
 /* Ups_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                          */
-/* EntrÈe: le status du GSM                                                                                                   */
-/* Sortie: nÈant                                                                                                              */
+/* Entr√©e: le status du GSM                                                                                                   */
+/* Sortie: n√©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Ups_send_status_to_master ( struct MODULE_UPS *ups, gboolean status )
   { /*if (Config.instance_is_master==TRUE)                                                        /* si l'instance est Maitre */
@@ -92,8 +92,8 @@
     ups->comm_status = status;
   }
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_MODULE_UPS: RecupÈration de la liste des ids des upss                                                        */
-/* EntrÈe: un log et une database                                                                                             */
+/* Recuperer_liste_id_MODULE_UPS: Recup√©ration de la liste des ids des upss                                                        */
+/* Entr√©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  static struct DB *Recuperer_ups ( void )
@@ -107,7 +107,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,tech_id,host,ups,username,password,enable,map_EA,map_E,map_A "
+                "SELECT id,tech_id,host,name,username,password,enable,map_EA,map_E,map_A "
                 " FROM %s ORDER BY host,ups", NOM_TABLE_UPS );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -122,8 +122,8 @@
     return(db);
   }
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_MODULE_UPS: RecupÈration de la liste des ids des upss                                                        */
-/* EntrÈe: un log et une database                                                                                             */
+/* Recuperer_liste_id_MODULE_UPS: Recup√©ration de la liste des ids des upss                                                        */
+/* Entr√©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  static struct MODULE_UPS *Recuperer_ups_suite( struct DB *db )
@@ -136,11 +136,11 @@
      }
 
     ups = (struct MODULE_UPS *)g_try_malloc0( sizeof(struct MODULE_UPS) );
-    if (!ups) Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: Erreur allocation mÈmoire", __func__ );
+    if (!ups) Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: Erreur allocation m√©moire", __func__ );
     else
      { g_snprintf( ups->tech_id,  sizeof(ups->tech_id),  "%s", db->row[1] );
        g_snprintf( ups->host,     sizeof(ups->host),     "%s", db->row[2] );
-       g_snprintf( ups->ups,      sizeof(ups->ups),      "%s", db->row[3] );
+       g_snprintf( ups->name,     sizeof(ups->name),     "%s", db->row[3] );
        g_snprintf( ups->username, sizeof(ups->username), "%s", db->row[4] );
        g_snprintf( ups->password, sizeof(ups->password), "%s", db->row[5] );
        ups->enable            = atoi(db->row[6]);
@@ -153,8 +153,8 @@
   }
 /******************************************************************************************************************************/
 /* Charger_tous_ups: Requete la DB pour charger les modules ups                                                               */
-/* EntrÈe: rien                                                                                                               */
-/* Sortie: le nombre de modules trouvÈ                                                                                        */
+/* Entr√©e: rien                                                                                                               */
+/* Sortie: le nombre de modules trouv√©                                                                                        */
 /******************************************************************************************************************************/
  static gboolean Charger_tous_ups ( void  )
   { struct MODULE_UPS *module;
@@ -170,14 +170,14 @@
     Cfg_ups.Modules_UPS = NULL;
     cpt = 0;
     while ( (module = Recuperer_ups_suite( db )) != NULL )
-     { cpt++;                                                                  /* Nous avons ajoutÈ un module dans la liste ! */
+     { cpt++;                                                                  /* Nous avons ajout√© un module dans la liste ! */
                                                                                             /* Ajout dans la liste de travail */
        pthread_mutex_lock( &Cfg_ups.lib->synchro );
        Cfg_ups.Modules_UPS = g_slist_prepend ( Cfg_ups.Modules_UPS, module );
        pthread_mutex_unlock( &Cfg_ups.lib->synchro );
        Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
                 "%s: tech_id='%s', host=%s, name=%s", __func__,
-                 module->tech_id, module->host, module->ups );
+                 module->tech_id, module->host, module->name );
      }
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "%s: %03d UPS found  !", __func__, cpt );
 
@@ -185,8 +185,8 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Rechercher_MODULE_UPS: RecupÈration du ups dont le num est en parametre                                                         */
-/* EntrÈe: un log et une database                                                                                             */
+/* Rechercher_MODULE_UPS: Recup√©ration du ups dont le num est en parametre                                                         */
+/* Entr√©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  static void Decharger_un_UPS ( struct MODULE_UPS *module )
@@ -198,7 +198,7 @@
   }
 /******************************************************************************************************************************/
 /* Decharger_tous_Decharge l'ensemble des modules UPS                                                                         */
-/* EntrÈe: rien                                                                                                               */
+/* Entr√©e: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Decharger_tous_UPS ( void  )
@@ -210,8 +210,8 @@
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
-/* EntrÈe: un id                                                                                                              */
-/* Sortie: nÈant                                                                                                              */
+/* Entr√©e: un id                                                                                                              */
+/* Sortie: n√©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Deconnecter_module ( struct MODULE_UPS *module )
   { gint num_ea;
@@ -226,21 +226,21 @@
     Ups_send_status_to_master ( module, FALSE );
 
     num_ea = module->map_EA;
-    SEA_range( num_ea++, 0);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 0);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 0);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 0);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 0);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 0);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 0);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 0);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 0);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 0);                                                                 /* NumÈro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                                                 /* Num√©ro de l'EA pour la valeur */
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
-/* EntrÈe: une nom et un password                                                                                             */
-/* Sortie: les variables globales sont initialisÈes, FALSE si pb                                                              */
+/* Entr√©e: une nom et un password                                                                                             */
+/* Sortie: les variables globales sont initialis√©es, FALSE si pb                                                              */
 /******************************************************************************************************************************/
  static gboolean Connecter_ups ( struct MODULE_UPS *module )
   { gchar buffer[80];
@@ -258,7 +258,7 @@
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Connecter_ups: %s", module->host );
 
 /********************************************************* UPSDESC ************************************************************/
-    g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->ups );
+    g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->name );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "%s: Sending GET UPSDESC failed (%s)", __func__,
@@ -271,7 +271,7 @@
                    (char *)upscli_strerror(&module->upsconn) );
         }
        else
-        { g_snprintf( module->libelle, sizeof(module->libelle), "%s", buffer + strlen(module->ups) + 9 );
+        { g_snprintf( module->libelle, sizeof(module->libelle), "%s", buffer + strlen(module->name) + 9 );
           Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                    "%s: Reading GET UPSDESC %s", __func__,
                    module->libelle );
@@ -321,21 +321,21 @@
     module->started = TRUE;
     Ups_send_status_to_master ( module, TRUE );
     num_ea = module->map_EA;
-    SEA_range( num_ea++, 1);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 1);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 1);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 1);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 1);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 1);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 1);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 1);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 1);                                                                 /* NumÈro de l'EA pour la valeur */
-    SEA_range( num_ea++, 1);                                                                 /* NumÈro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                                                 /* Num√©ro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                                                 /* Num√©ro de l'EA pour la valeur */
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Onduleur_set_instcmd: Envoi d'une instant commande ‡ l'ups                                                                 */
-/* EntrÈe : l'ups, le nom de la commande                                                                                      */
+/* Onduleur_set_instcmd: Envoi d'une instant commande √† l'ups                                                                 */
+/* Entr√©e : l'ups, le nom de la commande                                                                                      */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
 /******************************************************************************************************************************/
  gboolean Onduleur_set_instcmd ( struct MODULE_UPS *module, gchar *nom_cmd )
@@ -343,9 +343,9 @@
 
     if (module->started != TRUE) return(FALSE);
 
-    g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->ups, nom_cmd );
+    g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->name, nom_cmd );
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-             "%s: Sending '%s' to %s", __func__, buffer, module->ups );
+             "%s: Sending '%s' to %s", __func__, buffer, module->name );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                  "%s: Sending INSTCMD failed (%s) error %s", __func__,
@@ -363,14 +363,14 @@
      }
     else
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-                "%s: Sending '%s' to %s OK", __func__, buffer, module->ups );
+                "%s: Sending '%s' to %s OK", __func__, buffer, module->name );
      }
     return(TRUE);
   }
 
 /******************************************************************************************************************************/
 /* Onduleur_get_var: Recupere une valeur de la variable en parametre                                                          */
-/* EntrÈe : l'ups, le nom de variable, la variable a renseigner                                                               */
+/* Entr√©e : l'ups, le nom de variable, la variable a renseigner                                                               */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
 /******************************************************************************************************************************/
  static gchar *Onduleur_get_var ( struct MODULE_UPS *module, gchar *nom_var )
@@ -379,7 +379,7 @@
 
     if (module->started != TRUE) return(NULL);
 
-    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->ups, nom_var );
+    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->name, nom_var );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "%s: Sending GET VAR failed (%s) error=%s", __func__,
@@ -402,7 +402,7 @@
     if ( ! strncmp ( buffer, "VAR", 3 ) )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                 "%s: Reading GET VAR %s OK = %s", __func__, nom_var, buffer );
-       return(buffer + 6 + strlen(module->ups) + strlen(nom_var));
+       return(buffer + 6 + strlen(module->name) + strlen(nom_var));
      }
 
     if ( ! strcmp ( buffer, "ERR VAR-NOT-SUPPORTED" ) )
@@ -415,8 +415,8 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Envoyer_sortie_ups: Envoi des sorties/InstantCommand ‡ l'ups                                                               */
-/* EntrÈe: identifiants des modules ups                                                                                       */
+/* Envoyer_sortie_ups: Envoi des sorties/InstantCommand √† l'ups                                                               */
+/* Entr√©e: identifiants des modules ups                                                                                       */
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
  static gboolean Envoyer_sortie_ups( struct MODULE_UPS *module )
@@ -444,7 +444,7 @@
   }
 /******************************************************************************************************************************/
 /* Interroger_ups: Interrogation d'un ups                                                                                     */
-/* EntrÈe: identifiants des modules ups                                                                                       */
+/* Entr√©e: identifiants des modules ups                                                                                       */
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
  static gboolean Interroger_ups( struct MODULE_UPS *module )
@@ -453,84 +453,84 @@
 
     num_ea = module->map_EA;
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) );                                                       /* NumÈro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Num√©ro de l'EA pour la valeur */
        Dls_data_set_AI ( module->tech_id, "LOAD", module->ai_load, atof(reponse+1) );
      }
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) );                                                       /* NumÈro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Num√©ro de l'EA pour la valeur */
        Dls_data_set_AI ( module->tech_id, "REALPOWER", module->ai_realpower, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) );                                                       /* NumÈro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Num√©ro de l'EA pour la valeur */
        Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", module->ai_battery_charge, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) );                                                       /* NumÈro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Num√©ro de l'EA pour la valeur */
        Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", module->ai_input_voltage, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) );                                                       /* NumÈro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Num√©ro de l'EA pour la valeur */
        Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", module->ai_battery_runtime, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) );                                                       /* NumÈro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Num√©ro de l'EA pour la valeur */
        Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", module->ai_battery_voltage, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) );                                                       /* NumÈro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Num√©ro de l'EA pour la valeur */
        Dls_data_set_AI ( module->tech_id, "INPUT_HZ", module->ai_input_frequency, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) );                                                       /* NumÈro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Num√©ro de l'EA pour la valeur */
        Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", module->ai_output_current, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) );                                                       /* NumÈro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Num√©ro de l'EA pour la valeur */
        Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", module->ai_output_frequency, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
-     { SEA( num_ea, atof(reponse+1) );                                                       /* NumÈro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) );                                                       /* Num√©ro de l'EA pour la valeur */
        Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", module->ai_output_voltage, atof(reponse+1) );
      }
 
-/*---------------------------------------------- RÈcupÈration des entrÈes TOR de l'UPS ---------------------------------------*/
+/*---------------------------------------------- R√©cup√©ration des entr√©es TOR de l'UPS ---------------------------------------*/
     num_e  = module->map_E;
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
-     { SE( num_e, !strcmp(reponse, "\"on\"") );                                               /* NumÈro de l'E pour la valeur */
+     { SE( num_e, !strcmp(reponse, "\"on\"") );                                               /* Num√©ro de l'E pour la valeur */
        Dls_data_set_bool ( module->tech_id, "OUTLET1_STATUS", module->di_outlet_1_status, !strcmp(reponse, "\"on\"") );
      }
     num_e++;
     if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
-     { SE( num_e, !strcmp(reponse, "\"on\"") );                                               /* NumÈro de l'E pour la valeur */
+     { SE( num_e, !strcmp(reponse, "\"on\"") );                                               /* Num√©ro de l'E pour la valeur */
        Dls_data_set_bool ( module->tech_id, "OUTLET2_STATUS", module->di_outlet_2_status, !strcmp(reponse, "\"on\"") );
      }
 
     num_e++;
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { SE( num_e, !strcmp(reponse, "\"OL CHRG\"") );                                          /* NumÈro de l'E pour la valeur */
+     { SE( num_e, !strcmp(reponse, "\"OL CHRG\"") );                                          /* Num√©ro de l'E pour la valeur */
        Dls_data_set_bool ( module->tech_id, "UPS_OL_CHRG", module->di_ups_ol_charging, !strcmp(reponse, "\"OL CHRG\"") );
      }
 
     num_e++;
     if (reponse != NULL)
-     { SE( num_e, !strcmp(reponse, "\"OB\"") );                                               /* NumÈro de l'E pour la valeur */
+     { SE( num_e, !strcmp(reponse, "\"OB\"") );                                               /* Num√©ro de l'E pour la valeur */
        Dls_data_set_bool ( module->tech_id, "UPS_ON_BATT", module->di_ups_on_batt, !strcmp(reponse, "\"OB\"") );
      }
 
@@ -587,7 +587,7 @@
         { module = Chercher_module_ups_by_id ( Cfg_ups.admin_start );
           if (module) { module->enable = TRUE;
                         module->date_next_connexion = 0;
-                        Modifier_MODULE_UPS( &module->ups );
+                        Modifier_MODULE_UPS( &module->name );
                       }
           Cfg_ups.admin_start = 0;
         }
@@ -597,24 +597,24 @@
           if (module) { module->enable = FALSE;
                         Deconnecter_module  ( module );
                         module->date_next_connexion = 0;                                         /* RAZ de la date de retente */
-  /*                      Modifier_MODULE_UPS( &module->ups );
+  /*                      Modifier_MODULE_UPS( &module->name );
                       }
           Cfg_ups.admin_stop = 0;
         }*/
 
-       if (Cfg_ups.Modules_UPS == NULL)                                             /* Si pas de module rÈfÈrencÈs, on attend */
+       if (Cfg_ups.Modules_UPS == NULL)                                             /* Si pas de module r√©f√©renc√©s, on attend */
         { sleep(2); continue; }
 
-       pthread_mutex_lock ( &Cfg_ups.lib->synchro );                                   /* Car utilisation de la liste chainÈe */
+       pthread_mutex_lock ( &Cfg_ups.lib->synchro );                                   /* Car utilisation de la liste chain√©e */
        liste = Cfg_ups.Modules_UPS;
        while (liste && (lib->Thread_run == TRUE))
         { module = (struct MODULE_UPS *)liste->data;
           if ( module->enable != TRUE ||                            /* si le module n'est pas enable, on ne le traite pas */
                Partage->top < module->date_next_connexion )                        /* Si attente retente, on change de module */
-           { liste = g_slist_next(liste);                                  /* On prÈpare le prochain accËs au prochain module */
+           { liste = g_slist_next(liste);                                  /* On pr√©pare le prochain acc√®s au prochain module */
              continue;
            }
-/******************************************** DÈbut de l'interrogation du module **********************************************/
+/******************************************** D√©but de l'interrogation du module **********************************************/
           if ( ! module->started )                                                               /* Communication OK ou non ? */
            { if ( ! Connecter_ups( module ) )                                                 /* Demande de connexion a l'ups */
               { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
@@ -640,9 +640,9 @@
                 else module->date_next_connexion = Partage->top + UPS_POLLING;               /* Update toutes les xx secondes */
               }
            }
-          liste = liste->next;                                             /* On prÈpare le prochain accËs au prochain module */
+          liste = liste->next;                                             /* On pr√©pare le prochain acc√®s au prochain module */
         }
-       pthread_mutex_unlock ( &Cfg_ups.lib->synchro );                                 /* Car utilisation de la liste chainÈe */
+       pthread_mutex_unlock ( &Cfg_ups.lib->synchro );                                 /* Car utilisation de la liste chain√©e */
      }
 
     Decharger_tous_UPS();
