@@ -92,6 +92,19 @@
     json_builder_add_string_value ( builder, "built-in" );
     json_builder_end_object (builder);                                                                        /* End Document */
 
+    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
+    json_builder_set_member_name  ( builder, "thread" );
+    json_builder_add_string_value ( builder, "db" );
+    json_builder_set_member_name  ( builder, "debug" );
+    json_builder_add_boolean_value( builder, Config.log_db );
+    json_builder_set_member_name  ( builder, "started" );
+    json_builder_add_boolean_value( builder, TRUE );
+    json_builder_set_member_name  ( builder, "objet" );
+    json_builder_add_string_value ( builder, "Database Access" );
+    json_builder_set_member_name  ( builder, "fichier" );
+    json_builder_add_string_value ( builder, "built-in" );
+    json_builder_end_object (builder);                                                                        /* End Document */
+
     liste = Partage->com_msrv.Librairies;                                                /* Parcours de toutes les librairies */
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
@@ -128,13 +141,10 @@
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
  static gint Http_Traiter_request_getprocess_debug ( struct lws *wsi, gchar *thread, gboolean status )
-  { if ( ! strcasecmp ( thread, "arch" ) ) { Config.log_arch = status; }
-    else
-    if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
-    else
-    if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
-    else
-    if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }
+  {      if ( ! strcasecmp ( thread, "arch" ) ) { Config.log_arch = status; }
+    else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
+    else if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
+    else if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }
     else
      { GSList *liste;
        liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
