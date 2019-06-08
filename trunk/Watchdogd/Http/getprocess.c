@@ -200,6 +200,10 @@
         { Partage->com_dls.Thread_reload = TRUE;
           return(Http_Send_response_code ( wsi, HTTP_200_OK ));
         }
+       else if ( ! strcasecmp( target, "arch" ) )
+        { Partage->com_arch.Thread_reload = TRUE;
+          return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+        }
 
        liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
        while(liste)
