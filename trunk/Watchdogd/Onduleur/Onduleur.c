@@ -92,7 +92,7 @@
     ups->comm_status = status;
   }
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_MODULE_UPS: Recupération de la liste des ids des upss                                                        */
+/* Recuperer_liste_id_MODULE_UPS: Recupération de la liste des ids des upss                                                   */
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
@@ -108,21 +108,16 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT id,tech_id,host,name,username,password,enable,map_EA,map_E,map_A "
-                " FROM %s ORDER BY host,ups", NOM_TABLE_UPS );
+                " FROM %s ORDER BY host,name", NOM_TABLE_UPS );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);
        return(NULL);
      }
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Libere_DB_SQL( &db );
-       return(NULL);
-     }
     return(db);
   }
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_MODULE_UPS: Recupération de la liste des ids des upss                                                        */
+/* Recuperer_liste_id_MODULE_UPS: Recupération de la liste des ids des upss                                                   */
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
@@ -185,7 +180,7 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Rechercher_MODULE_UPS: Recupération du ups dont le num est en parametre                                                         */
+/* Rechercher_MODULE_UPS: Recupération du ups dont le num est en parametre                                                    */
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
@@ -454,84 +449,85 @@
     num_ea = module->map_EA;
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
      { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
-       Dls_data_set_AI ( module->tech_id, "LOAD", module->ai_load, atof(reponse+1) );
+       Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, atof(reponse+1) );
      }
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
      { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
-       Dls_data_set_AI ( module->tech_id, "REALPOWER", module->ai_realpower, atof(reponse+1) );
+       Dls_data_set_AI ( module->tech_id, "REALPOWER", &module->ai_realpower, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
      { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
-       Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", module->ai_battery_charge, atof(reponse+1) );
+       Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", &module->ai_battery_charge, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
      { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
-       Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", module->ai_input_voltage, atof(reponse+1) );
+       Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", &module->ai_input_voltage, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
      { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
-       Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", module->ai_battery_runtime, atof(reponse+1) );
+       Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", &module->ai_battery_runtime, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
      { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
-       Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", module->ai_battery_voltage, atof(reponse+1) );
+       Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", &module->ai_battery_voltage, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
      { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
-       Dls_data_set_AI ( module->tech_id, "INPUT_HZ", module->ai_input_frequency, atof(reponse+1) );
+       Dls_data_set_AI ( module->tech_id, "INPUT_HZ", &module->ai_input_frequency, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
      { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
-       Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", module->ai_output_current, atof(reponse+1) );
+       Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", &module->ai_output_current, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
      { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
-       Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", module->ai_output_frequency, atof(reponse+1) );
+       Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", &module->ai_output_frequency, atof(reponse+1) );
      }
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
      { SEA( num_ea, atof(reponse+1) );                                                       /* Numéro de l'EA pour la valeur */
-       Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", module->ai_output_voltage, atof(reponse+1) );
+       Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", &module->ai_output_voltage, atof(reponse+1) );
      }
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     num_e  = module->map_E;
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
      { SE( num_e, !strcmp(reponse, "\"on\"") );                                               /* Numéro de l'E pour la valeur */
-       Dls_data_set_bool ( module->tech_id, "OUTLET1_STATUS", module->di_outlet_1_status, !strcmp(reponse, "\"on\"") );
+       Dls_data_set_bool ( module->tech_id, "OUTLET1_STATUS", &module->di_outlet_1_status, !strcmp(reponse, "\"on\"") );
      }
     num_e++;
     if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
      { SE( num_e, !strcmp(reponse, "\"on\"") );                                               /* Numéro de l'E pour la valeur */
-       Dls_data_set_bool ( module->tech_id, "OUTLET2_STATUS", module->di_outlet_2_status, !strcmp(reponse, "\"on\"") );
+       Dls_data_set_bool ( module->tech_id, "OUTLET2_STATUS", &module->di_outlet_2_status, !strcmp(reponse, "\"on\"") );
      }
 
     num_e++;
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
      { SE( num_e, !strcmp(reponse, "\"OL CHRG\"") );                                          /* Numéro de l'E pour la valeur */
-       Dls_data_set_bool ( module->tech_id, "UPS_OL_CHRG", module->di_ups_ol_charging, !strcmp(reponse, "\"OL CHRG\"") );
+       Dls_data_set_bool ( module->tech_id, "UPS_ONLINE",   &module->di_ups_online,   !strncmp(reponse, "\"OL", 3) );
+       Dls_data_set_bool ( module->tech_id, "UPS_CHARGING", &module->di_ups_charging, !strcmp(reponse, "\"OL CHRG\"") );
+       Dls_data_set_bool ( module->tech_id, "UPS_ON_BATT",  &module->di_ups_on_batt,  !strcmp(reponse, "\"OB\"") );
      }
 
     num_e++;
     if (reponse != NULL)
      { SE( num_e, !strcmp(reponse, "\"OB\"") );                                               /* Numéro de l'E pour la valeur */
-       Dls_data_set_bool ( module->tech_id, "UPS_ON_BATT", module->di_ups_on_batt, !strcmp(reponse, "\"OB\"") );
      }
 
     return(TRUE);
@@ -611,7 +607,7 @@
         { module = (struct MODULE_UPS *)liste->data;
           if ( module->enable != TRUE ||                            /* si le module n'est pas enable, on ne le traite pas */
                Partage->top < module->date_next_connexion )                        /* Si attente retente, on change de module */
-           { liste = g_slist_next(liste);                                  /* On prépare le prochain accès au prochain module */
+           { liste = g_slist_next(liste);                                  /* On prépare le prochain accÃ¨s au prochain module */
              continue;
            }
 /******************************************** Début de l'interrogation du module **********************************************/
@@ -640,7 +636,7 @@
                 else module->date_next_connexion = Partage->top + UPS_POLLING;               /* Update toutes les xx secondes */
               }
            }
-          liste = liste->next;                                             /* On prépare le prochain accès au prochain module */
+          liste = liste->next;                                             /* On prépare le prochain accÃ¨s au prochain module */
         }
        pthread_mutex_unlock ( &Cfg_ups.lib->synchro );                                 /* Car utilisation de la liste chainée */
      }

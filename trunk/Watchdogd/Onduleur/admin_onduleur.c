@@ -57,7 +57,7 @@
     json_builder_set_member_name  ( builder, "admin_password" );
     json_builder_add_string_value ( builder, module->password );
 
-    json_builder_set_member_name  ( builder, "comm_status" );
+    json_builder_set_member_name  ( builder, "comm" );
     json_builder_add_boolean_value ( builder, module->comm_status );
 
     json_builder_set_member_name  ( builder, "ups_load" );
@@ -96,8 +96,11 @@
     json_builder_set_member_name  ( builder, "ups_outlet_2_status" );
     json_builder_add_boolean_value ( builder, Dls_data_get_bool( NULL, NULL, &module->di_outlet_2_status ) );
 
-    json_builder_set_member_name  ( builder, "ups_ol_chargibng" );
-    json_builder_add_boolean_value ( builder, Dls_data_get_bool( NULL, NULL, &module->di_ups_ol_charging ) );
+    json_builder_set_member_name  ( builder, "ups_online" );
+    json_builder_add_boolean_value ( builder, Dls_data_get_bool( NULL, NULL, &module->di_ups_online ) );
+
+    json_builder_set_member_name  ( builder, "ups_charging" );
+    json_builder_add_boolean_value ( builder, Dls_data_get_bool( NULL, NULL, &module->di_ups_charging ) );
 
     json_builder_set_member_name  ( builder, "ups_on_batt" );
     json_builder_add_boolean_value ( builder, Dls_data_get_bool( NULL, NULL, &module->di_ups_on_batt ) );

@@ -88,7 +88,8 @@
     gpointer ai_output_frequency;
     gpointer di_outlet_1_status;
     gpointer di_outlet_2_status;
-    gpointer di_ups_ol_charging;
+    gpointer di_ups_online;
+    gpointer di_ups_charging;
     gpointer di_ups_on_batt;
   };
 
