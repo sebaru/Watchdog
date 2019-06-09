@@ -599,14 +599,13 @@
      }
     if (alias->type==ALIAS_TYPE_STATIC)
      { g_snprintf( action->alors, taille,
-                   "  if (vars->bit_comm_out) SI(%d, 0, 0, 100, 0, 1);\n"
-                   "                     else SI(%d,%d,%d,%d,%d,%d);\n",
+                   "  if (vars->bit_comm_out) SI(%d, 0, 0, 100, 0, 1); else SI(%d,%d,%d,%d,%d,%d);\n",
                      alias->num, alias->num, mode, rouge, vert, bleu, cligno );
      }
     else
      { g_snprintf( action->alors, taille,
-                   "  if (vars->bit_comm_out) Dls_data_set_VISUEL( \"%s\", \"%s\", &_%s_%s, 0, \"darkgreen\", 1 );\n"
-                   "                     else Dls_data_set_VISUEL( \"%s\", \"%s\", &_%s_%s, %d, \"%s\", %d );\n",
+                   "  if (vars->bit_comm_out) Dls_data_set_VISUEL( \"%s\", \"%s\", &_%s_%s, 0, \"darkgreen\", 1 );"
+                   " else Dls_data_set_VISUEL( \"%s\", \"%s\", &_%s_%s, %d, \"%s\", %d );\n",
                      alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
                      alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno );
      }
@@ -903,7 +902,6 @@
     if (!rc) retour = TRAD_DLS_ERROR;
     else
      { setlocale(LC_ALL, "C");
-       DlsScanner_debug = 0;                                                                     /* Debug de la traduction ?? */
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);

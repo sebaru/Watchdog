@@ -42,7 +42,8 @@
          struct COMPARATEUR *comparateur;
        };
 
-%token <val>    T_ERROR PVIRGULE VIRGULE T_DPOINTS DONNE EQUIV T_MOINS T_POUV T_PFERM T_EGAL T_PLUS ET BARRE T_FOIS T_PIPE
+%token <val>    T_ERROR PVIRGULE VIRGULE T_DPOINTS DONNE EQUIV T_MOINS T_POUV T_PFERM T_EGAL T_PLUS ET BARRE T_FOIS
+%token <val>    T_SWITCH T_ACCOUV T_ACCFERM T_PIPE
 %token <val>    T_DEFINE T_STATIC
 
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_TOP_ALERTE
@@ -87,7 +88,6 @@ fichier: ligne_source_dls;
 ligne_source_dls:         listeAlias listeInstr
                         | listeAlias
                         | listeInstr
-                        | listeSwitch
                         |
                         ;
 
@@ -183,41 +183,44 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                    g_free($2);
                    g_free($5);
                 }}
+                | unSwitch
                 ;
 
 /****************************************************** Partie SWITCH *********************************************************/
-listeSwitch:    T_MOINS expr DONNE action PVIRGULE listeCase
-                {{ int taille;
-                   char *instr;
-                   taille = strlen($2)+strlen($4->alors)+strlen($6)+100;
-                   if ($4->sinon) taille+=strlen($4->sinon);
-                   instr = New_chaine( taille );
-                   g_snprintf( instr, taille,
-                               "/* Ligne %d ----------------------*/\n"
-                               "if(%s)\n { %s }\nelse\n { %s\n%s\n }\n\n",
-                               DlsScanner_get_lineno(), $2, $4->alors, ($4->sinon ? $4->sinon : " "), $6 );
-                   Emettre( instr ); g_free(instr);
-                   if ($4->sinon) g_free($4->sinon);
-                   g_free($4->alors); g_free($4);
-                   g_free($2);
-                   g_free($6);
+unSwitch:       T_SWITCH listeCase
+                {{ gchar chaine[80];
+                   g_snprintf( chaine, sizeof(chaine), "/* Ligne %d (CASE BEGIN)------------*/\n", DlsScanner_get_lineno() );
+                   Emettre( chaine );
+                   Emettre( $2 ); g_free($2);
+                   g_snprintf( chaine, sizeof(chaine), "/* Ligne %d (CASE END)--------------*/\n", DlsScanner_get_lineno() );
+                   Emettre( chaine );
                 }}
                 ;
 
-listeCase:      T_PIPE expr DONNE action PVIRGULE listeCase
+listeCase:      T_PIPE T_MOINS expr DONNE action PVIRGULE listeCase
                 {{ int taille;
-                   taille = strlen($2)+strlen($4->alors)+strlen($6)+100;
-                   if ($4->sinon) taille+=strlen($4->sinon);
+                   taille = strlen($3)+strlen($5->alors)+strlen($7)+100;
+                   if ($5->sinon) taille+=strlen($5->sinon);
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille,
-                               "/* Ligne %d ----------------------*/\n"
-                               "if(%s)\n { %s }\nelse\n { %s\n%s\n }\n\n",
-                               DlsScanner_get_lineno(), $2, $4->alors, ($4->sinon ? $4->sinon : " "), $6 );
+                               "/* Ligne %d (CASE INSIDE)----------*/\n"
+                               "if(%s)\n { %s }\nelse\n { %s\n%s }\n",
+                               DlsScanner_get_lineno(), $3, $5->alors, ($5->sinon ? $5->sinon : ""), $7 );
 
+                   if ($5->sinon) g_free($5->sinon);
+                   g_free($5->alors); g_free($5);
+                   g_free($3);
+                   g_free($7);
+                }}
+                | T_PIPE T_MOINS DONNE action PVIRGULE
+                {{ int taille;
+                   taille = strlen($4->alors)+100;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille,
+                               "/* Ligne %d (CASE INSIDE DEFAULT)--*/\n"
+                               "  %s", DlsScanner_get_lineno(), $4->alors );
                    if ($4->sinon) g_free($4->sinon);
                    g_free($4->alors); g_free($4);
-                   g_free($2);
-                   g_free($6);
                 }}
                 | {{ $$=strdup(""); }}
                 ;
