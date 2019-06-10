@@ -1093,6 +1093,10 @@
                  { Mnemo_auto_create_DO ( Dls_plugin.id, alias->acronyme, libelle );
                    break;
                  }
+                case MNEMO_TEMPO:
+                 { Mnemo_auto_create_TEMPO ( Dls_plugin.id, alias->acronyme, libelle );
+                   break;
+                 }
                 case MNEMO_ENTREE:
                  { Mnemo_auto_create_DI ( Dls_plugin.id, alias->acronyme, libelle );
                    break;

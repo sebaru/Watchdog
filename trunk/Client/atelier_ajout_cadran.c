@@ -7,7 +7,7 @@
  * atelier_ajout_cadran.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
  #include "trame.h"
  #include "Config_cli.h"
 
-/********************************************* Définitions des prototypes programme *******************************************/
+/********************************************* DÃ©finitions des prototypes programme *******************************************/
  #include "protocli.h"
 
  extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
@@ -48,7 +48,7 @@
 
 /******************************************************************************************************************************/
 /* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                                        */
-/* Entrée: Un id motif                                                                                                        */
+/* EntrÃ©e: Un id motif                                                                                                        */
 /* sortie: un struct TRAME_ITEM_MOTIF                                                                                         */
 /******************************************************************************************************************************/
  struct TRAME_ITEM_CADRAN *Id_vers_trame_cadran ( struct TYPE_INFO_ATELIER *infos, gint id )
@@ -60,7 +60,7 @@
        else liste = liste->next;
      }
     if (!liste)
-     { printf("Id_vers_trame_cadran: item %d non trouvé\n", id );
+     { printf("Id_vers_trame_cadran: item %d non trouvÃ©\n", id );
        return(NULL);
      }
     return( (struct TRAME_ITEM_CADRAN *)(liste->data) );
@@ -95,8 +95,8 @@
                    (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
 /******************************************************************************************************************************/
-/* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface                                  */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* CB_editier_propriete_TOR: Fonction appelÃ©e qd on appuie sur un des boutons de l'interface                                  */
+/* EntrÃ©e: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
 /* sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean CB_ajouter_editer_cadran ( GtkDialog *dialog, gint reponse,
@@ -124,10 +124,10 @@
              add_cadran.bit_controle = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitctrl) );
              g_snprintf( add_cadran.tech_id, sizeof(add_cadran.tech_id), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tech_id) ) );
              g_snprintf( add_cadran.acronyme, sizeof(add_cadran.acronyme), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acronyme) ) );
-
+             if (strlen(add_cadran.tech_id)) add_cadran.bit_controle = -1;
              Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CADRAN,
                             (gchar *)&add_cadran, sizeof(struct CMD_TYPE_CADRAN) );
-             printf("Requete d'ajout de cadran envoyée au serveur....\n");
+             printf("Requete d'ajout de cadran envoyÃ©e au serveur....\n");
              return(TRUE);                                                                    /* On laisse la fenetre ouverte */
            }
           else                                                                              /* Mise a jour */
@@ -139,6 +139,7 @@
                          "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tech_id) ) );
              g_snprintf( trame_cadran->cadran->acronyme, sizeof(trame_cadran->cadran->acronyme),
                          "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acronyme) ) );
+             if (strlen(trame_cadran->cadran->tech_id)) trame_cadran->cadran->bit_controle = -1;
              printf("Maj cadran  type=%d\n", trame_cadran->cadran->type );
            }
           break;
@@ -151,8 +152,8 @@
   }
 /******************************************************************************************************************************/
 /* Commenter: Met en route le processus permettant de cadraner un synoptique                                                  */
-/* Entrée: widget/data                                                                                                        */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: widget/data                                                                                                        */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Menu_ajouter_editer_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran )
   { GtkWidget *hboite, *table, *label;
@@ -222,13 +223,13 @@
         }
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bitctrl), trame_cadran->cadran->bit_controle );
      }
-    Afficher_mnemo_cadran_ctrl();                                                 /* Pour mettre a jour le mnemonique associé */
+    Afficher_mnemo_cadran_ctrl();                                                 /* Pour mettre a jour le mnemonique associÃ© */
     gtk_widget_show_all( F_ajout_cadran );
   }
 /******************************************************************************************************************************/
 /* Afficher_un_message: Ajoute un message dans la liste des messages                                                          */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: une reference sur le message                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_afficher_un_cadran_atelier( struct CMD_TYPE_CADRAN *rezo_cadran )
   { struct TRAME_ITEM_CADRAN *trame_cadran;
@@ -244,7 +245,7 @@
     memcpy ( cadran, rezo_cadran, sizeof( struct CMD_TYPE_CADRAN ) );
 
     trame_cadran = Trame_ajout_cadran ( TRUE, infos->Trame_atelier, cadran );
-    trame_cadran->groupe_dpl = Nouveau_groupe();                                     /* Numéro de groupe pour le deplacement */
+    trame_cadran->groupe_dpl = Nouveau_groupe();                                     /* NumÃ©ro de groupe pour le deplacement */
 
     g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "button-press-event",
                       G_CALLBACK(Clic_sur_cadran), trame_cadran );
@@ -259,8 +260,8 @@
   }
 /******************************************************************************************************************************/
 /* Cacher_un_message: Enleve un message de la liste des messages                                                              */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: une reference sur le message                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_cacher_un_cadran_atelier( struct CMD_TYPE_CADRAN *cadran )
   { struct TRAME_ITEM_CADRAN *trame_cadran;
@@ -270,7 +271,7 @@
     trame_cadran = Id_vers_trame_cadran( infos, cadran->id );
     printf("Proto_cacher_un_cadran_atelier debut: ID=%d %p\n", cadran->id, trame_cadran );
     if (!trame_cadran) return;
-    Deselectionner( infos, (struct TRAME_ITEM *)trame_cadran );/* Au cas ou il aurait été selectionné... */
+    Deselectionner( infos, (struct TRAME_ITEM *)trame_cadran );/* Au cas ou il aurait Ã©tÃ© selectionnÃ©... */
     Trame_del_cadran( trame_cadran );
     g_free(trame_cadran);
     infos->Trame_atelier->trame_items = g_list_remove( infos->Trame_atelier->trame_items, trame_cadran );

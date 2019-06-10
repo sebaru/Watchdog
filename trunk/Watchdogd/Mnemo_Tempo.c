@@ -36,6 +36,83 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
+/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
+/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/******************************************************************************************************************************/
+ gboolean Mnemo_auto_create_TEMPO ( gint dls_id, gchar *acronyme, gchar *libelle_src )
+  { gchar *acro, *libelle;
+    gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+/******************************************** Préparation de la base du mnemo *************************************************/
+    acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
+    if ( !acro )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
+       return(FALSE);
+     }
+
+    libelle    = Normaliser_chaine ( libelle_src );                                          /* Formatage correct des chaines */
+    if ( !libelle )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation libelle impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "INSERT INTO mnemos_Tempo SET dls_id='%d',acronyme='%s',libelle='%s' "
+                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
+                dls_id, acro, libelle );
+    g_free(libelle);
+    g_free(acro);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return (retour);
+  }
+/******************************************************************************************************************************/
+/* Rechercher_AI: Recupération des champs de base de données pour le AI tech_id:acro en parametre                             */
+/* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
+/* Sortie: la struct DB                                                                                                       */
+/******************************************************************************************************************************/
+ struct DB *Rechercher_Tempo ( gchar *tech_id, gchar *acronyme )
+  { gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(NULL);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT ai.libelle"
+                " FROM %s as mnemos_Tempo"
+                " INNER JOIN dls as d ON ai.dls_id = d.id"
+                " WHERE d.tech_id='%s' AND ai.acronyme='%s' LIMIT 1",
+                tech_id, acronyme
+              );
+
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+     { Libere_DB_SQL (&db);
+       return(NULL);
+     }
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+    return(db);
+  }
+/******************************************************************************************************************************/
 /* Rechercher_tempoDB: Recupération du tempo dont l'id est en parametre                                                       */
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant la temporisation                                                                          */

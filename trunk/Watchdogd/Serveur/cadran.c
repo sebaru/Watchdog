@@ -37,7 +37,7 @@
 /******************************************************************************************************************************/
  gboolean Tester_update_cadran( struct CADRAN *cadran )
   { if (!cadran) return(FALSE);
-    if (cadran->bit_controle!=-1)
+    if (cadran->bit_controle!=-1)                                                                   /* Ancienne mode statique */
      { switch(cadran->type)
         { case MNEMO_ENTREE:
                return( cadran->val_ech != E(cadran->bit_controle) );
@@ -54,6 +54,7 @@
           default: return(FALSE);
         }
      }
+
     switch(cadran->type)
      { case MNEMO_ENTREE:
        case MNEMO_BISTABLE:
@@ -83,6 +84,26 @@
 
     if (!cadran) return(NULL);
 
+    if (cadran->bit_controle==-1 && cadran->dls_data == NULL)
+     { struct DB *db;
+       if ( (db=Rechercher_CI ( cadran->tech_id, cadran->acronyme )) != NULL )
+        { cadran->type = MNEMO_CPT_IMP;
+          Libere_DB_SQL (&db);
+        }
+       else if ( (db=Rechercher_AI ( cadran->tech_id, cadran->acronyme )) != NULL )
+        { cadran->type = MNEMO_ENTREE_ANA;
+          Libere_DB_SQL (&db);
+        }
+       else if ( (db=Rechercher_Tempo ( cadran->tech_id, cadran->acronyme )) != NULL )
+        { cadran->type = MNEMO_TEMPO;
+          Libere_DB_SQL (&db);
+        }
+       else if ( (db=Rechercher_CH ( cadran->tech_id, cadran->acronyme )) != NULL )
+        { cadran->type = MNEMO_CPTH;
+          Libere_DB_SQL (&db);
+        }
+       else cadran->bit_controle = 0;
+     }
     etat_cadran = (struct CMD_ETAT_BIT_CADRAN *)g_try_malloc0( sizeof(struct CMD_ETAT_BIT_CADRAN) );
     if (!etat_cadran) return(NULL);
 
@@ -121,9 +142,11 @@
              }
             return(etat_cadran);
        case MNEMO_ENTREE_ANA:
-            if(cadran->bit_controle==-1) break;
-            cadran->val_ech = Partage->ea[cadran->bit_controle].val_ech;
-            if (EA_inrange(cadran->bit_controle))
+            if(cadran->bit_controle!=-1)
+             { cadran->val_ech = Partage->ea[cadran->bit_controle].val_ech; }
+            else
+             { cadran->val_ech = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data ); }
+            if ( cadran->bit_controle!=-1 && EA_inrange(cadran->bit_controle))
              { if(-1000000.0<cadran->val_ech && cadran->val_ech<1000000.0)
                 { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
                              "%6.2f %s", cadran->val_ech,
@@ -134,6 +157,20 @@
                 { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
                              "%8.0f %s", cadran->val_ech,
                               Partage->ea[cadran->bit_controle].confDB.unite
+                            );
+                }
+             }
+            else if ( cadran->bit_controle==-1 )
+             { if(-1000000.0<cadran->val_ech && cadran->val_ech<1000000.0)
+                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
+                             "%6.2f %s", cadran->val_ech,
+                              ((struct ANALOG_INPUT *)cadran->dls_data)->confDB.unite
+                            );
+                }
+               else
+                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
+                             "%8.0f %s", cadran->val_ech,
+                              ((struct ANALOG_INPUT *)cadran->dls_data)->confDB.unite
                             );
                 }
              }
@@ -183,10 +220,32 @@
                          );
              }
             return(etat_cadran);
+       case MNEMO_TEMPO:
+            if(cadran->bit_controle!=-1) break;
+            Dls_data_get_tempo ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+            struct DLS_TEMPO *tempo = cadran->dls_data;
+            if (!tempo) break;
+
+            if (tempo->status)
+             { gint src, heure, minute, seconde;
+               src = (tempo->date_off - tempo->date_on)/10;
+               heure = src / 3600;
+               minute = (src % 3600) / 60;
+               seconde = (src % (3600*60));
+               g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%02d:%02d:%02d", heure, minute, seconde );
+             } 
+            else
+             { gint src, heure, minute, seconde;
+               if (tempo->confDB.delai_on) src = tempo->confDB.delai_on/10;
+               else src = tempo->confDB.min_on/10;
+               heure = src / 3600;
+               minute = (src % 3600) / 60;
+               seconde = (src % (3600*60));
+               g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%02d:%02d:%02d", heure, minute, seconde );
+             } 
+            return(etat_cadran);
        default:
-            g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                        "unknown"
-                      );
+            g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "unknown" );
             break;
       }
      return(etat_cadran);

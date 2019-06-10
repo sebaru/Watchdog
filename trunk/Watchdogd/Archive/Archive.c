@@ -104,8 +104,7 @@
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
 /******************************************************************************************************************************/
  static void Ajouter_arch_all( gint type, gint num, gchar *nom, gchar *tech_id, gfloat valeur )
-  { static gint last_log = 0, taille_buf = 500000;
-    struct timeval tv;
+  { struct timeval tv;
     struct ARCHDB *arch;
 
     arch = (struct ARCHDB *)g_try_malloc0( sizeof(struct ARCHDB) );
@@ -131,8 +130,6 @@
 /******************************************************************************************************************************/
  void Ajouter_arch( gint type, gint num, gfloat valeur )
   { static gint last_log = 0;
-    struct timeval tv;
-    struct ARCHDB *arch;
 
     if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
     else if (Partage->com_arch.taille_arch > Partage->com_arch.max_buffer_size)
@@ -160,8 +157,6 @@
 /******************************************************************************************************************************/
  void Ajouter_arch_by_nom( gchar *nom, gchar *tech_id, gfloat valeur )
   { static gint last_log = 0;
-    struct timeval tv;
-    struct ARCHDB *arch;
 
     if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
     else if (Partage->com_arch.taille_arch > Partage->com_arch.max_buffer_size)
