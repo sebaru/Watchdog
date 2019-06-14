@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -99,10 +99,10 @@
 
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "histo",
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "histo",
                        &histo, sizeof(struct CMD_TYPE_HISTO) );
 /************************************************** Gestion des repeat ********************************************************/
-    if (histo.msg.time_repeat) 
+    if (histo.msg.time_repeat)
      { struct CMD_TYPE_HISTO *dup_histo;
        GSList *liste;
        pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Vérification de la liste actuelle */
@@ -196,7 +196,7 @@
 
     Modifier_histo_msgsDB ( &histo );
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "histo",
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "histo",
                        &histo, sizeof(struct CMD_TYPE_HISTO) );
   }
 /******************************************************************************************************************************/
@@ -219,7 +219,7 @@
 
     Modifier_histo_msgsDB ( &histo );
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "histo",
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "histo",
                        &histo, sizeof(struct CMD_TYPE_HISTO) );
   }
 /******************************************************************************************************************************/

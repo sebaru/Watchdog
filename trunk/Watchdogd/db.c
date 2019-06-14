@@ -1187,12 +1187,33 @@
        g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `ups` ADD `date_create` DATETIME NOT NULL DEFAULT NOW()");
        Lancer_requete_SQL ( db, requete );
+     }
 
+    if (database_version < 4183)
+     { g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `mnemos_Tempo` ADD `dls_id` int(11) NOT NULL DEFAULT '0';" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `mnemos_Tempo` ADD `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `mnemos_Tempo` ADD `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` DROP id_mnemo;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` DROP delai_on;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` DROP delai_off;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` DROP min_on;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` DROP min_off;" );
+       Lancer_requete_SQL ( db, requete );
      }
 
     Libere_DB_SQL(&db);
 fin:
-    database_version=4171;
+    database_version=4183;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
