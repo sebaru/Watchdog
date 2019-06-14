@@ -1207,7 +1207,7 @@
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` DROP min_on;" );
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` DROP min_off;" );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` DROP max_on;" );
        Lancer_requete_SQL ( db, requete );
      }
 

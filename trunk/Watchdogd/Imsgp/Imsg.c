@@ -225,10 +225,9 @@
     if (conv==NULL)
      { conv = purple_conversation_new(PURPLE_CONV_TYPE_IM, account, from); }
 
-    Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-             "%s: (%s) %s %s: %s", __func__,
-		           purple_conversation_get_name(conv),
-		           purple_utf8_strftime("(%H:%M:%S)", NULL), from, message );
+    Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "%s: (%s) %s %s: %s", __func__,
+		            purple_conversation_get_name(conv),
+		            purple_utf8_strftime("(%H:%M:%S)", NULL), from, message );
 
     imsg = Imsgp_recipient_allow_command ( from );
     if ( imsg == NULL )
@@ -240,48 +239,29 @@
 
     if ( ! strcasecmp( message, "ping" ) )                                                             /* Interfacage de test */
      { Imsgp_Envoi_message_to( from, "Pong !" ); }
-    else if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, message ) )
-     { Imsgp_Envoi_message_to( from, "Error searching Database .. Sorry .." ); }
+    else if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, message ) )
+     { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, message );
+       Imsgp_Envoi_message_to( from, "Error searching Database .. Sorry .." );
+     }
     else
-     { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;
-
-       if ( db->nbr_result == 0 )                                             /* Si pas d'enregistrement, demande de préciser */
+     { if ( db->nbr_result == 0 )                                             /* Si pas d'enregistrement, demande de préciser */
         { Imsgp_Envoi_message_to( from, "Error... No result found .. Sorry .." ); }
        if ( db->nbr_result > 1 )                                             /* Si trop d'enregistrement, demande de préciser */
-        { Imsgp_Envoi_message_to( from, " Need to choose ... :" ); }
-
-       while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL )
-        { if (db->nbr_result>1) Imsgp_Envoi_message_to( from, mnemo->ev_text );
-          if (db->nbr_result==1) result_mnemo = mnemo;
-                            else g_free(mnemo);
-        }
-       if (result_mnemo)
-        { gchar chaine[80];
-          switch ( result_mnemo->type )
-           { case MNEMO_MONOSTABLE:                                                          /* Positionnement du bit interne */
-                  g_snprintf( chaine, sizeof(chaine), "Mise a un du bit M%03d by %s", result_mnemo->num, imsg->user_name );
-                  Imsgp_Envoi_message_to( from, chaine );
-                  Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                             "%s: Mise a un du bit M%03d by %s", __func__, result_mnemo->num, imsg->user_name );
-                  if (result_mnemo->num!=-1) Envoyer_commande_dls(result_mnemo->num);
-                                        else Envoyer_commande_dls_data (result_mnemo->dls_tech_id, result_mnemo->acronyme);
-                  break;
-             case MNEMO_ENTREE:
-                  g_snprintf( chaine, sizeof(chaine), " Result = %d", E(result_mnemo->num) );
-                  Imsgp_Envoi_message_to( from, chaine );
-                  break;
-             case MNEMO_ENTREE_ANA:
-                  g_snprintf( chaine, sizeof(chaine), " Result = %f", EA_ech(result_mnemo->num) );
-                  Imsgp_Envoi_message_to( from, chaine );
-                  break;
-             default: g_snprintf( chaine, sizeof(chaine), "Cannot handle command... Check Mnemo !" );
-                      Imsgp_Envoi_message_to( from, chaine );
-                      Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                               "%s: Cannot handle commande type %d (num=%03d) for %s", __func__,
-                                result_mnemo->type, result_mnemo->num, imsg->user_name );
-                      break;
+        { Imsgp_Envoi_message_to( from, " Need to choose ... :" );
+          while ( Recuperer_mnemos_DI_suite( &db ) )
+           { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
+             Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
+                       src_text, tech_id, acro, libelle );
+             Imsgp_Envoi_message_to( from, src_text );
            }
-          g_free(result_mnemo);
+        }
+       else while ( Recuperer_mnemos_DI_suite( &db ) )
+        { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
+          Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
+                    src_text, tech_id, acro, libelle );
+
+          if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
+           { Envoyer_commande_dls_data ( tech_id, acro ); }
         }
      }
   }
@@ -538,6 +518,8 @@
                            PURPLE_CALLBACK(Imsgp_buddy_typing), NULL);
     purple_signal_connect( purple_conversations_get_handle(), "buddy-typed", &handle,
                            PURPLE_CALLBACK(Imsgp_buddy_typed), NULL);
+    purple_signal_connect( purple_conversations_get_handle(), "buddy-typing-stopped", &handle,
+                           PURPLE_CALLBACK(Imsgp_buddy_typing_stopped), NULL);
 
     zmq_msg = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 
