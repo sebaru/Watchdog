@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -95,7 +95,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT ai.libelle"
-                " FROM %s as mnemos_Tempo"
+                " FROM mnemos_Tempo"
                 " INNER JOIN dls as d ON ai.dls_id = d.id"
                 " WHERE d.tech_id='%s' AND ai.acronyme='%s' LIMIT 1",
                 tech_id, acronyme
@@ -122,7 +122,7 @@
     gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_tempoDB: DB connexion failed" );
        return(NULL);
@@ -173,7 +173,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_tempoDB: DB connexion failed" );
        return(FALSE);
@@ -187,7 +187,7 @@
                 "delai_on=VALUES(delai_on), min_on=VALUES(min_on), "
                 "delai_off=VALUES(delai_off), max_on=VALUES(max_on) ",
                 NOM_TABLE_MNEMO_TEMPO, mnemo_full->mnemo_base.id,
-                mnemo_full->mnemo_tempo.delai_on,  mnemo_full->mnemo_tempo.min_on, 
+                mnemo_full->mnemo_tempo.delai_on,  mnemo_full->mnemo_tempo.min_on,
                 mnemo_full->mnemo_tempo.max_on, mnemo_full->mnemo_tempo.delai_off
               );
 
@@ -204,7 +204,7 @@
   { gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_tempo: Connexion DB impossible" );
        return;
