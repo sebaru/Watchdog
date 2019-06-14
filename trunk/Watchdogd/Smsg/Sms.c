@@ -737,26 +737,28 @@
           else if ( !strcmp( event->tag, "send_sms" ) ) { Envoyer_smsg_gsm_text ( payload ); }
         }
 
-       if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
-        { sleep(1); continue; }
+       while ( Cfg_smsg.lib->Thread_run == TRUE &&
+               Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
+        { histo = &histo_buf;
 
-       histo = &histo_buf;
-
-       if ( histo && histo->alive == TRUE && histo->msg.sms != MSG_SMS_NONE)                /* On n'envoie que si MSGnum == 1 */
-        { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,
-                   "%s : Sending msg %d (%s)", __func__, histo->msg.num, histo->msg.libelle_sms );
+          if ( histo && histo->alive == TRUE && histo->msg.sms != MSG_SMS_NONE)             /* On n'envoie que si MSGnum == 1 */
+           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,
+                      "%s : Sending msg %d (%s)", __func__, histo->msg.num, histo->msg.libelle_sms );
 
 /*************************************************** Envoi en mode GSM ********************************************************/
-          if (Partage->top < TOP_MIN_ENVOI_SMS)
-           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,
-                      "%s: Envoi trop tot !! (%s)", __func__, histo->msg.libelle_sms ); }
+             if (Partage->top < TOP_MIN_ENVOI_SMS)
+              { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,
+                         "%s: Envoi trop tot !! (%s)", __func__, histo->msg.libelle_sms );
+                sleep(1);
+              }
+             else
+              { Smsg_send_to_all_authorized_recipients( &histo->msg ); }
+           }
           else
-           { Smsg_send_to_all_authorized_recipients( &histo->msg ); }
-        }
-       else
-        { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG,
-                    "%s : msg %d not sent (alive=%d, msg.sms = %d) (%s)", __func__,
-                    histo->msg.num, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
+           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG,
+                       "%s : msg %d not sent (alive=%d, msg.sms = %d) (%s)", __func__,
+                       histo->msg.num, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
+           }
         }
      }
     Smsg_send_status_to_master( FALSE );
