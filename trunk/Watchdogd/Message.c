@@ -234,7 +234,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s SET num='-1',acronyme='%s',libelle='%s',libelle_audio='%s',libelle_sms='%s',"
                 "type='%d',audio='0',bit_audio='0',enable='1',sms='0',time_repeat='0',dls_id='%d',persist='0' "
-                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)", NOM_TABLE_MSG, msg->acronyme,
+                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), type=VALUES(type)", NOM_TABLE_MSG, msg->acronyme,
                 libelle, libelle, libelle, msg->type, msg->dls_id
               );
     g_free(libelle);
