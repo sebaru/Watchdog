@@ -326,31 +326,31 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Imsgp_buddy_away(PurpleBuddy *buddy, PurpleStatus *old_status, PurpleStatus *status)
-  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO,
              "%s: '%s' with proto %s", __func__,
               purple_buddy_get_name(buddy), purple_account_get_protocol_id(purple_buddy_get_account(buddy)));
   }
 
  static void Imsgp_buddy_idle(PurpleBuddy *buddy, gboolean old_idle, gboolean idle)
-  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO,
              "%s: '%s' with proto %s", __func__,
               purple_buddy_get_name(buddy), purple_account_get_protocol_id(purple_buddy_get_account(buddy)));
   }
 
  static void Imsgp_buddy_typing(PurpleAccount *account, const char *name)
-  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_DEBUG,
              "%s: '%s' with proto %s", __func__,
               name, purple_account_get_protocol_id(account));
   }
 
  static void Imsgp_buddy_typed(PurpleAccount *account, const char *name) //not supported on all protocols
-  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_DEBUG,
              "%s: '%s' with proto %s", __func__,
               name, purple_account_get_protocol_id(account));
   }
 
  static void Imsgp_buddy_typing_stopped(PurpleAccount *account, const char *name)
-  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_DEBUG,
              "%s: '%s' with proto %s", __func__,
               name, purple_account_get_protocol_id(account));
   }

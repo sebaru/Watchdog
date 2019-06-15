@@ -146,7 +146,12 @@
             if(cadran->bit_controle!=-1)
              { cadran->val_ech = Partage->ea[cadran->bit_controle].val_ech; }
             else
-             { cadran->val_ech = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data ); }
+             { cadran->val_ech = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+               if (!cadran->dls_data)                            /* si AI pas trouvée, on remonte le nom du cadran en libellé */
+                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%s:%s", cadran->tech_id, cadran->acronyme );
+                  return(etat_cadran);
+                }
+             }
             if ( cadran->bit_controle!=-1 && EA_inrange(cadran->bit_controle))
              { if(-1000000.0<cadran->val_ech && cadran->val_ech<1000000.0)
                 { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
@@ -176,10 +181,7 @@
                 }
              }
             else
-             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                           " - pb comm - "
-                         );
-             }
+             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), " - pb comm - " ); }
             return(etat_cadran);
        case MNEMO_CPTH:
              { time_t valeur;

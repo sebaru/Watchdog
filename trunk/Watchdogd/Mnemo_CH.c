@@ -94,7 +94,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT cpt.valeur, cpt.unite"
+                "SELECT cpt.valeur"
                 " FROM mnemos_CH as cpt"
                 " INNER JOIN dls as d ON cpt.dls_id = d.id"
                 " WHERE d.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
