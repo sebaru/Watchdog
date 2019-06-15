@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/prctl.h>
  #include <sys/time.h>
@@ -93,7 +93,7 @@
      }
 
     result = Rechercher_mnemo_baseDB( id );
-    if (!result) 
+    if (!result)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
                   "Unable to locate mnemo %s", rezo_mnemonique->mnemo_base.libelle);
@@ -115,7 +115,6 @@
      { case MNEMO_ENTREE_ANA :  Charger_analogInput (); break;                                 /* Update de la running config */
        case MNEMO_CPT_IMP    :  Charger_cpt_imp ();     break;                                 /* Update de la running config */
        case MNEMO_CPTH       :  Charger_cpth ();        break;                                 /* Update de la running config */
-       case MNEMO_TEMPO      :  Charger_tempo ();       break;                                 /* Update de la running config */
        case MNEMO_REGISTRE   :  Charger_registre ();    break;                                 /* Update de la running config */
      }
     g_free(result);
@@ -198,7 +197,7 @@
      { g_snprintf( critere, sizeof(critere), "mnemo.dls_id = '%d'", client->mnemo_dls_id_to_send ); }
     else
      { g_snprintf( critere, sizeof(critere), "1=1" ); }
-    
+
     if ( ! Recuperer_mnemo_baseDB_with_conditions( &db, critere, -1, -1 ) )
      { Unref_client( client );                                                            /* Déréférence la structure cliente */
        return;
@@ -209,7 +208,7 @@
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MNEMONIQUES)) / sizeof(struct CMD_TYPE_MNEMO_BASE);
-    mnemos = (struct CMD_TYPE_MNEMONIQUES *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
+    mnemos = (struct CMD_TYPE_MNEMONIQUES *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );
     if (!mnemos)
      { struct CMD_GTK_MESSAGE erreur;
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "%s: Pb d'allocation memoire mnemos", __func__ );

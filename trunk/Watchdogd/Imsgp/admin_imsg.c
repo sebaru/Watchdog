@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include "watchdogd.h"
  #include "Imsg.h"
 
@@ -71,7 +71,7 @@
 
     response = Admin_write ( response, " | -- Liste des Contacts IMSG" );
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return(response);
@@ -112,7 +112,7 @@
     else if ( ! strcmp ( commande, "reload" ) )
      { response = Admin_imsgp_reload ( response ); }
     else if ( ! strcmp ( commande, "status" ) )
-     { gchar chaine[128];
+     {
      }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'IMSG'" );
