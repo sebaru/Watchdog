@@ -73,7 +73,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO mnemos_AI SET dls_id='%d',acronyme='%s',libelle='%s', unite='%s' "
-                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
+                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle),unite=VALUES(unite)",
                 dls_id, acro, libelle, unite );
     g_free(unite);
     g_free(libelle);
