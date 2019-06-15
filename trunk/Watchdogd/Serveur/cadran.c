@@ -63,14 +63,22 @@
           return( cadran->val_ech != valeur );
         }
        case MNEMO_TEMPO:
-       case MNEMO_ENTREE_ANA:
             return( TRUE );
+       case MNEMO_ENTREE_ANA:
+        { gfloat valeur;
+          valeur = Dls_data_get_AI ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+          return( cadran->val_ech != valeur );
+        }
        case MNEMO_CPT_IMP:
         { gint valeur;
           valeur = Dls_data_get_CI ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
           return( cadran->val_ech != valeur );
         }
        case MNEMO_CPTH:
+        { gint valeur;
+          valeur = Dls_data_get_CH ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+          return( cadran->val_ech != valeur );
+        }
        case MNEMO_REGISTRE:
        default: return(FALSE);
      }

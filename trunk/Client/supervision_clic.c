@@ -199,7 +199,7 @@
     else if (!pid)                                                                       /* Lancement de la ligne de commande */
      { gchar chaine[256];
        g_snprintf( chaine, sizeof(chaine),
-                  "http://%s/archive/show/%s/%s/%s",
+                  "https://%s.abls-habitat.fr/archive/show/%s/%s/%s",
                    Client.host, appui_cadran->cadran->tech_id, appui_cadran->cadran->acronyme, period );
        execlp( "firefox", "firefox", chaine, NULL );
        printf("Lancement de firefox failed\n");
