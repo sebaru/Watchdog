@@ -62,6 +62,7 @@
           valeur = Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
           return( cadran->val_ech != valeur );
         }
+       case MNEMO_TEMPO:
        case MNEMO_ENTREE_ANA:
             return( TRUE );
        case MNEMO_CPT_IMP:
@@ -75,8 +76,8 @@
      }
   }
 /******************************************************************************************************************************/
-/* Formater_cadran: Formate la structure dédiée cadran pour envoi au client                                                 */
-/* Entrée: un cadran                                                                                                         */
+/* Formater_cadran: Formate la structure dédiée cadran pour envoi au client                                                   */
+/* Entrée: un cadran                                                                                                          */
 /* Sortie: une structure prete à l'envoie                                                                                     */
 /******************************************************************************************************************************/
  struct CMD_ETAT_BIT_CADRAN *Formater_cadran( struct CADRAN *cadran )
@@ -102,7 +103,7 @@
         { cadran->type = MNEMO_CPTH;
           Libere_DB_SQL (&db);
         }
-       else cadran->bit_controle = 0;
+       else return(NULL);                                                                                 /* Si pas trouvé... */
      }
     etat_cadran = (struct CMD_ETAT_BIT_CADRAN *)g_try_malloc0( sizeof(struct CMD_ETAT_BIT_CADRAN) );
     if (!etat_cadran) return(NULL);
@@ -226,23 +227,22 @@
             struct DLS_TEMPO *tempo = cadran->dls_data;
             if (!tempo) break;
 
-            if (tempo->status)
+            if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON)                     /* Temporisation Retard en train de compter */
              { gint src, heure, minute, seconde;
-               src = (tempo->date_off - tempo->date_on)/10;
+               src = (tempo->date_on - Partage->top)/10;
                heure = src / 3600;
-               minute = (src % 3600) / 60;
-               seconde = (src % (3600*60));
+               minute = (src - heure*3600) / 60;
+               seconde = src - heure*3600 - minute*60;
                g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%02d:%02d:%02d", heure, minute, seconde );
-             } 
-            else
+             }
+            else if (tempo->status == DLS_TEMPO_NOT_COUNTING)                  /* Tempo ne compte pas: on affiche la consigne */
              { gint src, heure, minute, seconde;
-               if (tempo->confDB.delai_on) src = tempo->confDB.delai_on/10;
-               else src = tempo->confDB.min_on/10;
+               src = tempo->confDB.delai_on/10;
                heure = src / 3600;
-               minute = (src % 3600) / 60;
-               seconde = (src % (3600*60));
+               minute = (src - heure*3600) / 60;
+               seconde = src - heure*3600 - minute*60;
                g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%02d:%02d:%02d", heure, minute, seconde );
-             } 
+             }
             return(etat_cadran);
        default:
             g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "unknown" );

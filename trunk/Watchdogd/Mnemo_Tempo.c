@@ -94,10 +94,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT ai.libelle"
-                " FROM mnemos_Tempo"
-                " INNER JOIN dls as d ON ai.dls_id = d.id"
-                " WHERE d.tech_id='%s' AND ai.acronyme='%s' LIMIT 1",
+                "SELECT t.libelle"
+                " FROM mnemos_Tempo as t"
+                " INNER JOIN dls as d ON t.dls_id = d.id"
+                " WHERE d.tech_id='%s' AND t.acronyme='%s' LIMIT 1",
                 tech_id, acronyme
               );
 

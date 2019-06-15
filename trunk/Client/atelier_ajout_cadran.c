@@ -211,8 +211,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_bitctrl, 0, 2, 3, 4 );
 
     if (trame_cadran)
-     { gtk_entry_set_text( GTK_ENTRY(Entry_bitctrl), trame_cadran->cadran->libelle );
-       switch(trame_cadran->cadran->type)
+     { switch(trame_cadran->cadran->type)
         { default:
           case MNEMO_ENTREE_ANA: gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 0 ); break;
           case MNEMO_ENTREE    : gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 1 ); break;
@@ -222,6 +221,8 @@
           case MNEMO_REGISTRE  : gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 5 ); break;
         }
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bitctrl), trame_cadran->cadran->bit_controle );
+       gtk_entry_set_text( GTK_ENTRY(Entry_tech_id), trame_cadran->cadran->tech_id );
+       gtk_entry_set_text( GTK_ENTRY(Entry_acronyme), trame_cadran->cadran->acronyme );
      }
     Afficher_mnemo_cadran_ctrl();                                                 /* Pour mettre a jour le mnemonique associé */
     gtk_widget_show_all( F_ajout_cadran );
@@ -238,9 +239,7 @@
 
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_cadran->syn_id );
     cadran = (struct CMD_TYPE_CADRAN *)g_try_malloc0( sizeof(struct CMD_TYPE_CADRAN) );
-    if (!cadran)
-     { return;
-     }
+    if (!cadran) { printf("Cadran == NULL\n"); return; }
 
     memcpy ( cadran, rezo_cadran, sizeof( struct CMD_TYPE_CADRAN ) );
 

@@ -122,13 +122,12 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle,acro_syn,"
+                "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.posx,%s.posy,%s.angle,"
                 "syns_cadrans.tech_id,syns_cadrans.acronyme"
-                " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num AND syn_id=%d",
+                " FROM %s WHERE syn_id=%d",
                 NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
-                NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
-                NOM_TABLE_CADRAN, NOM_TABLE_MNEMO,                                                                   /* From */
-                NOM_TABLE_CADRAN, NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_MNEMO,
+                NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
+                NOM_TABLE_CADRAN,                                                                                    /* From */
                 id_syn );
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
@@ -160,13 +159,11 @@
        cadran->syn_id       = atoi(db->row[1]);                                         /* Synoptique ou est placée le cadran */
        cadran->type         = atoi(db->row[2]);
        cadran->bit_controle = atoi(db->row[3]);                                                                 /* Ixxx, Cxxx */
-       cadran->position_x   = atoi(db->row[5]);                                                  /* en abscisses et ordonnées */
-       cadran->position_y   = atoi(db->row[6]);
-       cadran->angle        = atof(db->row[7]);
-       g_snprintf( cadran->libelle,  sizeof(cadran->libelle),  "%s" ,db->row[4] );               /* Recopie dans la structure */
-       g_snprintf( cadran->acro_syn, sizeof(cadran->acro_syn), "%s" ,db->row[8] );               /* Recopie dans la structure */
-       g_snprintf( cadran->tech_id,  sizeof(cadran->tech_id),  "%s" ,db->row[9] );               /* Recopie dans la structure */
-       g_snprintf( cadran->acronyme, sizeof(cadran->acronyme), "%s" ,db->row[10] );              /* Recopie dans la structure */
+       cadran->position_x   = atoi(db->row[4]);                                                  /* en abscisses et ordonnées */
+       cadran->position_y   = atoi(db->row[5]);
+       cadran->angle        = atof(db->row[6]);
+       g_snprintf( cadran->tech_id,  sizeof(cadran->tech_id),  "%s" ,db->row[7] );               /* Recopie dans la structure */
+       g_snprintf( cadran->acronyme, sizeof(cadran->acronyme), "%s" ,db->row[8] );               /* Recopie dans la structure */
      }
     return(cadran);
   }
@@ -182,18 +179,17 @@
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_cadranDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle,acro_syn,"
+                "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.posx,%s.posy,%s.angle,"
                 "syns_cadrans.tech_id,syns_cadrans.acronyme"
-                " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num AND %s.id=%d",
+                " FROM %s WHERE %s.id=%d",
                 NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
-                NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
-                NOM_TABLE_CADRAN, NOM_TABLE_MNEMO,                                               /* From */
-                NOM_TABLE_CADRAN, NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_MNEMO,
+                NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
+                NOM_TABLE_CADRAN,                                                                /* From */
                 NOM_TABLE_CADRAN, id );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
@@ -202,7 +198,7 @@
      }
 
     cadran = Recuperer_cadranDB_suite( &db );
-    if (!cadran) Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_cadranDB: Capteur %03d not found in DB", id );
+    if (!cadran) Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Capteur %03d not found in DB", __func__, id );
     else Libere_DB_SQL( &db );
     return(cadran);
   }

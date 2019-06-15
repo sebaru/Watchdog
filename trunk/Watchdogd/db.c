@@ -1189,12 +1189,12 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4183)
+    if (database_version < 4187)
      { g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `mnemos_Tempo` ADD `dls_id` int(11) NOT NULL DEFAULT '0';" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete),
-                   "ALTER TABLE `mnemos_Tempo` ADD `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';" );
+                   "ALTER TABLE `mnemos_Tempo` ADD `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default'");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `mnemos_Tempo` ADD `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';" );
@@ -1213,7 +1213,7 @@
 
     Libere_DB_SQL(&db);
 fin:
-    database_version=4183;
+    database_version=4187;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
