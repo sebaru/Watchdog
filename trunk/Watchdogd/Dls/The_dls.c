@@ -309,17 +309,6 @@
     return(0);
   }
 /**********************************************************************************************************/
-/* Renvoie la valeur d'une tempo retard                                                                   */
-/**********************************************************************************************************/
- int T( int num )
-  { if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].state );
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "TR : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/**********************************************************************************************************/
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
 /**********************************************************************************************************/
  void SEA_range( int num, int range )
@@ -519,16 +508,16 @@
   { static guint seed;
     if (tempo->status == DLS_TEMPO_NOT_COUNTING && etat == 1)
      { tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_ON;
-       if (tempo->confDB.random)
+       if (tempo->random)
         { gfloat ratio;
           ratio = (gfloat)rand_r(&seed)/RAND_MAX;
-          tempo->confDB.delai_on  = (gint)(tempo->confDB.random * ratio);
-          if (tempo->confDB.delai_on<10) tempo->confDB.delai_on = 10;
-          tempo->confDB.min_on    = 0;
-          tempo->confDB.max_on    = 0;
-          tempo->confDB.delai_off = 0;
+          tempo->delai_on  = (gint)(tempo->random * ratio);
+          if (tempo->delai_on<10) tempo->delai_on = 10;
+          tempo->min_on    = 0;
+          tempo->max_on    = 0;
+          tempo->delai_off = 0;
         }
-       tempo->date_on = Partage->top + tempo->confDB.delai_on;
+       tempo->date_on = Partage->top + tempo->delai_on;
      }
 
     if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON && etat == 0)
@@ -540,37 +529,37 @@
      }
 
     if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
-        Partage->top < tempo->date_on + tempo->confDB.min_on )
-     { if (Partage->top+tempo->confDB.delai_off <= tempo->date_on + tempo->confDB.min_on)
-            { tempo->date_off = tempo->date_on+tempo->confDB.min_on; }
-       else { tempo->date_off = Partage->top+tempo->confDB.delai_off; }
+        Partage->top < tempo->date_on + tempo->min_on )
+     { if (Partage->top+tempo->delai_off <= tempo->date_on + tempo->min_on)
+            { tempo->date_off = tempo->date_on+tempo->min_on; }
+       else { tempo->date_off = Partage->top+tempo->delai_off; }
        tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
     if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
-        tempo->date_on + tempo->confDB.min_on <= Partage->top )
-     { tempo->date_off = Partage->top+tempo->confDB.delai_off;
+        tempo->date_on + tempo->min_on <= Partage->top )
+     { tempo->date_off = Partage->top+tempo->delai_off;
        tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
     if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 1 &&
-        tempo->date_on + tempo->confDB.min_on <= Partage->top )
+        tempo->date_on + tempo->min_on <= Partage->top )
      { tempo->status = DLS_TEMPO_WAIT_FOR_MAX_ON;
      }
 
     if (tempo->status == DLS_TEMPO_WAIT_FOR_MAX_ON && etat == 0 )
-     { if (tempo->confDB.max_on)
-            { if (Partage->top+tempo->confDB.delai_off < tempo->date_on+tempo->confDB.max_on)
-                   { tempo->date_off = Partage->top + tempo->confDB.delai_off; }
-              else { tempo->date_off = tempo->date_on+tempo->confDB.max_on; }
+     { if (tempo->max_on)
+            { if (Partage->top+tempo->delai_off < tempo->date_on+tempo->max_on)
+                   { tempo->date_off = Partage->top + tempo->delai_off; }
+              else { tempo->date_off = tempo->date_on+tempo->max_on; }
             }
-       else { tempo->date_off = Partage->top+tempo->confDB.delai_off; }
+       else { tempo->date_off = Partage->top+tempo->delai_off; }
        tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
-    if (tempo->status == DLS_TEMPO_WAIT_FOR_MAX_ON && etat == 1 && tempo->confDB.max_on &&
-        tempo->date_on + tempo->confDB.max_on <= Partage->top )
-     { tempo->date_off = tempo->date_on+tempo->confDB.max_on;
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MAX_ON && etat == 1 && tempo->max_on &&
+        tempo->date_on + tempo->max_on <= Partage->top )
+     { tempo->date_off = tempo->date_on+tempo->max_on;
        tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
@@ -582,22 +571,6 @@
 
     if (tempo->status == DLS_TEMPO_WAIT_FOR_COND_OFF && etat == 0 )
      { tempo->status = DLS_TEMPO_NOT_COUNTING; }
-  }
-/******************************************************************************************************************************/
-/* STR: Positionnement d'une Tempo retard DLS                                                                                 */
-/* Entrée: numero, etat                                                                                                       */
-/* Sortie: Neant                                                                                                              */
-/******************************************************************************************************************************/
- void ST( int num, int etat )
-  { struct DLS_TEMPO *tempo;
-
-    if (num<0 || num>=NBR_TEMPO)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "STR: num %d out of range", num ); }
-       return;
-     }
-    tempo = &Partage->Tempo_R[num];                                                  /* Récupération de la structure statique */
-    ST_local ( tempo, etat );
   }
 /******************************************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                                     */
@@ -1290,11 +1263,11 @@
            }
           g_snprintf( tempo->acronyme, sizeof(tempo->acronyme), "%s", acronyme );
           g_snprintf( tempo->tech_id,  sizeof(tempo->tech_id),  "%s", tech_id );
-          tempo->confDB.delai_on  = delai_on;
-          tempo->confDB.min_on    = min_on;
-          tempo->confDB.max_on    = max_on;
-          tempo->confDB.delai_off = delai_off;
-          tempo->confDB.random    = random;
+          tempo->delai_on  = delai_on;
+          tempo->min_on    = min_on;
+          tempo->max_on    = max_on;
+          tempo->delai_off = delai_off;
+          tempo->random    = random;
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_TEMPO = g_slist_prepend ( Partage->Dls_data_TEMPO, tempo );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );

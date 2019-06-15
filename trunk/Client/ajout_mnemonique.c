@@ -21,14 +21,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
  #include <gnome.h>
- 
+
  #include "Reseaux.h"
- 
+
 /********************************************* Définitions des prototypes programme *******************************************/
  #include "protocli.h"
 
@@ -48,7 +48,6 @@
  static struct CMD_TYPE_MNEMO_FULL Option_mnemo;                                             /* Mnemonique en cours d'édition */
  static GtkWidget *Table_options_AI;                                          /* Table des options associées aux Analog Input */
  static GtkWidget *Table_options_CPTIMP;                            /* Table des options associées aux compteurs d'impulsions */
- static GtkWidget *Table_options_Tempo;                                      /* Table des options associées aux temporisation */
  static GtkWidget *Table_options_Registre;                                       /* Table des options associées aux registres */
 /******************************************************************************************************************************/
 /* CB_ajouter_editer_mnemonique: Fonction appelée qd on appuie sur un des boutons de l'interface                              */
@@ -76,7 +75,6 @@
     switch ( Option_mnemo.mnemo_base.type )
      { case MNEMO_ENTREE_ANA: Get_options_AI       ( &Option_mnemo ); break;
        case MNEMO_CPT_IMP   : Get_options_CPTIMP   ( &Option_mnemo ); break;
-       case MNEMO_TEMPO     : Get_options_Tempo    ( &Option_mnemo ); break;
        case MNEMO_REGISTRE  : Get_options_Registre ( &Option_mnemo ); break;
      }
 
@@ -103,7 +101,7 @@
 /* sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void CB_valider ( void )
-  { gtk_dialog_response( GTK_DIALOG(F_ajout), GTK_RESPONSE_OK ); } 
+  { gtk_dialog_response( GTK_DIALOG(F_ajout), GTK_RESPONSE_OK ); }
 /******************************************************************************************************************************/
 /* Rafraichir_sensibilite_options: Cache ou montre la bonne table d'options en fonction du type                               */
 /* Entrée : Rien                                                                                                              */
@@ -114,12 +112,10 @@
     type = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
     gtk_widget_hide ( Table_options_AI );
     gtk_widget_hide ( Table_options_CPTIMP );
-    gtk_widget_hide ( Table_options_Tempo );
     gtk_widget_hide ( Table_options_Registre );
     switch(type)
      { case MNEMO_ENTREE_ANA: gtk_widget_show_all ( Table_options_AI ); break;
        case MNEMO_CPT_IMP   : gtk_widget_show_all ( Table_options_CPTIMP ); break;
-       case MNEMO_TEMPO     : gtk_widget_show_all ( Table_options_Tempo ); break;
        case MNEMO_REGISTRE  : gtk_widget_show_all ( Table_options_Registre ); break;
      }
   }
@@ -163,7 +159,7 @@
        case MNEMO_REGISTRE:
             gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_REGISTRE );
             break;
-       default: 
+       default:
             gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, 1.0 );
             break;
      }
@@ -291,7 +287,7 @@
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Specific Options") ) );
 
     gtk_widget_show_all( F_ajout );
-	
+
 /*********************************************** Seconde page : spéciale analog Input *****************************************/
     Table_options_AI = Get_options_AI_gtktable();
     gtk_table_set_row_spacings( GTK_TABLE(Table_options_AI), 5 );
@@ -310,16 +306,9 @@
     gtk_table_set_col_spacings( GTK_TABLE(Table_options_CPTIMP), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), Table_options_CPTIMP, TRUE, TRUE, 0 );
 
-/*********************************************** Seconde page : spéciale temporisations ***************************************/
-    Table_options_Tempo = Get_options_Tempo_gtktable();
-    gtk_table_set_row_spacings( GTK_TABLE(Table_options_Tempo), 5 );
-    gtk_table_set_col_spacings( GTK_TABLE(Table_options_Tempo), 5 );
-    gtk_box_pack_start( GTK_BOX(hboite), Table_options_Tempo, TRUE, TRUE, 0 );
-
 /************************************************* Positionnement des infos d'edition *****************************************/
     if (mnemo_full)                                                                             /* Si edition d'un mnemonique */
-     { gchar chaine[256];
-       gtk_entry_set_text( GTK_ENTRY(Entry_lib),      mnemo_full->mnemo_base.libelle );
+     { gtk_entry_set_text( GTK_ENTRY(Entry_lib),      mnemo_full->mnemo_base.libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_acro),     mnemo_full->mnemo_base.acronyme );
        gtk_entry_set_text( GTK_ENTRY(Entry_ev_host),  mnemo_full->mnemo_base.ev_host );
        gtk_entry_set_text( GTK_ENTRY(Entry_ev_thread),mnemo_full->mnemo_base.ev_thread );
@@ -334,7 +323,6 @@
      }
     Set_options_AI ( mnemo_full );
     Set_options_CPTIMP ( mnemo_full );
-    Set_options_Tempo ( mnemo_full );
     Set_options_Registre ( mnemo_full );
 
     gtk_widget_grab_focus( Entry_lib );

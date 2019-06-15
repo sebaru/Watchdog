@@ -73,7 +73,6 @@
  extern int E( int num );
  extern int B( int num );
  extern int M( int num );
- extern int T( int num );
  extern int EA_ech_inf( float val, int num );
  extern int EA_ech_sup( float val, int num );
  extern int EA_ech_inf_egal( float val, int num );
@@ -85,7 +84,6 @@
  extern float CI( int num );
  extern void SI( int num, int etat, int rouge, int vert, int bleu, int cligno );
  extern void SB( int num, int etat );
- extern void ST( int num, int etat );
  extern void SCH( int num, int etat, int reset );
  extern void SCI( int num, int etat, int reset, int ratio );
  extern void SM( int num, int etat );

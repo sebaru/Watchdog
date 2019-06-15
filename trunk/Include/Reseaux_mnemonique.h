@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -121,15 +121,6 @@
   { guint  valeur;                                                                                      /* Valeur du compteur */
   };
 
-/******************************************************* Pour les temporisations **********************************************/
- struct CMD_TYPE_MNEMO_TEMPO
-  { guint delai_on;                                                     /* delai avant mise à un (fixé par option mnémonique) */
-    guint delai_off;                                                  /* delai avant mise à zero (fixé par option mnémonique) */
-    guint min_on;                            /* Durée minimale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
-    guint max_on;                            /* Durée maximale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
-    guint random;                                         /* Est-ce une tempo random ? si oui, est la dynamique max du random */
-  };
-
 /******************************************************* Suite des structures *************************************************/
  struct CMD_TYPE_MNEMONIQUES
   { guint nbr_mnemos;                                                    /* Nombre de structure CMD_TYPE_MNEMONIQUE suivantes */
@@ -145,12 +136,11 @@
   { struct CMD_TYPE_MNEMO_BASE mnemo_base;
     union { struct CMD_TYPE_MNEMO_AI mnemo_ai;
             struct CMD_TYPE_MNEMO_CPT_IMP mnemo_cptimp;
-            struct CMD_TYPE_MNEMO_TEMPO mnemo_tempo;
             struct CMD_TYPE_MNEMO_REGISTRE mnemo_r;
           };
   };
 
- enum 
+ enum
   { SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,                                          /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN,                                      /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_ALL_MNEMONIQUE_FIN,                                  /* Ajout d'un groupe dans la liste cliente */
@@ -165,7 +155,7 @@
     SSTAG_CLIENT_EDIT_MNEMONIQUE,                                                  /* Le client demande l'edition d'un groupe */
     SSTAG_SERVEUR_EDIT_MNEMONIQUE_OK,                              /* Le serveur accepte et envoi les données correspondantes */
     SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE,                                             /* Le client renvoie les données editées */
-    SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,                                       /* Le serveur valide les nouvelles données */   
+    SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,                                       /* Le serveur valide les nouvelles données */
   };
 
 #endif

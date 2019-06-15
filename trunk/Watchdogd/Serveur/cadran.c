@@ -258,7 +258,7 @@
              }
             else if (tempo->status == DLS_TEMPO_NOT_COUNTING)                  /* Tempo ne compte pas: on affiche la consigne */
              { gint src, heure, minute, seconde;
-               src = tempo->confDB.delai_on/10;
+               src = tempo->delai_on/10;
                heure = src / 3600;
                minute = (src - heure*3600) / 60;
                seconde = src - heure*3600 - minute*60;
