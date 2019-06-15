@@ -42,7 +42,9 @@
          struct COMPARATEUR *comparateur;
        };
 
-%token <val>    T_ERROR PVIRGULE VIRGULE T_DPOINTS DONNE EQUIV MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS T_DEFINE T_STATIC
+%token <val>    T_ERROR PVIRGULE VIRGULE T_DPOINTS DONNE EQUIV T_MOINS T_POUV T_PFERM T_EGAL T_PLUS ET BARRE T_FOIS
+%token <val>    T_SWITCH T_ACCOUV T_ACCFERM T_PIPE
+%token <val>    T_DEFINE T_STATIC
 
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_TOP_ALERTE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_OSYN_ACQ
@@ -75,7 +77,7 @@
 %type  <val>         barre calcul_ea_result
 %type  <gliste>      liste_options options
 %type  <option>      une_option dyn_string
-%type  <chaine>      unite facteur expr suffixe
+%type  <chaine>      unite facteur expr suffixe listeCase
 %type  <action>      action une_action
 %type  <comparateur> comparateur
 %type  <chaine>      calcul_expr calcul_expr2 calcul_expr3
@@ -149,7 +151,7 @@ listeInstr:     une_instr listeInstr
                 | une_instr
                 ;
 
-une_instr:      MOINS expr DONNE action PVIRGULE
+une_instr:      T_MOINS expr DONNE action PVIRGULE
                 {{ int taille;
                    char *instr;
                    taille = strlen($2)+strlen($4->alors)+100;
@@ -171,7 +173,7 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                    g_free($4->alors); g_free($4);
                    g_free($2);
                 }}
-                | MOINS expr MOINS T_POUV calcul_expr T_PFERM DONNE calcul_ea_result PVIRGULE
+                | T_MOINS expr T_MOINS T_POUV calcul_expr T_PFERM DONNE calcul_ea_result PVIRGULE
                 {{ int taille;
                    char *instr;
                    taille = strlen($5)+strlen($2)+35;
@@ -181,16 +183,56 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                    g_free($2);
                    g_free($5);
                 }}
+                | unSwitch
+                ;
+
+/****************************************************** Partie SWITCH *********************************************************/
+unSwitch:       T_SWITCH listeCase
+                {{ gchar chaine[80];
+                   g_snprintf( chaine, sizeof(chaine), "/* Ligne %d (CASE BEGIN)------------*/\n", DlsScanner_get_lineno() );
+                   Emettre( chaine );
+                   Emettre( $2 ); g_free($2);
+                   g_snprintf( chaine, sizeof(chaine), "/* Ligne %d (CASE END)--------------*/\n", DlsScanner_get_lineno() );
+                   Emettre( chaine );
+                }}
+                ;
+
+listeCase:      T_PIPE T_MOINS expr DONNE action PVIRGULE listeCase
+                {{ int taille;
+                   taille = strlen($3)+strlen($5->alors)+strlen($7)+100;
+                   if ($5->sinon) taille+=strlen($5->sinon);
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille,
+                               "/* Ligne %d (CASE INSIDE)----------*/\n"
+                               "if(%s)\n { %s }\nelse\n { %s\n%s }\n",
+                               DlsScanner_get_lineno(), $3, $5->alors, ($5->sinon ? $5->sinon : ""), $7 );
+
+                   if ($5->sinon) g_free($5->sinon);
+                   g_free($5->alors); g_free($5);
+                   g_free($3);
+                   g_free($7);
+                }}
+                | T_PIPE T_MOINS DONNE action PVIRGULE
+                {{ int taille;
+                   taille = strlen($4->alors)+100;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille,
+                               "/* Ligne %d (CASE INSIDE DEFAULT)--*/\n"
+                               "  %s", DlsScanner_get_lineno(), $4->alors );
+                   if ($4->sinon) g_free($4->sinon);
+                   g_free($4->alors); g_free($4);
+                }}
+                | {{ $$=strdup(""); }}
                 ;
 /****************************************************** Partie CALCUL *********************************************************/
-calcul_expr:    calcul_expr OU calcul_expr2
+calcul_expr:    calcul_expr T_PLUS calcul_expr2
                 {{ int taille;
                    taille = strlen($1) + strlen($3) + 4;
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "(%s+%s)", $1, $3 );
                    g_free($1); g_free($3);
                 }}
-                | calcul_expr MOINS calcul_expr2
+                | calcul_expr T_MOINS calcul_expr2
                 {{ int taille;
                    taille = strlen($1) + strlen($3) + 4;
                    $$ = New_chaine( taille );
@@ -313,7 +355,7 @@ calcul_ea_result: T_REGISTRE ENTIER
                 }}
                 ;
 /******************************************************* Partie LOGIQUE *******************************************************/
-expr:           expr OU facteur
+expr:           expr T_PLUS facteur
                 {{ int taille;
                    taille = strlen($1)+strlen($3)+7;
                    $$ = New_chaine( taille );

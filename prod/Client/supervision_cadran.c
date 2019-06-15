@@ -21,18 +21,18 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
  #include <gnome.h>
  #include <sys/time.h>
- 
+
  #include "Reseaux.h"
  #include "Config_cli.h"
  #include "trame.h"
 
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
+ extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
@@ -63,11 +63,11 @@
     g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "button-press-event",
                       G_CALLBACK(Clic_sur_cadran_supervision), trame_cadran );
   }
-/**********************************************************************************************************/
-/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                   */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_changer_etat_cadran: Rafraichissement du visuel cadran sur parametre                                                 */
+/* Entrée: une reference sur le cadran                                                                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_changer_etat_cadran( struct CMD_ETAT_BIT_CADRAN *etat_cadran )
   { struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TYPE_INFO_SUPERVISION *infos;
@@ -76,27 +76,29 @@
     GList *liste;
     gint cpt;
 
-    cpt = 0;                                                 /* Nous n'avons encore rien fait au debut !! */
+    cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */
     liste = Liste_pages;
-    while(liste)                                              /* On parcours toutes les pages SUPERVISION */
+    while(liste)                                                                  /* On parcours toutes les pages SUPERVISION */
      { page = (struct PAGE_NOTEBOOK *)liste->data;
        if (page->type != TYPE_PAGE_SUPERVISION) { liste = liste->next; continue; }
        infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
 
-       liste_cadrans = infos->Trame->trame_items;          /* On parcours tous les cadrans de chaque page */
+       liste_cadrans = infos->Trame->trame_items;                              /* On parcours tous les cadrans de chaque page */
        while (liste_cadrans)
         { switch( *((gint *)liste_cadrans->data) )
-           { case TYPE_CADRAN    : cpt++;                            /* Nous updatons un cadran de plus ! */ 
-                                    trame_cadran = (struct TRAME_ITEM_CADRAN *)liste_cadrans->data;
-
-                                    if (etat_cadran->bit_controle == trame_cadran->cadran->bit_controle &&
-                                        etat_cadran->type == trame_cadran->cadran->type
-                                       )
-                                     { printf("Proto_changer_etat_cadran: change %s\n", etat_cadran->libelle );
-                                       g_object_set( trame_cadran->item_entry,
-                                                     "text", etat_cadran->libelle, NULL );
-                                     }
-                                    break;
+           { case TYPE_CADRAN    :
+              { cpt++;                                                                   /* Nous updatons un cadran de plus ! */
+                trame_cadran = (struct TRAME_ITEM_CADRAN *)liste_cadrans->data;
+                if ( (etat_cadran->bit_controle == trame_cadran->cadran->bit_controle &&
+                      etat_cadran->type == trame_cadran->cadran->type) ||
+                      (!strcmp(etat_cadran->tech_id, trame_cadran->cadran->tech_id) &&
+                       !strcmp(etat_cadran->acronyme, trame_cadran->cadran->acronyme))
+                   )
+                 { printf("Proto_changer_etat_cadran: change %s\n", etat_cadran->libelle );
+                   g_object_set( trame_cadran->item_entry, "text", etat_cadran->libelle, NULL );
+                 }
+                break;
+              }
              case TYPE_MOTIF:
              case TYPE_COMMENTAIRE:
              case TYPE_PASSERELLE:
@@ -107,9 +109,9 @@
         }
        liste = liste->next;
      }
-    if (!cpt)             /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
+    if (!cpt)                                 /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
      { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_CADRAN_UNKNOWN,
-                      (gchar *)etat_cadran, sizeof(struct CMD_ETAT_BIT_CADRAN) ); 
+                      (gchar *)etat_cadran, sizeof(struct CMD_ETAT_BIT_CADRAN) );
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

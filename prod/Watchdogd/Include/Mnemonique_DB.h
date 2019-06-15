@@ -87,6 +87,8 @@
  extern void Charger_tempo ( void );                                                                    /* Dans Mnemo_tempo.c */
  extern struct CMD_TYPE_MNEMO_TEMPO *Rechercher_mnemo_tempoDB ( guint id );
  extern gboolean Modifier_mnemo_tempoDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
+ extern gboolean Mnemo_auto_create_TEMPO ( gint dls_id, gchar *acronyme, gchar *libelle_src );
+ extern struct DB *Rechercher_Tempo ( gchar *tech_id, gchar *acronyme );
 
  extern void Charger_registre ( void );                                                              /* Dans Mnemo_registre.c */
  extern struct CMD_TYPE_MNEMO_REGISTRE *Rechercher_mnemo_registreDB ( guint id );

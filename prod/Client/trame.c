@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watxhdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -128,7 +128,7 @@
  void Trame_del_SVG ( struct TRAME_ITEM_SVG *trame_svg )
   { trame_svg->trame->Liste_timer = g_slist_remove ( trame_svg->trame->Liste_timer, trame_svg );/* Désactive la gestion clignotement */
     g_free(trame_svg);
-  }    
+  }
 /******************************************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                                                */
 /* Entrée: un item                                                                                                            */
@@ -315,7 +315,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
 #ifdef DEBUG_TRAME
     printf("Trame_peindre_motif: gif_largeur=%d  gif_hauteur=%d  r=%d,v=%d,b=%d\n",
             trame_motif->gif_largeur, trame_motif->gif_hauteur, r, v, b );
-#endif       
+#endif
 
     if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
     trame_motif->pixbuf = gdk_pixbuf_copy( (GdkPixbuf *)(trame_motif->image->data) );
@@ -326,7 +326,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
         { base = x<<2;
           if (buffer[ base+0 ] == buffer[ base+1 ] &&
               buffer[ base+1 ] == buffer[ base+2 ] &&
-              buffer[ base+2 ] == COULEUR_ACTIVE) 
+              buffer[ base+2 ] == COULEUR_ACTIVE)
            {  buffer[ base+0 ] = r;
               buffer[ base+1 ] = v;
               buffer[ base+2 ] = b;
@@ -338,7 +338,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
         { base = x*3;
           if (buffer[ base+0 ] == buffer[ base+1 ] &&
               buffer[ base+1 ] == buffer[ base+2 ] &&
-              buffer[ base+2 ] == COULEUR_ACTIVE) 
+              buffer[ base+2 ] == COULEUR_ACTIVE)
            {  buffer[ base+0 ] = r;
               buffer[ base+1 ] = v;
               buffer[ base+2 ] = b;
@@ -358,7 +358,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
 /******************************************************************************************************************************/
  void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num, guchar r, guchar v, guchar b )
   { GList *frame;
-    
+
     if (!(trame_motif && trame_motif->motif)) { printf ("Niet\n"); return; }
 
     frame = g_list_nth( trame_motif->images, num );
@@ -583,7 +583,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
  static gboolean Add_single_icone_to_item ( struct TRAME_ITEM_MOTIF *trame_item, guint icone_id, guint mode )
   { gchar nom_fichier[80];
     GdkPixbuf *pixbuf;
-    
+
     if (mode==0) g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", icone_id );
     else         g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", icone_id, mode );
     pixbuf = gdk_pixbuf_new_from_file ( nom_fichier, NULL );                            /* 2nde tentative */
@@ -650,7 +650,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
      }
 
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
-    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe, trame_motif->pixbuf, 
+    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe, trame_motif->pixbuf,
                                                   (-(gdouble)(larg/2)), (-(gdouble)(haut/2)),
                                                   "scale-to-fit", TRUE, "height", haut, "width", larg,
                                                   NULL );
@@ -956,7 +956,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                 struct CMD_TYPE_CADRAN *cadran )
   { struct TRAME_ITEM_CADRAN *trame_cadran;
     gchar *couleur_bordure;
-       
+
     if (!(trame && cadran)) return(NULL);
     trame_cadran = g_try_malloc0( sizeof(struct TRAME_ITEM_CADRAN) );
     if (!trame_cadran) return(NULL);
@@ -980,11 +980,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                      -1, GTK_ANCHOR_CENTER,
                                                      "font", "arial italic 12",
                                                      NULL);
-
-    trame_cadran->item_acro_syn = goo_canvas_text_new ( trame_cadran->item_groupe,
-                                                        cadran->acro_syn, 0.0, 30.0, -1, GTK_ANCHOR_CENTER,
-                                                       "font", "arial", "fill_color", "yellow",
-                                                        NULL );
 
     if ( flag )                                                                                    /* flag == TRUE si ATELIER */
      { trame_cadran->select_mi = goo_canvas_rect_new (trame_cadran->item_groupe,

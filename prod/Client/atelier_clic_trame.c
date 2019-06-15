@@ -21,12 +21,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
  #include <gnome.h>
- 
+
  #include "trame.h"
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
@@ -229,13 +229,13 @@ printf("Afficher_propriete: debut\n");
                                  { if ( event->button.state & 0x4 )                           /* CTRL ?? */
                                     { Selectionner ( infos, infos->Selection.groupe, TRUE ); }
                                    else
-                                    { if ( !Tester_selection( infos, infos->Selection.groupe ) ) 
+                                    { if ( !Tester_selection( infos, infos->Selection.groupe ) )
                                        { Tout_deselectionner( infos ); }
                                       Selectionner ( infos, infos->Selection.groupe, FALSE );
                                     }
                                  }
                                 break;
-       case GDK_MOTION_NOTIFY: 
+       case GDK_MOTION_NOTIFY:
                                if (Appui)
                                 { if (event->motion.state & 0x100)           /* Motion + Bouton gauche ?? */
                                    { gdouble posx, posy;
@@ -457,6 +457,7 @@ printf("Afficher_propriete: debut\n");
                       struct TRAME_ITEM_CADRAN *trame_cadran )
   { struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
+    gchar chaine[100];
     static GtkWidget *Popup = NULL;
     static GnomeUIInfo Popup_cadran[]=
      { GNOMEUIINFO_ITEM_STOCK( N_("Properties"), NULL, Afficher_propriete, GNOME_STOCK_PIXMAP_PROPERTIES ),
@@ -481,7 +482,8 @@ printf("Afficher_propriete: debut\n");
 
     Clic_general( infos, event );                                                                    /* Fonction de base clic */
 
-    Mettre_a_jour_description( infos, 0, trame_cadran->cadran->libelle );
+    g_snprintf(chaine, sizeof(chaine), "%s:%s", trame_cadran->cadran->tech_id, trame_cadran->cadran->acronyme );
+    Mettre_a_jour_description( infos, 0, chaine );
     if (event->type == GDK_BUTTON_PRESS)
      { if ( event->button.button == 1)
         { goo_canvas_item_raise( trame_cadran->select_mi, NULL );

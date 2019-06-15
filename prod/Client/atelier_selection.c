@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -128,7 +128,7 @@
     g_list_free( infos->Selection.items );
     infos->Selection.items = NULL;
     printf("Fin deselectionner\n");
-  } 
+  }
 
 /**********************************************************************************************************/
 /* Selectionner: Incorpore le groupe en parametre dans la liste des motifs selectionnés                   */
@@ -143,7 +143,7 @@
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GSList *liste;
     GList *objet;
- printf("Selectionner : Selectionner groupe %d\n", groupe );   
+ printf("Selectionner : Selectionner groupe %d\n", groupe );
     objet = infos->Trame_atelier->trame_items;
     while (objet)
      { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
@@ -233,7 +233,7 @@
        objet=objet->next;
      }
     printf("Fin selectionner\n");
-  } 
+  }
 /**********************************************************************************************************/
 /* Deplacer_selection: Deplace toute la selection sur le synoptique                                       */
 /* Entrée: Les variations en pixels                                                                       */
@@ -445,8 +445,6 @@
           case TYPE_CADRAN:
                trame_cadran = ((struct TRAME_ITEM_CADRAN *)selection->data);
                id_cadran.id = trame_cadran->cadran->id;
-               memcpy( &id_cadran.libelle, trame_cadran->cadran->libelle,
-                       sizeof(id_cadran.libelle) );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CADRAN,
                               (gchar *)&id_cadran, sizeof( struct CMD_TYPE_CADRAN ) );
                break;
@@ -474,7 +472,7 @@
     struct PAGE_NOTEBOOK *page;
     GList *selection;
     gint new_groupe;
- 
+
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
@@ -552,7 +550,7 @@
 
     angle = (gfloat) gtk_adjustment_get_value ( infos->Adj_angle );
 
- 
+
     selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
     while(selection)
      { switch ( *((gint *)selection->data) )
@@ -593,7 +591,7 @@
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
     GList *selection;
- 
+
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
@@ -622,7 +620,7 @@
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
     GList *selection;
- 
+
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
@@ -650,7 +648,7 @@
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
     GList *selection;
- 
+
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */

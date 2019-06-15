@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -36,6 +36,83 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
+/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
+/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/******************************************************************************************************************************/
+ gboolean Mnemo_auto_create_TEMPO ( gint dls_id, gchar *acronyme, gchar *libelle_src )
+  { gchar *acro, *libelle;
+    gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+/******************************************** Préparation de la base du mnemo *************************************************/
+    acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
+    if ( !acro )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
+       return(FALSE);
+     }
+
+    libelle    = Normaliser_chaine ( libelle_src );                                          /* Formatage correct des chaines */
+    if ( !libelle )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation libelle impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "INSERT INTO mnemos_Tempo SET dls_id='%d',acronyme='%s',libelle='%s' "
+                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
+                dls_id, acro, libelle );
+    g_free(libelle);
+    g_free(acro);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return (retour);
+  }
+/******************************************************************************************************************************/
+/* Rechercher_AI: Recupération des champs de base de données pour le AI tech_id:acro en parametre                             */
+/* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
+/* Sortie: la struct DB                                                                                                       */
+/******************************************************************************************************************************/
+ struct DB *Rechercher_Tempo ( gchar *tech_id, gchar *acronyme )
+  { gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(NULL);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT t.libelle"
+                " FROM mnemos_Tempo as t"
+                " INNER JOIN dls as d ON t.dls_id = d.id"
+                " WHERE d.tech_id='%s' AND t.acronyme='%s' LIMIT 1",
+                tech_id, acronyme
+              );
+
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+     { Libere_DB_SQL (&db);
+       return(NULL);
+     }
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+    return(db);
+  }
+/******************************************************************************************************************************/
 /* Rechercher_tempoDB: Recupération du tempo dont l'id est en parametre                                                       */
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant la temporisation                                                                          */
@@ -45,7 +122,7 @@
     gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_tempoDB: DB connexion failed" );
        return(NULL);
@@ -96,7 +173,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_tempoDB: DB connexion failed" );
        return(FALSE);
@@ -110,7 +187,7 @@
                 "delai_on=VALUES(delai_on), min_on=VALUES(min_on), "
                 "delai_off=VALUES(delai_off), max_on=VALUES(max_on) ",
                 NOM_TABLE_MNEMO_TEMPO, mnemo_full->mnemo_base.id,
-                mnemo_full->mnemo_tempo.delai_on,  mnemo_full->mnemo_tempo.min_on, 
+                mnemo_full->mnemo_tempo.delai_on,  mnemo_full->mnemo_tempo.min_on,
                 mnemo_full->mnemo_tempo.max_on, mnemo_full->mnemo_tempo.delai_off
               );
 
@@ -127,7 +204,7 @@
   { gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_tempo: Connexion DB impossible" );
        return;

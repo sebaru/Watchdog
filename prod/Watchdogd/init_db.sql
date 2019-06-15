@@ -331,6 +331,21 @@ CREATE TABLE IF NOT EXISTS `mnemos_CH` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `tempo`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `dls_id` INT(11) NOT NULL DEFAULT '0',
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  PRIMARY KEY (`id`),
+  UNIQUE (`dls_id`,`acronyme`),
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `mnemos_Horloge`
 --
 
@@ -657,22 +672,6 @@ CREATE TABLE IF NOT EXISTS `rs485` (
   `bit_comm` int(11) NOT NULL DEFAULT '0',
   `libelle` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `tempo`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
-  `id_mnemo` int(11) NOT NULL,
-  `delai_on` int(11) NOT NULL DEFAULT '0',
-  `delai_off` int(11) NOT NULL DEFAULT '0',
-  `min_on` int(11) NOT NULL DEFAULT '0',
-  `max_on` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id_mnemo`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------

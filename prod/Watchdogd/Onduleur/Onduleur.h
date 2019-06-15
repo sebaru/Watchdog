@@ -47,8 +47,8 @@
  #define NBR_CARAC_HOST_UPS           32
  #define NBR_CARAC_HOST_UPS_UTF8      (2*NBR_CARAC_HOST_UPS)
 
- #define NBR_CARAC_UPS_UPS            32
- #define NBR_CARAC_UPS_UPS_UTF8       (2*NBR_CARAC_UPS_UPS)
+ #define NBR_CARAC_NAME_UPS           32
+ #define NBR_CARAC_NAME_UPS_UTF8      (2*NBR_CARAC_NAME_UPS)
 
  #define NBR_CARAC_LIBELLE_UPS        60
  #define NBR_CARAC_LIBELLE_UPS_UTF8   (2*NBR_CARAC_LIBELLE_UPS)
@@ -65,7 +65,7 @@
     gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];                                                          /* Tech_id du module */
     gchar libelle[NBR_CARAC_LIBELLE_UPS_UTF8+1];                                                           /* Libelle associé */
     gchar host[NBR_CARAC_HOST_UPS_UTF8+1];                                                       /* Adresses IP du module UPS */
-    gchar ups[NBR_CARAC_UPS_UPS_UTF8+1];                                                          /* Nom de l'UPS sur le HOST */
+    gchar name[NBR_CARAC_NAME_UPS_UTF8+1];                                                        /* Nom de l'UPS sur le HOST */
     gchar username[NBR_CARAC_USERNAME_UPS_UTF8+1];                                                        /* Username associé */
     gchar password[NBR_CARAC_PASSWORD_UPS_UTF8+1];                                                        /* Password associé */
     guint map_EA;                                                                        /* Numéro de la premiere EA impactée */
@@ -88,7 +88,8 @@
     gpointer ai_output_frequency;
     gpointer di_outlet_1_status;
     gpointer di_outlet_2_status;
-    gpointer di_ups_ol_charging;
+    gpointer di_ups_online;
+    gpointer di_ups_charging;
     gpointer di_ups_on_batt;
   };
 

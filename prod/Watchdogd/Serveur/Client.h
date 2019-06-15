@@ -21,22 +21,22 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #ifndef _CLIENT_H_
  #define _CLIENT_H_
 
  #include <glib.h>
  #include <time.h>
  #include <pthread.h>
- 
+
  #include "Reseaux.h"
  #include "Utilisateur_DB.h"
 
  #define TAILLE_MACHINE            30                                                    /* Taille max pour un nom d'hote DNS */
- #define TEMPS_UPDATE_CADRAN      20                                  /* Rafraichissement des cadrans toutes les 2 secondes */
+ #define TEMPS_UPDATE_CADRAN       10                                     /* Rafraichissement des cadrans toutes les secondes */
  #define TEMPS_PULSE               20                                                           /* Envoi d'un pulse au client */
 
  enum
@@ -87,7 +87,7 @@
 
     struct CMD_TYPE_SYNOPTIQUE *syn_to_send;             /* Structure du synoptique en cours d'envoi (atelier ou supervision) */
     gint mnemo_dls_id_to_send;
-  };     
+  };
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

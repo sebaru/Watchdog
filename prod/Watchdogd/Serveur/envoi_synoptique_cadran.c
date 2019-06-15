@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/time.h>
  #include <string.h>
@@ -49,7 +49,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to delete cadran %s", rezo_cadran->libelle);
+                   "Unable to delete cadran %d", rezo_cadran->id);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -67,15 +67,15 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add cadran %s", rezo_cadran->libelle );
+                   "Unable to add cadran %d", rezo_cadran->id);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { result = Rechercher_cadranDB( id );
-           if (!result) 
+           if (!result)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate cadran %d", id );
+                          "Unable to locate cadran %d", id);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -97,7 +97,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to save cadran %s", rezo_cadran->libelle);
+                   "Unable to save cadran %d", rezo_cadran->id);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -108,10 +108,10 @@
 /* Sortie: 0 si present, 1 sinon                                                                                              */
 /******************************************************************************************************************************/
  static gint Chercher_bit_cadrans ( struct CADRAN *element, struct CADRAN *cherche )
-  { if (element->bit_controle == cherche->bit_controle &&
-        element->type == cherche->type)
-         return 0;
-    else return 1;
+  { if (element->bit_controle != -1 && element->bit_controle == cherche->bit_controle && element->type == cherche->type) return 0;
+    if (element->bit_controle == -1 &&
+        (!strcasecmp(element->tech_id, cherche->tech_id) && !strcasecmp(element->acronyme, cherche->acronyme))) return 0;
+    return 1;
   }
 /******************************************************************************************************************************/
 /* Envoyer_cadran_tag: Envoi des cadran au client en parametre                                                                */
@@ -129,14 +129,13 @@
     nbr.num = db->nbr_result;
     if (nbr.num)
      { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d cadrans", nbr.num );
-       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
-                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
     while ( (cadran = Recuperer_cadranDB_suite( &db )) != NULL )                      /* Pour tous les cadrans de la database */
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, 
-                "Envoyer_cadran_tag: cadran %d (%s) to client %s",
-                 cadran->id, cadran->libelle, client->machine );
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                "Envoyer_cadran_tag: cadran %d %s:%s to client %s",
+                 cadran->id, cadran->tech_id, cadran->acronyme, client->machine );
 
        Envoi_client ( client, tag, sstag,                                                        /* Envoi du cadran au client */
                       (gchar *)cadran, sizeof(struct CMD_TYPE_CADRAN) );
@@ -144,15 +143,17 @@
        if (tag == TAG_SUPERVISION)                                          /* Si mode supervision on envoit la valeur d'init */
         { struct CMD_ETAT_BIT_CADRAN *init_cadran;
           struct CADRAN *cadran_new;
-		  cadran_new = (struct CADRAN *) g_try_malloc0 ( sizeof(struct CADRAN) );
-		  if (!cadran_new)
+      		  cadran_new = (struct CADRAN *) g_try_malloc0 ( sizeof(struct CADRAN) );
+		        if (!cadran_new)
            { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                      "Envoyer_cadran_tag: Memory Error for %d (%s)", cadran->id, cadran->libelle );
+                      "Envoyer_cadran_tag: Memory Error for %d (%s:%s)", cadran->id, cadran->tech_id, cadran->acronyme );
            }
           else
-           { cadran_new->type         = cadran->type;
-			 cadran_new->bit_controle = cadran->bit_controle;
-			 
+           { cadran_new->type = cadran->type;
+			          cadran_new->bit_controle = cadran->bit_controle;
+             g_snprintf( cadran_new->tech_id, sizeof(cadran_new->tech_id), "%s", cadran->tech_id );
+             g_snprintf( cadran_new->acronyme, sizeof(cadran_new->acronyme), "%s", cadran->acronyme );
+
              init_cadran = Formater_cadran(cadran_new);                                   /* Formatage de la chaine associée */
              if (init_cadran)                                                            /* envoi la valeur d'init au client */
               { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CADRAN,
@@ -160,13 +161,14 @@
                 g_free(init_cadran);                                                                 /* On libere la mémoire */
               }
              else { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                             "Envoyer_cadran_tag: Formater_cadran failed for %d (%s)", cadran->id, cadran->libelle );
+                             "Envoyer_cadran_tag: Formater_cadran failed for %d (%s:%s)",
+                              cadran->id, cadran->tech_id, cadran->acronyme );
                   }
 
              if ( ! g_slist_find_custom(client->Liste_bit_cadrans, cadran_new, (GCompareFunc) Chercher_bit_cadrans) )
               { client->Liste_bit_cadrans = g_slist_prepend( client->Liste_bit_cadrans, cadran_new ); }
              else g_free( cadran_new );                          /* si deja dans la liste, plus besoin de cette zone mémoire */
-	      }
+	          }
         }
        g_free(cadran);
      }
