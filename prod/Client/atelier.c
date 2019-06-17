@@ -21,18 +21,18 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
  #include <gnome.h>
  #include <sys/time.h>
- 
+
  #include "Reseaux.h"
  #include "Config_cli.h"
  #include "trame.h"
 
- extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */  
+ extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */
  extern GtkWidget *Notebook;                                                             /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
@@ -46,7 +46,7 @@
  static void Menu_ajouter_passerelle ( struct TYPE_INFO_ATELIER *infos );
  static void Menu_ajouter_cadran ( struct TYPE_INFO_ATELIER *infos );
  static void Menu_enregistrer_synoptique( struct TYPE_INFO_ATELIER *infos );
-  
+
 /******************************************************************************************************************************/
 /* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                                        */
 /* Entrée: Un id motif                                                                                                        */
@@ -93,9 +93,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void Detruire_page_atelier ( struct PAGE_NOTEBOOK *page )
-  { struct TYPE_INFO_ATELIER *infos;
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;
-    if ( Nbr_page_type( TYPE_PAGE_ATELIER ) == 1 )                              /* S'il ne reste qu'1 page, c'est la derniere */
+  { if ( Nbr_page_type( TYPE_PAGE_ATELIER ) == 1 )                              /* S'il ne reste qu'1 page, c'est la derniere */
      { Detruire_fenetre_ajout_motif ();
        Detruire_fenetre_propriete_TOR ();
      }
@@ -222,7 +220,7 @@
 
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
-    
+
     page->type  = TYPE_PAGE_ATELIER;
     Liste_pages = g_list_append( Liste_pages, page );
 
@@ -242,7 +240,7 @@
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
-    
+
     cadran = gtk_label_new( _("Position X/Y") );                                                   /* Affichage des abcisses */
     gtk_table_attach_defaults( GTK_TABLE(table), cadran, 0, 1, 0, 1 );
     infos->Entry_posxy = gtk_entry_new();
@@ -262,7 +260,7 @@
     infos->Entry_libelle = gtk_entry_new();
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Entry_libelle, 1, 5, 1, 2 );
     gtk_entry_set_editable ( GTK_ENTRY(infos->Entry_libelle), FALSE );
-    
+
 /*************************************************** Trame proprement dite ****************************************************/
 
     boite1 = gtk_hbox_new( TRUE, 6 );                                                              /* Barre de controle trame */
@@ -287,7 +285,7 @@
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Detruire_page), page );
-    
+
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
 
@@ -405,7 +403,7 @@
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TYPE_INFO_ATELIER *infos;
     struct CMD_TYPE_MOTIF *motif;
-        
+
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_motif->syn_id );
     if (!infos) return;
     motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
@@ -447,7 +445,7 @@
  void Proto_cacher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TYPE_INFO_ATELIER *infos;
-        
+
     infos = Rechercher_infos_atelier_par_id_syn ( motif->syn_id );
     trame_motif = Id_vers_trame_motif( infos, motif->id );
     if (!trame_motif) return;

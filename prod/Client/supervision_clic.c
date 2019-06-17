@@ -199,8 +199,8 @@
     else if (!pid)                                                                       /* Lancement de la ligne de commande */
      { gchar chaine[256];
        g_snprintf( chaine, sizeof(chaine),
-                  "http://%s/getgraph.html?type=%d&num=%d&period=%s",
-                   Client.host, appui_cadran->cadran->type, appui_cadran->cadran->bit_controle, period );
+                  "https://%s.abls-habitat.fr/archive/show/%s/%s/%s",
+                   Client.host, appui_cadran->cadran->tech_id, appui_cadran->cadran->acronyme, period );
        execlp( "firefox", "firefox", chaine, NULL );
        printf("Lancement de firefox failed\n");
        _exit(0);
@@ -212,15 +212,15 @@
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Clic_cadran_supervision_hour ( void )
-  { Clic_cadran_supervision_action ( "hour" ); }
+  { Clic_cadran_supervision_action ( "HOUR" ); }
  static void Clic_cadran_supervision_day ( void )
-  { Clic_cadran_supervision_action ( "day" ); }
+  { Clic_cadran_supervision_action ( "DAY" ); }
  static void Clic_cadran_supervision_week ( void )
-  { Clic_cadran_supervision_action ( "week" ); }
+  { Clic_cadran_supervision_action ( "WEEK" ); }
  static void Clic_cadran_supervision_month ( void )
-  { Clic_cadran_supervision_action ( "month" ); }
+  { Clic_cadran_supervision_action ( "MONTH" ); }
  static void Clic_cadran_supervision_year ( void )
-  { Clic_cadran_supervision_action ( "year" ); }
+  { Clic_cadran_supervision_action ( "YEAR" ); }
 /******************************************************************************************************************************/
 /* CB_Cadran_Set_registre: Fonction appelée qd on appuie sur un des boutons de l'interface de modification de consigne        */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */

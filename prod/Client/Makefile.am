@@ -19,7 +19,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  liste_message.c ajout_message.c \
 			  liste_synoptique.c ajout_synoptique.c \
 			  liste_mnemonique.c ajout_mnemonique.c option_entreeana.c option_cpt_imp.c \
-			  option_tempo.c option_registre.c \
+			  option_registre.c \
                           liste_camera.c ajout_camera.c protocole_lowlevel.c \
 			  atelier.c atelier_clic_trame.c atelier_selection.c \
 			  atelier_agrandir.c atelier_propriete_motif.c atelier_ajout_motif.c \

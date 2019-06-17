@@ -44,7 +44,7 @@
        response = Admin_write ( response, " | - new_e $tech_id $acronyme   - Get digitalinput $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_b $tech_id $acronyme   - Get bistable $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_m $tech_id $acronyme   - Get monostable $tech_id $acronyme" );
-       response = Admin_write ( response, " | - new_t $tech_id $acronyme   - Get Tempo $tech_id $acronyme" );
+       response = Admin_write ( response, " | - t $tech_id $acronyme       - Get Tempo $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_ea $tech_id $acronyme  - Get Analog Input $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_msg $tech_id $acronyme - Get Message $tech_id $acronyme" );
        response = Admin_write ( response, " | - list_ea                   - List all dynamic Digital Inputs" );
@@ -55,7 +55,6 @@
        response = Admin_write ( response, " | - b $num                    - Get B[$num]" );
        response = Admin_write ( response, " | - a $num                    - Get A[$num]" );
        response = Admin_write ( response, " | - msg $num                  - Get MSG[$num]" );
-       response = Admin_write ( response, " | - tr $num                   - Get TR[$num]" );
        response = Admin_write ( response, " | - i $num                    - Get I[$num]" );
        response = Admin_write ( response, " | - ci $num                   - Get CI[$num]" );
        response = Admin_write ( response, " | - ch $num                   - Get CH[$num]" );
@@ -63,33 +62,13 @@
        response = Admin_write ( response, " | - help                      - This help" );
      } else
     if ( ! strcmp ( commande, "t" ) )
-     { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
-       if (num<NBR_TEMPO)
-        { g_snprintf( chaine, sizeof(chaine), " | - T%04d -> delai_on=%d min_on=%d max_on=%d delai_off=%d", num,
-			                   Partage->Tempo_R[num].confDB.delai_on, Partage->Tempo_R[num].confDB.min_on,
-			                   Partage->Tempo_R[num].confDB.max_on, Partage->Tempo_R[num].confDB.delai_off );
-          response = Admin_write ( response, chaine );
-          g_snprintf( chaine, sizeof(chaine), " | - T%04d  = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
-                      Partage->Tempo_R[num].state, Partage->Tempo_R[num].status,
-                      Partage->Tempo_R[num].date_on,
-                     (Partage->Tempo_R[num].date_on > Partage->top ? (Partage->Tempo_R[num].date_on - Partage->top)/10.0 : 0.0),
-                      Partage->Tempo_R[num].date_off,
-                     (Partage->Tempo_R[num].date_off > Partage->top ? (Partage->Tempo_R[num].date_off - Partage->top)/10.0 : 0.0) );
-          response = Admin_write ( response, chaine );
-        } else
-        { g_snprintf( chaine, sizeof(chaine), " | - T -> num '%d' out of range", num );
-          response = Admin_write ( response, chaine );
-	       }
-     } else
-    if ( ! strcmp ( commande, "new_t" ) )
      { gchar tech_id[80], acronyme[80];
        if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
         { struct DLS_TEMPO *tempo = NULL;
           Dls_data_get_tempo ( tech_id, acronyme, (gpointer)&tempo );
           if (tempo)
            { g_snprintf( chaine, sizeof(chaine), " | - T: %s:%s -> delai_on=%d min_on=%d max_on=%d delai_off=%d", tech_id, acronyme,
-			                   tempo->confDB.delai_on, tempo->confDB.min_on, tempo->confDB.max_on, tempo->confDB.delai_off );
+			                   tempo->delai_on, tempo->min_on, tempo->max_on, tempo->delai_off );
              response = Admin_write ( response, chaine );
              g_snprintf( chaine, sizeof(chaine), " | - T: %s:%s = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", tech_id, acronyme,
                       tempo->state, tempo->status, tempo->date_on,
@@ -190,7 +169,7 @@
              if (strcmp(tempo->tech_id, tech_id)) continue;
              g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s -> delai_on=%d min_on=%d max_on=%d delai_off=%d",
                         tempo->tech_id, tempo->acronyme,
-			                     tempo->confDB.delai_on, tempo->confDB.min_on, tempo->confDB.max_on, tempo->confDB.delai_off );
+			                     tempo->delai_on, tempo->min_on, tempo->max_on, tempo->delai_off );
              response = Admin_write ( response, chaine );
              g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)",
                       tempo->tech_id, tempo->acronyme,

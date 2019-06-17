@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include "watchdogd.h"
  #include "Sous_serveur.h"
 
@@ -173,7 +173,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  gchar *Admin_command( gchar *response, gchar *ligne )
-  { gchar commande[128], chaine[128];
+  { gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 

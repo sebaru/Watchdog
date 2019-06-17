@@ -63,14 +63,22 @@
           return( cadran->val_ech != valeur );
         }
        case MNEMO_TEMPO:
-       case MNEMO_ENTREE_ANA:
             return( TRUE );
+       case MNEMO_ENTREE_ANA:
+        { gfloat valeur;
+          valeur = Dls_data_get_AI ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+          return( cadran->val_ech != valeur );
+        }
        case MNEMO_CPT_IMP:
         { gint valeur;
           valeur = Dls_data_get_CI ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
           return( cadran->val_ech != valeur );
         }
        case MNEMO_CPTH:
+        { gint valeur;
+          valeur = Dls_data_get_CH ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+          return( cadran->val_ech != valeur );
+        }
        case MNEMO_REGISTRE:
        default: return(FALSE);
      }
@@ -146,7 +154,12 @@
             if(cadran->bit_controle!=-1)
              { cadran->val_ech = Partage->ea[cadran->bit_controle].val_ech; }
             else
-             { cadran->val_ech = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data ); }
+             { cadran->val_ech = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+               if (!cadran->dls_data)                            /* si AI pas trouvée, on remonte le nom du cadran en libellé */
+                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%s:%s", cadran->tech_id, cadran->acronyme );
+                  return(etat_cadran);
+                }
+             }
             if ( cadran->bit_controle!=-1 && EA_inrange(cadran->bit_controle))
              { if(-1000000.0<cadran->val_ech && cadran->val_ech<1000000.0)
                 { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
@@ -176,14 +189,19 @@
                 }
              }
             else
-             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                           " - pb comm - "
-                         );
-             }
+             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), " - pb comm - " ); }
             return(etat_cadran);
        case MNEMO_CPTH:
              { time_t valeur;
-               valeur = (time_t)Partage->ch[cadran->bit_controle].confDB.valeur;
+               if(cadran->bit_controle!=-1)
+                { valeur = (time_t)Partage->ch[cadran->bit_controle].confDB.valeur; }
+               else
+                { cadran->val_ech = Dls_data_get_CH(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+                  if (!cadran->dls_data)                            /* si AI pas trouvée, on remonte le nom du cadran en libellé */
+                   { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%s:%s", cadran->tech_id, cadran->acronyme );
+                     return(etat_cadran);
+                   }
+                }
                if (valeur < 60)
                 { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%02d min", (int)valeur ); }
                 else
@@ -194,17 +212,28 @@
        case MNEMO_CPT_IMP:
              { gfloat valeur;
                gchar *format;
-               if(cadran->bit_controle==-1) break;
-               valeur = Partage->ci[cadran->bit_controle].confDB.valeur;
-               valeur = valeur * (gfloat)Partage->ci[cadran->bit_controle].confDB.multi;                 /* Multiplication ! */
-               switch (Partage->ci[cadran->bit_controle].confDB.type)
-                { case CI_TOTALISATEUR: format = "%8.0f %s"; break;
-                  default:              format = "%8.2f %s"; break;
+               if(cadran->bit_controle!=-1)
+                { valeur = Partage->ci[cadran->bit_controle].confDB.valeur;
+                  valeur = valeur * (gfloat)Partage->ci[cadran->bit_controle].confDB.multi;               /* Multiplication ! */
+                  switch (Partage->ci[cadran->bit_controle].confDB.type)
+                   { case CI_TOTALISATEUR: format = "%8.0f %s"; break;
+                     default:              format = "%8.2f %s"; break;
+                   }
+                  g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), format, valeur,
+                              Partage->ci[cadran->bit_controle].confDB.unite
+                            );
+                  cadran->val_ech = Partage->ci[cadran->bit_controle].confDB.valeur;
                 }
-               g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), format, valeur,
-                           Partage->ci[cadran->bit_controle].confDB.unite
-                         );
-               cadran->val_ech = Partage->ci[cadran->bit_controle].confDB.valeur;
+               else
+                { cadran->val_ech = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+                  if (!cadran->dls_data)                            /* si AI pas trouvée, on remonte le nom du cadran en libellé */
+                   { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%s:%s", cadran->tech_id, cadran->acronyme );
+                     return(etat_cadran);
+                   }
+                  g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%8.2f fois", cadran->val_ech
+                              /*((struct DLS_CI *)cadran->dls_data)->confDB.unite*/
+                            );
+                }
              }
             break;
        case MNEMO_REGISTRE:
@@ -237,7 +266,7 @@
              }
             else if (tempo->status == DLS_TEMPO_NOT_COUNTING)                  /* Tempo ne compte pas: on affiche la consigne */
              { gint src, heure, minute, seconde;
-               src = tempo->confDB.delai_on/10;
+               src = tempo->delai_on/10;
                heure = src / 3600;
                minute = (src - heure*3600) / 60;
                seconde = src - heure*3600 - minute*60;

@@ -133,7 +133,6 @@
     guchar b [ (NBR_BIT_BISTABLE>>3) + 1 ];                                                                      /* Bistables */
     struct DLS_MESSAGES g [ NBR_MESSAGE_ECRITS ];                                               /* Message vers veille et syn */
     struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                                               /* DLS=rw, Sserveur=r */
-    struct DLS_TEMPO Tempo_R[NBR_TEMPO];
     struct REGISTRE registre[NBR_REGISTRE];
     GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */
     GSList *Dls_data_BOOL;                                                              /* Liste des bistables et monostables */

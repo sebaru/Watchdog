@@ -58,13 +58,17 @@
   };
 
  struct DLS_TEMPO                                                                           /* Définition d'une temporisation */
-  { struct CMD_TYPE_MNEMO_TEMPO confDB;
-    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     guint status;                                                                               /* Statut de la temporisation */
     guint date_on;                                                              /* date a partir de laquelle la tempo sera ON */
     guint date_off;                                                            /* date a partir de laquelle la tempo sera OFF */
     gboolean state;
+    guint delai_on;                                                     /* delai avant mise à un (fixé par option mnémonique) */
+    guint delai_off;                                                  /* delai avant mise à zero (fixé par option mnémonique) */
+    guint min_on;                            /* Durée minimale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
+    guint max_on;                            /* Durée maximale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
+    guint random;                                         /* Est-ce une tempo random ? si oui, est la dynamique max du random */
   };
 
  struct DLS_AI

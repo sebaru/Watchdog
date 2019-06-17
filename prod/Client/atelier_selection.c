@@ -7,7 +7,7 @@
  * atelier_selection.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,12 +33,12 @@
  #include "trame.h"
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
-/********************************* Définitions des prototypes programme ***********************************/
+/********************************* DÃ©finitions des prototypes programme ***********************************/
  #include "protocli.h"
 
 /**********************************************************************************************************/
-/* Tester_selection: Renvoie 1 si le groupe en parametre est actuellement selectionné, 0 sinon            */
-/* Entrée: Un numero de groupe                                                                            */
+/* Tester_selection: Renvoie 1 si le groupe en parametre est actuellement selectionnÃ©, 0 sinon            */
+/* EntrÃ©e: Un numero de groupe                                                                            */
 /* Sortie: TRUE/FALSE                                                                                     */
 /**********************************************************************************************************/
  gboolean Tester_selection ( struct TYPE_INFO_ATELIER *infos, gint groupe )
@@ -71,15 +71,15 @@
      }
   }
 /**********************************************************************************************************/
-/* Deselectionner Deselectionne un item parmi tous ceux selectionnés                                      */
-/* Entrée: rien                                                                                           */
+/* Deselectionner Deselectionne un item parmi tous ceux selectionnÃ©s                                      */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Deselectionner ( struct TYPE_INFO_ATELIER *infos, struct TRAME_ITEM *item )
   { infos->Selection.items = g_list_remove( infos->Selection.items, item ); }
 /**********************************************************************************************************/
-/* Tout_deselectionner: Deselectionne tous les motifs actuellement selectionnés                           */
-/* Entrée: rien                                                                                           */
+/* Tout_deselectionner: Deselectionne tous les motifs actuellement selectionnÃ©s                           */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Tout_deselectionner ( struct TYPE_INFO_ATELIER *infos )
@@ -131,8 +131,8 @@
   }
 
 /**********************************************************************************************************/
-/* Selectionner: Incorpore le groupe en parametre dans la liste des motifs selectionnés                   */
-/* Entrée: un numero de groupe, deselect=1 si on doit deselectionner les motifs qui sont selectionnes     */
+/* Selectionner: Incorpore le groupe en parametre dans la liste des motifs selectionnÃ©s                   */
+/* EntrÃ©e: un numero de groupe, deselect=1 si on doit deselectionner les motifs qui sont selectionnes     */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Selectionner ( struct TYPE_INFO_ATELIER *infos, gint groupe, gboolean deselect )
@@ -141,12 +141,11 @@
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CADRAN     *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
-    GSList *liste;
     GList *objet;
- printf("Selectionner : Selectionner groupe %d\n", groupe );
+    printf("Selectionner : Selectionner groupe %d\n", groupe );
     objet = infos->Trame_atelier->trame_items;
     while (objet)
-     { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
+     { switch ( *((gint *)objet->data) )                             /* Test du type de donnÃ©es dans data */
         { case TYPE_MOTIF:
                trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
                if (trame_motif->groupe_dpl == groupe)
@@ -236,7 +235,7 @@
   }
 /**********************************************************************************************************/
 /* Deplacer_selection: Deplace toute la selection sur le synoptique                                       */
-/* Entrée: Les variations en pixels                                                                       */
+/* EntrÃ©e: Les variations en pixels                                                                       */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Deplacer_selection ( struct TYPE_INFO_ATELIER *infos, gint deltax, gint deltay )
@@ -250,7 +249,7 @@
     gint dx, dy, new_x, new_y;
 
     largeur_grille = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(infos->Spin_grid) );
-    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
+    selection = infos->Selection.items;                              /* Pour tous les objets selectionnÃ©s */
     while(selection)
      { dx = deltax; dy = deltay;
        switch ( *((gint *)selection->data) )
@@ -342,8 +341,8 @@
      }
   }
 /**********************************************************************************************************/
-/* Dupliquer_selection: Envoi au serveur une demande de création pour chacun des objets selectionnés      */
-/* Entrée: Rien                                                                                           */
+/* Dupliquer_selection: Envoi au serveur une demande de crÃ©ation pour chacun des objets selectionnÃ©s      */
+/* EntrÃ©e: Rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Dupliquer_selection ( void )
@@ -361,7 +360,7 @@
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
 
     selection = infos->Selection.items;
-    while(selection)                                                 /* Pour tous les objets selectionnés */
+    while(selection)                                                 /* Pour tous les objets selectionnÃ©s */
      { switch ( *((gint *)selection->data) )
         { case TYPE_PASSERELLE:
                trame_pass = ((struct TRAME_ITEM_PASS *)selection->data);
@@ -396,7 +395,7 @@
   }
 /**********************************************************************************************************/
 /* Effacer_selection: Efface tous les elements de la selection en cours                                   */
-/* Entrée: Rien                                                                                           */
+/* EntrÃ©e: Rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Effacer_selection ( void )
@@ -419,7 +418,7 @@
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
 
     selection = infos->Selection.items;
-    while(selection)                                                 /* Pour tous les objets selectionnés */
+    while(selection)                                                 /* Pour tous les objets selectionnÃ©s */
      { switch ( *((gint *)selection->data) )
         { case TYPE_PASSERELLE:
                trame_pass = ((struct TRAME_ITEM_PASS *)selection->data);
@@ -463,8 +462,8 @@
      }
   }
 /**********************************************************************************************************/
-/* Fusionner_selection: Fusionne les elements selectionnés dans un meme groupe                            */
-/* Entrée: rien                                                                                           */
+/* Fusionner_selection: Fusionne les elements selectionnÃ©s dans un meme groupe                            */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Fusionner_selection ( void )
@@ -477,7 +476,7 @@
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
 
-    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
+    selection = infos->Selection.items;                              /* Pour tous les objets selectionnÃ©s */
     new_groupe = Nouveau_groupe();
     while(selection)
      { switch ( *((gint *)selection->data) )
@@ -504,7 +503,7 @@
   }
 /**********************************************************************************************************/
 /* Detacher_selection: Detache les elements d'un meme groupe de election                                  */
-/* Entrée: rien                                                                                           */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Detacher_selection ( void )
@@ -537,7 +536,7 @@
   }
 /**********************************************************************************************************/
 /* Rotationner_selection: Fait tourner la selection                                                       */
-/* Entrée: rien                                                                                           */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Rotationner_selection ( struct TYPE_INFO_ATELIER *infos )
@@ -551,7 +550,7 @@
     angle = (gfloat) gtk_adjustment_get_value ( infos->Adj_angle );
 
 
-    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
+    selection = infos->Selection.items;                              /* Pour tous les objets selectionnÃ©s */
     while(selection)
      { switch ( *((gint *)selection->data) )
        { case TYPE_MOTIF:
@@ -582,8 +581,8 @@
      }
   }
 /**********************************************************************************************************/
-/* Mettre_echelle_selection_1_1 : Mise à l'echelle 1 des motifs selectionnés                              */
-/* Entrée: Rien                                                                                           */
+/* Mettre_echelle_selection_1_1 : Mise Ã  l'echelle 1 des motifs selectionnÃ©s                              */
+/* EntrÃ©e: Rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Mettre_echelle_selection_1_1 ( void )
@@ -596,7 +595,7 @@
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
 
-    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
+    selection = infos->Selection.items;                              /* Pour tous les objets selectionnÃ©s */
     while(selection)
      { switch ( *((gint *)selection->data) )
         { case TYPE_MOTIF:
@@ -611,8 +610,8 @@
      }
   }
 /**********************************************************************************************************/
-/* Mettre_echelle_selection_1_1 : Mise à l'echelle 1 des motifs selectionnés                              */
-/* Entrée: Rien                                                                                           */
+/* Mettre_echelle_selection_1_1 : Mise Ã  l'echelle 1 des motifs selectionnÃ©s                              */
+/* EntrÃ©e: Rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Mettre_echelle_selection_1_Y ( void )
@@ -625,7 +624,7 @@
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
 
-    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
+    selection = infos->Selection.items;                              /* Pour tous les objets selectionnÃ©s */
     while(selection)
      { switch ( *((gint *)selection->data) )
         { case TYPE_MOTIF:
@@ -639,8 +638,8 @@
      }
   }
 /**********************************************************************************************************/
-/* Mettre_echelle_selection_1_1 : Mise à l'echelle 1 des motifs selectionnés uniquement sur la hauteur    */
-/* Entrée: Rien                                                                                           */
+/* Mettre_echelle_selection_1_1 : Mise Ã  l'echelle 1 des motifs selectionnÃ©s uniquement sur la hauteur    */
+/* EntrÃ©e: Rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Mettre_echelle_selection_X_1 ( void )
@@ -653,7 +652,7 @@
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
 
-    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
+    selection = infos->Selection.items;                              /* Pour tous les objets selectionnÃ©s */
     while(selection)
      { switch ( *((gint *)selection->data) )
         { case TYPE_MOTIF:
