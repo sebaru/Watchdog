@@ -213,11 +213,25 @@
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: valeur non trouvée", __func__ );
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
         }
+       gchar *unite = json_object_get_string_member ( object, "unite" );
+       if (!unite)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: unite non trouvée", __func__ );
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+        }
+       gchar *multi = json_object_get_string_member ( object, "multi" );
+       if (!multi)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: multi non trouvée", __func__ );
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+        }
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                 "%s: HTTP/ request for SET CI %s:%s = %s", __func__, tech_id, acronyme, valeur );
+                 "%s: HTTP/ request for SET CI %s:%s = %s %s multi %s", __func__,
+                  tech_id, acronyme, valeur, unite, multi );
        Dls_data_get_CI ( tech_id, acronyme, (gpointer *)&cpt_imp );
        if (cpt_imp)
-        { cpt_imp->valeur = atoi(valeur); }
+        { cpt_imp->valeur = atoi(valeur);
+          cpt_imp->multi  = atof(multi);
+          g_snprintf( cpt_imp->unite, sizeof(cpt_imp->unite), "%s", unite );
+        }
        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }
     else if (!strcasecmp(type,"CH"))
