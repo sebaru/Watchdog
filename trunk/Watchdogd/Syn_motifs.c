@@ -93,7 +93,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s SET icone='%d',syn_id='%d',libelle='%s',access_level='%d',bitctrl='%d',bitclic='%d',"
-                "posx='%d',posy='%d',larg='%f',haut='%f',angle='%f',"
+                "posx='%d',posy='%d',larg='%d',haut='%d',angle='%d',"
                 "dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',rafraich='%d',layer='%d',"
                 "clic_tech_id='%s',clic_acronyme='%s'",
                 NOM_TABLE_MOTIF,
@@ -184,9 +184,9 @@
        motif->bit_clic     = atoi(db->row[6]);                    /* Bit à activer quand on clic avec le bouton gauche souris */
        motif->position_x   = atoi(db->row[7]);                                                   /* en abscisses et ordonnées */
        motif->position_y   = atoi(db->row[8]);
-       motif->largeur      = atof(db->row[9]);                                         /* Taille de l'image sur le synoptique */
-       motif->hauteur      = atof(db->row[10]);
-       motif->angle        = atof(db->row[11]);
+       motif->largeur      = atoi(db->row[9]);                                         /* Taille de l'image sur le synoptique */
+       motif->hauteur      = atoi(db->row[10]);
+       motif->angle        = atoi(db->row[11]);
        motif->type_dialog  = atoi(db->row[12]);                      /* Type de la boite de dialogue pour le clic de commande */
        motif->type_gestion = atoi(db->row[13]);
        motif->rouge0       = atoi(db->row[14]);
@@ -253,9 +253,9 @@
        motif->bit_clic     = atoi(db->row[6]);                    /* Bit à activer quand on clic avec le bouton gauche souris */
        motif->position_x   = atoi(db->row[7]);                                                   /* en abscisses et ordonnées */
        motif->position_y   = atoi(db->row[8]);
-       motif->largeur      = atof(db->row[9]);                                         /* Taille de l'image sur le synoptique */
-       motif->hauteur      = atof(db->row[10]);
-       motif->angle        = atof(db->row[11]);
+       motif->largeur      = atoi(db->row[9]);                                         /* Taille de l'image sur le synoptique */
+       motif->hauteur      = atoi(db->row[10]);
+       motif->angle        = atoi(db->row[11]);
        motif->type_dialog  = atoi(db->row[12]);                      /* Type de la boite de dialogue pour le clic de commande */
        motif->type_gestion = atoi(db->row[13]);
        motif->rouge0       = atoi(db->row[14]);
@@ -304,8 +304,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "
-                "libelle='%s',access_level='%d',bitctrl='%d',bitclic='%d',posx='%d',posy='%d',larg='%f',"
-                "haut='%f',angle='%f',dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',"
+                "libelle='%s',access_level='%d',bitctrl='%d',bitclic='%d',posx='%d',posy='%d',larg='%d',"
+                "haut='%d',angle='%d',dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',"
                 "rafraich='%d',layer='%d',clic_tech_id='%s',clic_acronyme='%s'"
                 " WHERE id=%d;", NOM_TABLE_MOTIF,
                 libelle, motif->access_level,
