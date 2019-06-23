@@ -268,12 +268,12 @@ CREATE TABLE IF NOT EXISTS `mnemos_DO` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `mnemos_AnalogInput`
+-- Structure de la table `mnemos_AI`
 --
 
 CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `dls_id` int(11) NOT NULL DEFAULT '0',
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `type` int(11) NOT NULL DEFAULT '0',
@@ -286,8 +286,8 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `map_question_vocale` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `map_reponse_vocale` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun',
   PRIMARY KEY (`id`),
-  UNIQUE (`dls_id`,`acronyme`),
-  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
