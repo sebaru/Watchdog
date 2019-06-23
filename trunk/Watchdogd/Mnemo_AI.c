@@ -156,8 +156,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT ai.unite"
                 " FROM mnemos_AI as ai"
-                " INNER JOIN dls as d ON ai.dls_id = d.id"
-                " WHERE d.tech_id='%s' AND ai.acronyme='%s' LIMIT 1",
+                " WHERE ai.tech_id='%s' AND ai.acronyme='%s' LIMIT 1",
                 tech_id, acronyme
               );
 
@@ -190,8 +189,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-               "SELECT d.tech_id, m.acronyme, m.map_text, m.libelle "
-               "FROM mnemos_AI as m INNER JOIN dls as d ON d.id = m.dls_id "
+               "SELECT m.tech_id, m.acronyme, m.map_text, m.libelle "
+               "FROM mnemos_AI as m "
                " WHERE (m.map_host='*' OR m.map_host LIKE '%s') AND (m.map_thread='*' OR m.map_thread LIKE '%s')"
                " AND m.map_text LIKE '%s'", g_get_host_name(), thread, commande );
 
@@ -226,8 +225,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-               "SELECT d.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale "
-               "FROM mnemos_AI as m INNER JOIN dls as d ON d.id = m.dls_id"
+               "SELECT m.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale "
+               "FROM mnemos_AI as m"
                " WHERE m.map_question_vocale LIKE '%s'", commande );
     g_free(commande);
 

@@ -40,7 +40,7 @@
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_HORLOGE ( gint dls_id, gchar *acronyme, gchar *libelle_src )
+ gboolean Mnemo_auto_create_HORLOGE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;
     gchar requete[1024];
     gboolean retour;
@@ -63,9 +63,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_HORLOGE SET dls_id='%d',acronyme='%s',libelle='%s' "
+                "INSERT INTO mnemos_HORLOGE SET tech_id='%s',acronyme='%s',libelle='%s' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                dls_id, acro, libelle );
+                tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);
 
@@ -94,8 +94,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT d.tech_id, m.acronyme"
-                " FROM mnemos_HORLOGE as m INNER JOIN dls as d ON m.dls_id = d.id"
+                "SELECT m.tech_id, m.acronyme"
+                " FROM mnemos_HORLOGE as m"
                 " WHERE CURTIME() LIKE CONCAT(LPAD(m.heure,2,'0'),':',LPAD(m.minute,2,'0'),':%%')" );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */

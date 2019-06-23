@@ -343,7 +343,7 @@
     Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", &module->ai_battery_voltage, 0.0 );
     Charger_conf_AI ( module->ai_battery_voltage );
 
-    Mnemo_auto_create_AI ( module->tech_id, "INPUT_HZ", "Frequence d'entrée", "HZ" );
+    Mnemo_auto_create_AI ( module->tech_id, "INPUT_HZ", "Fréquence d'entrée", "HZ" );
     Dls_data_set_AI ( module->tech_id, "INPUT_HZ", &module->ai_input_frequency, 0.0 );
     Charger_conf_AI ( module->ai_input_frequency );
 
@@ -351,7 +351,7 @@
     Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", &module->ai_output_current, 0.0 );
     Charger_conf_AI ( module->ai_output_current );
 
-    Mnemo_auto_create_AI ( module->tech_id, "INPUT_HZ", "Frequence de sortie", "HZ" );
+    Mnemo_auto_create_AI ( module->tech_id, "INPUT_HZ", "Fréquence de sortie", "HZ" );
     Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", &module->ai_output_frequency, 0.0 );
     Charger_conf_AI ( module->ai_output_frequency );
 

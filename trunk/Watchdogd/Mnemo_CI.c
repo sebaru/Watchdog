@@ -41,7 +41,7 @@
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_CI ( gint dls_id, gchar *acronyme, gchar *libelle_src )
+ gboolean Mnemo_auto_create_CI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;
     gchar requete[1024];
     gboolean retour;
@@ -64,9 +64,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_CI SET dls_id='%d',acronyme='%s',libelle='%s' "
+                "INSERT INTO mnemos_CI SET tech_id='%s',acronyme='%s',libelle='%s' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                dls_id, acro, libelle );
+                tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);
 
@@ -97,8 +97,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT cpt.valeur, cpt.unite"
                 " FROM mnemos_CI as cpt"
-                " INNER JOIN dls as d ON cpt.dls_id = d.id"
-                " WHERE d.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
+                " WHERE cpt.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
                 tech_id, acronyme
               );
 
@@ -131,8 +130,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT cpt.valeur, cpt.etat, cpt.unite, cpt.multi"
                 " FROM mnemos_CI as cpt"
-                " INNER JOIN dls as d ON cpt.dls_id = d.id"
-                " WHERE d.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
+                " WHERE cpt.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
                 cpt_imp->tech_id, cpt_imp->acronyme
               );
 
@@ -314,8 +312,8 @@
     while ( liste )
      { struct DLS_CI *cpt_imp = (struct DLS_CI *)liste->data;
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE mnemos_CI as m INNER JOIN dls ON dls.id = m.dls_id SET valeur='%d', etat='%d' "
-                   "WHERE dls.tech_id='%s' AND m.acronyme='%s';",
+                   "UPDATE mnemos_CI as m SET valeur='%d', etat='%d' "
+                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
                    cpt_imp->valeur, cpt_imp->etat, cpt_imp->tech_id, cpt_imp->acronyme );
        Lancer_requete_SQL ( db, requete );
        liste = g_slist_next(liste);

@@ -1233,9 +1233,112 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4205)
+     { g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_DI` ADD `tech_id` VARCHAR(32) NULL DEFAULT NULL AFTER `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "UPDATE mnemos_DI inner join dls on mnemos_DI.dls_id = dls.id SET mnemos_DI.tech_id=dls.tech_id " );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_DI` ADD CONSTRAINT `mnemos_DI_tech_id` FOREIGN KEY (`tech_id`)"
+                  " REFERENCES `dls`(`tech_id`) ON DELETE CASCADE ON UPDATE RESTRICT;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `watchdog`.`mnemos_DI` ADD UNIQUE `tech_id` (`tech_id`, `acronyme`);");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_DI` DROP INDEX `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_DI` DROP `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_DO` ADD `tech_id` VARCHAR(32) NULL DEFAULT NULL AFTER `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "UPDATE mnemos_DO inner join dls on mnemos_DO.dls_id = dls.id SET mnemos_DO.tech_id=dls.tech_id " );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_AO` ADD CONSTRAINT `mnemos_DO_tech_id` FOREIGN KEY (`tech_id`)"
+                  " REFERENCES `dls`(`tech_id`) ON DELETE CASCADE ON UPDATE RESTRICT;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `watchdog`.`mnemos_DO` ADD UNIQUE `tech_id` (`tech_id`, `acronyme`);");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_DO` DROP INDEX `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_DO` DROP `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_CI` ADD `tech_id` VARCHAR(32) NULL DEFAULT NULL AFTER `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "UPDATE mnemos_CI inner join dls on mnemos_CI.dls_id = dls.id SET mnemos_CI.tech_id=dls.tech_id " );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_CI` ADD CONSTRAINT `mnemos_CI_tech_id` FOREIGN KEY (`tech_id`)"
+                  " REFERENCES `dls`(`tech_id`) ON DELETE CASCADE ON UPDATE RESTRICT;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `watchdog`.`mnemos_CI` ADD UNIQUE `tech_id` (`tech_id`, `acronyme`);");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_CI` DROP INDEX `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_CI` DROP `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_CH` ADD `tech_id` VARCHAR(32) NULL DEFAULT NULL AFTER `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "UPDATE mnemos_CH inner join dls on mnemos_CH.dls_id = dls.id SET mnemos_CH.tech_id=dls.tech_id " );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_CH` ADD CONSTRAINT `mnemos_CH_tech_id` FOREIGN KEY (`tech_id`)"
+                  " REFERENCES `dls`(`tech_id`) ON DELETE CASCADE ON UPDATE RESTRICT;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `watchdog`.`mnemos_CH` ADD UNIQUE `tech_id` (`tech_id`, `acronyme`);");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_CH` DROP INDEX `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_CH` DROP `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_Tempo` ADD `tech_id` VARCHAR(32) NULL DEFAULT NULL AFTER `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "UPDATE mnemos_Tempo inner join dls on mnemos_Tempo.dls_id = dls.id SET mnemos_Tempo.tech_id=dls.tech_id " );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_Tempo` ADD CONSTRAINT `mnemos_Tempo_tech_id` FOREIGN KEY (`tech_id`)"
+                  " REFERENCES `dls`(`tech_id`) ON DELETE CASCADE ON UPDATE RESTRICT;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `watchdog`.`mnemos_Tempo` ADD UNIQUE `tech_id` (`tech_id`, `acronyme`);");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_Tempo` DROP INDEX `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_Tempo` DROP `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+
+     }
+
     Libere_DB_SQL(&db);
 fin:
-    database_version=4203;
+    database_version=4205;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
