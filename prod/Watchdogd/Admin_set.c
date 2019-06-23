@@ -40,8 +40,8 @@
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'SET'" );
-       response = Admin_write ( response, " | - new_b $tech_id $acro $val - Set bistable $name_$owner to $val" );
-       response = Admin_write ( response, " | - new_m $tech_id $acro    - Set monostablea $name_$owner to 1" );
+       response = Admin_write ( response, " | - new_b $tech_id:$acro $val - Set bistable $name_$owner to $val" );
+       response = Admin_write ( response, " | - new_m $tech_id:$acro    - Set monostablea $name_$owner to 1" );
        response = Admin_write ( response, " | - e num val               - Set E[num]   = val" );
        response = Admin_write ( response, " | - m num val               - Set M[num]   = val" );
        response = Admin_write ( response, " | - b num val               - Set B[num]   = val" );
@@ -139,7 +139,7 @@
     if ( ! strcmp ( commande, "new_b" ) )
      { gchar tech_id[80], acronyme[80];
        int val;
-       if (sscanf ( ligne, "%s %s %s %d", commande, tech_id, acronyme, &val ) == 4)      /* Découpage de la ligne de commande */
+       if (sscanf ( ligne, "%s %[^:]%s %d", commande, tech_id, acronyme, &val ) == 4)    /* Découpage de la ligne de commande */
         { Dls_data_set_bool ( tech_id, acronyme, NULL, val );
           g_snprintf( chaine, sizeof(chaine), " | - %s:%s set to %d", tech_id, acronyme, val );
         }
@@ -148,7 +148,7 @@
      } else
     if ( ! strcmp ( commande, "new_m" ) )
      { gchar tech_id[80], acronyme[80];
-       if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
+       if (sscanf ( ligne, "%s %[^:]%s", commande, tech_id, acronyme ) == 3)             /* Découpage de la ligne de commande */
         { Envoyer_commande_dls_data ( tech_id, acronyme );
           g_snprintf( chaine, sizeof(chaine), " | - %s:%s set to 1", tech_id, acronyme );
         }

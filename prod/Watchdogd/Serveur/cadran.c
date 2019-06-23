@@ -177,14 +177,12 @@
             else if ( cadran->bit_controle==-1 )
              { if(-1000000.0<cadran->val_ech && cadran->val_ech<1000000.0)
                 { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                             "%6.2f %s", cadran->val_ech,
-                              ((struct ANALOG_INPUT *)cadran->dls_data)->confDB.unite
+                             "%6.2f %s", cadran->val_ech, ((struct DLS_AI *)cadran->dls_data)->unite
                             );
                 }
                else
                 { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                             "%8.0f %s", cadran->val_ech,
-                              ((struct ANALOG_INPUT *)cadran->dls_data)->confDB.unite
+                             "%8.0f %s", cadran->val_ech, ((struct DLS_AI *)cadran->dls_data)->unite
                             );
                 }
              }
@@ -226,12 +224,13 @@
                 }
                else
                 { cadran->val_ech = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-                  if (!cadran->dls_data)                            /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-                   { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%s:%s", cadran->tech_id, cadran->acronyme );
+                  struct DLS_CI *ci=cadran->dls_data;
+                  if (!ci)                                       /* si AI pas trouvée, on remonte le nom du cadran en libellé */
+                   { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "-- ?? --" );
                      return(etat_cadran);
                    }
-                  g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%8.2f fois", cadran->val_ech
-                              /*((struct DLS_CI *)cadran->dls_data)->confDB.unite*/
+                  g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%8.2f %s",
+                              cadran->val_ech * ci->multi, ci->unite
                             );
                 }
              }

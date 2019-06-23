@@ -47,9 +47,9 @@
     gint    rafraich;                                                         /* Temps de rafraichissement du motif à l'ecran */
     guint   position_x;                                                                          /* en abscisses et ordonnées */
     guint   position_y;
-    gfloat  largeur;                                                                   /* Taille de l'image sur le synoptique */
-    gfloat  hauteur;
-    gfloat  angle;
+    gint    largeur;                                                                   /* Taille de l'image sur le synoptique */
+    gint    hauteur;
+    gint    angle;
     gchar   type_dialog;                                             /* Type de la boite de dialogue pour le clic de commande */
     guchar  rouge0;
     guchar  vert0;

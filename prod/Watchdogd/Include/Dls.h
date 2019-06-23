@@ -129,6 +129,9 @@
   { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gint    valeur;
+    gfloat  ratio;
+    gfloat  multi;
+    gchar   unite[32];
     gint    val_en_cours1;                                                     /* valeur en cours pour le calcul via les ratio */
     gboolean etat;
   };

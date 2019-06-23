@@ -682,7 +682,7 @@
        if ( sscanf ( map_text, "%[^:]:AI%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_ana)
            { Dls_data_set_AI ( tech_id, acro, &module->AI[num], 0.0 );
-             Charger_conf_AI ( module->AI[num] );                                     /* Chargment de la conf AI depuis la DB */
+             Charger_conf_AI ( module->AI[num] );                                    /* Chargement de la conf AI depuis la DB */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
                          map_text, num, module->nbr_entree_ana );
@@ -726,15 +726,8 @@
        else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, dst_tag );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:COMM", module->modbus.tech_id );
-    if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, critere ) )
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
-    else while ( Recuperer_mnemos_DI_suite( &db ) )
-     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
-                 src_text, tech_id, acro, libelle );
-       Dls_data_set_bool ( tech_id, acro, &module->bit_comm, FALSE );
-     }
+    Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
+
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Module '%s' : mapping done", __func__,
               module->modbus.description );
   }

@@ -21,14 +21,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
  #include <gnome.h>
- 
+
  #include "Reseaux.h"
- 
+
  extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
  extern struct CONFIG Config;                                                              /* Configuration generale watchdog */
 /**************************************** Définitions des prototypes programme ************************************************/
@@ -58,7 +58,7 @@
     g_snprintf( Edit_dls.shortname, sizeof(Edit_dls.shortname), "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_shortname) ) );
     g_snprintf( Edit_dls.tech_id, sizeof(Edit_dls.tech_id), "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_tech_id) ) );
     g_snprintf( Edit_dls.package, sizeof(Edit_dls.package), "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_package) ) );
-    g_strcanon( Edit_dls.tech_id, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", 0 );
+    g_strcanon( Edit_dls.tech_id, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", '_' );
     if (strlen(Edit_dls.tech_id) == 0) g_snprintf( Edit_dls.tech_id, sizeof(Edit_dls.tech_id), "SYS" );
     index             = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
     Edit_dls.syn_id   = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
@@ -102,7 +102,7 @@
 /******************************************************************************************************************************/
  void Menu_ajouter_editer_plugin_dls ( struct CMD_TYPE_PLUGIN_DLS *edit_dls )
   { GtkWidget *frame, *vboite, *table, *texte;
-    gint cpt, i;
+    gint i;
 
     if (edit_dls)
      { memcpy( &Edit_dls, edit_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );                     /* Save pour utilisation future */

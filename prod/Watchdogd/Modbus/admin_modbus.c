@@ -86,6 +86,18 @@
        json_builder_set_member_name  ( builder, "started" );
        json_builder_add_int_value ( builder, module->started );
 
+       json_builder_set_member_name  ( builder, "nbr_entree_tor" );
+       json_builder_add_int_value ( builder, module->nbr_entree_tor );
+
+       json_builder_set_member_name  ( builder, "nbr_sortie_tor" );
+       json_builder_add_int_value ( builder, module->nbr_sortie_tor );
+
+       json_builder_set_member_name  ( builder, "nbr_entree_ana" );
+       json_builder_add_int_value ( builder, module->nbr_entree_ana );
+
+       json_builder_set_member_name  ( builder, "nbr_sortie_ana" );
+       json_builder_add_int_value ( builder, module->nbr_sortie_ana );
+
        json_builder_set_member_name  ( builder, "comm" );
        json_builder_add_int_value ( builder, Dls_data_get_bool( NULL, NULL, &module->bit_comm) );
 

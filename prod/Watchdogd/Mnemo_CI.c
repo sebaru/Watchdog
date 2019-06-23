@@ -129,7 +129,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT cpt.valeur, cpt.etat"
+                "SELECT cpt.valeur, cpt.etat, cpt.unite, cpt.multi"
                 " FROM mnemos_CI as cpt"
                 " INNER JOIN dls as d ON cpt.dls_id = d.id"
                 " WHERE d.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
@@ -145,8 +145,10 @@
     if ( db->row )
      { cpt_imp->valeur = atoi(db->row[0]);
        cpt_imp->etat   = atoi(db->row[1]);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CI '%s:%s'=%d (%d) loaded", __func__,
-                 cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur, cpt_imp->etat );
+       g_snprintf( cpt_imp->unite, sizeof(cpt_imp->unite), "%s", db->row[2] );
+       cpt_imp->multi  = atoi(db->row[3]);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CI '%s:%s'=%d %s (%d) loaded", __func__,
+                 cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur, cpt_imp->unite, cpt_imp->etat );
        Libere_DB_SQL( &db );
      }
   }

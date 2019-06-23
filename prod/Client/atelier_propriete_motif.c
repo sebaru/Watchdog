@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/atelier_propriete_motif.c         gestion des selections synoptique                             */
-/* Projet WatchDog version 3.0       Gestion d'habitat                      sam 04 avr 2009 13:43:20 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/atelier_propriete_motif.c         gestion des selections synoptique                                                 */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          sam 04 avr 2009 13:43:20 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * atelier_propriete_motif.c
  * This file is part of Watchdog
@@ -446,11 +446,11 @@ printf("Changer_couleur %p\n", data);
     gtk_widget_show( F_propriete );
     ok_timer = TIMER_ON;                                                                /* Arret du timer */
   }
-/**********************************************************************************************************/
-/* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface              */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
-/* sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface                                  */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
  static gboolean CB_editer_propriete_TOR ( GtkDialog *dialog, gint reponse,
                                            gboolean edition )
   { switch(reponse)
@@ -463,19 +463,20 @@ printf("Changer_couleur %p\n", data);
                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_clic_tech_id) ) );
     g_snprintf( Trame_motif->motif->clic_acronyme, sizeof(Trame_motif->motif->clic_acronyme),
                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_clic_acronyme) ) );
-    ok_timer = TIMER_OFF;                                                               /* Arret du timer */
+    g_strcanon( Trame_motif->motif->clic_acronyme, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", '_' );
+    ok_timer = TIMER_OFF;                                                                                   /* Arret du timer */
     gtk_widget_hide( F_propriete );
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Detruire_fenetre_propriete_TOR: Destruction de la fenetre de parametres DLS                            */
-/* Entrée: rien                                                                                           */
-/* Sortie: toute trace de la fenetre est eliminée                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Detruire_fenetre_propriete_TOR: Destruction de la fenetre de parametres DLS                                                */
+/* Entrée: rien                                                                                                               */
+/* Sortie: toute trace de la fenetre est eliminée                                                                             */
+/******************************************************************************************************************************/
  void Detruire_fenetre_propriete_TOR ( void )
   {
     ok_timer = TIMER_OFF;
-    gtk_timeout_remove( Tag_timer );                                  /* On le vire des fonctions actives */
+    gtk_timeout_remove( Tag_timer );                                                      /* On le vire des fonctions actives */
     if (Trame_preview0) Trame_detruire_trame( Trame_preview0 );
     if (Trame_preview1) Trame_detruire_trame( Trame_preview1 );
     gtk_widget_destroy( F_propriete );
