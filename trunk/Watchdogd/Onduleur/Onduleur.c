@@ -314,8 +314,10 @@
      }
 
 /************************************************** PREPARE LES AI ************************************************************/
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
-                "%s: %s: Initialise et charge les AI ", __func__, module->tech_id );
+    if (Dls_auto_create_plugin( module->tech_id, "Gestion de l'onduleur" ) == -1)
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->tech_id ); }
+
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "%s: %s: Initialise et charge les AI ", __func__, module->tech_id );
     Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, 0.0 );
     Charger_conf_AI ( module->ai_load );
     Dls_data_set_AI ( module->tech_id, "REALPOWER", &module->ai_realpower, 0.0 );

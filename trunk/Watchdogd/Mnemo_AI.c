@@ -36,11 +36,11 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
-/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
-/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/* Mnemo_auto_create_AI_by_tech_id: Ajoute un mnemonique dans la base via le tech_id                                          */
+/* Entrée: le tech_id, l'acronyme, le libelle et l'unite                                                                      */
+/* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_AI ( gint dls_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src )
+ gboolean Mnemo_auto_create_AI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src )
   { gchar *acro, *libelle, *unite;
     gchar requete[1024];
     gboolean retour;
@@ -72,9 +72,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_AI SET dls_id='%d',acronyme='%s',libelle='%s', unite='%s' "
+                "INSERT INTO mnemos_AI SET tech_id='%s',acronyme='%s',libelle='%s', unite='%s' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle),unite=VALUES(unite)",
-                dls_id, acro, libelle, unite );
+                tech_id, acro, libelle, unite );
     g_free(unite);
     g_free(libelle);
     g_free(acro);
@@ -278,8 +278,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT a.min,a.max,a.type,a.unite"
                 " FROM mnemos_AI as a"
-                " INNER JOIN dls as d ON a.dls_id = d.id"
-                " WHERE d.tech_id='%s' AND a.acronyme='%s' LIMIT 1",
+                " WHERE a.tech_id='%s' AND a.acronyme='%s' LIMIT 1",
                 ai->tech_id, ai->acronyme
               );
 

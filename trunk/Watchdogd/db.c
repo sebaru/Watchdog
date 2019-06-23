@@ -1211,9 +1211,31 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4203)
+     { g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_AI` ADD `tech_id` VARCHAR(32) NULL DEFAULT NULL AFTER `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "UPDATE mnemos_AI inner join dls on mnemos_AI.dls_id = dls.id SET mnemos_AI.tech_id=dls.tech_id " );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_AI` ADD CONSTRAINT `mnemos_AI_tech_id` FOREIGN KEY (`tech_id`)"
+                  " REFERENCES `dls`(`tech_id`) ON DELETE CASCADE ON UPDATE RESTRICT;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `watchdog`.`mnemos_AI` ADD UNIQUE `tech_id` (`tech_id`, `acronyme`);");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_AI` DROP INDEX `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE `mnemos_AI` DROP `dls_id`;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 fin:
-    database_version=4187;
+    database_version=4203;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

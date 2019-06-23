@@ -1108,7 +1108,7 @@
                 case MNEMO_ENTREE_ANA:
                  { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
                    if (!unite) unite="no unit";
-                   Mnemo_auto_create_AI ( Dls_plugin.id, alias->acronyme, libelle, unite );
+                   Mnemo_auto_create_AI ( Dls_plugin.tech_id, alias->acronyme, libelle, unite );
                    break;
                  }
                 case MNEMO_CPT_IMP:

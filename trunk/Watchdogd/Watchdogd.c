@@ -722,10 +722,10 @@
        Update_database_schema();                                                    /* Update du schéma de Database si besoin */
        Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */
        Modifier_configDB ( "global", "instance_version", VERSION );                      /* Update du champs instance_version */
-       Mnemo_auto_create_AI ( 1, "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
-       Mnemo_auto_create_AI ( 1, "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
-       Mnemo_auto_create_AI ( 1, "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
-       Mnemo_auto_create_AI ( 1, "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
+       Mnemo_auto_create_AI ( "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
+       Mnemo_auto_create_AI ( "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
+       Mnemo_auto_create_AI ( "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
+       Mnemo_auto_create_AI ( "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
 
        Partage->zmq_ctx = zmq_ctx_new ();                                          /* Initialisation du context d'echange ZMQ */
        if (!Partage->zmq_ctx)
