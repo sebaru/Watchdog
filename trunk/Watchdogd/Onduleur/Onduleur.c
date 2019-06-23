@@ -217,7 +217,8 @@
        module->started = FALSE;
      }
 
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "%s: Deconnecter_module %s", __func__, module->tech_id );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
+              "%s: %s disconnected (host='%s')", __func__, module->tech_id, module->host );
     Ups_send_status_to_master ( module, FALSE );
 
     num_ea = module->map_EA;
@@ -245,30 +246,30 @@
     if ( (connexion = upscli_connect( &module->upsconn, module->host,
                                       UPS_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: connexion refused by module '%s' (host '%s' -> %s)", __func__,
-                 module->tech_id, module->host, (char *)upscli_strerror(&module->upsconn) );
+                "%s: %s: connexion refused by module (host '%s' -> %s)", __func__, module->tech_id,
+                 module->host, (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
 
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Connecter_ups: %s", module->host );
-
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
+              "%s: %s connected (host='%s')", __func__, module->tech_id, module->host );
 /********************************************************* UPSDESC ************************************************************/
     g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->name );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: Sending GET UPSDESC failed (%s)", __func__,
+                "%s: %s: Sending GET UPSDESC failed (%s)", __func__, module->tech_id,
                 (char *)upscli_strerror(&module->upsconn) );
      }
     else
      { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                   "%s: Reading GET UPSDESC failed (%s)", __func__,
+                   "%s: %s: Reading GET UPSDESC failed (%s)", __func__, module->tech_id,
                    (char *)upscli_strerror(&module->upsconn) );
         }
        else
         { g_snprintf( module->libelle, sizeof(module->libelle), "%s", buffer + strlen(module->name) + 9 );
           Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                   "%s: Reading GET UPSDESC %s", __func__,
+                   "%s: %s: Reading GET UPSDESC %s", __func__, module->tech_id,
                    module->libelle );
         }
      }
@@ -276,18 +277,18 @@
     g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", module->username );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: Sending USERNAME failed %s", __func__,
+                "%s: %s: Sending USERNAME failed %s", __func__, module->tech_id,
                 (char *)upscli_strerror(&module->upsconn) );
      }
     else
      { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                   "%s: Reading USERNAME failed %s", __func__,
+                   "%s: %s: Reading USERNAME failed %s", __func__, module->tech_id,
                    (char *)upscli_strerror(&module->upsconn) );
         }
        else
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                   "%s: Reading USERNAME %s", __func__,
+                   "%s: %s: Reading USERNAME %s", __func__, module->tech_id,
                     buffer );
         }
      }
@@ -296,21 +297,45 @@
     g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", module->password );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: Sending PASSWORD failed %s", __func__,
+                "%s: %s: Sending PASSWORD failed %s", __func__, module->tech_id,
                 (char *)upscli_strerror(&module->upsconn) );
      }
     else
      { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                   "%s: Reading PASSWORD failed %s", __func__,
+                   "%s: %s: Reading PASSWORD failed %s", __func__, module->tech_id,
                    (char *)upscli_strerror(&module->upsconn) );
         }
        else
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                   "%s: Reading PASSWORD %s", __func__,
+                   "%s: %s: Reading PASSWORD %s", __func__, module->tech_id,
                    buffer );
         }
      }
+
+/************************************************** PREPARE LES AI ************************************************************/
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
+                "%s: %s: Initialise et charge les AI ", __func__, module->tech_id );
+    Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, 0.0 );
+    Charger_conf_AI ( module->ai_load );
+    Dls_data_set_AI ( module->tech_id, "REALPOWER", &module->ai_realpower, 0.0 );
+    Charger_conf_AI ( module->ai_realpower );
+    Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", &module->ai_battery_charge, 0.0 );
+    Charger_conf_AI ( module->ai_battery_charge );
+    Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", &module->ai_input_voltage, 0.0 );
+    Charger_conf_AI ( module->ai_input_voltage );
+    Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", &module->ai_battery_runtime, 0.0 );
+    Charger_conf_AI ( module->ai_battery_runtime );
+    Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", &module->ai_battery_voltage, 0.0 );
+    Charger_conf_AI ( module->ai_battery_voltage );
+    Dls_data_set_AI ( module->tech_id, "INPUT_HZ", &module->ai_input_frequency, 0.0 );
+    Charger_conf_AI ( module->ai_input_frequency );
+    Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", &module->ai_output_current, 0.0 );
+    Charger_conf_AI ( module->ai_output_current );
+    Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", &module->ai_output_frequency, 0.0 );
+    Charger_conf_AI ( module->ai_output_frequency );
+    Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", &module->ai_output_voltage, 0.0 );
+    Charger_conf_AI ( module->ai_output_voltage );
 
     module->date_next_connexion = 0;
     module->started = TRUE;
@@ -326,6 +351,8 @@
     SEA_range( num_ea++, 1);                                                                 /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 1);                                                                 /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 1);                                                                 /* Numéro de l'EA pour la valeur */
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
+              "%s: %s up and running (host='%s')", __func__, module->tech_id, module->host );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -340,10 +367,10 @@
 
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->name, nom_cmd );
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-             "%s: Sending '%s' to %s", __func__, buffer, module->name );
+             "%s: %s: Sending '%s'", __func__, module->tech_id, buffer );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                 "%s: Sending INSTCMD failed (%s) error %s", __func__,
+                 "%s: %s: Sending INSTCMD failed (%s) error %s", __func__, module->tech_id,
                  buffer, (char *)upscli_strerror(&module->upsconn) );
        Deconnecter_module ( module );
        return(FALSE);
@@ -351,14 +378,14 @@
 
     if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: Reading INSTCMD result failed (%s) error %s", __func__,
+                "%s: %s: Reading INSTCMD result failed (%s) error %s", __func__, module->tech_id,
                  nom_cmd, (char *)upscli_strerror(&module->upsconn) );
        Deconnecter_module ( module );
        return(FALSE);
      }
     else
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-                "%s: Sending '%s' to %s OK", __func__, buffer, module->name );
+                "%s: %s: Sending '%s' OK", __func__, module->tech_id, buffer );
      }
     return(TRUE);
   }
@@ -377,7 +404,7 @@
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->name, nom_var );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: Sending GET VAR failed (%s) error=%s", __func__,
+                "%s: %s: Sending GET VAR failed (%s) error=%s", __func__, module->tech_id,
                 buffer, (char *)upscli_strerror(&module->upsconn) );
        Deconnecter_module ( module );
        return(NULL);
@@ -385,18 +412,18 @@
 
     retour_read = upscli_readline( &module->upsconn, buffer, sizeof(buffer) );
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-             "%s: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s", __func__,
+             "%s: %s: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s", __func__, module->tech_id,
               nom_var, retour_read, upscli_upserror(&module->upsconn), buffer );
     if ( retour_read == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: Reading GET VAR result failed (%s) error=%s", __func__,
+                "%s: %s: Reading GET VAR result failed (%s) error=%s", __func__, module->tech_id,
                  nom_var, (char *)upscli_strerror(&module->upsconn) );
        return(NULL);
      }
 
     if ( ! strncmp ( buffer, "VAR", 3 ) )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                "%s: Reading GET VAR %s OK = %s", __func__, nom_var, buffer );
+                "%s: %s: Reading GET VAR %s OK = %s", __func__, module->tech_id, nom_var, buffer );
        return(buffer + 6 + strlen(module->name) + strlen(nom_var));
      }
 
@@ -405,7 +432,7 @@
      }
 
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-             "%s: Reading GET VAR %s Failed : error %s (buffer %s)", __func__,
+             "%s: %s: Reading GET VAR %s Failed : error %s (buffer %s)", __func__, module->tech_id,
               nom_var, (char *)upscli_strerror(&module->upsconn), buffer );
     return(NULL);
   }
@@ -614,21 +641,21 @@
           if ( ! module->started )                                                               /* Communication OK ou non ? */
            { if ( ! Connecter_ups( module ) )                                                 /* Demande de connexion a l'ups */
               { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                         "%s: Module '%s' DOWN", __func__, module->tech_id );
+                         "%s: %s: Module DOWN", __func__, module->tech_id );
                 Deconnecter_module ( module );                                         /* Sur erreur, on deconnecte le module */
                 module->date_next_connexion = Partage->top + UPS_RETRY;
               }
            }
           else
            { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                      "%s: Envoi des sorties ups '%s'", __func__, module->tech_id );
+                      "%s: %s: Envoi des sorties ups", __func__, module->tech_id );
              if ( Envoyer_sortie_ups ( module ) == FALSE )
               { Deconnecter_module ( module );                                         /* Sur erreur, on deconnecte le module */
                 module->date_next_connexion = Partage->top + UPS_RETRY;                          /* On retente dans longtemps */
               }
              else
               { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                         "%s: Interrogation ups '%s'", __func__, module->tech_id );
+                         "%s: %s: Interrogation ups", __func__, module->tech_id );
                 if ( Interroger_ups ( module ) == FALSE )
                  { Deconnecter_module ( module );
                    module->date_next_connexion = Partage->top + UPS_RETRY;                       /* On retente dans longtemps */

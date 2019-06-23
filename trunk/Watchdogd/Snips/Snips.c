@@ -86,7 +86,7 @@
      { g_snprintf ( insert, sizeof(insert), ",%s", room );
        g_strlcat( texte, insert, sizeof(texte) );
      }
-
+    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Sending %s", texte );
     Send_zmq_with_tag ( Cfg_snips.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SNIPS_QUESTION", texte, strlen(texte)+1 );
   }
 /******************************************************************************************************************************/
@@ -108,6 +108,7 @@
        g_strlcat( texte, insert, sizeof(texte) );
      }
 
+    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Searching for %s", texte );
     if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, texte ) )
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
     else while ( Recuperer_mnemos_DI_suite( &db ) )
