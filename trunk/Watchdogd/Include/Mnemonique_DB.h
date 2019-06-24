@@ -97,5 +97,10 @@
  extern gboolean Mnemo_auto_create_DO ( gchar *tech_id, gchar *acronyme, gchar *libelle );                /* Dans mnemos_DO.c */
  extern gboolean Recuperer_mnemos_DO_by_tag ( struct DB **db_retour, gchar *thread, gchar *tag );
  extern gboolean Recuperer_mnemos_DO_suite( struct DB **db_orig );
+
+ extern struct DB *Rechercher_BOOL ( gchar *tech_id, gchar *acronyme );                                 /* Dans mnemos_BOOL.c */
+ extern gboolean Mnemo_auto_create_BOOL ( gint type, gchar *tech_id, gchar *acronyme, gchar *libelle_src );
+ extern void Charger_confDB_BOOL ( void );
+ extern void Updater_confDB_BOOL ( void );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

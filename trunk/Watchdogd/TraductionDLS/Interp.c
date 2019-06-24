@@ -1089,6 +1089,11 @@
               { case MNEMO_BUS:
                 case MNEMO_MOTIF:
                    break;
+                case MNEMO_BISTABLE:
+                case MNEMO_MONOSTABLE:
+                 { Mnemo_auto_create_BOOL ( alias->type_bit, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   break;
+                 }
                 case MNEMO_SORTIE:
                  { Mnemo_auto_create_DO ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;

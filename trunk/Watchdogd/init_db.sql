@@ -232,6 +232,24 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `ev_
 -- Structure de la table `mnemos`
 --
 
+CREATE TABLE IF NOT EXISTS `mnemos_BOOL` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `etat` BOOLEAN NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `mnemos`
+--
+
 CREATE TABLE IF NOT EXISTS `mnemos_DI` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
@@ -244,7 +262,6 @@ CREATE TABLE IF NOT EXISTS `mnemos_DI` (
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
 
 -- --------------------------------------------------------
 
@@ -357,8 +374,8 @@ CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
 CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-  `etat` BOOLEAN NOT NULL DEFAULT '0',
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `etat` BOOLEAN NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `heure` int(11) NOT NULL DEFAULT '0',
   `minute` int(11) NOT NULL DEFAULT '0',

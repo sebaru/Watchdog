@@ -174,6 +174,7 @@
        Charger_cpt_imp();
        Charger_messages();
        Charger_registre();
+       Charger_confDB_BOOL();
      }
   }
 /******************************************************************************************************************************/
@@ -247,15 +248,16 @@
      }
   }
 /******************************************************************************************************************************/
-/* Sauver_compteur : Envoie les infos Compteurs à la base de données pour sauvegarde !                                        */
+/* Save_dls_data_to_DB : Envoie les infos DLS_DATA à la base de données pour sauvegarde !                                     */
 /* Entrée : Néant                                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Sauver_compteur ( void )
+ static void Save_dls_data_to_DB ( void )
   { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saving CPT", __func__ );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saving DLS_DATA", __func__ );
     Updater_cpthDB();                                                                     /* Sauvegarde des compteurs Horaire */
     Updater_cpt_impDB();                                                              /* Sauvegarde des compteurs d'impulsion */
+    Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
@@ -398,7 +400,7 @@
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
         { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "ping", NULL, 0 );
-          Sauver_compteur();
+          Save_dls_data_to_DB();
           Exporter();
           cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
@@ -415,7 +417,7 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
-    Sauver_compteur();                                                                     /* Dernière sauvegarde avant arret */
+    Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils(TRUE);                                                                    /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
