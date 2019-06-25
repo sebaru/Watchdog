@@ -1610,16 +1610,18 @@
           bit_defaut_fixe      |= plugin_actuel->vars.bit_defaut_fixe;
           bit_alarme           |= plugin_actuel->vars.bit_alarme;
           bit_alarme_fixe      |= plugin_actuel->vars.bit_alarme_fixe;
-          plugin_actuel->vars.bit_activite_up = !(bit_comm_out | bit_defaut | bit_defaut_fixe | bit_alarme | bit_alarme_fixe);
+          plugin_actuel->vars.bit_activite_ok = !(bit_comm_out | bit_defaut | bit_defaut_fixe | bit_alarme | bit_alarme_fixe);
 
           bit_veille_partielle |= plugin_actuel->vars.bit_veille;
           bit_veille_totale    &= plugin_actuel->vars.bit_veille;
           bit_alerte           |= plugin_actuel->vars.bit_alerte;
           bit_alerte_fixe      |= plugin_actuel->vars.bit_alerte_fixe;
+
           bit_derangement      |= plugin_actuel->vars.bit_derangement;
           bit_derangement_fixe |= plugin_actuel->vars.bit_derangement_fixe;
           bit_danger           |= plugin_actuel->vars.bit_danger;
           bit_danger_fixe      |= plugin_actuel->vars.bit_danger_fixe;
+          plugin_actuel->vars.bit_secupers_ok = !(bit_derangement | bit_derangement_fixe | bit_danger | bit_danger_fixe);
         }
        liste = liste->next;
      }
