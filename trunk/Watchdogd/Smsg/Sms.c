@@ -306,7 +306,7 @@
 
 
 	   GSM_FreeStateMachine(s);                                                                          	/* Free up used memory */
-    if (error == ERR_NONE) { Cfg_smsg.nbr_sms++; return(TRUE); }
+    if (sms_send_status == ERR_NONE) { Cfg_smsg.nbr_sms++; return(TRUE); }
     else return(FALSE);
   }
 /******************************************************************************************************************************/

@@ -229,6 +229,36 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `ev_
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `tableau`
+--
+
+CREATE TABLE IF NOT EXISTS `tableau` (
+ `id` INT NOT NULL AUTO_INCREMENT ,
+ `titre` VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
+ `access_level` int(11) NOT NULL ,
+ `date_create` DATETIME NOT NULL ,
+ PRIMARY KEY (`id`)) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `courbes`
+--
+
+CREATE TABLE IF NOT EXISTS `courbes` (
+  `id` INT NOT NULL AUTO_INCREMENT ,
+  `tableau_id` INT NOT NULL ,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `color` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX (`tableau_id`),
+  FOREIGN KEY (`tableau_id`) REFERENCES `tableau` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `mnemos`
 --
 
