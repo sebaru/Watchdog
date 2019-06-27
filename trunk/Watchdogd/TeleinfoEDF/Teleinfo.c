@@ -64,7 +64,7 @@
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
-        { g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.tech_id), "%s", valeur ); }
+        { g_snprintf( Cfg_teleinfo.tech_id, sizeof(Cfg_teleinfo.tech_id), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_teleinfo.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
@@ -87,7 +87,7 @@
     fd = open( Cfg_teleinfo.port, O_RDONLY | O_NOCTTY | O_NONBLOCK );
     if (fd<0)
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
-               "%s: Impossible d'ouvrir le port teleinfo %s, erreur %d", __func__, Cfg_teleinfo.port, fd );
+               "%s: Impossible d'ouvrir le port teleinfo '%s', erreur %d", __func__, Cfg_teleinfo.port, fd );
        return(-1);
      }
     memset(&oldtio, 0, sizeof(oldtio) );
