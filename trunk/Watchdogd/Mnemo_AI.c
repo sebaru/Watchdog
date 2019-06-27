@@ -297,6 +297,7 @@
     ai->type     = atoi(db->row[2]);
     g_snprintf( ai->unite, sizeof(ai->unite), "%s", db->row[3] );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s' loaded", __func__, ai->tech_id, ai->acronyme );
+    Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
 /* Modifier_analogInputDB: Modification d'un entreeANA Watchdog                                                               */

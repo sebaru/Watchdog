@@ -30,9 +30,9 @@
  #include "Teleinfo.h"
 
 /******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_json : fonction appelÃ© par le thread http lors d'une requete /run/                                                   */
+/* EntrÃ©e : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                           */
 /******************************************************************************************************************************/
  void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
   { JsonBuilder *builder;
@@ -48,10 +48,10 @@
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
      }
-/************************************************ Préparation du buffer JSON **************************************************/
+/************************************************ PrÃ©paration du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/status"))
-				 { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+				 { json_builder_begin_object (builder);                                                       /* CrÃ©ation du noeud principal */
 
        json_builder_set_member_name  ( builder, "tech_id" );
        json_builder_add_string_value ( builder, Cfg_teleinfo.tech_id );
@@ -70,7 +70,7 @@
 
        json_builder_end_object (builder);                                                                     /* End Document */
      }
-/************************************************ Génération du JSON **********************************************************/
+/************************************************ GÃ©nÃ©ration du JSON **********************************************************/
     gen = json_generator_new ();
     json_generator_set_root ( gen, json_builder_get_root(builder) );
     json_generator_set_pretty ( gen, TRUE );

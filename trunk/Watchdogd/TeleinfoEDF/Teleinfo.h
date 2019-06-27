@@ -51,16 +51,15 @@
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
     gchar buffer[TAILLE_BUFFER_TELEINFO];
     gint  last_view;                                                                            /* Date du dernier echange OK */
+    gint  nbr_connexion;                                                                        /* Date du dernier echange OK */
     gpointer adco;
     gpointer isous;
-    gint  last_view_hchc;
-    gint  last_view_hchp;
-    gint  last_view_iinst;
-    gint  last_view_imax;
-    gint  last_view_papp;
-    gint  last_view_hhchp;
-    gint  last_view_ptec;
-    gint  last_view_optarif;
+    gpointer base;
+    gpointer hchc;
+    gpointer hchp;
+    gpointer iinst;
+    gpointer imax;
+    gpointer papp;
  } Cfg_teleinfo;
 
 /************************************************ Définitions des prototypes **************************************************/

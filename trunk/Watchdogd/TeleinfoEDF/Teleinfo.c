@@ -102,6 +102,22 @@
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
               "%s: Ouverture port teleinfo okay %s", __func__, Cfg_teleinfo.port );
 
+    if (!Cfg_teleinfo.nbr_connexion)
+     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
+                "%s: %s: Initialise le DLS et charge les AI ", __func__, Cfg_teleinfo.tech_id );
+       if (Dls_auto_create_plugin( Cfg_teleinfo.tech_id, "Gestion du compteur EDF" ) == -1)
+        { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", Cfg_teleinfo.tech_id ); }
+
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ADCO", "N° d’identification du compteur", "numéro" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ISOUS", "Intensité souscrite ", "A" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "BASE", "Index optoin BASE", "Wh" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "HCHC", "Index heures creuses", "Wh" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "HCHP", "Index heures pleines", "Wh" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IINST", "ntensité instantanée", "A" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IMAX", "Intensité maximale", "A" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "PAPP", "Puissance apparente", "VA" );
+     }
+    Cfg_teleinfo.nbr_connexion++;
     return(fd);
   }
 /******************************************************************************************************************************/
@@ -136,37 +152,43 @@
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 ) )
      { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "ISOUS", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 6) ); }
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "ISOUS", &Cfg_teleinfo.isous, atof( Cfg_teleinfo.buffer + 6) ); }
        else /* Envoi au master via ZMQ */
         { Send_AI_to_master ( "ISOUS", Cfg_teleinfo.buffer + 6 ); }
      }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "BASE", 4 ) )
+     { if (Config.instance_is_master==TRUE)
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "BASE", &Cfg_teleinfo.base, atof( Cfg_teleinfo.buffer + 5) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "HCHC", Cfg_teleinfo.buffer + 5 ); }
+     }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )
      { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "HCHC", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 5) ); }
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "HCHC", &Cfg_teleinfo.hchc, atof( Cfg_teleinfo.buffer + 5) ); }
        else /* Envoi au master via ZMQ */
         { Send_AI_to_master ( "HCHC", Cfg_teleinfo.buffer + 5 ); }
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 ) )
      { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "HCHP", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 5) ); }
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "HCHP", &Cfg_teleinfo.hchp, atof( Cfg_teleinfo.buffer + 5) ); }
        else /* Envoi au master via ZMQ */
         { Send_AI_to_master ( "HCHP", Cfg_teleinfo.buffer + 5 ); }
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 ) )
      { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "IINST", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 6) ); }
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "IINST", &Cfg_teleinfo.iinst, atof( Cfg_teleinfo.buffer + 6) ); }
        else /* Envoi au master via ZMQ */
         { Send_AI_to_master ( "IINST", Cfg_teleinfo.buffer + 6 ); }
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 ) )
      { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "IMAX", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 5) ); }
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "IMAX", &Cfg_teleinfo.imax, atof( Cfg_teleinfo.buffer + 5) ); }
        else /* Envoi au master via ZMQ */
         { Send_AI_to_master ( "IMAX", Cfg_teleinfo.buffer + 5 ); }
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 ) )
      { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "PAPP", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 5) ); }
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "PAPP", &Cfg_teleinfo.papp, atof( Cfg_teleinfo.buffer + 5) ); }
        else /* Envoi au master via ZMQ */
         { Send_AI_to_master ( "PAPP", Cfg_teleinfo.buffer + 5 ); }
      }
@@ -225,6 +247,7 @@
         { if ( Cfg_teleinfo.date_next_retry <= Partage->top )
       		   { Cfg_teleinfo.mode = TINFO_RETRING;
 			          Cfg_teleinfo.date_next_retry = 0;
+             Cfg_teleinfo.nbr_connexion = 0;
 		         }
 		        else continue;
 		      }
