@@ -320,7 +320,21 @@
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
 
        if ( (byte=Recv_zmq_with_tag( zmq_from_slave, "msrv", &buffer, sizeof(buffer), &event, &payload )) > 0 )
-        { if ( !strcmp(event->tag,"SET_BIT") )
+        { if ( !strcmp(event->tag,"JSON") )
+           { JsonNode *query;
+             gchar *mode;
+             query = Json_get_from_string ( payload );
+             if (!query)
+              { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); continue; }
+             mode = Json_get_string ( query, "mode" );
+             if (!strcmp(mode,"SET_AI"))
+              { Dls_data_set_AI ( Json_get_string ( query, "tech_id" ),
+                                  Json_get_string ( query, "acronyme" ),
+                                  NULL, Json_get_float ( query, "valeur" ) );
+              }
+             json_node_unref (query);
+           }
+          else if ( !strcmp(event->tag,"SET_BIT") )
            { struct ZMQ_SET_BIT *bit;
              bit = (struct ZMQ_SET_BIT *)payload;
              Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
@@ -329,8 +343,8 @@
                        bit->type, bit->num, bit->dls_tech_id, bit->acronyme );
              if (bit->num != -1) Envoyer_commande_dls ( bit->num );
                             else Envoyer_commande_dls_data ( bit->dls_tech_id, bit->acronyme );
-           } else
-          if ( !strcmp(event->tag,"SET_BIT_TO_1") )
+           }
+          else if ( !strcmp(event->tag,"SET_BIT_TO_1") )
            { struct ZMQ_SET_BIT *bit;
              bit = (struct ZMQ_SET_BIT *)payload;
              Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
@@ -338,8 +352,8 @@
                        event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
                        bit->dls_tech_id, bit->acronyme );
              Dls_data_set_bool ( bit->dls_tech_id, bit->acronyme, NULL, TRUE );
-           } else
-          if ( !strcmp(event->tag,"SET_BIT_TO_0") )
+           }
+          else if ( !strcmp(event->tag,"SET_BIT_TO_0") )
            { struct ZMQ_SET_BIT *bit;
              bit = (struct ZMQ_SET_BIT *)payload;
              Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
@@ -347,12 +361,12 @@
                        event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
                        bit->dls_tech_id, bit->acronyme );
              Dls_data_set_bool ( bit->dls_tech_id, bit->acronyme, NULL, FALSE );
-           } else
-          if ( !strcmp(event->tag, "ping") )
+           }
+          else if ( !strcmp(event->tag, "ping") )
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s/%s to %s/%s",
                        __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
-           } else
-          if ( !strcmp(event->tag, "SNIPS_QUESTION") )
+           }
+          else if ( !strcmp(event->tag, "SNIPS_QUESTION") )
            { struct DB *db;
              Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SNIPS_QUESTION from %s/%s to %s/%s : '%s'",
                        __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
@@ -373,8 +387,8 @@
                                     "audio", "play_google", result_string, strlen(result_string)+1 );
                 g_free(result_string);
               }
-           } else
-          if ( !strcmp(event->tag, "sudo") )
+           }
+          else if ( !strcmp(event->tag, "sudo") )
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s/%s",
                        __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
              system(payload);

@@ -8,7 +8,7 @@ SUBDIRS=
 noinst_LTLIBRARIES     = libarchive.la
 libarchive_la_SOURCES    = Archive.c archiveDB.c admin_arch.c
 
-AM_CPPFLAGS= `pkg-config --cflags glib-2.0` \
+AM_CPPFLAGS= `pkg-config --cflags glib-2.0 json-glib-1.0` \
              `mysql_config --cflags` \
             -I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include

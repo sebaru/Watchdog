@@ -155,7 +155,7 @@
     return(sms);
   }
 /******************************************************************************************************************************/
-/* Smsg_is_recipient_authorized : Renvoi TRUE si le telephone en parametre peut set ou reset un bit interne                    */
+/* Smsg_is_recipient_authorized : Renvoi TRUE si le telephone en parametre peut set ou reset un bit interne                   */
 /* Entrée: le nom du destinataire                                                                                             */
 /* Sortie : booléen, TRUE/FALSE                                                                                               */
 /******************************************************************************************************************************/
@@ -503,19 +503,17 @@
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: No match found for '%s'", __func__, texte );
        g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
        Envoyer_smsg_gsm_text ( chaine );
-       Libere_DB_SQL ( &db );
      }
     else if (db->nbr_result > 1)
      { g_snprintf(chaine, sizeof(chaine), "Too many events found for '%s'", texte );             /* Envoi de l'erreur si trop */
        Envoyer_smsg_gsm_text ( chaine );
-       Libere_DB_SQL ( &db );
      }
     else
      { while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
         { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Match found for '%s' Type %d Num %d - %s", __func__,
                     texte, mnemo->type, mnemo->num, mnemo->libelle );
 
-          if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
+          if (Config.instance_is_master==TRUE)                                                    /* si l'instance est Maitre */
            { switch( mnemo->type )
               { case MNEMO_MONOSTABLE:
                      Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: From %s -> Mise à un du bit M%03d %s:%s", __func__,
@@ -544,6 +542,7 @@
           g_free(mnemo);
         }
      }
+    Libere_DB_SQL ( &db );
 
     if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, texte ) )
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
@@ -769,7 +768,7 @@
 end:
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_smsg.lib->Thread_run = FALSE;
-    Cfg_smsg.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */
+    Cfg_smsg.lib->TID = 0;                                                    /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

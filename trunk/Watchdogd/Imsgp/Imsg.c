@@ -133,7 +133,7 @@
 /* Entrée: le nom du destinataire et le message                                                                               */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- void Imsgp_Envoi_message_to ( const gchar *dest, gchar *message )
+ static void Imsgp_Envoi_message_to ( const gchar *dest, gchar *message )
   { PurpleConversation *conv;
 
    	conv = purple_find_conversation_with_account(PURPLE_CONV_TYPE_IM, dest, Cfg_imsgp.account);
@@ -192,7 +192,7 @@
 /* Entrée: le message                                                                                                         */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Imsgp_Envoi_message_to_all_available ( gchar *message )
+ void Imsgp_Envoi_message_to_all_available ( gchar *message )
   { struct IMSGPDB *imsg;
     struct DB *db;
 
@@ -237,32 +237,30 @@
      }
     g_free(imsg);
 
-    if ( ! strcasecmp( message, "ping" ) )                                                             /* Interfacage de test */
-     { Imsgp_Envoi_message_to( from, "Pong !" ); }
+    if ( ! strcasecmp( message, "ping" ) ) { Imsgp_Envoi_message_to( from, "Pong !" ); }               /* Interfacage de test */
     else if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, message ) )
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, message );
        Imsgp_Envoi_message_to( from, "Error searching Database .. Sorry .." );
+       return;
      }
-    else
-     { if ( db->nbr_result == 0 )                                             /* Si pas d'enregistrement, demande de préciser */
-        { Imsgp_Envoi_message_to( from, "Error... No result found .. Sorry .." ); }
-       if ( db->nbr_result > 1 )                                             /* Si trop d'enregistrement, demande de préciser */
-        { Imsgp_Envoi_message_to( from, " Need to choose ... :" );
-          while ( Recuperer_mnemos_DI_suite( &db ) )
-           { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
-             Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
-                       src_text, tech_id, acro, libelle );
-             Imsgp_Envoi_message_to( from, src_text );
-           }
-        }
-       else while ( Recuperer_mnemos_DI_suite( &db ) )
+
+    if ( db->nbr_result == 0 )                                                /* Si pas d'enregistrement, demande de préciser */
+     { Imsgp_Envoi_message_to( from, "Error... No result found .. Sorry .." ); }
+    else if ( db->nbr_result > 1 )                                           /* Si trop d'enregistrement, demande de préciser */
+     { Imsgp_Envoi_message_to( from, " Need to choose ... :" );
+       while ( Recuperer_mnemos_DI_suite( &db ) )
         { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
           Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
                     src_text, tech_id, acro, libelle );
-
-          if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
-           { Envoyer_commande_dls_data ( tech_id, acro ); }
+          Imsgp_Envoi_message_to( from, src_text );
         }
+     }
+    else while ( Recuperer_mnemos_DI_suite( &db ) )
+     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
+       Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
+                 src_text, tech_id, acro, libelle );
+        if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
+        { Envoyer_commande_dls_data ( tech_id, acro ); }
      }
   }
 /******************************************************************************************************************************/

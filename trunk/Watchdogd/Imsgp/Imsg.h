@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _IMSG_H_
  #define _IMSG_H_
 
@@ -56,8 +56,7 @@
   } Cfg_imsgp;
 /****************************************** Déclarations des prototypes ***********************************/
  extern gboolean Imsgp_Lire_config ( void );
- extern void Imsgp_Envoi_message_to ( const gchar *dest, gchar *message );
- extern void Imsgp_Mode_presence ( gchar *type, gchar *show, gchar *status );
+ void Imsgp_Envoi_message_to_all_available ( gchar *message );
  extern gboolean Recuperer_imsgpDB ( struct DB *db );
  extern struct IMSGPDB *Recuperer_imsgpDB_suite( struct DB *db );
 #endif

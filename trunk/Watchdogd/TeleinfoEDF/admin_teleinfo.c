@@ -21,45 +21,65 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include "watchdogd.h"
  #include "Teleinfo.h"
 
 /******************************************************************************************************************************/
-/* Admin_command: Fonction gerant les différentes commandes possible pour l'administration teleinfo                           */
-/* Entrée: Le buffer d'entrée a compléter                                                                                     */
-/* Sortie: Le buffer de sortie complété                                                                                       */
+/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- gchar *Admin_command( gchar *response, gchar *ligne )
-  { gchar commande[128], chaine[128];
+ void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
+  { JsonBuilder *builder;
+    JsonGenerator *gen;
+    gsize taille_buf;
+    gchar *buf;
 
-    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
-    if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'TELEINFO'" );
-       response = Admin_write ( response, "  reload                - Reload config from Database" );
-       response = Admin_write ( response, "  status                - Affiche les status du device Teleinfo" );
+    *buffer_p = NULL;
+    *taille_p = 0;
+
+    builder = json_builder_new ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       return;
      }
-    else if ( ! strcmp ( commande, "status" ) )
-     { g_snprintf( chaine, sizeof(chaine), " Port '%s' mode %d (retry in %02.1f) -> Last_view = %d (%.1fs ago)",
-                   Cfg_teleinfo.port, Cfg_teleinfo.mode, (Partage->top - Cfg_teleinfo.date_next_retry)/10.0,
-                   Cfg_teleinfo.last_view, (Partage->top - Cfg_teleinfo.last_view)/10.0
-                 );
-       response = Admin_write ( response, chaine );
+/************************************************ Préparation du buffer JSON **************************************************/
+                                                                      /* Lancement de la requete de recuperation des messages */
+    if (!strcmp(commande, "/status"))
+				 { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+
+       json_builder_set_member_name  ( builder, "tech_id" );
+       json_builder_add_string_value ( builder, Cfg_teleinfo.tech_id );
+
+       json_builder_set_member_name  ( builder, "port" );
+       json_builder_add_string_value ( builder, Cfg_teleinfo.port );
+
+       json_builder_set_member_name  ( builder, "mode" );
+       json_builder_add_int_value ( builder, Cfg_teleinfo.mode );
+
+       json_builder_set_member_name  ( builder, "retry_in" );
+       json_builder_add_int_value ( builder, (Partage->top - Cfg_teleinfo.date_next_retry)/10.0 );
+
+       json_builder_set_member_name  ( builder, "last_view" );
+       json_builder_add_int_value ( builder, (Partage->top - Cfg_teleinfo.last_view)/10.0 );
+
+       json_builder_end_object (builder);                                                                     /* End Document */
      }
-    else if ( ! strcmp ( commande, "reload" ) )
-     { g_snprintf( chaine, sizeof(chaine), " Reloading Teleinfo from Database" );
-       response = Admin_write ( response, chaine );
-       Cfg_teleinfo.reload = TRUE;
-     }
-    else
-     { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown Teleinfo command : %s", ligne );
-       response = Admin_write ( response, chaine );
-     }
-    return(response);
+/************************************************ Génération du JSON **********************************************************/
+    gen = json_generator_new ();
+    json_generator_set_root ( gen, json_builder_get_root(builder) );
+    json_generator_set_pretty ( gen, TRUE );
+    buf = json_generator_to_data (gen, &taille_buf);
+    g_object_unref(builder);
+    g_object_unref(gen);
+
+    *buffer_p = buf;
+    *taille_p = taille_buf;
+    return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

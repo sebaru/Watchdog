@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _TELEINFO_H_
  #define _TELEINFO_H_
 
@@ -44,11 +44,15 @@
   { struct LIBRAIRIE *lib;
     gint  mode;                                                                    /* Statut de connexion au port TeleInfoEDF */
     gint  date_next_retry;                                                 /* Date de la prochaine connexion au port teleinfo */
+    gchar tech_id[32];
     gchar port[80];
+    gboolean enable;                                                                                      /* Enable at boot ? */
     gint  fd;                                                               /* File Descriptor d'acces au module Teleinfo USB */
+    void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
+    gchar buffer[TAILLE_BUFFER_TELEINFO];
     gint  last_view;                                                                            /* Date du dernier echange OK */
-    gint  last_view_adco;
-    gint  last_view_isous;
+    gpointer adco;
+    gpointer isous;
     gint  last_view_hchc;
     gint  last_view_hchp;
     gint  last_view_iinst;
@@ -57,12 +61,8 @@
     gint  last_view_hhchp;
     gint  last_view_ptec;
     gint  last_view_optarif;
-    gboolean reload;
-    gboolean enable;                                                                                      /* Enable at boot ? */
-    gchar buffer[TAILLE_BUFFER_TELEINFO];
  } Cfg_teleinfo;
 
 /************************************************ Définitions des prototypes **************************************************/
- extern gboolean Teleinfo_Lire_config ( void );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

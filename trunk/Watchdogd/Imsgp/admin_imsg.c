@@ -29,111 +29,104 @@
  #include "Imsg.h"
 
 /******************************************************************************************************************************/
-/* Admin_imsgp_reload: Demande le rechargement des conf IMSG                                                                  */
-/* Entrée: le response                                                                                                        */
-/* Sortie: rien                                                                                                               */
+/* Admin_json_list : fonction appelée pour vérifier la liste des destinataires                                                */
+/* Entrée : un JSon Builder                                                                                                   */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static gchar *Admin_imsgp_reload ( gchar *response )
-  { Cfg_imsgp.lib->Thread_reload = TRUE;
-    response = Admin_write ( response, " | - IMSG Reloading done" );
-    return(response);
-  }
-/******************************************************************************************************************************/
-/* Admin_print_contact : Affiche le parametre sur la console d'admin CLI                                                      */
-/* Entrée: La response response ADMIN                                                                                         */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                                           */
-/******************************************************************************************************************************/
- static gchar *Admin_print_imsgp ( gchar *response, struct IMSGPDB *imsgp )
-  { gchar chaine[512];
-
-    g_snprintf( chaine, sizeof(chaine),
-              " | - [%03d]%12s -> user_enable       = %d\n"
-              " |               -> imsgp_enable       = %d\n"
-              " |               -> imsgp_jabberid     = %s\n"
-              " |               -> imsgp_allow_cde    = %d\n"
-              " |               -> imsgp_availability = %d\n"
-              " | ---------------> %s",
-                imsgp->user_id, imsgp->user_name, imsgp->user_enable, imsgp->user_imsg_enable, imsgp->user_jabberid,
-                imsgp->user_allow_cde, imsgp->user_available, imsgp->user_comment
-              );
-
-    response = Admin_write ( response, chaine );
-    return(response);
-  }
-/******************************************************************************************************************************/
-/* Admin_imsgp_list : L'utilisateur admin lance la commande "list" en mode imsgp                                              */
-/* Entrée: La response response ADMIN                                                                                         */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                                           */
-/******************************************************************************************************************************/
- static gchar *Admin_imsgp_list ( gchar *response )
+ static void Admin_json_list ( JsonBuilder *builder )
   { struct IMSGPDB *imsgp;
     struct DB *db;
-
-    response = Admin_write ( response, " | -- Liste des Contacts IMSG" );
 
     db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
-       return(response);
+       return;
      }
 
-/******************************************** Chargement des informations en bases ********************************************/
     if ( ! Recuperer_imsgpDB( db ) )
      { Libere_DB_SQL( &db );
        Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_imsgp Failed", __func__ );
-       return(response);
+       return;
      }
 
     while ( (imsgp = Recuperer_imsgpDB_suite( db )) != NULL)
-     { response = Admin_print_imsgp ( response, imsgp ); }
+     { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+
+       json_builder_set_member_name  ( builder, "user_id" );
+       json_builder_add_int_value ( builder, imsgp->user_id );
+
+       json_builder_set_member_name  ( builder, "user_name" );
+       json_builder_add_string_value ( builder, imsgp->user_name );
+
+       json_builder_set_member_name  ( builder, "user_enable" );
+       json_builder_add_boolean_value ( builder, imsgp->user_enable );
+
+       json_builder_set_member_name  ( builder, "user_imsg_enable" );
+       json_builder_add_boolean_value ( builder, imsgp->user_imsg_enable );
+
+       json_builder_set_member_name  ( builder, "user_jabber_id" );
+       json_builder_add_string_value ( builder, imsgp->user_jabberid );
+
+       json_builder_set_member_name  ( builder, "user_allow_command" );
+       json_builder_add_boolean_value ( builder, imsgp->user_allow_cde );
+
+       json_builder_set_member_name  ( builder, "user_available" );
+       json_builder_add_boolean_value ( builder, imsgp->user_available );
+
+       json_builder_set_member_name  ( builder, "user_comment" );
+       json_builder_add_string_value ( builder, imsgp->user_comment );
+
+       json_builder_end_object (builder);                                                                     /* End Document */
+     }
 
     Libere_DB_SQL( &db );
-    return(response);
   }
 /******************************************************************************************************************************/
-/* Admin_command : Appeller par le thread admin pour traiter une commande                                                     */
-/* Entrée: Le response d'admin, la ligne a traiter                                                                            */
-/* Sortie: néant                                                                                                              */
+/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- gchar *Admin_command( gchar *response, gchar *ligne )
-  { gchar commande[128], chaine[128];
+ void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
+  { JsonBuilder *builder;
+    JsonGenerator *gen;
+    gsize taille_buf;
+    gchar *buf;
 
-    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
+    *buffer_p = NULL;
+    *taille_p = 0;
 
-    if ( ! strcmp ( commande, "send" ) )
-     { gchar to[256];
-       sscanf ( ligne, "%s %s", commande, to );                      /* Découpage de la ligne de commande */
-       Imsgp_Envoi_message_to ( to, ligne + strlen (to) + 6 );
-       g_snprintf( chaine, sizeof(chaine), " | - Message '%s' sent to '%s'", ligne + strlen (to) + 6, to );
-       response = Admin_write ( response, chaine );
+    builder = json_builder_new ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       return;
      }
-    else if ( ! strcmp ( commande, "list" ) )
-     { response = Admin_imsgp_list ( response ); }
-    else if ( ! strcmp ( commande, "reload" ) )
-     { response = Admin_imsgp_reload ( response ); }
-    else if ( ! strcmp ( commande, "status" ) )
-     {
+/************************************************ Préparation du buffer JSON **************************************************/
+                                                                      /* Lancement de la requete de recuperation des messages */
+    if (!strcmp(commande, "/list")) { Admin_json_list ( builder ); }
+    else if ( ! strcmp ( commande, "/add_buddy/" ) )
+				 { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+       json_builder_set_member_name  ( builder, "buddy_name" );
+       json_builder_add_string_value ( builder, commande+11 );
+       json_builder_end_object (builder);                                                                     /* End Document */
+       purple_account_add_buddy( Cfg_imsgp.account, purple_buddy_new	( Cfg_imsgp.account, commande + 11, commande + 11 ) );
      }
-    else if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'IMSG'" );
-       response = Admin_write ( response, " | - send user@domain/resource message      - Send a message to user" );
-       response = Admin_write ( response, " | - add_buddy user@domain                  - Ajoute un buddy dans la liste" );
-       response = Admin_write ( response, " | - reload                                 - Reload configuration from Database" );
-       response = Admin_write ( response, " | - list                                   - List contact and availability" );
-/*       response = Admin_write ( response, "  presence new_status                    - Change Presence to 'new_status'" );
-  */
-       response = Admin_write ( response, " | - status                                 - See response status" );
+    else if ( ! strcmp ( commande, "/send/" ) )
+				 { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+       json_builder_set_member_name  ( builder, "message_sent" );
+       json_builder_add_string_value ( builder, commande+6 );
+       json_builder_end_object (builder);                                                                     /* End Document */
+       Imsgp_Envoi_message_to_all_available ( commande+6 );
      }
-    else if ( ! strcmp ( commande, "add_buddy" ) )
-				 { g_snprintf( chaine, sizeof(chaine), " | - Adding '%s'", ligne + 10 );
-       response = Admin_write ( response, chaine );
-       purple_account_add_buddy( Cfg_imsgp.account, purple_buddy_new	( Cfg_imsgp.account, ligne + 10, ligne + 10 ) );
-     }
-    else
-     { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown IMSGP command : %s", ligne );
-       response = Admin_write ( response, chaine );
-     }
-   return(response);
+/************************************************ Génération du JSON **********************************************************/
+    gen = json_generator_new ();
+    json_generator_set_root ( gen, json_builder_get_root(builder) );
+    json_generator_set_pretty ( gen, TRUE );
+    buf = json_generator_to_data (gen, &taille_buf);
+    g_object_unref(builder);
+    g_object_unref(gen);
+
+    *buffer_p = buf;
+    *taille_p = taille_buf;
+    return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
