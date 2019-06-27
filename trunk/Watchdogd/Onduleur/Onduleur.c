@@ -610,6 +610,11 @@
        goto end;
      }
 
+    if (Config.instance_is_master==FALSE)
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
+                "%s: Instance is not Master. Shutting Down %p", __func__, pthread_self() );
+       goto end;
+     }
 
     Cfg_ups.Modules_UPS = NULL;                                                               /* Init des variables du thread */
 
@@ -688,7 +693,7 @@
                 else module->date_next_connexion = Partage->top + UPS_POLLING;               /* Update toutes les xx secondes */
               }
            }
-          liste = liste->next;                                             /* On prépare le prochain accÃ¨s au prochain module */
+          liste = liste->next;                                            /* On prépare le prochain accÃ¨s au prochain module */
         }
        pthread_mutex_unlock ( &Cfg_ups.lib->synchro );                                 /* Car utilisation de la liste chainée */
      }
