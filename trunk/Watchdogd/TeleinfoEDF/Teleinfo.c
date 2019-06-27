@@ -205,6 +205,7 @@
        if ( lib->Thread_reload == TRUE )
         { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Reloading in progress", __func__ );
           close(Cfg_teleinfo.fd);                                                             /* Fermeture de la connexion FD */
+          Teleinfo_Lire_config ();                                          /* Lecture de la configuration logiciel du thread */
           Cfg_teleinfo.fd = Init_teleinfo();
           if (Cfg_teleinfo.fd<0)                                                               /* On valide l'acces aux ports */
            { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_CRIT,

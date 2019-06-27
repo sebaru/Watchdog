@@ -1,6 +1,7 @@
 #!/bin/sh
 
 echo "Installing dependencies"
+apt-get update
 apt-get install -y subversion libtool automake autoconf gcc git cmake
 apt-get install -y libglib2.0-dev bison flex libreadline-dev libgif-dev libgcrypt11-dev
 apt-get install -y libupsclient-dev libcurl4-gnutls-dev libssl-dev default-libmysqlclient-dev libpurple-dev libgammu-dev

@@ -30,29 +30,38 @@
  #include "watchdogd.h"
 /******************************************************************************************************************************/
 /* Json_create: Prepare un builder pour creer un nouveau buffer json                                                          */
-/* EntrÈe: nÈant                                                                                                              */
+/* Entr√©e: n√©ant                                                                                                              */
 /* Sortie: NULL si erreur                                                                                                     */
 /******************************************************************************************************************************/
  JsonBuilder *Json_create ( void )
   { JsonBuilder *builder;
     builder = json_builder_new();
     if (!builder) return(NULL);
-    json_builder_begin_object (builder);                                                       /* CrÈation du noeud principal */
+    json_builder_begin_object (builder);                                                       /* Cr√©ation du noeud principal */
     return(builder);
   }
 /******************************************************************************************************************************/
 /* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
-/* EntrÈe: le builder, le nom du parametre, la valeur                                                                         */
-/* Sortie: nÈant                                                                                                              */
+/* Entr√©e: le builder, le nom du parametre, la valeur                                                                         */
+/* Sortie: n√©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Json_add_string ( JsonBuilder *builder, gchar *name, gchar *chaine )
   { json_builder_set_member_name  ( builder, name );
     json_builder_add_string_value ( builder, chaine );
   }
 /******************************************************************************************************************************/
+/* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
+/* Entr√©e: le builder, le nom du parametre, la valeur                                                                         */
+/* Sortie: n√©ant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_add_int ( JsonBuilder *builder, gchar *name, gint valeur )
+  { json_builder_set_member_name  ( builder, name );
+    json_builder_add_int_value ( builder, valeur );
+  }
+/******************************************************************************************************************************/
 /* Json_add_double: Ajoute un enregistrement name/double dans le builder                                                      */
-/* EntrÈe: le builder, le nom du parametre, la valeur                                                                         */
-/* Sortie: nÈant                                                                                                              */
+/* Entr√©e: le builder, le nom du parametre, la valeur                                                                         */
+/* Sortie: n√©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Json_add_double ( JsonBuilder *builder, gchar *name, gfloat valeur )
   { json_builder_set_member_name  ( builder, name );
@@ -60,8 +69,8 @@
   }
 /******************************************************************************************************************************/
 /* Json_get_buf: Termine le buffer JSON en le formatant en chaine de caractere                                                */
-/* EntrÈe: le builder, un gsize * pour rÈcupÈrer la taille du buffer                                                          */
-/* Sortie: le buffer, a g_freÈ quand plus besoin                                                                              */
+/* Entr√©e: le builder, un gsize * pour r√©cup√©rer la taille du buffer                                                          */
+/* Sortie: le buffer, a g_fre√© quand plus besoin                                                                              */
 /******************************************************************************************************************************/
  gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p )
   { JsonGenerator *gen;
@@ -76,14 +85,14 @@
   }
 /******************************************************************************************************************************/
 /* Json_get_from_stirng: Recupere l'object de plus haut niveau dans une chiane JSON                                           */
-/* EntrÈe: la chaine de caractere                                                                                             */
+/* Entr√©e: la chaine de caractere                                                                                             */
 /* Sortie: l'objet                                                                                                            */
 /******************************************************************************************************************************/
  JsonNode *Json_get_from_string ( gchar *chaine )
   { return(json_from_string ( chaine, NULL )); }
 /******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
-/* EntrÈe: la query, le nom du parametre                                                                                      */
+/* Entr√©e: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
  gchar *Json_get_string ( JsonNode *query, gchar *chaine )
@@ -92,7 +101,7 @@
   }
 /******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
-/* EntrÈe: la query, le nom du parametre                                                                                      */
+/* Entr√©e: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
  gfloat Json_get_float ( JsonNode *query, gchar *chaine )

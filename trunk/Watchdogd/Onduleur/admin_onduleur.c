@@ -52,6 +52,8 @@
     json_builder_set_member_name  ( builder, "started" );
     json_builder_add_boolean_value ( builder, module->started );
 
+    Json_add_int ( builder, "nbr_connexion", module->nbr_connexion );
+
     json_builder_set_member_name  ( builder, "admin_username" );
     json_builder_add_string_value ( builder, module->username );
     json_builder_set_member_name  ( builder, "admin_password" );
