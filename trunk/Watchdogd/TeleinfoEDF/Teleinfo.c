@@ -84,7 +84,7 @@
   { struct termios oldtio;
     int fd;
 
-    fd = open( Cfg_teleinfo.port, O_RDONLY | O_NOCTTY | O_NONBLOCK );
+    fd = open( Cfg_teleinfo.port, O_RDONLY | O_NOCTTY | O_NONBLOCK | O_CLOEXEC );
     if (fd<0)
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
                "%s: Impossible d'ouvrir le port teleinfo '%s', erreur %d", __func__, Cfg_teleinfo.port, fd );
@@ -109,59 +109,66 @@
 /* Entrée: la trame a recue                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
+ static void Send_AI_to_master ( gchar *name, gchar *chaine )                                      /* Envoi au master via ZMQ */
+  { JsonBuilder *builder;
+    gchar *result;
+    gsize taille;
+    builder = Json_create ();
+    Json_add_string ( builder, "mode",     "SET_AI" );
+    Json_add_string ( builder, "tech_id",  Cfg_teleinfo.tech_id );
+    Json_add_string ( builder, "acronyme", name );
+    Json_add_double ( builder, "valeur",   atof( chaine ) );
+    result = Json_get_buf ( builder, &taille );
+    Send_zmq_with_tag ( Cfg_teleinfo.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "JSON", result, taille );
+    g_free(result);
+  }
+/******************************************************************************************************************************/
+/* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
+/* Entrée: la trame a recue                                                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Processer_trame( void )
   { if ( ! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 ) )
      { if (Config.instance_is_master==TRUE)
         { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "ADCO", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 5) ); }
        else /* Envoi au master via ZMQ */
-        { JsonBuilder *builder;
-          gchar *result;
-          gsize taille;
-          builder = Json_create ();
-          Json_add_string ( builder, "mode",     "SET_AI" );
-          Json_add_string ( builder, "tech_id",  Cfg_teleinfo.tech_id );
-          Json_add_string ( builder, "acronyme", "ADCO" );
-          Json_add_double ( builder, "valeur",   atof( Cfg_teleinfo.buffer + 5) );
-          result = Json_get_buf ( builder, &taille );
-          Send_zmq_with_tag ( Cfg_teleinfo.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "JSON", result, taille );
-          g_free(result);
-        }
+        { Send_AI_to_master ( "ADCO", Cfg_teleinfo.buffer + 5 ); }
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 ) )
      { if (Config.instance_is_master==TRUE)
         { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "ISOUS", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 6) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "ISOUS", Cfg_teleinfo.buffer + 6 ); }
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )
      { if (Config.instance_is_master==TRUE)
         { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "HCHC", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 5) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "HCHC", Cfg_teleinfo.buffer + 5 ); }
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 ) )
      { if (Config.instance_is_master==TRUE)
         { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "HCHP", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 5) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "HCHP", Cfg_teleinfo.buffer + 5 ); }
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 ) )
      { if (Config.instance_is_master==TRUE)
         { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "IINST", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 6) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "IINST", Cfg_teleinfo.buffer + 6 ); }
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 ) )
      { if (Config.instance_is_master==TRUE)
         { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "IMAX", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 5) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "IMAX", Cfg_teleinfo.buffer + 5 ); }
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 ) )
      { if (Config.instance_is_master==TRUE)
         { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "PAPP", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 5) ); }
-     }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "PTEC", 4 ) )
-     { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "PTEC", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 5) ); }
-     }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HHPHC", 5 ) )
-     { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "HHPHC", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 6) ); }
-     }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "OPTARIF", 7 ) )
-     { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "OPTARIF", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 8) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "PAPP", Cfg_teleinfo.buffer + 5 ); }
      }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     Cfg_teleinfo.last_view = Partage->top;
