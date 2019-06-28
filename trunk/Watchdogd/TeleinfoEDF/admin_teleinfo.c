@@ -36,14 +36,12 @@
 /******************************************************************************************************************************/
  void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
   { JsonBuilder *builder;
-    JsonGenerator *gen;
     gsize taille_buf;
-    gchar *buf;
 
     *buffer_p = NULL;
     *taille_p = 0;
 
-    builder = json_builder_new ();
+    builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
@@ -51,34 +49,14 @@
 /************************************************ Préparation du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/status"))
-				 { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-
-       json_builder_set_member_name  ( builder, "tech_id" );
-       json_builder_add_string_value ( builder, Cfg_teleinfo.tech_id );
-
-       json_builder_set_member_name  ( builder, "port" );
-       json_builder_add_string_value ( builder, Cfg_teleinfo.port );
-
-       json_builder_set_member_name  ( builder, "mode" );
-       json_builder_add_int_value ( builder, Cfg_teleinfo.mode );
-
-       json_builder_set_member_name  ( builder, "retry_in" );
-       json_builder_add_int_value ( builder, (Partage->top - Cfg_teleinfo.date_next_retry)/10.0 );
-
-       json_builder_set_member_name  ( builder, "last_view" );
-       json_builder_add_int_value ( builder, (Partage->top - Cfg_teleinfo.last_view)/10.0 );
-
-       json_builder_end_object (builder);                                                                     /* End Document */
+				 { Json_add_string ( builder, "tech_id", Cfg_teleinfo.tech_id );
+				   Json_add_string ( builder, "port", Cfg_teleinfo.port );
+				   Json_add_int ( builder, "mode", Cfg_teleinfo.mode );
+				   Json_add_int ( builder, "retry_in", (Partage->top - Cfg_teleinfo.date_next_retry)/10.0 );
+				   Json_add_int ( builder, "last_view", (Partage->top - Cfg_teleinfo.last_view)/10.0 );
      }
-/************************************************ Génération du JSON **********************************************************/
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
-
-    *buffer_p = buf;
+/************************************************ GÃ©nÃ©ration du JSON **********************************************************/
+    *buffer_p = Json_get_buf ( builder, &taille_buf );
     *taille_p = taille_buf;
     return;
   }

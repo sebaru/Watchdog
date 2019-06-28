@@ -50,6 +50,15 @@
     json_builder_add_string_value ( builder, chaine );
   }
 /******************************************************************************************************************************/
+/* Json_add_boolean: Ajoute un enregistrement name/bool dans le builder                                                       */
+/* Entrée: le builder, le nom du parametre, la valeur                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_add_bool ( JsonBuilder *builder, gchar *name, gboolean bool )
+  { json_builder_set_member_name  ( builder, name );
+    json_builder_add_boolean_value ( builder, bool );
+  }
+/******************************************************************************************************************************/
 /* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
 /* Entrée: le builder, le nom du parametre, la valeur                                                                         */
 /* Sortie: néant                                                                                                              */
