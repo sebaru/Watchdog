@@ -80,7 +80,7 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Rechercher_CI: Recupération des champs de base de données pour le CI tech_id:acro en parametre                        */
+/* Rechercher_CI: Recupération des champs de base de données pour le CI tech_id:acro en parametre                             */
 /* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
 /* Sortie: la struct DB                                                                                                       */
 /******************************************************************************************************************************/
@@ -113,7 +113,7 @@
     return(db);
   }
 /******************************************************************************************************************************/
-/* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
+/* Charger_conf_CI: Recupération de la conf de l'entrée analogique en parametre                                               */
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
@@ -144,7 +144,7 @@
      { cpt_imp->valeur = atoi(db->row[0]);
        cpt_imp->etat   = atoi(db->row[1]);
        g_snprintf( cpt_imp->unite, sizeof(cpt_imp->unite), "%s", db->row[2] );
-       cpt_imp->multi  = atoi(db->row[3]);
+       cpt_imp->multi  = atof(db->row[3]);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CI '%s:%s'=%d %s (%d) loaded", __func__,
                  cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur, cpt_imp->unite, cpt_imp->etat );
        Libere_DB_SQL( &db );

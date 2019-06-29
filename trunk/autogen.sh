@@ -1,6 +1,6 @@
 #! /bin/sh
 
-#svn update
+svn update
 osFedora=`grep "NAME=Fedora" /etc/os-release`
 osRaspbian=`grep "ID=raspbian" /etc/os-release`
 

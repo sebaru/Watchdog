@@ -605,12 +605,38 @@ unite:          modulateur ENTIER HEURE ENTIER
                          case MNEMO_CPT_IMP:
                           { taille = 30;
                             $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
-                            switch($5->type)
-                             { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $5->valf );  break;
-                               case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $5->valf );  break;
-                               case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $5->valf ); break;
-                               case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", alias->num, $5->valf ); break;
-                               case T_EGAL     : g_snprintf( $$, taille, "CI(%d)==%f", alias->num, $5->valf ); break;
+                            if (alias->type==ALIAS_TYPE_STATIC)
+                             { switch($5->type)
+                                { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $5->valf );  break;
+                                  case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $5->valf );  break;
+                                  case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $5->valf ); break;
+                                  case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", alias->num, $5->valf ); break;
+                                  case T_EGAL     : g_snprintf( $$, taille, "CI(%d)==%f", alias->num, $5->valf ); break;
+                                }
+                             }
+                            else
+                             { switch($5->type)
+                                { case INF:
+                                    g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)<%f",
+                                                alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                    break;
+                                  case SUP:
+                                    g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)>%f",
+                                                alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                    break;
+                                  case INF_OU_EGAL:
+                                    g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)<=%f",
+                                                alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                    break;
+                                  case SUP_OU_EGAL:
+                                    g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)>=%f",
+                                                alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                    break;
+                                  case T_EGAL:
+                                    g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)==%f",
+                                                alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                    break;
+                                }
                              }
                             break;
                           }

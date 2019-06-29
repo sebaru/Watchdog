@@ -262,6 +262,7 @@
         if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
         { Envoyer_commande_dls_data ( tech_id, acro ); }
      }
+    Libere_DB_SQL ( &db );
   }
 /******************************************************************************************************************************/
 /* Imsgp_Sauvegarder_statut_contact : Sauvegarde en mémoire le statut du contact en parametre                                 */

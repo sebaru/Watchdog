@@ -190,9 +190,8 @@
              { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), " - pb comm - " ); }
             return(etat_cadran);
        case MNEMO_CPTH:
-             { time_t valeur;
-               if(cadran->bit_controle!=-1)
-                { valeur = (time_t)Partage->ch[cadran->bit_controle].confDB.valeur; }
+             { if(cadran->bit_controle!=-1)
+                { cadran->val_ech = (time_t)Partage->ch[cadran->bit_controle].confDB.valeur; }
                else
                 { cadran->val_ech = Dls_data_get_CH(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
                   if (!cadran->dls_data)                            /* si AI pas trouvée, on remonte le nom du cadran en libellé */
@@ -200,11 +199,10 @@
                      return(etat_cadran);
                    }
                 }
-               if (valeur < 60)
-                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%02d min", (int)valeur ); }
+               if (cadran->val_ech < 60)
+                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%02d min", (int)cadran->val_ech ); }
                 else
-                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%05dh", (int)valeur/60 ); }
-               cadran->val_ech = Partage->ch[cadran->bit_controle].confDB.valeur;
+                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%05dh", (int)cadran->val_ech/60 ); }
              }
             break;
        case MNEMO_CPT_IMP:
@@ -229,6 +227,7 @@
                    { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "-- ?? --" );
                      return(etat_cadran);
                    }
+                  cadran->val_ech *= ci->multi;                                                           /* Multiplication ! */
                   g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%8.2f %s",
                               cadran->val_ech * ci->multi, ci->unite
                             );
