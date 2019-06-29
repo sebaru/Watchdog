@@ -108,14 +108,14 @@
        if (Dls_auto_create_plugin( Cfg_teleinfo.tech_id, "Gestion du compteur EDF" ) == -1)
         { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", Cfg_teleinfo.tech_id ); }
 
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ADCO", "N° d’identification du compteur", "numéro" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ADCO",  "N° d’identification du compteur", "numéro" );
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ISOUS", "Intensité souscrite ", "A" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "BASE", "Index optoin BASE", "Wh" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "HCHC", "Index heures creuses", "Wh" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "HCHP", "Index heures pleines", "Wh" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IINST", "ntensité instantanée", "A" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IMAX", "Intensité maximale", "A" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "PAPP", "Puissance apparente", "VA" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "BASE",  "Index option BASE", "Wh" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "HCHC",  "Index heures creuses", "Wh" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "HCHP",  "Index heures pleines", "Wh" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IINST", "Intensité instantanée", "A" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IMAX",  "Intensité maximale", "A" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "PAPP",  "Puissance apparente", "VA" );
      }
     Cfg_teleinfo.nbr_connexion++;
     return(fd);
@@ -160,7 +160,7 @@
      { if (Config.instance_is_master==TRUE)
         { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "BASE", &Cfg_teleinfo.base, atof( Cfg_teleinfo.buffer + 5) ); }
        else /* Envoi au master via ZMQ */
-        { Send_AI_to_master ( "HCHC", Cfg_teleinfo.buffer + 5 ); }
+        { Send_AI_to_master ( "BASE", Cfg_teleinfo.buffer + 5 ); }
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )
      { if (Config.instance_is_master==TRUE)
