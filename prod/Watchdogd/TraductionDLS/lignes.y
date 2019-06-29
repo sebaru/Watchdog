@@ -603,7 +603,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                             break;
                            }
                          case MNEMO_CPT_IMP:
-                          { taille = 30;
+                          { taille = 256;
                             $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                             if (alias->type==ALIAS_TYPE_STATIC)
                              { switch($5->type)
