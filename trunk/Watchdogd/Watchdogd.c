@@ -319,10 +319,11 @@
        Gerer_arrive_Ixxx_dls();                                                 /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
 
-       if ( (byte=Recv_zmq_with_tag( zmq_from_slave, "msrv", &buffer, sizeof(buffer), &event, &payload )) > 0 )
+       if ( (byte=Recv_zmq_with_tag( zmq_from_slave, "msrv", &buffer, sizeof(buffer)-1, &event, &payload )) > 0 )
         { if ( !strcmp(event->tag,"JSON") )
            { JsonNode *query;
              gchar *mode;
+             buffer[byte] = 0;                                                                       /* Caractère nul d'arret */
              query = Json_get_from_string ( payload );
              if (!query)
               { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); continue; }
