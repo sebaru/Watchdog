@@ -1350,10 +1350,32 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4219)
+     { g_snprintf( requete, sizeof(requete),
+                   "CREATE TABLE IF NOT EXISTS `tableau` ("
+                   "`id` INT NOT NULL AUTO_INCREMENT ,"
+                   "`titre` VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,"
+                   "`access_level` int(11) NOT NULL ,"
+                   "`date_create` DATETIME NOT NULL ,"
+                   "PRIMARY KEY (`id`)) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                  "CREATE TABLE IF NOT EXISTS `courbes` ("
+                  "`id` INT NOT NULL AUTO_INCREMENT ,"
+                  "`tableau_id` INT NOT NULL ,"
+                  "`tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,"
+                  "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                  "`color` varchar(32) COLLATE utf8_unicode_ci NOT NULL,"
+                  "PRIMARY KEY (`id`),"
+                  "INDEX (`tableau_id`),"
+                  "FOREIGN KEY (`tableau_id`) REFERENCES `tableau` (`id`) ON DELETE CASCADE"
+                  ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+       Lancer_requete_SQL ( db, requete );
+     }
 
     Libere_DB_SQL(&db);
 fin:
-    database_version=4206;
+    database_version=4219;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

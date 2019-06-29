@@ -115,7 +115,7 @@
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "HCHP",  "Index heures pleines", "Wh" );
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IINST", "Intensité instantanée", "A" );
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IMAX",  "Intensité maximale", "A" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "PAPP",  "Puissance apparente", "VA" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "PAPP",  "Puissance apparente consommée", "VA" );
      }
     Cfg_teleinfo.nbr_connexion++;
     return(fd);
