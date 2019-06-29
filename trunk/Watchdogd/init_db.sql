@@ -410,6 +410,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` (
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `heure` int(11) NOT NULL DEFAULT '0',
   `minute` int(11) NOT NULL DEFAULT '0',
+  `lundi` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE

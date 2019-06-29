@@ -1374,6 +1374,26 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4225)
+     { g_snprintf( requete, sizeof(requete), "DROP TABLE mnemos_HORLOGE" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` ("
+                   "`id` INT(11) NOT NULL AUTO_INCREMENT,"
+                   "`tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,"
+                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`etat` BOOLEAN NOT NULL DEFAULT '0',"
+                   "`libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                   "`heure` int(11) NOT NULL DEFAULT '0',"
+                   "`minute` int(11) NOT NULL DEFAULT '0',"
+                   "`lundi` tinyint(1) NOT NULL DEFAULT '0',"
+                   "PRIMARY KEY (`id`),"
+                   "UNIQUE (`tech_id`,`acronyme`),"
+                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 fin:
     database_version=4219;
