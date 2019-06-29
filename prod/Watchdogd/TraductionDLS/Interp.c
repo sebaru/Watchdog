@@ -1089,34 +1089,39 @@
               { case MNEMO_BUS:
                 case MNEMO_MOTIF:
                    break;
+                case MNEMO_BISTABLE:
+                case MNEMO_MONOSTABLE:
+                 { Mnemo_auto_create_BOOL ( alias->type_bit, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   break;
+                 }
                 case MNEMO_SORTIE:
-                 { Mnemo_auto_create_DO ( Dls_plugin.id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_DO ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_TEMPO:
-                 { Mnemo_auto_create_TEMPO ( Dls_plugin.id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_TEMPO ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_ENTREE:
-                 { Mnemo_auto_create_DI ( Dls_plugin.id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_DI ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_HORLOGE:
-                 { Mnemo_auto_create_HORLOGE ( Dls_plugin.id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_HORLOGE ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_ENTREE_ANA:
                  { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
                    if (!unite) unite="no unit";
-                   Mnemo_auto_create_AI ( Dls_plugin.id, alias->acronyme, libelle, unite );
+                   Mnemo_auto_create_AI ( Dls_plugin.tech_id, alias->acronyme, libelle, unite );
                    break;
                  }
                 case MNEMO_CPT_IMP:
-                 { Mnemo_auto_create_CI ( Dls_plugin.id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_CI ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_CPTH:
-                 { Mnemo_auto_create_CH ( Dls_plugin.id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_CH ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_MSG:

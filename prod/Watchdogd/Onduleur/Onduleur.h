@@ -73,6 +73,7 @@
     guint map_A;                                                                          /* Numéro de la premiere A impactée */
     gpointer bit_comm;                                                            /* Pointer de raccourci pour le bit de comm */
     gboolean comm_status;                                                /* Bit interne B d'etat communication avec le module */
+    gint  nbr_connexion;                                                              /* Nombre de connexion OK dans le temps */
     UPSCONN_t upsconn;                                                                               /* Connexion UPS à l'ups */
     gboolean started;                                                                                      /* Est-il actif ?? */
     time_t date_next_connexion;

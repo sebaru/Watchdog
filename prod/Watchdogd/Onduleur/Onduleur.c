@@ -314,31 +314,56 @@
      }
 
 /************************************************** PREPARE LES AI ************************************************************/
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
-                "%s: %s: Initialise et charge les AI ", __func__, module->tech_id );
-    Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, 0.0 );
-    Charger_conf_AI ( module->ai_load );
-    Dls_data_set_AI ( module->tech_id, "REALPOWER", &module->ai_realpower, 0.0 );
-    Charger_conf_AI ( module->ai_realpower );
-    Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", &module->ai_battery_charge, 0.0 );
-    Charger_conf_AI ( module->ai_battery_charge );
-    Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", &module->ai_input_voltage, 0.0 );
-    Charger_conf_AI ( module->ai_input_voltage );
-    Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", &module->ai_battery_runtime, 0.0 );
-    Charger_conf_AI ( module->ai_battery_runtime );
-    Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", &module->ai_battery_voltage, 0.0 );
-    Charger_conf_AI ( module->ai_battery_voltage );
-    Dls_data_set_AI ( module->tech_id, "INPUT_HZ", &module->ai_input_frequency, 0.0 );
-    Charger_conf_AI ( module->ai_input_frequency );
-    Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", &module->ai_output_current, 0.0 );
-    Charger_conf_AI ( module->ai_output_current );
-    Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", &module->ai_output_frequency, 0.0 );
-    Charger_conf_AI ( module->ai_output_frequency );
-    Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", &module->ai_output_voltage, 0.0 );
-    Charger_conf_AI ( module->ai_output_voltage );
+    if (!module->nbr_connexion)
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
+                "%s: %s: Initialise le DLS et charge les AI ", __func__, module->tech_id );
+       if (Dls_auto_create_plugin( module->tech_id, "Gestion de l'onduleur" ) == -1)
+        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->tech_id ); }
+
+       Mnemo_auto_create_AI ( module->tech_id, "LOAD", "Charge onduleur", "%" );
+       Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, 0.0 );
+       Charger_conf_AI ( module->ai_load );
+
+       Mnemo_auto_create_AI ( module->tech_id, "REALPOWER", "Charge onduleur", "W" );
+       Dls_data_set_AI ( module->tech_id, "REALPOWER", &module->ai_realpower, 0.0 );
+       Charger_conf_AI ( module->ai_realpower );
+
+       Mnemo_auto_create_AI ( module->tech_id, "BATTERY_CHARGE", "Charge batterie", "%" );
+       Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", &module->ai_battery_charge, 0.0 );
+       Charger_conf_AI ( module->ai_battery_charge );
+
+       Mnemo_auto_create_AI ( module->tech_id, "INPUT_VOLTAGE", "Tension d'entrée", "V" );
+       Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", &module->ai_input_voltage, 0.0 );
+       Charger_conf_AI ( module->ai_input_voltage );
+
+       Mnemo_auto_create_AI ( module->tech_id, "BATTERY_RUNTIME", "Durée de batterie restante", "s" );
+       Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", &module->ai_battery_runtime, 0.0 );
+       Charger_conf_AI ( module->ai_battery_runtime );
+
+       Mnemo_auto_create_AI ( module->tech_id, "BATTERY_VOLTAGE", "Tension batterie", "V" );
+       Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", &module->ai_battery_voltage, 0.0 );
+       Charger_conf_AI ( module->ai_battery_voltage );
+
+       Mnemo_auto_create_AI ( module->tech_id, "INPUT_HZ", "Fréquence d'entrée", "HZ" );
+       Dls_data_set_AI ( module->tech_id, "INPUT_HZ", &module->ai_input_frequency, 0.0 );
+       Charger_conf_AI ( module->ai_input_frequency );
+
+       Mnemo_auto_create_AI ( module->tech_id, "OUTPUT_CURRENT", "Courant de sortie", "A" );
+       Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", &module->ai_output_current, 0.0 );
+       Charger_conf_AI ( module->ai_output_current );
+
+       Mnemo_auto_create_AI ( module->tech_id, "INPUT_HZ", "Fréquence de sortie", "HZ" );
+       Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", &module->ai_output_frequency, 0.0 );
+       Charger_conf_AI ( module->ai_output_frequency );
+
+       Mnemo_auto_create_AI ( module->tech_id, "OUTPUT_VOLTAGE", "Tension de sortie", "V" );
+       Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", &module->ai_output_voltage, 0.0 );
+       Charger_conf_AI ( module->ai_output_voltage );
+     }
 
     module->date_next_connexion = 0;
     module->started = TRUE;
+    module->nbr_connexion++;
     Ups_send_status_to_master ( module, TRUE );
     num_ea = module->map_EA;
     SEA_range( num_ea++, 1);                                                                 /* Numéro de l'EA pour la valeur */
@@ -585,6 +610,11 @@
        goto end;
      }
 
+    if (Config.instance_is_master==FALSE)
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
+                "%s: Instance is not Master. Shutting Down %p", __func__, pthread_self() );
+       goto end;
+     }
 
     Cfg_ups.Modules_UPS = NULL;                                                               /* Init des variables du thread */
 
@@ -663,7 +693,7 @@
                 else module->date_next_connexion = Partage->top + UPS_POLLING;               /* Update toutes les xx secondes */
               }
            }
-          liste = liste->next;                                             /* On prépare le prochain accÃ¨s au prochain module */
+          liste = liste->next;                                            /* On prépare le prochain accÃ¨s au prochain module */
         }
        pthread_mutex_unlock ( &Cfg_ups.lib->synchro );                                 /* Car utilisation de la liste chainée */
      }

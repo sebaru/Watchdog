@@ -55,7 +55,7 @@
  extern gboolean Mnemo_auto_create_for_dls ( struct CMD_TYPE_MNEMO_FULL *mnemo );
 
  extern void Charger_analogInput ( void );                                                                 /* Dans Mnemo_AI.c */
- extern gboolean Mnemo_auto_create_AI ( gint dls_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src );
+ extern gboolean Mnemo_auto_create_AI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src );
  extern struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_aiDB ( guint id );
  extern struct DB *Rechercher_AI ( gchar *tech_id, gchar *acronyme );
  extern gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
@@ -64,12 +64,12 @@
  extern gboolean Recuperer_mnemos_AI_by_map_question_vocale ( struct DB **db_retour, gchar *map_snips );
  extern gboolean Recuperer_mnemos_AI_suite( struct DB **db_orig );
 
- extern gboolean Mnemo_auto_create_HORLOGE ( gint dls_id, gchar *acronyme, gchar *libelle_src );    /* Dans Mnemos_Horloges.c */
+ extern gboolean Mnemo_auto_create_HORLOGE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src ); /* Dans Mnemos_Horloges.c */
  extern void Activer_horlogeDB ( void );
 
  extern void Updater_cpt_impDB ( void );                                                                   /* Dans Mnemo_CI.c */
  extern void Charger_conf_CI ( struct DLS_CI *cpt_imp );
- extern gboolean Mnemo_auto_create_CI ( gint dls_id, gchar *acronyme, gchar *libelle_src );
+ extern gboolean Mnemo_auto_create_CI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );
  extern struct DB *Rechercher_CI ( gchar *tech_id, gchar *acronyme );
  extern void Charger_cpt_imp ( void );
  extern struct CMD_TYPE_MNEMO_CPT_IMP *Rechercher_mnemo_cptimpDB ( guint id );
@@ -77,25 +77,30 @@
 
  extern void Updater_cpthDB ( void );                                                                   /* Dans Mnemo_CPT_H.c */
  extern void Charger_conf_CH ( struct DLS_CH *cpt_h );
- extern gboolean Mnemo_auto_create_CH ( gint dls_id, gchar *acronyme, gchar *libelle_src );
+ extern gboolean Mnemo_auto_create_CH ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );
  extern struct DB *Rechercher_CH ( gchar *tech_id, gchar *acronyme );
  extern void Charger_cpth ( void );
  extern struct CMD_TYPE_MNEMO_CPT_H *Rechercher_mnemo_cpthDB ( guint id );
  extern gboolean Modifier_mnemo_cpthDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
- extern gboolean Mnemo_auto_create_TEMPO ( gint dls_id, gchar *acronyme, gchar *libelle_src );          /* Dans Mnemo_tempo.c */
+ extern gboolean Mnemo_auto_create_TEMPO ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );       /* Dans Mnemo_tempo.c */
  extern struct DB *Rechercher_Tempo ( gchar *tech_id, gchar *acronyme );
 
  extern void Charger_registre ( void );                                                              /* Dans Mnemo_registre.c */
  extern struct CMD_TYPE_MNEMO_REGISTRE *Rechercher_mnemo_registreDB ( guint id );
  extern gboolean Modifier_mnemo_registreDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
 
- extern gboolean Mnemo_auto_create_DI ( gint dls_id, gchar *acronyme, gchar *libelle );                   /* Dans mnemos_DI.c */
+ extern gboolean Mnemo_auto_create_DI ( gchar *tech_id, gchar *acronyme, gchar *libelle );                /* Dans mnemos_DI.c */
  extern gboolean Recuperer_mnemos_DI_by_text ( struct DB **db_retour, gchar *thread, gchar *text );
  extern gboolean Recuperer_mnemos_DI_suite( struct DB **db_orig );
 
- extern gboolean Mnemo_auto_create_DO ( gint dls_id, gchar *acronyme, gchar *libelle );                   /* Dans mnemos_DO.c */
+ extern gboolean Mnemo_auto_create_DO ( gchar *tech_id, gchar *acronyme, gchar *libelle );                /* Dans mnemos_DO.c */
  extern gboolean Recuperer_mnemos_DO_by_tag ( struct DB **db_retour, gchar *thread, gchar *tag );
  extern gboolean Recuperer_mnemos_DO_suite( struct DB **db_orig );
+
+ extern struct DB *Rechercher_BOOL ( gchar *tech_id, gchar *acronyme );                                 /* Dans mnemos_BOOL.c */
+ extern gboolean Mnemo_auto_create_BOOL ( gint type, gchar *tech_id, gchar *acronyme, gchar *libelle_src );
+ extern void Charger_confDB_BOOL ( void );
+ extern void Updater_confDB_BOOL ( void );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

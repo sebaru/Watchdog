@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/TraductionDLS/mots.l        Définitions des mots DLS                                         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    jeu. 24 juin 2010 19:37:32 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/TraductionDLS/mots.l        Définitions des mots DLS                                                             */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                        jeu. 24 juin 2010 19:37:32 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * mots.l
  * This file is part of Watchdog
@@ -40,7 +40,7 @@
 
 /* Expressions rationnelles de detection */
 digit         [0-9]+
-digitf        [-]?[0-9]+[.[0-9]+]?
+digitf        [-]?[0-9]+[\.[0-9]+]?
 id            [a-zA-Z][a-zA-Z_0-9]+[a-zA-Z0-9]
 chaine        [^"]*
 blanc         [\t ]+
@@ -93,7 +93,7 @@ newline       [\n\r]+
 "_MEMSA_DEFAUT"            { DlsScanner_lval.val = T_ACT_DEF;    return T_ACT_DEF;    }
 "_MEMSA_ALARME_FIXE"       { DlsScanner_lval.val = T_ACT_ALAF;   return T_ACT_ALAF;   }
 "_MEMSA_ALARME"            { DlsScanner_lval.val = T_ACT_ALA;    return T_ACT_ALA;    }
-"_MEMSA_UP"                { DlsScanner_lval.val = T_ACT_UP;     return T_ACT_UP;     }
+"_MEMSA_OK"                { DlsScanner_lval.val = T_ACT_OK;     return T_ACT_OK;     }
 "_MEMSSB_VEILLE"           { DlsScanner_lval.val = T_SBIEN_VEILLE;return T_SBIEN_VEILLE; }
 "_MEMSSB_ALERTE_FIXE"      { DlsScanner_lval.val = T_SBIEN_ALEF; return T_SBIEN_ALEF; }
 "_MEMSSB_ALERTE"           { DlsScanner_lval.val = T_SBIEN_ALE;  return T_SBIEN_ALE;  }
@@ -101,6 +101,7 @@ newline       [\n\r]+
 "_MEMSSP_DERANGEMENT"      { DlsScanner_lval.val = T_SPERS_DER;  return T_SPERS_DER;  }
 "_MEMSSP_DANGER_FIXE"      { DlsScanner_lval.val = T_SPERS_DANF; return T_SPERS_DANF; }
 "_MEMSSP_DANGER"           { DlsScanner_lval.val = T_SPERS_DAN;  return T_SPERS_DAN;  }
+"_MEMSSP_OK"               { DlsScanner_lval.val = T_SPERS_OK;   return T_SPERS_OK;   }
 "_OSYN_ACQUIT"             { DlsScanner_lval.val = T_OSYN_ACQ;   return T_OSYN_ACQ;   }
 
  /************************************************ Couleurs ***********************************************/

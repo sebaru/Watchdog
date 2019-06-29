@@ -229,20 +229,68 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `ev_
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `tableau`
+--
+
+CREATE TABLE IF NOT EXISTS `tableau` (
+ `id` INT NOT NULL AUTO_INCREMENT ,
+ `titre` VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
+ `access_level` int(11) NOT NULL ,
+ `date_create` DATETIME NOT NULL ,
+ PRIMARY KEY (`id`)) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `courbes`
+--
+
+CREATE TABLE IF NOT EXISTS `courbes` (
+  `id` INT NOT NULL AUTO_INCREMENT ,
+  `tableau_id` INT NOT NULL ,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `color` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX (`tableau_id`),
+  FOREIGN KEY (`tableau_id`) REFERENCES `tableau` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `mnemos`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_BOOL` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `etat` BOOLEAN NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `mnemos`
 --
 
 CREATE TABLE IF NOT EXISTS `mnemos_DI` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `dls_id` int(11) NOT NULL DEFAULT '0',
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `src_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
   `src_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
   `src_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
-  UNIQUE (`dls_id`,`acronyme`),
-  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -253,7 +301,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_DI` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_DO` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `dls_id` int(11) NOT NULL DEFAULT '0',
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `dst_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
@@ -261,19 +309,19 @@ CREATE TABLE IF NOT EXISTS `mnemos_DO` (
   `dst_tag` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `dst_param1` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
-  UNIQUE (`dls_id`,`acronyme`),
-  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `mnemos_AnalogInput`
+-- Structure de la table `mnemos_AI`
 --
 
 CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `dls_id` int(11) NOT NULL DEFAULT '0',
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `type` int(11) NOT NULL DEFAULT '0',
@@ -286,8 +334,8 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `map_question_vocale` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `map_reponse_vocale` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun',
   PRIMARY KEY (`id`),
-  UNIQUE (`dls_id`,`acronyme`),
-  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -298,7 +346,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_CI` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `dls_id` INT(11) NOT NULL DEFAULT '0',
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `etat` BOOLEAN NOT NULL DEFAULT '0',
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
@@ -306,9 +354,10 @@ CREATE TABLE IF NOT EXISTS `mnemos_CI` (
   `multi` float NOT NULL DEFAULT '1',
   `unite` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'fois',
   PRIMARY KEY (`id`),
-  UNIQUE (`dls_id`,`acronyme`),
-  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
 
 -- --------------------------------------------------------
 
@@ -318,15 +367,16 @@ CREATE TABLE IF NOT EXISTS `mnemos_CI` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_CH` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `dls_id` INT(11) NOT NULL DEFAULT '0',
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `etat` BOOLEAN NOT NULL DEFAULT '0',
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `valeur` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE (`dls_id`,`acronyme`),
-  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
 
 -- --------------------------------------------------------
 
@@ -336,12 +386,14 @@ CREATE TABLE IF NOT EXISTS `mnemos_CH` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `dls_id` INT(11) NOT NULL DEFAULT '0',
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   PRIMARY KEY (`id`),
-  UNIQUE (`dls_id`,`acronyme`),
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
 
 -- --------------------------------------------------------
 
@@ -351,16 +403,17 @@ CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `dls_id` INT(11) NOT NULL DEFAULT '0',
-  `etat` BOOLEAN NOT NULL DEFAULT '0',
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `etat` BOOLEAN NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `heure` int(11) NOT NULL DEFAULT '0',
   `minute` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE (`dls_id`,`acronyme`),
-  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
 
 -- --------------------------------------------------------
 

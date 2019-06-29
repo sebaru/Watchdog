@@ -40,7 +40,7 @@
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_DI ( gint dls_id, gchar *acronyme, gchar *libelle_src )
+ gboolean Mnemo_auto_create_DI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;
     gchar requete[1024];
     gboolean retour;
@@ -63,9 +63,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                "INSERT INTO mnemos_DI SET dls_id='%d',acronyme='%s',libelle='%s' "
+                "INSERT INTO mnemos_DI SET tech_id='%s',acronyme='%s',libelle='%s' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                dls_id, acro, libelle );
+                tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);
 
@@ -96,8 +96,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-               "SELECT d.tech_id, m.acronyme, m.src_text, m.libelle "
-               "FROM mnemos_DI as m INNER JOIN dls as d ON d.id = m.dls_id"
+               "SELECT m.tech_id, m.acronyme, m.src_text, m.libelle "
+               "FROM mnemos_DI as m "
                " WHERE (m.src_host='*' OR m.src_host LIKE '%s') AND (m.src_thread='*' OR m.src_thread LIKE '%s')"
                " AND m.src_text LIKE '%s'",
                g_get_host_name(), thread, commande );

@@ -35,6 +35,7 @@
 
  #include "Reseaux.h"
  #include "Zmq.h"
+ #include "Json.h"
  #include "config.h"
  #include "Db.h"
  #include "Config.h"

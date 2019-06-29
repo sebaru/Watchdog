@@ -36,74 +36,36 @@
  static void Admin_json_ups_print ( JsonBuilder *builder, struct MODULE_UPS *module )
   { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
 
-    json_builder_set_member_name  ( builder, "tech_id" );
-    json_builder_add_string_value ( builder, module->tech_id );
+    Json_add_string ( builder, "tech_id", module->tech_id );
+    Json_add_string ( builder, "host", module->host );
+    Json_add_string ( builder, "name", module->name );
+    Json_add_string ( builder, "libelle", module->libelle );
 
-    json_builder_set_member_name  ( builder, "host" );
-    json_builder_add_string_value ( builder, module->host );
-    json_builder_set_member_name  ( builder, "name" );
-    json_builder_add_string_value ( builder, module->name );
-    json_builder_set_member_name  ( builder, "libelle" );
-    json_builder_add_string_value ( builder, module->libelle );
+    Json_add_bool ( builder, "enable", module->enable );
+    Json_add_bool ( builder, "started", module->started );
+    Json_add_bool ( builder, "comm", module->comm_status );
+    Json_add_int ( builder, "nbr_connexion", module->nbr_connexion );
 
-    json_builder_set_member_name  ( builder, "enable" );
-    json_builder_add_boolean_value ( builder, module->enable );
+    Json_add_string ( builder, "admin_username", module->username );
+    Json_add_string ( builder, "admin_password", module->password );
 
-    json_builder_set_member_name  ( builder, "started" );
-    json_builder_add_boolean_value ( builder, module->started );
 
-    json_builder_set_member_name  ( builder, "admin_username" );
-    json_builder_add_string_value ( builder, module->username );
-    json_builder_set_member_name  ( builder, "admin_password" );
-    json_builder_add_string_value ( builder, module->password );
+    Json_add_double ( builder, "ups_load", Dls_data_get_AI( NULL, NULL, &module->ai_load ) );
+    Json_add_double ( builder, "ups_realpower", Dls_data_get_AI( NULL, NULL, &module->ai_realpower ) );
+    Json_add_double ( builder, "ups_battery_charge", Dls_data_get_AI( NULL, NULL, &module->ai_battery_charge ) );
+    Json_add_double ( builder, "ups_battery_runtime", Dls_data_get_AI( NULL, NULL, &module->ai_battery_runtime ) );
+    Json_add_double ( builder, "ups_battery_voltage", Dls_data_get_AI( NULL, NULL, &module->ai_battery_voltage ) );
+    Json_add_double ( builder, "ups_input_voltage", Dls_data_get_AI( NULL, NULL, &module->ai_input_voltage ) );
+    Json_add_double ( builder, "ups_input_frequency", Dls_data_get_AI( NULL, NULL, &module->ai_input_frequency ) );
+    Json_add_double ( builder, "ups_output_current", Dls_data_get_AI( NULL, NULL, &module->ai_output_current ) );
+    Json_add_double ( builder, "ups_output_voltage", Dls_data_get_AI( NULL, NULL, &module->ai_output_voltage ) );
+    Json_add_double ( builder, "ups_output_frequency", Dls_data_get_AI( NULL, NULL, &module->ai_output_frequency ) );
 
-    json_builder_set_member_name  ( builder, "comm" );
-    json_builder_add_boolean_value ( builder, module->comm_status );
-
-    json_builder_set_member_name  ( builder, "ups_load" );
-    json_builder_add_double_value ( builder, Dls_data_get_AI( NULL, NULL, &module->ai_load ) );
-
-    json_builder_set_member_name  ( builder, "ups_realpower" );
-    json_builder_add_double_value ( builder, Dls_data_get_AI( NULL, NULL, &module->ai_realpower ) );
-
-    json_builder_set_member_name  ( builder, "ups_battery_charge" );
-    json_builder_add_double_value ( builder, Dls_data_get_AI( NULL, NULL, &module->ai_battery_charge ) );
-
-    json_builder_set_member_name  ( builder, "ups_battery_runtime" );
-    json_builder_add_double_value ( builder, Dls_data_get_AI( NULL, NULL, &module->ai_battery_runtime ) );
-
-    json_builder_set_member_name  ( builder, "ups_battery_voltage" );
-    json_builder_add_double_value ( builder, Dls_data_get_AI( NULL, NULL, &module->ai_battery_voltage ) );
-
-    json_builder_set_member_name  ( builder, "ups_input_voltage" );
-    json_builder_add_double_value ( builder, Dls_data_get_AI( NULL, NULL, &module->ai_input_voltage ) );
-
-    json_builder_set_member_name  ( builder, "ups_input_frequency" );
-    json_builder_add_double_value ( builder, Dls_data_get_AI( NULL, NULL, &module->ai_input_frequency ) );
-
-    json_builder_set_member_name  ( builder, "ups_output_current" );
-    json_builder_add_double_value ( builder, Dls_data_get_AI( NULL, NULL, &module->ai_output_current ) );
-
-    json_builder_set_member_name  ( builder, "ups_output_voltage" );
-    json_builder_add_double_value ( builder, Dls_data_get_AI( NULL, NULL, &module->ai_output_voltage ) );
-
-    json_builder_set_member_name  ( builder, "ups_output_frequency" );
-    json_builder_add_double_value ( builder, Dls_data_get_AI( NULL, NULL, &module->ai_output_frequency ) );
-
-    json_builder_set_member_name  ( builder, "ups_outlet_1_status" );
-    json_builder_add_boolean_value ( builder, Dls_data_get_bool( NULL, NULL, &module->di_outlet_1_status ) );
-
-    json_builder_set_member_name  ( builder, "ups_outlet_2_status" );
-    json_builder_add_boolean_value ( builder, Dls_data_get_bool( NULL, NULL, &module->di_outlet_2_status ) );
-
-    json_builder_set_member_name  ( builder, "ups_online" );
-    json_builder_add_boolean_value ( builder, Dls_data_get_bool( NULL, NULL, &module->di_ups_online ) );
-
-    json_builder_set_member_name  ( builder, "ups_charging" );
-    json_builder_add_boolean_value ( builder, Dls_data_get_bool( NULL, NULL, &module->di_ups_charging ) );
-
-    json_builder_set_member_name  ( builder, "ups_on_batt" );
-    json_builder_add_boolean_value ( builder, Dls_data_get_bool( NULL, NULL, &module->di_ups_on_batt ) );
+    Json_add_bool ( builder, "ups_outlet_1_status", Dls_data_get_bool( NULL, NULL, &module->di_outlet_1_status ) );
+    Json_add_bool ( builder, "ups_outlet_2_status", Dls_data_get_bool( NULL, NULL, &module->di_outlet_2_status ) );
+    Json_add_bool ( builder, "ups_online", Dls_data_get_bool( NULL, NULL, &module->di_ups_online ) );
+    Json_add_bool ( builder, "ups_charging", Dls_data_get_bool( NULL, NULL, &module->di_ups_charging ) );
+    Json_add_bool ( builder, "ups_on_batt", Dls_data_get_bool( NULL, NULL, &module->di_ups_on_batt ) );
 
     json_builder_end_object (builder);                                                                        /* End Document */
   }
@@ -134,14 +96,12 @@
 /******************************************************************************************************************************/
  void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
   { JsonBuilder *builder;
-    JsonGenerator *gen;
     gsize taille_buf;
-    gchar *buf;
 
     *buffer_p = NULL;
     *taille_p = 0;
 
-    builder = json_builder_new ();
+    builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
@@ -151,14 +111,7 @@
     if (!strcmp(commande, "/list")) { Admin_json_ups_list ( builder ); }
 
 /************************************************ Génération du JSON **********************************************************/
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
-
-    *buffer_p = buf;
+    *buffer_p = Json_get_buf ( builder, &taille_buf );
     *taille_p = taille_buf;
     return;
   }

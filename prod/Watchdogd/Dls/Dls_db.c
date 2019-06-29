@@ -65,6 +65,42 @@
     return(retour);
   }
 /******************************************************************************************************************************/
+/* Dls_auto_create_plugin: Créé automatiquement le plugin en parametre (tech_id, nom)                                         */
+/* Entrées: le tech_id (unique) et le nom associé                                                                             */
+/* Sortie: -1 si pb, id sinon                                                                                                 */
+/******************************************************************************************************************************/
+ gint Dls_auto_create_plugin( gchar *tech_id, gchar *nom_src )
+  { gchar requete[1024], *nom;
+    gboolean retour;
+    struct DB *db;
+    gint id;
+
+    nom = Normaliser_chaine ( nom_src );                                                     /* Formatage correct des chaines */
+    if (!nom)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation nom impossible", __func__ );
+       return(-1);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+               "INSERT INTO dls SET "
+               "tech_id='%s',shortname='%s',name='%s',package='custom',"
+               "actif=0,syn_id=1,compil_status=0,sourcecode='/* Default ! */' "
+               "ON DUPLICATE KEY UPDATE tech_id=VALUES(tech_id)", tech_id, tech_id, nom );
+    g_free(nom);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(-1);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if ( retour == FALSE ) { id=-1; }
+    else { id = Recuperer_last_ID_SQL ( db ); }
+    Libere_DB_SQL(&db);
+    return(id);
+  }
+/******************************************************************************************************************************/
 /* Ajouter_dlsDB: Ajout d'un programme DLS dans la base de données                                                            */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
 /* Sortie: -1 si pb, id sinon                                                                                                 */

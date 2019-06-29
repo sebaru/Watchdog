@@ -21,14 +21,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _SMSG_H_
  #define _SMSG_H_
-
- #include <json-glib/json-glib.h>
 
  #define NOM_THREAD                    "smsg"
 

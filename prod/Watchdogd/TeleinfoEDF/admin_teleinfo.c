@@ -21,45 +21,43 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include "watchdogd.h"
  #include "Teleinfo.h"
 
 /******************************************************************************************************************************/
-/* Admin_command: Fonction gerant les différentes commandes possible pour l'administration teleinfo                           */
-/* Entrée: Le buffer d'entrée a compléter                                                                                     */
-/* Sortie: Le buffer de sortie complété                                                                                       */
+/* Admin_json : fonction appelÃ© par le thread http lors d'une requete /run/                                                   */
+/* EntrÃ©e : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                           */
 /******************************************************************************************************************************/
- gchar *Admin_command( gchar *response, gchar *ligne )
-  { gchar commande[128], chaine[128];
+ void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
+  { JsonBuilder *builder;
+    gsize taille_buf;
 
-    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
-    if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'TELEINFO'" );
-       response = Admin_write ( response, "  reload                - Reload config from Database" );
-       response = Admin_write ( response, "  status                - Affiche les status du device Teleinfo" );
+    *buffer_p = NULL;
+    *taille_p = 0;
+
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       return;
      }
-    else if ( ! strcmp ( commande, "status" ) )
-     { g_snprintf( chaine, sizeof(chaine), " Port '%s' mode %d (retry in %02.1f) -> Last_view = %d (%.1fs ago)",
-                   Cfg_teleinfo.port, Cfg_teleinfo.mode, (Partage->top - Cfg_teleinfo.date_next_retry)/10.0,
-                   Cfg_teleinfo.last_view, (Partage->top - Cfg_teleinfo.last_view)/10.0
-                 );
-       response = Admin_write ( response, chaine );
+/************************************************ PrÃ©paration du buffer JSON **************************************************/
+                                                                      /* Lancement de la requete de recuperation des messages */
+    if (!strcmp(commande, "/status"))
+				 { Json_add_string ( builder, "tech_id", Cfg_teleinfo.tech_id );
+				   Json_add_string ( builder, "port", Cfg_teleinfo.port );
+				   Json_add_int ( builder, "mode", Cfg_teleinfo.mode );
+				   Json_add_int ( builder, "retry_in", (Partage->top - Cfg_teleinfo.date_next_retry)/10.0 );
+				   Json_add_int ( builder, "last_view", (Partage->top - Cfg_teleinfo.last_view)/10.0 );
      }
-    else if ( ! strcmp ( commande, "reload" ) )
-     { g_snprintf( chaine, sizeof(chaine), " Reloading Teleinfo from Database" );
-       response = Admin_write ( response, chaine );
-       Cfg_teleinfo.reload = TRUE;
-     }
-    else
-     { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown Teleinfo command : %s", ligne );
-       response = Admin_write ( response, chaine );
-     }
-    return(response);
+/************************************************ GÃƒÂ©nÃƒÂ©ration du JSON **********************************************************/
+    *buffer_p = Json_get_buf ( builder, &taille_buf );
+    *taille_p = taille_buf;
+    return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

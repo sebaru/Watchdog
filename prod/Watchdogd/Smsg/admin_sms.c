@@ -21,17 +21,17 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <unistd.h>                                                                                      /* Pour gethostname */
  #include "watchdogd.h"
  #include "Sms.h"
 
 /******************************************************************************************************************************/
-/* Admin_json_list : fonction appelée pour lister les modules modbus                                                          */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
+/* Entrée : un JSon Builder                                                                                                   */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_status ( JsonBuilder *builder )

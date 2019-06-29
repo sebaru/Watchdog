@@ -36,11 +36,11 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
-/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
-/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/* Mnemo_auto_create_AI_by_tech_id: Ajoute un mnemonique dans la base via le tech_id                                          */
+/* Entrée: le tech_id, l'acronyme, le libelle et l'unite                                                                      */
+/* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_AI ( gint dls_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src )
+ gboolean Mnemo_auto_create_AI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src )
   { gchar *acro, *libelle, *unite;
     gchar requete[1024];
     gboolean retour;
@@ -72,9 +72,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_AI SET dls_id='%d',acronyme='%s',libelle='%s', unite='%s' "
+                "INSERT INTO mnemos_AI SET tech_id='%s',acronyme='%s',libelle='%s', unite='%s' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle),unite=VALUES(unite)",
-                dls_id, acro, libelle, unite );
+                tech_id, acro, libelle, unite );
     g_free(unite);
     g_free(libelle);
     g_free(acro);
@@ -156,8 +156,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT ai.unite"
                 " FROM mnemos_AI as ai"
-                " INNER JOIN dls as d ON ai.dls_id = d.id"
-                " WHERE d.tech_id='%s' AND ai.acronyme='%s' LIMIT 1",
+                " WHERE ai.tech_id='%s' AND ai.acronyme='%s' LIMIT 1",
                 tech_id, acronyme
               );
 
@@ -190,8 +189,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-               "SELECT d.tech_id, m.acronyme, m.map_text, m.libelle "
-               "FROM mnemos_AI as m INNER JOIN dls as d ON d.id = m.dls_id "
+               "SELECT m.tech_id, m.acronyme, m.map_text, m.libelle "
+               "FROM mnemos_AI as m "
                " WHERE (m.map_host='*' OR m.map_host LIKE '%s') AND (m.map_thread='*' OR m.map_thread LIKE '%s')"
                " AND m.map_text LIKE '%s'", g_get_host_name(), thread, commande );
 
@@ -226,8 +225,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-               "SELECT d.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale "
-               "FROM mnemos_AI as m INNER JOIN dls as d ON d.id = m.dls_id"
+               "SELECT m.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale "
+               "FROM mnemos_AI as m"
                " WHERE m.map_question_vocale LIKE '%s'", commande );
     g_free(commande);
 
@@ -278,8 +277,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT a.min,a.max,a.type,a.unite"
                 " FROM mnemos_AI as a"
-                " INNER JOIN dls as d ON a.dls_id = d.id"
-                " WHERE d.tech_id='%s' AND a.acronyme='%s' LIMIT 1",
+                " WHERE a.tech_id='%s' AND a.acronyme='%s' LIMIT 1",
                 ai->tech_id, ai->acronyme
               );
 
@@ -299,6 +297,7 @@
     ai->type     = atoi(db->row[2]);
     g_snprintf( ai->unite, sizeof(ai->unite), "%s", db->row[3] );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s' loaded", __func__, ai->tech_id, ai->acronyme );
+    Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
 /* Modifier_analogInputDB: Modification d'un entreeANA Watchdog                                                               */

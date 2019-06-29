@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/time.h>
  #include <sys/prctl.h>
@@ -39,37 +39,39 @@
  #include "Teleinfo.h"
 
 /******************************************************************************************************************************/
-/* Teleinfo_Lire_config : Lit la config Watchdog et rempli la structure m�moire                                               */
-/* Entr�e: le pointeur sur la LIBRAIRIE                                                                                       */
-/* Sortie: N�ant                                                                                                              */
+/* Teleinfo_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                               */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Teleinfo_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 
     Cfg_teleinfo.lib->Thread_debug = FALSE;                                                    /* Settings default parameters */
-    Cfg_teleinfo.enable            = FALSE; 
+    Cfg_teleinfo.enable            = FALSE;
     g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port),
                "%s", DEFAUT_PORT_TELEINFO );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de donn�es */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_WARNING,
-                "Sms_Lire_config: Database connexion failed. Using Default Parameters" );
+                "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* R�cup�ration d'une config dans la DB */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,                                        /* Print Config */
-                "Teleinfo_Lire_config: '%s' = %s", nom, valeur );
+                "%s: '%s' = %s", __func__, nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
+        { g_snprintf( Cfg_teleinfo.tech_id, sizeof(Cfg_teleinfo.tech_id), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_teleinfo.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_teleinfo.lib->Thread_debug = TRUE;  }
        else
         { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
-                   "Sms_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
         }
      }
     return(TRUE);
@@ -82,10 +84,10 @@
   { struct termios oldtio;
     int fd;
 
-    fd = open( Cfg_teleinfo.port, O_RDONLY | O_NOCTTY | O_NONBLOCK );
+    fd = open( Cfg_teleinfo.port, O_RDONLY | O_NOCTTY | O_NONBLOCK | O_CLOEXEC );
     if (fd<0)
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
-               "Init_teleinfo: Impossible d'ouvrir le port teleinfo %s, erreur %d", Cfg_teleinfo.port, fd );
+               "%s: Impossible d'ouvrir le port teleinfo '%s', erreur %d", __func__, Cfg_teleinfo.port, fd );
        return(-1);
      }
     memset(&oldtio, 0, sizeof(oldtio) );
@@ -98,62 +100,100 @@
     tcsetattr(fd, TCSANOW, &oldtio);
     tcflush(fd, TCIOFLUSH);
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
-              "Init_teleinfo: Ouverture port teleinfo okay %s", Cfg_teleinfo.port );
+              "%s: Ouverture port teleinfo okay %s", __func__, Cfg_teleinfo.port );
 
+    if (!Cfg_teleinfo.nbr_connexion)
+     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
+                "%s: %s: Initialise le DLS et charge les AI ", __func__, Cfg_teleinfo.tech_id );
+       if (Dls_auto_create_plugin( Cfg_teleinfo.tech_id, "Gestion du compteur EDF" ) == -1)
+        { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", Cfg_teleinfo.tech_id ); }
+
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ADCO",  "N° d’identification du compteur", "numéro" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ISOUS", "Intensité souscrite ", "A" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "BASE",  "Index option BASE", "Wh" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "HCHC",  "Index heures creuses", "Wh" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "HCHP",  "Index heures pleines", "Wh" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IINST", "Intensité instantanée", "A" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IMAX",  "Intensité maximale", "A" );
+       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "PAPP",  "Puissance apparente consommée", "VA" );
+     }
+    Cfg_teleinfo.nbr_connexion++;
     return(fd);
   }
 /******************************************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
-/* Entr�e: la trame a recue                                                                                                   */
-/* Sortie: n�ant                                                                                                              */
+/* Entrée: la trame a recue                                                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Send_AI_to_master ( gchar *name, gchar *chaine )                                      /* Envoi au master via ZMQ */
+  { JsonBuilder *builder;
+    gchar *result;
+    gsize taille;
+    builder = Json_create ();
+    Json_add_string ( builder, "mode",     "SET_AI" );
+    Json_add_string ( builder, "tech_id",  Cfg_teleinfo.tech_id );
+    Json_add_string ( builder, "acronyme", name );
+    Json_add_double ( builder, "valeur",   atof( chaine ) );
+    result = Json_get_buf ( builder, &taille );
+    Send_zmq_with_tag ( Cfg_teleinfo.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "JSON", result, taille );
+    g_free(result);
+  }
+/******************************************************************************************************************************/
+/* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
+/* Entrée: la trame a recue                                                                                                   */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Processer_trame( void )
-  { 
-#ifdef bouh
-    if ( (! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 )) && Cfg_teleinfo.last_view_adco + 300 <= Partage->top )
-     { Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, "ADCO", atof( Cfg_teleinfo.buffer + 5) );
-       Cfg_teleinfo.last_view_adco = Partage->top;
+  { if ( ! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 ) )
+     { if (Config.instance_is_master==TRUE)
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "ADCO", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 5) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "ADCO", Cfg_teleinfo.buffer + 5 ); }
      }
-    else if ( (! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 )) && Cfg_teleinfo.last_view_isous + 300 <= Partage->top )
-     { Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, "ISOUS", atof( Cfg_teleinfo.buffer + 6) );
-       Cfg_teleinfo.last_view_isous = Partage->top;
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 ) )
+     { if (Config.instance_is_master==TRUE)
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "ISOUS", &Cfg_teleinfo.isous, atof( Cfg_teleinfo.buffer + 6) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "ISOUS", Cfg_teleinfo.buffer + 6 ); }
      }
-    else if ( (! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 )) && Cfg_teleinfo.last_view_hchc + 300 <= Partage->top )
-     { Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, "HCHC", atof( Cfg_teleinfo.buffer + 5) );
-	      Cfg_teleinfo.last_view_hchc = Partage->top;
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "BASE", 4 ) )
+     { if (Config.instance_is_master==TRUE)
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "BASE", &Cfg_teleinfo.base, atof( Cfg_teleinfo.buffer + 5) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "BASE", Cfg_teleinfo.buffer + 5 ); }
      }
-    else if ( (! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 )) && Cfg_teleinfo.last_view_hchp + 300 <= Partage->top )
-     { Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, "HCHP", atof( Cfg_teleinfo.buffer + 5) );
-	      Cfg_teleinfo.last_view_hchp = Partage->top;
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )
+     { if (Config.instance_is_master==TRUE)
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "HCHC", &Cfg_teleinfo.hchc, atof( Cfg_teleinfo.buffer + 5) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "HCHC", Cfg_teleinfo.buffer + 5 ); }
      }
-    else if ( (! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 )) && Cfg_teleinfo.last_view_iinst + 300 <= Partage->top )
-     { Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, "IINST", atof( Cfg_teleinfo.buffer + 6) );
-	      Cfg_teleinfo.last_view_iinst = Partage->top;
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 ) )
+     { if (Config.instance_is_master==TRUE)
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "HCHP", &Cfg_teleinfo.hchp, atof( Cfg_teleinfo.buffer + 5) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "HCHP", Cfg_teleinfo.buffer + 5 ); }
      }
-    else if ( (! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 )) && Cfg_teleinfo.last_view_imax + 300 <= Partage->top )
-     { Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, "IMAX", atof( Cfg_teleinfo.buffer + 5) );
-	      Cfg_teleinfo.last_view_imax = Partage->top;
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 ) )
+     { if (Config.instance_is_master==TRUE)
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "IINST", &Cfg_teleinfo.iinst, atof( Cfg_teleinfo.buffer + 6) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "IINST", Cfg_teleinfo.buffer + 6 ); }
      }
-    else if ( (! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 )) && Cfg_teleinfo.last_view_papp + 300 <= Partage->top )
-     { Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, "PAPP", atof( Cfg_teleinfo.buffer + 5) );
-	      Cfg_teleinfo.last_view_papp = Partage->top;
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 ) )
+     { if (Config.instance_is_master==TRUE)
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "IMAX", &Cfg_teleinfo.imax, atof( Cfg_teleinfo.buffer + 5) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "IMAX", Cfg_teleinfo.buffer + 5 ); }
      }
-    else if ( (! strncmp ( Cfg_teleinfo.buffer, "PTEC", 4 )) && Cfg_teleinfo.last_view_ptec + 300 <= Partage->top )
-     { Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, "PTEC", atof( Cfg_teleinfo.buffer + 5) );
-	      Cfg_teleinfo.last_view_ptec = Partage->top;
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 ) )
+     { if (Config.instance_is_master==TRUE)
+        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "PAPP", &Cfg_teleinfo.papp, atof( Cfg_teleinfo.buffer + 5) ); }
+       else /* Envoi au master via ZMQ */
+        { Send_AI_to_master ( "PAPP", Cfg_teleinfo.buffer + 5 ); }
      }
-    else if ( (! strncmp ( Cfg_teleinfo.buffer, "HHPHC", 5 )) && Cfg_teleinfo.last_view_hhchp + 300 <= Partage->top )
-     { Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, "HHPHC", atof( Cfg_teleinfo.buffer + 6) );
-	      Cfg_teleinfo.last_view_hhchp = Partage->top;
-     }
-    else if ( (! strncmp ( Cfg_teleinfo.buffer, "OPTARIF", 7 )) && Cfg_teleinfo.last_view_optarif + 300 <= Partage->top )
-     { Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, "OPTARIF", atof( Cfg_teleinfo.buffer + 8) );
-	      Cfg_teleinfo.last_view_optarif = Partage->top;
-     }
-    else { return; }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     Cfg_teleinfo.last_view = Partage->top;
-#endif
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread Teleinfo                                                                               */
@@ -170,7 +210,7 @@
     Teleinfo_Lire_config ();                                                /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
+              "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Cfg_teleinfo.lib->Thread_run = TRUE;                                                                /* Le thread tourne ! */
 
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), NOM_THREAD );
@@ -178,54 +218,52 @@
 
     if (!Cfg_teleinfo.enable)
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: Thread is not enabled in config. Shutting Down %p",
-                 pthread_self() );
+                "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
        goto end;
      }
+
+    Cfg_teleinfo.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
     Cfg_teleinfo.mode = TINFO_RETRING;
-    while( lib->Thread_run == TRUE)                                                          /* On tourne tant que necessaire */
+    while( lib->Thread_run == TRUE )                                                         /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
 
-       if (lib->Thread_reload == TRUE)
-        { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "Run_thread: recu signal SIGUSR1" );
-          lib->Thread_reload = FALSE;
-        }
-
-       if (Cfg_teleinfo.reload == TRUE)
-        { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "Run_thread: Reloading in progress" );
+       if ( lib->Thread_reload == TRUE )
+        { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Reloading in progress", __func__ );
           close(Cfg_teleinfo.fd);                                                             /* Fermeture de la connexion FD */
+          Teleinfo_Lire_config ();                                          /* Lecture de la configuration logiciel du thread */
           Cfg_teleinfo.fd = Init_teleinfo();
           if (Cfg_teleinfo.fd<0)                                                               /* On valide l'acces aux ports */
            { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_CRIT,
-                      "Run_thread: Reloading with port %s failed", Cfg_teleinfo.port );
+                      "%s: Reloading with port %s failed", __func__, Cfg_teleinfo.port );
            }
-          Cfg_teleinfo.reload = FALSE;
+          lib->Thread_reload = FALSE;
         }
 
        if (Cfg_teleinfo.mode == TINFO_WAIT_BEFORE_RETRY)
         { if ( Cfg_teleinfo.date_next_retry <= Partage->top )
-		   { Cfg_teleinfo.mode = TINFO_RETRING;
-			 Cfg_teleinfo.date_next_retry = 0;
-		   }
-		  else continue;
-		}
+      		   { Cfg_teleinfo.mode = TINFO_RETRING;
+			          Cfg_teleinfo.date_next_retry = 0;
+             Cfg_teleinfo.nbr_connexion = 0;
+		         }
+		        else continue;
+		      }
 
        if (Cfg_teleinfo.mode == TINFO_RETRING)
         { Cfg_teleinfo.fd = Init_teleinfo();
           if (Cfg_teleinfo.fd<0)                                                               /* On valide l'acces aux ports */
            { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
-                       "Run_thread: Init TELEINFO failed. Re-trying in %ds", TINFO_RETRY_DELAI/10 );
+                       "%s: Init TELEINFO failed. Re-trying in %ds", __func__, TINFO_RETRY_DELAI/10 );
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
            }
           else
            { Cfg_teleinfo.mode = TINFO_CONNECTED;
-			 Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,"Acces TELEINFO FD=%d", Cfg_teleinfo.fd );
-		   }
+			          Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO, "%s: Acces TELEINFO FD=%d", __func__, Cfg_teleinfo.fd );
+		         }
         }
 
 /************************************************ Reception trame TELEINFO ****************************************************/
@@ -241,7 +279,7 @@
           cpt = read( Cfg_teleinfo.fd, (unsigned char *)&Cfg_teleinfo.buffer + nbr_octet_lu, 1 );
           if (cpt>0)
            { if (Cfg_teleinfo.buffer[nbr_octet_lu] == '\n')                                          /* Process de la trame ? */
-              { Cfg_teleinfo.buffer[nbr_octet_lu] = 0x0;                                            /* Caract�re fin de trame */
+              { Cfg_teleinfo.buffer[nbr_octet_lu] = 0x0;                                            /* Caractère fin de trame */
                 Processer_trame();
                 nbr_octet_lu = 0;
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
@@ -255,25 +293,25 @@
              else { nbr_octet_lu = 0;                                                              /* Depassement de tampon ! */
                     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
                     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
-                             "Run_thread: BufferOverflow, dropping trame" );
+                             "%s: BufferOverflow, dropping trame", __func__ );
                   }
-             
+
            }
         }
        if (!(Partage->top % 50))                                                                /* Test toutes les 5 secondes */
         { gboolean closing = FALSE;
           struct stat buf;
-	      gint retour;
-		  retour = fstat( Cfg_teleinfo.fd, &buf );
-		  if (retour == -1)
+	         gint retour;
+		        retour = fstat( Cfg_teleinfo.fd, &buf );
+		        if (retour == -1)
            { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
-                      "Run_thread: Fstat Error (%s), closing connexion and re-trying in %ds",
+                      "%s: Fstat Error (%s), closing connexion and re-trying in %ds", __func__,
                        strerror(errno), TINFO_RETRY_DELAI/10 );
              closing = TRUE;
            }
           else if ( buf.st_nlink < 1 )
            { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
-                      "Run_thread: USB device disappeared. Closing connexion and re-trying in %ds", TINFO_RETRY_DELAI/10 );
+                      "%s: USB device disappeared. Closing connexion and re-trying in %ds", __func__, TINFO_RETRY_DELAI/10 );
              closing = TRUE;
            }
           if (closing == TRUE)
@@ -284,10 +322,10 @@
         }
      }
     close(Cfg_teleinfo.fd);                                                                   /* Fermeture de la connexion FD */
+    Close_zmq ( Cfg_teleinfo.zmq_to_master );
 
 end:
-    Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Down . . . TID = %p", pthread_self() );
+    Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_teleinfo.lib->Thread_run = FALSE;                                                       /* Le thread ne tourne plus ! */
     Cfg_teleinfo.lib->TID = 0;                                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

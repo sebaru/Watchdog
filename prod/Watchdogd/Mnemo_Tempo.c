@@ -40,7 +40,7 @@
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_TEMPO ( gint dls_id, gchar *acronyme, gchar *libelle_src )
+ gboolean Mnemo_auto_create_TEMPO ( gchar *tech_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;
     gchar requete[1024];
     gboolean retour;
@@ -63,9 +63,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_Tempo SET dls_id='%d',acronyme='%s',libelle='%s' "
+                "INSERT INTO mnemos_Tempo SET tech_id='%s',acronyme='%s',libelle='%s' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                dls_id, acro, libelle );
+                tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);
 
@@ -94,10 +94,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT t.libelle"
-                " FROM mnemos_Tempo as t"
-                " INNER JOIN dls as d ON t.dls_id = d.id"
-                " WHERE d.tech_id='%s' AND t.acronyme='%s' LIMIT 1",
+                "SELECT m.libelle"
+                " FROM mnemos_Tempo as m"
+                " WHERE m.tech_id='%s' AND m.acronyme='%s' LIMIT 1",
                 tech_id, acronyme
               );
 

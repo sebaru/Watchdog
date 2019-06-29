@@ -63,15 +63,19 @@
     json_builder_set_member_name  ( builder, "bit_defaut_fixe" ); json_builder_add_boolean_value ( builder, dls->vars.bit_defaut_fixe );
     json_builder_set_member_name  ( builder, "bit_alarme" ); json_builder_add_boolean_value ( builder, dls->vars.bit_alarme );
     json_builder_set_member_name  ( builder, "bit_alarme_fixe" ); json_builder_add_boolean_value ( builder, dls->vars.bit_alarme_fixe );
+    json_builder_set_member_name  ( builder, "bit_activite_ok" ); json_builder_add_boolean_value ( builder, dls->vars.bit_activite_ok );
+
     json_builder_set_member_name  ( builder, "bit_alerte" ); json_builder_add_boolean_value ( builder, dls->vars.bit_alerte );
     json_builder_set_member_name  ( builder, "bit_alerte_fixe" ); json_builder_add_boolean_value ( builder, dls->vars.bit_alerte_fixe );
+    json_builder_set_member_name  ( builder, "bit_veille" ); json_builder_add_boolean_value ( builder, dls->vars.bit_veille );
+
     json_builder_set_member_name  ( builder, "bit_derangement" ); json_builder_add_boolean_value ( builder, dls->vars.bit_derangement );
     json_builder_set_member_name  ( builder, "bit_derangement_fixe" ); json_builder_add_boolean_value ( builder, dls->vars.bit_derangement_fixe );
     json_builder_set_member_name  ( builder, "bit_danger" ); json_builder_add_boolean_value ( builder, dls->vars.bit_danger );
     json_builder_set_member_name  ( builder, "bit_danger_fixe" ); json_builder_add_boolean_value ( builder, dls->vars.bit_danger_fixe );
+    json_builder_set_member_name  ( builder, "bit_secu_pers_ok" ); json_builder_add_boolean_value ( builder, dls->vars.bit_secupers_ok );
+
     json_builder_set_member_name  ( builder, "bit_acquit" ); json_builder_add_boolean_value ( builder, dls->vars.bit_acquit );
-    json_builder_set_member_name  ( builder, "bit_activite_up" ); json_builder_add_boolean_value ( builder, dls->vars.bit_activite_up );
-    json_builder_set_member_name  ( builder, "bit_veille" ); json_builder_add_boolean_value ( builder, dls->vars.bit_veille );
     json_builder_end_object (builder);
   }
 /******************************************************************************************************************************/

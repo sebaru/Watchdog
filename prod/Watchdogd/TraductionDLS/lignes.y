@@ -47,8 +47,8 @@
 %token <val>    T_DEFINE T_STATIC
 
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_TOP_ALERTE
-%token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_OSYN_ACQ
-%token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_UP
+%token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_SPERS_OK T_OSYN_ACQ
+%token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_OK
 %token <val>    T_BUS T_HOST T_THREAD T_TAG T_PARAM1
 
 %token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE
@@ -423,9 +423,13 @@ unite:          modulateur ENTIER HEURE ENTIER
                 | T_OSYN_ACQ
                 {{ $$ = g_strdup("vars->bit_acquit");
                 }}
-                | barre T_ACT_UP
-                {{ if ($1) $$ = g_strdup("!vars->bit_activite_up");
-                      else $$ = g_strdup("vars->bit_activite_up");
+                | barre T_ACT_OK
+                {{ if ($1) $$ = g_strdup("!vars->bit_activite_ok");
+                      else $$ = g_strdup("vars->bit_activite_ok");
+                }}
+                | barre T_SPERS_OK
+                {{ if ($1) $$ = g_strdup("!vars->bit_secupers_ok");
+                      else $$ = g_strdup("vars->bit_secupers_ok");
                 }}
                 | barre T_BI ENTIER
                 {{ int taille;
@@ -601,12 +605,38 @@ unite:          modulateur ENTIER HEURE ENTIER
                          case MNEMO_CPT_IMP:
                           { taille = 30;
                             $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
-                            switch($5->type)
-                             { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $5->valf );  break;
-                               case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $5->valf );  break;
-                               case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $5->valf ); break;
-                               case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", alias->num, $5->valf ); break;
-                               case T_EGAL     : g_snprintf( $$, taille, "CI(%d)==%f", alias->num, $5->valf ); break;
+                            if (alias->type==ALIAS_TYPE_STATIC)
+                             { switch($5->type)
+                                { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $5->valf );  break;
+                                  case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $5->valf );  break;
+                                  case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $5->valf ); break;
+                                  case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", alias->num, $5->valf ); break;
+                                  case T_EGAL     : g_snprintf( $$, taille, "CI(%d)==%f", alias->num, $5->valf ); break;
+                                }
+                             }
+                            else
+                             { switch($5->type)
+                                { case INF:
+                                    g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)<%f",
+                                                alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                    break;
+                                  case SUP:
+                                    g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)>%f",
+                                                alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                    break;
+                                  case INF_OU_EGAL:
+                                    g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)<=%f",
+                                                alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                    break;
+                                  case SUP_OU_EGAL:
+                                    g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)>=%f",
+                                                alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                    break;
+                                  case T_EGAL:
+                                    g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)==%f",
+                                                alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                    break;
+                                }
                              }
                             break;
                           }
