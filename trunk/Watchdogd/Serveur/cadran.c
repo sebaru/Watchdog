@@ -227,7 +227,6 @@
                    { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "-- ?? --" );
                      return(etat_cadran);
                    }
-                  cadran->val_ech *= ci->multi;                                                           /* Multiplication ! */
                   g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%8.2f %s",
                               cadran->val_ech * ci->multi, ci->unite
                             );
