@@ -64,10 +64,10 @@
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
-       json_builder_set_member_name  ( builder, "valeur" );
-       json_builder_add_int_value    ( builder, cpt_imp->valeur );
-       json_builder_set_member_name  ( builder, "etat" );
-       json_builder_add_boolean_value ( builder, cpt_imp->etat );
+       Json_add_bool   ( builder, "etat", cpt_imp->etat );
+       Json_add_int    ( builder, "valeur", cpt_imp->valeur );
+       Json_add_double ( builder, "multi", cpt_imp->multi );
+       Json_add_string ( builder, "unite", cpt_imp->unite );
      }
 /*------------------------------------------------ Compteur horaire ----------------------------------------------------------*/
     else if (!strcasecmp(type,"CH"))
