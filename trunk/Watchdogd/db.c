@@ -1354,6 +1354,7 @@
      { g_snprintf( requete, sizeof(requete),
                    "CREATE TABLE IF NOT EXISTS `tableau` ("
                    "`id` INT NOT NULL AUTO_INCREMENT ,"
+                   "`type` int(11) NOT NULL DEFAULT 0,"
                    "`titre` VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,"
                    "`access_level` int(11) NOT NULL ,"
                    "`date_create` DATETIME NOT NULL ,"

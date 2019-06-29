@@ -264,6 +264,7 @@ CREATE TABLE IF NOT EXISTS `courbes` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_BOOL` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` int(11) NOT NULL DEFAULT 0,
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
