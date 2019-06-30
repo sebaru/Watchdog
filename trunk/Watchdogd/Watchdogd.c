@@ -390,9 +390,11 @@
               }
            }
           else if ( !strcmp(event->tag, "sudo") )
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s/%s",
+           { gchar chaine[80];
+             Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s/%s",
                        __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
-             system(payload);
+             g_snprintf( chaine, sizeof(chaine), "sudo %s", (gchar *)payload );
+             system(chaine);
            }
         }
 

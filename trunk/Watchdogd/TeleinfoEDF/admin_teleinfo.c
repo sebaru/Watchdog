@@ -49,13 +49,16 @@
 /************************************************ Préparation du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/status"))
-				 { Json_add_string ( builder, "tech_id", Cfg_teleinfo.tech_id );
+				 { json_builder_begin_object(builder);Json_add_string ( builder, "tech_id", Cfg_teleinfo.tech_id );
 				   Json_add_string ( builder, "port", Cfg_teleinfo.port );
 				   Json_add_int ( builder, "mode", Cfg_teleinfo.mode );
 				   Json_add_int ( builder, "retry_in", (Partage->top - Cfg_teleinfo.date_next_retry)/10.0 );
 				   Json_add_int ( builder, "last_view", (Partage->top - Cfg_teleinfo.last_view)/10.0 );
+				   Json_add_int ( builder, "adco", Dls_data_get_AI( Cfg_teleinfo.tech_id, "ADCO", &Cfg_teleinfo.adco) );
+				   Json_add_int ( builder, "base", Dls_data_get_AI( Cfg_teleinfo.tech_id, "BASE", &Cfg_teleinfo.base) );
+       json_builder_end_object(builder);
      }
-/************************************************ GÃ©nÃ©ration du JSON **********************************************************/
+/************************************************ Géné©ration du JSON **********************************************************/
     *buffer_p = Json_get_buf ( builder, &taille_buf );
     *taille_p = taille_buf;
     return;
