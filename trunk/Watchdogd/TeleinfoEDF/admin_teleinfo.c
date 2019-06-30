@@ -58,7 +58,7 @@
 				   Json_add_int ( builder, "base", Dls_data_get_AI( Cfg_teleinfo.tech_id, "BASE", &Cfg_teleinfo.base) );
        json_builder_end_object(builder);
      }
-/************************************************ Géné©ration du JSON **********************************************************/
+/************************************************ Génération du JSON **********************************************************/
     *buffer_p = Json_get_buf ( builder, &taille_buf );
     *taille_p = taille_buf;
     return;

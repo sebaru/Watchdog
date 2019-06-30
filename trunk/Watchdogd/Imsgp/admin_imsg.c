@@ -52,29 +52,14 @@
     while ( (imsgp = Recuperer_imsgpDB_suite( db )) != NULL)
      { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
 
-       json_builder_set_member_name  ( builder, "user_id" );
-       json_builder_add_int_value ( builder, imsgp->user_id );
-
-       json_builder_set_member_name  ( builder, "user_name" );
-       json_builder_add_string_value ( builder, imsgp->user_name );
-
-       json_builder_set_member_name  ( builder, "user_enable" );
-       json_builder_add_boolean_value ( builder, imsgp->user_enable );
-
-       json_builder_set_member_name  ( builder, "user_imsg_enable" );
-       json_builder_add_boolean_value ( builder, imsgp->user_imsg_enable );
-
-       json_builder_set_member_name  ( builder, "user_jabber_id" );
-       json_builder_add_string_value ( builder, imsgp->user_jabberid );
-
-       json_builder_set_member_name  ( builder, "user_allow_command" );
-       json_builder_add_boolean_value ( builder, imsgp->user_allow_cde );
-
-       json_builder_set_member_name  ( builder, "user_available" );
-       json_builder_add_boolean_value ( builder, imsgp->user_available );
-
-       json_builder_set_member_name  ( builder, "user_comment" );
-       json_builder_add_string_value ( builder, imsgp->user_comment );
+       Json_add_int    ( builder, "user_id", imsgp->user_id );
+       Json_add_string ( builder, "user_name", imsgp->user_name );
+       Json_add_bool   ( builder, "user_enable", imsgp->user_enable );
+       Json_add_bool   ( builder, "user_imsg_enable", imsgp->user_imsg_enable );
+       Json_add_string ( builder, "user_jabber_id", imsgp->user_jabberid );
+       Json_add_bool   ( builder, "user_allow_command", imsgp->user_allow_cde );
+       Json_add_bool   ( builder, "user_available", imsgp->user_available );
+       Json_add_string ( builder, "user_comment", imsgp->user_comment );
 
        json_builder_end_object (builder);                                                                     /* End Document */
      }
@@ -88,14 +73,12 @@
 /******************************************************************************************************************************/
  void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
   { JsonBuilder *builder;
-    JsonGenerator *gen;
     gsize taille_buf;
-    gchar *buf;
 
     *buffer_p = NULL;
     *taille_p = 0;
 
-    builder = json_builder_new ();
+    builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
@@ -104,28 +87,20 @@
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/list")) { Admin_json_list ( builder ); }
     else if ( ! strcmp ( commande, "/add_buddy/" ) )
-				 { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-       json_builder_set_member_name  ( builder, "buddy_name" );
-       json_builder_add_string_value ( builder, commande+11 );
+				 { json_builder_begin_object (builder);                                                    /* Création du noeud principal */
+       Json_add_string ( builder, "buddy_name", commande+11 );
        json_builder_end_object (builder);                                                                     /* End Document */
        purple_account_add_buddy( Cfg_imsgp.account, purple_buddy_new	( Cfg_imsgp.account, commande + 11, commande + 11 ) );
      }
     else if ( ! strcmp ( commande, "/send/" ) )
-				 { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-       json_builder_set_member_name  ( builder, "message_sent" );
-       json_builder_add_string_value ( builder, commande+6 );
+				 { json_builder_begin_object (builder);                                                    /* Création du noeud principal */
+       Json_add_string ( builder, "message_sent", commande+6 );
        json_builder_end_object (builder);                                                                     /* End Document */
        Imsgp_Envoi_message_to_all_available ( commande+6 );
      }
-/************************************************ Génération du JSON **********************************************************/
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
 
-    *buffer_p = buf;
+/************************************************ Génération du JSON **********************************************************/
+    *buffer_p = Json_get_buf ( builder, &taille_buf );
     *taille_p = taille_buf;
     return;
   }

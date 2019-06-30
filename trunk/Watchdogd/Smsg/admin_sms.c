@@ -30,57 +30,43 @@
  #include "Sms.h"
 
 /******************************************************************************************************************************/
-/* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
-/* Entrée : un JSon Builder                                                                                                   */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_json_status : fonction appelÃ©e pour vÃ©rifier le status de la librairie                                               */
+/* EntrÃ©e : un JSon Builder                                                                                                   */
+/* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_status ( JsonBuilder *builder )
-  { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+  { json_builder_begin_object (builder);                                                       /* CrÃ©ation du noeud principal */
 
-    json_builder_set_member_name  ( builder, "tech_id" );
-    json_builder_add_string_value ( builder, Cfg_smsg.tech_id );
-
-    json_builder_set_member_name  ( builder, "comm_status" );
-    json_builder_add_boolean_value ( builder, Cfg_smsg.comm_status );
-
-    json_builder_set_member_name  ( builder, "nbr_sms" );
-    json_builder_add_int_value ( builder, Cfg_smsg.nbr_sms );
+    Json_add_string ( builder, "tech_id", Cfg_smsg.tech_id );
+    Json_add_bool ( builder, "comm_status", Cfg_smsg.comm_status );
+    Json_add_int ( builder, "nbr_sms", Cfg_smsg.nbr_sms );
 
     json_builder_end_object (builder);                                                                        /* End Document */
   }
 /******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_json : fonction appelÃ© par le thread http lors d'une requete /run/                                                   */
+/* EntrÃ©e : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                           */
 /******************************************************************************************************************************/
  void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
   { JsonBuilder *builder;
-    JsonGenerator *gen;
     gsize taille_buf;
-    gchar *buf;
 
     *buffer_p = NULL;
     *taille_p = 0;
 
-    builder = json_builder_new ();
+    builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
      }
-/************************************************ Préparation du buffer JSON **************************************************/
+/************************************************ PrÃ©paration du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/status")) { Admin_json_status ( builder ); }
 
-/************************************************ Génération du JSON **********************************************************/
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
-
-    *buffer_p = buf;
+/************************************************ GÃ©nÃ©ration du JSON **********************************************************/
+    *buffer_p = Json_get_buf ( builder, &taille_buf );
     *taille_p = taille_buf;
-    return;
+
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
