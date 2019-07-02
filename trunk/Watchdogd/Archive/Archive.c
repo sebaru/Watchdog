@@ -195,6 +195,9 @@
     Partage->com_arch.taille_arch = 0;
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
+    Mnemo_auto_create_AI ( "SYS", "ARCH_REQUEST_NUMBER", "Nb enregistrement dans le tampon d'archivage", "enreg." );
+    Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 0.0 );
+
     last_update = Partage->top;
     while(Partage->com_arch.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
