@@ -1374,7 +1374,7 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4225)
+    if (database_version < 4230)
      { g_snprintf( requete, sizeof(requete), "DROP TABLE mnemos_HORLOGE" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete),
@@ -1382,21 +1382,27 @@
                    "`id` INT(11) NOT NULL AUTO_INCREMENT,"
                    "`tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,"
                    "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`etat` BOOLEAN NOT NULL DEFAULT '0',"
-                   "`libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                   "PRIMARY KEY (`id`),"
+                   "UNIQUE (`tech_id`,`acronyme`),"
+                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE_tiks` ("
+                   "`id` INT(11) NOT NULL AUTO_INCREMENT,"
+                   "`horloge_id` INT(11) NOT NULL,"
                    "`heure` int(11) NOT NULL DEFAULT '0',"
                    "`minute` int(11) NOT NULL DEFAULT '0',"
                    "`lundi` tinyint(1) NOT NULL DEFAULT '0',"
                    "PRIMARY KEY (`id`),"
-                   "UNIQUE (`tech_id`,`acronyme`),"
-                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE"
+                   "FOREIGN KEY (`horloge_id`) REFERENCES `mnemos_HORLOGE` (`id`) ON DELETE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
        Lancer_requete_SQL ( db, requete );
      }
 
     Libere_DB_SQL(&db);
 fin:
-    database_version=4219;
+    database_version=4230;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
