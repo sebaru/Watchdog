@@ -92,6 +92,15 @@
     gpointer di_ups_online;
     gpointer di_ups_charging;
     gpointer di_ups_on_batt;
+    gpointer do_load_off;
+    gpointer do_load_on;
+    gpointer do_outlet_1_off;
+    gpointer do_outlet_1_on;
+    gpointer do_outlet_2_off;
+    gpointer do_outlet_2_on;
+    gpointer do_start_deep_bat;
+    gpointer do_start_quick_bat;
+    gpointer do_stop_test_bat;
   };
 
 /************************************************* Déclaration des prototypes *************************************************/
