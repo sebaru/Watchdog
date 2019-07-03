@@ -68,11 +68,7 @@
     gchar name[NBR_CARAC_NAME_UPS_UTF8+1];                                                        /* Nom de l'UPS sur le HOST */
     gchar username[NBR_CARAC_USERNAME_UPS_UTF8+1];                                                        /* Username associé */
     gchar password[NBR_CARAC_PASSWORD_UPS_UTF8+1];                                                        /* Password associé */
-    guint map_EA;                                                                        /* Numéro de la premiere EA impactée */
-    guint map_E;                                                                          /* Numéro de la premiere E impactée */
-    guint map_A;                                                                          /* Numéro de la premiere A impactée */
     gpointer bit_comm;                                                            /* Pointer de raccourci pour le bit de comm */
-    gboolean comm_status;                                                /* Bit interne B d'etat communication avec le module */
     gint  nbr_connexion;                                                              /* Nombre de connexion OK dans le temps */
     UPSCONN_t upsconn;                                                                               /* Connexion UPS à l'ups */
     gboolean started;                                                                                      /* Est-il actif ?? */
