@@ -225,8 +225,7 @@
   { gchar buffer[80];
     int connexion;
 
-    if ( (connexion = upscli_connect( &module->upsconn, module->host,
-                                      UPS_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
+    if ( (connexion = upscli_connect( &module->upsconn, module->host, UPS_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "%s: %s: connexion refused by module (host '%s' -> %s)", __func__, module->tech_id,
                  module->host, (char *)upscli_strerror(&module->upsconn) );
@@ -305,6 +304,9 @@
        Mnemo_auto_create_DI ( module->tech_id, "COMM", "Statut de la communication avec l'onduleur" );
        Mnemo_auto_create_DI ( module->tech_id, "OUTLET_1_STATUS", "Statut de la prise n°1" );
        Mnemo_auto_create_DI ( module->tech_id, "OUTLET_2_STATUS", "Statut de la prise n°2" );
+       Mnemo_auto_create_DI ( module->tech_id, "UPS_ONLINE", "UPS Online" );
+       Mnemo_auto_create_DI ( module->tech_id, "UPS_CHARGING", "UPS en charge" );
+       Mnemo_auto_create_DI ( module->tech_id, "UPS_ON_BATT",  "UPS sur batterie" );
 
        Mnemo_auto_create_AI ( module->tech_id, "LOAD", "Charge onduleur", "%" );
        Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, 0.0 );

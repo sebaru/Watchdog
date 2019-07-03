@@ -735,8 +735,7 @@
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
  struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    struct ALIAS *alias;
+  { struct ALIAS *alias;
     struct DB *db;
 
     alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
@@ -749,29 +748,41 @@
 
     if (!strcmp(tech_id,"THIS")) tech_id=Dls_plugin.tech_id;
 
-    if ( (db=Rechercher_CI ( tech_id, acronyme )) != NULL )
+    if ( (db=Rechercher_BOOL ( tech_id, acronyme )) != NULL )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->type_bit      = MNEMO_CPT_IMP;
+       alias->type_bit = atoi(db->row[0]);
        Libere_DB_SQL (&db);
      }
     else if ( (db=Rechercher_AI ( tech_id, acronyme )) != NULL )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->type_bit      = MNEMO_ENTREE_ANA;
+       alias->type_bit = MNEMO_ENTREE_ANA;
+       Libere_DB_SQL (&db);
+     }
+    else if ( (db=Rechercher_DI ( tech_id, acronyme )) != NULL )
+     { alias->tech_id  = g_strdup(tech_id);
+       alias->acronyme = g_strdup(acronyme);
+       alias->type_bit = atoi(db->row[0]);
+       Libere_DB_SQL (&db);
+     }
+    else if ( (db=Rechercher_DO ( tech_id, acronyme )) != NULL )
+     { alias->tech_id  = g_strdup(tech_id);
+       alias->acronyme = g_strdup(acronyme);
+       alias->type_bit = atoi(db->row[0]);
+       Libere_DB_SQL (&db);
+     }
+    else if ( (db=Rechercher_CI ( tech_id, acronyme )) != NULL )
+     { alias->tech_id  = g_strdup(tech_id);
+       alias->acronyme = g_strdup(acronyme);
+       alias->type_bit = MNEMO_CPT_IMP;
        Libere_DB_SQL (&db);
      }
     else if ( (db=Rechercher_CH ( tech_id, acronyme )) != NULL )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->type_bit      = MNEMO_CPTH;
+       alias->type_bit = MNEMO_CPTH;
        Libere_DB_SQL (&db);
-     }
-    else if ( (mnemo=Rechercher_mnemo_baseDB_by_acronyme ( tech_id, acronyme )) != NULL )
-     { alias->tech_id  = g_strdup(tech_id);
-       alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = mnemo->type;
-       g_free(mnemo);
      }
     else
      { g_free(alias);
