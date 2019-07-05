@@ -130,10 +130,12 @@
     gchar *result;
     gsize taille;
     builder = Json_create ();
+    json_builder_begin_object ( builder );
     Json_add_string ( builder, "mode",     "SET_AI" );
     Json_add_string ( builder, "tech_id",  Cfg_teleinfo.tech_id );
     Json_add_string ( builder, "acronyme", name );
     Json_add_double ( builder, "valeur",   atof( chaine ) );
+    json_builder_end_object ( builder );
     result = Json_get_buf ( builder, &taille );
     Send_zmq_with_tag ( Cfg_teleinfo.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "JSON", result, taille );
     g_free(result);

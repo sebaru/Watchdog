@@ -501,7 +501,10 @@ unite:          modulateur ENTIER HEURE ENTIER
                    if ($3) { tech_id = $2; acro = $3; }
                       else { tech_id = NULL; acro = $2; }
                    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
-                   if (!alias && $3) { alias = Set_new_external_alias(tech_id,acro); }/* Si dependance externe, on va chercher */
+                   if (!alias)
+                    { if ($3) { alias = Set_new_external_alias(tech_id,acro); }      /* Si dependance externe, on va chercher */
+                         else { alias = Set_new_external_alias("THIS",acro); }/* Si dependance pseudo-externe, on va chercher */
+                    }
                    if (alias)
                     { if ($5 && (alias->type_bit==MNEMO_TEMPO ||                              /* Vérification des bits non comparables */
                                  alias->type_bit==MNEMO_ENTREE ||

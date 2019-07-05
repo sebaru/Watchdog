@@ -91,10 +91,12 @@
  extern gboolean Modifier_mnemo_registreDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
 
  extern gboolean Mnemo_auto_create_DI ( gchar *tech_id, gchar *acronyme, gchar *libelle );                /* Dans mnemos_DI.c */
+ extern struct DB *Rechercher_DI ( gchar *tech_id, gchar *acronyme );
  extern gboolean Recuperer_mnemos_DI_by_text ( struct DB **db_retour, gchar *thread, gchar *text );
  extern gboolean Recuperer_mnemos_DI_suite( struct DB **db_orig );
 
  extern gboolean Mnemo_auto_create_DO ( gchar *tech_id, gchar *acronyme, gchar *libelle );                /* Dans mnemos_DO.c */
+ extern struct DB *Rechercher_DO ( gchar *tech_id, gchar *acronyme );
  extern gboolean Recuperer_mnemos_DO_by_tag ( struct DB **db_retour, gchar *thread, gchar *tag );
  extern gboolean Recuperer_mnemos_DO_suite( struct DB **db_orig );
 

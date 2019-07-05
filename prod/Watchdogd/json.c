@@ -37,7 +37,6 @@
   { JsonBuilder *builder;
     builder = json_builder_new();
     if (!builder) return(NULL);
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
     return(builder);
   }
 /******************************************************************************************************************************/
@@ -84,9 +83,9 @@
  gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p )
   { JsonGenerator *gen;
     gchar *result;
-    json_builder_end_object (builder);                                                                        /* End Document */
     gen = json_generator_new ();
     json_generator_set_root ( gen, json_builder_get_root(builder) );
+    json_generator_set_pretty ( gen, TRUE );
     result = json_generator_to_data (gen, taille_buf_p);
     g_object_unref(builder);
     g_object_unref(gen);

@@ -43,7 +43,7 @@
 
     Json_add_bool ( builder, "enable", module->enable );
     Json_add_bool ( builder, "started", module->started );
-    Json_add_bool ( builder, "comm", module->comm_status );
+    Json_add_bool ( builder, "comm", Dls_data_get_bool ( module->tech_id, "COMM", &module->bit_comm ) );
     Json_add_int ( builder, "nbr_connexion", module->nbr_connexion );
 
     Json_add_string ( builder, "admin_username", module->username );
