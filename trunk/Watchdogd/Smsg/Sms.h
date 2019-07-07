@@ -31,7 +31,7 @@
  #define NOM_THREAD                    "smsg"
 
  #define TOP_MIN_ENVOI_SMS              1200                                      /* 2 minutes sans envoi de SMS au démarrage */
- #define TAILLE_SMSBOX_APIKEY           64                                     /* Nombre de caractere dans la clef API SMSBOX */
+ #define TAILLE_SMSBOX_APIKEY           128                                    /* Nombre de caractere dans la clef API SMSBOX */
  #define DEFAUT_SMSBOX_APIKEY           "changeme"
 
  struct SMS_CONFIG

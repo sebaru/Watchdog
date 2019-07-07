@@ -49,7 +49,7 @@
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_smsg.lib->Thread_debug = FALSE;                                                         /* Settings default parameters */
+    Cfg_smsg.lib->Thread_debug = FALSE;                                                        /* Settings default parameters */
     Cfg_smsg.enable            = FALSE;
     g_snprintf( Cfg_smsg.smsbox_apikey, sizeof(Cfg_smsg.smsbox_apikey), "%s", DEFAUT_SMSBOX_APIKEY );
 
@@ -60,7 +60,7 @@
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,                                             /* Print Config */
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,                                            /* Print Config */
                 "%s: '%s' = %s", __func__, nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "smsbox_apikey" ) )
         { g_snprintf( Cfg_smsg.smsbox_apikey, sizeof(Cfg_smsg.smsbox_apikey), "%s", valeur ); }
@@ -197,7 +197,7 @@
     return(sms);
   }
 /******************************************************************************************************************************/
-/* Smsg_Send_CB: Appelé par le téléphone quand le SMS est parti                                                                */
+/* Smsg_Send_CB: Appelé par le téléphone quand le SMS est parti                                                               */
 /* Entrée: le message à envoyer sateur                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
