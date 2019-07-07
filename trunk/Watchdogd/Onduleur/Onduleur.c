@@ -379,13 +379,12 @@
     module->date_next_connexion = 0;
     module->started = TRUE;
     module->nbr_connexion++;
-    Ups_send_status_to_master ( module, TRUE );
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
               "%s: %s up and running (host='%s')", __func__, module->tech_id, module->host );
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Onduleur_set_instcmd: Envoi d'une instant commande Ã  l'ups                                                                 */
+/* Onduleur_set_instcmd: Envoi d'une instant commande à l'ups                                                                 */
 /* Entrée : l'ups, le nom de la commande                                                                                      */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
 /******************************************************************************************************************************/
@@ -547,6 +546,7 @@
        Dls_data_set_bool ( module->tech_id, "UPS_CHARGING", &module->di_ups_charging, !strcmp(reponse, "\"OL CHRG\"") );
        Dls_data_set_bool ( module->tech_id, "UPS_ON_BATT",  &module->di_ups_on_batt,  !strcmp(reponse, "\"OB\"") );
      }
+    Ups_send_status_to_master ( module, TRUE );
 
     return(TRUE);
   }

@@ -769,7 +769,7 @@
     else if ( (db=Rechercher_DO ( tech_id, acronyme )) != NULL )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = atoi(db->row[0]);
+       alias->type_bit = MNEMO_SORTIE;
        Libere_DB_SQL (&db);
      }
     else if ( (db=Rechercher_CI ( tech_id, acronyme )) != NULL )
