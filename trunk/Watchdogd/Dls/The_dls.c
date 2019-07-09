@@ -867,7 +867,7 @@
     if (valeur == FALSE && bool->etat==TRUE) { bool->edge_down = TRUE; } else { bool->edge_down = FALSE; }
     if (bool->etat != valeur)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
-                 __func__, bool->tech_id, bool->acronyme, bool->etat, bool->edge_up, bool->edge_down );
+                 __func__, bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
      }
     bool->etat = valeur;
   }
