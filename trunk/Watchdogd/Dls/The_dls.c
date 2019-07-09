@@ -863,13 +863,13 @@
       }
     else bool = (struct DLS_BOOL *)*bool_p;
 
+    if (valeur == TRUE && bool->etat==FALSE) { bool->edge_up = TRUE; } else { bool->edge_up = FALSE; }
+    if (valeur == FALSE && bool->etat==TRUE) { bool->edge_down = TRUE; } else { bool->edge_down = FALSE; }
     if (bool->etat != valeur)
-     { if (valeur == TRUE && bool->etat==FALSE) { bool->edge_up = TRUE; } else { bool->edge_up = FALSE; }
-       if (valeur == FALSE && bool->etat==TRUE) { bool->edge_down = TRUE; } else { bool->edge_down = FALSE; }
-       bool->etat = valeur;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
                  __func__, bool->tech_id, bool->acronyme, bool->etat, bool->edge_up, bool->edge_down );
      }
+    bool->etat = valeur;
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_bool: Remonte l'etat d'un boolean                                                                             */
