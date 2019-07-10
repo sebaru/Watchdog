@@ -139,11 +139,16 @@
     while(liste)                                                                            /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)liste->data;
        if ( plugin->plugindb.id == dls_id )
-        { if (plugin->handle)                                   /* Peut etre à 0 si changement de librairie et erreur de link */
-           { dlclose( plugin->handle );
+        { Reseter_all_bit_interne ( plugin );
+          if (plugin->handle)                                   /* Peut etre à 0 si changement de librairie et erreur de link */
+           { if (dlclose( plugin->handle ))
+              { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for %06d (%s)", __func__,
+                          dlerror(), plugin->plugindb.id, plugin->plugindb.shortname );
+              }
              plugin->handle = NULL;
+             Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin %06d unloaded (%s)", __func__,
+                       plugin->plugindb.id, plugin->plugindb.shortname );
            }
-          Reseter_all_bit_interne ( plugin );
           Charger_un_plugin ( plugin );
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin %06d reloaded (%s)", __func__,
                     plugin->plugindb.id, plugin->plugindb.shortname );
@@ -183,7 +188,12 @@
      { struct PLUGIN_DLS *plugin = liste->data;
        if (plugin->plugindb.id == id)
         { Reseter_all_bit_interne (plugin);
-          if (plugin->handle) dlclose( plugin->handle );
+          if (plugin->handle)
+           { if (dlclose( plugin->handle ))
+              { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for %06d (%s)", __func__,
+                          dlerror(), plugin->plugindb.id, plugin->plugindb.shortname );
+              }
+           }
           dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
                                                                             /* Destruction de l'entete associée dans la GList */
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
