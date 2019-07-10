@@ -954,7 +954,8 @@
                             "    Update_edge_up_value();\n"
                             "    if (vars->debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";
           gchar *End_Go =   "  }\n";
-          gchar chaine[4096];
+          gchar chaine[4096], date[32];
+          time_t ltime;
           gint cpt=0;                                                                                   /* Compteur d'actions */
 
           write(fd, include, strlen(include));
@@ -1032,6 +1033,14 @@
              liste = liste->next;
            }
 
+
+          time(&ltime);
+          ctime_r(&ltime, date);
+          g_snprintf(chaine, sizeof(chaine),
+                    "/*******************************************************/\n"
+                    " gchar *version (void)\n"
+                    "  { return(\"V%s - %s\"); \n  }\n", VERSION, date );
+          write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
 
           g_snprintf(chaine, sizeof(chaine),
                     "/*******************************************************/\n"

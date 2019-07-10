@@ -88,6 +88,13 @@
                       "%s: Candidat %06d does not provide Get_Tableau_msg function", __func__, dls->plugindb.id );
              Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
            }
+
+          dls->version = dlsym( dls->handle, "version" );                                     /* Recherche de la fonction */
+          if (!dls->version)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
+                      "%s: Candidat %06d does not provide version function", __func__, dls->plugindb.id );
+             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
+           }
          }
      }
     if (dls->plugindb.on) dls->start_date = time(NULL);
@@ -477,6 +484,3 @@
     return( DLS_COMPIL_OK );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
-                    "%s: Loading plugins %d ('%s') for syn '%d' '%s'", __func__,
-                    plugindb->id, plugindb->shortname, id, plugindb->syn_page );

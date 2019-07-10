@@ -45,6 +45,7 @@
     gint (*Get_Tableau_bit)(gint);                                             /* Fonction d'identification des bits utilisés */
     gint (*Get_Tableau_num)(gint);                                             /* Fonction d'identification des bits utilisés */
     gint (*Get_Tableau_msg)(gint);                                             /* Fonction d'identification des bits utilisés */
+    gchar (*version)(void);                                                        /* Retourne le numéro de version du plugin */
     struct DLS_TO_PLUGIN vars;
   };
 
