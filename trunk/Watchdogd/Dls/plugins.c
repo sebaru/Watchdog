@@ -150,7 +150,7 @@
                        plugin->plugindb.id, plugin->plugindb.shortname );
            }
           Charger_un_plugin ( plugin );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin %06d reloaded (%s)", __func__,
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin %06d loaded (%s)", __func__,
                     plugin->plugindb.id, plugin->plugindb.shortname );
           return;
         }
@@ -231,7 +231,10 @@
 
     while(dls_tree->Liste_plugin_dls)                                                        /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)dls_tree->Liste_plugin_dls->data;
-       if (plugin->handle) dlclose( plugin->handle );
+       if (plugin->handle && dlclose( plugin->handle ))
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for %06d (%s)", __func__,
+                    dlerror(), plugin->plugindb.id, plugin->plugindb.shortname );
+        }
        dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
                                                                              /* Destruction de l'entete associé dans la GList */
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
@@ -277,8 +280,6 @@
      { struct CMD_TYPE_PLUGIN_DLS *plugindb;
        while ( (plugindb = Recuperer_plugins_dlsDB_suite( &db )) != NULL )
         { struct PLUGIN_DLS *dls;
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
-                    "%s: Loading plugins '%s' for syn '%d' '%s'", __func__, plugindb->shortname, id, plugindb->syn_page );
           dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
           if (!dls)
            { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: out of memory", __func__ );
@@ -476,3 +477,6 @@
     return( DLS_COMPIL_OK );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
+                    "%s: Loading plugins %d ('%s') for syn '%d' '%s'", __func__,
+                    plugindb->id, plugindb->shortname, id, plugindb->syn_page );
