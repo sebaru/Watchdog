@@ -105,11 +105,11 @@
     liste_bit = Partage->Dls_data_TEMPO;
     while(liste_bit)
      { struct DLS_TEMPO *tempo = liste_bit->data;
-       liste_bit = g_slist_next(liste_bit);
        if (!strcmp(tempo->tech_id, plugin->plugindb.tech_id))
-        { Partage->Dls_data_TEMPO = g_slist_remove( Partage->Dls_data_TEMPO, tempo );
-          g_free(tempo);
+        { tempo->status = DLS_TEMPO_NOT_COUNTING;                                           /* La tempo ne compte pas du tout */
+          tempo->init = FALSE;
         }
+       liste_bit = g_slist_next(liste_bit);
      }
     liste_bit = Partage->Dls_data_MSG;                                               /* Decharge tous les messages du modules */
     while(liste_bit)

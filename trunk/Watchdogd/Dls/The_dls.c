@@ -1267,11 +1267,7 @@
            }
           g_snprintf( tempo->acronyme, sizeof(tempo->acronyme), "%s", acronyme );
           g_snprintf( tempo->tech_id,  sizeof(tempo->tech_id),  "%s", tech_id );
-          tempo->delai_on  = delai_on;
-          tempo->min_on    = min_on;
-          tempo->max_on    = max_on;
-          tempo->delai_off = delai_off;
-          tempo->random    = random;
+          tempo->init = FALSE;
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_TEMPO = g_slist_prepend ( Partage->Dls_data_TEMPO, tempo );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
@@ -1281,6 +1277,14 @@
       }
     else tempo = (struct DLS_TEMPO *)*tempo_p;
 
+    if (tempo->init == FALSE)
+     { tempo->delai_on  = delai_on;
+       tempo->min_on    = min_on;
+       tempo->max_on    = max_on;
+       tempo->delai_off = delai_off;
+       tempo->random    = random;
+       tempo->init      = TRUE;
+     }
     ST_local ( tempo, etat );                                                                     /* Recopie dans la variable */
   }
 /******************************************************************************************************************************/
