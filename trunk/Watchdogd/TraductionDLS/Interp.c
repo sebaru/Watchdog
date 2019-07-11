@@ -954,7 +954,8 @@
                             "    Update_edge_up_value();\n"
                             "    if (vars->debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";
           gchar *End_Go =   "  }\n";
-          gchar chaine[4096], date[32];
+          gchar chaine[4096], date[64];
+          struct tm *temps;
           time_t ltime;
           gint cpt=0;                                                                                   /* Compteur d'actions */
 
@@ -1035,7 +1036,10 @@
 
 
           time(&ltime);
-          ctime_r(&ltime, date);
+          temps = localtime( (time_t *)&ltime );
+          if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
+                else { g_snprintf(date, sizeof(date), "Erreur"); }
+
           g_snprintf(chaine, sizeof(chaine),
                     "/*******************************************************/\n"
                     " gchar *version (void)\n"
