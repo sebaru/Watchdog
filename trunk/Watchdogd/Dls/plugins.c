@@ -53,7 +53,7 @@
     dls->conso    = 0.0;
 
     if (Partage->com_dls.Compil_at_boot) Compiler_source_dls( FALSE, dls->plugindb.id, NULL, 0 );
-    dls->handle = dlopen( nom_fichier_absolu, RTLD_GLOBAL | RTLD_NOW );                     /* Ouverture du fichier librairie */
+    dls->handle = dlopen( nom_fichier_absolu, RTLD_LOCAL | RTLD_NOW );                      /* Ouverture du fichier librairie */
     if (!dls->handle)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                 "%s: Candidat %06d failed (%s)", __func__, dls->plugindb.id, dlerror() );
