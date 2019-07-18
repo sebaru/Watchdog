@@ -1388,7 +1388,7 @@
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete),
-                   "CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE_tiks` ("
+                   "CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE_ticks` ("
                    "`id` INT(11) NOT NULL AUTO_INCREMENT,"
                    "`horloge_id` INT(11) NOT NULL,"
                    "`heure` int(11) NOT NULL DEFAULT '0',"

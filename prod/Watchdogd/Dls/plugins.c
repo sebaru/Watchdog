@@ -53,7 +53,7 @@
     dls->conso    = 0.0;
 
     if (Partage->com_dls.Compil_at_boot) Compiler_source_dls( FALSE, dls->plugindb.id, NULL, 0 );
-    dls->handle = dlopen( nom_fichier_absolu, RTLD_GLOBAL | RTLD_NOW );                     /* Ouverture du fichier librairie */
+    dls->handle = dlopen( nom_fichier_absolu, RTLD_LOCAL | RTLD_NOW );                      /* Ouverture du fichier librairie */
     if (!dls->handle)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                 "%s: Candidat %06d failed (%s)", __func__, dls->plugindb.id, dlerror() );
@@ -88,6 +88,13 @@
                       "%s: Candidat %06d does not provide Get_Tableau_msg function", __func__, dls->plugindb.id );
              Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
            }
+
+          dls->version = dlsym( dls->handle, "version" );                                     /* Recherche de la fonction */
+          if (!dls->version)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
+                      "%s: Candidat %06d does not provide version function", __func__, dls->plugindb.id );
+             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
+           }
          }
      }
     if (dls->plugindb.on) dls->start_date = time(NULL);
@@ -105,25 +112,25 @@
     liste_bit = Partage->Dls_data_TEMPO;
     while(liste_bit)
      { struct DLS_TEMPO *tempo = liste_bit->data;
-       liste_bit = g_slist_next(liste_bit);
        if (!strcmp(tempo->tech_id, plugin->plugindb.tech_id))
-        { Partage->Dls_data_TEMPO = g_slist_remove( Partage->Dls_data_TEMPO, tempo );
-          g_free(tempo);
+        { tempo->status = DLS_TEMPO_NOT_COUNTING;                                           /* La tempo ne compte pas du tout */
+          tempo->init = FALSE;
         }
+       liste_bit = g_slist_next(liste_bit);
      }
     liste_bit = Partage->Dls_data_MSG;                                               /* Decharge tous les messages du modules */
     while(liste_bit)
      { struct DLS_MESSAGES *msg = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(msg->tech_id, plugin->plugindb.tech_id))
-        { Dls_data_set_MSG ( msg->tech_id, msg->acronyme, (gpointer *)&msg, 0 ); }
+        { Dls_data_set_MSG ( msg->tech_id, msg->acronyme, (gpointer *)&msg, FALSE ); }
      }
     liste_bit = Partage->Dls_data_BOOL;                                              /* Decharge tous les messages du modules */
     while(liste_bit)
      { struct DLS_BOOL *bool = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(bool->tech_id, plugin->plugindb.tech_id))
-        { Dls_data_set_bool ( bool->tech_id, bool->acronyme, (gpointer *)&bool, 0 ); }
+        { Dls_data_set_bool ( bool->tech_id, bool->acronyme, (gpointer *)&bool, FALSE ); }
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }
@@ -139,13 +146,18 @@
     while(liste)                                                                            /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)liste->data;
        if ( plugin->plugindb.id == dls_id )
-        { if (plugin->handle)                                   /* Peut etre à 0 si changement de librairie et erreur de link */
-           { dlclose( plugin->handle );
+        { Reseter_all_bit_interne ( plugin );
+          if (plugin->handle)                                   /* Peut etre à 0 si changement de librairie et erreur de link */
+           { if (dlclose( plugin->handle ))
+              { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for %06d (%s)", __func__,
+                          dlerror(), plugin->plugindb.id, plugin->plugindb.shortname );
+              }
              plugin->handle = NULL;
+             Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin %06d unloaded (%s)", __func__,
+                       plugin->plugindb.id, plugin->plugindb.shortname );
            }
-          Reseter_all_bit_interne ( plugin );
           Charger_un_plugin ( plugin );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin %06d reloaded (%s)", __func__,
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin %06d loaded (%s)", __func__,
                     plugin->plugindb.id, plugin->plugindb.shortname );
           return;
         }
@@ -183,7 +195,12 @@
      { struct PLUGIN_DLS *plugin = liste->data;
        if (plugin->plugindb.id == id)
         { Reseter_all_bit_interne (plugin);
-          if (plugin->handle) dlclose( plugin->handle );
+          if (plugin->handle)
+           { if (dlclose( plugin->handle ))
+              { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for %06d (%s)", __func__,
+                          dlerror(), plugin->plugindb.id, plugin->plugindb.shortname );
+              }
+           }
           dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
                                                                             /* Destruction de l'entete associée dans la GList */
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
@@ -221,7 +238,10 @@
 
     while(dls_tree->Liste_plugin_dls)                                                        /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)dls_tree->Liste_plugin_dls->data;
-       if (plugin->handle) dlclose( plugin->handle );
+       if (plugin->handle && dlclose( plugin->handle ))
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for %06d (%s)", __func__,
+                    dlerror(), plugin->plugindb.id, plugin->plugindb.shortname );
+        }
        dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
                                                                              /* Destruction de l'entete associé dans la GList */
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
@@ -267,8 +287,6 @@
      { struct CMD_TYPE_PLUGIN_DLS *plugindb;
        while ( (plugindb = Recuperer_plugins_dlsDB_suite( &db )) != NULL )
         { struct PLUGIN_DLS *dls;
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
-                    "%s: Loading plugins '%s' for syn '%d' '%s'", __func__, plugindb->shortname, id, plugindb->syn_page );
           dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
           if (!dls)
            { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: out of memory", __func__ );
@@ -444,7 +462,7 @@
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: GCC start (pid %d) source %s cible %s!",
                  __func__, getpid(), source, cible );
        execlp( "gcc", "gcc", "-I/usr/include/glib-2.0", "-I/usr/lib/glib-2.0/include", "-I/usr/lib64/glib-2.0/include",
-               "-shared", "-o3", "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
+               "-shared", "--no-gnu-unique", "-ggdb", "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s_Fils: lancement GCC failed", __func__ );
        _exit(0);
      }

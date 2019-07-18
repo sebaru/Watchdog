@@ -700,8 +700,14 @@
      { taille = 256;
        action = New_action();
        action->alors = New_chaine( taille );
-       g_snprintf( action->alors, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_%s_%s, %d );\n",
-                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, !barre );
+       if (barre)
+        { g_snprintf( action->alors, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_%s_%s, FALSE );\n",
+                                             alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+        }
+       else
+        { g_snprintf( action->alors, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_%s_%s, TRUE );\n",
+                                             alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+        }
      }
     return(action);
   }
@@ -769,7 +775,7 @@
     else if ( (db=Rechercher_DO ( tech_id, acronyme )) != NULL )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = atoi(db->row[0]);
+       alias->type_bit = MNEMO_SORTIE;
        Libere_DB_SQL (&db);
      }
     else if ( (db=Rechercher_CI ( tech_id, acronyme )) != NULL )
@@ -948,7 +954,9 @@
                             "    Update_edge_up_value();\n"
                             "    if (vars->debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";
           gchar *End_Go =   "  }\n";
-          gchar chaine[4096];
+          gchar chaine[4096], date[64];
+          struct tm *temps;
+          time_t ltime;
           gint cpt=0;                                                                                   /* Compteur d'actions */
 
           write(fd, include, strlen(include));
@@ -1026,6 +1034,17 @@
              liste = liste->next;
            }
 
+
+          time(&ltime);
+          temps = localtime( (time_t *)&ltime );
+          if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
+                else { g_snprintf(date, sizeof(date), "Erreur"); }
+
+          g_snprintf(chaine, sizeof(chaine),
+                    "/*******************************************************/\n"
+                    " gchar *version (void)\n"
+                    "  { return(\"V%s - %s\"); \n  }\n", VERSION, date );
+          write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
 
           g_snprintf(chaine, sizeof(chaine),
                     "/*******************************************************/\n"

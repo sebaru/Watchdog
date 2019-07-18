@@ -45,6 +45,7 @@
     gint (*Get_Tableau_bit)(gint);                                             /* Fonction d'identification des bits utilisés */
     gint (*Get_Tableau_num)(gint);                                             /* Fonction d'identification des bits utilisés */
     gint (*Get_Tableau_msg)(gint);                                             /* Fonction d'identification des bits utilisés */
+    gchar *(*version)(void);                                                       /* Retourne le numéro de version du plugin */
     struct DLS_TO_PLUGIN vars;
   };
 
@@ -60,6 +61,7 @@
  struct DLS_TEMPO                                                                           /* Définition d'une temporisation */
   { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gboolean init;                                   /* True si les données delai_on/off min_on/off ont bien été positionnées */
     guint status;                                                                               /* Statut de la temporisation */
     guint date_on;                                                              /* date a partir de laquelle la tempo sera ON */
     guint date_off;                                                            /* date a partir de laquelle la tempo sera OFF */

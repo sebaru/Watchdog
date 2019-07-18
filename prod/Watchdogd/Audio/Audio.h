@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _AUDIO_H_
  #define _AUDIO_H_
 
@@ -43,7 +43,7 @@
     gint last_audio;                                                                   /* Date de la derniere emission sonore */
     gboolean enable;                                                                      /* Is this thread enabled at boot ? */
     gchar language[80];                                             /* Language de restitution vocal, au format google_speech */
-    gchar device[20];
+    gchar device[32];
     guint nbr_diffusion_wav;
     guint nbr_diffusion_google;
   } Cfg_audio;

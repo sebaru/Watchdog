@@ -86,7 +86,7 @@
      { g_snprintf ( insert, sizeof(insert), ",%s", room );
        g_strlcat( texte, insert, sizeof(texte) );
      }
-    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Sending %s", texte );
+    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Sending %s", __func__, texte );
     Send_zmq_with_tag ( Cfg_snips.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SNIPS_QUESTION", texte, strlen(texte)+1 );
   }
 /******************************************************************************************************************************/

@@ -52,6 +52,8 @@
     json_builder_set_member_name  ( builder, "tech_id" );   json_builder_add_string_value ( builder, dls->plugindb.tech_id );
     json_builder_set_member_name  ( builder, "shortname" ); json_builder_add_string_value ( builder, dls->plugindb.shortname );
     json_builder_set_member_name  ( builder, "name" );      json_builder_add_string_value ( builder, dls->plugindb.nom );
+    if (dls->version) Json_add_string ( builder, "version", dls->version() );
+                 else Json_add_string ( builder, "version", "Unknown" );
     json_builder_set_member_name  ( builder, "started" );   json_builder_add_boolean_value ( builder, dls->plugindb.on );
     json_builder_set_member_name  ( builder, "start_date" );json_builder_add_string_value ( builder, date );
 

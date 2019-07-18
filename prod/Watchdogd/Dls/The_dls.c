@@ -865,6 +865,10 @@
 
     if (valeur == TRUE && bool->etat==FALSE) { bool->edge_up = TRUE; } else { bool->edge_up = FALSE; }
     if (valeur == FALSE && bool->etat==TRUE) { bool->edge_down = TRUE; } else { bool->edge_down = FALSE; }
+    if (bool->etat != valeur)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
+                 __func__, bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
+     }
     bool->etat = valeur;
   }
 /******************************************************************************************************************************/
@@ -1263,11 +1267,7 @@
            }
           g_snprintf( tempo->acronyme, sizeof(tempo->acronyme), "%s", acronyme );
           g_snprintf( tempo->tech_id,  sizeof(tempo->tech_id),  "%s", tech_id );
-          tempo->delai_on  = delai_on;
-          tempo->min_on    = min_on;
-          tempo->max_on    = max_on;
-          tempo->delai_off = delai_off;
-          tempo->random    = random;
+          tempo->init = FALSE;
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_TEMPO = g_slist_prepend ( Partage->Dls_data_TEMPO, tempo );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
@@ -1277,6 +1277,14 @@
       }
     else tempo = (struct DLS_TEMPO *)*tempo_p;
 
+    if (tempo->init == FALSE)
+     { tempo->delai_on  = delai_on;
+       tempo->min_on    = min_on;
+       tempo->max_on    = max_on;
+       tempo->delai_off = delai_off;
+       tempo->random    = random;
+       tempo->init      = TRUE;
+     }
     ST_local ( tempo, etat );                                                                     /* Recopie dans la variable */
   }
 /******************************************************************************************************************************/
@@ -1701,6 +1709,7 @@
 
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
+          Dls_Lire_config();
           Decharger_plugins();
           Charger_plugins();
           Partage->com_dls.Thread_reload = FALSE;
