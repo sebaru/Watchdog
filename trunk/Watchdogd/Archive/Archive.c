@@ -72,6 +72,8 @@
         { Partage->com_arch.max_buffer_size = atoi(valeur);  }
        else if ( ! g_ascii_strcasecmp ( nom, "days" ) )
         { Partage->com_arch.duree_retention = atoi(valeur);  }
+       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Config.log_arch = TRUE;  }
        else
         { Info_new( Config.log, Config.log_arch, LOG_NOTICE,
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
@@ -229,7 +231,7 @@
 
        db = Init_ArchDB_SQL();
        if (!db)
-        { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Unable to open database %s/%s/%s", __func__,
+        { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Unable to open database %s/%s/%s. Restarting in 10s.", __func__,
                     Partage->com_arch.archdb_host, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
           sleep(10);
           continue;
