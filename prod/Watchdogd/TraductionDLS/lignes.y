@@ -67,7 +67,7 @@
 %token <val>    T_MSG ICONE CPT_H T_CPT_IMP EANA T_START T_REGISTRE
 %type  <val>    alias_bit
 
-%token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP
+%token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_IN_RANGE
 %type  <val>    couleur
 
 %token <chaine> ID T_CHAINE
@@ -504,8 +504,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                          $$=New_chaine(2);
                          g_snprintf( $$, 2, "0" );
                        } else
-                      if (!$5 && (alias->type_bit==MNEMO_ENTREE_ANA ||        /* Vérification des bits obligatoirement comparables */
-                                  alias->type_bit==MNEMO_REGISTRE ||
+                      if (!$5 && (alias->type_bit==MNEMO_REGISTRE ||
                                   alias->type_bit==MNEMO_CPT_IMP ||
                                   alias->type_bit==MNEMO_CPTH)
                          )
@@ -541,44 +540,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                              break;
                           }
                          case MNEMO_ENTREE_ANA:
-                          { if ($5->type == T_EGAL)
-                             { Emettre_erreur_new( "Ligne %d: '%s (EA%4d)' ne peut s'utiliser avec le comparateur '='",
-                                                   DlsScanner_get_lineno(), $3, alias->num );
-                               $$=New_chaine(2);
-                               g_snprintf( $$, 2, "0" );
-                             }
-                            else
-                             { taille = 100;
-                               $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
-                               if (alias->type==ALIAS_TYPE_STATIC)
-                                { switch($5->type)
-                                   { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $5->valf, alias->num ); break;
-                                     case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $5->valf, alias->num ); break;
-                                     case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $5->valf, alias->num ); break;
-                                     case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $5->valf, alias->num ); break;
-                                   }
-                                }
-                               else
-                                { switch($5->type)
-                                   { case INF:
-                                       g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<%f",
-                                                   alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                       break;
-                                     case SUP:
-                                       g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>%f",
-                                                   alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                       break;
-                                     case INF_OU_EGAL:
-                                       g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<=%f",
-                                                   alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                       break;
-                                     case SUP_OU_EGAL:
-                                       g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>=%f",
-                                                   alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                       break;
-                                   }
-                                }
-                             }
+                          { $$ = New_condition_entree_ana( $1, alias, $4, $5 );
                             break;
                           }
                          case MNEMO_REGISTRE:
@@ -895,6 +857,11 @@ une_option:     MODE T_EGAL ENTIER
                 | T_EDGE_UP
                 {{ $$=New_option();
                    $$->type = T_EDGE_UP;
+                   $$->entier = 1;
+                }}
+                | T_IN_RANGE
+                {{ $$=New_option();
+                   $$->type = T_IN_RANGE;
                    $$->entier = 1;
                 }}
                 | T_DAA T_EGAL ENTIER

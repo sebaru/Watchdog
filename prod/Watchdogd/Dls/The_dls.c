@@ -1242,6 +1242,19 @@
     return( ai->val_ech );
   }
 /******************************************************************************************************************************/
+/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_AI_inrange ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
+  { struct DLS_AI *ai;
+    Dls_data_get_AI ( tech_id, acronyme, ai_p );
+    if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
+     { ai = (struct DLS_AI *)*ai_p;
+       return( ai->inrange );
+     }
+    return(FALSE);
+  }
+/******************************************************************************************************************************/
 /* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/

@@ -108,7 +108,7 @@
        g_strlcat( texte, insert, sizeof(texte) );
      }
 
-    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Searching for %s", texte );
+    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Searching for %s", __func__, texte );
     if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, texte ) )
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
     else while ( Recuperer_mnemos_DI_suite( &db ) )
