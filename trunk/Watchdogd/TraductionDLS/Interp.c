@@ -258,7 +258,7 @@
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
  gchar *New_condition_entree_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur )
-  { gint taille, in_range = Get_option_entier ( alias->options, T_IN_RANGE );
+  { gint taille, in_range = Get_option_entier ( options, T_IN_RANGE );
     gchar *result;
 
     if (in_range==1)
