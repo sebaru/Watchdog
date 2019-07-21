@@ -64,6 +64,7 @@
  extern void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
                                 gchar *host, gchar *thread, gchar *tag, gchar *param1);
  extern gfloat   Dls_data_get_AI        ( gchar *tech_id, gchar *acronyme, gpointer *ai_p );
+ extern gboolean Dls_data_get_AI_inrange ( gchar *tech_id, gchar *acronyme, gpointer *ai_p );
  extern void Dls_data_set_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio );
  extern gint Dls_data_get_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p );
  extern void Dls_data_set_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p, gboolean etat, gint reset );
@@ -78,6 +79,7 @@
  extern int EA_ech_sup( float val, int num );
  extern int EA_ech_inf_egal( float val, int num );
  extern int EA_ech_sup_egal( float val, int num );
+ extern int EA_inrange( int num );
  extern void SEA( int num, float val_avant_ech );
  extern void SR( int num, float val );
  extern float EA_ech( int num );

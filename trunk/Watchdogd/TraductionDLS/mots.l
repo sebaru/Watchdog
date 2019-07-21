@@ -120,6 +120,7 @@ newline       [\n\r]+
 "ratio"                    { DlsScanner_lval.val = RATIO;       return RATIO;       }
 "color"                    { DlsScanner_lval.val = COLOR;       return COLOR;       }
 "cligno"                   { DlsScanner_lval.val = CLIGNO;      return CLIGNO;      }
+"in_range"                 { DlsScanner_lval.val = T_IN_RANGE;  return T_IN_RANGE;  }
 "edge_up"                  { DlsScanner_lval.val = T_EDGE_UP;   return T_EDGE_UP;   }
 "libelle"                  { DlsScanner_lval.val = T_LIBELLE;   return T_LIBELLE;   }
 "unite"                    { DlsScanner_lval.val = T_UNITE;     return T_UNITE;     }

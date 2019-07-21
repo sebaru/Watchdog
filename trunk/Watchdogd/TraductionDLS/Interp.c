@@ -217,7 +217,7 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
+/* New_condition_entree: Prepare la chaine de caractere associée à la condition, en respectant les options                    */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -249,6 +249,73 @@
        else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
             }
+     }
+    return(result);
+  }
+/******************************************************************************************************************************/
+/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_entree_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur )
+  { gint taille, in_range = Get_option_entier ( alias->options, T_IN_RANGE );
+    gchar *result;
+
+    if (in_range==1)
+     { taille = 100;
+       result = New_chaine( taille ); /* 10 caractères max */
+       if (alias->type==ALIAS_TYPE_STATIC)
+        { if (barre) g_snprintf( result, taille, "!EA_inrange(%d)", alias->num );
+                else g_snprintf( result, taille, "EA_inrange(%d)", alias->num );
+        }
+       else
+        { if (barre) g_snprintf( result, taille, "!Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
+                                 alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+                else g_snprintf( result, taille, "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
+                                 alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+        }
+       return(result);
+     }
+    if (!comparateur)                                                    /* Vérification des bits obligatoirement comparables */
+     { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser qu'avec une comparaison", DlsScanner_get_lineno(), alias->acronyme );
+       result=New_chaine(2);
+       g_snprintf( result, 2, "0" );
+       return(result);
+     }
+
+    if (comparateur->type == T_EGAL)
+     { Emettre_erreur_new( "Ligne %d: '%s (EA%4d)' ne peut s'utiliser avec le comparateur '='",
+                           DlsScanner_get_lineno(), alias->acronyme, alias->num );
+       result=New_chaine(2);
+       g_snprintf( result, 2, "0" );
+       return(result);
+     }
+
+    taille = 100;
+    result = New_chaine( taille ); /* 10 caractères max */
+    if (alias->type==ALIAS_TYPE_STATIC)
+     { switch(comparateur->type)
+        { case INF        : g_snprintf( result, taille, "EA_ech_inf(%f,%d)", comparateur->valf, alias->num ); break;
+          case SUP        : g_snprintf( result, taille, "EA_ech_sup(%f,%d)", comparateur->valf, alias->num ); break;
+          case INF_OU_EGAL: g_snprintf( result, taille, "EA_ech_inf_egal(%f,%d)", comparateur->valf, alias->num ); break;
+          case SUP_OU_EGAL: g_snprintf( result, taille, "EA_ech_sup_egal(%f,%d)", comparateur->valf, alias->num ); break;
+        }
+     }
+    else
+     { switch(comparateur->type)
+        { case INF:         g_snprintf( result, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<%f",
+                                        alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
+                            break;
+          case SUP:         g_snprintf( result, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>%f",
+                                        alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
+                            break;
+          case INF_OU_EGAL: g_snprintf( result, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<=%f",
+                                        alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
+                            break;
+          case SUP_OU_EGAL: g_snprintf( result, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>=%f",
+                                        alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
+                            break;
+        }
      }
     return(result);
   }

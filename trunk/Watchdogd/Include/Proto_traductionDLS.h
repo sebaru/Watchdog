@@ -82,6 +82,7 @@
  extern void Emettre_init_alias( void );
  extern struct COMPARATEUR *New_comparateur( void );
  extern gchar *New_condition_entree( int barre, struct ALIAS *alias, GList *options );
+ extern gchar *New_condition_entree_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur );
  extern gchar *New_condition_bi( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_tempo( int barre, struct ALIAS *alias, GList *options );
