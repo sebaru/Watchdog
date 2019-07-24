@@ -161,8 +161,8 @@
                 g_free(init_cadran);                                                                 /* On libere la mémoire */
               }
              else { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                             "Envoyer_cadran_tag: Formater_cadran failed for %d (%s:%s)",
-                              cadran->id, cadran->tech_id, cadran->acronyme );
+                             "Envoyer_cadran_tag: Formater_cadran failed for %d (%s:%s, type %d, bit_ctrl %d)",
+                              cadran->id, cadran->tech_id, cadran->acronyme, cadran->type, cadran->bit_controle );
                   }
 
              if ( ! g_slist_find_custom(client->Liste_bit_cadrans, cadran_new, (GCompareFunc) Chercher_bit_cadrans) )
