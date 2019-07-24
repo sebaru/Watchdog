@@ -204,7 +204,7 @@
     if (alias->num != -1) /* Alias par numéro ? */
      { return(New_condition_bi_old( barre, alias->num, options)); }
     else /* Alias par nom */
-     { taille = 100;
+     { taille = 256;
        result = New_chaine( taille ); /* 10 caractères max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
             { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
@@ -240,7 +240,7 @@
             }
      }
     else /* Alias par nom */
-     { taille = 100;
+     { taille = 256;
        result = New_chaine( taille ); /* 10 caractères max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
             { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
@@ -262,7 +262,7 @@
     gchar *result;
 
     if (in_range==1)
-     { taille = 100;
+     { taille = 256;
        result = New_chaine( taille ); /* 10 caractères max */
        if (alias->type==ALIAS_TYPE_STATIC)
         { if (barre) g_snprintf( result, taille, "!EA_inrange(%d)", alias->num );
@@ -291,7 +291,7 @@
        return(result);
      }
 
-    taille = 100;
+    taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
     if (alias->type==ALIAS_TYPE_STATIC)
      { switch(comparateur->type)
@@ -335,7 +335,7 @@
        else { g_snprintf( result, taille, "!M(%d)", alias->num ); }
      }
     else /* Alias par nom */
-     { taille = 100;
+     { taille = 256;
        result = New_chaine( taille ); /* 10 caractères max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
             { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
@@ -375,7 +375,7 @@
  gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options )
   { gchar *result;
     gint taille;
-    taille = 100;                                                                               /* Alias par nom uniquement ! */
+    taille = 256;                                                                               /* Alias par nom uniquement ! */
     result = New_chaine( taille ); /* 10 caractères max */
     if ( !barre )
          { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
@@ -451,7 +451,7 @@
     if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
      { return(New_action_msg_old ( alias->num )); }
 
-    taille = 100;
+    taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
