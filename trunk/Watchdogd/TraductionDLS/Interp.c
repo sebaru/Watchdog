@@ -293,7 +293,8 @@
 
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
-    if (alias->type==ALIAS_TYPE_STATIC)
+    setlocale(LC_ALL, "C");
+     if (alias->type==ALIAS_TYPE_STATIC)
      { switch(comparateur->type)
         { case INF        : g_snprintf( result, taille, "EA_ech_inf(%f,%d)", comparateur->valf, alias->num ); break;
           case SUP        : g_snprintf( result, taille, "EA_ech_sup(%f,%d)", comparateur->valf, alias->num ); break;
