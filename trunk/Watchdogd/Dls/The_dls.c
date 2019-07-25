@@ -1396,6 +1396,8 @@
              pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
              Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
              pthread_mutex_unlock( &Partage->com_msrv.synchro );
+             Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_MSG '%s:%s'=%d",
+                       __func__, msg->tech_id, msg->acronyme, etat );
            }
           msg->changes++;
           msg->last_change = Partage->top;
