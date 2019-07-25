@@ -1591,9 +1591,11 @@
 /******************************************************************************************************************************/
  void Dls_foreach ( void *user_data, void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
                                      void (*do_tree)   (void *user_data, struct DLS_TREE *) )
-  { pthread_mutex_lock( &Partage->com_dls.synchro );
-    Dls_foreach_dls_tree( Partage->com_dls.Dls_tree, user_data, do_plugin, do_tree );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
+  { if (Partage->com_dls.Dls_tree)
+     { pthread_mutex_lock( &Partage->com_dls.synchro );
+       Dls_foreach_dls_tree( Partage->com_dls.Dls_tree, user_data, do_plugin, do_tree );
+       pthread_mutex_unlock( &Partage->com_dls.synchro );
+     }
   }
 /******************************************************************************************************************************/
 /* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
