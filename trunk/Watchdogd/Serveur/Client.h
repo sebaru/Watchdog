@@ -36,7 +36,7 @@
  #include "Utilisateur_DB.h"
 
  #define TAILLE_MACHINE            30                                                    /* Taille max pour un nom d'hote DNS */
- #define TEMPS_UPDATE_CADRAN       10                                     /* Rafraichissement des cadrans toutes les secondes */
+ #define TEMPS_UPDATE_CADRAN        5                                     /* Rafraichissement des cadrans toutes les secondes */
  #define TEMPS_PULSE               20                                                           /* Envoi d'un pulse au client */
 
  enum

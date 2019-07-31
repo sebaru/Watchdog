@@ -39,9 +39,12 @@
  struct CMD_ETAT_BIT_CADRAN
   { gint    bit_controle;
     gint    type;
-    gchar   libelle[25];
     gchar   tech_id[32];                                                                         /* Visuel Acronyme du cadran */
     gchar   acronyme[64];                                                                        /* Visuel Acronyme du cadran */
+    gboolean in_range;
+    gfloat  valeur;
+    gchar   unite[25];                                                                           /* Visuel Acronyme du cadran */
+    gpointer dls_data;                                                    /* Pointer de raccourci pour les cadrans dynamiques */
   };
 
  struct CMD_SET_BIT_INTERNE

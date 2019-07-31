@@ -59,15 +59,6 @@
     GSList *Liste_motif;                                                                     /* Destruction d'un histo client */
   } Cfg_ssrv;
 
- struct CADRAN
-  { gint   type;                                                                                   /* type du bit de controle */
-    gint   bit_controle;
-    gfloat val_ech;
-    gchar   tech_id[32];                                                                         /* Visuel Acronyme du cadran */
-    gchar   acronyme[64];                                                                        /* Visuel Acronyme du cadran */
-    gpointer dls_data;                                                    /* Pointer de raccourci pour les cadrans dynamiques */
-  };
-
 /*---------------------------------------- Déclarations des prototypes de fonctions ------------------------------------------*/
                                                                                                             /* Dans serveur.c */
  extern gboolean Ssrv_Lire_config ( void );
@@ -104,9 +95,8 @@
  extern void Connecter_ssl( struct CLIENT *client );                                                         /* Dans accept.c */
 
 
- extern gboolean Tester_update_cadran( struct CADRAN *cadran );                                          /* Dans cadran.c */
- extern struct CMD_ETAT_BIT_CADRAN *Formater_cadran( struct CADRAN *cadran );
-
+ extern gboolean Tester_update_cadran( struct CMD_ETAT_BIT_CADRAN *cadran );                                 /* Dans cadran.c */
+ extern void Formater_cadran( struct CMD_ETAT_BIT_CADRAN *cadran );
                                                                                                               /* Dans ident.c */
  extern gboolean Tester_autorisation ( struct CLIENT *client, struct REZO_CLI_IDENT *ident );
 

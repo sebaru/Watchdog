@@ -64,6 +64,50 @@
                       G_CALLBACK(Clic_sur_cadran_supervision), trame_cadran );
   }
 /******************************************************************************************************************************/
+/* Met a jour le libelle d'un cadran                                                                                          */
+/******************************************************************************************************************************/
+ static void Updater_cadran ( struct CMD_ETAT_BIT_CADRAN *cadran, struct TRAME_ITEM_CADRAN *trame_cadran )
+  { gchar libelle[25];
+    switch(cadran->type)
+     { case MNEMO_ENTREE:
+       case MNEMO_BISTABLE:
+            g_snprintf( libelle, sizeof(libelle), "%s", (cadran->valeur ? "TRUE" : "FALSE") );
+            break;
+       case MNEMO_ENTREE_ANA:
+            if (!cadran->in_range) g_snprintf(libelle, sizeof(libelle), "not in range" );
+            else
+            if(-1000000.0<cadran->valeur && cadran->valeur<1000000.0)
+             { g_snprintf( libelle, sizeof(libelle), "%6.2f %s", cadran->valeur, cadran->unite ); }
+            else
+             { g_snprintf( libelle, sizeof(libelle), "%8.0f %s", cadran->valeur, cadran->unite ); }
+            break;
+       case MNEMO_CPTH:
+            if (cadran->valeur < 60)
+             { g_snprintf( libelle, sizeof(libelle), "%02d min", (int)cadran->valeur ); }
+            else
+             { g_snprintf( libelle, sizeof(libelle), "%05dh", (int)cadran->valeur/60 ); }
+            break;
+       case MNEMO_CPT_IMP:
+            g_snprintf( libelle, sizeof(libelle), "%8.2f %s", cadran->valeur, cadran->unite );
+            break;
+       case MNEMO_REGISTRE:
+            break;
+       case MNEMO_TEMPO:
+             { gint src, heure, minute, seconde;
+               src = cadran->valeur/10;
+               heure = src / 3600;
+               minute = (src - heure*3600) / 60;
+               seconde = src - heure*3600 - minute*60;
+               g_snprintf( libelle, sizeof(libelle), "%02d:%02d:%02d", heure, minute, seconde );
+             }
+            break;
+       default:
+            g_snprintf( libelle, sizeof(libelle), "unknown" );
+            break;
+      }
+    g_object_set( trame_cadran->item_entry, "text", libelle, NULL );
+  }
+/******************************************************************************************************************************/
 /* Proto_changer_etat_cadran: Rafraichissement du visuel cadran sur parametre                                                 */
 /* Entrée: une reference sur le cadran                                                                                        */
 /* Sortie: Néant                                                                                                              */
@@ -97,9 +141,9 @@
                       (!strcmp(etat_cadran->tech_id, trame_cadran->cadran->tech_id) &&
                        !strcmp(etat_cadran->acronyme, trame_cadran->cadran->acronyme)))
                    )
-                 { printf("Proto_changer_etat_cadran: change %d:%d %s:%s %s\n",
-                          etat_cadran->type, etat_cadran->bit_controle, etat_cadran->tech_id, etat_cadran->acronyme, etat_cadran->libelle );
-                   g_object_set( trame_cadran->item_entry, "text", etat_cadran->libelle, NULL );
+                 { Updater_cadran ( etat_cadran, trame_cadran );
+                   printf("Proto_changer_etat_cadran: change %d:%d %s:%s %f\n",
+                          etat_cadran->type, etat_cadran->bit_controle, etat_cadran->tech_id, etat_cadran->acronyme, etat_cadran->valeur );
                  }
                 break;
               }
