@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -43,8 +43,8 @@
  void Clear_histoDB ( void )
   { struct DB *db;
     gchar requete[1024];
-    
-    db = Init_DB_SQL();       
+
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_histoDB: Connexion DB failed" );
        return;
@@ -73,16 +73,15 @@
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
           return(FALSE);
         }
-          
+
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s(alive,id_msg,nom_ack,date_create_sec,date_create_usec)"
+                   "INSERT INTO %s(alive,id_msg,nom_ack,date_create)"
                    " VALUES "
-                   "('%d','%d','%s','%d','%d')", NOM_TABLE_HISTO_MSGS, TRUE,
-                   histo->msg.id, 
-                   nom_ack, (int)histo->date_create_sec, (int)histo->date_create_usec );
+                   "('%d','%d','%s','%s'))", NOM_TABLE_HISTO_MSGS, TRUE,
+                   histo->msg.id, nom_ack, histo->date_create );
      }
     else
-     { 
+     {
        if (histo->alive == TRUE)
         { nom_ack = Normaliser_chaine ( histo->nom_ack );                                    /* Formatage correct des chaines */
           if (!nom_ack)
@@ -90,20 +89,20 @@
              return(FALSE);
            }
           g_snprintf( requete, sizeof(requete),                                                                /* Requete SQL */
-                      "UPDATE %s SET nom_ack='%s',date_fixe='%d'"
-                      " WHERE id='%d'", NOM_TABLE_HISTO_MSGS, nom_ack, (int)histo->date_fixe, histo->id );
+                      "UPDATE %s SET nom_ack='%s',date_fixe='%s'"
+                      " WHERE id='%d'", NOM_TABLE_HISTO_MSGS, nom_ack, histo->date_fixe, histo->id );
           g_free(nom_ack);
         }
        else
         { g_snprintf( requete, sizeof(requete),                                                                /* Requete SQL */
-                      "UPDATE %s as histo SET histo.alive=0,histo.date_fin='%d'"
+                      "UPDATE %s as histo SET histo.alive=0,histo.date_fin='%s'"
                       " WHERE histo.alive=1 AND histo.id_msg = '%d' ",
                       NOM_TABLE_HISTO_MSGS,
-                      (int)histo->date_fin, histo->msg.id );
+                      histo->date_fin, histo->msg.id );
         }
      }
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -142,7 +141,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
-                "parent_syn.page, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
+                "parent_syn.page, syn.page, histo.nom_ack, histo.date_create,"
                 "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
@@ -201,8 +200,8 @@
         }
      }
     g_strlcat( requete, " ORDER BY histo.date_create_sec, histo.date_create_usec LIMIT 500;", sizeof(requete) );
- 
-    db = Init_DB_SQL();       
+
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_histoDB: DB connexion failed" );
        return(FALSE);
@@ -225,7 +224,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
-                "parent_syn.page, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
+                "parent_syn.page, syn.page, histo.nom_ack, histo.date_create,"
                 "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
@@ -235,8 +234,8 @@
                 " WHERE alive = 1 ORDER BY histo.date_create_sec, histo.date_create_usec",
                 NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE        /* From */
               );
- 
-    db = Init_DB_SQL();       
+
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -259,7 +258,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
-                "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
+                "syn.groupe, syn.page, histo.nom_ack, histo.date_create,"
                 "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
@@ -269,8 +268,8 @@
                 NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, /* From */
                 id
               );
- 
-    db = Init_DB_SQL();       
+
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_histo_msgsDB_by_id: DB connexion failed" );
        return(NULL);
@@ -310,17 +309,16 @@
        g_snprintf( histo_msgs->msg.syn_parent_page, sizeof(histo_msgs->msg.syn_parent_page), "%s", db->row[6]  );
        g_snprintf( histo_msgs->msg.syn_page,        sizeof(histo_msgs->msg.syn_page),        "%s", db->row[7]  );
        g_snprintf( histo_msgs->nom_ack,             sizeof(histo_msgs->nom_ack),             "%s", db->row[8]  );
-       g_snprintf( histo_msgs->msg.dls_shortname,   sizeof(histo_msgs->msg.dls_shortname),   "%s", db->row[13] );
+       g_snprintf( histo_msgs->msg.dls_shortname,   sizeof(histo_msgs->msg.dls_shortname),   "%s", db->row[12] );
        histo_msgs->id               = atoi(db->row[0]);
        histo_msgs->alive            = atoi(db->row[1]);
        histo_msgs->msg.num          = atoi(db->row[2]);
        histo_msgs->msg.type         = atoi(db->row[4]);
        histo_msgs->msg.syn_id       = atoi(db->row[5]);
-       histo_msgs->date_create_sec  = atoi(db->row[9]);
-       histo_msgs->date_create_usec = atoi(db->row[10]);
-       histo_msgs->date_fixe        = atoi(db->row[11]);
-       histo_msgs->date_fin         = atoi(db->row[12]);
-       histo_msgs->msg.id           = atoi(db->row[14]);
+       g_snprintf ( histo_msgs->date_create, sizeof(histo_msgs->date_create), "%s", db->row[9] );
+       g_snprintf ( histo_msgs->date_fixe,   sizeof(histo_msgs->date_fixe), "%s", db->row[10] );
+       g_snprintf ( histo_msgs->date_fin,    sizeof(histo_msgs->date_fin), "%s", db->row[11] );
+       histo_msgs->msg.id           = atoi(db->row[13]);
      }
     return(histo_msgs);
   }

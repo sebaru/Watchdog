@@ -15,7 +15,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  protocole_synoptique.c protocole_admin.c \
                           menu.c timer.c admin.c \
 			  liste_plugin_dls.c ajout_plugin_dls.c edit_source_dls.c \
-			  liste_histo.c liste_histo_msgs.c \
+			  liste_histo.c \
 			  liste_message.c ajout_message.c \
 			  liste_synoptique.c ajout_synoptique.c \
 			  liste_mnemonique.c ajout_mnemonique.c option_entreeana.c option_cpt_imp.c \

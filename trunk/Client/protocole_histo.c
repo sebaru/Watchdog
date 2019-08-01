@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -40,9 +40,7 @@
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
  void Gerer_protocole_histo ( struct CONNEXION *connexion )
-  { static GList *Arrivee_histo_msgs = NULL;
-    static GList *Arrivee_histo = NULL;
-    static gint32 page_id;
+  { static GList *Arrivee_histo = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_SHOW_HISTO:
@@ -67,7 +65,7 @@
              { struct CMD_TYPE_HISTO *histo;
                Set_progress_plus(1);
                histo = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
-               if (!histo) return; 
+               if (!histo) return;
                memcpy( histo, connexion->donnees, sizeof(struct CMD_TYPE_HISTO ) );
                Arrivee_histo = g_list_append( Arrivee_histo, histo );
              }
@@ -78,25 +76,6 @@
                g_list_free( Arrivee_histo );
                Arrivee_histo = NULL;
                Chercher_page_notebook( TYPE_PAGE_HISTO, 0, TRUE );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS:
-             { struct CMD_RESPONSE_HISTO_MSGS *response;
-               Set_progress_plus(1);
-
-               response = (struct CMD_RESPONSE_HISTO_MSGS *)g_try_malloc0( sizeof( struct CMD_RESPONSE_HISTO_MSGS ) );
-               if (!response) return; 
-               memcpy( response, connexion->donnees, sizeof(struct CMD_RESPONSE_HISTO_MSGS ) );
-               Arrivee_histo_msgs = g_list_append( Arrivee_histo_msgs, response );
-               page_id = response->page_id;                     /* Sauvegarde de la page pour futur clear */
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS_FIN:
-             { Proto_effacer_liste_histo_msgs(page_id);
-               g_list_foreach( Arrivee_histo_msgs, (GFunc)Proto_afficher_un_histo_msgs, NULL );
-               g_list_foreach( Arrivee_histo_msgs, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_histo_msgs );
-               Arrivee_histo_msgs = NULL;
              }
             break;
      }

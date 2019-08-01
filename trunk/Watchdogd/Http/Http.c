@@ -179,7 +179,7 @@
 /******************************************************************************************************************************/
  static void WS_send_histo ( struct lws *wsi, struct CMD_TYPE_HISTO *histo )
   { struct WS_PER_SESSION_DATA *pss;
-    gchar *buf, *buf_to_send, *date_create;
+    gchar *buf, *buf_to_send;
     JsonBuilder *builder;
     JsonGenerator *gen;
     gsize taille_buf;
@@ -197,14 +197,7 @@
     json_builder_begin_object (builder);                                                                  /* Contenu du Histo */
     json_builder_set_member_name  ( builder, "alive" );         json_builder_add_boolean_value( builder, histo->alive );
 
-    time = histo->date_create_sec;
-    temps = localtime( (time_t *)&time );
-    if (temps) { strftime( chaine, sizeof(chaine), "%F %T", temps ); }
-    else       { g_snprintf( chaine, sizeof(chaine), "Erreur" ); }
-    date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-    g_snprintf( chaine, sizeof(chaine), "%s.%03d", date_create, ((int)histo->date_create_usec/1000) );
-    g_free( date_create );
-    json_builder_set_member_name  ( builder, "date_create" );   json_builder_add_string_value ( builder, chaine );
+    Json_builder_add_string ( builder, "date_create", histo->date_create );
     json_builder_set_member_name  ( builder, "nom_ack" );       json_builder_add_string_value ( builder, histo->nom_ack );
     json_builder_set_member_name  ( builder, "num" );           json_builder_add_int_value    ( builder, histo->msg.num );
     json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, histo->msg.libelle );
