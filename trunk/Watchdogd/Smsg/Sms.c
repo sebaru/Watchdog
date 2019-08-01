@@ -293,9 +293,7 @@
                 "%s: Envoi SMS Ok to %s (%s)", __func__, telephone, msg->libelle_sms );
      }
     else
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
-                "%s: Envoi SMS Nok to %s", __func__, telephone );
-     }
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING, "%s: Envoi SMS Nok to %s", __func__, telephone ); }
 
    	error = GSM_TerminateConnection(s); 	                                                             /* Terminate connection */
 	   if (error != ERR_NONE)
@@ -415,8 +413,11 @@
     while ( (sms = Smsg_Recuperer_smsDB_suite( db )) != NULL)
      { switch (msg->sms)
         { case MSG_SMS_YES:
-               if ( Envoi_sms_gsm   ( msg, sms->user_phone ) == FALSE )
-                { Envoi_sms_smsbox( msg, sms->user_phone ); }
+               if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
+                { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
+                            "%s: Error sending with GSM. Falling back to SMSBOX", __func__ );
+                  Envoi_sms_smsbox( msg, sms->user_phone );
+                }
                break;
           case MSG_SMS_GSM_ONLY:
                Envoi_sms_gsm   ( msg, sms->user_phone );
@@ -504,7 +505,7 @@
      }
 
     if ( db->nbr_result == 0 )                                                              /* Si pas d'enregistrement trouvé */
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: No Static match found for '%s'", __func__, texte );
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: No Static match found for '%s' Trying dyn one.", __func__, texte );
        g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
        Envoyer_smsg_gsm_text ( chaine );
      }
