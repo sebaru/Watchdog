@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/supervision_cadran.c        Affichage des cadrans synoptique de supervision                     */
-/* Projet WatchDog version 3.0       Gestion d'habitat                       mer 01 fév 2006 18:41:37 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/supervision_cadran.c        Affichage des cadrans synoptique de supervision                                         */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           mer 01 fév 2006 18:41:37 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * supervision_cadran.c
  * This file is part of Watchdog
@@ -32,19 +32,19 @@
  #include "Config_cli.h"
  #include "trame.h"
 
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */
- extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+ extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */
+ extern GtkWidget *Notebook;                                                             /* Le Notebook de controle du client */
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
+ extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 
-/********************************* Définitions des prototypes programme ***********************************/
+/***************************************** Définitions des prototypes programme ***********************************************/
  #include "protocli.h"
 
-/**********************************************************************************************************/
-/* Proto_afficher_un_cadran_supervision: Ajoute un cadran sur la trame de supervision                     */
-/* Entrée: une reference sur le cadran                                                                    */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_afficher_un_cadran_supervision: Ajoute un cadran sur la trame de supervision                                         */
+/* Entrée: une reference sur le cadran                                                                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_afficher_un_cadran_supervision( struct CMD_TYPE_CADRAN *rezo_cadran )
   { struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TYPE_INFO_SUPERVISION *infos;
@@ -68,6 +68,7 @@
 /******************************************************************************************************************************/
  static void Updater_cadran ( struct CMD_ETAT_BIT_CADRAN *cadran, struct TRAME_ITEM_CADRAN *trame_cadran )
   { gchar libelle[25];
+    trame_cadran->valeur = cadran->valeur;
     switch(cadran->type)
      { case MNEMO_ENTREE:
        case MNEMO_BISTABLE:
@@ -91,6 +92,7 @@
             g_snprintf( libelle, sizeof(libelle), "%8.2f %s", cadran->valeur, cadran->unite );
             break;
        case MNEMO_REGISTRE:
+            g_snprintf( libelle, sizeof(libelle), "unknown_r" );
             break;
        case MNEMO_TEMPO:
              { gint src, heure, minute, seconde;
@@ -142,8 +144,9 @@
                        !strcmp(etat_cadran->acronyme, trame_cadran->cadran->acronyme)))
                    )
                  { Updater_cadran ( etat_cadran, trame_cadran );
-                   printf("Proto_changer_etat_cadran: change %d:%d %s:%s %f\n",
-                          etat_cadran->type, etat_cadran->bit_controle, etat_cadran->tech_id, etat_cadran->acronyme, etat_cadran->valeur );
+                   /*printf("Proto_changer_etat_cadran: change %d:%d %s:%s in_range=%d valeur=%f\n",
+                          etat_cadran->type, etat_cadran->bit_controle, etat_cadran->tech_id, etat_cadran->acronyme,
+                          etat_cadran->in_range, etat_cadran->valeur );*/
                  }
                 break;
               }

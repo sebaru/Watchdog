@@ -7,7 +7,7 @@
  * option_registre.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,26 +21,26 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
  #include <gnome.h>
- 
+
  #include "Reseaux.h"
 
-/******************************************** Définitions des prototypes programme ********************************************/
+/******************************************** DÃ©finitions des prototypes programme ********************************************/
  #include "protocli.h"
 
  extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
  extern struct CONFIG Config;                                                              /* Configuration generale watchdog */
 
- static GtkWidget *Entry_unite;                                                        /* Unite correspondante à l'entrée ana */
+ static GtkWidget *Entry_unite;                                                        /* Unite correspondante Ã  l'entrÃ©e ana */
 
 /******************************************************************************************************************************/
-/* Get_options_registre: Récupère les options d'un mnemo Registre et les applique a la structure en parametre                 */
-/* Entrée: la structure destinatrice                                                                                          */
-/* Sortie: néant                                                                                                              */
+/* Get_options_registre: RÃ©cupÃ¨re les options d'un mnemo Registre et les applique a la structure en parametre                 */
+/* EntrÃ©e: la structure destinatrice                                                                                          */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Get_options_Registre ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { struct CMD_TYPE_MNEMO_REGISTRE *mnemo;
@@ -50,12 +50,12 @@
   }
 /******************************************************************************************************************************/
 /* Ajouter_entreeANA: Ajoute un entreeANA au systeme                                                                          */
-/* Entrée: rien                                                                                                               */
+/* EntrÃ©e: rien                                                                                                               */
 /* sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  GtkWidget *Get_options_Registre_gtktable ( void )
   { GtkWidget *table, *texte;
-    gint cpt, i;
+    gint i;
 
     table = gtk_table_new( 2, 4, TRUE );
 
@@ -73,9 +73,9 @@
     return(table);
   }
 /******************************************************************************************************************************/
-/* Set_options_AI: positionne dans l'IHM les différents champs de l'AnalogInput en parametre                                  */
-/* Entrée : une structure representant l'AnalogInput                                                                          */
-/* Sortie : néant                                                                                                             */
+/* Set_options_AI: positionne dans l'IHM les diffÃ©rents champs de l'AnalogInput en parametre                                  */
+/* EntrÃ©e : une structure representant l'AnalogInput                                                                          */
+/* Sortie : nÃ©ant                                                                                                             */
 /******************************************************************************************************************************/
  void Set_options_Registre ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { struct CMD_TYPE_MNEMO_REGISTRE *mnemo;

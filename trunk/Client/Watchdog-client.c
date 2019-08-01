@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Client/Watchdog-client.c        Le client Watchdog v2.0                                                                    */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                           ven 15 fév 2008 18:05:42 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           ven 15 fÃ©v 2008 18:05:42 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <gnome.h>
  #include <string.h>
  #include <stdlib.h>
@@ -32,7 +32,7 @@
  #include <unistd.h>
  #include <time.h>
 
-/**************************************** Définitions des prototypes programme ************************************************/
+/**************************************** DÃ©finitions des prototypes programme ************************************************/
  #include "protocli.h"
  #include "config.h"
  #include "Erreur.h"
@@ -52,20 +52,20 @@
  static void A_propos ( GtkWidget *widget, gpointer data );
  static gboolean Arret = FALSE;
 
-/***************************************************** Définition du menu *****************************************************/
- GnomeUIInfo Menu_lowlevel[]=                                            /*!< Définition du menu lowlevel */
+/***************************************************** DÃ©finition du menu *****************************************************/
+ GnomeUIInfo Menu_lowlevel[]=                                            /*!< DÃ©finition du menu lowlevel */
   { GNOMEUIINFO_ITEM_STOCK( N_("_Camera"), N_("Edit Camera"),
                             Menu_want_camera, GNOME_STOCK_PIXMAP_MIC ),
     GNOMEUIINFO_END
   };
 
- GnomeUIInfo Menu_client_leger[]=                                    /*!< Définition du menu d'administration du client leger */
+ GnomeUIInfo Menu_client_leger[]=                                    /*!< DÃ©finition du menu d'administration du client leger */
   { GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
                             Menu_want_client_leger, GNOME_STOCK_PIXMAP_MAIL ),
     GNOMEUIINFO_END
   };
 
- GnomeUIInfo Menu_admin[]=                                                           /*!< Définition du menu d'administration */
+ GnomeUIInfo Menu_admin[]=                                                           /*!< DÃ©finition du menu d'administration */
   { GNOMEUIINFO_ITEM_STOCK( N_("Adminis_tration"), N_("Administration"),
                             Menu_want_page_admin, GNOME_STOCK_PIXMAP_PROPERTIES ),
     GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
@@ -80,12 +80,12 @@
     GNOMEUIINFO_SUBTREE(N_("_Client leger"), Menu_client_leger),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_view[]=                                                                        /*!< Définition du menu view */
+ GnomeUIInfo Menu_view[]=                                                                        /*!< DÃ©finition du menu view */
   { GNOMEUIINFO_ITEM_STOCK( N_("_Historique MSGS"), N_("Show Historique"),
                             Menu_want_histo_msgs, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_serveur[]=                                                  /*!< Définition du menu de connexion au serveur */
+ GnomeUIInfo Menu_serveur[]=                                                  /*!< DÃ©finition du menu de connexion au serveur */
   { GNOMEUIINFO_ITEM_STOCK( N_("Connect"), N_("Connect to server"),
                             Connecter, GNOME_STOCK_PIXMAP_EXEC ),
     GNOMEUIINFO_ITEM_STOCK( N_("Stop"), N_("Stop the connexion"),
@@ -95,18 +95,18 @@
     GNOMEUIINFO_ITEM_STOCK( N_("_Quit"), N_("Disconnect and quit"), Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_aide[]=                                                                        /*!< Définition du menu aide */
+ GnomeUIInfo Menu_aide[]=                                                                        /*!< DÃ©finition du menu aide */
   { GNOMEUIINFO_ITEM_STOCK( N_("A propos.."), N_("Signatures"), A_propos, GNOME_STOCK_PIXMAP_ABOUT ),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_principal[]=                                                 /*!< Définition de la barre de menu principale */
+ GnomeUIInfo Menu_principal[]=                                                 /*!< DÃ©finition de la barre de menu principale */
   { GNOMEUIINFO_SUBTREE(N_("_Serveur"), Menu_serveur),
     GNOMEUIINFO_SUBTREE(N_("_Admin"), Menu_admin),
     GNOMEUIINFO_SUBTREE(N_("A_ide"), Menu_aide),
     GNOMEUIINFO_END
   };
 
- GnomeUIInfo Barre_outils[]=                                                             /*!< Définition de la barre d'outils */
+ GnomeUIInfo Barre_outils[]=                                                             /*!< DÃ©finition de la barre d'outils */
   { GNOMEUIINFO_ITEM_STOCK( N_("Connect"), N_("Connect to server"),
                             Connecter, GNOME_STOCK_PIXMAP_EXEC ),
     GNOMEUIINFO_ITEM_STOCK( N_("Stop"), N_("Stop the connexion"),
@@ -119,11 +119,11 @@
                             Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
     GNOMEUIINFO_END
   };
-  
+
 /**********************************************************************************************************/
 /*!A_propos: Presentation du programme et des authors
  **********************************************************************************************************/
- static void A_propos ( GtkWidget *widget,                              /*!< widget source de l'évènement */
+ static void A_propos ( GtkWidget *widget,                              /*!< widget source de l'Ã©vÃ¨nement */
                         gpointer data                                               /*!< data du callback */
                       )
   { const gchar *auteurs[]=
@@ -133,7 +133,7 @@
      };
 
     gtk_show_about_dialog( NULL, "program-name", "Watchdog-client",
-                           "version", VERSION, "copyright", "Copyright 2010-2017 © Sebastien Lefevre",
+                           "version", VERSION, "copyright", "Copyright 2010-2017 Â© Sebastien Lefevre",
                            "authors", auteurs,
                            "license", "Watchdog is free software; you can redistribute it and/or modify\n"
                                       "it under the terms of the GNU General Public License as published by\n"
@@ -148,14 +148,14 @@
                                       "You should have received a copy of the GNU General Public License\n"
                                       "along with Watchdog; if not, write to the Free Software\n"
                                       "Foundation, Inc., 51 Franklin St, Fifth Floor, \n"
-                                      "Boston, MA  02110-1301  USA\n", 
+                                      "Boston, MA  02110-1301  USA\n",
                            NULL );
   }
 
 /******************************************************************************************************************************/
 /*!Traitement_signaux: Gestion principale des signaux de Watchdog-client
  ******************************************************************************************************************************/
- static void Traitement_signaux ( int num                                                           /*! numéro du signal recu */
+ static void Traitement_signaux ( int num                                                           /*! numÃ©ro du signal recu */
                                 )
   { switch (num)
      { case SIGINT :
@@ -178,7 +178,7 @@
   }
 /******************************************************************************************************************************/
 /* Curl_progress_callback: Callbakc d'affichage de la progression du download ou upload                                       */
-/* Entrée:                                                                                                                    */
+/* EntrÃ©e:                                                                                                                    */
 /* Sortie: 0                                                                                                                  */
 /******************************************************************************************************************************/
  gint Curl_progress_callback ( void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
@@ -188,12 +188,11 @@
   }
 /******************************************************************************************************************************/
 /* WTD_Curl_init: Envoie une requete au serveur                                                                               */
-/* Entrée:                                                                                                                    */
+/* EntrÃ©e:                                                                                                                    */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
  CURL *WTD_Curl_init ( gchar *erreur )
-  { gchar sid[256];
-    CURL *curl;
+  { CURL *curl;
 
     curl = curl_easy_init();                                                                /* Preparation de la requete CURL */
     if (!curl)
@@ -218,7 +217,7 @@
   }
 /******************************************************************************************************************************/
 /* WTD_Curl_request: Envoie une requete au serveur                                                                            */
-/* Entrée:                                                                                                                    */
+/* EntrÃ©e:                                                                                                                    */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean WTD_Curl_post_request ( gchar *uri, gint post, gchar *post_data, gint post_length )
@@ -251,7 +250,7 @@
      { /*curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );*/
        curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
      }
-     
+
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
     curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
 /*       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );*/
@@ -315,7 +314,7 @@
     GnomeClient *client;
 
     gchar *file = NULL, *host = NULL, *user = NULL, *passwd = NULL;
-    struct poptOption Options[]= 
+    struct poptOption Options[]=
      { { "conffile", 'c',   POPT_ARG_STRING,
          &file,             0, _("Configuration file"), "FILE" },
        { "host", 's',       POPT_ARG_STRING,
@@ -335,12 +334,12 @@
        POPT_TABLEEND
      };
 
-    if (chdir( g_get_home_dir() ))                                                      /* Positionnement à la racine du home */
+    if (chdir( g_get_home_dir() ))                                                      /* Positionnement Ã  la racine du home */
      { printf( "Chdir %s failed\n", g_get_home_dir() ); exit(EXIT_ERREUR); }
     else
      { printf( "Chdir %s OK\n", g_get_home_dir() ); }
 
-    if (chdir( REPERTOIR_CONF ))                                                        /* Positionnement à la bonne position */
+    if (chdir( REPERTOIR_CONF ))                                                        /* Positionnement Ã  la bonne position */
      { printf ("Chdir %s NOK. Creating new directory\n", REPERTOIR_CONF );
        mkdir ( REPERTOIR_CONF, 0700 );
        chdir ( REPERTOIR_CONF );
@@ -357,15 +356,15 @@
     if (host)            g_snprintf( Config_cli.host,    sizeof(Config_cli.host),    "%s", host   );
     if (user)            g_snprintf( Config_cli.user,    sizeof(Config_cli.user),    "%s", user   );
     if (passwd)          g_snprintf( Config_cli.passwd,  sizeof(Config_cli.passwd),  "%s", passwd );
-    if (port!=-1)        Config_cli.port_ihm  = port;                                      /* Priorite à la ligne de commande */
-    if (gui_tech!=-1)    Config_cli.gui_tech  = gui_tech;                                  /* Priorite à la ligne de commande */
+    if (port!=-1)        Config_cli.port_ihm  = port;                                      /* Priorite Ã  la ligne de commande */
+    if (gui_tech!=-1)    Config_cli.gui_tech  = gui_tech;                                  /* Priorite Ã  la ligne de commande */
     if (debug_level!=-1) Config_cli.log_level = debug_level;
     Info_change_log_level( Config_cli.log, Config_cli.log_level );
 
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, _("Main : Start v%s"), VERSION );
     Print_config_cli( &Config_cli );
 
-    F_client = gnome_app_new( PROGRAMME, TITRE_F_CONFIG );                                          /* Création de la fenetre */
+    F_client = gnome_app_new( PROGRAMME, TITRE_F_CONFIG );                                          /* CrÃ©ation de la fenetre */
     g_signal_connect( G_OBJECT( F_client ), "delete_event",
                       G_CALLBACK( Fermer_client ), NULL );
     g_signal_connect( G_OBJECT( F_client ), "destroy",
@@ -384,9 +383,9 @@
     sig.sa_handler = Traitement_signaux;
     sigemptyset(&sig.sa_mask);
     sig.sa_flags = 0;
-    sigaction( SIGTERM, &sig, NULL );                                                           /* Arret Prématuré (logiciel) */
-    sigaction( SIGINT,  &sig, NULL );                                                           /* Arret Prématuré (logiciel) */
-    sigaction( SIGPIPE,  &sig, NULL );                                                          /* Arret Prématuré (logiciel) */
+    sigaction( SIGTERM, &sig, NULL );                                                           /* Arret PrÃ©maturÃ© (logiciel) */
+    sigaction( SIGINT,  &sig, NULL );                                                           /* Arret PrÃ©maturÃ© (logiciel) */
+    sigaction( SIGPIPE,  &sig, NULL );                                                          /* Arret PrÃ©maturÃ© (logiciel) */
 
     Client.gids = NULL;                                                  /* Initialisation de la structure de client en cours */
     Client.mode = DISCONNECTED;
