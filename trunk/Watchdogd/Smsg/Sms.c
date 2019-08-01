@@ -293,7 +293,8 @@
                 "%s: Envoi SMS Ok to %s (%s)", __func__, telephone, msg->libelle_sms );
      }
     else
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING, "%s: Envoi SMS Nok to %s", __func__, telephone ); }
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
+                "%s: Envoi SMS Nok to %s (error '%s')", __func__, telephone, GSM_ErrorString(error) ); }
 
    	error = GSM_TerminateConnection(s); 	                                                             /* Terminate connection */
 	   if (error != ERR_NONE)
