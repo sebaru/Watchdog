@@ -77,7 +77,7 @@
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s(alive,id_msg,nom_ack,date_create)"
                    " VALUES "
-                   "('%d','%d','%s','%s'))", NOM_TABLE_HISTO_MSGS, TRUE,
+                   "('%d','%d','%s','%s')", NOM_TABLE_HISTO_MSGS, TRUE,
                    histo->msg.id, nom_ack, histo->date_create );
      }
     else
@@ -187,7 +187,7 @@
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_histo_msgsDB_by_id: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
 
@@ -219,7 +219,7 @@
 
     histo_msgs = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof(struct CMD_TYPE_HISTO) );
     if (!histo_msgs) Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                              "Recuperer_histo_msgsDB_suite: Erreur allocation mémoire" );
+                              "%s: Erreur allocation mémoire", __func__ );
     else                                                                                         /* Recopie dans la structure */
      { g_snprintf( histo_msgs->msg.libelle,         sizeof(histo_msgs->msg.libelle),         "%s", db->row[3]  );
        g_snprintf( histo_msgs->msg.syn_parent_page, sizeof(histo_msgs->msg.syn_parent_page), "%s", db->row[6]  );
