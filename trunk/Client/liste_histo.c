@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/liste_message.c        Gestion de la page d'affichage des messages au fil de l'eau                                  */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                          mer 20 aoû 2003 18:19:00 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          mer 20 aoÃ» 2003 18:19:00 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * liste_histo.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF }, /* Danger */
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF }  /* Derangement */
   };
-/**************************************** Définitions des prototypes programme ************************************************/
+/**************************************** DÃ©finitions des prototypes programme ************************************************/
  #include "protocli.h"
  #include "client.h"
 
@@ -90,7 +90,7 @@
   };
 /**********************************************************************************************************/
 /* Menu_acquitter_histo: Acquittement d'un des messages histo                                             */
-/* Entrée: rien                                                                                           */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  static void Menu_acquitter_histo ( void )
@@ -105,7 +105,7 @@
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     while ( lignes )
-     { gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
+     { gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnÃ©e */
        gtk_tree_model_get( store, &iter, COLONNE_ID, &histo.id, -1 );                      /* Recup du id */
        gtk_tree_model_get( store, &iter, COLONNE_NUM, &histo.msg.num, -1 );               /* Recup du num */
 
@@ -114,11 +114,11 @@
        lignes = lignes->next;
      }
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
+    g_list_free (lignes);                                                           /* Liberation mÃ©moire */
   }
 /**********************************************************************************************************/
-/* Menu_go_to_syn: Affiche les synoptiques associés aux messages histo                                    */
-/* Entrée: rien                                                                                           */
+/* Menu_go_to_syn: Affiche les synoptiques associÃ©s aux messages histo                                    */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  static void Menu_go_to_syn ( void )
@@ -133,7 +133,7 @@
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     while ( lignes )
      { guint id_syn;
-       gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
+       gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnÃ©e */
        gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &id_syn, -1 );                  /* Recup du id */
 
        Changer_vue_directe ( id_syn );
@@ -142,11 +142,11 @@
        lignes = lignes->next;
      }
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
+    g_list_free (lignes);                                                           /* Liberation mÃ©moire */
   }
 /**********************************************************************************************************/
 /* Gerer_popup_message: Gestion du menu popup quand on clique droite sur la liste des messages            */
-/* Entrée: la liste(widget), l'evenement bouton, et les data                                              */
+/* EntrÃ©e: la liste(widget), l'evenement bouton, et les data                                              */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  static gboolean Gerer_popup_histo ( GtkWidget *widget, GdkEventButton *event, gpointer data )
@@ -169,7 +169,7 @@
           gtk_tree_path_free( path );
           ya_selection = TRUE;
         }
-     } else ya_selection = TRUE;                                 /* ya bel et bien qqchose de selectionné */
+     } else ya_selection = TRUE;                                 /* ya bel et bien qqchose de selectionnÃ© */
 
     if ( event->button == 3 && ya_selection )                                         /* Gestion du popup */
      { gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, event, NULL, F_client );
@@ -182,13 +182,13 @@
     return(FALSE);
   }
 /**********************************************************************************************************/
-/* Rafraichir_visu_message: Rafraichissement du message à la position iter de la liste                    */
-/* Entrée: une reference sur l'utilisateur                                                                */
-/* Sortie: Néant                                                                                          */
+/* Rafraichir_visu_message: Rafraichissement du message Ã  la position iter de la liste                    */
+/* EntrÃ©e: une reference sur l'utilisateur                                                                */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  static void Rafraichir_visu_histo( GtkTreeIter *iter, struct CMD_TYPE_HISTO *histo )
   { GtkTreeModel *store;
-    gchar chaine[128], ack[128], groupe_page[512];
+    gchar ack[128], groupe_page[512];
 
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", histo->msg.syn_parent_page, histo->msg.syn_page );
 
@@ -216,8 +216,8 @@
   }
 /**********************************************************************************************************/
 /* Proto_rafrachir_un_histo: Rafraichissement de l'histo en parametre                                     */
-/* Entrée: une reference sur le groupe                                                                    */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: une reference sur le groupe                                                                    */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo )
   { GtkTreeModel *store;
@@ -238,9 +238,9 @@
      }
   }
 /**********************************************************************************************************/
-/* Afficher_un_message: Ajout d'un message dans la liste des messages à l'écran                           */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
+/* Afficher_un_message: Ajout d'un message dans la liste des messages Ã  l'Ã©cran                           */
+/* EntrÃ©e: une reference sur le message                                                                   */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo )
   { GtkListStore *store;
@@ -262,8 +262,8 @@
   }
 /**********************************************************************************************************/
 /* Cacher_un_utilisateur: Enleve un groupe de la liste des utilisateurs                                   */
-/* Entrée: une reference sur l'utilisateur                                                                */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: une reference sur l'utilisateur                                                                */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo )
   { GtkTreeModel *store;
@@ -283,8 +283,8 @@
      }
   }
 /**********************************************************************************************************/
-/* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */
-/* Entrée: rien                                                                                           */
+/* Creer_page_message: Creation de la page du notebook consacrÃ©e aux messages watchdog                    */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: un widget boite                                                                                */
 /**********************************************************************************************************/
  void Reset_page_histo( void )
@@ -293,8 +293,8 @@
     gtk_list_store_clear( GTK_LIST_STORE(store) );
   }
 /**********************************************************************************************************/
-/* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */
-/* Entrée: rien                                                                                           */
+/* Creer_page_message: Creation de la page du notebook consacrÃ©e aux messages watchdog                    */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: un widget boite                                                                                */
 /**********************************************************************************************************/
  void Creer_page_histo( void )

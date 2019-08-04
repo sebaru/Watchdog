@@ -38,22 +38,6 @@
     gchar date_fin[32];
   };
 
- struct CMD_RESPONSE_HISTO_MSGS
-  { struct CMD_TYPE_HISTO histo;
-    gint32 page_id;                    /* Numéro de la page du client sur laquelle afficher les résultats */
-  };
-
- struct CMD_CRITERE_HISTO_MSGS
-  { guint  num;                                                                /* Numero unique historique */
-    gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  groupage[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    guint  type;                                                       /* Etat, prealarme, defaut, alarme */
-    guint  date_create_min;
-    guint  date_create_max;
-    gchar  nom_ack[NBR_CARAC_LOGIN_UTF8+1];
-    gint32 page_id;
-  };
-
  enum
   { SSTAG_SERVEUR_ADDPROGRESS_HISTO,
     SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN,
@@ -63,9 +47,6 @@
     SSTAG_CLIENT_ACK_HISTO,
     SSTAG_SERVEUR_ACK_HISTO,
 
-    SSTAG_CLIENT_REQUETE_HISTO_MSGS,          /* Le client fait une requete sur l'historique de smessages */
-    SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS,                     /* Reponse à une requete histo_hard */
-    SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS_FIN,
   };
 
 #endif

@@ -183,9 +183,6 @@
     JsonBuilder *builder;
     JsonGenerator *gen;
     gsize taille_buf;
-    struct tm *temps;
-    gchar chaine[80];
-    time_t time;
 
     pss = lws_wsi_user ( wsi );
     builder = json_builder_new ();
@@ -197,7 +194,7 @@
     json_builder_begin_object (builder);                                                                  /* Contenu du Histo */
     json_builder_set_member_name  ( builder, "alive" );         json_builder_add_boolean_value( builder, histo->alive );
 
-    Json_builder_add_string ( builder, "date_create", histo->date_create );
+    Json_add_string ( builder, "date_create", histo->date_create );
     json_builder_set_member_name  ( builder, "nom_ack" );       json_builder_add_string_value ( builder, histo->nom_ack );
     json_builder_set_member_name  ( builder, "num" );           json_builder_add_int_value    ( builder, histo->msg.num );
     json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, histo->msg.libelle );

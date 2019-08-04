@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -37,7 +37,6 @@
   { JsonBuilder *builder;
     JsonGenerator *gen;
     gsize taille_buf;
-    gint retour, num;
     gchar *buf;
 
     builder = json_builder_new ();
@@ -72,14 +71,14 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
-  { 
+  {
     *buffer_p = NULL;
     *taille_p = 0;
 /************************************************ Préparation du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/status"))
      { Admin_json_status ( buffer_p, taille_p ); }
-    
+
     return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
