@@ -232,8 +232,8 @@
        histo_msgs->msg.type         = atoi(db->row[4]);
        histo_msgs->msg.syn_id       = atoi(db->row[5]);
        g_snprintf ( histo_msgs->date_create, sizeof(histo_msgs->date_create), "%s", db->row[9] );
-       g_snprintf ( histo_msgs->date_fixe,   sizeof(histo_msgs->date_fixe), "%s", db->row[10] );
-       g_snprintf ( histo_msgs->date_fin,    sizeof(histo_msgs->date_fin), "%s", db->row[11] );
+       if (db->row[10]) g_snprintf ( histo_msgs->date_fixe,   sizeof(histo_msgs->date_fixe), "%s", db->row[10] );
+       if (db->row[11]) g_snprintf ( histo_msgs->date_fin,    sizeof(histo_msgs->date_fin), "%s", db->row[11] );
        histo_msgs->msg.id           = atoi(db->row[13]);
      }
     return(histo_msgs);
