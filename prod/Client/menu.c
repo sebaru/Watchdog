@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -32,7 +32,7 @@
 
  extern struct CLIENT Client;                                    /* Identifiant de l'utilisateur en cours */
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
+ extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 /********************************* Définitions des prototypes programme ***********************************/
@@ -93,13 +93,6 @@
  void Menu_want_synoptique ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_SYNOPTIQUE, 0, TRUE )) return;
     Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE, NULL, 0 );
-  }
-/**********************************************************************************************************/
-/* Menu_want_histo_msgs: l'utilisateur desire voir l'historique                                           */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
- void Menu_want_histo_msgs ( void )
-  { Creer_page_liste_histo_msgs();
   }
 /**********************************************************************************************************/
 /* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                             */

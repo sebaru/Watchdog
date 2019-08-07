@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
@@ -36,7 +36,6 @@
 /**********************************************************************************************************/
  void Gerer_protocole_histo( struct CLIENT *client )
   { struct CONNEXION *connexion;
-    pthread_t tid;
     connexion = client->connexion;
 
     if ( ! Tester_level_util( client->util, ACCESS_LEVEL_HISTO ) )
@@ -48,16 +47,7 @@
      }
 
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_CLIENT_REQUETE_HISTO_MSGS:
-             { memcpy( &client->requete, (struct CMD_REQUETE_HISTO_MSGS *)connexion->donnees,
-                       sizeof( client->requete ) );
-               Ref_client( client, "Send histo msgs" );
-               pthread_create( &tid, NULL, (void *)Proto_envoyer_histo_msgs_thread, client );
-               pthread_detach( tid );
-               Client_mode( client, VALIDE );
-             }
-            break;
-       case SSTAG_CLIENT_ACK_HISTO:
+     { case SSTAG_CLIENT_ACK_HISTO:
              { struct CMD_TYPE_HISTO *histo;
                histo = (struct CMD_TYPE_HISTO *)connexion->donnees;
                Proto_acquitter_histo( client, histo );

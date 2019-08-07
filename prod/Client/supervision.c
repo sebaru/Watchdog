@@ -7,7 +7,7 @@
  * supervision.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,23 +21,23 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
  #include <gnome.h>
  #include <sys/time.h>
- 
+
  #include "Reseaux.h"
  #include "Config_cli.h"
  #include "trame.h"
 
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
+ extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 
-/********************************************* Définitions des prototypes programme *******************************************/
+/********************************************* DÃ©finitions des prototypes programme *******************************************/
  #include "protocli.h"
 
  enum
@@ -45,11 +45,11 @@
      COLONNE_HORLOGE_LIBELLE,
      NBR_COLONNE_HORLOGE
   };
-  
+
 /******************************************************************************************************************************/
-/* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numéro                                      */
-/* Entrée: Un numéro de synoptique                                                                                            */
-/* Sortie: Une référence sur les champs d'information de la page en question                                                  */
+/* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numÃ©ro                                      */
+/* EntrÃ©e: Un numÃ©ro de synoptique                                                                                            */
+/* Sortie: Une rÃ©fÃ©rence sur les champs d'information de la page en question                                                  */
 /******************************************************************************************************************************/
  struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( gint syn_id )
   { struct TYPE_INFO_SUPERVISION *infos;
@@ -61,7 +61,7 @@
      { page = (struct PAGE_NOTEBOOK *)liste->data;
        if ( page->type == TYPE_PAGE_SUPERVISION )                /* Est-ce bien une page d'supervision ?? */
         { infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
-          if (infos->syn_id == syn_id) break;                              /* Nous avons trouvé le syn !! */
+          if (infos->syn_id == syn_id) break;                              /* Nous avons trouvÃ© le syn !! */
         }
        liste = liste->next;                                                        /* On passe au suivant */
      }
@@ -69,7 +69,7 @@
   }
 /******************************************************************************************************************************/
 /* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                                                */
-/* Entrée: la page en question                                                                                                */
+/* EntrÃ©e: la page en question                                                                                                */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Detruire_page_supervision( struct PAGE_NOTEBOOK *page )
@@ -80,7 +80,7 @@
   }
 /******************************************************************************************************************************/
 /* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                                                */
-/* Entrée: la page en question                                                                                                */
+/* EntrÃ©e: la page en question                                                                                                */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Changer_option_zoom (GtkRange *range, struct TYPE_INFO_SUPERVISION *infos )
@@ -90,8 +90,8 @@
   }
 /******************************************************************************************************************************/
 /* draw_page: Dessine une page pour l'envoyer sur l'imprimante                                                                */
-/* Entrée: néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: nÃ©ant                                                                                                              */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void draw_page (GtkPrintOperation *operation,
                         GtkPrintContext   *context,
@@ -104,8 +104,8 @@
   }
 /******************************************************************************************************************************/
 /* Menu_exporter_message: Exportation de la base dans un fichier texte                                                        */
-/* Entrée: néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: nÃ©ant                                                                                                              */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Menu_exporter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
   { GtkPrintOperation *print;
@@ -121,14 +121,14 @@
   }
 /******************************************************************************************************************************/
 /* Menu_acquitter_synoptique: Envoi une commande d'acquit du synoptique en cours de visu                                      */
-/* Entrée: La page d'information synoptique                                                                                   */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: La page d'information synoptique                                                                                   */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Menu_acquitter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
   { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACQ_SYN, (gchar *)&infos->syn_id, sizeof(gint) ); }
 /******************************************************************************************************************************/
-/* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
-/* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
+/* Creer_page_message: Creation de la page du notebook consacrÃ©e aux messages watchdog                                        */
+/* EntrÃ©e: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Creer_page_supervision ( gchar *libelle, guint syn_id )
@@ -142,7 +142,7 @@
     printf("Creation page synoptique %d\n", syn_id );
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
-    
+
     page->infos = (struct TYPE_INFO_SUPERVISION *)g_try_malloc0( sizeof(struct TYPE_INFO_SUPERVISION) );
     infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
     if (!page->infos) { g_free(page); return; }
@@ -157,7 +157,7 @@
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
 /**************************************************** Trame proprement dite ***************************************************/
-    
+
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_ALWAYS, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
@@ -222,8 +222,8 @@
   }
 /**********************************************************************************************************/
 /* Proto_afficher_un_motif_supervision: Ajoute un motif sur la trame de supervision                       */
-/* Entrée: une reference sur le motif                                                                     */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: une reference sur le motif                                                                     */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
@@ -237,11 +237,11 @@
 
     memcpy( motif, rezo_motif, sizeof(struct CMD_TYPE_MOTIF) );
     trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
-    if (!trame_motif) 
+    if (!trame_motif)
      { printf("Erreur creation d'un nouveau motif\n");
        return;                                                          /* Ajout d'un test anti seg-fault */
      }
-    trame_motif->groupe_dpl = Nouveau_groupe();                   /* Numéro de groupe pour le deplacement */
+    trame_motif->groupe_dpl = Nouveau_groupe();                   /* NumÃ©ro de groupe pour le deplacement */
     trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */
     trame_motif->vert   = motif->vert0;                                          /* Sauvegarde etat motif */
     trame_motif->bleu   = motif->bleu0;                                          /* Sauvegarde etat motif */
@@ -254,8 +254,8 @@
   }
 /******************************************************************************************************************************/
 /* Changer_etat_motif: Changement d'etat d'un motif                                                                           */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: une reference sur le message                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Changer_etat_motif( struct TRAME_ITEM_MOTIF *trame_motif, struct CMD_ETAT_BIT_CTRL *etat_motif )
   { printf("Changer_etat_motif: %d = %d %d %d etat %d (type %d) cligno=%d %s\n",
@@ -284,7 +284,7 @@
                                     etat_motif->rouge, etat_motif->vert, etat_motif->bleu );
              }
             break;
-       case TYPE_DYNAMIQUE: 
+       case TYPE_DYNAMIQUE:
             Trame_choisir_frame( trame_motif, etat_motif->etat, etat_motif->rouge,
                                                                 etat_motif->vert,
                                                                 etat_motif->bleu );            /* frame 1 */
@@ -293,14 +293,14 @@
                                                etat_motif->vert,
                                                etat_motif->bleu );
             break;
-       default: printf("Changer_etat_motif: type gestion non géré %d bit_ctrl=%d\n",
+       default: printf("Changer_etat_motif: type gestion non gÃ©rÃ© %d bit_ctrl=%d\n",
                         trame_motif->motif->type_gestion, trame_motif->motif->bit_controle );
      }
   }
 /******************************************************************************************************************************/
 /* Changer_etat_passerelle: Changement d'etat d'une passerelle (toutes les vignettes)                                         */
-/* Entrée: une reference sur la passerelle, l'etat attendu                                                                    */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: une reference sur la passerelle, l'etat attendu                                                                    */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Changer_etat_passerelle( struct TRAME_ITEM_PASS *trame_pass, struct CMD_TYPE_SYN_VARS *vars )
   { printf("Changer_etat_passerelle syn %d!\n", vars->syn_id );
@@ -317,7 +317,7 @@
      { Trame_set_svg ( trame_pass->item_1, "jaune", 0, FALSE ); }
     else
      { Trame_set_svg ( trame_pass->item_1, "vert", 0, FALSE ); }
-    
+
 
     if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Personnes **************************/
      { Trame_set_svg ( trame_pass->item_2, "kaki", 0, TRUE ); }
@@ -347,8 +347,8 @@
  }
 /******************************************************************************************************************************/
 /* Changer_etat_passerelle: Changement d'etat d'une passerelle (toutes les vignettes)                                         */
-/* Entrée: une reference sur la passerelle, l'etat attendu                                                                    */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: une reference sur la passerelle, l'etat attendu                                                                    */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Changer_etat_etiquette( struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_SYN_VARS *vars )
   { printf("Changer_etat_etiquette syn %d!\n", vars->syn_id );
@@ -393,8 +393,8 @@
  }
 /******************************************************************************************************************************/
 /* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: une reference sur le message                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_changer_etat_motif( struct CMD_ETAT_BIT_CTRL *etat_motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
@@ -420,7 +420,7 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
            { case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)liste_motifs->data;
                                     if (trame_motif->motif->bit_controle == etat_motif->num)
                                      { Changer_etat_motif( trame_motif, etat_motif );
-                                       cpt++;                                             /* Nous updatons un motif de plus ! */ 
+                                       cpt++;                                             /* Nous updatons un motif de plus ! */
                                      }
                                     break;
              case TYPE_COMMENTAIRE: break;
@@ -430,14 +430,14 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
         }
        liste = liste->next;
      }
-    if (!cpt)                                 /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
-     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN, (gchar *)etat_motif, sizeof(struct CMD_ETAT_BIT_CTRL) ); 
+    if (!cpt)                                 /* Si nous n'avons rien mis Ã  jour, c'est que le bit Ixxx ne nous est pas utile */
+     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN, (gchar *)etat_motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
      }
   }
 /******************************************************************************************************************************/
 /* Proto_set_syn_vars: Mets a jour les variables de run d'un synoptique                                                       */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: une reference sur le message                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_set_syn_vars( struct CMD_TYPE_SYN_VARS *syn_vars )
   { struct TYPE_INFO_SUPERVISION *infos;
@@ -473,24 +473,24 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
 
        objet = infos->Trame->trame_items;
        while (objet)
-        { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
+        { switch ( *((gint *)objet->data) )                             /* Test du type de donnÃ©es dans data */
            { case TYPE_PASSERELLE:
                    { struct TRAME_ITEM_PASS *trame_pass = objet->data;
                      if (trame_pass->pass->syn_cible_id == syn_vars->syn_id)
                       { Changer_etat_passerelle( trame_pass, syn_vars );
-                        cpt++;                                                            /* Nous updatons un motif de plus ! */ 
+                        cpt++;                                                            /* Nous updatons un motif de plus ! */
                       }
                    }
                   break;
-             default: printf("Selectionner: type inconnu\n" );
+             default: break;
            }
           objet=objet->next;
         }
        liste = liste->next;
      }
 
-    if (!cpt)                                 /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
-     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_SYN_VARS_UNKNOWN, (gchar *)syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) ); 
+    if (!cpt)                                 /* Si nous n'avons rien mis Ã  jour, c'est que le bit Ixxx ne nous est pas utile */
+     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_SYN_VARS_UNKNOWN, (gchar *)syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

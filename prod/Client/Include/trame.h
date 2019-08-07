@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -38,7 +38,7 @@
  #define TAILLE_FONT                60                                      /* Nombre de caractere pour la police d'affichage */
  #define COULEUR_FOND_SYN           "MidnightBlue"
  #define COULEUR_ACTIVE             200
- 
+
  #define TAILLE_ICONE_X             100
  #define TAILLE_ICONE_Y             100
 
@@ -98,7 +98,7 @@
     GdkPixbuf *pixbuf;                                                               /* Pixbuf colorié et visualisé à l'écran */
     guchar num_image;                                                             /* Numero de l'image actuellement présentée */
     guchar nbr_images;                                                                   /* Nombre total d'image dans le .gif */
-    
+
     guchar rouge;                                                                                /* Couleur attendue du motif */
     guchar vert;
     guchar bleu;
@@ -155,8 +155,12 @@
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     struct CMD_TYPE_CADRAN *cadran;
+    GooCanvasItem *item_groupe_fleche;
+    struct TRAME_ITEM_SVG *fleche_droite;
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
     gint selection;
+    gfloat valeur;
+    gfloat old_valeur[20];
   };
 
  struct TRAME_ITEM_CAMERA_SUP
@@ -212,6 +216,7 @@
                                                          struct CMD_TYPE_PASSERELLE *pass );
  extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
                                                      struct CMD_TYPE_CADRAN *cadran );
+ extern void Trame_cadran_set_tendance ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_ajout_motif_par_item ( struct TRAME *trame,
                                           struct TRAME_ITEM_MOTIF *trame_motif );
  extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );

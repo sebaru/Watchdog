@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Include/Histo_DB.h        Déclaration structure internes des historiques watchdog            */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      mar 10 jun 2003 12:12:38 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Include/Histo_DB.h        DÃ©claration structure internes des historiques watchdog                                */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          mar 10 jun 2003 12:12:38 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Histo_DB.h
  * This file is part of Watchdog
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _HISTO_H_
  #define _HISTO_H_
 
@@ -35,15 +35,13 @@
 
  #define NOM_TABLE_HISTO_MSGS  "histo_msgs"
 
-/*************************************** Définitions des prototypes ***************************************/
+/*********************************************** DÃ©finitions des prototypes ***************************************************/
  extern void Clear_histoDB ( void );
  extern gboolean Ajouter_histo_msgsDB ( struct CMD_TYPE_HISTO *histo );
  extern gboolean Modifier_histo_msgsDB ( struct CMD_TYPE_HISTO *histo );
  extern struct CMD_TYPE_HISTO *Rechercher_histo_msgsDB_by_id ( guint id );
  extern gboolean Recuperer_histo_msgsDB_alive ( struct DB **db );
- extern gboolean Recuperer_histo_msgsDB ( struct DB **db,
-                                           struct CMD_CRITERE_HISTO_MSGS *critere );
  extern struct CMD_TYPE_HISTO *Recuperer_histo_msgsDB_suite( struct DB **db );
 
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

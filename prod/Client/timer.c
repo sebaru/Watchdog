@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Client/timer.c         Gestion des échéances temporelles                                               */
+/* Client/timer.c         Gestion des Ã©chÃ©ances temporelles                                               */
 /* Projet WatchDog version 3.0       Gestion d'habitat                       dim 28 nov 2004 14:11:04 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -7,7 +7,7 @@
  * timer.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -29,14 +29,14 @@
  #include "Config_cli.h"
  #include "client.h"
 
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
+ extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */
  extern struct CLIENT Client;                           /* Identifiant de l'utilisateur en cours */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
-/********************************* Définitions des prototypes programme ***********************************/
+/********************************* DÃ©finitions des prototypes programme ***********************************/
  #include "protocli.h"
 
 /******************************************************************************************************************************/
-/* Timer_motif: gestion des échéances temporelles des motifs.                                                                 */
+/* Timer_motif: gestion des Ã©chÃ©ances temporelles des motifs.                                                                 */
 /* Entree: trame_motif                                                                                                        */
 /* Sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
@@ -45,7 +45,7 @@
            else g_object_set ( trame_svg->item, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
   }
 /**********************************************************************************************************/
-/* Timer_motif: gestion des échéances temporelles des motifs.                                             */
+/* Timer_motif: gestion des Ã©chÃ©ances temporelles des motifs.                                             */
 /* Entree: trame_motif                                                                                    */
 /* Sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
@@ -53,7 +53,7 @@
   { switch( trame_motif->motif->type_gestion )
      { case TYPE_INERTE    : return;
        case TYPE_STATIQUE  : break;
-                       
+
        case TYPE_PROGRESSIF:
             if (trame_motif->etat && trame_motif->num_image != trame_motif->nbr_images-1)
              { Trame_choisir_frame ( trame_motif, trame_motif->num_image+1,
@@ -154,13 +154,13 @@
      }
   }
 /**********************************************************************************************************/
-/* Timer: gestion des échéances temporelles. Appelée toutes les 333 millisecondes                         */
+/* Timer: gestion des Ã©chÃ©ances temporelles. AppelÃ©e toutes les 333 millisecondes                         */
 /* Entree: data inutile                                                                                   */
 /* Sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  gboolean Timer ( gpointer data )
   { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TRAME_ITEM_PASS *trame_pass;
+    struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
     static gboolean hidden=FALSE;
@@ -183,10 +183,13 @@
         { case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)liste_motifs->data;
                                  Timer_motif( trame_motif, hidden );
                                  break;
-          case TYPE_COMMENTAIRE:                                
-          case TYPE_CADRAN:      break;
+          case TYPE_COMMENTAIRE:
+                                 break;
+          case TYPE_CADRAN:      trame_cadran = (struct TRAME_ITEM_CADRAN *)liste_motifs->data;
+                                 Trame_cadran_set_tendance ( trame_cadran );
+                                 break;
           case TYPE_CAMERA_SUP : break;
-          default: printf("Timer: type inconnu\n" );
+          /*default: printf("Timer: type inconnu\n" );*/
         }
        liste_motifs=liste_motifs->next;
      }

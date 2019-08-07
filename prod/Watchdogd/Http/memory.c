@@ -132,16 +132,15 @@
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
-       json_builder_set_member_name  ( builder, "etat" );
-       json_builder_add_boolean_value  ( builder, tempo->state );
-       json_builder_set_member_name  ( builder, "status" );
-       json_builder_add_int_value  ( builder, tempo->status );
-       json_builder_set_member_name  ( builder, "date_on" );
-       json_builder_add_int_value  ( builder, tempo->date_on );
-       json_builder_set_member_name  ( builder, "date_off" );
-       json_builder_add_int_value  ( builder, tempo->date_off );
-       json_builder_set_member_name  ( builder, "top" );
-       json_builder_add_int_value  ( builder, Partage->top );
+       Json_add_bool  ( builder, "etat", tempo->state );
+       Json_add_int   ( builder, "status", tempo->status );
+       Json_add_int   ( builder, "daa", tempo->delai_on );
+       Json_add_int   ( builder, "dma", tempo->min_on );
+       Json_add_int   ( builder, "dMa", tempo->max_on );
+       Json_add_int   ( builder, "dad", tempo->delai_off );
+       Json_add_int   ( builder, "date_on", tempo->date_on );
+       Json_add_int   ( builder, "date_off", tempo->date_off );
+       Json_add_int   ( builder, "top", Partage->top );
      }
 /*---------------------------------------------------- Visuels ---------------------------------------------------------------*/
     else if (!strcasecmp(type,"I"))

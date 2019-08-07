@@ -100,7 +100,6 @@ Watchdogd/Enocean/Makefile \
 Watchdogd/Imsgp/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Http/Makefile \
-Watchdogd/Lirc/Makefile \
 Watchdogd/Serveur/Makefile \
 Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \

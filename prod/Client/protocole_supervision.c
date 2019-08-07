@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -43,8 +43,6 @@
   { static GList *Arrivee_comment = NULL;
     static GList *Arrivee_palette = NULL;
     static GList *Arrivee_camera_sup = NULL;
-    static GList *Arrivee_horloges = NULL;
-    static GList *Arrivee_horloge = NULL;
     static int save_id = 0;
 
     switch ( Reseau_ss_tag ( connexion ) )
@@ -92,7 +90,7 @@
                Set_progress_plus(1);
 
                comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof( struct CMD_TYPE_COMMENT ) );
-               if (!comment) return; 
+               if (!comment) return;
                memcpy( comment, connexion->donnees, sizeof(struct CMD_TYPE_COMMENT ) );
                Arrivee_comment = g_list_append( Arrivee_comment, comment );
                save_id = comment->syn_id;
@@ -122,7 +120,7 @@
                Set_progress_plus(1);
 
                palette = (struct CMD_TYPE_PALETTE *)g_try_malloc0( sizeof( struct CMD_TYPE_PALETTE ) );
-               if (!palette) return; 
+               if (!palette) return;
                memcpy( palette, connexion->donnees, sizeof(struct CMD_TYPE_PALETTE ) );
                Arrivee_palette = g_list_append( Arrivee_palette, palette );
                save_id = palette->syn_id;
@@ -153,7 +151,7 @@
                Set_progress_plus(1);
 
                camera_sup = (struct CMD_TYPE_CAMERASUP *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERASUP ) );
-               if (!camera_sup) return; 
+               if (!camera_sup) return;
                memcpy( camera_sup, connexion->donnees, sizeof(struct CMD_TYPE_CAMERASUP ) );
                Arrivee_camera_sup = g_list_append( Arrivee_camera_sup, camera_sup );
              }

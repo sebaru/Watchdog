@@ -7,7 +7,7 @@
  * liste_plugin_dls.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2007 - SÈbastien Lefevre
+ * Copyright (C) 2007 - S√©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
   };
 #endif
- static gchar *DLS_COMPIL_STATUS[]=                                          /* Status en franÁais de la derniere compilation */
+ static gchar *DLS_COMPIL_STATUS[]=                                          /* Status en fran√ßais de la derniere compilation */
   { "Never compiled yet",
     "Export from Database failed",
     "Error loading source file",
@@ -79,7 +79,7 @@
     "Error, plugin is setting bits he does not own."
   };
 
-/******************************************* DÈfinitions des prototypes programme *********************************************/
+/******************************************* D√©finitions des prototypes programme *********************************************/
  #include "protocli.h"
 
  static void Menu_effacer_plugin_dls ( void );
@@ -107,7 +107,7 @@
 
 /******************************************************************************************************************************/
 /* Dls_compil_status: Renvoie le statut en clair de la derniere compilation D.L.S                                             */
-/* EntrÈe : le statut au format entier                                                                                        */
+/* Entr√©e : le statut au format entier                                                                                        */
 /* Sortie : le statut au format chaine                                                                                        */
 /******************************************************************************************************************************/
  static gchar *Dls_compil_status ( guint status )
@@ -117,7 +117,7 @@
   }
 /******************************************************************************************************************************/
 /* Menu_want_mnemonique: l'utilisateur desire editer les mnemoniques d'un plugin DLS                                          */
-/* EntrÈe/Sortie: rien                                                                                                        */
+/* Entr√©e/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  static void Menu_editer_mnemo ( void )
   { struct CMD_TYPE_PLUGIN_DLS rezo_dls;
@@ -132,10 +132,10 @@
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_plugin_dls) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                                            /* Si rien n'est selectionnÈ */
+    if (!nbr) return;                                                                            /* Si rien n'est selectionn√© */
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnÈe */
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionn√©e */
     gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_dls.id, -1 );                                          /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, -1 );                                         /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_PACKAGE, &package, -1 );                                         /* Recup du id */
@@ -147,7 +147,7 @@
     g_free( nom );
     g_free( tech_id );
     g_free( package );
-    if (!Chercher_page_notebook (TYPE_PAGE_MNEMONIQUE, rezo_dls.id, TRUE))                    /* Page deja crÈÈ et affichÈe ? */
+    if (!Chercher_page_notebook (TYPE_PAGE_MNEMONIQUE, rezo_dls.id, TRUE))                    /* Page deja cr√©√© et affich√©e ? */
      { Creer_page_mnemonique ( &rezo_dls );
        Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE, (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
        Chercher_page_notebook ( TYPE_PAGE_MNEMONIQUE, rezo_dls.id, TRUE );
@@ -157,12 +157,10 @@
   }
 /******************************************************************************************************************************/
 /* Menu_editer_all_mnemo: Demande l'affichage de la page complete de tous les mnemoniques                                     */
-/* EntrÈe/Sortie: rien                                                                                                        */
+/* Entr√©e/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  static void Menu_editer_all_mnemo ( void )
-  { struct CMD_TYPE_PLUGIN_DLS rezo_dls;
-
-    if (!Chercher_page_notebook (TYPE_PAGE_ALL_MNEMONIQUE, 0, TRUE))                          /* Page deja crÈÈ et affichÈe ? */
+  { if (!Chercher_page_notebook (TYPE_PAGE_ALL_MNEMONIQUE, 0, TRUE))                          /* Page deja cr√©√© et affich√©e ? */
      { Creer_page_all_mnemonique ();
        Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_PAGE_ALL_MNEMONIQUE, NULL, 0 );
        Chercher_page_notebook ( TYPE_PAGE_ALL_MNEMONIQUE, 0, TRUE );
@@ -170,18 +168,18 @@
   }
 /******************************************************************************************************************************/
 /* Menu_refresh_plugin_D.L.S: rafraichir la liste des plugins D.L.S                                                           */
-/* EntrÈe : nÈant                                                                                                             */
-/* Sortie : nÈant                                                                                                             */
+/* Entr√©e : n√©ant                                                                                                             */
+/* Sortie : n√©ant                                                                                                             */
 /******************************************************************************************************************************/
  static void Menu_refresh_plugin_dls ( void )
   { GtkListStore *store;
-    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_plugin_dls) ));      /* RÈcupÈration du model de data */
+    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_plugin_dls) ));      /* R√©cup√©ration du model de data */
     gtk_list_store_clear ( store );
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_PAGE_DLS, NULL, 0 );
   }
 /******************************************************************************************************************************/
-/* CB_effacer_utilisateur: Fonction appelÈe qd on appuie sur un des boutons de l'interface                                    */
-/* EntrÈe: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* CB_effacer_utilisateur: Fonction appel√©e qd on appuie sur un des boutons de l'interface                                    */
+/* Entr√©e: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
 /* sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean CB_effacer_plugin_dls ( GtkDialog *dialog, gint reponse, gboolean edition )
@@ -198,7 +196,7 @@
             lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
             while ( lignes )
              { gchar *nom;
-               gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnÈe */
+               gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionn√©e */
                gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_dls.id, -1 );        /* Recup du id */
                gtk_tree_model_get( store, &iter, COLONNE_NOM, &nom, -1 );
 
@@ -211,7 +209,7 @@
                lignes = lignes->next;
              }
             g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-            g_list_free (lignes);                                                   /* Liberation mÈmoire */
+            g_list_free (lignes);                                                   /* Liberation m√©moire */
             break;
        default: break;
      }
@@ -220,14 +218,14 @@
   }
 /******************************************************************************************************************************/
 /* Menu_ajouter_synoptique: Ajout d'un synoptique                                                                             */
-/* EntrÈe: rien                                                                                                               */
+/* Entr√©e: rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Menu_ajouter_plugin_dls ( void )
   { Menu_ajouter_editer_plugin_dls( NULL ); }
 /******************************************************************************************************************************/
 /* Menu_effacer_plugin_dls: Retrait d'un plugin dls                                                                           */
-/* EntrÈe: rien                                                                                                               */
+/* Entr√©e: rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Menu_effacer_plugin_dls ( void )
@@ -238,7 +236,7 @@
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_plugin_dls) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                       /* Si rien n'est selectionnÈ */
+    if (!nbr) return;                                                       /* Si rien n'est selectionn√© */
 
     dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client),
                                       GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
@@ -250,8 +248,8 @@
     gtk_widget_show_all( dialog );
   }
 /******************************************************************************************************************************/
-/* Menu_editer_source_dls: Demande d'edition du plugin_dls selectionnÈ                                                        */
-/* EntrÈe: rien                                                                                                               */
+/* Menu_editer_source_dls: Demande d'edition du plugin_dls selectionn√©                                                        */
+/* Entr√©e: rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Menu_editer_source_dls ( void )
@@ -267,10 +265,10 @@
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_plugin_dls) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                                            /* Si rien n'est selectionnÈ */
+    if (!nbr) return;                                                                            /* Si rien n'est selectionn√© */
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnÈe */
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionn√©e */
     gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_dls.id, -1 );                                          /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, -1 );                                         /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_PACKAGE, &package, -1 );                                         /* Recup du id */
@@ -283,7 +281,7 @@
     g_free( nom );
     g_free( tech_id );
     g_free( package );
-    if (!Chercher_page_notebook (TYPE_PAGE_SOURCE_DLS, rezo_dls.id, TRUE))/* Page deja crÈÈ et affichÈe ? */
+    if (!Chercher_page_notebook (TYPE_PAGE_SOURCE_DLS, rezo_dls.id, TRUE))/* Page deja cr√©√© et affich√©e ? */
      { Creer_page_source_dls ( &rezo_dls );
      Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_SOURCE_DLS, (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
      }
@@ -291,8 +289,8 @@
     g_list_free (lignes);
   }
 /******************************************************************************************************************************/
-/* Menu_editer_plugin_dls: Demande d'edition du plugin_dls selectionnÈ                                                        */
-/* EntrÈe: rien                                                                                                               */
+/* Menu_editer_plugin_dls: Demande d'edition du plugin_dls selectionn√©                                                        */
+/* Entr√©e: rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Menu_editer_plugin_dls ( void )
@@ -308,10 +306,10 @@
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_plugin_dls) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                        /* Si rien n'est selectionnÈ */
+    if (!nbr) return;                                                        /* Si rien n'est selectionn√© */
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnÈe */
+    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionn√©e */
     gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_dls.id, -1 );               /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_NOM, &nom, -1 );
 
@@ -324,8 +322,8 @@
   }
 /******************************************************************************************************************************/
 /* Menu_exporter_message: Exportation de la base dans un fichier texte                                                        */
-/* EntrÈe: nÈant                                                                                                              */
-/* Sortie: NÈant                                                                                                              */
+/* Entr√©e: n√©ant                                                                                                              */
+/* Sortie: N√©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Menu_exporter_plugin_dls( void )
   { GtkSourcePrintCompositor *compositor;
@@ -340,7 +338,7 @@
     valide = gtk_tree_model_get_iter_first( store, &iter );
     if (!valide) return;
 
-    buffer = gtk_source_buffer_new( NULL );                               /* CrÈation d'un nouveau buffer */
+    buffer = gtk_source_buffer_new( NULL );                               /* Cr√©ation d'un nouveau buffer */
     gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), "active",
                                 "background", "green", "foreground", "white", NULL
                                );
@@ -412,7 +410,7 @@
   }
 /******************************************************************************************************************************/
 /* Gerer_popup_plugin_dls: Gestion du menu popup quand on clique droite sur la liste des plugin_dls                           */
-/* EntrÈe: la liste(widget), l'evenement bouton, et les data                                                                  */
+/* Entr√©e: la liste(widget), l'evenement bouton, et les data                                                                  */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean Gerer_popup_plugin_dls ( GtkWidget *widget, GdkEventButton *event, gpointer data )
@@ -439,7 +437,7 @@
              gtk_tree_path_free( path );
              ya_selection = TRUE;
            }
-        } else ya_selection = TRUE;                              /* ya bel et bien qqchose de selectionnÈ */
+        } else ya_selection = TRUE;                              /* ya bel et bien qqchose de selectionn√© */
 
        gnome_popup_menu_do_popup_modal( (ya_selection ? Popup_select : Popup_nonselect),
                                         NULL, NULL, event, NULL, F_client );
@@ -450,8 +448,8 @@
     return(FALSE);
   }
 /******************************************************************************************************************************/
-/* Creer_page_plugin_dls: Creation de la page du notebook consacrÈe aux plugins plugin_dlss watchdog                          */
-/* EntrÈe: rien                                                                                                               */
+/* Creer_page_plugin_dls: Creation de la page du notebook consacr√©e aux plugins plugin_dlss watchdog                          */
+/* Entr√©e: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Creer_page_plugin_dls( void )
@@ -478,7 +476,7 @@
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                                    /* Id du plugin */
-                                              G_TYPE_BOOLEAN,                                                     /* ActivÈ ? */
+                                              G_TYPE_BOOLEAN,                                                     /* Activ√© ? */
                                               G_TYPE_STRING,                                                       /* Package */
                                               G_TYPE_STRING,                                                   /* Groupe/Page */
                                               G_TYPE_STRING,                                                     /* Shortname */
@@ -654,9 +652,9 @@
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Plugins D.L.S") ) );
   }
 /******************************************************************************************************************************/
-/* Rafraichir_visu_plugin_dls: Rafraichissement d'un plugin_dls la liste ‡ l'Ècran                                            */
-/* EntrÈe: une reference sur le plugin_dls                                                                                    */
-/* Sortie: NÈant                                                                                                              */
+/* Rafraichir_visu_plugin_dls: Rafraichissement d'un plugin_dls la liste √† l'√©cran                                            */
+/* Entr√©e: une reference sur le plugin_dls                                                                                    */
+/* Sortie: N√©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Rafraichir_visu_plugin_dls( GtkTreeIter *iter, struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
   { gchar groupe_page[512];
@@ -685,8 +683,8 @@
   }
 /******************************************************************************************************************************/
 /* Afficher_un_plugin_dls: Ajoute un plugin_dls dans la liste des plugin_dls                                                  */
-/* EntrÈe: une reference sur le plugin_dls                                                                                    */
-/* Sortie: NÈant                                                                                                              */
+/* Entr√©e: une reference sur le plugin_dls                                                                                    */
+/* Sortie: N√©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
   { GtkListStore *store;
@@ -699,8 +697,8 @@
   }
 /******************************************************************************************************************************/
 /* Cacher_un_plugin_dls: Enleve un plugin_dls de la liste des plugin_dls                                                      */
-/* EntrÈe: une reference sur le plugin_dls                                                                                    */
-/* Sortie: NÈant                                                                                                              */
+/* Entr√©e: une reference sur le plugin_dls                                                                                    */
+/* Sortie: N√©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_cacher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
   { GtkTreeModel *store;
@@ -725,8 +723,8 @@
   }
 /******************************************************************************************************************************/
 /* Proto_rafrachir_un_plugin_dls: Rafraichissement du plugin_dls en parametre                                                 */
-/* EntrÈe: une reference sur le plugin_dls                                                                                    */
-/* Sortie: NÈant                                                                                                              */
+/* Entr√©e: une reference sur le plugin_dls                                                                                    */
+/* Sortie: N√©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_rafraichir_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
   { GtkTreeModel *store;

@@ -72,9 +72,11 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  static void Gerer_arrive_MSGxxx_dls_on ( gint num )
-  { struct CMD_TYPE_MESSAGE *msg;
+  { gchar chaine[80], *date_create;
+    struct CMD_TYPE_MESSAGE *msg;
     struct CMD_TYPE_HISTO histo;
     struct timeval tv;
+    struct tm *temps;
 
     msg = Rechercher_messageDB( num );
     if (!msg)
@@ -90,10 +92,13 @@
        return;
      }
 /***************************************** Création de la structure interne de stockage ***************************************/
+    histo.alive = TRUE;
     gettimeofday( &tv, NULL );
-    histo.alive            = TRUE;
-    histo.date_create_sec  = tv.tv_sec;
-    histo.date_create_usec = tv.tv_usec;
+    temps = localtime( (time_t *)&tv.tv_sec );
+    strftime( chaine, sizeof(chaine), "%F %T", temps );
+    date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
+    g_snprintf( histo.date_create, sizeof(histo.date_create), "%s.%02d", date_create, (gint)tv.tv_usec/10000 );
+    g_free( date_create );
     g_snprintf( histo.nom_ack, sizeof(histo.nom_ack), "None" );
     Ajouter_histo_msgsDB( &histo );                                                                    /* Si ajout dans DB OK */
 
@@ -131,9 +136,11 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  static void Gerer_arrive_MSG_event_dls_on ( struct DLS_MESSAGES *msg )
-  { struct CMD_TYPE_MESSAGE *message;
+  { gchar chaine[80], *date_create;
+    struct CMD_TYPE_MESSAGE *message;
     struct CMD_TYPE_HISTO histo;
     struct timeval tv;
+    struct tm *temps;
 
     message = Rechercher_messageDB_par_acronyme ( msg->tech_id, msg->acronyme );
     if (!message) return;
@@ -148,10 +155,13 @@
        return;
      }
 /***************************************** Création de la structure interne de stockage ***************************************/
-    gettimeofday( &tv, NULL );
     histo.alive            = TRUE;
-    histo.date_create_sec  = tv.tv_sec;
-    histo.date_create_usec = tv.tv_usec;
+    gettimeofday( &tv, NULL );
+    temps = localtime( (time_t *)&tv.tv_sec );
+    strftime( chaine, sizeof(chaine), "%F %T", temps );
+    date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
+    g_snprintf( histo.date_create, sizeof(histo.date_create), "%s.%02d", date_create, (gint)tv.tv_usec/10000 );
+    g_free( date_create );
     g_snprintf( histo.nom_ack, sizeof(histo.nom_ack), "None" );
     Ajouter_histo_msgsDB( &histo );                                                                    /* Si ajout dans DB OK */
 
@@ -166,7 +176,10 @@
 /******************************************************************************************************************************/
  static void Gerer_arrive_MSGxxx_dls_off ( gint num )
   { struct CMD_TYPE_HISTO histo;
+    gchar chaine[80], *date_fin;
     struct CMD_TYPE_MESSAGE *msg;
+    struct timeval tv;
+    struct tm *temps;
     GSList *liste;
 
     msg = Rechercher_messageDB( num );
@@ -177,7 +190,12 @@
     g_free( msg );                                                                     /* On a plus besoin de cette reference */
 
     histo.alive   = FALSE;
-    time ( (time_t *)&histo.date_fin );
+    gettimeofday( &tv, NULL );
+    temps = localtime( (time_t *)&tv.tv_sec );
+    strftime( chaine, sizeof(chaine), "%F %T", temps );
+    date_fin = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
+    g_snprintf( histo.date_fin, sizeof(histo.date_fin), "%s.%02d", date_fin, (gint)tv.tv_usec/10000 );
+    g_free( date_fin );
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );                           /* Retrait de la liste des messages en REPEAT */
     liste = Partage->com_msrv.liste_msg_repeat;
@@ -205,7 +223,10 @@
 /******************************************************************************************************************************/
  static void Gerer_arrive_MSG_event_dls_off ( struct DLS_MESSAGES *msg )
   { struct CMD_TYPE_MESSAGE *message;
+    gchar chaine[80], *date_fin;
     struct CMD_TYPE_HISTO histo;
+    struct timeval tv;
+    struct tm *temps;
 
     message = Rechercher_messageDB_par_acronyme ( msg->tech_id, msg->acronyme );
     if (!message) return;
@@ -215,7 +236,12 @@
     g_free( message );                                                                 /* On a plus besoin de cette reference */
 
     histo.alive  = FALSE;
-    time ( (time_t *)&histo.date_fin );
+    gettimeofday( &tv, NULL );
+    temps = localtime( (time_t *)&tv.tv_sec );
+    strftime( chaine, sizeof(chaine), "%F %T", temps );
+    date_fin = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
+    g_snprintf( histo.date_fin, sizeof(histo.date_fin), "%s.%02d", date_fin, (gint)tv.tv_usec/10000 );
+    g_free( date_fin );
 
     Modifier_histo_msgsDB ( &histo );
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );

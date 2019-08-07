@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -33,7 +33,7 @@
  #include <gtksourceview/gtksourceprintcompositor.h>
  #include <curl/curl.h>
  #include <json-glib/json-glib.h>
-  
+
  #include "Reseaux.h"
  #include "trame.h"
 
@@ -117,7 +117,7 @@
     GtkWidget *Check_nom_ack;
     GtkWidget *Entry_nom_ack;
     GtkWidget *Check_libelle;
-    GtkWidget *Entry_libelle; 
+    GtkWidget *Entry_libelle;
     GtkWidget *Check_groupage;
     GtkWidget *Entry_groupage;
     GtkWidget *Check_debut;
@@ -126,7 +126,7 @@
     GtkWidget *Date_fin;
     gint page_id;
   };
-  
+
  struct TYPE_INFO_ATELIER
   { struct CMD_TYPE_SYNOPTIQUE syn;                                                    /* Id du synoptique en cours d'edition */
                                                                     /* Interface de plus haut niveau: affichage du synoptique */
@@ -181,7 +181,7 @@
  extern GtkWidget *Bobouton ( GdkPixmap *pix, GdkBitmap *bitmap, gchar *cadran );
  extern gint Nbr_page_type ( gint type );
  extern struct PAGE_NOTEBOOK *Page_actuelle ( void );
- 
+
  extern void Connecter ( void );                                                                            /* Dans connect.c */
  extern gboolean Connecter_ssl ( void );
  extern gboolean Connecter_au_serveur ( void );
@@ -209,10 +209,10 @@
 
  extern gboolean Timer ( gpointer data );                                                                     /* Dans timer.c */
 
- extern void Proto_afficher_un_admin( struct CMD_TYPE_ADMIN *admin );                                         /* Dans admin.c */ 
+ extern void Proto_afficher_un_admin( struct CMD_TYPE_ADMIN *admin );                                         /* Dans admin.c */
  extern void Creer_page_admin( void );
 
- extern void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );                      /* Dans liste_plugin_dls.c */ 
+ extern void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );                      /* Dans liste_plugin_dls.c */
  extern void Proto_cacher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern void Proto_rafraichir_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern void Creer_page_plugin_dls( void );
@@ -228,7 +228,7 @@
  extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );                                   /* Dans liste_histo.c */
  extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
  extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
- extern void Creer_page_histo( void );                               
+ extern void Creer_page_histo( void );
 
  extern void Proto_afficher_un_message( struct CMD_TYPE_MESSAGE *message );                           /* Dans liste_message.c */
  extern void Proto_cacher_un_message( struct CMD_TYPE_MESSAGE *message );
@@ -292,7 +292,7 @@
  extern void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                                    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern gint Nouveau_groupe ( void );
- 
+
                                                                                                   /* Dans atelier_selection.c */
  extern void Tout_deselectionner ( struct TYPE_INFO_ATELIER *infos );
  extern gboolean Tester_selection ( struct TYPE_INFO_ATELIER *infos, gint groupe );
@@ -355,10 +355,6 @@
  extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
  extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *camera_sup );
 
- extern void Creer_page_liste_histo_msgs( void );                                                  /* Dans liste_histo_msgs.c */
- extern void Proto_effacer_liste_histo_msgs( gint page_id );
- extern void Proto_afficher_un_histo_msgs( struct CMD_RESPONSE_HISTO_MSGS *response );
- 
                                                                                                         /* Dans supervision.c */
  extern void Creer_page_supervision( gchar *libelle, guint syn_id );
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
@@ -378,7 +374,7 @@
 
                                                                                                 /* Dans supervision_comment.c */
  extern void Proto_afficher_un_comment_supervision( struct CMD_TYPE_COMMENT *rezo_comment );
- 
+
                                                                                              /* Dans supervision_passerelle.c */
  extern void Proto_afficher_une_passerelle_supervision( struct CMD_TYPE_PASSERELLE *rezo_pass );
  extern void Changer_vue_directe ( guint num_syn );
@@ -433,7 +429,7 @@
  extern void Proto_afficher_un_camera( struct CMD_TYPE_CAMERA *camera );                               /* Dans liste_camera.c */
  extern void Proto_cacher_un_camera( struct CMD_TYPE_CAMERA *camera );
  extern void Proto_rafraichir_un_camera( struct CMD_TYPE_CAMERA *camera );
- extern void Creer_page_camera( void );                               
+ extern void Creer_page_camera( void );
  extern gchar *Type_camera_vers_string ( guint type );
  extern void Creer_liste_camera ( GtkWidget **Liste_camera, GtkWidget **Scroll );
  extern  void Rafraichir_visu_camera( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_CAMERA *camera );
@@ -446,7 +442,7 @@
  extern void Proto_afficher_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo );
  extern void Proto_cacher_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo );
  extern void Proto_rafraichir_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo );
- 
+
  extern void Menu_ajouter_editer_horloge ( struct CMD_TYPE_MNEMO_FULL *edit_horloge, gint id_mnemo);  /* Dans ajout_horloge.c */
 
  #endif

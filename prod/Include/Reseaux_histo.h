@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -33,40 +33,20 @@
     gboolean alive;                                                                 /* Le message est-il encore d'actualité ? */
     struct CMD_TYPE_MESSAGE msg;
     gchar nom_ack [ NBR_CARAC_LOGIN_UTF8 + 1 ];
-    guint date_create_sec;
-    guint date_create_usec;
-    guint date_fixe;
-    guint date_fin;
+    gchar date_create[32];
+    gchar date_fixe[32];
+    gchar date_fin[32];
   };
 
- struct CMD_RESPONSE_HISTO_MSGS
-  { struct CMD_TYPE_HISTO histo;
-    gint32 page_id;                    /* Numéro de la page du client sur laquelle afficher les résultats */
-  };
-
- struct CMD_CRITERE_HISTO_MSGS
-  { guint  num;                                                                /* Numero unique historique */
-    gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  groupage[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    guint  type;                                                       /* Etat, prealarme, defaut, alarme */
-    guint  date_create_min;
-    guint  date_create_max;
-    gchar  nom_ack[NBR_CARAC_LOGIN_UTF8+1];
-    gint32 page_id;
-  };
-
- enum 
+ enum
   { SSTAG_SERVEUR_ADDPROGRESS_HISTO,
     SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN,
     SSTAG_SERVEUR_SHOW_HISTO,
     SSTAG_SERVEUR_DEL_HISTO,
-    
+
     SSTAG_CLIENT_ACK_HISTO,
     SSTAG_SERVEUR_ACK_HISTO,
-    
-    SSTAG_CLIENT_REQUETE_HISTO_MSGS,          /* Le client fait une requete sur l'historique de smessages */
-    SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS,                     /* Reponse à une requete histo_hard */
-    SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS_FIN,
+
   };
 
 #endif

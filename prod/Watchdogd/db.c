@@ -1400,9 +1400,42 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4267)
+     { g_snprintf( requete, sizeof(requete), "alter table histo_msgs ADD `date_create` DATETIME(2)");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "update histo_msgs set date_create = FROM_UNIXTIME(CONCAT(date_create_sec,'.',date_create_usec));" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table histo_msgs DROP `date_create_sec`;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table histo_msgs DROP `date_create_usec`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table histo_msgs ADD `date_fin_temp` DATETIME(2);" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table histo_msgs ADD `date_fixe_temp` DATETIME(2);" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "update histo_msgs set date_fin_temp = FROM_UNIXTIME(date_fin);" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "update histo_msgs set date_fixe_temp = FROM_UNIXTIME(date_fixe);" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table histo_msgs DROP `date_fin`;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table histo_msgs DROP `date_fixe`;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table histo_msgs CHANGE `date_fin_temp` `date_fin` DATETIME(2);" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table histo_msgs CHANGE `date_fixe_temp` `date_fixe` DATETIME(2);");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 4271)
+     { g_snprintf( requete, sizeof(requete), "alter table msgs ADD `etat` tinyint(1) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 fin:
-    database_version=4230;
+    database_version=4271;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

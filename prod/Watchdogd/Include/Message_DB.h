@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _MESSAGE_DB_H_
  #define _MESSAGE_DB_H_
 
@@ -47,6 +47,7 @@
  extern gboolean Modifier_messageDB( struct CMD_TYPE_MESSAGE *msg );
  extern gboolean Modifier_messageDB_set_mp3 ( gint id, gboolean valeur );
  extern void Charger_messages ( void );
-
+ extern void Charger_confDB_MSG ( void );
+ extern void Updater_confDB_MSG ( void );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

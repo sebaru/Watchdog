@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/connect.c        Gestion du logon user sur module Client Watchdog                                                   */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                           sam 16 fév 2008 19:19:02 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           sam 16 fÃ©v 2008 19:19:02 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * connect.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -32,13 +32,13 @@
  #include <netdb.h>
  #include <fcntl.h>
  #include <openssl/err.h>
- 
+
  #include "Reseaux.h"
  #include "client.h"
  #include "Config_cli.h"
- 
+
  static GtkWidget *F_ident;                                                      /* Fenetre d'identification de l'utilisateur */
-/******************************************** Définitions des prototypes programme ********************************************/
+/******************************************** DÃ©finitions des prototypes programme ********************************************/
  #include "config.h"
  #include "protocli.h"
 
@@ -46,21 +46,21 @@
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
  extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
 /******************************************************************************************************************************/
-/* Deconnecter: libere la mémoire et deconnecte le client                                                                     */
-/* Entrée/Sortie: rien                                                                                                        */
+/* Deconnecter: libere la mÃ©moire et deconnecte le client                                                                     */
+/* EntrÃ©e/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Deconnecter_sale ( void )
   { Fermer_connexion(Client.connexion);
     Client.connexion = NULL;
-    if (Client.ssl_ctx) SSL_CTX_free(Client.ssl_ctx);                                           /* Libération du contexte SSL */
+    if (Client.ssl_ctx) SSL_CTX_free(Client.ssl_ctx);                                           /* LibÃ©ration du contexte SSL */
     Client.ssl_ctx = NULL;
     Client.mode = DISCONNECTED;
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode DISCONNECTED" );
     Effacer_pages();                                                                          /* Efface les pages du notebook */
   }
 /******************************************************************************************************************************/
-/* Deconnecter: libere la mémoire et deconnecte le client                                                                     */
-/* Entrée/Sortie: rien                                                                                                        */
+/* Deconnecter: libere la mÃ©moire et deconnecte le client                                                                     */
+/* EntrÃ©e/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Deconnecter ( void )
   { if (!Client.connexion) return;
@@ -70,7 +70,7 @@
   }
 /******************************************************************************************************************************/
 /* Envoi_serveur: Envoi d'un paquet au serveur                                                                                */
-/* Entrée: des infos sur le paquet à envoyer                                                                                  */
+/* EntrÃ©e: des infos sur le paquet Ã  envoyer                                                                                  */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  gboolean Envoi_serveur ( gint tag, gint ss_tag, gchar *buffer, gint taille )
@@ -84,19 +84,17 @@
   }
 /******************************************************************************************************************************/
 /* Envoyer_authentification: envoi de l'authentification cliente au serveur                                                   */
-/* Entrée/Sortie: rien                                                                                                        */
+/* EntrÃ©e/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Envoyer_authentification ( void )
-  { pthread_t tid;
-    
-    g_snprintf( Client.ident.version, sizeof(Client.ident.version), "%s", VERSION );
+  { g_snprintf( Client.ident.version, sizeof(Client.ident.version), "%s", VERSION );
     if (!Client.cli_certif)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                 "Envoyer_identification: sending login(%s)/password(XX) and version number(%s)",
                  Client.ident.nom, Client.ident.version
                );
      } else
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                 "Envoyer_identification: sending login(%s) and version number(%s). Certificate already sent",
                  Client.ident.nom, Client.ident.version
                );
@@ -115,8 +113,8 @@
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
-/* Entrée: une nom et un password                                                                                             */
-/* Sortie: les variables globales sont initialisées, FALSE si pb                                                              */
+/* EntrÃ©e: une nom et un password                                                                                             */
+/* Sortie: les variables globales sont initialisÃ©es, FALSE si pb                                                              */
 /******************************************************************************************************************************/
  gboolean Connecter_au_serveur ( void )
   { struct addrinfo *result, *rp;
@@ -138,7 +136,7 @@
     s = getaddrinfo( Client.host, service, &hints, &result);
     if (s != 0)
      { Log( _("DNS failed") );
-       Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
+       Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
                  _("Connecter_au_serveur: DNS failed %s(%s)"), Client.host, gai_strerror(s) );
        return(FALSE);
      }
@@ -152,7 +150,7 @@
      {
         connexion = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (connexion == -1)
-         { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
+         { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
                     "Connecter_au_serveur: Socket creation failed" );
            continue;
          }
@@ -164,7 +162,7 @@
           break;                  /* Success */
         }
        else
-        { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
+        { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
                     "Connecter_au_serveur: connexion refused by server %s (%s) family=%d",
                     Client.host, service, rp->ai_family );
         }
@@ -172,7 +170,7 @@
      }
     freeaddrinfo(result);
     if (rp == NULL)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
                     "Connecter_au_serveur: all family connexion failed for server %s (%s)",
                     Client.host, service );
        Log( "Connexion refused by server" );
@@ -181,10 +179,10 @@
 
     Client.connexion = Nouvelle_connexion( Config_cli.log, connexion, -1 );                       /* Creation de la structure */
     if (!Client.connexion)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, 
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
                  _("Connecter_au_serveur: cannot create new connexion") );
        Deconnecter();
-       return(FALSE);       
+       return(FALSE);
      }
 
     Client.mode = ATTENTE_INTERNAL;
@@ -194,7 +192,7 @@
   }
 /******************************************************************************************************************************/
 /* Init_SSL: Initialisation de l'environnement SSL                                                                            */
-/* Entrée: rien                                                                                                               */
+/* EntrÃ©e: rien                                                                                                               */
 /* Sortie: un contexte SSL                                                                                                    */
 /******************************************************************************************************************************/
  static SSL_CTX *Init_ssl ( void )
@@ -204,17 +202,17 @@
     FILE *fd;
 
     SSL_load_error_strings();                                                                        /* Initialisation de SSL */
-    SSL_library_init();                                                                 /* Init SSL et PRNG: number générator */
+    SSL_library_init();                                                                 /* Init SSL et PRNG: number gÃ©nÃ©rator */
 
-    ssl_ctx = SSL_CTX_new ( TLS_client_method() );                                              /* Création d'un contexte SSL */
+    ssl_ctx = SSL_CTX_new ( TLS_client_method() );                                              /* CrÃ©ation d'un contexte SSL */
     if (!ssl_ctx)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, 
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
                  "Init_ssl : Error creation SSL_CTX_new %s", ERR_error_string( ERR_get_error(), NULL ) );
        return( NULL );
      }
 
-    SSL_CTX_set_mode( ssl_ctx, SSL_MODE_AUTO_RETRY );                                                    /* Mode non bloquant */       
-    SSL_CTX_set_options( ssl_ctx, SSL_OP_SINGLE_DH_USE );                                        /* Options externe à OpenSSL */
+    SSL_CTX_set_mode( ssl_ctx, SSL_MODE_AUTO_RETRY );                                                    /* Mode non bloquant */
+    SSL_CTX_set_options( ssl_ctx, SSL_OP_SINGLE_DH_USE );                                        /* Options externe Ã  OpenSSL */
 
     retour = SSL_CTX_load_verify_locations( ssl_ctx, Config_cli.ssl_file_ca, NULL );
     if (retour != 1)
@@ -225,7 +223,7 @@
        return(NULL);
      } else Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                      "Init_ssl : load verify locations OK (file %s)", Config_cli.ssl_file_ca );
-       
+
     SSL_CTX_set_verify( ssl_ctx, SSL_VERIFY_PEER, NULL );                             /* Type de verification des certificats */
 
     g_snprintf( nom_fichier, sizeof(nom_fichier), "%s.crt", Client.ident.nom );
@@ -254,7 +252,7 @@
         }
        Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                  "Init_ssl : Use of certificate %s", Nom_certif(Client.cli_certif) );
-                                                                                                     /* Clef privée du client */
+                                                                                                     /* Clef privÃ©e du client */
        g_snprintf( nom_fichier, sizeof(nom_fichier), "%s.pem", Client.ident.nom );
        retour = SSL_CTX_use_RSAPrivateKey_file( ssl_ctx, nom_fichier, SSL_FILETYPE_PEM );
        if (retour != 1)
@@ -276,10 +274,10 @@
      }
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "SSL initialisation ok" );
     return(ssl_ctx);
-  }  
+  }
 /******************************************************************************************************************************/
-/* Connecter_ssl: Tentative de connexion sécurisée au serveur                                                                 */
-/* Entrée/Sortie: rien                                                                                                        */
+/* Connecter_ssl: Tentative de connexion sÃ©curisÃ©e au serveur                                                                 */
+/* EntrÃ©e/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  gboolean Connecter_ssl ( void )
   { gint retour;
@@ -293,7 +291,7 @@
      }
 
     Client.connexion->ssl = SSL_new( Client.ssl_ctx );                                           /* Instanciation du contexte */
-    if (Client.connexion->ssl)                                                                    /* Si réussite d'allocation */
+    if (Client.connexion->ssl)                                                                    /* Si rÃ©ussite d'allocation */
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "Connecter_ssl: SSL_new OK" );
        SSL_set_fd( Client.connexion->ssl, Client.connexion->socket );
        SSL_set_connect_state( Client.connexion->ssl );                                               /* Nous sommes un client */
@@ -315,13 +313,13 @@ encore:
           */
           goto encore;
         }
-       
+
        Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
                  "Connecter_ssl: SSL_connect get error %d (%s)",
                  retour, ERR_error_string( ERR_get_error(), NULL ) );
        Log( "SSL_connect failed" );
      }
-                                              /* Ici, la connexion a été effectuée, il faut maintenant tester les certificats */
+                                              /* Ici, la connexion a Ã©tÃ© effectuÃ©e, il faut maintenant tester les certificats */
     Client.srv_certif = SSL_get_peer_certificate( Client.connexion->ssl );               /* On prend le certificat du serveur */
     if (!Client.srv_certif)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
@@ -350,7 +348,7 @@ encore:
   }
 /******************************************************************************************************************************/
 /* Identifier: Affiche la fenetre d'identification de l'utilisateur                                                           */
-/* Entrée: rien                                                                                                               */
+/* EntrÃ©e: rien                                                                                                               */
 /* Sortie: kedal                                                                                                              */
 /******************************************************************************************************************************/
  void Connecter ( void )

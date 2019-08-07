@@ -294,8 +294,7 @@
      }
     else
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
-                "%s: Envoi SMS Nok to %s", __func__, telephone );
-     }
+                "%s: Envoi SMS Nok to %s (error '%s')", __func__, telephone, GSM_ErrorString(error) ); }
 
    	error = GSM_TerminateConnection(s); 	                                                             /* Terminate connection */
 	   if (error != ERR_NONE)
@@ -394,7 +393,10 @@
   { struct SMSDB *sms;
     struct DB *db;
 
-    if (sending_is_disabled == TRUE) return;                           /* Si envoi désactivé, on sort de suite de la fonction */
+    if (sending_is_disabled == TRUE)                                   /* Si envoi désactivé, on sort de suite de la fonction */
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Sending is disabled. Dropping message", __func__ );
+       return;
+     }
 
     db = Init_DB_SQL();
     if (!db)
@@ -412,8 +414,11 @@
     while ( (sms = Smsg_Recuperer_smsDB_suite( db )) != NULL)
      { switch (msg->sms)
         { case MSG_SMS_YES:
-               if ( Envoi_sms_gsm   ( msg, sms->user_phone ) == FALSE )
-                { Envoi_sms_smsbox( msg, sms->user_phone ); }
+               if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
+                { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
+                            "%s: Error sending with GSM. Falling back to SMSBOX", __func__ );
+                  Envoi_sms_smsbox( msg, sms->user_phone );
+                }
                break;
           case MSG_SMS_GSM_ONLY:
                Envoi_sms_gsm   ( msg, sms->user_phone );
@@ -476,20 +481,21 @@
      }
 
     if ( ! strcasecmp( texte, "ping" ) )                                                               /* Interfacage de test */
-     { Envoyer_smsg_gsm_text ( "Pong !" );
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Ping Received from '%s'. Sending Pong", __func__, from );
+       Envoyer_smsg_gsm_text ( "Pong !" );
        return;
      }
 
     if ( ! strcasecmp( texte, "smsoff" ) )                                                                      /* Smspanic ! */
      { sending_is_disabled = TRUE;
        Envoyer_smsg_gsm_text ( "Sending SMS is off !" );
-       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is DISABLED", __func__ );
+       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is DISABLED by '%s'", __func__, from );
        return;
      }
 
     if ( ! strcasecmp( texte, "smson" ) )                                                                       /* Smspanic ! */
      { Envoyer_smsg_gsm_text ( "Sending SMS is on !" );
-       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is ENABLED", __func__ );
+       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is ENABLED by '%s'", __func__, from );
        sending_is_disabled = FALSE;
        return;
      }
@@ -500,17 +506,17 @@
      }
 
     if ( db->nbr_result == 0 )                                                              /* Si pas d'enregistrement trouvé */
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: No match found for '%s'", __func__, texte );
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: No Static match found for '%s' Trying dyn one.", __func__, texte );
        g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
        Envoyer_smsg_gsm_text ( chaine );
      }
     else if (db->nbr_result > 1)
-     { g_snprintf(chaine, sizeof(chaine), "Too many events found for '%s'", texte );             /* Envoi de l'erreur si trop */
+     { g_snprintf(chaine, sizeof(chaine), "Too many static events found for '%s'", texte );      /* Envoi de l'erreur si trop */
        Envoyer_smsg_gsm_text ( chaine );
      }
     else
      { while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
-        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Match found for '%s' Type %d Num %d - %s", __func__,
+        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Static Match found for '%s' Type %d Num %d - %s", __func__,
                     texte, mnemo->type, mnemo->num, mnemo->libelle );
 
           if (Config.instance_is_master==TRUE)                                                    /* si l'instance est Maitre */
@@ -548,7 +554,7 @@
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
     else while ( Recuperer_mnemos_DI_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
-       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
+       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Dyn Match found '%s' '%s:%s' - %s", __func__,
                  src_text, tech_id, acro, libelle );
 
        if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
@@ -741,7 +747,7 @@
         { histo = &histo_buf;
 
           if ( histo && histo->alive == TRUE && histo->msg.sms != MSG_SMS_NONE)             /* On n'envoie que si MSGnum == 1 */
-           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,
+           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
                       "%s : Sending msg %d (%s)", __func__, histo->msg.num, histo->msg.libelle_sms );
 
 /*************************************************** Envoi en mode GSM ********************************************************/

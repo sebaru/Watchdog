@@ -120,23 +120,18 @@
         }
 /************************************************* Envoi des chaines cadrans *************************************************/
        if (client->mode == VALIDE && client->Liste_bit_cadrans && client->date_next_send_cadran < Partage->top)
-        { struct CADRAN *cadran;
+        { struct CMD_ETAT_BIT_CADRAN *cadran;
           GSList *liste_cadran;
           client->date_next_send_cadran = Partage->top + TEMPS_UPDATE_CADRAN;
           liste_cadran = client->Liste_bit_cadrans;
-          while (liste_cadran)                                                           /* Pour tous les cadrans du client */
-           { cadran = (struct CADRAN *)liste_cadran->data;
-              if (Tester_update_cadran(cadran))                                      /* Doit-on updater le cadran client ? */
-              { struct CMD_ETAT_BIT_CADRAN *etat;
-                etat = Formater_cadran(cadran);                                          /* Formatage de la chaine associée */
-                if (etat)                                                                                     /* envoi client */
-                 { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CADRAN,
-                                 (gchar *)etat, sizeof(struct CMD_ETAT_BIT_CADRAN) );
-                   g_free(etat);                                                                      /* On libere la mémoire */
-                 }
-                else Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Not enought memory to send cadran" );
+          while (liste_cadran)                                                             /* Pour tous les cadrans du client */
+           { cadran = (struct CMD_ETAT_BIT_CADRAN *)liste_cadran->data;
+             if (Tester_update_cadran(cadran))                                          /* Doit-on updater le cadran client ? */
+              { Formater_cadran(cadran);                                                  /* Formatage de la chaine associée */
+                Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CADRAN,
+                              (gchar *)cadran, sizeof(struct CMD_ETAT_BIT_CADRAN) );
               }
-             liste_cadran = liste_cadran->next;                                              /* On passe au cadran suivant */
+             liste_cadran = liste_cadran->next;                                                 /* On passe au cadran suivant */
            }
         }
 /********************************************** Envoi des histos et des motifs ************************************************/

@@ -35,22 +35,22 @@
 /* Entrée: un cadran                                                                                                         */
 /* Sortie: une structure prete à l'envoie                                                                                     */
 /******************************************************************************************************************************/
- gboolean Tester_update_cadran( struct CADRAN *cadran )
+ gboolean Tester_update_cadran( struct CMD_ETAT_BIT_CADRAN *cadran )
   { if (!cadran) return(FALSE);
     if (cadran->bit_controle!=-1)                                                                   /* Ancienne mode statique */
      { switch(cadran->type)
         { case MNEMO_ENTREE:
-               return( cadran->val_ech != E(cadran->bit_controle) );
+               return( cadran->valeur != E(cadran->bit_controle) );
           case MNEMO_BISTABLE:
-               return( cadran->val_ech != B(cadran->bit_controle) );
+               return( cadran->valeur != B(cadran->bit_controle) );
           case MNEMO_ENTREE_ANA:
                return( TRUE );
           case MNEMO_CPTH:
-               return( cadran->val_ech != Partage->ch[cadran->bit_controle].confDB.valeur );
+               return( cadran->valeur != Partage->ch[cadran->bit_controle].confDB.valeur );
           case MNEMO_CPT_IMP:
-               return( cadran->val_ech != Partage->ci[cadran->bit_controle].confDB.valeur );
+               return( cadran->valeur != Partage->ci[cadran->bit_controle].confDB.valeur );
           case MNEMO_REGISTRE:
-               return( cadran->val_ech != Partage->registre[cadran->bit_controle].val );
+               return( cadran->valeur != Partage->registre[cadran->bit_controle].val );
           default: return(FALSE);
         }
      }
@@ -60,24 +60,24 @@
        case MNEMO_BISTABLE:
         { gboolean valeur;
           valeur = Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-          return( cadran->val_ech != valeur );
+          return( cadran->valeur != valeur );
         }
        case MNEMO_TEMPO:
             return( TRUE );
        case MNEMO_ENTREE_ANA:
         { gfloat valeur;
           valeur = Dls_data_get_AI ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-          return( cadran->val_ech != valeur );
+          return( cadran->valeur != valeur );
         }
        case MNEMO_CPT_IMP:
         { gint valeur;
           valeur = Dls_data_get_CI ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-          return( cadran->val_ech != valeur );
+          return( cadran->valeur != valeur );
         }
        case MNEMO_CPTH:
         { gint valeur;
           valeur = Dls_data_get_CH ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-          return( cadran->val_ech != valeur );
+          return( cadran->valeur != valeur );
         }
        case MNEMO_REGISTRE:
        default: return(FALSE);
@@ -88,10 +88,9 @@
 /* Entrée: un cadran                                                                                                          */
 /* Sortie: une structure prete à l'envoie                                                                                     */
 /******************************************************************************************************************************/
- struct CMD_ETAT_BIT_CADRAN *Formater_cadran( struct CADRAN *cadran )
-  { struct CMD_ETAT_BIT_CADRAN *etat_cadran;
-
-    if (!cadran) return(NULL);
+ void Formater_cadran( struct CMD_ETAT_BIT_CADRAN *cadran )
+  { 
+    if (!cadran) return;
 
     if (cadran->bit_controle==-1 && cadran->dls_data == NULL)
      { struct DB *db;
@@ -111,169 +110,95 @@
         { cadran->type = MNEMO_CPTH;
           Libere_DB_SQL (&db);
         }
-       else return(NULL);                                                                                 /* Si pas trouvé... */
+       else return;                                                                                       /* Si pas trouvé... */
      }
-    etat_cadran = (struct CMD_ETAT_BIT_CADRAN *)g_try_malloc0( sizeof(struct CMD_ETAT_BIT_CADRAN) );
-    if (!etat_cadran) return(NULL);
-
-    etat_cadran->type         = cadran->type;
-    etat_cadran->bit_controle = cadran->bit_controle;
-    g_snprintf( etat_cadran->tech_id, sizeof(etat_cadran->tech_id), "%s", cadran->tech_id );
-    g_snprintf( etat_cadran->acronyme, sizeof(etat_cadran->acronyme), "%s", cadran->acronyme );
 
     switch(cadran->type)
      { case MNEMO_BISTABLE:
+            cadran->in_range = TRUE;
             if (cadran->bit_controle!=-1)
-             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                           "B%04d = %d", cadran->bit_controle, B(cadran->bit_controle)
-                         );
-               cadran->val_ech = B(cadran->bit_controle);
-             }
+             { cadran->valeur = 1.0 * B(cadran->bit_controle); }
             else
-             { gboolean valeur;
-               valeur = Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-               g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "B = %d", valeur );
-               cadran->val_ech = valeur;
-             }
-            return(etat_cadran);
+             { cadran->valeur = 1.0 * Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data ); }
+            break;
        case MNEMO_ENTREE:
+            cadran->in_range = TRUE;
             if (cadran->bit_controle!=-1)
-             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                           "E%04d = %d", cadran->bit_controle, E(cadran->bit_controle)
-                         );
-               cadran->val_ech = B(cadran->bit_controle);
-             }
+             { cadran->valeur = 1.0 * E(cadran->bit_controle); }
             else
-             { gboolean valeur;
-               valeur = Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-               g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "E = %d", valeur );
-               cadran->val_ech = valeur;
-             }
-            return(etat_cadran);
+             { cadran->valeur = 1.0 * Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data ); }
+            break;
        case MNEMO_ENTREE_ANA:
             if(cadran->bit_controle!=-1)
-             { cadran->val_ech = Partage->ea[cadran->bit_controle].val_ech; }
+             { cadran->valeur = Partage->ea[cadran->bit_controle].val_ech;
+               cadran->in_range = EA_inrange(cadran->bit_controle);
+               g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", Partage->ea[cadran->bit_controle].confDB.unite );
+             }
             else
-             { cadran->val_ech = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+             { struct DLS_AI *ai;
+               cadran->valeur = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
                if (!cadran->dls_data)                            /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%s:%s", cadran->tech_id, cadran->acronyme );
-                  return(etat_cadran);
+                { cadran->in_range = FALSE;
+                  break;
                 }
+               ai = (struct DLS_AI *)cadran->dls_data;
+               cadran->in_range = ai->inrange;
+               cadran->valeur = ai->val_ech;
+               g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ai->unite );
              }
-            if ( cadran->bit_controle!=-1 && EA_inrange(cadran->bit_controle))
-             { if(-1000000.0<cadran->val_ech && cadran->val_ech<1000000.0)
-                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                             "%6.2f %s", cadran->val_ech,
-                              Partage->ea[cadran->bit_controle].confDB.unite
-                            );
-                }
-               else
-                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                             "%8.0f %s", cadran->val_ech,
-                              Partage->ea[cadran->bit_controle].confDB.unite
-                            );
-                }
-             }
-            else if ( cadran->bit_controle==-1 )
-             { if(-1000000.0<cadran->val_ech && cadran->val_ech<1000000.0)
-                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                             "%6.2f %s", cadran->val_ech, ((struct DLS_AI *)cadran->dls_data)->unite
-                            );
-                }
-               else
-                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                             "%8.0f %s", cadran->val_ech, ((struct DLS_AI *)cadran->dls_data)->unite
-                            );
-                }
-             }
-            else
-             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), " - pb comm - " ); }
-            return(etat_cadran);
+            break;
        case MNEMO_CPTH:
-             { if(cadran->bit_controle!=-1)
-                { cadran->val_ech = (time_t)Partage->ch[cadran->bit_controle].confDB.valeur; }
+             { cadran->in_range = TRUE;
+               if(cadran->bit_controle!=-1)
+                { cadran->valeur = (time_t)Partage->ch[cadran->bit_controle].confDB.valeur; }
                else
-                { cadran->val_ech = Dls_data_get_CH(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-                  if (!cadran->dls_data)                            /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-                   { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%s:%s", cadran->tech_id, cadran->acronyme );
-                     return(etat_cadran);
-                   }
-                }
-               if (cadran->val_ech < 60)
-                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%02d min", (int)cadran->val_ech ); }
-                else
-                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%05dh", (int)cadran->val_ech/60 ); }
+                { cadran->valeur = Dls_data_get_CH(cadran->tech_id, cadran->acronyme, &cadran->dls_data ); }
              }
             break;
        case MNEMO_CPT_IMP:
-             { gfloat valeur;
-               gchar *format;
-               if(cadran->bit_controle!=-1)
-                { valeur = Partage->ci[cadran->bit_controle].confDB.valeur;
-                  valeur = valeur * (gfloat)Partage->ci[cadran->bit_controle].confDB.multi;               /* Multiplication ! */
-                  switch (Partage->ci[cadran->bit_controle].confDB.type)
-                   { case CI_TOTALISATEUR: format = "%8.0f %s"; break;
-                     default:              format = "%8.2f %s"; break;
-                   }
-                  g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), format, valeur,
-                              Partage->ci[cadran->bit_controle].confDB.unite
-                            );
-                  cadran->val_ech = Partage->ci[cadran->bit_controle].confDB.valeur;
+             { if(cadran->bit_controle!=-1)
+                { cadran->valeur = Partage->ci[cadran->bit_controle].confDB.valeur;
+                  cadran->valeur *= (gfloat)Partage->ci[cadran->bit_controle].confDB.multi;               /* Multiplication ! */
+                  g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", Partage->ci[cadran->bit_controle].confDB.unite );
+                  cadran->in_range = TRUE;
                 }
                else
-                { cadran->val_ech = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+                { cadran->valeur = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
                   struct DLS_CI *ci=cadran->dls_data;
                   if (!ci)                                       /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-                   { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "-- ?? --" );
-                     return(etat_cadran);
+                   { cadran->in_range = FALSE;
+                     break;
                    }
-                  g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%8.2f %s",
-                              cadran->val_ech * ci->multi, ci->unite
-                            );
+                  cadran->in_range = TRUE;
+                  cadran->valeur *= ci->multi;                                                            /* Multiplication ! */
+                  g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ci->unite );
                 }
              }
             break;
        case MNEMO_REGISTRE:
             if(cadran->bit_controle==-1) break;
-            cadran->val_ech = Partage->registre[cadran->bit_controle].val;
-            if(-1000000.0<cadran->val_ech && cadran->val_ech<1000000.0)
-             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%6.2f %s", cadran->val_ech,
-                           Partage->registre[cadran->bit_controle].confDB.unite
-                         );
-             }
-            else
-             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%8.0f %s", cadran->val_ech,
-                           Partage->registre[cadran->bit_controle].confDB.unite
-                         );
-             }
-            return(etat_cadran);
+            cadran->valeur = Partage->registre[cadran->bit_controle].val;
+            g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", Partage->registre[cadran->bit_controle].confDB.unite );
+            cadran->in_range = TRUE;
+            break;
        case MNEMO_TEMPO:
             if(cadran->bit_controle!=-1) break;
             Dls_data_get_tempo ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
             struct DLS_TEMPO *tempo = cadran->dls_data;
-            if (!tempo) break;
-
+            if (!tempo)
+             { cadran->in_range = FALSE;
+               break;
+             }
+            cadran->in_range = FALSE;
+               
             if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON)                     /* Temporisation Retard en train de compter */
-             { gint src, heure, minute, seconde;
-               src = (tempo->date_on - Partage->top)/10;
-               heure = src / 3600;
-               minute = (src - heure*3600) / 60;
-               seconde = src - heure*3600 - minute*60;
-               g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%02d:%02d:%02d", heure, minute, seconde );
-             }
+             { cadran->valeur = (tempo->date_on - Partage->top); }
             else if (tempo->status == DLS_TEMPO_NOT_COUNTING)                  /* Tempo ne compte pas: on affiche la consigne */
-             { gint src, heure, minute, seconde;
-               src = tempo->delai_on/10;
-               heure = src / 3600;
-               minute = (src - heure*3600) / 60;
-               seconde = src - heure*3600 - minute*60;
-               g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%02d:%02d:%02d", heure, minute, seconde );
-             }
-            return(etat_cadran);
+             { cadran->valeur = tempo->delai_on; }
+            break;
        default:
-            g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "unknown" );
+            cadran->in_range = FALSE;
             break;
       }
-     return(etat_cadran);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

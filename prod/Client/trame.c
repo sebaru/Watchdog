@@ -7,7 +7,7 @@
  * trame.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 
  #define FACTEUR_PI 3.141592654/180.0
 
- #include <gnome.h>                                                             /* Bibliothèque graphique */
+ #include <gnome.h>                                                             /* BibliothÃ¨que graphique */
  #include <gdk-pixbuf/gdk-pixbuf.h>                                          /* Gestion des images/motifs */
  #include <gdk-pixbuf/gdk-pixdata.h>                                         /* Gestion des images/motifs */
  #include <goocanvas.h>                                                            /* Interface GooCanvas */
@@ -40,7 +40,7 @@
 
  #include "trame.h"
 /* #define DEBUG_TRAME*/
-/********************************* Définitions des prototypes programme ***********************************/
+/********************************* DÃ©finitions des prototypes programme ***********************************/
  #include "Config_cli.h"
  #include "protocli.h"
  #include "client.h"
@@ -57,7 +57,7 @@
 
 /**********************************************************************************************************/
 /* Reduire_en_vignette: Met un motif aux dimensions de vignette                                           */
-/* Entrée: Le trame_motif souhaité                                                                        */
+/* EntrÃ©e: Le trame_motif souhaitÃ©                                                                        */
 /* Sortie: niet                                                                                           */
 /**********************************************************************************************************/
  void Reduire_en_vignette ( struct CMD_TYPE_MOTIF *motif )
@@ -76,7 +76,7 @@
   }
 /**********************************************************************************************************/
 /* Trame_new_item: Renvoi un nouveau item, completement vierge                                            */
-/* Entrée: kedal                                                                                          */
+/* EntrÃ©e: kedal                                                                                          */
 /* Sortie: une structure TRAME_ITEM_MOTIF                                                                 */
 /**********************************************************************************************************/
  struct TRAME_ITEM_MOTIF *Trame_new_item ( void )
@@ -89,7 +89,7 @@
   }
 /**********************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
-/* Entrée: un item                                                                                        */
+/* EntrÃ©e: un item                                                                                        */
 /* Sortie: rieng                                                                                          */
 /**********************************************************************************************************/
  void Trame_del_item ( struct TRAME_ITEM_MOTIF *trame_motif )
@@ -104,7 +104,7 @@
   }
 /**********************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
-/* Entrée: un item                                                                                        */
+/* EntrÃ©e: un item                                                                                        */
 /* Sortie: rieng                                                                                          */
 /**********************************************************************************************************/
  void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
@@ -112,46 +112,47 @@
     if (trame_camera_sup->item_groupe) goo_canvas_item_remove( trame_camera_sup->item_groupe );
     if (trame_camera_sup->select_mi) goo_canvas_item_remove( trame_camera_sup->select_mi );
   }
-/**********************************************************************************************************/
-/* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
-/* Entrée: un item                                                                                        */
-/* Sortie: rieng                                                                                          */
-/**********************************************************************************************************/
- void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran )
-  { if (trame_cadran->item_groupe) goo_canvas_item_remove( trame_cadran->item_groupe );
-  }
 /******************************************************************************************************************************/
-/* Trame_del_svg: Libere la mémoire liée à un objet de type SVG                                                               */
-/* Entrée: le SVG                                                                                                             */
+/* Trame_del_svg: Libere la mÃ©moire liÃ©e Ã  un objet de type SVG                                                               */
+/* EntrÃ©e: le SVG                                                                                                             */
 /* Sortie: rieng                                                                                                              */
 /******************************************************************************************************************************/
  void Trame_del_SVG ( struct TRAME_ITEM_SVG *trame_svg )
-  { trame_svg->trame->Liste_timer = g_slist_remove ( trame_svg->trame->Liste_timer, trame_svg );/* Désactive la gestion clignotement */
+  { trame_svg->trame->Liste_timer = g_slist_remove ( trame_svg->trame->Liste_timer, trame_svg );/* DÃ©sactive la gestion clignotement */
     g_free(trame_svg);
   }
 /******************************************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                                                */
-/* Entrée: un item                                                                                                            */
+/* EntrÃ©e: un item                                                                                                            */
+/* Sortie: rieng                                                                                                              */
+/******************************************************************************************************************************/
+ void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran )
+  { if (trame_cadran->item_groupe) goo_canvas_item_remove( trame_cadran->item_groupe );
+    Trame_del_SVG (trame_cadran->fleche_droite);                                         /* DÃ©sactive la gestion clignotement */
+  }
+/******************************************************************************************************************************/
+/* Trame_del_item: Renvoi un nouveau item, completement vierge                                                                */
+/* EntrÃ©e: un item                                                                                                            */
 /* Sortie: rieng                                                                                                              */
 /******************************************************************************************************************************/
  void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass )
   { goo_canvas_item_remove( trame_pass->item_groupe );
-    Trame_del_SVG (trame_pass->item_1);                                                  /* Désactive la gestion clignotement */
-    Trame_del_SVG (trame_pass->item_2);                                                  /* Désactive la gestion clignotement */
-    Trame_del_SVG (trame_pass->item_3);                                                  /* Désactive la gestion clignotement */
+    Trame_del_SVG (trame_pass->item_1);                                                  /* DÃ©sactive la gestion clignotement */
+    Trame_del_SVG (trame_pass->item_2);                                                  /* DÃ©sactive la gestion clignotement */
+    Trame_del_SVG (trame_pass->item_3);                                                  /* DÃ©sactive la gestion clignotement */
   }
 /**********************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
-/* Entrée: un item                                                                                        */
+/* EntrÃ©e: un item                                                                                        */
 /* Sortie: rieng                                                                                          */
 /**********************************************************************************************************/
  void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm )
   { if (trame_comm->item_groupe) goo_canvas_item_remove( trame_comm->item_groupe );
   }
 /******************************************************************************************************************************/
-/* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre                                  */
-/* Entrée: la structure graphique TRAME_MOTIF                                                                                 */
-/* Sortie: néant                                                                                                              */
+/* Trame_rafraichir_motif: remet Ã  jour la position, rotation, echelle du motif en parametre                                  */
+/* EntrÃ©e: la structure graphique TRAME_MOTIF                                                                                 */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Trame_rafraichir_motif ( struct TRAME_ITEM_MOTIF *trame_motif )
   { if (!(trame_motif && trame_motif->motif)) return;
@@ -161,7 +162,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
                              (gdouble)trame_motif->motif->position_x,
                              (gdouble)trame_motif->motif->position_y
                            );
-    if (trame_motif->motif->mnemo_id!=0)                      /* Les motifs spéciaux ne tournent pas, et pas de zoom non plus */
+    if (trame_motif->motif->mnemo_id!=0)                      /* Les motifs spÃ©ciaux ne tournent pas, et pas de zoom non plus */
      { cairo_matrix_rotate ( &trame_motif->transform, 0.0 );
        cairo_matrix_scale  ( &trame_motif->transform, 1.0, 1.0 );
      }
@@ -227,9 +228,9 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
      }
   }
 /******************************************************************************************************************************/
-/* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre                                  */
-/* Entrée: la structure graphique TRAME_MOTIF                                                                                 */
-/* Sortie: néant                                                                                                              */
+/* Trame_rafraichir_motif: remet Ã  jour la position, rotation, echelle du motif en parametre                                  */
+/* EntrÃ©e: la structure graphique TRAME_MOTIF                                                                                 */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
   { if (!(trame_camera_sup && trame_camera_sup->camera_sup)) return;
@@ -245,9 +246,9 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     goo_canvas_item_set_transform ( trame_camera_sup->item_groupe, &trame_camera_sup->transform );
   }
 /**********************************************************************************************************/
-/* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre              */
-/* Entrée: la structure graphique TRAME_MOTIF                                                             */
-/* Sortie: néant                                                                                          */
+/* Trame_rafraichir_motif: remet Ã  jour la position, rotation, echelle du motif en parametre              */
+/* EntrÃ©e: la structure graphique TRAME_MOTIF                                                             */
+/* Sortie: nÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Trame_rafraichir_comment ( struct TRAME_ITEM_COMMENT *trame_comment )
   { if (!(trame_comment && trame_comment->comment)) return;
@@ -264,9 +265,9 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     goo_canvas_item_set_transform ( trame_comment->item_groupe, &trame_comment->transform );
   }
 /**********************************************************************************************************/
-/* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre              */
-/* Entrée: la structure graphique TRAME_MOTIF                                                             */
-/* Sortie: néant                                                                                          */
+/* Trame_rafraichir_motif: remet Ã  jour la position, rotation, echelle du motif en parametre              */
+/* EntrÃ©e: la structure graphique TRAME_MOTIF                                                             */
+/* Sortie: nÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Trame_rafraichir_passerelle ( struct TRAME_ITEM_PASS *trame_pass )
   { if (!(trame_pass && trame_pass->pass)) return;
@@ -282,11 +283,11 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
 
     goo_canvas_item_set_transform ( trame_pass->item_groupe, &trame_pass->transform );
   }
-/**********************************************************************************************************/
-/* Trame_rafraichir_cadran: remet à jour la position, rotation, echelle du cadran en parametre          */
-/* Entrée: la structure graphique TRAME_ITEM_CADRAN                                                      */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_rafraichir_cadran: remet Ã  jour la position, rotation, echelle du cadran en parametre                                */
+/* EntrÃ©e: la structure graphique TRAME_ITEM_CADRAN                                                                           */
+/* Sortie: nÃ©ant                                                                                                              */
+/******************************************************************************************************************************/
  void Trame_rafraichir_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran )
   { if (!(trame_cadran && trame_cadran->cadran)) return;
 
@@ -298,12 +299,53 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
 
     cairo_matrix_rotate ( &trame_cadran->transform, (gdouble)trame_cadran->cadran->angle*FACTEUR_PI );
     cairo_matrix_scale  ( &trame_cadran->transform, 1.0, 1.0 );
-
     goo_canvas_item_set_transform ( trame_cadran->item_groupe, &trame_cadran->transform );
   }
+/******************************************************************************************************************************/
+/* Trame_rafraichir_cadran: remet Ã  jour la position, rotation, echelle du cadran en parametre                                */
+/* EntrÃ©e: la structure graphique TRAME_ITEM_CADRAN                                                                           */
+/* Sortie: nÃ©ant                                                                                                              */
+/******************************************************************************************************************************/
+ void Trame_cadran_set_tendance ( struct TRAME_ITEM_CADRAN *trame_cadran )
+  { gfloat moyenne, ratio, angle;
+    gint cpt;
+    if (!(trame_cadran && trame_cadran->cadran)) return;
+
+    memcpy( &trame_cadran->old_valeur[0], &trame_cadran->old_valeur[1], 19*sizeof(gfloat) );
+    trame_cadran->old_valeur[19] = trame_cadran->valeur;
+    for (moyenne = 0.0, cpt =0; cpt<20; cpt++)
+     { moyenne += trame_cadran->old_valeur[cpt]; }
+    moyenne /= 20.0;
+
+    if (moyenne!=0.0) ratio = 1.0*(trame_cadran->valeur-moyenne)/moyenne;
+                 else ratio = 0.0;
+    if (ratio>3.0) ratio=3.0;
+    if (ratio<-3.0) ratio=-3.0;
+    angle = -90.0*ratio/3.0;
+if (!strcmp(trame_cadran->cadran->tech_id, "TEMP"))
+ { printf("tech_id:%s:%s moyenne=%f valeur=%f -> ratio=%f angle=%f \n", trame_cadran->cadran->tech_id,trame_cadran->cadran->acronyme,
+       moyenne, trame_cadran->valeur, ratio, angle);
+ }
+
+         if (ratio < -2.0 || ratio > 2.0) { Trame_set_svg ( trame_cadran->fleche_droite, "rouge", 0, FALSE ); }
+    else if (ratio < -1.0 || ratio > 1.0) { Trame_set_svg ( trame_cadran->fleche_droite, "orange", 0, FALSE ); }
+    else Trame_set_svg ( trame_cadran->fleche_droite, "vert", 0, FALSE );
+
+    cairo_matrix_init_identity ( &trame_cadran->transform );
+    cairo_matrix_translate ( &trame_cadran->transform,
+                             (gdouble)trame_cadran->cadran->position_x+75.0,
+                             (gdouble)trame_cadran->cadran->position_y
+                           );
+    cairo_matrix_rotate ( &trame_cadran->transform, (gdouble)angle*FACTEUR_PI );
+    cairo_matrix_scale  ( &trame_cadran->transform, 1.0, 1.0 );
+    cairo_matrix_translate ( &trame_cadran->transform,
+                             -trame_cadran->fleche_droite->taillex/2.0,
+                             -trame_cadran->fleche_droite->tailley/2.0 );
+    goo_canvas_item_set_transform ( trame_cadran->fleche_droite->item, &trame_cadran->transform );
+  }
 /**********************************************************************************************************/
-/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                         */
-/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                        */
+/* Trame_peindre_motif: Peint un motif de la couleur selectionnÃ©e                                         */
+/* EntrÃ©e: une structure TRAME_ITEM_MOTIF, la couleur de reference                                        */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, guchar r, guchar v, guchar b )
@@ -353,7 +395,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
   }
 /******************************************************************************************************************************/
 /* Trame_choisir_frame: Choisit une frame parmi celles du motif                                                               */
-/* Entrée: une structure TRAME_ITEM_MOTIF, le numero de frame voulue                                                          */
+/* EntrÃ©e: une structure TRAME_ITEM_MOTIF, le numero de frame voulue                                                          */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num, guchar r, guchar v, guchar b )
@@ -373,7 +415,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
 
 /******************************************************************************************************************************/
 /* Charger_pixbuf: Tente de charger un ensemble de pixbuf representant un icone                                               */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* EntrÃ©e: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
  void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier )
@@ -408,7 +450,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
   }
 /******************************************************************************************************************************/
 /* Satellite_Receive_response : Recupere la reponse du serveur (master)                                                       */
-/* Entrée : Les informations à sauvegarder                                                                                    */
+/* EntrÃ©e : Les informations Ã  sauvegarder                                                                                    */
 /******************************************************************************************************************************/
  static size_t CB_Receive_gif_data( char *ptr, size_t size, size_t nmemb, void *userdata )
   { gchar *new_buffer;
@@ -425,8 +467,8 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     return(size*nmemb);
   }
 /**********************************************************************************************************/
-/* Download_gif: Tente de récupérer un .gif depuis le serveur                                             */
-/* Entrée: l'id et le mode attendu                                                                        */
+/* Download_gif: Tente de rÃ©cupÃ©rer un .gif depuis le serveur                                             */
+/* EntrÃ©e: l'id et le mode attendu                                                                        */
 /* Sortie: FALSE si probleme                                                                              */
 /**********************************************************************************************************/
  static gboolean Download_gif ( gint id, gint mode )
@@ -437,8 +479,8 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     CURLcode res;
     CURL *curl;
 
-    Gif_received_buffer = NULL;                                     /* Init du tampon de reception à NULL */
-    Gif_received_size = 0;                                          /* Init du tampon de reception à NULL */
+    Gif_received_buffer = NULL;                                     /* Init du tampon de reception Ã  NULL */
+    Gif_received_size = 0;                                          /* Init du tampon de reception Ã  NULL */
     http_response = 0;
 
     curl = curl_easy_init();                                            /* Preparation de la requete CURL */
@@ -509,8 +551,8 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Download_icon : Tente de récupérer un fichier depuis le serveur commun abls-habitat.fr                                     */
-/* Entrée: le nom de fichier a télécharger                                                                                    */
+/* Download_icon : Tente de rÃ©cupÃ©rer un fichier depuis le serveur commun abls-habitat.fr                                     */
+/* EntrÃ©e: le nom de fichier a tÃ©lÃ©charger                                                                                    */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
  static gboolean Download_icon ( gchar *file )
@@ -521,8 +563,8 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     CURLcode res;
     CURL *curl;
 
-    Gif_received_buffer = NULL;                                                         /* Init du tampon de reception à NULL */
-    Gif_received_size = 0;                                                              /* Init du tampon de reception à NULL */
+    Gif_received_buffer = NULL;                                                         /* Init du tampon de reception Ã  NULL */
+    Gif_received_size = 0;                                                              /* Init du tampon de reception Ã  NULL */
     http_response = 0;
 
     curl = curl_easy_init();                                                                /* Preparation de la requete CURL */
@@ -577,7 +619,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
   }
 /******************************************************************************************************************************/
 /* Add_single_icone_to_item : Chargement d'un icone (ID+Mode) dans l'item en parametre                                        */
-/* Entrée: L'item, l'icone_id et le mode attendu                                                                              */
+/* EntrÃ©e: L'item, l'icone_id et le mode attendu                                                                              */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
  static gboolean Add_single_icone_to_item ( struct TRAME_ITEM_MOTIF *trame_item, guint icone_id, guint mode )
@@ -588,7 +630,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     else         g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", icone_id, mode );
     pixbuf = gdk_pixbuf_new_from_file ( nom_fichier, NULL );                            /* 2nde tentative */
     if (!pixbuf)
-    { printf("Add_single_icone_to_item: Erreur chargement %s\n", nom_fichier); return(FALSE); }/* Chargement en erreur ou terminé */
+    { printf("Add_single_icone_to_item: Erreur chargement %s\n", nom_fichier); return(FALSE); }/* Chargement en erreur ou terminÃ© */
     trame_item->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
     trame_item->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
     trame_item->images = g_list_append( trame_item->images, pixbuf );     /* Et ajout dans la liste */
@@ -598,7 +640,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
   }
 /******************************************************************************************************************************/
 /* Charger_pixbuf: Tente de charger un ensemble de pixbuf representant un icone                                               */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* EntrÃ©e: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
  static void Charger_pixbuf_id ( struct TRAME_ITEM_MOTIF *trame_item, guint icone_id )
@@ -611,33 +653,38 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     trame_item->gif_hauteur = 0;
 
     local_found = Add_single_icone_to_item(trame_item, icone_id, 0);                       /* Tentatives de chargement locale */
-    if ( local_found == FALSE )                                        /* Si non, tentative de récupération auprès du serveur */
+    if ( local_found == FALSE )                                        /* Si non, tentative de rÃ©cupÃ©ration auprÃ¨s du serveur */
      { while ( Download_gif ( icone_id, trame_item->nbr_images ) == TRUE )                              /* Trying to download */
         { Add_single_icone_to_item(trame_item, icone_id, trame_item->nbr_images); }
      }
-                                                                  /* Chargement des frames restantes (downloadées ou locales) */
+                                                                  /* Chargement des frames restantes (downloadÃ©es ou locales) */
     while ( Add_single_icone_to_item(trame_item, icone_id, trame_item->nbr_images) == TRUE );
   }
 /******************************************************************************************************************************/
 /* Charger_pixbuf: Tente de charger un ensemble de pixbuf representant un icone                                               */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* EntrÃ©e: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
  static GdkPixbuf *Charger_svg_pixbuf ( gchar *nom, gchar *couleur, gint mode, gint taille_x, gint taille_y )
   { GdkPixbuf *pixbuf;
     gchar file[80];
-    if (mode==0) { g_snprintf(file, sizeof(file), "%s_%s.svg", nom, couleur ); }
-            else { g_snprintf(file, sizeof(file), "%s_%d_%s.svg", nom, mode, couleur ); }
-    pixbuf = gdk_pixbuf_new_from_file_at_size( file, taille_x, taille_y, NULL );
+    if (!couleur) { g_snprintf(file, sizeof(file), "%s.svg", nom ); }
+    else if (mode==0) { g_snprintf(file, sizeof(file), "%s_%s.svg", nom, couleur ); }
+                 else { g_snprintf(file, sizeof(file), "%s_%d_%s.svg", nom, mode, couleur ); }
+    if (taille_x>0 && taille_y>0) pixbuf = gdk_pixbuf_new_from_file_at_size( file, taille_x, taille_y, NULL );
+                             else pixbuf = gdk_pixbuf_new_from_file( file, NULL );
 
-    if (pixbuf) return(pixbuf);                                                       /* Si trouvé en local, on charge direct */
+    if (pixbuf) return(pixbuf);                                                       /* Si trouvÃ© en local, on charge direct */
                                                                           /* Sinon on telecharge depuis le repository d'icone */
-    if (Download_icon ( file )) { pixbuf = gdk_pixbuf_new_from_file_at_size( file, taille_x, taille_y, NULL ); }
+    if (Download_icon ( file ))
+     { if (taille_x>0 && taille_y>0) pixbuf = gdk_pixbuf_new_from_file_at_size( file, taille_x, taille_y, NULL );
+                                else pixbuf = gdk_pixbuf_new_from_file( file, NULL );
+     }
     return(pixbuf);
   }
 /******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* EntrÃ©e: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
  static struct TRAME_ITEM_MOTIF *Trame_ajout_motif_special ( struct TRAME *trame, struct TRAME_ITEM_MOTIF *trame_motif )
@@ -670,7 +717,7 @@ printf("New motif special : posx=%d posy=%d\n", trame_motif->motif->position_x, 
   }
 /******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* EntrÃ©e: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
  struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame, struct CMD_TYPE_MOTIF *motif )
@@ -679,12 +726,12 @@ printf("New motif special : posx=%d posy=%d\n", trame_motif->motif->position_x, 
     if (!(trame && motif)) return(NULL);
 
     trame_motif = Trame_new_item();
-    if (!trame_motif) { printf("Trame_ajout_motif: Erreur mémoire\n"); return(NULL); }
+    if (!trame_motif) { printf("Trame_ajout_motif: Erreur mÃ©moire\n"); return(NULL); }
 
     trame_motif->motif = motif;
     trame_motif->type = TYPE_MOTIF;
 
-    if (motif->mnemo_id!=0)                                                               /* Chargement de l'icone id associé */
+    if (motif->mnemo_id!=0)                                                               /* Chargement de l'icone id associÃ© */
      { Trame_ajout_motif_special ( trame, trame_motif ); }
     else
      { Charger_pixbuf_id( trame_motif, motif->icone_id );
@@ -750,7 +797,7 @@ printf("New motif special : posx=%d posy=%d\n", trame_motif->motif->position_x, 
   }
 /******************************************************************************************************************************/
 /* Trame_ajout_camera_sup: Ajoute un camera_sup sur le visuel                                                                 */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* EntrÃ©e: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: la structure referencant la camera de supervision, ou NULL si erreur                                               */
 /******************************************************************************************************************************/
  struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
@@ -791,7 +838,7 @@ printf("New motif special : posx=%d posy=%d\n", trame_motif->motif->position_x, 
   }
 /**********************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                       */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
+/* EntrÃ©e: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
 /* Sortie: reussite                                                                                       */
 /**********************************************************************************************************/
  void Trame_ajout_motif_par_item ( struct TRAME *trame,
@@ -819,7 +866,7 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
   }
 /**********************************************************************************************************/
 /* Trame_ajout_commentaire: Ajoute un commentaire sur le visuel                                           */
-/* Entrée: une structure commentaire, la trame de reference                                               */
+/* EntrÃ©e: une structure commentaire, la trame de reference                                               */
 /* Sortie: reussite                                                                                       */
 /**********************************************************************************************************/
  struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire ( gint flag, struct TRAME *trame,
@@ -858,13 +905,17 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     return(trame_comm);
   }
 /******************************************************************************************************************************/
-/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                                             */
-/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                                            */
+/* Trame_peindre_motif: Peint un motif de la couleur selectionnÃ©e                                                             */
+/* EntrÃ©e: une structure TRAME_ITEM_MOTIF, la couleur de reference                                                            */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Trame_set_svg ( struct TRAME_ITEM_SVG *trame_svg, gchar *couleur, gint mode, gboolean cligno )
   { GdkPixbuf *pixbuf;
     pixbuf = Charger_svg_pixbuf ( trame_svg->svg_name, couleur, mode, trame_svg->taillex, trame_svg->tailley );
+    if (! (trame_svg->taillex>0 && trame_svg->tailley>0) )  /* Si chargement sans imposer la taille, reprend la taille du svg */
+     { trame_svg->taillex = gdk_pixbuf_get_width(pixbuf);
+       trame_svg->tailley = gdk_pixbuf_get_height(pixbuf);
+     }
     g_object_set( G_OBJECT(trame_svg->item), "pixbuf", pixbuf, NULL );
     if (cligno && !trame_svg->cligno)                                                    /* Active la gestion du clignotement */
      { trame_svg->trame->Liste_timer = g_slist_prepend ( trame_svg->trame->Liste_timer, trame_svg );
@@ -874,8 +925,8 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
      { trame_svg->cligno = FALSE; }                       /* Arret cligno. Il sera sorti de la liste par l'interruption timer */
   }
 /******************************************************************************************************************************/
-/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                                             */
-/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                                            */
+/* Trame_peindre_motif: Peint un motif de la couleur selectionnÃ©e                                                             */
+/* EntrÃ©e: une structure TRAME_ITEM_MOTIF, la couleur de reference                                                            */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static struct TRAME_ITEM_SVG *Trame_new_SVG ( struct TRAME *trame, GooCanvasItem *item_groupe, gchar *nom, gchar *couleur,
@@ -893,7 +944,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
   }
 /******************************************************************************************************************************/
 /* Trame_ajout_passerelle: Ajoute une passerelle sur le visuel                                                                */
-/* Entrée: une structure passerelle, la trame de reference                                                                    */
+/* EntrÃ©e: une structure passerelle, la trame de reference                                                                    */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
  struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame, struct CMD_TYPE_PASSERELLE *pass )
@@ -949,7 +1000,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
   }
 /******************************************************************************************************************************/
 /* Trame_ajout_cadran: Ajoute un cadran sur le visuel                                                                         */
-/* Entrée: une structure cadran, la trame de reference                                                                        */
+/* EntrÃ©e: une structure cadran, la trame de reference                                                                        */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
  struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
@@ -966,10 +1017,8 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame_cadran->item_groupe = goo_canvas_group_new ( trame->canvas_root,                                   /* Groupe cadran */
                                                         NULL);
 
-    if (cadran->type == MNEMO_REGISTRE)
-     { couleur_bordure = "red"; }
-    else
-     { couleur_bordure = "green"; }
+    if (cadran->type == MNEMO_REGISTRE) { couleur_bordure = "red"; }
+                                   else { couleur_bordure = "green"; }
     trame_cadran->item_carre = goo_canvas_rect_new (trame_cadran->item_groupe,
                                                     -55.0, -15.0, 110.0, 30.0,
                                                     "fill_color", "gray",
@@ -980,6 +1029,10 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                      -1, GTK_ANCHOR_CENTER,
                                                      "font", "arial italic 12",
                                                      NULL);
+
+    trame_cadran->item_groupe_fleche = goo_canvas_group_new ( trame->canvas_root, NULL );                    /* Groupe cadran */
+    trame_cadran->fleche_droite = Trame_new_SVG ( trame, trame_cadran->item_groupe_fleche,
+                                                  "fleche_droite", "noir", 0, -1, -1, 0, 0 );
 
     if ( flag )                                                                                    /* flag == TRUE si ATELIER */
      { trame_cadran->select_mi = goo_canvas_rect_new (trame_cadran->item_groupe,
@@ -998,7 +1051,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
   }
 /******************************************************************************************************************************/
 /* Trame_creer_trame: Creation d'une nouvelle trame                                                                           */
-/* Entrée: les tailles x, y et la couleur de fond                                                                             */
+/* EntrÃ©e: les tailles x, y et la couleur de fond                                                                             */
 /* Sortie: un widget GTK                                                                                                      */
 /******************************************************************************************************************************/
  struct TRAME *Trame_creer_trame ( guint taille_x, guint taille_y, char *coul, guint grille )
@@ -1015,10 +1068,10 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame->fond = goo_canvas_rect_new ( trame->canvas_root, 0.0, 0.0, (double) taille_x, (double) taille_y,
                                        "stroke_color", "yellow", NULL);
     goo_canvas_item_lower( GOO_CANVAS_ITEM(trame->fond), NULL );
-                                                                                         /* Creation de la vignette activités */
+                                                                                         /* Creation de la vignette activitÃ©s */
     trame->Logo = Trame_new_SVG ( trame, trame->canvas_root, "logo", "neutre", 0,
                                   60, 60, TAILLE_SYNOPTIQUE_X, 10 );
-                                                                                         /* Creation de la vignette activités */
+                                                                                         /* Creation de la vignette activitÃ©s */
     trame->Vignette_activite = Trame_new_SVG ( trame, trame->canvas_root, "Pignon", "vert", 0,
                                                40, 40, TAILLE_SYNOPTIQUE_X+10,  60 );
                                                                                          /* Creation de la vignette secu bien */
@@ -1041,7 +1094,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
   }
 /******************************************************************************************************************************/
 /* Trame_effacer_trame: Efface la trame en parametre                                                                          */
-/* Entrée: la trame voulue                                                                                                    */
+/* EntrÃ©e: la trame voulue                                                                                                    */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Trame_effacer_trame ( struct TRAME *trame )
@@ -1093,7 +1146,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
 /******************************************************************************************************************************/
 /* Trame_detruire_trame: Destruction d'une trame                                                                              */
-/* Entrée: la trame voulue                                                                                                    */
+/* EntrÃ©e: la trame voulue                                                                                                    */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Trame_detruire_trame ( struct TRAME *trame )

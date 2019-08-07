@@ -107,7 +107,7 @@
 /* Entrée: L'element                                                                                                          */
 /* Sortie: 0 si present, 1 sinon                                                                                              */
 /******************************************************************************************************************************/
- static gint Chercher_bit_cadrans ( struct CADRAN *element, struct CADRAN *cherche )
+ static gint Chercher_bit_cadrans ( struct CMD_ETAT_BIT_CADRAN *element, struct CMD_ETAT_BIT_CADRAN *cherche )
   { if (element->bit_controle != -1 && element->bit_controle == cherche->bit_controle && element->type == cherche->type) return 0;
     if (element->bit_controle == -1 &&
         (!strcasecmp(element->tech_id, cherche->tech_id) && !strcasecmp(element->acronyme, cherche->acronyme))) return 0;
@@ -142,33 +142,27 @@
 
        if (tag == TAG_SUPERVISION)                                          /* Si mode supervision on envoit la valeur d'init */
         { struct CMD_ETAT_BIT_CADRAN *init_cadran;
-          struct CADRAN *cadran_new;
-      		  cadran_new = (struct CADRAN *) g_try_malloc0 ( sizeof(struct CADRAN) );
-		        if (!cadran_new)
-           { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                      "Envoyer_cadran_tag: Memory Error for %d (%s:%s)", cadran->id, cadran->tech_id, cadran->acronyme );
-           }
-          else
-           { cadran_new->type = cadran->type;
-			          cadran_new->bit_controle = cadran->bit_controle;
-             g_snprintf( cadran_new->tech_id, sizeof(cadran_new->tech_id), "%s", cadran->tech_id );
-             g_snprintf( cadran_new->acronyme, sizeof(cadran_new->acronyme), "%s", cadran->acronyme );
 
-             init_cadran = Formater_cadran(cadran_new);                                   /* Formatage de la chaine associée */
-             if (init_cadran)                                                            /* envoi la valeur d'init au client */
-              { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CADRAN,
-                              (gchar *)init_cadran, sizeof(struct CMD_ETAT_BIT_CADRAN) );
-                g_free(init_cadran);                                                                 /* On libere la mémoire */
-              }
-             else { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                             "Envoyer_cadran_tag: Formater_cadran failed for %d (%s:%s)",
-                              cadran->id, cadran->tech_id, cadran->acronyme );
-                  }
+          init_cadran = (struct CMD_ETAT_BIT_CADRAN *)g_try_malloc0(sizeof(struct CMD_ETAT_BIT_CADRAN));
+          if (init_cadran)
+           { init_cadran->type = cadran->type;
+             init_cadran->bit_controle = cadran->bit_controle;
+             g_snprintf( init_cadran->tech_id, sizeof(init_cadran->tech_id), "%s", cadran->tech_id );
+             g_snprintf( init_cadran->acronyme, sizeof(init_cadran->acronyme), "%s", cadran->acronyme );
 
-             if ( ! g_slist_find_custom(client->Liste_bit_cadrans, cadran_new, (GCompareFunc) Chercher_bit_cadrans) )
-              { client->Liste_bit_cadrans = g_slist_prepend( client->Liste_bit_cadrans, cadran_new ); }
-             else g_free( cadran_new );                          /* si deja dans la liste, plus besoin de cette zone mémoire */
+             Formater_cadran(init_cadran);                                                    /* Formatage de la chaine associée */
+             Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CADRAN,
+                           (gchar *)init_cadran, sizeof(struct CMD_ETAT_BIT_CADRAN) );
+   
+             if ( ! g_slist_find_custom(client->Liste_bit_cadrans, init_cadran, (GCompareFunc) Chercher_bit_cadrans) )
+              { client->Liste_bit_cadrans = g_slist_prepend( client->Liste_bit_cadrans, init_cadran ); }
+             else g_free( init_cadran );                          /* si deja dans la liste, plus besoin de cette zone mémoire */
+
 	          }
+          else { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                          "%s: cadran %d %s:%s : memory error sending to client %s", __func__,
+                           cadran->id, cadran->tech_id, cadran->acronyme, client->machine );
+               }
         }
        g_free(cadran);
      }
