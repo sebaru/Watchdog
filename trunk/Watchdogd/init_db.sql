@@ -663,6 +663,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `sms` int(11) NOT NULL DEFAULT '0',
   `time_repeat` int(11) NOT NULL DEFAULT '0',
   `is_mp3` tinyint(1) NOT NULL DEFAULT '0',
+  `etat` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE(`dls_id`,`acronyme`),
   FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE

@@ -258,6 +258,7 @@
     Updater_cpthDB();                                                                     /* Sauvegarde des compteurs Horaire */
     Updater_cpt_impDB();                                                              /* Sauvegarde des compteurs d'impulsion */
     Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
+    Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
