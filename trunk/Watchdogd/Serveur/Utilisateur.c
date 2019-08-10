@@ -35,6 +35,7 @@
 
 /*********************************************** Prototypes des fonctions *****************************************************/
  #include "watchdogd.h"
+ #include "Utilisateur_DB.h"
 
 /******************************************************************************************************************************/
 /* Tester_level_util: renvoie true si l'utilisateur fait partie du groupe en parametre                                       */
