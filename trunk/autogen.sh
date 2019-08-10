@@ -3,6 +3,7 @@
 svn update
 osFedora=`grep "NAME=Fedora" /etc/os-release`
 osRaspbian=`grep "ID=raspbian" /etc/os-release`
+osDebian=`grep "ID=debian" /etc/os-release`
 
 if [ -n "$osFedora" ]; then
   echo "Compiling for Fedora !"
@@ -13,6 +14,12 @@ fi
 
 if [ -n "$osRaspbian" ]; then
   echo "Compiling for Raspbian !"
+  cp Makefile.am.raspbian Makefile.am
+  cp Watchdogd/Makefile.am.raspbian Watchdogd/Makefile.am
+fi
+
+if [ -n "$osDebian" ]; then
+  echo "Compiling for Debian !"
   cp Makefile.am.raspbian Makefile.am
   cp Watchdogd/Makefile.am.raspbian Watchdogd/Makefile.am
 fi
