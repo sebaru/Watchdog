@@ -186,7 +186,7 @@
           case TYPE_COMMENTAIRE:
                                  break;
           case TYPE_CADRAN:      trame_cadran = (struct TRAME_ITEM_CADRAN *)liste_motifs->data;
-                                 Trame_cadran_set_tendance ( trame_cadran );
+                                 if (trame_cadran->cadran->type==MNEMO_ENTREE_ANA) Trame_cadran_set_tendance ( trame_cadran );
                                  break;
           case TYPE_CAMERA_SUP : break;
           /*default: printf("Timer: type inconnu\n" );*/

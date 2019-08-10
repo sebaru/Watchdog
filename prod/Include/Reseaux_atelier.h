@@ -101,14 +101,16 @@
 /****************************************************** Gestion des cadrans ***************************************************/
  struct CMD_TYPE_CADRAN
   { gint    id;
+    gchar   tech_id[32];                                                                         /* Visuel Acronyme du cadran */
+    gchar   acronyme[64];                                                                        /* Visuel Acronyme du cadran */
     gint    syn_id;                                                                    /* Numéro du synoptique ou est l'icone */
     gint    type;                                                                                  /* type du bit de controle */
     gint    bit_controle;                                                                                       /* Ixxx, Cxxx */
     guint   position_x;                                                                          /* en abscisses et ordonnées */
     guint   position_y;
-    gfloat  angle;
-    gchar   tech_id[32];                                                                         /* Visuel Acronyme du cadran */
-    gchar   acronyme[64];                                                                        /* Visuel Acronyme du cadran */
+    gint    angle;
+    gboolean fleche_left;                                                 /* TRUE si la fleche de tendance doit etre à gauche */
+    gint    nb_decimal;                                                                       /* Nombre de decimal a afficher */
   };
 
 /************************************************* Gestion des cameras de supervision *****************************************/

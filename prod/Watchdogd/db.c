@@ -1433,9 +1433,18 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4277)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `fleche_left` tinyint(1) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `nb_decimal` int(11) NOT NULL DEFAULT '2'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans CHANGE `angle` `angle` int(11) NOT NULL DEFAULT '0'");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 fin:
-    database_version=4271;
+    database_version=4277;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
