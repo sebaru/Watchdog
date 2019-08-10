@@ -1,11 +1,9 @@
 [Unit]
-Description=Watchdog User daemon
-
+Description=Watchdog server daemon
+After=syslog.target network.target auditd.service
 [Service]
-Type=simple
 ExecStart=/usr/local/bin/Watchdogd -f
 ExecReload=/bin/kill -USR2 $MAINPID
-#User=watchdog
-#Group=users
 [Install]
 WantedBy=multi-user.target
+

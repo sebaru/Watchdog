@@ -5,8 +5,8 @@ echo "Creating systemd service"
 echo "Quel user fera tourner Watchdog ?"
 read -p "User: " wtd_user
 
-echo "Dois-je installer la Database (oui/non) ?"
-read -p "Création DB: " database
+echo "L'instance est-elle master ? (oui/non)"
+read -p "instance_is_master: " master
 
 if [ "$wtd_user" = "watchdog" ]
 	then
@@ -17,7 +17,12 @@ fi
 
 echo "Installation in standalone mode in $wtd_home for $wtd_user"
 sleep 5
-sudo cp /usr/local/etc/Watchdogd.service.system /etc/systemd/system/Watchdogd.service
+if [ "$master" = "non" ]
+	then
+		sudo cp /usr/local/etc/Watchdogd.service.master /etc/systemd/system/Watchdogd.service
+	else
+                sudo cp /usr/local/etc/Watchdogd.service.slave /etc/systemd/system/Watchdogd.service
+fi
 sudo systemctl daemon-reload
 sudo systemctl enable Watchdogd.service
 sudo usermod -a -G audio,dialout $wtd_user
@@ -45,7 +50,7 @@ if [ ! -f $CONFFILE ]
     sed "/usr/local/etc/watchdogd.conf.sample" -e "s#dbpasstobechanged#$NEWPASSWORD#g" | \
     sed -e "s#usertobechanged#$wtd_user#g" | \
     sudo tee "$CONFFILE" > /dev/null
-    if [ "$database" = "oui" ]
+    if [ "$master" = "oui" ]
     then
      /usr/bin/mysqladmin -u root create WatchdogDB
      echo "CREATE USER 'watchdog' IDENTIFIED BY '$NEWPASSWORD'; GRANT ALL PRIVILEGES ON WatchdogDB.* TO watchdog; FLUSH PRIVILEGES; source /usr/local/share/Watchdog/init_db.sql;" | mysql -u root WatchdogDB
