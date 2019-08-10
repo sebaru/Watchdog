@@ -108,7 +108,7 @@
     gint    bit_controle;                                                                                       /* Ixxx, Cxxx */
     guint   position_x;                                                                          /* en abscisses et ordonnées */
     guint   position_y;
-    gfloat  angle;
+    gint    angle;
     gboolean fleche_left;                                                 /* TRUE si la fleche de tendance doit etre à gauche */
     gint    nb_decimal;                                                                       /* Nombre de decimal a afficher */
   };

@@ -119,7 +119,7 @@
              add_cadran.position_x = TAILLE_SYNOPTIQUE_X/2;
              add_cadran.position_y = TAILLE_SYNOPTIQUE_Y/2;
              add_cadran.syn_id  = infos->syn.id;
-             add_cadran.angle   = 0.0;
+             add_cadran.angle   = 0;
              add_cadran.fleche_left = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_left) );
              add_cadran.nb_decimal  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_nb_decimal) );
              type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
