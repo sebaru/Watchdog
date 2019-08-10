@@ -109,8 +109,8 @@
     guint   position_x;                                                                          /* en abscisses et ordonnées */
     guint   position_y;
     gfloat  angle;
-    gboolean left;                                                        /* TRUE si la fleche de tendance doit etre à gauche */
-    gint    decimal;                                                                          /* Nombre de decimal a afficher */
+    gboolean fleche_left;                                                 /* TRUE si la fleche de tendance doit etre à gauche */
+    gint    nb_decimal;                                                                       /* Nombre de decimal a afficher */
   };
 
 /************************************************* Gestion des cameras de supervision *****************************************/

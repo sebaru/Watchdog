@@ -81,7 +81,7 @@
 
 
                if(-1000000.0<cadran->valeur && cadran->valeur<1000000.0) digit = "%6"; else digit="%8";
-               switch (trame_cadran->cadran->decimal)
+               switch (trame_cadran->cadran->nb_decimal)
                 { case 0: decimal = "0"; break;
                   case 1: decimal = "1"; break;
                   case 2: decimal = "2"; break;

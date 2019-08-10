@@ -519,8 +519,8 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `posy` int(11) NOT NULL DEFAULT '0',
   `type` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
-  `left` tinyint(1) NOT NULL DEFAULT '0',
-  `decimal` int(11) NOT NULL DEFAULT '0',
+  `fleche_left` tinyint(1) NOT NULL DEFAULT '0',
+  `nb_decimal` int(11) NOT NULL DEFAULT '2',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;

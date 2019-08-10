@@ -44,7 +44,7 @@
  static GtkWidget *Entry_tech_id;                                                                   /* Libelle proprement dit */
  static GtkWidget *Entry_acronyme;                                                                  /* Libelle proprement dit */
  static GtkWidget *Spin_bitctrl;
- static GtkWidget *Spin_decimal;
+ static GtkWidget *Spin_nb_decimal;
  static GtkWidget *Option_left;                                                /* Type de capteur (totalisateur/moyenneur/..) */
  static GtkWidget *Combo_type;
 
@@ -120,8 +120,8 @@
              add_cadran.position_y = TAILLE_SYNOPTIQUE_Y/2;
              add_cadran.syn_id  = infos->syn.id;
              add_cadran.angle   = 0.0;
-             add_cadran.left    = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_left) );
-             add_cadran.decimal = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_decimal) );
+             add_cadran.fleche_left = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_left) );
+             add_cadran.nb_decimal  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_nb_decimal) );
              type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
              add_cadran.type = Type_bit_interne_int( type );
              g_free(type);
@@ -138,8 +138,8 @@
            { type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
              trame_cadran->cadran->type = Type_bit_interne_int( type );
              g_free(type);
-             trame_cadran->cadran->left    = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_left) );
-             trame_cadran->cadran->decimal = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_decimal) );
+             trame_cadran->cadran->fleche_left = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_left) );
+             trame_cadran->cadran->nb_decimal  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_nb_decimal) );
              trame_cadran->cadran->bit_controle = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitctrl) );
              g_snprintf( trame_cadran->cadran->tech_id, sizeof(trame_cadran->cadran->tech_id),
                          "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tech_id) ) );
@@ -229,7 +229,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 5, 6 );
     adj = gtk_adjustment_new( 0, 0, 2, 1, 1, 0 );
     Spin_bitctrl = gtk_spin_button_new( (GtkAdjustment *)adj, 0.5, 0.5);
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_decimal, 1, 2, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_nb_decimal, 1, 2, 5, 6 );
 
     if (trame_cadran)
      { switch(trame_cadran->cadran->type)
@@ -241,8 +241,8 @@
           case MNEMO_CPT_IMP   : gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 4 ); break;
           case MNEMO_REGISTRE  : gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 5 ); break;
         }
-       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_left), trame_cadran->cadran->left );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_decimal), trame_cadran->cadran->decimal );
+       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_left), trame_cadran->cadran->fleche_left );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_nb_decimal), trame_cadran->cadran->nb_decimal );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bitctrl), trame_cadran->cadran->bit_controle );
        gtk_entry_set_text( GTK_ENTRY(Entry_tech_id), trame_cadran->cadran->tech_id );
        gtk_entry_set_text( GTK_ENTRY(Entry_acronyme), trame_cadran->cadran->acronyme );

@@ -328,7 +328,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     else Trame_set_svg ( trame_cadran->fleche_droite, "vert", 0, FALSE );
 
     cairo_matrix_init_identity ( &trame_cadran->transform );
-    if (trame_cadran->cadran->left)
+    if (trame_cadran->cadran->fleche_left)
      { cairo_matrix_translate ( &trame_cadran->transform,
                                 (gdouble)trame_cadran->cadran->position_x-65.0,
                                 (gdouble)trame_cadran->cadran->position_y

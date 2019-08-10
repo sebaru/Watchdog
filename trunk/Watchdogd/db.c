@@ -1434,9 +1434,9 @@
      }
 
     if (database_version < 4275)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `left` tinyint(1) NOT NULL DEFAULT '0'" );
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `fleche_left` tinyint(1) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `decimal` int(11) NOT NULL DEFAULT '0'" );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `nb_decimal` int(11) NOT NULL DEFAULT '2'" );
        Lancer_requete_SQL ( db, requete );
      }
 
