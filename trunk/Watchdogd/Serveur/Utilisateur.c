@@ -74,33 +74,6 @@
 /* Entrées: un log, une db et un id d'utilisateur                                                                             */
 /* Sortie: une structure utilisateur, ou null si erreur                                                                       */
 /******************************************************************************************************************************/
- gboolean Recuperer_utilisateurDB( struct DB **db_retour )
-  { gchar requete[1024];
-    gboolean retour;
-    struct DB *db;
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT username,id,comment,enable,access_level,date_create,"
-                "date_modif,hash,sms_enable,sms_phone,sms_allow_cde,"
-                "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
-                "FROM %s", NOM_TABLE_UTIL );
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE) Libere_DB_SQL (&db);
-    *db_retour = db;
-    return ( retour );
-  }
-/******************************************************************************************************************************/
-/* Rechercher_utilsDB: Recuperation de tous les champs des utilisateurs                                                       */
-/* Entrées: un log, une db et un id d'utilisateur                                                                             */
-/* Sortie: une structure utilisateur, ou null si erreur                                                                       */
-/******************************************************************************************************************************/
  struct CMD_TYPE_UTILISATEUR *Recuperer_utilisateurDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_UTILISATEUR *util;
     struct DB *db;
