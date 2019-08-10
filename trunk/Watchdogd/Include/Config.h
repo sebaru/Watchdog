@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Include/Config.h        Définitions de la structure de configuration watchdog                */
+/* Watchdogd/Include/Config.h        DÃ©finitions de la structure de configuration watchdog                */
 /* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:23:17 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -28,7 +28,7 @@
 #ifndef _CONFIG_H_
  #define _CONFIG_H_
 
- #define NOM_TABLE_CONFIG         "config"                          /* Nom de la table en base de données */
+ #define NOM_TABLE_CONFIG         "config"                          /* Nom de la table en base de donnÃ©es */
 
  #define TAILLE_HOME              80                                           /* Chemin HOME de watchdog */
 
@@ -40,13 +40,14 @@
 
     gint  db_port;
     gchar db_host    [ TAILLE_DB_HOST+1 ];                            /* Nom du host de la base de donnes */
-    gchar db_username[ TAILLE_DB_USERNAME+1 ];            /* Nom de l'administrateur de la base de données*/
+    gchar db_username[ TAILLE_DB_USERNAME+1 ];            /* Nom de l'administrateur de la base de donnÃ©es*/
     gchar db_database[ TAILLE_DB_DATABASE+1 ];                          /* Chemin d'acces aux DB watchdog */
     gchar db_password[ TAILLE_DB_PASSWORD+1 ];                          /* Mot de passe de connexion ODBC */
 
-    gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
-    gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
-    gboolean instance_is_master;                           /* TRUE si l'instance est l'instance maitresse */
+    gboolean home_is_set;                                                               /* TRUE si home is set dans la config */
+    gchar home [ TAILLE_HOME+1 ];                                                              /* Repertoire maison du daemon */
+    gchar librairie_dir [ TAILLE_HOME+1 ];                                   /* Repertoire de stockage des libraires watchdog */
+    gboolean instance_is_master;                                               /* TRUE si l'instance est l'instance maitresse */
     gchar master_host[ TAILLE_DB_HOST+1 ];
     guint log_level;                                                      /* Niveau de debug du programme */
     gboolean log_msrv;                                                            /* TRUE si log_override */
@@ -60,7 +61,7 @@
  #define DEFAUT_DB_HOST                 "localhost"          /* Ne pas depasser TAILLE_DB_HOST caracteres */
  #define DEFAUT_DB_DATABASE             "WatchdogDB"         /* Ne pas depasser TAILLE_DB_NAME caracteres */
  #define DEFAUT_DB_USERNAME             "watchdog"    /* Ne pas depasser TAILLE_ADMIN_USERNAME caracteres */
- #define DEFAUT_DB_PASSWORD             "seb"            /* Ne pas depasser TAILLE_DB_PASSWORD caractères */
+ #define DEFAUT_DB_PASSWORD             "seb"            /* Ne pas depasser TAILLE_DB_PASSWORD caractÃ¨res */
  #define DEFAUT_DB_PORT                 3306
  #define DEFAUT_LIBRAIRIE_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
 
