@@ -228,7 +228,7 @@
     label = gtk_label_new( _("Nombre de décimales") );
     gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 5, 6 );
     adj = gtk_adjustment_new( 0, 0, 2, 1, 1, 0 );
-    Spin_bitctrl = gtk_spin_button_new( (GtkAdjustment *)adj, 0.5, 0.5);
+    Spin_nb_decimal = gtk_spin_button_new( (GtkAdjustment *)adj, 0.5, 0.5);
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_nb_decimal, 1, 2, 5, 6 );
 
     if (trame_cadran)
