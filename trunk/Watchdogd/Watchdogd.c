@@ -658,7 +658,7 @@
      }
           g_snprintf( Config.home, sizeof(Config.home), "%s", g_get_home_dir() );
 
-    if (!Config.home_is_set) g_snprintf(Config.home, sizeof(Config.home), "%s", g_get_home_dir() );
+    if (!Config.home_is_set) g_snprintf(Config.home, sizeof(Config.home), "%s", pwd->pw_dir );
     if (chdir(Config.home))                                                             /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
     else

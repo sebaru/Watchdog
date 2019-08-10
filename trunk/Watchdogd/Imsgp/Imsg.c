@@ -471,7 +471,7 @@
 	 */
    	signal(SIGCHLD, SIG_IGN);
 
-   	purple_util_set_user_dir(g_get_home_dir());
+   	purple_util_set_user_dir(Config.home);
    	purple_debug_set_enabled(FALSE);
    	purple_core_set_ui_ops(&Imsgp_core_uiops);
 	   purple_eventloop_set_ui_ops(&glib_eventloops);
