@@ -17,7 +17,7 @@ fi
 
 echo "Installation in standalone mode in $wtd_home for $wtd_user"
 sleep 5
-if [ "$master" = "non" ]
+if [ "$master" = "oui" ]
 	then
 		sudo cp /usr/local/etc/Watchdogd.service.master /etc/systemd/system/Watchdogd.service
 	else
