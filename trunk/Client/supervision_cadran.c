@@ -77,10 +77,18 @@
        case MNEMO_ENTREE_ANA:
             if (!cadran->in_range) g_snprintf(libelle, sizeof(libelle), "not in range" );
             else
-            if(-1000000.0<cadran->valeur && cadran->valeur<1000000.0)
-             { g_snprintf( libelle, sizeof(libelle), "%6.2f %s", cadran->valeur, cadran->unite ); }
-            else
-             { g_snprintf( libelle, sizeof(libelle), "%8.0f %s", cadran->valeur, cadran->unite ); }
+             { gchar *digit, *decimal, format[24];
+
+
+               if(-1000000.0<cadran->valeur && cadran->valeur<1000000.0) digit = "%6"; else digit="%8";
+               switch (trame_cadran->cadran->decimal)
+                { case 0: decimal = "0"; break;
+                  case 1: decimal = "1"; break;
+                  case 2: decimal = "2"; break;
+                }
+               g_snprintf( format, sizeof(format), "%s.%sf %%s", digit, decimal );
+               g_snprintf( libelle, sizeof(libelle), format, cadran->valeur, cadran->unite );
+             }
             break;
        case MNEMO_CPTH:
             if (cadran->valeur < 60)
