@@ -150,6 +150,8 @@
                        !strcmp(etat_cadran->acronyme, trame_cadran->cadran->acronyme)))
                    )
                  { Updater_cadran ( etat_cadran, trame_cadran );
+                   printf("%s: change cadran type %d:%d %s:%s\n", __func__,
+                               etat_cadran->type, etat_cadran->bit_controle, etat_cadran->tech_id, etat_cadran->acronyme );
                    /*printf("Proto_changer_etat_cadran: change %d:%d %s:%s in_range=%d valeur=%f\n",
                           etat_cadran->type, etat_cadran->bit_controle, etat_cadran->tech_id, etat_cadran->acronyme,
                           etat_cadran->in_range, etat_cadran->valeur );*/

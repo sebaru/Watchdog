@@ -35,7 +35,7 @@
  #include "Sous_serveur.h"
 /******************************************************************************************************************************/
 /* Proto_effacer_cadran_atelier: Retrait du cadran en parametre                                                               */
-/* Entrée: le client demandeur et le cadran en question                                                                       */
+/* EntrÃ©e: le client demandeur et le cadran en question                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_effacer_cadran_atelier ( struct CLIENT *client, struct CMD_TYPE_CADRAN *rezo_cadran )
@@ -56,7 +56,7 @@
   }
 /******************************************************************************************************************************/
 /* Proto_ajouter_cadran_atelier: Ajout d'un cadran dans un synoptique                                                         */
-/* Entrée: le client demandeur et le cadran en question                                                                       */
+/* EntrÃ©e: le client demandeur et le cadran en question                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_ajouter_cadran_atelier ( struct CLIENT *client, struct CMD_TYPE_CADRAN *rezo_cadran )
@@ -88,7 +88,7 @@
   }
 /******************************************************************************************************************************/
 /* Proto_valider_editer_cadran_atelier: Le client desire editer un cadran                                                     */
-/* Entrée: le client demandeur et le cadran en question                                                                       */
+/* EntrÃ©e: le client demandeur et le cadran en question                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_valider_editer_cadran_atelier ( struct CLIENT *client, struct CMD_TYPE_CADRAN *rezo_cadran )
@@ -103,8 +103,8 @@
      }
   }
 /******************************************************************************************************************************/
-/* Chercher_bit_cadrans: Renvoie 0 si l'element en argument est dans la liste                                                */
-/* Entrée: L'element                                                                                                          */
+/* Chercher_bit_cadrans: Renvoie 0 si l'element en argument est dans la liste                                                 */
+/* EntrÃ©e: L'element                                                                                                          */
 /* Sortie: 0 si present, 1 sinon                                                                                              */
 /******************************************************************************************************************************/
  static gint Chercher_bit_cadrans ( struct CMD_ETAT_BIT_CADRAN *element, struct CMD_ETAT_BIT_CADRAN *cherche )
@@ -115,8 +115,8 @@
   }
 /******************************************************************************************************************************/
 /* Envoyer_cadran_tag: Envoi des cadran au client en parametre                                                                */
-/* Entrée: Le client, le tag reseau et sous-tag                                                                               */
-/* Sortie: néant                                                                                                              */
+/* EntrÃ©e: Le client, le tag reseau et sous-tag                                                                               */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Envoyer_cadran_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_TYPE_CADRAN *cadran;
@@ -134,13 +134,12 @@
 
     while ( (cadran = Recuperer_cadranDB_suite( &db )) != NULL )                      /* Pour tous les cadrans de la database */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_cadran_tag: cadran %d %s:%s to client %s",
+                "%s: cadran %d %s:%s to client %s", __func__,
                  cadran->id, cadran->tech_id, cadran->acronyme, client->machine );
 
-       Envoi_client ( client, tag, sstag,                                                        /* Envoi du cadran au client */
-                      (gchar *)cadran, sizeof(struct CMD_TYPE_CADRAN) );
-
-       if (tag == TAG_SUPERVISION)                                          /* Si mode supervision on envoit la valeur d'init */
+       if (tag == TAG_ATELIER)
+        { Envoi_client ( client, tag, sstag, (gchar *)cadran, sizeof(struct CMD_TYPE_CADRAN) ); }/* Envoi du cadran au client */
+       else if (tag == TAG_SUPERVISION)                                     /* Si mode supervision on envoit la valeur d'init */
         { struct CMD_ETAT_BIT_CADRAN *init_cadran;
 
           init_cadran = (struct CMD_ETAT_BIT_CADRAN *)g_try_malloc0(sizeof(struct CMD_ETAT_BIT_CADRAN));
@@ -150,13 +149,15 @@
              g_snprintf( init_cadran->tech_id, sizeof(init_cadran->tech_id), "%s", cadran->tech_id );
              g_snprintf( init_cadran->acronyme, sizeof(init_cadran->acronyme), "%s", cadran->acronyme );
 
-             Formater_cadran(init_cadran);                                                    /* Formatage de la chaine associée */
+             Formater_cadran(init_cadran);                                                 /* Formatage de la chaine associÃ©e */
+             cadran->type = init_cadran->type;  /* Le type de cadran pour les cadran dynamique est dispo apres le 'formatter' */
+             Envoi_client ( client, tag, sstag, (gchar *)cadran, sizeof(struct CMD_TYPE_CADRAN) );
              Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CADRAN,
                            (gchar *)init_cadran, sizeof(struct CMD_ETAT_BIT_CADRAN) );
-   
+
              if ( ! g_slist_find_custom(client->Liste_bit_cadrans, init_cadran, (GCompareFunc) Chercher_bit_cadrans) )
               { client->Liste_bit_cadrans = g_slist_prepend( client->Liste_bit_cadrans, init_cadran ); }
-             else g_free( init_cadran );                          /* si deja dans la liste, plus besoin de cette zone mémoire */
+             else g_free( init_cadran );                          /* si deja dans la liste, plus besoin de cette zone mÃ©moire */
 
 	          }
           else { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
