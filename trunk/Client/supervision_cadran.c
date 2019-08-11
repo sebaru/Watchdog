@@ -53,11 +53,10 @@
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_cadran->syn_id );
     if (!(infos && infos->Trame)) return;
     cadran = (struct CMD_TYPE_CADRAN *)g_try_malloc0( sizeof(struct CMD_TYPE_CADRAN) );
-    if (!cadran)
-     { return;
-     }
+    if (!cadran) return;
     memcpy ( cadran, rezo_cadran, sizeof( struct CMD_TYPE_CADRAN ) );
-
+    printf("%s: add cadran type %d:%d %s:%s\n", __func__,
+                          cadran->type, cadran->bit_controle, cadran->tech_id, cadran->acronyme );
     trame_cadran = Trame_ajout_cadran ( FALSE, infos->Trame, cadran );
     trame_cadran->groupe_dpl = Nouveau_groupe();                 /* Numéro de groupe pour le deplacement */
     g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "button-press-event",
