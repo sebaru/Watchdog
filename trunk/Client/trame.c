@@ -1035,7 +1035,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                      "font", "arial italic 12",
                                                      NULL);
 
-    if (trame_cadran->cadran->type == MNEMO_ENTREE_ANA)
+    if (!flag && trame_cadran->cadran->type == MNEMO_ENTREE_ANA)
      { trame_cadran->item_groupe_fleche = goo_canvas_group_new ( trame->canvas_root, NULL );                    /* Groupe cadran */
        trame_cadran->fleche_droite = Trame_new_SVG ( trame, trame_cadran->item_groupe_fleche,
                                                      "fleche_droite", "noir", 0, -1, -1, 0, 0 );
