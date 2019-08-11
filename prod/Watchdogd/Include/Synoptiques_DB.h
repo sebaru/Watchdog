@@ -21,16 +21,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _SYNOPTIQUES_H_
  #define _SYNOPTIQUES_H_
 
  #include "Reseaux.h"
  #include "Db.h"
- #include "Utilisateur_DB.h"
 
  #define NOM_TABLE_SYNOPTIQUE     "syns"
  #define NOM_TABLE_MOTIF          "syns_motifs"
@@ -98,6 +97,6 @@
  extern struct CMD_TYPE_SCENARIO *Recuperer_scenarioDB_suite( struct DB **db );
  extern struct CMD_TYPE_SCENARIO *Rechercher_scenarioDB ( guint id );
  extern gboolean Modifier_scenarioDB( struct CMD_TYPE_SCENARIO *scenario );
- 
+
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

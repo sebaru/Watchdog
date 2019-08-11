@@ -58,6 +58,9 @@ then
   AC_MSG_ERROR([no suitable flex found. Please install the 'flex' package.])
 fi
 
+LEXLIB=
+AC_SUBST(LEXLIB)
+
 dnl parametres par defaut
 CFLAGS="-Wall -Wno-unused-result -Wno-comment -Wno-pointer-sign -Wno-discarded-qualifiers -pipe -g -ggdb -D_GNU_SOURCE"
 

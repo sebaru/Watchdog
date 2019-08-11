@@ -74,6 +74,7 @@
        case MNEMO_BISTABLE:
             g_snprintf( libelle, sizeof(libelle), "%s", (cadran->valeur ? "TRUE" : "FALSE") );
             break;
+       case MNEMO_REGISTRE:
        case MNEMO_ENTREE_ANA:
             if (!cadran->in_range) g_snprintf(libelle, sizeof(libelle), "not in range" );
             else
@@ -98,9 +99,6 @@
             break;
        case MNEMO_CPT_IMP:
             g_snprintf( libelle, sizeof(libelle), "%8.2f %s", cadran->valeur, cadran->unite );
-            break;
-       case MNEMO_REGISTRE:
-            g_snprintf( libelle, sizeof(libelle), "unknown_r" );
             break;
        case MNEMO_TEMPO:
              { gint src, heure, minute, seconde;

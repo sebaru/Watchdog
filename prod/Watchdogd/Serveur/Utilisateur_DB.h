@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _UTILISATEUR_H_
  #define _UTILISATEUR_H_
 
@@ -52,8 +52,7 @@
 
 
 /************************************************ Prototypes de fonctions *****************************************************/
- extern gboolean Recuperer_utilisateurDB( struct DB **db );                                             /* Dans Utilisateur.c */
- extern gboolean Tester_level_util( struct CMD_TYPE_UTILISATEUR *util, guint id_groupe );
+ extern gboolean Tester_level_util( struct CMD_TYPE_UTILISATEUR *util, guint id_groupe );               /* Dans Utilisateur.c */
  extern struct CMD_TYPE_UTILISATEUR *Recuperer_utilisateurDB_suite( struct DB **db );
  extern struct CMD_TYPE_UTILISATEUR *Rechercher_utilisateurDB_by_name( gchar *nom );
  extern gboolean Check_utilisateur_password( struct CMD_TYPE_UTILISATEUR *util, gchar *pwd );

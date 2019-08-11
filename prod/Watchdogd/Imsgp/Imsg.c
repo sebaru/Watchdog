@@ -81,8 +81,7 @@
   { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT id,username,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
-                " FROM %s as user ORDER BY username",
-                NOM_TABLE_UTIL );
+                " FROM users as user ORDER BY username" );
 
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
@@ -95,8 +94,7 @@
   { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT id,username,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
-                " FROM %s as user WHERE enable=1 AND imsg_enable=1 AND imsg_available=1 ORDER BY username",
-                NOM_TABLE_UTIL );
+                " FROM users as user WHERE enable=1 AND imsg_enable=1 AND imsg_available=1 ORDER BY username" );
 
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
@@ -167,8 +165,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,username,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
-                " FROM %s as user WHERE enable=1 AND imsg_allow_cde=1 AND imsg_jabberid LIKE '%s' LIMIT 1",
-                NOM_TABLE_UTIL, jabberid );
+                " FROM users as user WHERE enable=1 AND imsg_allow_cde=1 AND imsg_jabberid LIKE '%s' LIMIT 1", jabberid );
     g_free(jabberid);
 
     db = Init_DB_SQL();
@@ -285,7 +282,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s SET imsg_available=%d WHERE imsg_jabberid='%s'", NOM_TABLE_UTIL, available, jabberid );
+                "UPDATE users SET imsg_available=%d WHERE imsg_jabberid='%s'", available, jabberid );
     g_free(jabberid);
 
     db = Init_DB_SQL();
@@ -474,7 +471,7 @@
 	 */
    	signal(SIGCHLD, SIG_IGN);
 
-   	purple_util_set_user_dir(g_get_home_dir());
+   	purple_util_set_user_dir(Config.home);
    	purple_debug_set_enabled(FALSE);
    	purple_core_set_ui_ops(&Imsgp_core_uiops);
 	   purple_eventloop_set_ui_ops(&glib_eventloops);

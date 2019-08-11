@@ -40,8 +40,8 @@
 /* Sortie: La structure mémoire est à jour                                                                                    */
 /******************************************************************************************************************************/
  void Lire_config ( char *fichier_config )
-  { gchar *chaine, fichier_etc[32], fichier_home[80];
-    GError *error = NULL;
+  { GError *error = NULL;
+    gchar *chaine;
     GKeyFile *gkf;
 	   gint num;
 
@@ -51,6 +51,7 @@
 
     Config.instance_is_master = TRUE;
     Config.log_db             = FALSE;
+    Config.home_is_set        = FALSE;
     Config.db_port            = DEFAUT_DB_PORT;
 
     g_snprintf( Config.db_host,     sizeof(Config.db_host),     "%s", DEFAUT_DB_HOST  );
@@ -62,35 +63,22 @@
     Config.log_msrv  = FALSE;
     Config.log_arch  = FALSE;
 
-    g_snprintf( fichier_etc,  sizeof(fichier_etc),  "/etc/watchdogd.conf" );
-    g_snprintf( fichier_home, sizeof(fichier_home), "%s/.watchdog/watchdogd.conf", g_get_home_dir() );
-
     gkf = g_key_file_new();
 
     if (fichier_config)
      { if (g_key_file_load_from_file(gkf, fichier_config, G_KEY_FILE_NONE, &error))
         { g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier_config );
-          g_snprintf( Config.home, sizeof(Config.home), "%s", g_get_home_dir() );
           goto parse;
         }
-       printf("Unable to parse config file %s, error %s. Trying another file.\n", fichier_config, error->message );
+       printf("Unable to parse CLI config file %s, error %s. Trying /etc/ file.\n", fichier_config, error->message );
        g_error_free( error ); error = NULL;
      }
 
-    if (g_key_file_load_from_file(gkf, fichier_home, G_KEY_FILE_NONE, &error))
-     { g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier_home );
-       g_snprintf( Config.home, sizeof(Config.home), "%s/.watchdog", g_get_home_dir() );
+    if (g_key_file_load_from_file(gkf, "/etc/watchdogd.conf", G_KEY_FILE_NONE, &error))
+     { g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", "/etc/watchdogd.conf" );
        goto parse;
      }
-    printf("Unable to parse config file %s, error %s. Trying another file.\n", fichier_home, error->message );
-    g_error_free( error ); error = NULL;
-
-    if (g_key_file_load_from_file(gkf, fichier_etc, G_KEY_FILE_NONE, &error))
-     { g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier_etc );
-       g_snprintf( Config.home, sizeof(Config.home), "%s", g_get_home_dir() );
-       goto parse;
-     }
-    printf("Unable to parse config file %s, error %s\n", fichier_etc, error->message );
+    printf("Unable to parse config file /etc/watchdogd.conf, error %s\n", error->message );
     g_error_free( error ); error = NULL;
     printf("Error : Unable to parse any config file\n" );
     goto end;
@@ -99,7 +87,9 @@ parse:
     printf("Using config file %s.\n", Config.config_file );
     chaine = g_key_file_get_string ( gkf, "GLOBAL", "home", NULL );
     if (chaine)
-     { g_snprintf( Config.home, sizeof(Config.home), "%s", chaine ); g_free(chaine); }
+     { g_snprintf( Config.home, sizeof(Config.home), "%s", chaine ); g_free(chaine);
+       Config.home_is_set = TRUE;
+     }
 
     chaine = g_key_file_get_string ( gkf, "GLOBAL", "master_host", NULL );
     if (chaine)

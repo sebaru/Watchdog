@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <sys/socket.h>
  #include <sys/un.h>                                                                   /* Description de la structure AF UNIX */
  #include <sys/types.h>
@@ -91,7 +91,6 @@
 
             if ( g_str_has_prefix ( commande, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
        else if ( g_str_has_prefix ( commande, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
-       else if ( g_str_has_prefix ( commande, "user"      ) ) { response = Admin_user     ( response, ligne + 5);  }
        else if ( g_str_has_prefix ( commande, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
        else if ( g_str_has_prefix ( commande, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
        else { gboolean found = FALSE;
@@ -103,7 +102,7 @@
                      { response = Admin_write ( response, " | -- WARNING --" );
                        response = Admin_write ( response, " | -- Thread is not started, Running config is not loaded --");
                        response = Admin_write ( response, " | -- WARNING --" );
-                     }    
+                     }
                     if (lib->Admin_command)                        /* Ancienne mode, via appel de fonction intégrée au thread */
                      { response =  lib->Admin_command ( response, ligne + strlen(lib->admin_prompt)+1 ); }     /* Appel local */
                     found = TRUE;
@@ -133,7 +132,6 @@
     response = Admin_write ( NULL, chaine );
          if ( g_str_has_prefix ( ligne, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
     else if ( g_str_has_prefix ( ligne, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
-    else if ( g_str_has_prefix ( ligne, "user"      ) ) { response = Admin_user     ( response, ligne + 5);  }
     else if ( g_str_has_prefix ( ligne, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
     else if ( g_str_has_prefix ( ligne, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
     else response = Admin_running (response, ligne);

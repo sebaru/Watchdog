@@ -30,7 +30,6 @@
 
  #include "Reseaux.h"
  #include "Db.h"
- #include "Utilisateur_DB.h"
  #include "Message_DB.h"
 
  #define NOM_TABLE_HISTO_MSGS  "histo_msgs"
