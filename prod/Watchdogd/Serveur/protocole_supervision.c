@@ -38,7 +38,7 @@
  static void Proto_Acquitter_synoptique ( void *user_data, struct PLUGIN_DLS *plugin )
   { gint syn_id = *(gint *)user_data;
     if (plugin->plugindb.syn_id == syn_id)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "%s: Synoptique %d -> plugin %s acquitté", __func__,
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Synoptique %d -> plugin %s acquitté", __func__,
                  plugin->plugindb.syn_id, plugin->plugindb.nom );
        plugin->vars.bit_acquit = TRUE;
      }
@@ -54,27 +54,35 @@
     g_snprintf( titre, sizeof(titre), "W-SUPR-%03d", client->ssrv_id );
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "%s: Starting Sending motifs", __func__ );
     Envoyer_motif_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
 	                                                SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
 
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "%s: Starting Sending palettes", __func__ );
     Envoyer_palette_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
 
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "%s: Starting Sending cadrans", __func__ );
     Envoyer_cadran_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN,
                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN_FIN );
 
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "%s: Starting Sending pass", __func__ );
     Envoyer_passerelle_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
 	                                                     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );
 
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "%s: Starting Sending comments", __func__ );
     Envoyer_comment_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN );
 
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "%s: Starting Sending camera_sup", __func__ );
     Envoyer_camera_sup_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,
                                                       SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN );
 
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;
     Unref_client( client );                                                               /* Déréférence la structure cliente */
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
+              "%s: Sending Synoptique %d finished", __func__, client->syn_to_send );
     pthread_exit ( NULL );
   }
 /******************************************************************************************************************************/
@@ -132,6 +140,8 @@
                Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
                               (gchar *)client->syn_to_send, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                Ref_client( client, "Send supervision" );
+               Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
+                         "%s: Starting Send Synoptique %d", __func__, client->syn_to_send );
                pthread_create( &tid, NULL, (void *)Proto_Envoyer_supervision_thread, client );
                pthread_detach( tid );
              }
