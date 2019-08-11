@@ -744,10 +744,6 @@
        Update_database_schema();                                                    /* Update du schéma de Database si besoin */
        Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */
        Modifier_configDB ( "global", "instance_version", VERSION );                      /* Update du champs instance_version */
-       Mnemo_auto_create_AI ( "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
-       Mnemo_auto_create_AI ( "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
-       Mnemo_auto_create_AI ( "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
-       Mnemo_auto_create_AI ( "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
 
        Partage->zmq_ctx = zmq_ctx_new ();                                          /* Initialisation du context d'echange ZMQ */
        if (!Partage->zmq_ctx)
@@ -756,7 +752,11 @@
         { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Context OK", __func__ ); }
 
        if (Config.instance_is_master)
-        { if ( pthread_create( &TID, NULL, (void *)Boucle_pere_master, NULL ) )
+        { Mnemo_auto_create_AI ( "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
+          Mnemo_auto_create_AI ( "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
+          Mnemo_auto_create_AI ( "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
+          Mnemo_auto_create_AI ( "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
+          if ( pthread_create( &TID, NULL, (void *)Boucle_pere_master, NULL ) )
            { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                       "%s: Demarrage boucle sans fin pthread_create failed %s", __func__, strerror(errno) );
            }
@@ -767,7 +767,6 @@
                       "%s: Demarrage boucle sans fin pthread_create failed %s", __func__, strerror(errno) );
            }
         }
-
                                                          /********** Mise en place de la gestion des signaux ******************/
        sig.sa_handler = Traitement_signaux;                                         /* Gestionnaire de traitement des signaux */
        sig.sa_flags = SA_RESTART;                         /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
