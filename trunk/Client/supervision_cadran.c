@@ -85,7 +85,8 @@
                switch (trame_cadran->cadran->nb_decimal)
                 { case 0: decimal = "0"; break;
                   case 1: decimal = "1"; break;
-                  case 2: decimal = "2"; break;
+                  case 2:
+                  default: decimal = "2"; break;
                 }
                g_snprintf( format, sizeof(format), "%s.%sf %%s", digit, decimal );
                g_snprintf( libelle, sizeof(libelle), format, cadran->valeur, cadran->unite );

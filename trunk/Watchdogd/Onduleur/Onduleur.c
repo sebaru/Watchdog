@@ -340,7 +340,7 @@
        Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", &module->ai_output_current, 0.0 );
        Charger_conf_AI ( module->ai_output_current );
 
-       Mnemo_auto_create_AI ( module->tech_id, "INPUT_HZ", "Fréquence de sortie", "HZ" );
+       Mnemo_auto_create_AI ( module->tech_id, "OUTPUT_HZ", "Fréquence de sortie", "HZ" );
        Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", &module->ai_output_frequency, 0.0 );
        Charger_conf_AI ( module->ai_output_frequency );
 
@@ -372,7 +372,7 @@
        Mnemo_auto_create_DO ( module->tech_id, "START_QUICK_BAT", "Active un test de decharge léger" );
        Dls_data_set_DO ( module->tech_id, "START_QUICK_BAT", &module->do_start_quick_bat, 0.0 );
 
-       Mnemo_auto_create_DO ( module->tech_id, "STOP_TEST_BAT", "Stop le test de déchagre batterie" );
+       Mnemo_auto_create_DO ( module->tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
        Dls_data_set_DO ( module->tech_id, "STOP_TEST_BAT", &module->do_start_quick_bat, 0.0 );
      }
 
