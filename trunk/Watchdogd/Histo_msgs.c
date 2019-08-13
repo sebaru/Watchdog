@@ -76,9 +76,8 @@
 
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s(alive,id_msg,nom_ack,date_create)"
-                   " VALUES "
-                   "('%d','%d','%s','%s')", NOM_TABLE_HISTO_MSGS, TRUE,
-                   histo->msg.id, nom_ack, histo->date_create );
+                   " VALUES ('%d','%d','%s','%s') ON DUPLICATE KEY SET date_create=VALUES(`date_create`)",
+                   NOM_TABLE_HISTO_MSGS, TRUE, histo->msg.id, nom_ack, histo->date_create );
      }
     else
      {
@@ -95,10 +94,9 @@
         }
        else
         { g_snprintf( requete, sizeof(requete),                                                                /* Requete SQL */
-                      "UPDATE %s as histo SET histo.alive=0,histo.date_fin='%s'"
+                      "UPDATE %s as histo SET histo.alive=NULL,histo.date_fin='%s'"
                       " WHERE histo.alive=1 AND histo.id_msg = '%d' ",
-                      NOM_TABLE_HISTO_MSGS,
-                      histo->date_fin, histo->msg.id );
+                      NOM_TABLE_HISTO_MSGS, histo->date_fin, histo->msg.id );
         }
      }
 
