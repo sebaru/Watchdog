@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `config` (
   `nom_thread` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `nom` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `valeur` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
-  UNIQUE KEY `instance_id` (`instance_id`,`nom_thread`,`nom`)
+  UNIQUE (`instance_id`,`nom_thread`,`nom`)
 ) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -690,7 +690,7 @@ CREATE TABLE IF NOT EXISTS `histo_msgs` (
   `date_fixe` DATETIME(2) NULL,
   `date_fin` DATETIME(2) NULL,
   PRIMARY KEY (`id`),
-  UNIQUE `alive` (`id_msg`,`alive`),
+  UNIQUE (`id_msg`,`alive`),
   KEY `date_create` (`date_create`),
   KEY `alive` (`alive`),
   FOREIGN KEY (`id_msg`) REFERENCES `msgs` (`id`) ON DELETE CASCADE

@@ -76,7 +76,7 @@
 
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s(alive,id_msg,nom_ack,date_create)"
-                   " VALUES ('%d','%d','%s','%s') ON DUPLICATE KEY SET date_create=VALUES(`date_create`)",
+                   " VALUES ('%d','%d','%s','%s') ON DUPLICATE KEY UPDATE date_create=VALUES(`date_create`)",
                    NOM_TABLE_HISTO_MSGS, TRUE, histo->msg.id, nom_ack, histo->date_create );
      }
     else
