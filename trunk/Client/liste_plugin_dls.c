@@ -84,10 +84,12 @@
 
  static void Menu_effacer_plugin_dls ( void );
  static void Menu_editer_mnemo ( void );
+ static void Menu_editer_mnemo_new ( void );
  static void Menu_editer_source_dls ( void );
  static void Menu_editer_plugin_dls ( void );
  static void Menu_ajouter_plugin_dls ( void );
  static void Menu_refresh_plugin_dls ( void );
+ static void Menu_editer_source_dls_new ( void );
 
  static GnomeUIInfo Menu_popup_select[]=
   { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_plugin_dls, GNOME_STOCK_PIXMAP_ADD ),
@@ -95,6 +97,11 @@
     GNOMEUIINFO_ITEM_STOCK ( N_("Properties"), NULL, Menu_editer_plugin_dls, GNOME_STOCK_PIXMAP_PROPERTIES ),
     GNOMEUIINFO_ITEM_STOCK ( N_("M_nemoniques"), N_("Edit mnemoniques"),
                              Menu_editer_mnemo, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
+    GNOMEUIINFO_SEPARATOR,
+    GNOMEUIINFO_ITEM_STOCK ( N_("_Edition new Interface"), N_("Editer dans la nouvelle interface"),
+                             Menu_editer_source_dls_new, GNOME_STOCK_PIXMAP_BOOK_OPEN ),
+    GNOMEUIINFO_ITEM_STOCK ( N_("Mnemo new Interface"), N_("Edit mnemoniques"),
+                             Menu_editer_mnemo_new, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK ( N_("Remove"), NULL, Menu_effacer_plugin_dls, GNOME_STOCK_PIXMAP_CLEAR ),
     GNOMEUIINFO_END
@@ -285,6 +292,62 @@
      { Creer_page_source_dls ( &rezo_dls );
      Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_SOURCE_DLS, (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
      }
+    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (lignes);
+  }
+/******************************************************************************************************************************/
+/* Menu_editer_source_dls: Demande d'edition du plugin_dls selectionné                                                        */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Menu_editer_source_dls_new ( void )
+  { GtkTreeSelection *selection;
+    gchar chaine[256], *tech_id;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    GList *lignes;
+    guint nbr;
+
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_plugin_dls) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_plugin_dls) );
+
+    nbr = gtk_tree_selection_count_selected_rows( selection );
+    if (nbr!=1) return;                                                                           /* Si rien n'est selectionné */
+
+    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
+    gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, -1 );                                         /* Recup du id */
+    g_snprintf( chaine, sizeof(chaine), "admin/dls/sourceedit/%s", tech_id );
+    g_free( tech_id );
+    Firefox_exec( chaine );
+    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (lignes);
+  }
+/******************************************************************************************************************************/
+/* Menu_editer_source_dls: Demande d'edition du plugin_dls selectionné                                                        */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Menu_editer_mnemo_new ( void )
+  { GtkTreeSelection *selection;
+    gchar chaine[256], *tech_id;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    GList *lignes;
+    guint nbr;
+
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_plugin_dls) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_plugin_dls) );
+
+    nbr = gtk_tree_selection_count_selected_rows( selection );
+    if (nbr!=1) return;                                                                           /* Si rien n'est selectionné */
+
+    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
+    gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, -1 );                                         /* Recup du id */
+    g_snprintf( chaine, sizeof(chaine), "admin/mnemo/index/%s", tech_id );
+    g_free( tech_id );
+    Firefox_exec( chaine );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);
   }

@@ -147,6 +147,22 @@
   }
 
 /******************************************************************************************************************************/
+/* Firefox_exec:Lance un navigateur avec l'URI en pj                                                                          */
+/******************************************************************************************************************************/
+ void Firefox_exec ( gchar *uri )
+  { gchar chaine[256];
+    gint pid;
+    g_snprintf(chaine, sizeof(chaine), "https://%s.abls-habitat.fr/%s", Client.host, uri );
+    printf( "Lancement d'un firefox sur %s\n", chaine );
+    pid = fork();
+    if (pid<0) return;
+    else if (!pid)                                                                       /* Lancement de la ligne de commande */
+     { execlp( "firefox", "firefox", chaine, NULL );
+       printf("Lancement de firefox failed\n");
+       _exit(0);
+     }
+  }
+/******************************************************************************************************************************/
 /*!Traitement_signaux: Gestion principale des signaux de Watchdog-client
  ******************************************************************************************************************************/
  static void Traitement_signaux ( int num                                                           /*! numéro du signal recu */
