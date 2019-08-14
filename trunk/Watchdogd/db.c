@@ -303,7 +303,7 @@
      }
 
     Info_new( Config.log, Config.log_db, LOG_NOTICE,
-             "Update_database_schema: Actual Database_Version detected = %05d", database_version );
+             "%s: Actual Database_Version detected = %05d. Please wait while upgrading.", __func__, database_version );
 
     if (database_version==0) goto fin;
 
@@ -1455,7 +1455,7 @@
 
     Libere_DB_SQL(&db);
 fin:
-    database_version=4277;
+    database_version=4307;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
