@@ -1228,7 +1228,7 @@
                    g_snprintf( msg.libelle,  sizeof(msg.libelle), "%s", libelle );
                    msg.dls_id = Dls_plugin.id;
                    msg.type = Get_option_entier ( alias->options, T_TYPE );
-                   Ajouter_messageDB_for_dls ( &msg );
+                   Mnemo_auto_create_MSG ( &msg );
                    break;
                  }
                 default: g_snprintf( mnemo.mnemo_base.acronyme, sizeof(mnemo.mnemo_base.acronyme), "%s", alias->acronyme );

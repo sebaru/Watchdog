@@ -205,7 +205,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
- gint Ajouter_messageDB_for_dls ( struct CMD_TYPE_MESSAGE *msg )
+ gint Mnemo_auto_create_MSG ( struct CMD_TYPE_MESSAGE *msg )
   { gchar *libelle, *libelle_audio, *libelle_sms;
     gchar requete[2048];
     gboolean retour;
@@ -402,34 +402,6 @@
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
- struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_mnemo_id ( guint mnemo_id )
-  { struct CMD_TYPE_MESSAGE *message;
-    gchar requete[512];
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(NULL);
-     }
-
-    g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
-                " WHERE msg.mnemo_id=%d LIMIT 1", mnemo_id                                                                       /* Where */
-              );
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { Libere_DB_SQL( &db );
-       return(NULL);
-     }
-
-    message = Recuperer_messageDB_suite( &db );
-    if (message) Libere_DB_SQL ( &db );
-    return(message);
-  }
-/******************************************************************************************************************************/
-/* Rechercher_messageDB_par_id: Recupération du message dont l'id est en parametre                                            */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: une GList                                                                                                          */
-/******************************************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_acronyme ( gchar *tech_id, gchar *acronyme )
   { struct CMD_TYPE_MESSAGE *message;
     gchar requete[512];
@@ -559,8 +531,8 @@
     while ( liste )
      { struct DLS_MESSAGES *msg = (struct DLS_MESSAGES *)liste->data;
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE msgs as m SET etat='%d' "
-                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                   "UPDATE msgs as m INNER JOIN dls as d ON m.dls_id = d.id SET m.etat='%d' "
+                   "WHERE d.tech_id='%s' AND m.acronyme='%s';",
                    msg->etat, msg->tech_id, msg->acronyme );
        Lancer_requete_SQL ( db, requete );
        liste = g_slist_next(liste);

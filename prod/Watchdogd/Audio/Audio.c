@@ -161,8 +161,8 @@
                 "%s: '%s' waiting to finish pid=%d", __func__, libelle_audio, pid );
        waitpid(pid, NULL, 0 );
      }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-             "%s: Wtd_play_google '%s' finished pid=%d", __func__, libelle_audio, pid );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "%s: Wtd_play_google %s '%s' %s finished pid=%d", __func__,
+              Cfg_audio.language, libelle_audio, Cfg_audio.device, pid );
     Cfg_audio.nbr_diffusion_google++;
     return(TRUE);
   }

@@ -1442,6 +1442,17 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4307)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE histo_msgs CHANGE `alive` `alive` tinyint(1) NULL DEFAULT NULL" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE histo_msgs SET `alive`=NULL WHERE `alive`=0" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "DELETE FROM histo_msgs WHERE `alive`=1" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE histo_msgs ADD UNIQUE (`id_msg`,`alive`)" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 fin:
     database_version=4277;

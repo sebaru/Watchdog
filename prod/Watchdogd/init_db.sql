@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `config` (
   `nom_thread` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `nom` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `valeur` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
-  UNIQUE KEY `instance_id` (`instance_id`,`nom_thread`,`nom`)
+  UNIQUE (`instance_id`,`nom_thread`,`nom`)
 ) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -684,13 +684,14 @@ INSERT INTO `msgs` (`id`, `num`, `dls_id`, `libelle`, `libelle_audio`, `libelle_
 CREATE TABLE IF NOT EXISTS `histo_msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_msg` int(11) NOT NULL DEFAULT '0',
-  `alive` tinyint(1) NOT NULL,
+  `alive` tinyint(1) NULL DEFAULT NULL,
   `nom_ack` varchar(97) COLLATE utf8_unicode_ci DEFAULT NULL,
   `date_create` DATETIME(2) NULL,
   `date_fixe` DATETIME(2) NULL,
   `date_fin` DATETIME(2) NULL,
   PRIMARY KEY (`id`),
-  KEY `date_create_sec` (`date_create_sec`),
+  UNIQUE (`id_msg`,`alive`),
+  KEY `date_create` (`date_create`),
   KEY `alive` (`alive`),
   FOREIGN KEY (`id_msg`) REFERENCES `msgs` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
