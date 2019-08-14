@@ -531,8 +531,8 @@
     while ( liste )
      { struct DLS_MESSAGES *msg = (struct DLS_MESSAGES *)liste->data;
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE msgs as m SET etat='%d' "
-                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                   "UPDATE msgs as m INNER JOIN dls as d ON m.dls_id = d.id SET m.etat='%d' "
+                   "WHERE d.tech_id='%s' AND m.acronyme='%s';",
                    msg->etat, msg->tech_id, msg->acronyme );
        Lancer_requete_SQL ( db, requete );
        liste = g_slist_next(liste);
