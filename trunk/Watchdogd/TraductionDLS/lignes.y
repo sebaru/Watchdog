@@ -54,7 +54,7 @@
 %token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE
 %token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM
 
-%token <val>    T_TYPE T_ETAT T_ATTENTE T_DEFAUT T_ALARME T_VEILLE T_ALERTE T_DERANGEMENT T_DANGER
+%token <val>    T_TYPE T_INFO T_ATTENTE T_DEFAUT T_ALARME T_VEILLE T_ALERTE T_DERANGEMENT T_DANGER
 %type  <val>    type_msg
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
@@ -956,7 +956,7 @@ dyn_string:     T_CHAINE
 
 couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE | KAKI
                 ;
-type_msg:         T_ETAT    {{ $$=MSG_ETAT; }}
+type_msg:         T_INFO    {{ $$=MSG_ETAT; }}
                 | T_ATTENTE {{ $$=MSG_ATTENTE; }}
                 | T_DEFAUT  {{ $$=MSG_DEFAUT; }}
                 | T_ALARME  {{ $$=MSG_ALARME; }}
