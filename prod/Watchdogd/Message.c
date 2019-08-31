@@ -70,7 +70,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT num,persist"
-                " FROM %s",
+                " FROM %s WHERE num<>'-1'",
                 NOM_TABLE_MSG );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -268,7 +268,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
-                " WHERE %s ORDER BY parent_syn.page,syn.page,num ", (conditions ? conditions : "1=1")                /* Where */
+                " WHERE %s AND num<>'-1' ORDER BY parent_syn.page,syn.page,num ", (conditions ? conditions : "1=1")  /* Where */
               );
 
     if (start != -1 && length != -1)                                                 /* Critere d'affichage (offset et count) */

@@ -466,6 +466,7 @@
 /******************************************************************************************************************************/
  static void Traiter_commande_sms ( gchar *from, gchar *texte )
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
+    gboolean found = FALSE;
     struct SMSDB *sms;
     gchar chaine[160];
     struct DB *db;
@@ -504,8 +505,6 @@
 
     if ( db->nbr_result == 0 )                                                              /* Si pas d'enregistrement trouvé */
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: No Static match found for '%s' Trying dyn one.", __func__, texte );
-       g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
-       Envoyer_smsg_gsm_text ( chaine );
      }
     else if (db->nbr_result > 1)
      { g_snprintf(chaine, sizeof(chaine), "Too many static events found for '%s'", texte );      /* Envoi de l'erreur si trop */
@@ -516,6 +515,7 @@
         { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Static Match found for '%s' Type %d Num %d - %s", __func__,
                     texte, mnemo->type, mnemo->num, mnemo->libelle );
 
+          found=TRUE;
           if (Config.instance_is_master==TRUE)                                                    /* si l'instance est Maitre */
            { switch( mnemo->type )
               { case MNEMO_MONOSTABLE:
@@ -547,6 +547,12 @@
      }
     Libere_DB_SQL ( &db );
 
+    if (found)
+     { g_snprintf(chaine, sizeof(chaine), "'%s' done.", texte );                           /* Envoi de l'erreur si pas trouvé */
+       Envoyer_smsg_gsm_text ( chaine );
+       return;
+     }
+
     if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, texte ) )
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
     else while ( Recuperer_mnemos_DI_suite( &db ) )
@@ -554,6 +560,7 @@
        Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Dyn Match found '%s' '%s:%s' - %s", __func__,
                  src_text, tech_id, acro, libelle );
 
+       found=TRUE;
        if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
         { Envoyer_commande_dls_data ( tech_id, acro ); }
        else /* Envoi au master via thread HTTP */
@@ -565,6 +572,11 @@
           Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BIT", &bit, sizeof(struct ZMQ_SET_BIT) );
         }
      }
+
+    if (found)
+         { g_snprintf(chaine, sizeof(chaine), "'%s' done.", texte ); }
+    else { g_snprintf(chaine, sizeof(chaine), "'%s' not found in static or dynamic.", texte ); }/* Envoi de l'erreur si pas trouvé */
+    Envoyer_smsg_gsm_text ( chaine );
   }
 /******************************************************************************************************************************/
 /* Smsg_disconnect: Se deconnecte du telephone ou de la clef 3G                                                               */
