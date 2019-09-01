@@ -15,7 +15,7 @@
  #define MDEF_REPOS_F   <-> _B(libelle="Mémorisation du défaut repos acquitté (Fixe) du TL");
  #define MDEF_TRAVAIL   <-> _B(libelle="Mémorisation du défaut travail non acquitté du TL");
  #define MDEF_TRAVAIL_F <-> _B(libelle="Mémorisation du défaut travail acquitté (Fixe) du TL");
- #define MSG_TELE_ON    <-> _MSG(type=etat,libelle="Allumé"); /* TL activé */
+ #define MSG_TELE_ON    <-> _MSG(type=info,libelle="Allumé"); /* TL activé */
  #define MSG_DEF_REPOS  <-> _MSG(type=defaut,libelle="Défaut repos"); /* Defaut repos */
  #define MSG_DEF_TRAVAIL<-> _MSG(type=defaut,libelle="Défaut travail"); /* Defaut travail */
 
