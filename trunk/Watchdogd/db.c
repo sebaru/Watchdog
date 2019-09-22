@@ -1464,8 +1464,9 @@
                    "`dst_posy` int(11) NOT NULL DEFAULT 0,"
                    "`stroke` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'black',"
                    "`stroke_dasharray` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,"
-                   "`stroke_width` int(11) NOT NULL DEFAULT 1"
-                   "FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,"
+                   "`stroke_width` int(11) NOT NULL DEFAULT 1,"
+                   "PRIMARY KEY (`id`),"
+                   "FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE"
                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete),
@@ -1476,13 +1477,14 @@
                    "`posy` int(11) NOT NULL DEFAULT 0,"
                    "`width` int(11) NOT NULL DEFAULT 10,"
                    "`height` int(11) NOT NULL DEFAULT 10,"
-                   "`rx` int(11) NOT NULLDEFAULT 0,"
-                   "`ry` int(11) NOT NULLDEFAULT 0,"
+                   "`rx` int(11) NOT NULL DEFAULT 0,"
+                   "`ry` int(11) NOT NULL DEFAULT 0,"
                    "`stroke` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'black',"
                    "`fill` varchar(32) COLLATE utf8_unicode_ci NOT NULL,"
                    "`stroke_width` int(11) NOT NULL DEFAULT 1,"
                    "`stroke_dasharray` varchar(32) COLLATE utf8_unicode_ci NULL,"
-                   "FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,"
+                   "PRIMARY KEY (`id`),"
+                   "FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE"
                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
        Lancer_requete_SQL ( db, requete );
      }
