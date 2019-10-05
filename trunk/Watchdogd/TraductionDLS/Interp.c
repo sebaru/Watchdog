@@ -795,7 +795,7 @@
     if (!tech_id) alias->tech_id = g_strdup(Dls_plugin.tech_id);
              else alias->tech_id = g_strdup(tech_id);
     alias->acronyme = g_strdup(acronyme);
-    alias->type_bit      = bit;
+    alias->type_bit = bit;
     alias->num      = num;
     alias->barre    = barre;
     alias->options  = options;
@@ -1224,10 +1224,13 @@
                  }
                 case MNEMO_MSG:
                  { struct CMD_TYPE_MESSAGE msg;
+                   gint param;
                    g_snprintf( msg.acronyme, sizeof(msg.acronyme), "%s", alias->acronyme );
                    g_snprintf( msg.libelle,  sizeof(msg.libelle), "%s", libelle );
                    msg.dls_id = Dls_plugin.id;
-                   msg.type = Get_option_entier ( alias->options, T_TYPE );
+                   param = Get_option_entier ( alias->options, T_TYPE );
+                   if (param!=-1) msg.type = param;
+                             else msg.type = MSG_ETAT;
                    Mnemo_auto_create_MSG ( &msg );
                    break;
                  }
