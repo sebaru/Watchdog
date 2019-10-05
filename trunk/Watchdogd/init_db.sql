@@ -631,6 +631,9 @@ CREATE TABLE IF NOT EXISTS `syns_liens` (
   `stroke` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'black',
   `stroke_dasharray` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,
   `stroke_width` int(11) NOT NULL DEFAULT 1,
+  `stroke_linecap` varchar(32) COLLATE utf8_unicode_ci DEFAULT 'butt',
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
@@ -650,6 +653,8 @@ CREATE TABLE IF NOT EXISTS `syns_rectangles` (
   `fill` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `stroke_width` int(11) NOT NULL DEFAULT 1,
   `stroke_dasharray` varchar(32) COLLATE utf8_unicode_ci NULL,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
