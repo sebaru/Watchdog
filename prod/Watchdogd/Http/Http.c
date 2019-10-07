@@ -229,27 +229,25 @@
 /******************************************************************************************************************************/
  static gint CB_ws_histos ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
   {
-#ifdef bouh
     struct WS_PER_SESSION_DATA *pss;
     gchar *util;
     pss = lws_wsi_user ( wsi );
     switch (tag)
      { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);
 /*            if (Get_phpsessionid_cookie(wsi)==FALSE)                                              /* Recupere le PHPSessionID */
-             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No PHPSESSID. Killing.", __func__ );
+/*             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No PHPSESSID. Killing.", __func__ );
                return(1);
              }
 /*            util = Rechercher_util_by_phpsessionid ( pss->sid );*/
-            if (!util)
+/*            if (!util)
              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No user found for session %s.", __func__, pss->sid );
                return(1);
              }
             g_snprintf( pss->util, sizeof(pss->util), "%s", util );
             g_free(util);
 
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established for %s", __func__, pss->util );
-            /*pss->zmq = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
-            Connect_zmq ( pss->zmq, "inproc", ZMQUEUE_LIVE_MSGS, 0 );*/
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established for %s", __func__, pss->util );*/
+            pss->zmq = Connect_zmq ( ZMQ_SUB, "listen-to-msgs",   "inproc", ZMQUEUE_LIVE_MSGS, 0 );
             break;
        case LWS_CALLBACK_CLOSED:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback closed", __func__ );
@@ -263,8 +261,8 @@
              }
             lws_callback_on_writable(wsi);
             break;
+       default: return(0);
      }
-#endif
     return(0);
   }
 /******************************************************************************************************************************/

@@ -205,7 +205,14 @@
   {
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    if (!strcasecmp(type,"CI"))
+    if (!strcasecmp(type,"M"))
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                 "%s: HTTP/ request for SET M %s:%s", __func__, tech_id, acronyme );
+       Envoyer_commande_dls_data ( tech_id, acronyme );
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    else if (!strcasecmp(type,"CI"))
      { struct DLS_CI *cpt_imp=NULL;
        gchar *valeur = json_object_get_string_member ( object, "valeur" );
        if (!valeur)
@@ -233,6 +240,7 @@
         }
        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }
+/************************************************ Préparation du buffer JSON **************************************************/
     else if (!strcasecmp(type,"CH"))
      { struct DLS_CH *cpt_h=NULL;
        gchar *valeur = json_object_get_string_member ( object, "valeur" );

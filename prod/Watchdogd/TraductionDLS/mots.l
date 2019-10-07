@@ -131,7 +131,7 @@ newline       [\n\r]+
 "dMa"                      { DlsScanner_lval.val = T_DMAXA;     return T_DMAXA;     }
 "dad"                      { DlsScanner_lval.val = T_DAD;       return T_DAD;       }
 "type"                     { DlsScanner_lval.val = T_TYPE;      return T_TYPE;      }
-"etat"                     { DlsScanner_lval.val = T_ETAT;      return T_ETAT;      }
+"info"                     { DlsScanner_lval.val = T_INFO;      return T_INFO;      }
 "attente"                  { DlsScanner_lval.val = T_ATTENTE;   return T_ATTENTE;   }
 "defaut"                   { DlsScanner_lval.val = T_DEFAUT;    return T_DEFAUT;    }
 "alarme"                   { DlsScanner_lval.val = T_ALARME;    return T_ALARME;    }

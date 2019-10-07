@@ -1453,9 +1453,66 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4323)
+     { g_snprintf( requete, sizeof(requete),
+                   "CREATE TABLE IF NOT EXISTS `syns_liens` ("
+                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                   "`syn_id` int(11) NOT NULL DEFAULT 0,"
+                   "`src_posx` int(11) NOT NULL DEFAULT 0,"
+                   "`src_posy` int(11) NOT NULL DEFAULT 0,"
+                   "`dst_posx` int(11) NOT NULL DEFAULT 0,"
+                   "`dst_posy` int(11) NOT NULL DEFAULT 0,"
+                   "`stroke` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'black',"
+                   "`stroke_dasharray` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,"
+                   "`stroke_width` int(11) NOT NULL DEFAULT 1,"
+                   "PRIMARY KEY (`id`),"
+                   "FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE"
+                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "CREATE TABLE IF NOT EXISTS `syns_rectangles` ("
+                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                   "`syn_id` int(11) NOT NULL DEFAULT 0,"
+                   "`posx` int(11) NOT NULL DEFAULT 0,"
+                   "`posy` int(11) NOT NULL DEFAULT 0,"
+                   "`width` int(11) NOT NULL DEFAULT 10,"
+                   "`height` int(11) NOT NULL DEFAULT 10,"
+                   "`rx` int(11) NOT NULL DEFAULT 0,"
+                   "`ry` int(11) NOT NULL DEFAULT 0,"
+                   "`stroke` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'black',"
+                   "`fill` varchar(32) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`stroke_width` int(11) NOT NULL DEFAULT 1,"
+                   "`stroke_dasharray` varchar(32) COLLATE utf8_unicode_ci NULL,"
+                   "PRIMARY KEY (`id`),"
+                   "FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE"
+                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 4327)
+     { g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `syns_liens` ADD `stroke_linecap` varchar(32) COLLATE utf8_unicode_ci DEFAULT 'butt'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `syns_liens` ADD `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `syns_liens` ADD `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 4328)
+     { g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `syns_rectangles` ADD `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `syns_rectangles` ADD `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 fin:
-    database_version=4307;
+    database_version=4328;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
