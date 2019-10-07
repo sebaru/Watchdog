@@ -1088,9 +1088,11 @@
     gboolean need_arch = FALSE;
     if (etat)
      { if (reset)                                                                       /* Le compteur doit-il etre resetté ? */
-        { cpt_imp->val_en_cours1 = 0;                                          /* Valeur transitoire pour gérer les ratio */
-          cpt_imp->valeur = 0;                                                 /* Valeur transitoire pour gérer les ratio */
-          need_arch = TRUE;
+        { if (cpt_imp->valeur!=0)
+           { cpt_imp->val_en_cours1 = 0;                                          /* Valeur transitoire pour gérer les ratio */
+             cpt_imp->valeur = 0;                                                 /* Valeur transitoire pour gérer les ratio */
+             need_arch = TRUE;
+           }
         }
        else if ( cpt_imp->etat == FALSE )                                                             /* Passage en actif */
         { cpt_imp->etat = TRUE;
@@ -1756,7 +1758,7 @@
        Dls_run_dls_tree( Partage->com_dls.Dls_tree );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
        SB_SYS(3, 1);                                                  /* B3 est toujours à un apres le premier tour programme */
-
+       Partage->com_dls.Top_check_horaire = FALSE;                         /* Cotrole horaire effectué un fois par minute max */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
        Partage->audit_tour_dls_per_sec++;                                   /* Gestion de l'audit nbr de tour DLS par seconde */
 /******************************************** Gestion des 1000 tours DLS par seconde ******************************************/

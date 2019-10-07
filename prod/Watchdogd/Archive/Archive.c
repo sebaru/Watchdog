@@ -177,7 +177,7 @@
         }
        return;
      }
-    Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Add Arch in list: '%s:%s'", __func__, tech_id, nom );
+    Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Add Arch in list: '%s:%s'=%f", __func__, tech_id, nom, valeur );
     Ajouter_arch_all( -1, -1, nom, tech_id, valeur );
   }
 /******************************************************************************************************************************/
@@ -250,7 +250,7 @@
           g_free(arch);
           nb_enreg++;                        /* Permet de limiter a au plus 1000 enregistrement histoire de limiter la famine */
         }
-       Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Traitement de %d enregistrement en %06.1fs. Reste %d", __func__,
+       Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
                  nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch );
        Libere_DB_SQL( &db );                                                                               /* pour historique */
        Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 1.0*Partage->com_arch.taille_arch );
