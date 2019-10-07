@@ -212,7 +212,8 @@
     gboolean Compil_at_boot;                                            /* True si DLS doit compiler les plugins au démarrage */
     guint admin_start;                                                                              /* Demande de deconnexion */
     guint admin_stop;                                                                               /* Demande de deconnexion */
-    guint temps_sched;
+    guint temps_sched;                                          /* Delai d'attente DLS pour assurer 100 tours max par seconde */
+    gboolean Top_check_horaire;                                                    /* True le controle horaire est réalisable */
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/
