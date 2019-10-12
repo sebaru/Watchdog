@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _ARCHIVAGE_DB_H_
  #define _ARCHIVAGE_DB_H_
 
@@ -67,7 +67,7 @@
  extern gint Arch_Clear_list ( void );
  extern void Ajouter_arch( gint type, gint num, gfloat valeur );
  extern void Ajouter_arch_by_nom( gchar *nom, gchar *tech_id, gfloat valeur );
- extern void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );
+ extern gboolean Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );
  extern gchar *Admin_arch ( gchar *responose, gchar *ligne );
  extern void Arch_Update_SQL_Partitions_thread ( void );
 #endif
