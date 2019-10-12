@@ -184,7 +184,7 @@
                     "%s: HTTP/ request for GET I %s:%s", __func__, tech_id, acronyme );
           Dls_data_get_VISUEL ( tech_id, acronyme, (gpointer *)&visu );
           if (!visu)
-           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: visu non trouvée", __func__ );
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: visu %s:%s non trouvé", __func__, tech_id, acronyme );
              g_object_unref(builder);
              return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
            }
