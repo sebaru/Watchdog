@@ -826,13 +826,14 @@ CREATE TABLE IF NOT EXISTS `users` (
   `date_create` DATETIME NOT NULL DEFAULT NOW(),
   `date_modif` DATETIME DEFAULT NULL,
   `sms_enable` tinyint(1) NOT NULL DEFAULT '0',
-  `sms_phone` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
+  `sms_phone` varchar(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `sms_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
   `imsg_enable` tinyint(1) NOT NULL DEFAULT '0',
-  `imsg_jabberid` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
+  `imsg_jabberid` varchar(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `imsg_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
   `imsg_available` tinyint(1) NOT NULL DEFAULT '0',
   `ssrv_bit_presence` int(11) NOT NULL DEFAULT '0',
+  `session_id` varchar(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'NONE',
   PRIMARY KEY (`id`),
   KEY(`username`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
