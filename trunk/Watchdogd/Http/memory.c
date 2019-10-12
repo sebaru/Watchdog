@@ -128,7 +128,7 @@
                  "%s: HTTP/ request for GET T %s:%s", __func__, tech_id, acronyme );
        Dls_data_get_tempo ( tech_id, acronyme, (gpointer *)&tempo );
        if (!tempo)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: bool non trouvé", __func__ );
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: tempo %s:%s non trouvée", __func__, tech_id, acronyme );
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
@@ -141,6 +141,19 @@
        Json_add_int   ( builder, "date_on", tempo->date_on );
        Json_add_int   ( builder, "date_off", tempo->date_off );
        Json_add_int   ( builder, "top", Partage->top );
+     }
+/*---------------------------------------------------------- Tempo -----------------------------------------------------------*/
+    else if (!strcasecmp(type,"E"))
+     { struct DLS_BOOL *bool=NULL;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                 "%s: HTTP/ request for GET E %s:%s", __func__, tech_id, acronyme );
+       Dls_data_get_bool ( tech_id, acronyme, (gpointer *)&bool );
+       if (!bool)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: bool %s:%s non trouvé", __func__, tech_id, acronyme );
+          g_object_unref(builder);
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
+        }
+       Json_add_bool  ( builder, "etat", bool->etat );
      }
 /*---------------------------------------------------- Visuels ---------------------------------------------------------------*/
     else if (!strcasecmp(type,"I"))
