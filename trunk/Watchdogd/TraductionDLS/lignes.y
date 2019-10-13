@@ -64,7 +64,7 @@
 %type  <val>    modulateur jour_semaine
 
 %token <val>    T_BI T_MONO ENTREE SORTIE T_TEMPO T_HORLOGE T_DYN_STRING
-%token <val>    T_MSG ICONE CPT_H T_CPT_IMP EANA T_START T_REGISTRE
+%token <val>    T_MSG T_ICONE CPT_H T_CPT_IMP EANA T_START T_REGISTRE
 %type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_IN_RANGE
@@ -138,7 +138,7 @@ alias_bit:        T_BI       {{ $$=MNEMO_BISTABLE;   }}
                 | SORTIE     {{ $$=MNEMO_SORTIE;     }}
                 | T_MSG      {{ $$=MNEMO_MSG;        }}
                 | T_TEMPO    {{ $$=MNEMO_TEMPO;      }}
-                | ICONE      {{ $$=MNEMO_MOTIF;      }}
+                | T_ICONE    {{ $$=MNEMO_MOTIF;      }}
                 | CPT_H      {{ $$=MNEMO_CPTH;       }}
                 | T_CPT_IMP  {{ $$=MNEMO_CPT_IMP;    }}
                 | EANA       {{ $$=MNEMO_ENTREE_ANA; }}

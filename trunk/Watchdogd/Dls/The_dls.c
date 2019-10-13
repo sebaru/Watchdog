@@ -1474,19 +1474,17 @@
         { if ( visu->changes == 10 )                                                /* Est-ce le dernier change avant blocage */
            { visu->etat   = 0;                                                   /* Si oui, on passe le visuel en kaki cligno */
              g_snprintf( visu->color, sizeof(visu->color), "brown" );
-             visu->cligno = 1;                                                    /* Clignotant */
+             visu->cligno = 1;                                                                                  /* Clignotant */
            }
-          else { visu->etat   = etat;  /* Sinon on recopie ce qui est demandé par le plugin DLS */
+          else { visu->etat   = etat;                                /* Sinon on recopie ce qui est demandé par le plugin DLS */
                  g_snprintf( visu->color, sizeof(visu->color), "%s", color );
                  visu->cligno = cligno;
                }
 
-          visu->last_change = Partage->top;                               /* Date de la photo ! */
-          #ifdef bouh
+          visu->last_change = Partage->top;                                                             /* Date de la photo ! */
           pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
-          Partage->com_msrv.liste_i = g_slist_append( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) );
+          Partage->com_msrv.liste_new_i = g_slist_append( Partage->com_msrv.liste_new_i, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          #endif
         }
        visu->changes++;                                                                                /* Un change de plus ! */
        Partage->audit_bit_interne_per_sec++;
