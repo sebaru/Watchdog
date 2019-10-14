@@ -48,36 +48,36 @@
           else { g_snprintf(date, sizeof(date), "Erreur"); }
 
     json_builder_begin_object (builder);
-    json_builder_set_member_name  ( builder, "id" );        json_builder_add_int_value ( builder, dls->plugindb.id );
-    json_builder_set_member_name  ( builder, "tech_id" );   json_builder_add_string_value ( builder, dls->plugindb.tech_id );
-    json_builder_set_member_name  ( builder, "shortname" ); json_builder_add_string_value ( builder, dls->plugindb.shortname );
-    json_builder_set_member_name  ( builder, "name" );      json_builder_add_string_value ( builder, dls->plugindb.nom );
+    Json_add_int    ( builder, "id",        dls->plugindb.id );
+    Json_add_string ( builder, "tech_id",   dls->plugindb.tech_id );
+    Json_add_string ( builder, "shortname", dls->plugindb.shortname );
+    Json_add_string ( builder, "name" ,     dls->plugindb.nom );
     if (dls->version) Json_add_string ( builder, "version", dls->version() );
                  else Json_add_string ( builder, "version", "Unknown" );
-    json_builder_set_member_name  ( builder, "started" );   json_builder_add_boolean_value ( builder, dls->plugindb.on );
-    json_builder_set_member_name  ( builder, "start_date" );json_builder_add_string_value ( builder, date );
+    Json_add_bool   ( builder, "started",   dls->plugindb.on );
+    Json_add_string ( builder, "start_date", date );
 
-    json_builder_set_member_name  ( builder, "conso" );     json_builder_add_double_value ( builder, dls->conso );
-    json_builder_set_member_name  ( builder, "starting" );  json_builder_add_boolean_value ( builder, dls->vars.starting );
-    json_builder_set_member_name  ( builder, "debug" );     json_builder_add_boolean_value ( builder, dls->vars.debug );
-    json_builder_set_member_name  ( builder, "bit_comm_out" ); json_builder_add_boolean_value ( builder, dls->vars.bit_comm_out );
-    json_builder_set_member_name  ( builder, "bit_defaut" ); json_builder_add_boolean_value ( builder, dls->vars.bit_defaut );
-    json_builder_set_member_name  ( builder, "bit_defaut_fixe" ); json_builder_add_boolean_value ( builder, dls->vars.bit_defaut_fixe );
-    json_builder_set_member_name  ( builder, "bit_alarme" ); json_builder_add_boolean_value ( builder, dls->vars.bit_alarme );
-    json_builder_set_member_name  ( builder, "bit_alarme_fixe" ); json_builder_add_boolean_value ( builder, dls->vars.bit_alarme_fixe );
-    json_builder_set_member_name  ( builder, "bit_activite_ok" ); json_builder_add_boolean_value ( builder, dls->vars.bit_activite_ok );
+    Json_add_double ( builder, "conso", dls->conso );
+    Json_add_bool   ( builder, "starting",             dls->vars.starting );
+    Json_add_bool   ( builder, "debug",                dls->vars.debug );
+    Json_add_bool   ( builder, "bit_comm_out",         dls->vars.bit_comm_out );
+    Json_add_bool   ( builder, "bit_defaut",           dls->vars.bit_defaut );
+    Json_add_bool   ( builder, "bit_defaut_fixe",      dls->vars.bit_defaut_fixe );
+    Json_add_bool   ( builder, "bit_alarme",           dls->vars.bit_alarme );
+    Json_add_bool   ( builder, "bit_alarme_fixe",      dls->vars.bit_alarme_fixe );
+    Json_add_bool   ( builder, "bit_activite_ok",      dls->vars.bit_activite_ok );
 
-    json_builder_set_member_name  ( builder, "bit_alerte" ); json_builder_add_boolean_value ( builder, dls->vars.bit_alerte );
-    json_builder_set_member_name  ( builder, "bit_alerte_fixe" ); json_builder_add_boolean_value ( builder, dls->vars.bit_alerte_fixe );
-    json_builder_set_member_name  ( builder, "bit_veille" ); json_builder_add_boolean_value ( builder, dls->vars.bit_veille );
+    Json_add_bool   ( builder, "bit_alerte",           dls->vars.bit_alerte );
+    Json_add_bool   ( builder, "bit_alerte_fixe",      dls->vars.bit_alerte_fixe );
+    Json_add_bool   ( builder, "bit_veille",           dls->vars.bit_veille );
 
-    json_builder_set_member_name  ( builder, "bit_derangement" ); json_builder_add_boolean_value ( builder, dls->vars.bit_derangement );
-    json_builder_set_member_name  ( builder, "bit_derangement_fixe" ); json_builder_add_boolean_value ( builder, dls->vars.bit_derangement_fixe );
-    json_builder_set_member_name  ( builder, "bit_danger" ); json_builder_add_boolean_value ( builder, dls->vars.bit_danger );
-    json_builder_set_member_name  ( builder, "bit_danger_fixe" ); json_builder_add_boolean_value ( builder, dls->vars.bit_danger_fixe );
-    json_builder_set_member_name  ( builder, "bit_secu_pers_ok" ); json_builder_add_boolean_value ( builder, dls->vars.bit_secupers_ok );
+    Json_add_bool   ( builder, "bit_derangement",      dls->vars.bit_derangement );
+    Json_add_bool   ( builder, "bit_derangement_fixe", dls->vars.bit_derangement_fixe );
+    Json_add_bool   ( builder, "bit_danger",           dls->vars.bit_danger );
+    Json_add_bool   ( builder, "bit_danger_fixe",      dls->vars.bit_danger_fixe );
+    Json_add_bool   ( builder, "bit_secu_pers_ok",     dls->vars.bit_secupers_ok );
 
-    json_builder_set_member_name  ( builder, "bit_acquit" ); json_builder_add_boolean_value ( builder, dls->vars.bit_acquit );
+    Json_add_bool   ( builder, "bit_acquit",           dls->vars.bit_acquit );
     json_builder_end_object (builder);
   }
 /******************************************************************************************************************************/
@@ -86,13 +86,12 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  static gint Http_dls_getlist ( struct lws *wsi )
-  { gchar *buf;
-    JsonBuilder *builder;
-    JsonGenerator *gen;
+  { JsonBuilder *builder;
+    gchar *buf;
     gsize taille_buf;
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = json_builder_new ();
+    builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return(Http_Send_response_code ( wsi, HTTP_SERVER_ERROR ));
@@ -100,18 +99,10 @@
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping dlslist ----------------------------------------------------*/
     json_builder_begin_array (builder);                                                        /* Création du noeud principal */
-
     Dls_foreach ( builder, Http_dls_do_plugin, NULL );
-
     json_builder_end_array (builder);                                                                         /* End Document */
 
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
-
+    buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
     return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
   }

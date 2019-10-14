@@ -181,37 +181,26 @@
   { struct WS_PER_SESSION_DATA *pss;
     gchar *buf, *buf_to_send;
     JsonBuilder *builder;
-    JsonGenerator *gen;
     gsize taille_buf;
 
     pss = lws_wsi_user ( wsi );
-    builder = json_builder_new ();
+    builder = Json_create ();
     if (!builder) return;
 
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-    json_builder_set_member_name  ( builder, "Histo" );
-
     json_builder_begin_object (builder);                                                                  /* Contenu du Histo */
-    json_builder_set_member_name  ( builder, "alive" );         json_builder_add_boolean_value( builder, histo->alive );
-
-    Json_add_string ( builder, "date_create", histo->date_create );
-    json_builder_set_member_name  ( builder, "nom_ack" );       json_builder_add_string_value ( builder, histo->nom_ack );
-    json_builder_set_member_name  ( builder, "num" );           json_builder_add_int_value    ( builder, histo->msg.num );
-    json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, histo->msg.libelle );
-    json_builder_set_member_name  ( builder, "syn_groupe" );    json_builder_add_string_value ( builder, histo->msg.syn_parent_page );
-    json_builder_set_member_name  ( builder, "syn_page" );      json_builder_add_string_value ( builder, histo->msg.syn_page );
-    json_builder_set_member_name  ( builder, "syn_libelle" );   json_builder_add_string_value ( builder, histo->msg.syn_libelle );
-    json_builder_set_member_name  ( builder, "dls_shortname" ); json_builder_add_string_value ( builder, histo->msg.dls_shortname );
+    Json_add_bool ( builder, "alive", histo->alive );
+    Json_add_string ( builder, "date_create",   histo->date_create );
+    Json_add_string ( builder, "nom_ack",       histo->nom_ack );
+    Json_add_int    ( builder, "num",           histo->msg.num );
+    Json_add_string ( builder, "libelle",       histo->msg.libelle );
+    Json_add_string ( builder, "syn_groupe",    histo->msg.syn_parent_page );
+    Json_add_string ( builder, "syn_page",      histo->msg.syn_page );
+    Json_add_string ( builder, "syn_libelle",   histo->msg.syn_libelle );
+    Json_add_string ( builder, "dls_shortname", histo->msg.dls_shortname );
     json_builder_end_object (builder);                                                                           /* End Histo */
 
-    json_builder_end_object (builder);                                                                        /* End Document */
-
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
+    buf = Json_get_buf ( builder, &taille_buf );
+#ifdef bouh
     buf_to_send = g_try_malloc0( taille_buf + LWS_PRE );
     if (buf_to_send)
      { memcpy( buf_to_send + LWS_PRE, buf, taille_buf );
@@ -221,6 +210,7 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
               "%s: send %d byte to '%s' ('%s')", __func__, taille_buf, pss->sid, pss->util );
     g_free(buf);
+#endif
   }
 /******************************************************************************************************************************/
 /* CB_ws_histos : Gere le protocole WS histos (appellée par libwebsockets)                                                    */

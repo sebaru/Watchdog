@@ -36,10 +36,7 @@
  static void Admin_json_status ( JsonBuilder *builder )
   {
     json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-
-    json_builder_set_member_name  ( builder, "nbr_message_recu" );
-    json_builder_add_int_value ( builder, Cfg_snips.nbr_msg_recu );
-
+    Json_add_int ( builder, "nbr_message_recu", Cfg_snips.nbr_msg_recu );
     json_builder_end_object (builder);                                                                        /* End Document */
   }
 /******************************************************************************************************************************/
@@ -47,16 +44,12 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
+ void Admin_json ( gchar *commande, gchar **buffer_p, gsize *taille_p )
   { JsonBuilder *builder;
-    JsonGenerator *gen;
-    gsize taille_buf;
-    gchar *buf;
-
     *buffer_p = NULL;
     *taille_p = 0;
 
-    builder = json_builder_new ();
+    builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
@@ -65,16 +58,7 @@
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/status")) { Admin_json_status ( builder ); }
 
-/************************************************ Génération du JSON **********************************************************/
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
-
-    *buffer_p = buf;
-    *taille_p = taille_buf;
+    *buffer_p = Json_get_buf ( builder, taille_p );
     return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

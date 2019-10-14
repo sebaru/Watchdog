@@ -81,9 +81,12 @@
 /******************************************************************************************************************************/
  gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p )
   { JsonGenerator *gen;
+    JsonNode *RootNode;
     gchar *result;
     gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
+    RootNode = json_builder_get_root(builder);
+    json_generator_set_root ( gen, RootNode );
+    json_node_unref(RootNode);
     json_generator_set_pretty ( gen, TRUE );
     result = json_generator_to_data (gen, taille_buf_p);
     g_object_unref(builder);

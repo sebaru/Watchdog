@@ -38,12 +38,11 @@
 /******************************************************************************************************************************/
  static gint Http_Memory_get ( struct lws *wsi, JsonObject *object, gchar *type, gchar *tech_id, gchar *acronyme )
   { JsonBuilder *builder;
-    JsonGenerator *gen;
     gsize taille_buf;
 	   gchar *buf;
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = json_builder_new ();
+    builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
@@ -64,10 +63,10 @@
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
-       Json_add_bool   ( builder, "etat", cpt_imp->etat );
+       Json_add_bool   ( builder, "etat",   cpt_imp->etat );
        Json_add_int    ( builder, "valeur", cpt_imp->valeur );
-       Json_add_double ( builder, "multi", cpt_imp->multi );
-       Json_add_string ( builder, "unite", cpt_imp->unite );
+       Json_add_double ( builder, "multi",  cpt_imp->multi );
+       Json_add_string ( builder, "unite",  cpt_imp->unite );
      }
 /*------------------------------------------------ Compteur horaire ----------------------------------------------------------*/
     else if (!strcasecmp(type,"CH"))
@@ -80,10 +79,8 @@
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
-       json_builder_set_member_name  ( builder, "valeur" );
-       json_builder_add_int_value    ( builder, cpt_h->valeur );
-       json_builder_set_member_name  ( builder, "etat" );
-       json_builder_add_boolean_value ( builder, cpt_h->etat );
+       Json_add_int  ( builder, "valeur", cpt_h->valeur );
+       Json_add_bool ( builder, "etat",   cpt_h->etat );
      }
 /*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
     else if (!strcasecmp(type,"EA"))
@@ -96,16 +93,11 @@
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
-       json_builder_set_member_name  ( builder, "valeur_brute" );
-       json_builder_add_double_value  ( builder, ai->val_avant_ech );
-       json_builder_set_member_name  ( builder, "valeur_min" );
-       json_builder_add_double_value  ( builder, ai->min );
-       json_builder_set_member_name  ( builder, "valeur_max" );
-       json_builder_add_double_value  ( builder, ai->max );
-       json_builder_set_member_name  ( builder, "valeur" );
-       json_builder_add_double_value  ( builder, ai->val_ech );
-       json_builder_set_member_name  ( builder, "type" );
-       json_builder_add_double_value  ( builder, ai->type );
+       Json_add_double ( builder, "valeur_brute", ai->val_avant_ech );
+       Json_add_double ( builder, "valeur_min",   ai->min );
+       Json_add_double ( builder, "valeur_max",   ai->max );
+       Json_add_double ( builder, "valeur",       ai->val_ech );
+       Json_add_int    ( builder, "type",         ai->type );
      }
 /*----------------------------------------------- Bistable et Monostables ----------------------------------------------------*/
     else if (!strcasecmp(type,"B") || !strcasecmp(type,"M"))
@@ -118,8 +110,7 @@
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
-       json_builder_set_member_name  ( builder, "etat" );
-       json_builder_add_boolean_value  ( builder, bool->etat );
+       Json_add_bool ( builder, "etat", bool->etat );
      }
 /*---------------------------------------------------------- Tempo -----------------------------------------------------------*/
     else if (!strcasecmp(type,"T"))
@@ -132,15 +123,15 @@
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
-       Json_add_bool  ( builder, "etat", tempo->state );
-       Json_add_int   ( builder, "status", tempo->status );
-       Json_add_int   ( builder, "daa", tempo->delai_on );
-       Json_add_int   ( builder, "dma", tempo->min_on );
-       Json_add_int   ( builder, "dMa", tempo->max_on );
-       Json_add_int   ( builder, "dad", tempo->delai_off );
-       Json_add_int   ( builder, "date_on", tempo->date_on );
-       Json_add_int   ( builder, "date_off", tempo->date_off );
-       Json_add_int   ( builder, "top", Partage->top );
+       Json_add_bool ( builder, "etat", tempo->state );
+       Json_add_int  ( builder, "status", tempo->status );
+       Json_add_int  ( builder, "daa", tempo->delai_on );
+       Json_add_int  ( builder, "dma", tempo->min_on );
+       Json_add_int  ( builder, "dMa", tempo->max_on );
+       Json_add_int  ( builder, "dad", tempo->delai_off );
+       Json_add_int  ( builder, "date_on", tempo->date_on );
+       Json_add_int  ( builder, "date_off", tempo->date_off );
+       Json_add_int  ( builder, "top", Partage->top );
      }
 /*---------------------------------------------------------- Tempo -----------------------------------------------------------*/
     else if (!strcasecmp(type,"E"))
@@ -167,16 +158,11 @@
         }
        num = atoi(num_s);
        if (num!=-1)
-        { json_builder_set_member_name  ( builder, "etat" );
-          json_builder_add_int_value    ( builder, Partage->i[num].etat );
-          json_builder_set_member_name  ( builder, "rouge" );
-          json_builder_add_int_value    ( builder, Partage->i[num].rouge);
-          json_builder_set_member_name  ( builder, "vert" );
-          json_builder_add_int_value    ( builder, Partage->i[num].vert );
-          json_builder_set_member_name  ( builder, "bleu" );
-          json_builder_add_int_value    ( builder, Partage->i[num].bleu );
-          json_builder_set_member_name  ( builder, "cligno" );
-          json_builder_add_int_value    ( builder, Partage->i[num].cligno );
+        { Json_add_int ( builder, "etat",   Partage->i[num].etat );
+          Json_add_int ( builder, "rouge",  Partage->i[num].rouge);
+          Json_add_int ( builder, "vert",   Partage->i[num].vert );
+          Json_add_int ( builder, "bleu",   Partage->i[num].bleu );
+          Json_add_int ( builder, "cligno", Partage->i[num].cligno );
         }
        else
         { struct DLS_VISUEL *visu=NULL;
@@ -188,24 +174,15 @@
              g_object_unref(builder);
              return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
            }
-          json_builder_set_member_name  ( builder, "etat" );
-          json_builder_add_int_value    ( builder, visu->etat );
-          json_builder_set_member_name  ( builder, "color" );
-          json_builder_add_string_value ( builder, visu->color);
-          json_builder_set_member_name  ( builder, "cligno" );
-          json_builder_add_int_value    ( builder, visu->cligno );
+          Json_add_int    ( builder, "etat",   visu->etat  );
+          Json_add_string ( builder, "color",  visu->color );
+          Json_add_bool   ( builder, "cligno", visu->cligno );
         }
      }
 
     json_builder_end_object (builder);                                                                        /* End Document */
 
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
-
+    buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
     return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
   }

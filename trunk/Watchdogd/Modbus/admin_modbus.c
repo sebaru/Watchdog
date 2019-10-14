@@ -76,51 +76,21 @@
      { struct MODULE_MODBUS *module = liste_modules->data;
 
        json_builder_begin_object (builder);                                                    /* Contenu du Noeud Passerelle */
-
-       json_builder_set_member_name  ( builder, "tech_id" );
-       json_builder_add_string_value ( builder, module->modbus.tech_id );
-
-       json_builder_set_member_name  ( builder, "mode" );
-       json_builder_add_string_value ( builder, Modbus_mode_to_string(module) );
-
-       json_builder_set_member_name  ( builder, "started" );
-       json_builder_add_int_value ( builder, module->started );
-
-       json_builder_set_member_name  ( builder, "nbr_entree_tor" );
-       json_builder_add_int_value ( builder, module->nbr_entree_tor );
-
-       json_builder_set_member_name  ( builder, "nbr_sortie_tor" );
-       json_builder_add_int_value ( builder, module->nbr_sortie_tor );
-
-       json_builder_set_member_name  ( builder, "nbr_entree_ana" );
-       json_builder_add_int_value ( builder, module->nbr_entree_ana );
-
-       json_builder_set_member_name  ( builder, "nbr_sortie_ana" );
-       json_builder_add_int_value ( builder, module->nbr_sortie_ana );
-
-       json_builder_set_member_name  ( builder, "comm" );
-       json_builder_add_int_value ( builder, Dls_data_get_bool( NULL, NULL, &module->bit_comm) );
-
-       json_builder_set_member_name  ( builder, "transaction_id" );
-       json_builder_add_int_value ( builder, module->transaction_id );
-
-       json_builder_set_member_name  ( builder, "nbr_request_par_sec" );
-       json_builder_add_int_value ( builder, module->nbr_request_par_sec );
-
-       json_builder_set_member_name  ( builder, "delai" );
-       json_builder_add_int_value ( builder, module->delai );
-
-       json_builder_set_member_name  ( builder, "nbr_deconnect" );
-       json_builder_add_int_value ( builder, module->nbr_deconnect );
-
-       json_builder_set_member_name  ( builder, "last_reponse" );
-       json_builder_add_int_value ( builder, (Partage->top - module->date_last_reponse)/10 );
-
-       json_builder_set_member_name  ( builder, "date_next_eana" );
-       json_builder_add_int_value ( builder, (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1) );
-
-       json_builder_set_member_name  ( builder, "date_retente" );
-       json_builder_add_int_value ( builder, (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1) );
+       Json_add_string ( builder, "tech_id", module->modbus.tech_id );
+       Json_add_string ( builder, "mode", Modbus_mode_to_string(module) );
+       Json_add_bool   ( builder, "started", module->started );
+       Json_add_int    ( builder, "nbr_entree_tor", module->nbr_entree_tor );
+       Json_add_int    ( builder, "nbr_sortie_tor", module->nbr_sortie_tor );
+       Json_add_int    ( builder, "nbr_entree_ana", module->nbr_entree_ana );
+       Json_add_int    ( builder, "nbr_sortie_ana", module->nbr_sortie_ana );
+       Json_add_bool   ( builder, "comm", Dls_data_get_bool( NULL, NULL, &module->bit_comm) );
+       Json_add_int    ( builder, "transaction_id", module->transaction_id );
+       Json_add_int    ( builder, "nbr_request_par_sec", module->nbr_request_par_sec );
+       Json_add_int    ( builder, "delai", module->delai );
+       Json_add_int    ( builder, "nbr_deconnect", module->nbr_deconnect );
+       Json_add_int    ( builder, "last_reponse", (Partage->top - module->date_last_reponse)/10 );
+       Json_add_int    ( builder, "date_next_eana", (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1) );
+       Json_add_int    ( builder, "date_retente", (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1) );
 
        json_builder_end_object (builder);                                                                 /* End Module Array */
 
@@ -135,16 +105,13 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
+ void Admin_json ( gchar *commande, gchar **buffer_p, gsize *taille_p )
   { JsonBuilder *builder;
-    JsonGenerator *gen;
-    gsize taille_buf;
-    gchar *buf;
 
     *buffer_p = NULL;
     *taille_p = 0;
 
-    builder = json_builder_new ();
+    builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
@@ -154,15 +121,7 @@
     if (!strcmp(commande, "/list")) { Admin_json_list ( builder ); }
 
 /************************************************ Génération du JSON **********************************************************/
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
-
-    *buffer_p = buf;
-    *taille_p = taille_buf;
+    *buffer_p = Json_get_buf ( builder, taille_p );
     return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

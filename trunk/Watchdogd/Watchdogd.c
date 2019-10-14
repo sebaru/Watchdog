@@ -283,11 +283,6 @@
     Partage->com_msrv.zmq_to_slave = Bind_zmq ( ZMQ_PUB, "pub-to-slave", "tcp", "*", 5555 );
     zmq_from_slave = Bind_zmq ( ZMQ_SUB, "listen-to-slave", "tcp", "*", 5556 );
 
-/************************************* Création des zones de bits internes dynamiques *****************************************/
-    Partage->Dls_data_AI   = NULL;
-    Partage->Dls_data_BOOL = NULL;
-    Partage->Dls_data_MSG  = NULL;
-
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
      { if (!Demarrer_arch())                                                                   /* Demarrage gestion Archivage */
@@ -469,11 +464,6 @@
 /***************************************** Socket de subscription au master ***************************************************/
     Partage->com_msrv.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",    "tcp", Config.master_host, 5556 );
     zmq_from_master                 = Connect_zmq ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
-
-/************************************* Création des zones de bits internes dynamiques *****************************************/
-    Partage->Dls_data_AI   = NULL;
-    Partage->Dls_data_BOOL = NULL;
-    Partage->Dls_data_MSG  = NULL;
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
@@ -725,6 +715,15 @@
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
        pthread_mutex_init( &Partage->com_db.synchro, &attr );
+
+/************************************* Création des zones de bits internes dynamiques *****************************************/
+       Partage->Dls_data_AI     = NULL;
+       Partage->Dls_data_BOOL   = NULL;
+       Partage->Dls_data_MSG    = NULL;
+       Partage->Dls_data_CH     = NULL;
+       Partage->Dls_data_CI     = NULL;
+       Partage->Dls_data_TEMPO  = NULL;
+       Partage->Dls_data_VISUEL = NULL;
 
        sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );

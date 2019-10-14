@@ -38,13 +38,12 @@
 /******************************************************************************************************************************/
  static gint Http_Traiter_request_getprocess_list ( struct lws *wsi )
   { JsonBuilder *builder;
-    JsonGenerator *gen;
     gsize taille_buf;
     GSList *liste;
     gchar *buf;
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = json_builder_new ();
+    builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
@@ -54,84 +53,53 @@
     json_builder_begin_array (builder);                                                                  /* Contenu du Status */
 
     json_builder_begin_object (builder);                                                                 /* Contenu du Status */
-    json_builder_set_member_name  ( builder, "thread" );
-    json_builder_add_string_value ( builder, "msrv" );
-    json_builder_set_member_name  ( builder, "debug" );
-    json_builder_add_boolean_value( builder, Config.log_msrv );
-    json_builder_set_member_name  ( builder, "started" );
-    json_builder_add_boolean_value( builder, Partage->com_msrv.Thread_run );
-    json_builder_set_member_name  ( builder, "objet" );
-    json_builder_add_string_value ( builder, "Local Master Server" );
-    json_builder_set_member_name  ( builder, "fichier" );
-    json_builder_add_string_value ( builder, "built-in" );
+    Json_add_string ( builder, "thread",  "msrv" );
+    Json_add_bool   ( builder, "debug",   Config.log_msrv );
+    Json_add_bool   ( builder, "started", Partage->com_msrv.Thread_run );
+    Json_add_string ( builder, "objet",   "Local Master Server" );
+    Json_add_string ( builder, "fichier", "built-in" );
     json_builder_end_object (builder);                                                                        /* End Document */
 
     json_builder_begin_object (builder);                                                                 /* Contenu du Status */
-    json_builder_set_member_name  ( builder, "thread" );
-    json_builder_add_string_value ( builder, "dls" );
-    json_builder_set_member_name  ( builder, "debug" );
-    json_builder_add_boolean_value( builder, Partage->com_dls.Thread_debug );
-    json_builder_set_member_name  ( builder, "started" );
-    json_builder_add_boolean_value( builder, Partage->com_dls.Thread_run );
-    json_builder_set_member_name  ( builder, "objet" );
-    json_builder_add_string_value ( builder, "D.L.S" );
-    json_builder_set_member_name  ( builder, "fichier" );
-    json_builder_add_string_value ( builder, "built-in" );
+    Json_add_string ( builder, "thread",  "dls" );
+    Json_add_bool   ( builder, "debug",   Partage->com_dls.Thread_debug );
+    Json_add_bool   ( builder, "started", Partage->com_dls.Thread_run );
+    Json_add_string ( builder, "objet",   "D.L.S" );
+    Json_add_string ( builder, "fichier", "built-in" );
     json_builder_end_object (builder);                                                                        /* End Document */
 
     json_builder_begin_object (builder);                                                                 /* Contenu du Status */
-    json_builder_set_member_name  ( builder, "thread" );
-    json_builder_add_string_value ( builder, "arch" );
-    json_builder_set_member_name  ( builder, "debug" );
-    json_builder_add_boolean_value( builder, Config.log_arch );
-    json_builder_set_member_name  ( builder, "started" );
-    json_builder_add_boolean_value( builder, Partage->com_arch.Thread_run );
-    json_builder_set_member_name  ( builder, "objet" );
-    json_builder_add_string_value ( builder, "Archivage" );
-    json_builder_set_member_name  ( builder, "fichier" );
-    json_builder_add_string_value ( builder, "built-in" );
+    Json_add_string ( builder, "thread",  "arch" );
+    Json_add_bool   ( builder, "debug",   Config.log_arch );
+    Json_add_bool   ( builder, "started", Partage->com_arch.Thread_run );
+    Json_add_string ( builder, "objet",   "Archivage" );
+    Json_add_string ( builder, "fichier", "built-in" );
     json_builder_end_object (builder);                                                                        /* End Document */
 
     json_builder_begin_object (builder);                                                                 /* Contenu du Status */
-    json_builder_set_member_name  ( builder, "thread" );
-    json_builder_add_string_value ( builder, "db" );
-    json_builder_set_member_name  ( builder, "debug" );
-    json_builder_add_boolean_value( builder, Config.log_db );
-    json_builder_set_member_name  ( builder, "started" );
-    json_builder_add_boolean_value( builder, TRUE );
-    json_builder_set_member_name  ( builder, "objet" );
-    json_builder_add_string_value ( builder, "Database Access" );
-    json_builder_set_member_name  ( builder, "fichier" );
-    json_builder_add_string_value ( builder, "built-in" );
+    Json_add_string ( builder, "thread",  "db" );
+    Json_add_bool   ( builder, "debug",   Config.log_db );
+    Json_add_bool   ( builder, "started", TRUE );
+    Json_add_string ( builder, "objet",   "Database Access" );
+    Json_add_string ( builder, "fichier", "built-in" );
     json_builder_end_object (builder);                                                                        /* End Document */
 
     liste = Partage->com_msrv.Librairies;                                                /* Parcours de toutes les librairies */
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
        json_builder_begin_object (builder);                                                                 /* Contenu du Status */
-       json_builder_set_member_name  ( builder, "thread" );
-       json_builder_add_string_value ( builder, lib->admin_prompt );
-       json_builder_set_member_name  ( builder, "debug" );
-       json_builder_add_boolean_value ( builder, lib->Thread_debug );
-       json_builder_set_member_name  ( builder, "started" );
-       json_builder_add_boolean_value ( builder, lib->Thread_run );
-       json_builder_set_member_name  ( builder, "objet" );
-       json_builder_add_string_value ( builder, lib->admin_help );
-       json_builder_set_member_name  ( builder, "fichier" );
-       json_builder_add_string_value ( builder, lib->nom_fichier );
+       Json_add_string ( builder, "thread",  lib->admin_prompt );
+       Json_add_bool   ( builder, "debug",   lib->Thread_debug );
+       Json_add_bool   ( builder, "started", lib->Thread_run );
+       Json_add_string ( builder, "objet",   lib->admin_help );
+       Json_add_string ( builder, "fichier", lib->nom_fichier );
        json_builder_end_object (builder);                                                                        /* End Document */
 
        liste = liste->next;
      }
     json_builder_end_array (builder);                                                                         /* End Document */
 
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
-
+    buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
     return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
   }
