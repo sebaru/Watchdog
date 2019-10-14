@@ -211,8 +211,7 @@
     Cfg_teleinfo.lib->TID = pthread_self();                                                 /* Sauvegarde du TID pour le pere */
     Teleinfo_Lire_config ();                                                /* Lecture de la configuration logiciel du thread */
 
-    Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
-              "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
+    Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Cfg_teleinfo.lib->Thread_run = TRUE;                                                                /* Le thread tourne ! */
 
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), NOM_THREAD );

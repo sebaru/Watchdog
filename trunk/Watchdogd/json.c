@@ -36,7 +36,6 @@
  JsonBuilder *Json_create ( void )
   { JsonBuilder *builder;
     builder = json_builder_new();
-    if (!builder) return(NULL);
     return(builder);
   }
 /******************************************************************************************************************************/

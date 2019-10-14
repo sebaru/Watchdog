@@ -445,17 +445,6 @@
     Close_zmq ( Partage->com_msrv.zmq_to_slave );
     Close_zmq ( zmq_from_slave );
 
-/********************************* Dechargement des zones de bits internes dynamiques *****************************************/
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique 1", __func__ );
-    g_slist_foreach (Partage->Dls_data_BOOL, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_BOOL);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique 2", __func__ );
-    g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_AI);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique 3", __func__ );
-    g_slist_foreach (Partage->Dls_data_MSG, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_MSG);
-
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );
   }
@@ -793,6 +782,28 @@
        pthread_join( TID, NULL );                                                       /* Attente fin de la boucle pere MSRV */
        zmq_ctx_term( Partage->zmq_ctx );
        zmq_ctx_destroy( Partage->zmq_ctx );
+/********************************* Dechargement des zones de bits internes dynamiques *****************************************/
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique BOOL", __func__ );
+       g_slist_foreach (Partage->Dls_data_BOOL, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_BOOL);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique AI", __func__ );
+       g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_AI);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MSG", __func__ );
+       g_slist_foreach (Partage->Dls_data_MSG, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_MSG);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique TEMPO", __func__ );
+       g_slist_foreach (Partage->Dls_data_TEMPO, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_TEMPO);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique CH", __func__ );
+       g_slist_foreach (Partage->Dls_data_CH, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_CH);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique CI", __func__ );
+       g_slist_foreach (Partage->Dls_data_CI, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_CI);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique VISUEL", __func__ );
+       g_slist_foreach (Partage->Dls_data_VISUEL, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_VISUEL);
      }
 
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
