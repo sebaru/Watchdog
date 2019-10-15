@@ -70,7 +70,6 @@
 
             if ( g_str_has_prefix ( commande, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
        else if ( g_str_has_prefix ( commande, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
-       else if ( g_str_has_prefix ( commande, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
        else if ( g_str_has_prefix ( commande, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
        else { gboolean found = FALSE;
               liste = Partage->com_msrv.Librairies;                                      /* Parcours de toutes les librairies */

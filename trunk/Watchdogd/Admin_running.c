@@ -46,7 +46,6 @@
        response = Admin_write ( response, "  help $topic           - Affiche l'aide du topic, parmi les topics suivants" );
        response = Admin_write ( response, "  ping                  - Ping Watchdog" );
        response = Admin_write ( response, "  audit                 - Audit bit/s" );
-       response = Admin_write ( response, "  dbcfg $thread         - Manage Threads Parameters in Database" );
        response = Admin_write ( response, "  clear_histo           - Clear Histo DB" );
        response = Admin_write ( response, "  get                   - Sous-menu de lecture des bits internes" );
        response = Admin_write ( response, "  set                   - Sous-menu d'affectation des bits internes" );
@@ -87,11 +86,6 @@
                    Config.run_as, getuid(),
                    Config.home );
        response = Admin_write ( response, chaine );
-     } else
-    if ( ! strcmp ( commande, "dbcfg" ) )
-     { gchar chaine[128];
-       if (sscanf ( ligne, "%s %s", commande, chaine ) != 2) return(response);
-       return(Admin_dbcfg( response, chaine ));
      } else
     if ( ! strcmp ( commande, "clear_histo" ) )
      { Clear_histoDB ();                                                                   /* Clear de la table histo au boot */
