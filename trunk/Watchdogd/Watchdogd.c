@@ -296,9 +296,6 @@
     else
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" ); }
 
-    if (!Demarrer_admin())                                                                                 /* Démarrage ADMIN */
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb Admin -> Arret" ); }
-
 /***************************************** Debut de la boucle sans fin ********************************************************/
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
@@ -432,7 +429,7 @@
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
-    Stopper_fils(TRUE);                                                                    /* Arret de tous les fils watchdog */
+    Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
     Close_zmq ( Partage->com_msrv.zmq_motif );
     Close_zmq ( Partage->com_msrv.zmq_to_bus );
@@ -534,7 +531,7 @@
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
-    Stopper_fils(TRUE);                                                                    /* Arret de tous les fils watchdog */
+    Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
     Close_zmq ( Partage->com_msrv.zmq_to_bus );
     Close_zmq ( zmq_from_bus );
@@ -713,7 +710,6 @@
        pthread_mutex_init( &Partage->com_dls.synchro_traduction, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro_data, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
-       pthread_mutex_init( &Partage->com_admin.synchro, &attr );
        pthread_mutex_init( &Partage->com_db.synchro, &attr );
 
 /************************************* Création des zones de bits internes dynamiques *****************************************/
@@ -810,7 +806,6 @@
     pthread_mutex_destroy( &Partage->com_dls.synchro_traduction );
     pthread_mutex_destroy( &Partage->com_dls.synchro_data );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
-    pthread_mutex_destroy( &Partage->com_admin.synchro );
     pthread_mutex_destroy( &Partage->com_db.synchro );
 
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
