@@ -86,14 +86,18 @@
   { if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
      { Dls_data_set_bool ( Cfg_smsg.tech_id, "COMM", &Cfg_smsg.bit_comm, status ); }                      /* Communication OK */
     else /* Envoi au master via thread HTTP */
-     { struct ZMQ_SET_BIT bit;
-       bit.type = 0;
-       bit.num = -1;
-       g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", Cfg_smsg.tech_id );
-       g_snprintf( bit.acronyme, sizeof(bit.acronyme), "COMM" );
-       Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv",
-                           (status ? "SET_BIT_TO_1" : "SET_BIT_TO_0"),
-                           &bit, sizeof(struct ZMQ_SET_BIT) );
+     { JsonBuilder *builder;
+       gchar *result;
+       gsize taille;
+       builder = Json_create ();
+       json_builder_begin_object ( builder );
+       Json_add_string ( builder, "tech_id",  Cfg_smsg.tech_id );
+       Json_add_string ( builder, "acronyme", "COMM" );
+       Json_add_bool   ( builder, "etat", status );
+       json_builder_end_object ( builder );
+       result = Json_get_buf ( builder, &taille );
+       Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BOOL", result, taille );
+       g_free(result);
      }
     Cfg_smsg.comm_status = status;
   }
@@ -465,8 +469,7 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Traiter_commande_sms ( gchar *from, gchar *texte )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    gboolean found = FALSE;
+  { gboolean found = FALSE;
     struct SMSDB *sms;
     gchar chaine[160];
     struct DB *db;
@@ -498,61 +501,6 @@
        return;
      }
 
-    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, texte ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte );
-       return;
-     }
-
-    if ( db->nbr_result == 0 )                                                              /* Si pas d'enregistrement trouvé */
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: No Static match found for '%s' Trying dyn one.", __func__, texte );
-     }
-    else if (db->nbr_result > 1)
-     { g_snprintf(chaine, sizeof(chaine), "Too many static events found for '%s'", texte );      /* Envoi de l'erreur si trop */
-       Envoyer_smsg_gsm_text ( chaine );
-     }
-    else
-     { while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
-        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Static Match found for '%s' Type %d Num %d - %s", __func__,
-                    texte, mnemo->type, mnemo->num, mnemo->libelle );
-
-          found=TRUE;
-          if (Config.instance_is_master==TRUE)                                                    /* si l'instance est Maitre */
-           { switch( mnemo->type )
-              { case MNEMO_MONOSTABLE:
-                     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: From %s -> Mise à un du bit M%03d %s:%s", __func__,
-                               from, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme );
-                     if (mnemo->num != -1) Envoyer_commande_dls ( mnemo->num );
-                                      else Envoyer_commande_dls_data ( mnemo->dls_tech_id, mnemo->acronyme );
-                     break;
-                default:
-                     Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                               "%s: From %s -> Error, type of mnemo not handled", __func__, from );
-              }
-           }
-          else /* Envoi au master via thread HTTP */
-           { if (mnemo->type == MNEMO_MONOSTABLE)
-              { struct ZMQ_SET_BIT bit;
-                bit.type = mnemo->type;
-                bit.num = mnemo->num;
-                g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", mnemo->dls_tech_id );
-                g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", mnemo->acronyme );
-                Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BIT",
-                                    &bit, sizeof(struct ZMQ_SET_BIT) );
-              }
-             else Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                           "%s: From %s -> Error, type of mnemo not handled", __func__, from );
-           }
-          g_free(mnemo);
-        }
-     }
-    Libere_DB_SQL ( &db );
-
-    if (found)
-     { g_snprintf(chaine, sizeof(chaine), "'%s' done.", texte );                           /* Envoi de l'erreur si pas trouvé */
-       Envoyer_smsg_gsm_text ( chaine );
-       return;
-     }
-
     if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, texte ) )
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
     else while ( Recuperer_mnemos_DI_suite( &db ) )
@@ -564,18 +512,24 @@
        if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
         { Envoyer_commande_dls_data ( tech_id, acro ); }
        else /* Envoi au master via thread HTTP */
-        { struct ZMQ_SET_BIT bit;
-          bit.type = 0;
-          bit.num = -1;
-          g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", tech_id );
-          g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", acro );
-          Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BIT", &bit, sizeof(struct ZMQ_SET_BIT) );
+        { JsonBuilder *builder;
+          gchar *result;
+          gsize taille;
+          builder = Json_create ();
+          json_builder_begin_object ( builder );
+          Json_add_string ( builder, "tech_id", tech_id );
+          Json_add_string ( builder, "acronyme", acro );
+          Json_add_bool   ( builder, "etat", TRUE );
+          json_builder_end_object ( builder );
+          result = Json_get_buf ( builder, &taille );
+          Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BOOL", result, taille );
+          g_free(result);
         }
      }
 
     if (found)
          { g_snprintf(chaine, sizeof(chaine), "'%s' done.", texte ); }
-    else { g_snprintf(chaine, sizeof(chaine), "'%s' not found in static or dynamic.", texte ); }/* Envoi de l'erreur si pas trouvé */
+    else { g_snprintf(chaine, sizeof(chaine), "'%s' not found in database.", texte ); }    /* Envoi de l'erreur si pas trouvé */
     Envoyer_smsg_gsm_text ( chaine );
   }
 /******************************************************************************************************************************/

@@ -119,12 +119,18 @@
        if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
         { Envoyer_commande_dls_data ( tech_id, acro ); }
        else /* Envoi au master via thread HTTP */
-        { struct ZMQ_SET_BIT bit;
-          bit.type = 0;
-          bit.num = -1;
-          g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", tech_id );
-          g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", acro );
-          Send_zmq_with_tag ( Cfg_snips.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BIT", &bit, sizeof(struct ZMQ_SET_BIT) );
+        { JsonBuilder *builder;
+          gchar *result;
+          gsize taille;
+          builder = Json_create ();
+          json_builder_begin_object ( builder );
+          Json_add_string ( builder, "tech_id", tech_id );
+          Json_add_string ( builder, "acronyme", acro );
+          Json_add_bool   ( builder, "etat", TRUE );
+          json_builder_end_object ( builder );
+          result = Json_get_buf ( builder, &taille );
+          Send_zmq_with_tag ( Cfg_snips.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BOOL", result, taille );
+          g_free(result);
         }
      }
   }

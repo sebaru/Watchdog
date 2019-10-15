@@ -77,17 +77,10 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Ups_send_status_to_master ( struct MODULE_UPS *ups, gboolean status )
-  { /*if (Config.instance_is_master==TRUE)                                                        /* si l'instance est Maitre */
+  { if (Config.instance_is_master==TRUE)                                                        /* si l'instance est Maitre */
      { Dls_data_set_bool ( ups->tech_id, "COMM", &ups->bit_comm, status ); }                              /* Communication OK */
 /*    else
-     { struct ZMQ_SET_BIT bit;
-       bit.type = 0;
-       bit.num = -1;
-       g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", ups->tech_id );
-       g_snprintf( bit.acronyme, sizeof(bit.acronyme), "COMM" );
-       Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv",
-                           (status ? "SET_BIT_TO_1" : "SET_BIT_TO_0"),
-                           &bit, sizeof(struct ZMQ_SET_BIT) );
+     { 
      }*/
   }
 /******************************************************************************************************************************/

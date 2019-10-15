@@ -118,4 +118,13 @@
   { JsonObject *object = json_node_get_object (query);
     return((gfloat)json_object_get_double_member ( object, chaine ));
   }
+/******************************************************************************************************************************/
+/* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
+/* Entrée: la query, le nom du parametre                                                                                      */
+/* Sortie: la chaine de caractere                                                                                             */
+/******************************************************************************************************************************/
+ gboolean Json_get_bool ( JsonNode *query, gchar *chaine )
+  { JsonObject *object = json_node_get_object (query);
+    return(json_object_get_boolean_member ( object, chaine ));
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
