@@ -260,7 +260,7 @@
                   json_builder_begin_object (builder);                                         /* Création du noeud principal */
                   Json_add_string ( builder, "tech_id",  visu.tech_id );
                   Json_add_string ( builder, "acronyme", visu.acronyme );
-                  Json_add_int    ( builder, "mode",     visu.etat );
+                  Json_add_int    ( builder, "mode",     visu.mode );
                   Json_add_string ( builder, "color",    visu.color );
                   Json_add_bool   ( builder, "cligno",   visu.cligno );
                   json_builder_end_object (builder);                                                          /* End Document */

@@ -1435,8 +1435,8 @@
 /* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
- void Dls_data_set_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p, gboolean etat,
-                            gchar *color, gint cligno )
+ void Dls_data_set_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p, gint mode,
+                            gchar *color, gboolean cligno )
   { struct DLS_VISUEL *visu;
 
     if (!visu_p || !*visu_p)
@@ -1466,17 +1466,17 @@
       }
     else visu = (struct DLS_VISUEL *)*visu_p;
 
-    if (visu->etat != etat || strcmp( visu->color, color ) || visu->cligno != cligno )
+    if (visu->mode != mode || strcmp( visu->color, color ) || visu->cligno != cligno )
      { if ( visu->last_change + 50 <= Partage->top )                                 /* Si pas de change depuis plus de 5 sec */
         { visu->changes = 0; }
 
        if ( visu->changes <= 10 )                                                          /* Si moins de 10 changes en 5 sec */
         { if ( visu->changes == 10 )                                                /* Est-ce le dernier change avant blocage */
-           { visu->etat   = 0;                                                   /* Si oui, on passe le visuel en kaki cligno */
+           { visu->mode   = 0;                                                   /* Si oui, on passe le visuel en kaki cligno */
              g_snprintf( visu->color, sizeof(visu->color), "brown" );
              visu->cligno = 1;                                                                                  /* Clignotant */
            }
-          else { visu->etat   = etat;                                /* Sinon on recopie ce qui est demandé par le plugin DLS */
+          else { visu->mode   = mode;                                /* Sinon on recopie ce qui est demandé par le plugin DLS */
                  g_snprintf( visu->color, sizeof(visu->color), "%s", color );
                  visu->cligno = cligno;
                }
@@ -1499,7 +1499,7 @@
     GSList *liste;
     if (visu_p && *visu_p)                                                             /* Si pointeur d'acceleration disponible */
      { visu = (struct DLS_VISUEL *)*visu_p;
-       return( visu->etat );
+       return( visu->mode );
      }
     if (!tech_id || !acronyme) return(FALSE);
 
@@ -1512,7 +1512,7 @@
 
     if (!liste) return(FALSE);
     if (visu_p) *visu_p = (gpointer)visu;                                           /* Sauvegarde pour acceleration si besoin */
-    return( visu->etat );
+    return( visu->mode );
   }
 /******************************************************************************************************************************/
 /* Dls_dyn_string: Formate la chaine en parametre avec le bit également en parametre                                          */

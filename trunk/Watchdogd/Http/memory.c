@@ -174,7 +174,7 @@
              g_object_unref(builder);
              return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
            }
-          Json_add_int    ( builder, "etat",   visu->etat  );
+          Json_add_int    ( builder, "mode",   visu->mode  );
           Json_add_string ( builder, "color",  visu->color );
           Json_add_bool   ( builder, "cligno", visu->cligno );
         }

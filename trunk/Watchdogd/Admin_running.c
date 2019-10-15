@@ -73,7 +73,6 @@
     if ( ! strcmp ( commande, "ident" ) )
      { gchar date[128], nom[128];
        struct tm *temps;
-       gint num;
        temps = localtime( (time_t *)&Partage->start_time );
        if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
        else       { g_snprintf( date, sizeof(date), "Erreur" ); }
