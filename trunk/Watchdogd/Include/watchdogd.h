@@ -75,7 +75,6 @@
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
                                                                                  /* Fonction de gestion des commandes d'admin */
-    gchar *(*Admin_command)( gchar *response, gchar *ligne );
     void *(*Admin_json)( gchar *commande, gchar **buffer, gint *taille_buf );
   };
 

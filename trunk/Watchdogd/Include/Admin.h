@@ -32,10 +32,8 @@
 
 
 /*********************************************** Définitions des prototypes ***************************************************/
- extern gchar *Admin_running ( gchar *response, gchar *ligne );                                               /* Dans Admin.c */
- extern gchar *Admin_set ( gchar *response, gchar *ligne );
+ extern gchar *Admin_set ( gchar *response, gchar *ligne );                                                   /* Dans Admin.c */
  extern gchar *Admin_get ( gchar *response, gchar *ligne );
- extern gchar *Admin_dbcfg ( gchar *response, gchar *ligne );
  extern gchar *Admin_write ( gchar *response, gchar *new_ligne );
  extern gchar *Processer_commande_admin ( gchar *user, gchar *host, gchar *ligne );
  extern void New_Processer_commande_admin ( struct ZMQ_TARGET *event, gchar *ligne );

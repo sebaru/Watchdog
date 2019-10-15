@@ -135,7 +135,6 @@
        return(NULL);
      }
 
-    lib->Admin_command = dlsym( lib->dl_handle, "Admin_command" );                                /* Recherche de la fonction */
     lib->Admin_json    = dlsym( lib->dl_handle, "Admin_json" );                                   /* Recherche de la fonction */
 
     g_snprintf( lib->nom_fichier, sizeof(lib->nom_fichier), "%s", nom_absolu );

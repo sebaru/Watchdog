@@ -445,6 +445,11 @@
                 { g_snprintf( pss->url, sizeof(pss->url), "/postfile" );
                   return(0);
                 }
+               else if ( ! strcasecmp ( url, "/log/debug" ) )   { Info_change_log_level ( Config.log, LOG_DEBUG   ); return(1); }
+               else if ( ! strcasecmp ( url, "/log/notice" ) )  { Info_change_log_level ( Config.log, LOG_NOTICE  ); return(1); }
+               else if ( ! strcasecmp ( url, "/log/info" ) )    { Info_change_log_level ( Config.log, LOG_INFO    ); return(1); }
+               else if ( ! strcasecmp ( url, "/log/warning" ) ) { Info_change_log_level ( Config.log, LOG_WARNING ); return(1); }
+               else if ( ! strcasecmp ( url, "/log/error" ) )   { Info_change_log_level ( Config.log, LOG_ERR     ); return(1); }
 /****************************************** WS get Running config library *****************************************************/
                else if ( ! strncasecmp( url, "/library/", 9 ) )
                 { gchar *target = url+9;
