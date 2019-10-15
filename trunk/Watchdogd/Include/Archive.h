@@ -68,7 +68,7 @@
  extern void Ajouter_arch( gint type, gint num, gfloat valeur );
  extern void Ajouter_arch_by_nom( gchar *nom, gchar *tech_id, gfloat valeur );
  extern gboolean Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );
- extern gchar *Admin_arch ( gchar *responose, gchar *ligne );
+ extern void Admin_arch_json ( gchar *commande, gchar **buffer_p, gint *taille_p );
  extern void Arch_Update_SQL_Partitions_thread ( void );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
