@@ -60,6 +60,7 @@ fi
 echo "done."
 
 echo "Starting Watchdog"
+	sudo ldconfig	
 	sudo systemctl start Watchdogd.service
 echo "done."
 
