@@ -33,52 +33,33 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_status ( gchar **buffer_p, gint *taille_p )
-  { JsonBuilder *builder;
-    JsonGenerator *gen;
-    gsize taille_buf;
-    gchar *buf;
-
-    builder = json_builder_new ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-       return;
-     }
-
+ static void Admin_json_status ( JsonBuilder *builder )
+  {
     json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-
-    json_builder_set_member_name  ( builder, "nbr_diffusion_radio" );
-    json_builder_add_int_value ( builder, Cfg_radio.nbr_diffusion );
-
-    json_builder_set_member_name  ( builder, "radio_en_cours" );
-    json_builder_add_int_value ( builder, Cfg_radio.radio_en_cours );
-
+    Json_add_int ( builder, "nbr_diffusion_radio", Cfg_radio.nbr_diffusion );
+    Json_add_int ( builder, "radio_en_cours", Cfg_radio.radio_en_cours );
     json_builder_end_object (builder);                                                                        /* End Document */
-
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
-
-    *buffer_p = buf;
-    *taille_p = taille_buf;
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
-  {
+ void Admin_json ( gchar *commande, gchar **buffer_p, gsize *taille_p )
+  { JsonBuilder *builder;
     *buffer_p = NULL;
     *taille_p = 0;
+
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       return;
+     }
 /************************************************ Préparation du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
-    if (!strcmp(commande, "/status"))
-     { Admin_json_status ( buffer_p, taille_p ); }
+    if (!strcmp(commande, "/status")) { Admin_json_status ( builder ); }
 
+    *buffer_p = Json_get_buf ( builder, taille_p );
     return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

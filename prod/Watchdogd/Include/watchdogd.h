@@ -75,7 +75,6 @@
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
                                                                                  /* Fonction de gestion des commandes d'admin */
-    gchar *(*Admin_command)( gchar *response, gchar *ligne );
     void *(*Admin_json)( gchar *commande, gchar **buffer, gint *taille_buf );
   };
 
@@ -95,6 +94,7 @@
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
     GSList *liste_i;                                                             /* liste de I a traiter dans la distribution */
+    GSList *liste_new_i;                                             /* liste de I (dynamique) a traiter dans la distribution */
     GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
     struct ZMQUEUE *zmq_msg;                                                           /* Message Queue des messages Watchdog */
     struct ZMQUEUE *zmq_motif;                                                           /* Message Queue des motifs Watchdog */
@@ -123,7 +123,6 @@
     struct COM_MSRV com_msrv;                                                                        /* Changement du à D.L.S */
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                                      /* Com avec le thread ARCH */
-    struct COM_ADMIN com_admin;                                                                   /* Com avec le thread ADMIN */
 
     struct CPT_HORAIRE ch [ NBR_COMPTEUR_H ];
     struct CPT_IMP ci [ NBR_COMPTEUR_IMP ];
@@ -154,10 +153,9 @@
  extern void *w_malloc0( gint size, gchar *justification );
  extern void w_free( void *ptr, gchar *justification );
 
- extern void Stopper_fils ( gint flag );                                                                    /* Dans process.c */
+ extern void Stopper_fils ( void );                                                                         /* Dans process.c */
  extern gboolean Demarrer_dls ( void );
  extern gboolean Demarrer_arch ( void );
- extern gboolean Demarrer_admin ( void );
  extern void Charger_librairies ( void );
  extern void Decharger_librairies ( void );
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );

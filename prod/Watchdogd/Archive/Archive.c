@@ -35,9 +35,9 @@
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
 
 /******************************************************************************************************************************/
-/* Arch_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* Arch_Lire_config : Lit la config Watchdog et rempli la structure mÃ©moire                                                   */
+/* EntrÃ©e: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Arch_Lire_config ( void )
   { gchar *nom, *valeur;
@@ -51,13 +51,13 @@
     Partage->com_arch.max_buffer_size = ARCHIVE_DEFAULT_BUFFER_SIZE;
     Partage->com_arch.duree_retention = ARCHIVE_DEFAUT_RETENTION;
 
-    if ( ! Recuperer_configDB( &db, "arch" ) )                                              /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, "arch" ) )                                              /* Connexion a la base de donnÃ©es */
      { Info_new( Config.log, Config.log_arch, LOG_WARNING,
                 "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* RÃ©cupÃ©ration d'une config dans la DB */
      {      if ( ! g_ascii_strcasecmp ( nom, "database" ) )
         { g_snprintf( Partage->com_arch.archdb_database, sizeof(Partage->com_arch.archdb_database), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "username" ) )
@@ -83,7 +83,7 @@
   }
 /******************************************************************************************************************************/
 /* Arch_clear_list: efface la liste des archives a prendre en compte                                                          */
-/* Entrées: néant                                                                                                             */
+/* EntrÃ©es: nÃ©ant                                                                                                             */
 /* Sortie : le nombre d'archive detruites                                                                                     */
 /******************************************************************************************************************************/
  gint Arch_Clear_list ( void )
@@ -93,7 +93,7 @@
     save_nbr = Partage->com_arch.taille_arch;
     while ( Partage->com_arch.liste_arch )
      { arch = Partage->com_arch.liste_arch->data;                                                     /* Recuperation du arch */
-       g_free(arch);                                                                                    /* Libération mémoire */
+       g_free(arch);                                                                                    /* LibÃ©ration mÃ©moire */
        Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
        Partage->com_arch.taille_arch--;
      }
@@ -102,8 +102,8 @@
     return(save_nbr);
  }
 /******************************************************************************************************************************/
-/* Ajouter_arch: Ajoute une archive dans la base de données                                                                   */
-/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
+/* Ajouter_arch: Ajoute une archive dans la base de donnÃ©es                                                                   */
+/* EntrÃ©es: le type de bit, le numÃ©ro du bit, et sa valeur                                                                    */
 /******************************************************************************************************************************/
  static void Ajouter_arch_all( gint type, gint num, gchar *nom, gchar *tech_id, gfloat valeur )
   { struct timeval tv;
@@ -127,8 +127,8 @@
     pthread_mutex_unlock( &Partage->com_arch.synchro );
   }
 /******************************************************************************************************************************/
-/* Ajouter_arch: Ajoute une archive dans la base de données                                                                   */
-/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
+/* Ajouter_arch: Ajoute une archive dans la base de donnÃ©es                                                                   */
+/* EntrÃ©es: le type de bit, le numÃ©ro du bit, et sa valeur                                                                    */
 /******************************************************************************************************************************/
  void Ajouter_arch( gint type, gint num, gfloat valeur )
   { static gint last_log = 0;
@@ -154,8 +154,8 @@
     Ajouter_arch_all( type, num, NULL, NULL, valeur );
   }
 /******************************************************************************************************************************/
-/* Ajouter_arch: Ajoute une archive dans la base de données                                                                   */
-/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
+/* Ajouter_arch: Ajoute une archive dans la base de donnÃ©es                                                                   */
+/* EntrÃ©es: le type de bit, le numÃ©ro du bit, et sa valeur                                                                    */
 /******************************************************************************************************************************/
  void Ajouter_arch_by_nom( gchar *nom, gchar *tech_id, gfloat valeur )
   { static gint last_log = 0;
@@ -191,7 +191,7 @@
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
 
-    Arch_Lire_config ();                                                                       /* Lecture des données en base */
+    Arch_Lire_config ();                                                                       /* Lecture des donnÃ©es en base */
     Partage->com_arch.liste_arch  = NULL;                                                     /* Initialisation des variables */
     Partage->com_arch.Thread_run  = TRUE;                                                               /* Le thread tourne ! */
     Partage->com_arch.taille_arch = 0;
@@ -239,16 +239,17 @@
        Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Traitement de %05d archive(s)", __func__,
                  Partage->com_arch.taille_arch );
        top = Partage->top;
-       nb_enreg = 0;                                                       /* Au début aucun enregistrement est passé a la DB */
-       while (Partage->com_arch.liste_arch && Partage->com_arch.Thread_run == TRUE && nb_enreg<1000)
+       nb_enreg = 0;                                                       /* Au dÃ©but aucun enregistrement est passÃ© a la DB */
+       gboolean retour = TRUE;
+       while (Partage->com_arch.liste_arch && Partage->com_arch.Thread_run == TRUE && nb_enreg<1000 && retour==TRUE)
         { pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
           arch = Partage->com_arch.liste_arch->data;                                                  /* Recuperation du arch */
           Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
           Partage->com_arch.taille_arch--;
           pthread_mutex_unlock( &Partage->com_arch.synchro );
-          Ajouter_archDB ( db, arch );
+          retour = Ajouter_archDB ( db, arch );
           g_free(arch);
-          nb_enreg++;                        /* Permet de limiter a au plus 1000 enregistrement histoire de limiter la famine */
+          nb_enreg++;                       /* Permet de limiter a au plus 1000 enregistrements histoire de limiter la famine */
         }
        Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
                  nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch );

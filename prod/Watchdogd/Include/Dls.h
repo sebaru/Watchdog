@@ -148,13 +148,13 @@
   };
 
  struct DLS_VISUEL
-  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gint etat;
-    gchar color[16];
-    gint cligno;
-    gint last_change;
-    gint changes;
+  { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gint     mode;
+    gchar    color[16];
+    gboolean cligno;
+    gint     last_change;
+    gint     changes;
   };
 
  struct DLS_MESSAGES

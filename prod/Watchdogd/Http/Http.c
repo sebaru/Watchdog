@@ -181,37 +181,26 @@
   { struct WS_PER_SESSION_DATA *pss;
     gchar *buf, *buf_to_send;
     JsonBuilder *builder;
-    JsonGenerator *gen;
     gsize taille_buf;
 
     pss = lws_wsi_user ( wsi );
-    builder = json_builder_new ();
+    builder = Json_create ();
     if (!builder) return;
 
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-    json_builder_set_member_name  ( builder, "Histo" );
-
     json_builder_begin_object (builder);                                                                  /* Contenu du Histo */
-    json_builder_set_member_name  ( builder, "alive" );         json_builder_add_boolean_value( builder, histo->alive );
-
-    Json_add_string ( builder, "date_create", histo->date_create );
-    json_builder_set_member_name  ( builder, "nom_ack" );       json_builder_add_string_value ( builder, histo->nom_ack );
-    json_builder_set_member_name  ( builder, "num" );           json_builder_add_int_value    ( builder, histo->msg.num );
-    json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, histo->msg.libelle );
-    json_builder_set_member_name  ( builder, "syn_groupe" );    json_builder_add_string_value ( builder, histo->msg.syn_parent_page );
-    json_builder_set_member_name  ( builder, "syn_page" );      json_builder_add_string_value ( builder, histo->msg.syn_page );
-    json_builder_set_member_name  ( builder, "syn_libelle" );   json_builder_add_string_value ( builder, histo->msg.syn_libelle );
-    json_builder_set_member_name  ( builder, "dls_shortname" ); json_builder_add_string_value ( builder, histo->msg.dls_shortname );
+    Json_add_bool ( builder, "alive", histo->alive );
+    Json_add_string ( builder, "date_create",   histo->date_create );
+    Json_add_string ( builder, "nom_ack",       histo->nom_ack );
+    Json_add_int    ( builder, "num",           histo->msg.num );
+    Json_add_string ( builder, "libelle",       histo->msg.libelle );
+    Json_add_string ( builder, "syn_groupe",    histo->msg.syn_parent_page );
+    Json_add_string ( builder, "syn_page",      histo->msg.syn_page );
+    Json_add_string ( builder, "syn_libelle",   histo->msg.syn_libelle );
+    Json_add_string ( builder, "dls_shortname", histo->msg.dls_shortname );
     json_builder_end_object (builder);                                                                           /* End Histo */
 
-    json_builder_end_object (builder);                                                                        /* End Document */
-
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
+    buf = Json_get_buf ( builder, &taille_buf );
+#ifdef bouh
     buf_to_send = g_try_malloc0( taille_buf + LWS_PRE );
     if (buf_to_send)
      { memcpy( buf_to_send + LWS_PRE, buf, taille_buf );
@@ -221,6 +210,78 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
               "%s: send %d byte to '%s' ('%s')", __func__, taille_buf, pss->sid, pss->util );
     g_free(buf);
+#endif
+  }
+/******************************************************************************************************************************/
+/* CB_ws_histos : Gere le protocole WS histos (appellée par libwebsockets)                                                    */
+/* Entrées : le contexte, le message, l'URL                                                                                   */
+/* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
+/******************************************************************************************************************************/
+ static gint CB_ws_live_motifs ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
+  {
+    struct WS_PER_SESSION_DATA *pss;
+    gchar *util;
+    pss = lws_wsi_user ( wsi );
+    switch (tag)
+     { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);
+/*            if (Get_phpsessionid_cookie(wsi)==FALSE)                                              /* Recupere le PHPSessionID */
+/*             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No PHPSESSID. Killing.", __func__ );
+               return(1);
+             }
+/*            util = Rechercher_util_by_phpsessionid ( pss->sid );*/
+/*            if (!util)
+             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No user found for session %s.", __func__, pss->sid );
+               return(1);
+             }
+            g_snprintf( pss->util, sizeof(pss->util), "%s", util );
+            g_free(util);
+
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established for %s", __func__, pss->util );*/
+            pss->zmq = Connect_zmq ( ZMQ_SUB, "listen-to-motifs",   "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback connected", __func__ );
+            break;
+       case LWS_CALLBACK_CLOSED:
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback closed", __func__ );
+            if (pss->zmq) Close_zmq(pss->zmq);
+            break;
+       case LWS_CALLBACK_SERVER_WRITEABLE:
+             { struct DLS_VISUEL visu;
+               if ( pss->zmq && Recv_zmq ( pss->zmq, &visu, sizeof(struct DLS_VISUEL) ) == sizeof(struct DLS_VISUEL) )
+                { JsonBuilder *builder;
+                  gsize taille_buf;
+                  gchar *buf, *result;
+                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                            "%s: Visuel %s:%s received", __func__, visu.tech_id, visu.acronyme );
+                  builder = Json_create ();
+                  if (builder == NULL)
+                   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+                     return(1);
+                   }
+                  json_builder_begin_object (builder);                                         /* Création du noeud principal */
+                  Json_add_string ( builder, "tech_id",  visu.tech_id );
+                  Json_add_string ( builder, "acronyme", visu.acronyme );
+                  Json_add_int    ( builder, "mode",     visu.mode );
+                  Json_add_string ( builder, "color",    visu.color );
+                  Json_add_bool   ( builder, "cligno",   visu.cligno );
+                  json_builder_end_object (builder);                                                          /* End Document */
+                  buf = Json_get_buf ( builder, &taille_buf );
+                  result = (gchar *)g_malloc(LWS_SEND_BUFFER_PRE_PADDING + taille_buf);
+                  if (result == NULL)
+                   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon Result creation failed", __func__ );
+                     g_free(buf);
+                     return(1);
+                   }
+                  memcpy ( result + LWS_SEND_BUFFER_PRE_PADDING , buf, taille_buf );
+                  g_free(buf);
+                  lws_write	(	wsi,	result+LWS_SEND_BUFFER_PRE_PADDING, taille_buf, LWS_WRITE_TEXT );
+                  g_free(result);
+                }
+             }
+            lws_callback_on_writable(wsi);
+            break;
+       default: return(0);
+     }
+    return(0);
   }
 /******************************************************************************************************************************/
 /* CB_ws_histos : Gere le protocole WS histos (appellée par libwebsockets)                                                    */
@@ -384,6 +445,11 @@
                 { g_snprintf( pss->url, sizeof(pss->url), "/postfile" );
                   return(0);
                 }
+               else if ( ! strcasecmp ( url, "/log/debug" ) )   { Info_change_log_level ( Config.log, LOG_DEBUG   ); return(1); }
+               else if ( ! strcasecmp ( url, "/log/notice" ) )  { Info_change_log_level ( Config.log, LOG_NOTICE  ); return(1); }
+               else if ( ! strcasecmp ( url, "/log/info" ) )    { Info_change_log_level ( Config.log, LOG_INFO    ); return(1); }
+               else if ( ! strcasecmp ( url, "/log/warning" ) ) { Info_change_log_level ( Config.log, LOG_WARNING ); return(1); }
+               else if ( ! strcasecmp ( url, "/log/error" ) )   { Info_change_log_level ( Config.log, LOG_ERR     ); return(1); }
 /****************************************** WS get Running config library *****************************************************/
                else if ( ! strncasecmp( url, "/library/", 9 ) )
                 { gchar *target = url+9;
@@ -450,6 +516,7 @@
   { struct lws_protocols WS_PROTOS[] =
      { { "http-only", CB_http, sizeof(struct HTTP_PER_SESSION_DATA), 0 },       /* first protocol must always be HTTP handler */
        { "histos", CB_ws_histos, sizeof(struct WS_PER_SESSION_DATA), 0 },
+       { "live-motifs", CB_ws_live_motifs, sizeof(struct WS_PER_SESSION_DATA), 0 },
        { NULL, NULL, 0, 0 } /* terminator */
      };
     struct stat sbuf;

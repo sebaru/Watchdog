@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Admin/Admin.c        Gestion des connexions Admin au serveur watchdog                                            */
+/* Watchdogd/Admin.c        Gestion des connexions Admin au serveur watchdog                                                  */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                           dim 18 jan 2009 14:43:27 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -34,30 +34,9 @@
 
  #include "watchdogd.h"
 
- static void *Socket;
-
-/******************************************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes d'admin au serveur watchdog                                             */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- static gboolean Activer_ecoute_admin ( void )
-  { Socket = Bind_zmq ( ZMQ_REP, "listen-local-admin", "ipc", NOM_SOCKET, 0 );
-    return (Socket!=NULL);
-  }
-/******************************************************************************************************************************/
-/* Desactiver_ecoute_admin: Ferme la socker fifo d'administration                                                             */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Desactiver_ecoute_admin ( void )
-  { Close_zmq ( Socket );
-    unlink(NOM_SOCKET);                                                                   /* Suppression du fichier de socket */
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: socket disabled", __func__ );
-  }
 /******************************************************************************************************************************/
 /* Admin_write : Concatene deux chaines de caracteres proprementvvvvvvv                                                       */
-/* Entrée : le buffer et la chaine                                                                                            */
+/* EntrÃ©e : le buffer et la chaine                                                                                            */
 /* Sortie: La nouvelle chaine                                                                                                 */
 /******************************************************************************************************************************/
  gchar *Admin_write ( gchar *response, gchar *new_ligne )
@@ -69,14 +48,12 @@
   }
 /******************************************************************************************************************************/
 /* Ecouter_admin: Ecoute ce que dis le CLIENT                                                                                 */
-/* Entrée: la connexion, le user host d'origine et commande a parser                                                          */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: la connexion, le user host d'origine et commande a parser                                                          */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  gchar *Processer_commande_admin ( gchar *user, gchar *host, gchar *ligne )
   { gchar commande[128], chaine[256];
-    struct LIBRAIRIE *lib;
     gchar *response=NULL;
-    GSList *liste;
 
     if (!(user && host)) return(NULL);
 
@@ -87,99 +64,11 @@
                 (gdouble)Partage->top/10.0, ligne, g_get_host_name() );
     response = Admin_write ( NULL, chaine );
 
-    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                                    /* DÃ©coupage de la ligne de commande */
 
             if ( g_str_has_prefix ( commande, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
        else if ( g_str_has_prefix ( commande, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
-       else if ( g_str_has_prefix ( commande, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
-       else if ( g_str_has_prefix ( commande, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
-       else { gboolean found = FALSE;
-              liste = Partage->com_msrv.Librairies;                                      /* Parcours de toutes les librairies */
-              while(liste)
-               { lib = (struct LIBRAIRIE *)liste->data;
-                 if ( g_str_has_prefix( commande, lib->admin_prompt ) )
-                  { if (lib->Thread_run == FALSE)
-                     { response = Admin_write ( response, " | -- WARNING --" );
-                       response = Admin_write ( response, " | -- Thread is not started, Running config is not loaded --");
-                       response = Admin_write ( response, " | -- WARNING --" );
-                     }
-                    if (lib->Admin_command)                        /* Ancienne mode, via appel de fonction intégrée au thread */
-                     { response =  lib->Admin_command ( response, ligne + strlen(lib->admin_prompt)+1 ); }     /* Appel local */
-                    found = TRUE;
-                  }
-                 liste = liste->next;
-               }
-              if (found == FALSE)                                                /* Si pas trouvé, rollback sur Admin_running */
-               { response = Admin_running ( response, ligne ); }
-            }
     response = Admin_write ( response, " -\n" );
     return(response);                                                                                    /* Fin de la reponse */
-  }
-/******************************************************************************************************************************/
-/* Ecouter_admin: Ecoute ce que dis le CLIENT                                                                                 */
-/* Entrée: la connexion, le user host d'origine et commande a parser                                                          */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void New_Processer_commande_admin ( struct ZMQ_TARGET *event, gchar *ligne )
-  { gchar chaine[256];
-    gchar *response=NULL;
-
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Received CLI from %s/%s to %s/%s: '%s'", __func__,
-              event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, ligne );
-
-    g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing '%s' on instance '%s'",
-                (gdouble)Partage->top/10.0, ligne, g_get_host_name() );
-    response = Admin_write ( NULL, chaine );
-         if ( g_str_has_prefix ( ligne, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
-    else if ( g_str_has_prefix ( ligne, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
-    else if ( g_str_has_prefix ( ligne, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
-    else if ( g_str_has_prefix ( ligne, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
-    else response = Admin_running (response, ligne);
-
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master,                           /* Send to local msrv */
-                        NULL, "msrv", event->src_instance, event->src_thread, "cli_response", response, strlen(response)+1 );
-  }
-/******************************************************************************************************************************/
-/* Run_admin: Ecoute les commandes d'admin locale et les traite                                                               */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Run_admin ( void )
-  { prctl(PR_SET_NAME, "W-Admin", 0, 0, 0 );
-
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-              "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
-
-    if ( Activer_ecoute_admin() == FALSE )
-     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Unable to open Socket -> Stop", __func__ );
-       Partage->com_admin.TID = 0;                                            /* On indique au master que le thread est mort. */
-       pthread_exit(GINT_TO_POINTER(-1));
-     } else Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                      "%s: Socket is enabled, waiting for clients", __func__ );
-
-    Partage->com_admin.Thread_run = TRUE;                                                               /* Le thread tourne ! */
-    while(Partage->com_admin.Thread_run == TRUE)                                             /* On tourne tant que necessaire */
-     { gchar buffer[2048];
-       if (Partage->com_admin.Thread_reload)                                                         /* On a recu reload ?? */
-        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: recu SIGUSR1", __func__ );
-          Partage->com_admin.Thread_reload = FALSE;
-        }
-
-       if ( Recv_zmq ( Socket, &buffer, sizeof(buffer) ) > 0 )
-        { gchar *response;
-          response = Processer_commande_admin ( "localuser", "localhost", buffer );
-          Send_zmq ( Socket, response, strlen(response)+1 );
-          Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Response = %s", __func__, response );
-          g_free(response);
-        }
-
-       sched_yield();
-       usleep(10000);
-     }
-
-    Desactiver_ecoute_admin ();
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
-    Partage->com_admin.TID = 0;                                               /* On indique au master que le thread est mort. */
-    pthread_exit(GINT_TO_POINTER(0));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

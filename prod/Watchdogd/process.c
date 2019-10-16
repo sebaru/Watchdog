@@ -45,7 +45,7 @@
 
 /******************************************************************************************************************************/
 /* Start_librairie: Demarre le thread en paremetre                                                                            */
-/* EntrÃée: La structure associÃée au thread                                                                                    */
+/* EntrÃƒÃ©e: La structure associÃƒÃ©e au thread                                                                                    */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Start_librairie ( struct LIBRAIRIE *lib )
@@ -71,13 +71,13 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: pthread_create failed (%s)", __func__, lib->nom_fichier );
        return(FALSE);
      }
-    pthread_attr_destroy(&attr);                                                                        /* LibÃération mÃémoire */
+    pthread_attr_destroy(&attr);                                                                        /* LibÃƒÃ©ration mÃƒÃ©moire */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Starting thread %s OK (TID=%p)", __func__, lib->nom_fichier, tid );
     return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Stop_librairie: Arrete le thread en paremetre                                                                              */
-/* EntrÃée: La structure associÃée au thread                                                                                    */
+/* EntrÃƒÃ©e: La structure associÃƒÃ©e au thread                                                                                    */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Stop_librairie ( struct LIBRAIRIE *lib )
@@ -93,7 +93,7 @@
   }
 /******************************************************************************************************************************/
 /* Charger_librarie_par_fichier: Ouverture d'une librairie par son nom                                                        */
-/* EntrÃée: Le nom de fichier correspondant                                                                                    */
+/* EntrÃƒÃ©e: Le nom de fichier correspondant                                                                                    */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_prompt )
@@ -135,7 +135,6 @@
        return(NULL);
      }
 
-    lib->Admin_command = dlsym( lib->dl_handle, "Admin_command" );                                /* Recherche de la fonction */
     lib->Admin_json    = dlsym( lib->dl_handle, "Admin_json" );                                   /* Recherche de la fonction */
 
     g_snprintf( lib->nom_fichier, sizeof(lib->nom_fichier), "%s", nom_absolu );
@@ -149,8 +148,8 @@
     return(lib);
   }
 /******************************************************************************************************************************/
-/* Decharger_librairie_par_nom: Decharge la librairie dont le nom est en paramètre                                            */
-/* Entrée: Le nom de la librairie                                                                                             */
+/* Decharger_librairie_par_nom: Decharge la librairie dont le nom est en paramÃ¨tre                                            */
+/* EntrÃ©e: Le nom de la librairie                                                                                             */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  gboolean Decharger_librairie_par_prompt ( gchar *prompt )
@@ -158,8 +157,8 @@
     GSList *liste;
 
     liste = Partage->com_msrv.Librairies;
-    while(liste)                                                                            /* Liberation mÃémoire des modules */
-     { lib = (struct LIBRAIRIE *)liste->data;                                         /* RÃécupÃération des donnÃées de la liste */
+    while(liste)                                                                            /* Liberation mÃƒÃ©moire des modules */
+     { lib = (struct LIBRAIRIE *)liste->data;                                         /* RÃƒÃ©cupÃƒÃ©ration des donnÃƒÃ©es de la liste */
 
        if ( ! strcmp ( lib->admin_prompt, prompt ) )
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: trying to unload %s", __func__, lib->nom_fichier );
@@ -168,7 +167,7 @@
           pthread_mutex_destroy( &lib->synchro );
           dlclose( lib->dl_handle );
           Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
-                                                                             /* Destruction de l'entete associÃé dans la GList */
+                                                                             /* Destruction de l'entete associÃƒÃ© dans la GList */
           Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: library %s unloaded", __func__, lib->nom_fichier );
           g_free( lib );
           return(TRUE);
@@ -180,7 +179,7 @@
   }
 /******************************************************************************************************************************/
 /* Decharger_librairies: Decharge toutes les librairies                                                                       */
-/* EntrÃée: Rien                                                                                                               */
+/* EntrÃƒÃ©e: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Decharger_librairies ( void )
@@ -194,21 +193,21 @@
        liste = liste->next;
      }
 
-    while(Partage->com_msrv.Librairies)                                                     /* Liberation mÃémoire des modules */
+    while(Partage->com_msrv.Librairies)                                                     /* Liberation mÃƒÃ©moire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
        Decharger_librairie_par_prompt (lib->admin_prompt);
      }
   }
 /******************************************************************************************************************************/
 /* Charger_librairies: Ouverture de toutes les librairies possibles pour Watchdog                                             */
-/* EntrÃ©e: Rien                                                                                                               */
+/* EntrÃƒÂ©e: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_librairies ( void )
   { struct dirent *fichier;
     DIR *repertoire;
 
-    repertoire = opendir ( Config.librairie_dir );                                  /* Ouverture du rÃépertoire des librairies */
+    repertoire = opendir ( Config.librairie_dir );                                  /* Ouverture du rÃƒÃ©pertoire des librairies */
     if (!repertoire)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Directory %s Unknown", __func__, Config.librairie_dir );
        return;
@@ -217,7 +216,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Loading Directory %s in progress", __func__, Config.librairie_dir );
      }
 
-    while( (fichier = readdir( repertoire )) )                                      /* Pour chacun des fichiers du rÃ©pertoire */
+    while( (fichier = readdir( repertoire )) )                                      /* Pour chacun des fichiers du rÃƒÂ©pertoire */
      { gchar prompt[64];
        if (!strncmp( fichier->d_name, "libwatchdog-server-", 19 ))                     /* Chargement unitaire d'une librairie */
         { if ( ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
@@ -228,13 +227,13 @@
            }
         }
      }
-    closedir( repertoire );                                                 /* Fermeture du rÃ©pertoire a la fin du traitement */
+    closedir( repertoire );                                                 /* Fermeture du rÃƒÂ©pertoire a la fin du traitement */
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: %d Library loaded", __func__, g_slist_length( Partage->com_msrv.Librairies ) );
   }
 /******************************************************************************************************************************/
 /* Demarrer_dls: Thread un process DLS                                                                                        */
-/* EntrÃ©e: rien                                                                                                               */
+/* EntrÃƒÂ©e: rien                                                                                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Demarrer_dls ( void )
@@ -252,26 +251,8 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Demarrer_admin: Thread un process admin                                                                                    */
-/* EntrÃée: rien                                                                                                               */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Demarrer_admin ( void )
-  { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Demande de demarrage %d", __func__, getpid() );
-    if (Partage->com_admin.Thread_run == TRUE)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: An instance is already running (%d)", __func__, Partage->com_admin.TID );
-       return(FALSE);
-     }
-    if (pthread_create( &Partage->com_admin.TID, NULL, (void *)Run_admin, NULL ))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: pthread_create failed", __func__ );
-       return(FALSE);
-     }
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: thread admin (%p) seems to be running", __func__, Partage->com_admin.TID );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Demarrer_arch: Thread un process arch                                                                                      */
-/* EntrÃée: rien                                                                                                               */
+/* EntrÃƒÃ©e: rien                                                                                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Demarrer_arch ( void )
@@ -289,9 +270,9 @@
   }
 /******************************************************************************************************************************/
 /* Stopper_fils: arret de tous les fils Watchdog                                                                              */
-/* EntrÃée/Sortie: flag = TRUE si on demande aussi l'arret du thread Admin                                                     */
+/* EntrÃ©/Sortie: nÃ©ant                                                                                                        */
 /******************************************************************************************************************************/
- void Stopper_fils ( gint flag )
+ void Stopper_fils ( void )
   { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Debut stopper_fils", __func__ );
 
     Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Waiting for DLS (%p) to finish", __func__, Partage->com_dls.TID );
@@ -303,13 +284,6 @@
     Partage->com_arch.Thread_run = FALSE;
     while ( Partage->com_arch.TID != 0 ) sched_yield();                                                    /* Attente fin DLS */
     Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: ok, ARCH is down", __func__ );
-
-    if (flag)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Waiting for ADMIN (%p) to finish", __func__, Partage->com_admin.TID );
-       Partage->com_admin.Thread_run = FALSE;
-       while ( Partage->com_admin.TID != 0 ) sched_yield();                                                /* Attente fin DLS */
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: ok, ADMIN is down", __func__ );
-     }
 
     Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Fin stopper_fils", __func__ );
   }

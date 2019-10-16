@@ -21,35 +21,22 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _ADMIN_H_
  #define _ADMIN_H_
 
  #include <pthread.h>
- #define NOM_SOCKET "socket.wdg"
 
- struct COM_ADMIN                                                                      /* Communication entre DLS et la RS485 */
-  { pthread_t TID;                                                                                   /* Identifiant du thread */
-    pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_reload;                                                          /* TRUE si le thread doit gerer le USR1 */
-  };
 
 /*********************************************** Définitions des prototypes ***************************************************/
- extern void Run_admin ( void );                                                                              /* Dans Admin.c */
- extern gchar *Admin_running ( gchar *response, gchar *ligne );
- extern gchar *Admin_process ( gchar *response, gchar *ligne );
- extern gchar *Admin_dls ( gchar *response, gchar *ligne );
- extern gchar *Admin_set ( gchar *response, gchar *ligne );
+ extern gchar *Admin_set ( gchar *response, gchar *ligne );                                                   /* Dans Admin.c */
  extern gchar *Admin_get ( gchar *response, gchar *ligne );
- extern gchar *Admin_user ( gchar *response, gchar *ligne );
- extern gchar *Admin_dbcfg ( gchar *response, gchar *ligne );
  extern gchar *Admin_write ( gchar *response, gchar *new_ligne );
  extern gchar *Processer_commande_admin ( gchar *user, gchar *host, gchar *ligne );
  extern void New_Processer_commande_admin ( struct ZMQ_TARGET *event, gchar *ligne );
- 
+
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -51,13 +51,6 @@
     gchar tag[24];
   };
 
- struct ZMQ_SET_BIT
-  { gint type;
-    gint num;
-    gchar acronyme [ NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1 ];
-    gchar dls_tech_id [ NBR_CARAC_PLUGIN_DLS_TECHID ];
-  };
-
 /************************************************ Définitions des prototypes **************************************************/
  extern struct ZMQUEUE *Connect_zmq ( gint pattern, gchar *name, gchar *type, gchar *endpoint, gint port );     /* Dans zmq.c */
  extern struct ZMQUEUE *Bind_zmq ( gint pattern, gchar *name, gchar *type, gchar *endpoint, gint port );

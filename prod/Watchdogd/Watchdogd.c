@@ -283,11 +283,6 @@
     Partage->com_msrv.zmq_to_slave = Bind_zmq ( ZMQ_PUB, "pub-to-slave", "tcp", "*", 5555 );
     zmq_from_slave = Bind_zmq ( ZMQ_SUB, "listen-to-slave", "tcp", "*", 5556 );
 
-/************************************* Création des zones de bits internes dynamiques *****************************************/
-    Partage->Dls_data_AI   = NULL;
-    Partage->Dls_data_BOOL = NULL;
-    Partage->Dls_data_MSG  = NULL;
-
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
      { if (!Demarrer_arch())                                                                   /* Demarrage gestion Archivage */
@@ -300,9 +295,6 @@
      }
     else
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" ); }
-
-    if (!Demarrer_admin())                                                                                 /* Démarrage ADMIN */
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb Admin -> Arret" ); }
 
 /***************************************** Debut de la boucle sans fin ********************************************************/
     cpt_5_minutes = Partage->top + 3000;
@@ -321,48 +313,31 @@
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
 
        if ( (byte=Recv_zmq_with_tag( zmq_from_slave, "msrv", &buffer, sizeof(buffer)-1, &event, &payload )) > 0 )
-        { if ( !strcmp(event->tag,"JSON") )
+        { if ( !strcmp(event->tag,"SET_AI") )
            { JsonNode *query;
-             gchar *mode;
              buffer[byte] = 0;                                                                       /* Caractère nul d'arret */
              query = Json_get_from_string ( payload );
              if (!query)
               { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); continue; }
-             mode = Json_get_string ( query, "mode" );
-             if (!strcmp(mode,"SET_AI"))
-              { Dls_data_set_AI ( Json_get_string ( query, "tech_id" ),
-                                  Json_get_string ( query, "acronyme" ),
-                                  NULL, Json_get_float ( query, "valeur" ) );
-              }
+             Dls_data_set_AI ( Json_get_string ( query, "tech_id" ),
+                               Json_get_string ( query, "acronyme" ),
+                               NULL, Json_get_float ( query, "valeur" ) );
              json_node_unref (query);
            }
-          else if ( !strcmp(event->tag,"SET_BIT") )
-           { struct ZMQ_SET_BIT *bit;
-             bit = (struct ZMQ_SET_BIT *)payload;
+          else if ( !strcmp(event->tag,"SET_BOOL") )
+           { JsonNode *query;
+             buffer[byte] = 0;                                                                       /* Caractère nul d'arret */
+             query = Json_get_from_string ( payload );
+             if (!query)
+              { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); continue; }
+
              Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                       "%s: receive TAG_ZMQ_SET_BIT from %s/%s to %s/%s : bit type %d num %d, techid %s acronyme %s", __func__,
+                       "%s: receive SET_BOOL=1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
                        event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
-                       bit->type, bit->num, bit->dls_tech_id, bit->acronyme );
-             if (bit->num != -1) Envoyer_commande_dls ( bit->num );
-                            else Envoyer_commande_dls_data ( bit->dls_tech_id, bit->acronyme );
-           }
-          else if ( !strcmp(event->tag,"SET_BIT_TO_1") )
-           { struct ZMQ_SET_BIT *bit;
-             bit = (struct ZMQ_SET_BIT *)payload;
-             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                       "%s: receive TAG_ZMQ_SET_BIT_TO_1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
-                       event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
-                       bit->dls_tech_id, bit->acronyme );
-             Dls_data_set_bool ( bit->dls_tech_id, bit->acronyme, NULL, TRUE );
-           }
-          else if ( !strcmp(event->tag,"SET_BIT_TO_0") )
-           { struct ZMQ_SET_BIT *bit;
-             bit = (struct ZMQ_SET_BIT *)payload;
-             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                       "%s: receive TAG_ZMQ_SET_BIT_TO_0 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
-                       event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
-                       bit->dls_tech_id, bit->acronyme );
-             Dls_data_set_bool ( bit->dls_tech_id, bit->acronyme, NULL, FALSE );
+                       Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
+             Dls_data_set_bool ( Json_get_string ( query, "tech_id" ),
+                                 Json_get_string ( query, "acronyme" ),
+                                 NULL, Json_get_bool ( query, "etat" ) );
            }
           else if ( !strcmp(event->tag, "ping") )
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s/%s to %s/%s",
@@ -437,24 +412,13 @@
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
-    Stopper_fils(TRUE);                                                                    /* Arret de tous les fils watchdog */
+    Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
     Close_zmq ( Partage->com_msrv.zmq_motif );
     Close_zmq ( Partage->com_msrv.zmq_to_bus );
     Close_zmq ( zmq_from_bus );
     Close_zmq ( Partage->com_msrv.zmq_to_slave );
     Close_zmq ( zmq_from_slave );
-
-/********************************* Dechargement des zones de bits internes dynamiques *****************************************/
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique 1", __func__ );
-    g_slist_foreach (Partage->Dls_data_BOOL, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_BOOL);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique 2", __func__ );
-    g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_AI);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique 3", __func__ );
-    g_slist_foreach (Partage->Dls_data_MSG, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_MSG);
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );
@@ -480,11 +444,6 @@
 /***************************************** Socket de subscription au master ***************************************************/
     Partage->com_msrv.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",    "tcp", Config.master_host, 5556 );
     zmq_from_master                 = Connect_zmq ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
-
-/************************************* Création des zones de bits internes dynamiques *****************************************/
-    Partage->Dls_data_AI   = NULL;
-    Partage->Dls_data_BOOL = NULL;
-    Partage->Dls_data_MSG  = NULL;
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
@@ -555,7 +514,7 @@
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
-    Stopper_fils(TRUE);                                                                    /* Arret de tous les fils watchdog */
+    Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
     Close_zmq ( Partage->com_msrv.zmq_to_bus );
     Close_zmq ( zmq_from_bus );
@@ -734,8 +693,16 @@
        pthread_mutex_init( &Partage->com_dls.synchro_traduction, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro_data, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
-       pthread_mutex_init( &Partage->com_admin.synchro, &attr );
        pthread_mutex_init( &Partage->com_db.synchro, &attr );
+
+/************************************* Création des zones de bits internes dynamiques *****************************************/
+       Partage->Dls_data_AI     = NULL;
+       Partage->Dls_data_BOOL   = NULL;
+       Partage->Dls_data_MSG    = NULL;
+       Partage->Dls_data_CH     = NULL;
+       Partage->Dls_data_CI     = NULL;
+       Partage->Dls_data_TEMPO  = NULL;
+       Partage->Dls_data_VISUEL = NULL;
 
        sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
@@ -793,6 +760,28 @@
        pthread_join( TID, NULL );                                                       /* Attente fin de la boucle pere MSRV */
        zmq_ctx_term( Partage->zmq_ctx );
        zmq_ctx_destroy( Partage->zmq_ctx );
+/********************************* Dechargement des zones de bits internes dynamiques *****************************************/
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique BOOL", __func__ );
+       g_slist_foreach (Partage->Dls_data_BOOL, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_BOOL);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique AI", __func__ );
+       g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_AI);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MSG", __func__ );
+       g_slist_foreach (Partage->Dls_data_MSG, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_MSG);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique TEMPO", __func__ );
+       g_slist_foreach (Partage->Dls_data_TEMPO, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_TEMPO);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique CH", __func__ );
+       g_slist_foreach (Partage->Dls_data_CH, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_CH);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique CI", __func__ );
+       g_slist_foreach (Partage->Dls_data_CI, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_CI);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique VISUEL", __func__ );
+       g_slist_foreach (Partage->Dls_data_VISUEL, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_VISUEL);
      }
 
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
@@ -800,7 +789,6 @@
     pthread_mutex_destroy( &Partage->com_dls.synchro_traduction );
     pthread_mutex_destroy( &Partage->com_dls.synchro_data );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
-    pthread_mutex_destroy( &Partage->com_admin.synchro );
     pthread_mutex_destroy( &Partage->com_db.synchro );
 
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */

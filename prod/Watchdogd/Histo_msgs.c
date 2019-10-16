@@ -36,27 +36,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Clear_histoDB: Elimination des messages histo au boot systeme                                                              */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- void Clear_histoDB ( void )
-  { struct DB *db;
-    gchar requete[1024];
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_histoDB: Connexion DB failed" );
-       return;
-     }                                                                                               /* Si pas de histos (??) */
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s SET alive=0 WHERE alive=1", NOM_TABLE_HISTO_MSGS );
-
-    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
-    Libere_DB_SQL( &db );
-  }
-/******************************************************************************************************************************/
 /* Modifier_Ajouter_histo_msgsDB: Ajout ou modifier un enregistrement MSGS de la base de données                              */
 /* Entrée: un flag d'ajout et un enregistrement à modifier                                                                    */
 /* Sortie: false si probleme                                                                                                  */

@@ -36,7 +36,6 @@
  JsonBuilder *Json_create ( void )
   { JsonBuilder *builder;
     builder = json_builder_new();
-    if (!builder) return(NULL);
     return(builder);
   }
 /******************************************************************************************************************************/
@@ -82,9 +81,12 @@
 /******************************************************************************************************************************/
  gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p )
   { JsonGenerator *gen;
+    JsonNode *RootNode;
     gchar *result;
     gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
+    RootNode = json_builder_get_root(builder);
+    json_generator_set_root ( gen, RootNode );
+    json_node_unref(RootNode);
     json_generator_set_pretty ( gen, TRUE );
     result = json_generator_to_data (gen, taille_buf_p);
     g_object_unref(builder);
@@ -115,5 +117,14 @@
  gfloat Json_get_float ( JsonNode *query, gchar *chaine )
   { JsonObject *object = json_node_get_object (query);
     return((gfloat)json_object_get_double_member ( object, chaine ));
+  }
+/******************************************************************************************************************************/
+/* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
+/* Entrée: la query, le nom du parametre                                                                                      */
+/* Sortie: la chaine de caractere                                                                                             */
+/******************************************************************************************************************************/
+ gboolean Json_get_bool ( JsonNode *query, gchar *chaine )
+  { JsonObject *object = json_node_get_object (query);
+    return(json_object_get_boolean_member ( object, chaine ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
