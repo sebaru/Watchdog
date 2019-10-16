@@ -129,7 +129,7 @@
           Json_add_bool   ( builder, "etat", TRUE );
           json_builder_end_object ( builder );
           result = Json_get_buf ( builder, &taille );
-          Send_zmq_with_tag ( Cfg_snips.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BOOL", result, taille );
+          Send_zmq_with_tag ( Cfg_snips.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_CDE", result, taille );
           g_free(result);
         }
      }
