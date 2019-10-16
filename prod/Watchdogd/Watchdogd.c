@@ -324,6 +324,19 @@
                                NULL, Json_get_float ( query, "valeur" ) );
              json_node_unref (query);
            }
+          else if ( !strcmp(event->tag,"SET_CDE") )
+           { JsonNode *query;
+             buffer[byte] = 0;                                                                       /* Caractère nul d'arret */
+             query = Json_get_from_string ( payload );
+             if (!query)
+              { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); continue; }
+
+             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                       "%s: receive SET_CDE=1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
+                       event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
+                       Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
+             Envoyer_commande_dls_data ( Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
+           }
           else if ( !strcmp(event->tag,"SET_BOOL") )
            { JsonNode *query;
              buffer[byte] = 0;                                                                       /* Caractère nul d'arret */

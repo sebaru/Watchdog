@@ -41,7 +41,6 @@ echo "done."
 sleep 2
 
 echo "Create Database and conf file"
-sudo systemctl restart mariadb
 CONFFILE=/etc/watchdogd.conf
 if [ ! -f $CONFFILE ]
  then
@@ -52,7 +51,8 @@ if [ ! -f $CONFFILE ]
     sudo tee "$CONFFILE" > /dev/null
     if [ "$master" = "oui" ]
     then
-     /usr/bin/mysqladmin -u root create WatchdogDB
+    sudo systemctl restart mariadb
+    /usr/bin/mysqladmin -u root create WatchdogDB
      echo "CREATE USER 'watchdog' IDENTIFIED BY '$NEWPASSWORD'; GRANT ALL PRIVILEGES ON WatchdogDB.* TO watchdog; FLUSH PRIVILEGES; source /usr/local/share/Watchdog/init_db.sql;" | mysql -u root WatchdogDB
      /usr/bin/mysql_secure_installation
     fi
@@ -60,6 +60,7 @@ fi
 echo "done."
 
 echo "Starting Watchdog"
+	sudo ldconfig	
 	sudo systemctl start Watchdogd.service
 echo "done."
 
