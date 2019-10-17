@@ -71,6 +71,7 @@
     int barre;                                                                               /* Represente la negation ou pas */
     GList *options;
     gint used;
+    gboolean external;                 /* TRUE si le bit interne est externe au module (ie pas déclaré en tant qu'alias local */
   };
 
 /****************************************************** Prototypes ************************************************************/
