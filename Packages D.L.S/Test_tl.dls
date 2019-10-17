@@ -6,6 +6,9 @@
  #define OSMS_TL_OFF    <-> _E(libelle="Demande SMS d'extinction TL"); /* Ordre TL  OFF */
  #define ODLS_TL_OFF    <-> _M(libelle="Demande DLS d'extinction TL");
  #define ODLS_TL_ON     <-> _M(libelle="Demande DLS d'allumage TL");
+ #define ODLS_TL_TOGGLE <-> _M(libelle="Demande DLS de bascule du TL");
+ #define ODLS_TL_TOGGLE_ON  <-> _M(libelle="Demande DLS de bascule ON du TL");
+ #define ODLS_TL_TOGGLE_OFF <-> _M(libelle="Demande DLS de bascule OFF du TL");
  #define OVOC_TL_OFF    <-> _E(libelle="Demande VOCALE d'extinction TL");
  #define OVOC_TL_ON     <-> _E(libelle="Demande VOCALE d'allumage TL");
 
@@ -18,6 +21,7 @@
  #define MSG_TELE_ON    <-> _MSG(type=info,libelle="Allumé"); /* TL activé */
  #define MSG_DEF_REPOS  <-> _MSG(type=defaut,libelle="Défaut repos"); /* Defaut repos */
  #define MSG_DEF_TRAVAIL<-> _MSG(type=defaut,libelle="Défaut travail"); /* Defaut travail */
+ #define VISU_POS_TL    <-> _I(libelle="Position Télérupteur"); /* Position du Télérupteur des luminaires centre  */
 
  /* Bits purement internes au module */
  #define MEWANTTL       <-> _B(libelle="Etat attendu du TL (0=ouvert, 1=fermé)");
@@ -61,9 +65,12 @@
 
  /* ORDRES DU MODULE ----------------------------------------------------------*/
 
+  - _MEMSA_OK. ODLS_TL_TOGGLE ./POS_TL -> ODLS_TL_TOGGLE_ON;
+  - _MEMSA_OK. ODLS_TL_TOGGLE . POS_TL -> ODLS_TL_TOGGLE_OFF;
+
  /* CALCUL ETAT ATTENDU TELERUPTEUR */
-  - _MEMSA_OK. (OSMS_TL_ON  + ODLS_TL_ON  + OVOC_TL_ON ). /POS_TL -> MEWANTTL, MEACTELE;
-  - _MEMSA_OK. (OSMS_TL_OFF + ODLS_TL_OFF + OVOC_TL_OFF).  POS_TL ->/MEWANTTL, MEACTELE;
+  - _MEMSA_OK. (OSMS_TL_ON  + ODLS_TL_ON  + ODLS_TL_TOGGLE_ON  + OVOC_TL_ON ). /POS_TL -> MEWANTTL, MEACTELE;
+  - _MEMSA_OK. (OSMS_TL_OFF + ODLS_TL_OFF + ODLS_TL_TOGGLE_OFF + OVOC_TL_OFF).  POS_TL ->/MEWANTTL, MEACTELE;
 
  /* PILOTAGE TELE SUR COMMANDE DE MANOEUVRE */
   - MEACTELE -> TR_IMP, TR_DEF;
@@ -74,6 +81,13 @@
   - MEWANTTL .  POS_TL -> /MEACTELE;
   -/MEWANTTL . /POS_TL -> /MEACTELE;
 
+
+                                    /*******************************************/
+ /***********************************              VISUELS                      ***********************************/
+                                    /*******************************************/
+  switch
+   | - POS_TL -> VISU_POS_TL(mode=0,color=jaune);
+   | -        -> VISU_POS_TL(mode=0,color=gris);
 
                                     /*******************************************/
  /***********************************              MESSAGES IMPRIMANTES         ***********************************/
