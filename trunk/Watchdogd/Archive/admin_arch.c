@@ -29,25 +29,57 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Admin_arch_testdb: Test la response vers le serveur de base de donn�es                                                    */
-/* Entr�e: la response pour sortiee client et la ligne de commande                                                           */
-/* Sortie: N�ant                                                                                                              */
+/* Admin_arch_testdb: Test la response vers le serveur de base de données                                                    */
+/* Entrée: la response pour sortiee client et la ligne de commande                                                           */
+/* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Admin_arch_json_testdb ( JsonBuilder *builder )
   { gchar chaine[256];
-    struct DB*db;
+    struct DB *db;
 
     db = Init_ArchDB_SQL();
     g_snprintf( chaine, sizeof(chaine), " Response to DB %s (Host='%s':%d, User='%s' DB='%s')", (db ? "OK" : "Failed"),
                 Partage->com_arch.archdb_host, Partage->com_arch.archdb_port, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
-    json_builder_begin_object (builder);                                                       /* Cr�ation du noeud principal */
+    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
     Json_add_string ( builder, "result", chaine );
-    json_builder_end_object (builder);                                                         /* Cr�ation du noeud principal */
+    json_builder_end_object (builder);                                                         /* Création du noeud principal */
+    Libere_DB_SQL ( &db );
   }
 /******************************************************************************************************************************/
-/* Admin_json : fonction appel� par le thread http lors d'une requete /run/                                                   */
-/* Entr�e : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entr�e sont mis � jour                                                                           */
+/* Admin_arch_json_clear: Supprime tous les enregistrements dans le tampon d'attente                                          */
+/* Entrée: le JSON builder pour préparer la réponse au client                                                                 */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Admin_arch_json_clear ( JsonBuilder *builder )
+  { gint nbr;
+
+    nbr = Arch_Clear_list();
+    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+    Json_add_int ( builder, "nbr_archive_deleted", nbr );
+    json_builder_end_object (builder);                                                         /* Création du noeud principal */
+  }
+/******************************************************************************************************************************/
+/* Admin_arch_json_purge: Lance le thread de purge des archives                                                               */
+/* Entrée: le JSON builder pour préparer la réponse au client                                                                 */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Admin_arch_json_purge ( JsonBuilder *builder )
+  { pthread_t tid;
+    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+    if (pthread_create( &tid, NULL, (void *)Arch_Update_SQL_Partitions_thread, NULL ))
+     { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: pthread_create failed for Update SQL Partitions", __func__ );
+       Json_add_string ( builder, "exec_purge_thread", "success" );
+     }
+     else
+     { pthread_detach( tid );                                        /* On le detache pour qu'il puisse se terminer tout seul */
+       Json_add_string ( builder, "exec_purge_thread", "failed" );
+     }
+    json_builder_end_object (builder);                                                         /* Création du noeud principal */
+  }
+/******************************************************************************************************************************/
+/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  void Admin_arch_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
   { JsonBuilder *builder;
@@ -61,13 +93,13 @@
      { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
      }
-/************************************************ Pr�paration du buffer JSON **************************************************/
+/************************************************ Préparation du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
-    /*if (!strcmp(commande, "/clear")) { Admin_arch_json_clear ( builder ); }
+    if (!strcmp(commande, "/clear")) { Admin_arch_json_clear ( builder ); }
     else if (!strcmp(commande, "/purge")) { Admin_arch_json_purge ( builder ); }
-    else*/ if (!strcmp(commande, "/testdb")) { Admin_arch_json_testdb ( builder ); }
+    else if (!strcmp(commande, "/testdb")) { Admin_arch_json_testdb ( builder ); }
 
-/************************************************ G�n�ration du JSON **********************************************************/
+/************************************************ Génération du JSON **********************************************************/
     *buffer_p = Json_get_buf ( builder, &taille_buf );
     *taille_p = taille_buf;
 

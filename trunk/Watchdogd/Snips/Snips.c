@@ -325,6 +325,7 @@
           if ( !strcmp( event->tag, "stop_snips" ) )
            { Stopper_snips(); }*/
         }
+       if ( !Partage->top%3000) Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_INFO, "%s: Waiting for Intents", __func__ );
        usleep(1000);
      }
     Close_zmq ( zmq_from_bus );
