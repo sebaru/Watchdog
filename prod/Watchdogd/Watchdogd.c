@@ -665,6 +665,7 @@
 
        setsid();                                                                                 /* Indépendance du processus */
      }
+
                                                                                       /* Verification de l'unicité du process */
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );
     if (fd_lock<0)
@@ -696,6 +697,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Shared memory failed to allocate" ); }
     else
      { pthread_mutexattr_t attr;                                                       /* Initialisation des mutex de synchro */
+       gint nbr_essai_db = 20;
        memset( Partage, 0, sizeof(struct PARTAGE) );                                                 /* RAZ des bits internes */
        Importer();                                                      /* Tente d'importer les données juste après un reload */
        time ( &Partage->start_time );
@@ -717,12 +719,27 @@
        Partage->Dls_data_TEMPO  = NULL;
        Partage->Dls_data_VISUEL = NULL;
 
+       while (nbr_essai_db > 0)                                                   /* Test itératif de connexion a la database */
+        { struct DB *db = Init_DB_SQL();
+          if (db) { Libere_DB_SQL ( &db ); break; }
+          Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                    "%s: Connection to DB failed (test %d). Retrying in 5s.", __func__, nbr_essai_db );
+          nbr_essai_db--;
+          sleep(5);
+        }
+       if (nbr_essai_db == 0)
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connection to DB failed many times. Stopping.", __func__ );
+          close(fd_lock);                                     /* Fermeture du FileDescriptor correspondant au fichier de lock */
+          exit(EXIT_FAILURE);
+        }
+       else { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connection to DB OK.", __func__ ); }
+
        sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
        Update_database_schema();                                                    /* Update du schéma de Database si besoin */
        Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */
-       Modifier_configDB ( "global", "instance_version", VERSION );                      /* Update du champs instance_version */
+       Modifier_configDB ( "msrv", "instance_version", VERSION );                        /* Update du champs instance_version */
 
        Partage->zmq_ctx = zmq_ctx_new ();                                          /* Initialisation du context d'echange ZMQ */
        if (!Partage->zmq_ctx)
@@ -795,21 +812,25 @@
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique VISUEL", __func__ );
        g_slist_foreach (Partage->Dls_data_VISUEL, (GFunc) g_free, NULL );
        g_slist_free (Partage->Dls_data_VISUEL);
+
+       pthread_mutex_destroy( &Partage->com_msrv.synchro );
+       pthread_mutex_destroy( &Partage->com_dls.synchro );
+       pthread_mutex_destroy( &Partage->com_dls.synchro_traduction );
+       pthread_mutex_destroy( &Partage->com_dls.synchro_data );
+       pthread_mutex_destroy( &Partage->com_arch.synchro );
+       pthread_mutex_destroy( &Partage->com_db.synchro );
      }
-
-    pthread_mutex_destroy( &Partage->com_msrv.synchro );
-    pthread_mutex_destroy( &Partage->com_dls.synchro );
-    pthread_mutex_destroy( &Partage->com_dls.synchro_traduction );
-    pthread_mutex_destroy( &Partage->com_dls.synchro_data );
-    pthread_mutex_destroy( &Partage->com_arch.synchro );
-    pthread_mutex_destroy( &Partage->com_db.synchro );
-
-    close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
     if (Partage->com_msrv.Thread_clear_reboot == FALSE) Exporter();                           /* Tente d'exporter les données */
     else { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "CLEAR-REBOOT : Erasing export file %s", FICHIER_EXPORT );
            unlink ( FICHIER_EXPORT );
          }
+
+    sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
+    pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
+    curl_global_cleanup();
+    Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
+    close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
     if (Partage->com_msrv.Thread_reboot == TRUE)                                         /* Devons-nous rebooter le process ? */
      { gint pid;
@@ -825,11 +846,7 @@
         }
      }
 
-    sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
-    pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
-    curl_global_cleanup();
-    Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Stopped" );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Stopped", __func__ );
     return(EXIT_OK);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

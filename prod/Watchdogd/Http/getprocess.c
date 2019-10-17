@@ -183,13 +183,14 @@
           return(Http_Send_response_code ( wsi, HTTP_200_OK ));
         }
 
-       liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
+       liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
        while(liste)
         { struct LIBRAIRIE *lib = liste->data;
           if ( ! strcasecmp( target, lib->admin_prompt ) )
            { if (lib->Thread_run == FALSE)
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                         "%s: reloading %s -> Library found but not started.", __func__, target );
+                         "%s: reloading %s -> Library found but not started. Please Start %s before reload",
+                         __func__, target, target );
               }
              else
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
