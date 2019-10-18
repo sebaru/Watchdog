@@ -681,7 +681,8 @@
                  map_text, tech_id, acro, libelle );
        if ( sscanf ( map_text, "%[^:]:AI%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_ana)
-           { Dls_data_set_AI ( tech_id, acro, &module->AI[num], 0.0 );
+           { Dls_data_get_AI ( tech_id, acro, &module->AI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
+             if(module->AI[num] == NULL) Dls_data_set_AI ( tech_id, acro, &module->AI[num], 0.0 );       /* Sinon, on le crée */
              Charger_conf_AI ( module->AI[num] );                                    /* Chargement de la conf AI depuis la DB */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
@@ -701,7 +702,9 @@
                  src_text, tech_id, acro, libelle );
        if ( sscanf ( src_text, "%[^:]:DI%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_tor)
-           { Dls_data_set_bool ( tech_id, acro, &module->DI[num], FALSE ); }
+           { Dls_data_get_bool ( tech_id, acro, &module->DI[num] );      /* bit déjà existant deja dans la structure DLS DATA */
+             if(module->DI[num] == NULL) Dls_data_set_bool ( tech_id, acro, &module->DI[num], FALSE );   /* Sinon, on le crée */
+           }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
                          src_text, num, module->nbr_entree_tor );
         }
@@ -719,7 +722,9 @@
                  dst_tag, tech_id, acro, libelle );
        if ( sscanf ( dst_tag, "%[^:]:DO%d", debut, &num ) == 2 )                      /* Découpage de la ligne ev_text */
         { if (num<module->nbr_sortie_tor)
-           { Dls_data_set_bool ( tech_id, acro, &module->DO[num], FALSE ); }
+           { Dls_data_get_bool ( tech_id, acro, &module->DI[num] );      /* bit déjà existant deja dans la structure DLS DATA */
+             if(module->DI[num] == NULL) Dls_data_set_bool ( tech_id, acro, &module->DO[num], FALSE );   /* Sinon, on le crée */
+           }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
                          dst_tag, num, module->nbr_entree_tor );
         }
