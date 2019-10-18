@@ -722,8 +722,8 @@
                  dst_tag, tech_id, acro, libelle );
        if ( sscanf ( dst_tag, "%[^:]:DO%d", debut, &num ) == 2 )                      /* Découpage de la ligne ev_text */
         { if (num<module->nbr_sortie_tor)
-           { Dls_data_get_bool ( tech_id, acro, &module->DI[num] );      /* bit déjà existant deja dans la structure DLS DATA */
-             if(module->DI[num] == NULL) Dls_data_set_bool ( tech_id, acro, &module->DO[num], FALSE );   /* Sinon, on le crée */
+           { Dls_data_get_bool ( tech_id, acro, &module->DO[num] );      /* bit déjà existant deja dans la structure DLS DATA */
+             if(module->DO[num] == NULL) Dls_data_set_bool ( tech_id, acro, &module->DO[num], FALSE );   /* Sinon, on le crée */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
                          dst_tag, num, module->nbr_entree_tor );
