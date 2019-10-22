@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Rs485/Rs485.c  Gestion des modules rs485 Watchdgo 2.0                                                            */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                          dim 21 aoû 2005 17:09:19 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          dim 21 aoÃ» 2005 17:09:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Rs485.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,9 +41,9 @@
  #include "Rs485.h"
 
 /******************************************************************************************************************************/
-/* Rs485_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* Rs485_Lire_config : Lit la config Watchdog et rempli la structure mÃ©moire                                                  */
+/* EntrÃ©e: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Rs485_Lire_config ( void )
   { gchar *nom, *valeur;
@@ -53,13 +53,13 @@
     Cfg_rs485.enable            = FALSE;
     g_snprintf( Cfg_rs485.port, sizeof(Cfg_rs485.port), "%s", DEFAUT_PORT_RS485 );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de donnÃ©es */
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
                 "Rs485_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* RÃ©cupÃ©ration d'une config dans la DB */
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,                                           /* Print Config */
                 "Rs485_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
@@ -77,7 +77,7 @@
   }
 /******************************************************************************************************************************/
 /* Retirer_rs485DB: Elimination d'un module rs485                                                                             */
-/* Entrée: un log et une database                                                                                             */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Retirer_rs485DB ( struct RS485DB *rs485 )
@@ -96,12 +96,12 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
-    Cfg_rs485.lib->Thread_reload = TRUE;                              /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_rs485.lib->Thread_reload = TRUE;                              /* Rechargement des modules RS en mÃ©moire de travaille */
     return(retour);
   }
 /******************************************************************************************************************************/
 /* Ajouter_rs485DB: Ajout ou edition d'un rs485                                                                               */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure rs485                                             */
+/* EntrÃ©e: un log et une database, un flag d'ajout/edition, et la structure rs485                                             */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gint Ajouter_rs485DB ( struct RS485DB *rs485 )
@@ -138,12 +138,12 @@
                           }
     last_id = Recuperer_last_ID_SQL ( db );
     Libere_DB_SQL( &db );
-    Cfg_rs485.lib->Thread_reload = TRUE;                              /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_rs485.lib->Thread_reload = TRUE;                              /* Rechargement des modules RS en mÃ©moire de travaille */
     return( last_id );
   }
 /******************************************************************************************************************************/
 /* Modifier_rs485DB: Modification d'un rs485 Watchdog                                                                         */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
+/* EntrÃ©es: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
 /* Sortie: -1 si pb, id sinon                                                                                                 */
 /******************************************************************************************************************************/
  gboolean Modifier_rs485DB( struct RS485DB *rs485 )
@@ -177,12 +177,12 @@
     g_free(libelle);
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
-    Cfg_rs485.lib->Thread_reload = TRUE;                              /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_rs485.lib->Thread_reload = TRUE;                              /* Rechargement des modules RS en mÃ©moire de travaille */
     return( retour );
   }
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                                    */
-/* Entrée: un log et une database                                                                                             */
+/* Recuperer_liste_id_rs485DB: RecupÃ©ration de la liste des ids des rs485s                                                    */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  static gboolean Recuperer_rs485DB ( struct DB *db )
@@ -196,8 +196,8 @@
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                                    */
-/* Entrée: un log et une database                                                                                             */
+/* Recuperer_liste_id_rs485DB: RecupÃ©ration de la liste des ids des rs485s                                                    */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  static struct RS485DB *Recuperer_rs485DB_suite( struct DB *db )
@@ -211,7 +211,7 @@
 
     rs485 = (struct RS485DB *)g_try_malloc0( sizeof(struct RS485DB) );
     if (!rs485) Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
-                          "%s: Erreur allocation mémoire", __func__ );
+                          "%s: Erreur allocation mÃ©moire", __func__ );
     else
      { g_snprintf( rs485->libelle, sizeof(rs485->libelle), "%s", db->row[3] );
        g_snprintf( rs485->date_ajout, sizeof(rs485->date_ajout), "%s", db->row[13] );
@@ -233,8 +233,8 @@
   }
 /**********************************************************************************************************/
 /* Chercher_module_rs485_by_id: Recherche le module dont l'id est en parametre                            */
-/* Entrée: l'id du module                                                                                 */
-/* Sortie: le module, ou NULL si non trouvé                                                               */
+/* EntrÃ©e: l'id du module                                                                                 */
+/* Sortie: le module, ou NULL si non trouvÃ©                                                               */
 /**********************************************************************************************************/
  struct MODULE_RS485 *Chercher_module_rs485_by_id ( gint id )
   { struct MODULE_RS485 *module;
@@ -254,8 +254,8 @@
   }
 /**********************************************************************************************************/
 /* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                         */
-/* Entrée: rien                                                                                           */
-/* Sortie: le nombre de modules trouvé                                                                    */
+/* EntrÃ©e: rien                                                                                           */
+/* Sortie: le nombre de modules trouvÃ©                                                                    */
 /**********************************************************************************************************/
  static gboolean Charger_tous_rs485 ( void  )
   { struct DB *db;
@@ -281,9 +281,9 @@
        if (!rs485) break;
 
        module = (struct MODULE_RS485 *)g_try_malloc0( sizeof(struct MODULE_RS485) );
-       if (!module)                                                   /* Si probleme d'allocation mémoire */
+       if (!module)                                                   /* Si probleme d'allocation mÃ©moire */
         { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
-                    "Charger_tous_RS485: Erreur allocation mémoire struct MODULE_RS485" );
+                    "Charger_tous_RS485: Erreur allocation mÃ©moire struct MODULE_RS485" );
           g_free(rs485);
           Libere_DB_SQL( &db );
           return(FALSE);
@@ -308,8 +308,8 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Deconnecter_rs485: Deconnecte un module RS485 de la liste des modules interrogés                       */
-/* Entrée: le module                                                                                      */
+/* Deconnecter_rs485: Deconnecte un module RS485 de la liste des modules interrogÃ©s                       */
+/* EntrÃ©e: le module                                                                                      */
 /* Sortie: void                                                                                           */
 /**********************************************************************************************************/
  static void Deconnecter_rs485 ( struct MODULE_RS485 *module )
@@ -324,8 +324,8 @@
     module->started = FALSE;
   }
 /**********************************************************************************************************/
-/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
-/* Entrée: un log et une database                                                                         */
+/* Rechercher_msgDB: RecupÃ©ration du message dont le num est en parametre                                 */
+/* EntrÃ©e: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  static void Decharger_tous_rs485 ( void  )
@@ -342,23 +342,23 @@
   }
 /**********************************************************************************************************/
 /* Calcul_crc16: renvoie le CRC16 de la trame en parametre                                                */
-/* Entrée: la trame a tester                                                                              */
+/* EntrÃ©e: la trame a tester                                                                              */
 /* Sortie: le crc 16 bits                                                                                 */
 /**********************************************************************************************************/
  static int Calcul_crc16 (struct TRAME_RS485 *Trame)
   { unsigned int index_bits;                                    /* nombre de bits a traiter dans un octet */
-    unsigned int retenue;                        /* valeur de la retenue éventuelle suite aux calculs CRC */
+    unsigned int retenue;                        /* valeur de la retenue Ã©ventuelle suite aux calculs CRC */
     unsigned int index_octets;                              /* position des octets formant la trame RS485 */
-    unsigned short CRC16;                                      /* Valeur du CRC16 lié à la trame en cours */
+    unsigned short CRC16;                                      /* Valeur du CRC16 liÃ© Ã  la trame en cours */
 
-    CRC16 = 0xFFFF;                                                              /* initialisation à FFFF */
+    CRC16 = 0xFFFF;                                                              /* initialisation Ã  FFFF */
 
     for ( index_octets=0; index_octets<TAILLE_ENTETE-2+Trame->taille; index_octets++ )
      {                                                                         /* CRC OUEX octet en cours */
        CRC16 = CRC16 ^ (short)*((unsigned char *)Trame + index_octets);
        for( index_bits = 0; index_bits<8; index_bits++ )
-        { retenue = CRC16 & 1;                             /* Récuperer la retenue avant traitement CRC16 */
-          CRC16 = CRC16 >> 1;                                      /* décalage d'un bit à droite du CRC16 */
+        { retenue = CRC16 & 1;                             /* RÃ©cuperer la retenue avant traitement CRC16 */
+          CRC16 = CRC16 >> 1;                                      /* dÃ©calage d'un bit Ã  droite du CRC16 */
           if (retenue == 1)
            { CRC16 = CRC16 ^ 0xA001; }                                         /* CRC16 OUEX A001 en hexa */
         }
@@ -367,7 +367,7 @@
   }
 /******************************************************************************************************************************/
 /* Envoyer_trame: envoie d'une trame RS485 sur la ligne                                                                       */
-/* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
+/* EntrÃ©e: L'id de la transmission, et la trame a transmettre                                                                 */
 /******************************************************************************************************************************/
  static void Envoyer_trame( int fd, struct TRAME_RS485 *trame )
   { int crc16;
@@ -375,12 +375,12 @@
     crc16 = Calcul_crc16 (trame);
     trame->crc16_h = crc16 >> 8;
     trame->crc16_l = crc16 & 0xFF;
-/*    printf("crc16 calculÃ© Ã  l'envoi: %04X  %2X %2X  taille %d\n", crc16, trame->crc16_h, trame->crc16_l,
+/*    printf("crc16 calculÃƒÂ© ÃƒÂ  l'envoi: %04X  %2X %2X  taille %d\n", crc16, trame->crc16_h, trame->crc16_l,
                                                                   trame->taille );*/
 
     if (write( fd, trame, TAILLE_ENTETE - 2 ) == -1)                                        /* Ecriture de l'entete */
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "%s: Write Entete Error '%s'", __func__, strerror(errno) ); }
-    if (trame->taille)                                                           /* On envoie les données */
+    if (trame->taille)                                                           /* On envoie les donnÃ©es */
      { if (write( fd, &trame->donnees, trame->taille )==-1)
         { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "%s: Write %d bytes Error '%s'", __func__,
                     trame->taille, strerror(errno) );
@@ -393,7 +393,7 @@
   }
 /**********************************************************************************************************/
 /* Envoyer_trame: envoie d'une trame RS485 sur la ligne                                                   */
-/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
+/* EntrÃ©e: L'id de la transmission, et la trame a transmettre                                             */
 /**********************************************************************************************************/
  static void Envoyer_trame_want_inputANA( struct MODULE_RS485 *module, int fd )
   { static struct TRAME_RS485 Trame_want_entre_ana=
@@ -404,7 +404,7 @@
   }
 /**********************************************************************************************************/
 /* Envoyer_trame: envoie d'une trame RS485 sur la ligne                                                   */
-/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
+/* EntrÃ©e: L'id de la transmission, et la trame a transmettre                                             */
 /**********************************************************************************************************/
  static void Envoyer_trame_want_inputTOR( struct MODULE_RS485 *module, int fd )
   { static struct TRAME_RS485 Trame_want_entre_tor=
@@ -468,7 +468,7 @@
   }
 /**********************************************************************************************************/
 /* Fermer_rs485: Fermeture de la ligne RS485                                                              */
-/* Sortie: néant                                                                                          */
+/* Sortie: nÃ©ant                                                                                          */
 /**********************************************************************************************************/
  static void Fermer_rs485 ( void )
   { if ( Cfg_rs485.fd != -1 )
@@ -480,8 +480,8 @@
   }
 /**********************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                   */
-/* Entrée: la trame a recue                                                                               */
-/* Sortie: néant                                                                                          */
+/* EntrÃ©e: la trame a recue                                                                               */
+/* Sortie: nÃ©ant                                                                                          */
 /**********************************************************************************************************/
  static int Processer_trame( struct MODULE_RS485 *module, struct TRAME_RS485 *trame )
   { struct TRAME_RS485_IDENT *trame_ident;
@@ -532,7 +532,7 @@
                 }
              }
 	    break;
-       default: printf("Trame non traitée\n"); return(FALSE);
+       default: printf("Trame non traitÃ©e\n"); return(FALSE);
      }
     return(TRUE);
   }
@@ -590,10 +590,10 @@
           lib->Thread_reload = FALSE;
         }
 
-       if (Cfg_rs485.Modules_RS485 == NULL )                    /* Si pas de module référencés, on attend */
+       if (Cfg_rs485.Modules_RS485 == NULL )                    /* Si pas de module rÃ©fÃ©rencÃ©s, on attend */
         { sleep(1); continue; }
 
-       pthread_mutex_lock ( &Cfg_rs485.lib->synchro );             /* Car utilisation de la liste chainée */
+       pthread_mutex_lock ( &Cfg_rs485.lib->synchro );             /* Car utilisation de la liste chainÃ©e */
        liste = Cfg_rs485.Modules_RS485;
        while (liste && (lib->Thread_run == TRUE) && (Cfg_rs485.lib->Thread_reload == FALSE))
         { module = (struct MODULE_RS485 *)liste->data;
@@ -640,7 +640,7 @@
                 nbr_oct_lu = 0;                                         /* RAZ des variables de reception */
                 attente_reponse = FALSE;
                 sleep(5);                                          /* Attente de 5 secondes avant relance */
-                liste = NULL;          /* Pour sortir de la boucle (amélioration reactivité admin command */
+                liste = NULL;          /* Pour sortir de la boucle (amÃ©lioration reactivitÃ© admin command */
                 continue;
               }
            }
@@ -651,14 +651,14 @@
           tv.tv_usec= 0;
           retval = select(Cfg_rs485.fd+1, &fdselect, NULL, NULL, &tv );         /* Attente d'un caractere */
           if (retval>=0 && FD_ISSET(Cfg_rs485.fd, &fdselect) )
-	   { int bute, cpt;
+	          { int bute, cpt;
              if (nbr_oct_lu<TAILLE_ENTETE)
-	      { bute = TAILLE_ENTETE; } else { bute = sizeof(Trame); }
+	             { bute = TAILLE_ENTETE; } else { bute = sizeof(Trame); }
 
              cpt = read( Cfg_rs485.fd, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
              if (cpt>0)
               { nbr_oct_lu = nbr_oct_lu + cpt;
-   	        if (nbr_oct_lu >= TAILLE_ENTETE + Trame.taille)                       /* traitement trame */
+   	            if (nbr_oct_lu >= TAILLE_ENTETE + Trame.taille)                       /* traitement trame */
                  { int crc_recu;
                    nbr_oct_lu = 0;
 #ifdef bouh
@@ -677,7 +677,7 @@
                                 "Run_thread: CRC16 failed !!");
                     }
                    else
-                    { if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
+                    { if (Processer_trame( module, &Trame ))/* Si la trame est processÃ©e, on passe suivant */
                        { attente_reponse = FALSE;                             /* Nous avons une reponse ! */
                          SB(module->rs485.bit_comm, 1);             /* Bit de comm = 1 pour avertir D.L.S */
                          module->started = 1;
@@ -688,10 +688,10 @@
                    memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                  }
               }
-	   }
+	          }
         }                                                                           /* Fin du While liste */
-       pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );           /* Car utilisation de la liste chainée */
-      }                                                                    /* Fin du while partage->arret */
+       pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );           /* Car utilisation de la liste chainÃ©e */
+     }                                                                     /* Fin du while partage->arret */
     Fermer_rs485();
     Decharger_tous_rs485();
 
