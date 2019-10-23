@@ -1050,6 +1050,97 @@
      }
   }
 /******************************************************************************************************************************/
+/* Met à jour la sortie analogique à partir de sa valeur avant mise a l'echelle                                               */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_AO ( gchar *tech_id, gchar *acronyme, gpointer *ao_p, float val_avant_ech )
+  { struct DLS_AO *ao;
+    gboolean need_arch;
+
+    if (!ao_p || !*ao_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_AO;
+       while (liste)
+        { ao = (struct DLS_AO *)liste->data;
+          if ( !strcasecmp ( ao->acronyme, acronyme ) && !strcasecmp( ao->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+
+       if (!liste)
+        { ao = g_try_malloc0 ( sizeof(struct DLS_AO) );
+          if (!ao)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( ao->acronyme, sizeof(ao->acronyme), "%s", acronyme );
+          g_snprintf( ao->tech_id,  sizeof(ao->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_AO = g_slist_prepend ( Partage->Dls_data_AO, ao );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding AO '%s:%s'", __func__, tech_id, acronyme );
+        }
+       if (ao_p) *ao_p = (gpointer)ao;                                              /* Sauvegarde pour acceleration si besoin */
+      }
+    else ao = (struct DLS_AO *)*ao_p;
+
+    need_arch = FALSE;
+    if (ao->val_avant_ech != val_avant_ech)
+     { ao->val_avant_ech = val_avant_ech;                                           /* Archive au mieux toutes les 5 secondes */
+       if ( ao->last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top ) { need_arch = TRUE; }
+
+       switch ( ao->type )
+        { case 0: /*SORTIEANA_NON_INTERP:*/
+               ao->val_ech = val_avant_ech;                                                        /* Pas d'interprétation !! */
+               break;
+#ifdef bouh
+          case ENTREEANA_4_20_MA_10BITS:
+               if (val_avant_ech < 100)                                                /* 204) Modification du range pour 4mA */
+                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */
+                  ai->inrange = 0;
+                }
+               else
+                { if (val_avant_ech < 204) val_avant_ech = 204;                                         /* Valeur à l'echelle */
+                  ai->val_ech = (gfloat) ((val_avant_ech-204)*(ai->max - ai->min))/820.0 + ai->min;
+                  ai->inrange = 1;
+                }
+               break;
+          case ENTREEANA_4_20_MA_12BITS:
+               if (val_avant_ech < 400)
+                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */
+                  ai->inrange = 0;
+                }
+               else
+                { if (val_avant_ech < 816) val_avant_ech = 816;                                         /* Valeur à l'echelle */
+                  ai->val_ech = (gfloat) ((val_avant_ech-816)*(ai->max - ai->min))/3280.0 + ai->min;
+                  ai->inrange = 1;
+                }
+               break;
+          case ENTREEANA_WAGO_750455:                                                                              /* 4/20 mA */
+               ai->val_ech = (gfloat) (val_avant_ech*(ai->max - ai->min))/4095.0 + ai->min;
+               ai->inrange = 1;
+               break;
+          case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
+               if (val_avant_ech > -32767 && val_avant_ech < 8500)
+                { ai->val_ech = (gfloat)(val_avant_ech/10.0);                                           /* Valeur à l'echelle */
+                  ai->inrange = 1;
+                }
+               else ai->inrange = 0;
+               break;
+#endif
+          default:
+               ao->val_ech = 0.0;
+        }
+     }
+    else if ( ao->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
+     { need_arch = TRUE; }                                                               /* Archive au pire toutes les 10 min */
+
+    if (need_arch)
+     { Ajouter_arch_by_nom( ao->acronyme, ao->tech_id, ao->val_ech );                                  /* Archivage si besoin */
+       ao->last_arch = Partage->top;
+     }
+  }
+/******************************************************************************************************************************/
 /* Dls_data_set_INT: Positionne un integer dans la mémoire DLS                                                                */
 /* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
 /* Sortie : Néant                                                                                                             */
@@ -1242,6 +1333,30 @@
     if (!liste) return(0.0);
     if (ai_p) *ai_p = (gpointer)ai;                                                 /* Sauvegarde pour acceleration si besoin */
     return( ai->val_ech );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gfloat Dls_data_get_AO ( gchar *tech_id, gchar *acronyme, gpointer *ao_p )
+  { struct DLS_AO *ao;
+    GSList *liste;
+    if (ao_p && *ao_p)                                                               /* Si pointeur d'acceleration disponible */
+     { ao = (struct DLS_AO *)*ao_p;
+       return( ao->val_avant_ech );
+     }
+    if (!tech_id || !acronyme) return(0.0);
+
+    liste = Partage->Dls_data_AO;
+    while (liste)
+     { ao = (struct DLS_AO *)liste->data;
+       if ( !strcasecmp ( ao->acronyme, acronyme ) && !strcasecmp( ao->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste) return(0.0);
+    if (ao_p) *ao_p = (gpointer)ao;                                                 /* Sauvegarde pour acceleration si besoin */
+    return( ao->val_avant_ech );
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */

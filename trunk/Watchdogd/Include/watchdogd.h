@@ -137,6 +137,7 @@
     GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */
     GSList *Dls_data_BOOL;                                                              /* Liste des bistables et monostables */
     GSList *Dls_data_AI;                                                                   /* Liste des entrees dynamique ANA */
+    GSList *Dls_data_AO;                                                                   /* Liste des entrees dynamique ANA */
     GSList *Dls_data_MSG;                                                                  /* Liste des entrees dynamique TOR */
     GSList *Dls_data_CI;                                                                  /* Liste des compteurs d'impulsions */
     GSList *Dls_data_CH;                                                                      /* Liste des compteurs horaires */

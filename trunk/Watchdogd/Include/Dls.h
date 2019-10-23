@@ -86,6 +86,18 @@
     guint   inrange;
   };
 
+ struct DLS_AO
+  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gfloat  min;
+    gfloat  max;
+    guint   type;                                                                                  /* Type de gestion de l'EA */
+    gchar   unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                                         /* Km, h, ° ... */
+    gfloat  val_ech;
+    gfloat  val_avant_ech;
+    guint   last_arch;                                                                         /* Date de la derniere archive */
+  };
+
  struct DIGITAL_INPUT
   { gboolean etat;
   };
