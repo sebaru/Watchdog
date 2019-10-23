@@ -96,6 +96,7 @@
     GSList *liste_i;                                                             /* liste de I a traiter dans la distribution */
     GSList *liste_new_i;                                             /* liste de I (dynamique) a traiter dans la distribution */
     GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
+    GSList *Liste_AO;                                                            /* liste de A a traiter dans la distribution */
     struct ZMQUEUE *zmq_msg;                                                           /* Message Queue des messages Watchdog */
     struct ZMQUEUE *zmq_motif;                                                           /* Message Queue des motifs Watchdog */
     struct ZMQUEUE *zmq_to_bus;                                                      /* Message Queue des evenements Watchdog */

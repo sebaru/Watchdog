@@ -37,11 +37,14 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Gerer_arrive_Axxx_dls ( void )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo;
+  { JsonBuilder *builder;
+    gsize taille_buf;
     struct DLS_BOOL *bool;
+    struct DLS_AO *ao;
+    gchar *buffer;
     gint reste;
 
-    if (!Partage->com_msrv.Liste_DO) return;                                                      /* Si pas de a, on se barre */
+    if (!Partage->com_msrv.Liste_DO) goto suite_AO;                                               /* Si pas de a, on se barre */
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
     bool = (struct DLS_BOOL *)Partage->com_msrv.Liste_DO->data;                                /* Recuperation du numero de a */
@@ -49,7 +52,7 @@
     reste = g_slist_length(Partage->com_msrv.Liste_DO);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    mnemo = Rechercher_mnemo_baseDB_by_acronyme ( bool->tech_id, bool->acronyme );
+/*    mnemo = Rechercher_mnemo_baseDB_by_acronyme ( bool->tech_id, bool->acronyme );
     if (!mnemo)
      { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Mnemo not found for %s:%s", __func__, bool->tech_id, bool->acronyme );
        return;
@@ -59,9 +62,36 @@
               bool->tech_id, bool->acronyme, mnemo->ev_host, mnemo->ev_thread, mnemo->ev_text, reste );
 
     if ( strlen ( mnemo->ev_text ) > 0 )                           /* Existe t'il un evenement associé ? (implique furtivité) */
-     { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv",
+/*     { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv",
                            mnemo->ev_host, mnemo->ev_thread, "dls_event", mnemo->ev_text, strlen(mnemo->ev_text)+1 );
      }
     g_free(mnemo);
+*/
+suite_AO:
+    pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
+    ao = (struct DLS_AO *)Partage->com_msrv.Liste_AO->data;                                /* Recuperation du numero de a */
+    Partage->com_msrv.Liste_AO = g_slist_remove ( Partage->com_msrv.Liste_AO, ao );
+    reste = g_slist_length(Partage->com_msrv.Liste_AO);
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending SET_AO '%s':'%s' = %f to Slave/Bus (reste %d)", __func__,
+              ao->tech_id, ao->acronyme, ao->val_ech, reste );
+
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       return;
+     }
+
+    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+    Json_add_string ( builder, "tech_id",  ao->tech_id );
+    Json_add_string ( builder, "acronyme", ao->acronyme );
+    Json_add_double ( builder, "valeur",   ao->val_ech );
+    json_builder_end_object (builder);                                                                        /* End Document */
+    buffer = Json_get_buf ( builder, &taille_buf );
+
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "msrv", "SET_AO", buffer, taille_buf );
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "SET_AO", buffer, taille_buf );
+    g_free(buffer);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

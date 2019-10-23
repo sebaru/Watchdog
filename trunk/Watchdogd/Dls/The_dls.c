@@ -1131,6 +1131,11 @@
           default:
                ao->val_ech = 0.0;
         }
+       pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
+       Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_AO '%s:%s'=%f/%f",
+                 __func__, ao->tech_id, ao->acronyme, ao->val_avant_ech, ao->val_ech );
      }
     else if ( ao->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
      { need_arch = TRUE; }                                                               /* Archive au pire toutes les 10 min */
