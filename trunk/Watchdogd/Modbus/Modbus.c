@@ -55,6 +55,7 @@
 
     Cfg_modbus.lib->Thread_debug = FALSE;                                                      /* Settings default parameters */
     Cfg_modbus.enable            = FALSE;
+    Cfg_modbus.nbr_request_par_sec      = 50;
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
@@ -63,12 +64,13 @@
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,                                          /* Print Config */
-                "%s: '%s' = %s", __func__, nom, valeur );
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_modbus.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_modbus.lib->Thread_debug = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "nbr_request_par_sec" ) )
+        { Cfg_modbus.nbr_request_par_sec = atoi(valeur);  }
        else
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
@@ -1014,7 +1016,7 @@
        if (Partage->top>=module->last_top+10)                                                        /* Toutes les 1 secondes */
         { module->nbr_request_par_sec = module->nbr_request;
           module->nbr_request = 0;
-          if(module->nbr_request_par_sec > 100) module->delai += 10;
+          if(module->nbr_request_par_sec > Cfg_modbus.nbr_request_par_sec) module->delai += 10;
                        else if(module->delai>0) module->delai -= 10;
           module->last_top = Partage->top;
         }
