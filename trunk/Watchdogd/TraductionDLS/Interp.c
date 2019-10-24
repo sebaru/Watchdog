@@ -1198,6 +1198,10 @@
                  { Mnemo_auto_create_DO ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
+                case MNEMO_SORTIE_ANA:
+                 { Mnemo_auto_create_AO ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                   break;
+                 }
                 case MNEMO_TEMPO:
                  { Mnemo_auto_create_TEMPO ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;

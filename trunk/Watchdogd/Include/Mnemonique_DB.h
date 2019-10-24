@@ -104,5 +104,8 @@
  extern gboolean Mnemo_auto_create_BOOL ( gint type, gchar *tech_id, gchar *acronyme, gchar *libelle_src );
  extern void Charger_confDB_BOOL ( void );
  extern void Updater_confDB_BOOL ( void );
+
+ extern gboolean Mnemo_auto_create_AO ( gchar *tech_id, gchar *acronyme, gchar *libelle );                /* Dans mnemos_AO.c */
+ extern struct DB *Rechercher_AO ( gchar *tech_id, gchar *acronyme );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
