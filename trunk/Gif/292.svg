@@ -73,7 +73,7 @@
        height="1.8521081"
        x="0"
        y="294.8833"
-       class="WTD-ActiveColor" />
+       class="WTD-ActiveFillColor" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 0,294.75102 H 21.166669"

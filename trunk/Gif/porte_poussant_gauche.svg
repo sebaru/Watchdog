@@ -68,7 +68,7 @@
      inkscape:groupmode="layer"
      id="Layer 1">
     <rect
-       class="WTD-ActiveColor"
+       class="WTD-ActiveFillColor"
        style="fill:#c8c8c8;stroke:#000000;stroke-width:0.26458332;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="Dormant_g"
        width="5.2916665"
@@ -76,7 +76,7 @@
        x="0.14174107"
        y="1.5875001" />
     <rect
-       class="WTD-ActiveColor"
+       class="WTD-ActiveFillColor"
        style="fill:#c8c8c8;stroke:#000000;stroke-width:0.26458332;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="Dormant_d"
        width="5.2916665"
@@ -92,7 +92,7 @@
        y="4.2333159"
        inkscape:transform-center-x="-7.8850836"
        inkscape:transform-center-y="-2.8852345"
-       class="WTD-ActiveColor WTD-StateEvent">
+       class="WTD-ActiveFillColor WTD-StateEvent">
       <animateTransform
          attributeName="transform"
          attributeType="XML"
@@ -118,7 +118,7 @@
        cx="21.134346"
        cy="8.3356247"
        r="1.3229166"
-       class="WTD-ActiveColor" />
+       class="WTD-ActiveFillColor" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 6.8413658,6.9023388 c 0,1.32292 2.6458315,1.32292 2.6458315,1.32292"
