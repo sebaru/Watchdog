@@ -656,7 +656,7 @@
     action->alors = New_chaine( taille );
     switch (coul)
      { case ROUGE   : rouge = 255; vert =   0; bleu =   0; color="red"; break;
-       case VERT    : rouge =   0; vert = 255; bleu =   0; color="green"; break;
+       case VERT    : rouge =   0; vert = 255; bleu =   0; color="lime"; break;
        case BLEU    : rouge =   0; vert =   0; bleu = 255; color="blue"; break;
        case JAUNE   : rouge = 255; vert = 255; bleu =   0; color="yellow"; break;
        case ORANGE  : rouge = 255; vert = 190; bleu =   0; color="orange"; break;
