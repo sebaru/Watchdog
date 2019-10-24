@@ -68,7 +68,8 @@
      transform="translate(-19.315,-20.92)">
     <circle
        id="path3676"
-       style="fill:#c0c0c0;fill-rule:evenodd;fill-opacity:1"
+       class="WTD-ActiveFillColor"
+       style="fill:#c8c8c8;fill-rule:evenodd;fill-opacity:1"
        transform="matrix(0.62849,0,0,0.62849,-351.35,-520.1)"
        cx="655.00006"
        cy="908.54846"
