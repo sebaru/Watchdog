@@ -29,19 +29,18 @@
  #include "Dmx.h"
 
 /******************************************************************************************************************************/
-/* Admin_json_list : fonction appelée pour lister les modules dmx                                                          */
+/* Admin_json_list : fonction appelée pour lister les modules dmx                                                             */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_status ( JsonBuilder *builder )
-  { GSList *liste_modules;
-    json_builder_begin_array (builder);                                                                  /* Contenu du Status */
-
-    json_builder_begin_object (builder);                                                    /* Contenu du Noeud Passerelle */
+  { json_builder_begin_object (builder);                                                    /* Contenu du Noeud Passerelle */
     Json_add_string ( builder, "tech_id", Cfg_dmx.tech_id );
     Json_add_string ( builder, "device", Cfg_dmx.device );
-    Json_add_string ( builder, "enable", Cfg_dmx.enable );
-    Json_add_int ( builder, "nbr_request", Cfg_dmx.nbr_request );
+    Json_add_bool   ( builder, "enable", Cfg_dmx.enable );
+    Json_add_int    ( builder, "nbr_request", Cfg_dmx.nbr_request );
+    Json_add_int    ( builder, "taille_trame_dmx", Cfg_dmx.taille_trame_dmx );
+    Json_add_bool   ( builder, "comm", Cfg_dmx.comm_status );
     json_builder_end_object (builder);                                                                    /* End Module Array */
   }
 /******************************************************************************************************************************/

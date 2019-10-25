@@ -91,6 +91,7 @@
     gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gfloat  min;
     gfloat  max;
+    gfloat  valeur;
     guint   type;                                                                                  /* Type de gestion de l'EA */
     gchar   unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                                         /* Km, h, ° ... */
     gfloat  val_ech;

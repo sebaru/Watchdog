@@ -58,16 +58,22 @@
     gboolean enable;                                                                               /* Thread enable at boot ? */
     gint nbr_request;                                                                        /* Nombre de requete par seconde */
     gint fd;                                                                       /* File Descriptor d'accès au port USB DMX */
-/*    gpointer *AO;                                                            /* Tableau dynamique d'accès aux bits internes */
+    gboolean comm_status;
+    void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
+    struct DLS_AO *Canal;                                                      /* Tableau dynamique d'accès aux bits internes */
+    gint taille_trame_dmx;
+    guchar *Trame_dmx;
   } Cfg_dmx;
 
- struct TRAME_DMX_REQUEST                                                                       /* Definition d'une trame DMX */
-  { guint8 start_delimiter;                                                            /* Start of message delimiter, hex 7E. */
-    guint8 label;                                                                       /* Label to identify type of message. */
-    guint8 length_lsb;                                            /* Data length LSB. Valid range for data length is 0 to 600 */
-    guint8 length_msb;                                            /* Data length MSB. Valid range for data length is 0 to 600 */
-    guchar data[25];                                                                   /* 1 Start Code + 24 canaux minimums ! */
-    guchar end_delimiter;                                        /* (0xE7). Ne pas oublier le end_delimiter en fin de trame ! */
+ struct TRAME_DMX_PRE                                                                           /* Definition d'une trame DMX */
+  { guchar start_delimiter;                                                            /* Start of message delimiter, hex 7E. */
+    guchar label;                                                                       /* Label to identify type of message. */
+    guchar length_lsb;                                            /* Data length LSB. Valid range for data length is 0 to 600 */
+    guchar length_msb;                                            /* Data length MSB. Valid range for data length is 0 to 600 */
+    guchar start_code;                                                                 /* 1 Start Code + 24 canaux minimums ! */
+  };
+ struct TRAME_DMX_POST
+  { guchar end_delimiter;                                        /* (0xE7). Ne pas oublier le end_delimiter en fin de trame ! */
   };
 
  #define TAILLE_ENTETE_DMX   4                                     /* Nombre d'octet avant d'etre sur d'avoir la taille trame */

@@ -111,4 +111,49 @@
      }
     return(db);
   }
+/******************************************************************************************************************************/
+/* Rechercher_AO_by_text: Recupération des champs de base de données pour le AI par map                                       */
+/* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
+/* Sortie: la struct DB                                                                                                       */
+/******************************************************************************************************************************/
+ gboolean Recuperer_mnemos_AO_by_text ( struct DB **db_retour, gchar *thread, gchar *text )
+  { gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete),
+               "SELECT m.tech_id, m.acronyme, m.map_text, m.libelle, m.min, m.max, m.type, m.valeur "
+               "FROM mnemos_AO as m "
+               " WHERE (m.map_host='*' OR m.map_host LIKE '%s') AND (m.map_thread='*' OR m.map_thread LIKE '%s')"
+               " AND m.map_text LIKE '%s'", g_get_host_name(), thread, text );
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
+  }
+/******************************************************************************************************************************/
+/* Recuperer_mnemo_base_DB_suite: Fonction itérative de récupération des mnémoniques de base                                  */
+/* Entrée: un pointeur sur la connexion de baase de données                                                                   */
+/* Sortie: une structure nouvellement allouée                                                                                 */
+/******************************************************************************************************************************/
+ gboolean Recuperer_mnemos_AO_suite( struct DB **db_orig )
+  { struct DB *db;
+
+    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       return(FALSE);
+     }
+
+    return(TRUE);                                                                                    /* Résultat dans db->row */
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
