@@ -60,6 +60,7 @@
     Json_add_string ( builder, "version",  VERSION );
     Json_add_string ( builder, "instance", g_get_host_name() );
     Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
+    Json_add_string ( builder, "runs_as", Config.run_as );
 
     temps = localtime( (time_t *)&Partage->start_time );
     if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
