@@ -40,6 +40,7 @@
  #define MSG_DEF_REPOS  <-> _MSG(type=defaut,libelle="Défaut repos"); /* Defaut repos */
  #define MSG_DEF_TRAVAIL<-> _MSG(type=defaut,libelle="Défaut travail"); /* Defaut travail */
  #define VISU_POS_TL    <-> _I(libelle="Position Télérupteur"); /* Position du Télérupteur */
+ #define CI_TL          <-> _CI(libelle="Compteur d'impulsion Téérupteur");
 
 /* Bits purement internes au module */
  #define MEWANTTL       <-> _B(libelle="Etat attendu du TL (0=ouvert, 1=fermé)");
@@ -88,7 +89,7 @@
 
 /* PILOTAGE TELE SUR COMMANDE DE MANOEUVRE */
   - MEACTELE -> TR_IMP, TR_DEF;
-  - TR_IMP   -> ACT_TL;
+  - TR_IMP   -> ACT_TL, CI_TL;
   -/TR_IMP   ->/ACT_TL;
 
 /* FIN DE MANOEUVRE */
