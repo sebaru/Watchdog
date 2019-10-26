@@ -51,6 +51,8 @@
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     json_builder_begin_object (builder);                                                                 /* Contenu du Status */
+    Json_add_string ( builder, "tech_id", tech_id );
+    Json_add_string ( builder, "acronyme", acronyme );
 
 /*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
     if (!strcasecmp(type,"CI"))
@@ -59,7 +61,7 @@
                  "%s: HTTP/ request for GET CI %s:%s", __func__, tech_id, acronyme );
        Dls_data_get_CI ( tech_id, acronyme, (gpointer *)&cpt_imp );
        if (!cpt_imp)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: cpt_imp non trouvée", __func__ );
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: cpt_imp '%s:%s' non trouvée", __func__, tech_id, acronyme );
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
@@ -75,7 +77,7 @@
                  "%s: HTTP/ request for GET CH %s:%s", __func__, tech_id, acronyme );
        Dls_data_get_CH ( tech_id, acronyme, (gpointer *)&cpt_h );
        if (!cpt_h)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: cpth non trouvée", __func__ );
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: cpth '%s:%s' non trouvée", __func__, tech_id, acronyme );
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
@@ -89,7 +91,7 @@
                  "%s: HTTP/ request for GET EA %s:%s", __func__, tech_id, acronyme );
        Dls_data_get_AI ( tech_id, acronyme, (gpointer *)&ai );
        if (!ai)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ai non trouvée", __func__ );
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ai '%s:%s' non trouvée", __func__, tech_id, acronyme );
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
@@ -99,6 +101,23 @@
        Json_add_double ( builder, "valeur",       ai->val_ech );
        Json_add_int    ( builder, "type",         ai->type );
      }
+/*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
+    else if (!strcasecmp(type,"AO"))
+     { struct DLS_AO *ao=NULL;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                 "%s: HTTP/ request for GET AO %s:%s", __func__, tech_id, acronyme );
+       Dls_data_get_AO ( tech_id, acronyme, (gpointer *)&ao );
+       if (!ao)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ao '%s:%s' non trouvée", __func__, tech_id, acronyme );
+          g_object_unref(builder);
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
+        }
+       Json_add_double ( builder, "valeur_brute", ao->val_avant_ech );
+       Json_add_double ( builder, "valeur_min",   ao->min );
+       Json_add_double ( builder, "valeur_max",   ao->max );
+       Json_add_double ( builder, "valeur",       ao->val_ech );
+       Json_add_int    ( builder, "type",         ao->type );
+     }
 /*----------------------------------------------- Bistable et Monostables ----------------------------------------------------*/
     else if (!strcasecmp(type,"B") || !strcasecmp(type,"M"))
      { struct DLS_BOOL *bool=NULL;
@@ -106,7 +125,7 @@
                  "%s: HTTP/ request for GET B/M %s:%s", __func__, tech_id, acronyme );
        Dls_data_get_bool ( tech_id, acronyme, (gpointer *)&bool );
        if (!bool)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: bool non trouvé", __func__ );
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: bool '%s:%s' non trouvé", __func__, tech_id, acronyme );
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
@@ -119,7 +138,7 @@
                  "%s: HTTP/ request for GET T %s:%s", __func__, tech_id, acronyme );
        Dls_data_get_tempo ( tech_id, acronyme, (gpointer *)&tempo );
        if (!tempo)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: tempo %s:%s non trouvée", __func__, tech_id, acronyme );
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: tempo '%s:%s' non trouvée", __func__, tech_id, acronyme );
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
@@ -140,7 +159,7 @@
                  "%s: HTTP/ request for GET E %s:%s", __func__, tech_id, acronyme );
        Dls_data_get_bool ( tech_id, acronyme, (gpointer *)&bool );
        if (!bool)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: bool %s:%s non trouvé", __func__, tech_id, acronyme );
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: bool '%s:%s' non trouvé", __func__, tech_id, acronyme );
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
@@ -170,7 +189,7 @@
                     "%s: HTTP/ request for GET I %s:%s", __func__, tech_id, acronyme );
           Dls_data_get_VISUEL ( tech_id, acronyme, (gpointer *)&visu );
           if (!visu)
-           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: visu %s:%s non trouvé", __func__, tech_id, acronyme );
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: visu '%s:%s' non trouvé", __func__, tech_id, acronyme );
              g_object_unref(builder);
              return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
            }
@@ -179,6 +198,8 @@
           Json_add_bool   ( builder, "cligno", visu->cligno );
         }
      }
+/*------------------------------------------------------- sinon --------------------------------------------------------------*/
+    else { Json_add_bool ( builder, "found", FALSE ); }
 
     json_builder_end_object (builder);                                                                        /* End Document */
 
@@ -243,6 +264,21 @@
        Dls_data_get_CH ( tech_id, acronyme, (gpointer *)&cpt_h );
        if (cpt_h)
         { cpt_h->valeur = atoi(valeur); }
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    else if (!strcasecmp(type,"AO"))
+     { struct DLS_AO *ao=NULL;
+       gchar *valeur = json_object_get_string_member ( object, "valeur" );
+       if (!valeur)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: valeur non trouvée", __func__ );
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+        }
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                 "%s: HTTP/ request for SET AO '%s:%s' = %s", __func__, tech_id, acronyme, valeur );
+       Dls_data_get_AO ( tech_id, acronyme, (gpointer *)&ao );
+       if (ao)
+        { ao->val_avant_ech = atof(valeur); }
        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }
 /*************************************************** Envoi au client **********************************************************/

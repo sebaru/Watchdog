@@ -182,9 +182,10 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                    if ($8)
                     { taille = strlen($5)+strlen($2)+strlen($8->tech_id)+strlen($8->acronyme)+100;
                       instr = New_chaine( taille );
-                      g_snprintf( instr, taille, "if(%s) { Dls_data_set_AO(%s,%s,%s); }\n", $2, $8->tech_id, $8->acronyme, $5 );
+                      g_snprintf( instr, taille,
+                                  "if(%s) { Dls_data_set_AO ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
+                                  $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
                       Emettre( instr ); g_free(instr);
-                      g_free($8);
                     }
                    g_free($2);
                    g_free($5);

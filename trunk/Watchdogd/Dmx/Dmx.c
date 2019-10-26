@@ -130,6 +130,7 @@
              Cfg_dmx.Canal[num].type = atoi(type);
              Cfg_dmx.Canal[num].val_avant_ech = atof(valeur);
              Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO, "%s: AO '%s:%s' loaded", __func__, tech_id, acro );
+             cpt++;
            }
           else Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
                          map_text, num, 24 );
@@ -188,14 +189,16 @@
 /* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
 /******************************************************************************************************************************/
  static gboolean Envoyer_trame_dmx_request( void )
-  { Cfg_dmx.Trame_dmx[0] = 0x7E;
+  { gint cpt;
+    Cfg_dmx.Trame_dmx[0] = 0x7E;
     Cfg_dmx.Trame_dmx[1] = DMX_Output_Only_Send_DMX_Packet_Request;
 /*  trame_dmx.length_lsb =  sizeof(trame_dmx.data) & 0xFF;
     trame_dmx.length_msb = (sizeof(trame_dmx.data) & 0xFF00) >> 8; */
     Cfg_dmx.Trame_dmx[2] = 24 + 1; /* Spécifiquement pour une taille_data < 256 */
     Cfg_dmx.Trame_dmx[3] = 0;
     Cfg_dmx.Trame_dmx[4] = 0; /* Start Code DMX = 0 */
-    Cfg_dmx.Trame_dmx[5] ++; /* Pour test */
+    for (cpt=0; cpt<24; cpt++)
+     { Cfg_dmx.Trame_dmx[5+cpt] = (guchar)Cfg_dmx.Canal[cpt].val_avant_ech; }
     Cfg_dmx.Trame_dmx[29] = 0xE7; /* End delimiter */
     if ( write( Cfg_dmx.fd, Cfg_dmx.Trame_dmx, Cfg_dmx.taille_trame_dmx ) != Cfg_dmx.taille_trame_dmx )/* Ecriture de la trame */
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Write Trame Error '%s'", __func__, strerror(errno) );

@@ -256,6 +256,7 @@
  extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech );
  extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p );
  extern gint Dls_data_get_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p );
+ extern gfloat Dls_data_get_AO ( gchar *tech_id, gchar *acronyme, gpointer *ao_p );
  extern void SEA( int num, float val_avant_ech );
  extern void SEA_range( int num, int range );
  extern void SEA_ech( int num, float val_ech );
