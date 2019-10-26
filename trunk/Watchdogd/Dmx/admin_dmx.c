@@ -34,13 +34,20 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_status ( JsonBuilder *builder )
-  { json_builder_begin_object (builder);                                                    /* Contenu du Noeud Passerelle */
+  { gint cpt;
+    json_builder_begin_object (builder);                                                    /* Contenu du Noeud Passerelle */
     Json_add_string ( builder, "tech_id", Cfg_dmx.tech_id );
     Json_add_string ( builder, "device", Cfg_dmx.device );
     Json_add_bool   ( builder, "enable", Cfg_dmx.enable );
     Json_add_int    ( builder, "nbr_request", Cfg_dmx.nbr_request );
     Json_add_int    ( builder, "taille_trame_dmx", Cfg_dmx.taille_trame_dmx );
     Json_add_bool   ( builder, "comm", Cfg_dmx.comm_status );
+
+    for (cpt=0; cpt<24; cpt++)
+     { gchar canal[12];
+       g_snprintf( canal, sizeof(canal), "canal_%d", cpt );
+       Json_add_int ( builder, canal, Cfg_dmx.Canal[cpt].val_avant_ech );
+     }
     json_builder_end_object (builder);                                                                    /* End Module Array */
   }
 /******************************************************************************************************************************/

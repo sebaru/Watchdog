@@ -209,8 +209,8 @@
      }
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
               "%s: send %d byte to '%s' ('%s')", __func__, taille_buf, pss->sid, pss->util );
-    g_free(buf);
 #endif
+    g_free(buf);
   }
 /******************************************************************************************************************************/
 /* CB_ws_histos : Gere le protocole WS histos (appellée par libwebsockets)                                                    */

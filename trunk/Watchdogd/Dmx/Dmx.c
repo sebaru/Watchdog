@@ -47,7 +47,7 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Dmx_Lire_config ( void )
+ static gboolean Dmx_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 
@@ -100,48 +100,6 @@
     Cfg_dmx.comm_status = status;
   }
 /******************************************************************************************************************************/
-/* Dmx_init: Initialisation de la ligne DMX                                                                                   */
-/* Entrée: Néant.                                                                                                             */
-/* Sortie: -1 si erreur, sinon, le FileDescriptor associé                                                                     */
-/******************************************************************************************************************************/
- static void Dmx_init ( void )
-  { Cfg_dmx.fd = open( Cfg_dmx.device, O_WRONLY | O_NOCTTY /*| O_NONBLOCK*/ );
-    if (Cfg_dmx.fd<0)
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Impossible d'ouvrir le device '%s', retour=%d (%s)", __func__,
-                 Cfg_dmx.device, Cfg_dmx.fd, strerror(errno) );
-       return;
-     }
-    Cfg_dmx.Canal = g_try_malloc0( sizeof(struct DLS_AO) * 24 );                                  /* 24 Canaux pour commencer */
-    if (!Cfg_dmx.Canal)
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Memory Error for Canal", __func__ );
-       close(Cfg_dmx.fd); Cfg_dmx.fd=-1;
-       return;
-     }
-    Cfg_dmx.taille_trame_dmx = sizeof(struct TRAME_DMX_PRE) + 24 + sizeof(struct TRAME_DMX_POST);
-    Cfg_dmx.Trame_dmx = g_try_malloc0( Cfg_dmx.taille_trame_dmx );      /* 24 Canaux */
-    if (!Cfg_dmx.Trame_dmx)
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Memory Error for Trame_DMX", __func__ );
-       g_free(Cfg_dmx.Canal); Cfg_dmx.Canal = NULL;
-       close(Cfg_dmx.fd);     Cfg_dmx.fd=-1;
-       return;
-     }
-    Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO, "%s: Ouverture port dmx okay %s", __func__, Cfg_dmx.device );
-    Dmx_send_status_to_master( TRUE );
-  }
-/******************************************************************************************************************************/
-/* Dmx_close: Fermeture de la ligne DMX                                                                                       */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dmx_close ( void )
-  { if ( Cfg_dmx.fd != -1 )
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO, "%s: Fermeture device '%s' dmx okay", __func__, Cfg_dmx.device );
-       close(Cfg_dmx.fd);
-       Cfg_dmx.fd = -1;
-     }
-    if (Cfg_dmx.Canal) { g_free(Cfg_dmx.Canal); Cfg_dmx.Canal = NULL; }
-    Dmx_send_status_to_master( FALSE );
-  }
-/******************************************************************************************************************************/
 /* Dmx_do_mapping : mappe les entrees/sorties Wago avec la zone de mémoire interne dynamique                                  */
 /* Entrée : la structure referencant le module                                                                                */
 /* Sortie : rien                                                                                                              */
@@ -167,26 +125,69 @@
         { if (num<=24)
            { g_snprintf( Cfg_dmx.Canal[num].tech_id, sizeof(Cfg_dmx.Canal[num].tech_id), "%s", tech_id );
              g_snprintf( Cfg_dmx.Canal[num].acronyme, sizeof(Cfg_dmx.Canal[num].acronyme), "%s", acro );
-             Cfg_dmx.Canal[num].min    = atof(min);
-             Cfg_dmx.Canal[num].max    = atof(max);
-             Cfg_dmx.Canal[num].type   = atoi(type);
-             Cfg_dmx.Canal[num].valeur = atof(valeur);
-             Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AO '%s:%s' loaded", __func__, tech_id, acro );
+             Cfg_dmx.Canal[num].min  = atof(min);
+             Cfg_dmx.Canal[num].max  = atof(max);
+             Cfg_dmx.Canal[num].type = atoi(type);
+             Cfg_dmx.Canal[num].val_avant_ech = atof(valeur);
+             Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO, "%s: AO '%s:%s' loaded", __func__, tech_id, acro );
            }
           else Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
                          map_text, num, 24 );
         }
        else Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, map_text );
      }
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d AO loaded", __func__, cpt );
+    Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO, "%s: %d AO loaded", __func__, cpt );
 
     Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: DMX '%s' : mapping done", __func__, Cfg_dmx.tech_id );
+  }
+/******************************************************************************************************************************/
+/* Dmx_init: Initialisation de la ligne DMX                                                                                   */
+/* Entrée: Néant.                                                                                                             */
+/* Sortie: -1 si erreur, sinon, le FileDescriptor associé                                                                     */
+/******************************************************************************************************************************/
+ static void Dmx_init ( void )
+  { Cfg_dmx.fd = open( Cfg_dmx.device, O_WRONLY | O_NOCTTY /*| O_NONBLOCK*/ );
+    if (Cfg_dmx.fd<0)
+     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Impossible d'ouvrir le device '%s', retour=%d (%s)", __func__,
+                 Cfg_dmx.device, Cfg_dmx.fd, strerror(errno) );
+       return;
+     }
+    Cfg_dmx.Canal = g_try_malloc0( sizeof(struct DLS_AO) * 24 );                                  /* 24 Canaux pour commencer */
+    if (!Cfg_dmx.Canal)
+     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Memory Error for Canal", __func__ );
+       close(Cfg_dmx.fd); Cfg_dmx.fd=-1;
+       return;
+     }
+    Cfg_dmx.taille_trame_dmx = sizeof(struct TRAME_DMX_PRE) + 24 + sizeof(struct TRAME_DMX_POST);
+    Cfg_dmx.Trame_dmx = g_try_malloc0( Cfg_dmx.taille_trame_dmx );      /* 24 Canaux */
+    if (!Cfg_dmx.Trame_dmx)
+     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Memory Error for Trame_DMX", __func__ );
+       g_free(Cfg_dmx.Canal); Cfg_dmx.Canal = NULL;
+       close(Cfg_dmx.fd);     Cfg_dmx.fd=-1;
+       return;
+     }
+    Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Ouverture port dmx okay %s", __func__, Cfg_dmx.device );
+    Dmx_send_status_to_master( TRUE );
+    Dmx_do_mapping();
+  }
+/******************************************************************************************************************************/
+/* Dmx_close: Fermeture de la ligne DMX                                                                                       */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dmx_close ( void )
+  { if ( Cfg_dmx.fd != -1 )
+     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Fermeture device '%s' dmx okay", __func__, Cfg_dmx.device );
+       close(Cfg_dmx.fd);
+       Cfg_dmx.fd = -1;
+     }
+    if (Cfg_dmx.Canal) { g_free(Cfg_dmx.Canal); Cfg_dmx.Canal = NULL; }
+    Dmx_send_status_to_master( FALSE );
   }
 /******************************************************************************************************************************/
 /* Envoyer_trame_dmx_request: envoie une trame DMX au token USB                                                               */
 /* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
 /******************************************************************************************************************************/
- static void Envoyer_trame_dmx_request( void )
+ static gboolean Envoyer_trame_dmx_request( void )
   { Cfg_dmx.Trame_dmx[0] = 0x7E;
     Cfg_dmx.Trame_dmx[1] = DMX_Output_Only_Send_DMX_Packet_Request;
 /*  trame_dmx.length_lsb =  sizeof(trame_dmx.data) & 0xFF;
@@ -197,7 +198,42 @@
     Cfg_dmx.Trame_dmx[5] ++; /* Pour test */
     Cfg_dmx.Trame_dmx[29] = 0xE7; /* End delimiter */
     if ( write( Cfg_dmx.fd, Cfg_dmx.Trame_dmx, Cfg_dmx.taille_trame_dmx ) != Cfg_dmx.taille_trame_dmx )/* Ecriture de la trame */
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_WARNING, "%s: Write Trame Error '%s'", __func__, strerror(errno) ); }
+     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Write Trame Error '%s'", __func__, strerror(errno) );
+       return(FALSE);
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Dmx_updater_DB: Met a jour les valeurs des Entrées/Sorties dans la base de données                                         */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dmx_Updater_DB ( void )
+  { gchar requete[200];
+    struct DB *db;
+    gint cpt = 0;
+
+    if (!Cfg_dmx.Canal)
+     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Aucun bit à sauver", __func__ );
+       return;
+     }
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Connexion DB impossible", __func__ );
+       return;
+     }
+
+    for (cpt=0; cpt<24; cpt++)
+     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                   "UPDATE mnemos_AO as m SET valeur='%f' "
+                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                   Cfg_dmx.Canal[cpt].val_avant_ech, Cfg_dmx.Canal[cpt].tech_id, Cfg_dmx.Canal[cpt].acronyme );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    Libere_DB_SQL( &db );
+    Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: %d AO updated", __func__, cpt );
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du MODBUS                                                                                        */
@@ -225,7 +261,6 @@ reload:
      }
 
     Dmx_init();
-    Dmx_do_mapping();
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { usleep(10000);
        sched_yield();
@@ -236,10 +271,16 @@ reload:
           lib->Thread_reload = TRUE;
           break;
         }
-       Envoyer_trame_dmx_request();
+       if (Envoyer_trame_dmx_request()==FALSE)
+        { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Write error, sleeping 5s before retrying.", __func__);
+          sleep(5);
+          lib->Thread_reload = TRUE;
+          break;
+        }
      }                                                                     /* Fin du while partage->arret */
 
     Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Preparing to stop . . . TID = %p", __func__, pthread_self() );
+    Dmx_Updater_DB();
     Dmx_close();
     Close_zmq ( Cfg_dmx.zmq_to_master );
 

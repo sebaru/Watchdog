@@ -54,7 +54,7 @@
  struct DMX_CONFIG                                                                       /* Communication entre DLS et la DMX */
   { struct LIBRAIRIE *lib;
     gchar tech_id[32];                                                                               /* Tech_id du module DMX */
-    gchar device[32];                                                               /* Nom du device USB associé au canal DMX */
+    gchar device[64];                                                               /* Nom du device USB associé au canal DMX */
     gboolean enable;                                                                               /* Thread enable at boot ? */
     gint nbr_request;                                                                        /* Nombre de requete par seconde */
     gint fd;                                                                       /* File Descriptor d'accès au port USB DMX */
@@ -79,6 +79,5 @@
  #define TAILLE_ENTETE_DMX   4                                     /* Nombre d'octet avant d'etre sur d'avoir la taille trame */
 
 /****************************************************** Déclaration des prototypes ********************************************/
- extern gboolean Dmx_Lire_config ( void );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
