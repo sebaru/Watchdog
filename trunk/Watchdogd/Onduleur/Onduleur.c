@@ -80,7 +80,7 @@
   { if (Config.instance_is_master==TRUE)                                                        /* si l'instance est Maitre */
      { Dls_data_set_bool ( ups->tech_id, "COMM", &ups->bit_comm, status ); }                              /* Communication OK */
 /*    else
-     { 
+     {
      }*/
   }
 /******************************************************************************************************************************/
@@ -291,7 +291,7 @@
     if (!module->nbr_connexion)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
                 "%s: %s: Initialise le DLS et charge les AI ", __func__, module->tech_id );
-       if (Dls_auto_create_plugin( module->tech_id, "Gestion de l'onduleur" ) == -1)
+       if (Dls_auto_create_plugin( module->tech_id, "Gestion de l'onduleur" ) == FALSE)
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->tech_id ); }
 
        Mnemo_auto_create_DI ( module->tech_id, "COMM", "Statut de la communication avec l'onduleur" );

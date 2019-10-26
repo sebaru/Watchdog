@@ -201,6 +201,7 @@
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Write Trame Error '%s'", __func__, strerror(errno) );
        return(FALSE);
      }
+    Cfg_dmx.nbr_request++;
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -254,18 +255,24 @@ reload:
     Cfg_dmx.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Dmx_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
+
     if (!Cfg_dmx.enable)
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
        goto end;
      }
 
+    if (Dls_auto_create_plugin( Cfg_dmx.tech_id, "Gestion du DMX" ) == FALSE)
+     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", Cfg_dmx.tech_id ); }
+
+    Mnemo_auto_create_DI ( Cfg_dmx.tech_id, "COMM", "Statut de la communication avec le token DMX" );
+
     Dmx_init();
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { usleep(10000);
+     { usleep(100000);
        sched_yield();
 
-       if (Cfg_dmx.fd == -1)
+       if (Cfg_dmx.comm_status == FALSE)
         { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Acces DMX not opened, sleeping 5s before retrying.", __func__);
           sleep(5);
           lib->Thread_reload = TRUE;

@@ -239,7 +239,7 @@
  extern gboolean Set_compil_status_plugin_dlsDB( gint id, gint status, gchar *log_buffer );
  extern gboolean Get_source_dls_from_DB ( gint id, gchar **result_buffer, gint *result_taille );
  extern gboolean Save_source_dls_to_DB( gint id, gchar *buffer, gint taille );
- extern gint Dls_auto_create_plugin( gchar *tech_id, gchar *nom );
+ extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *nom );
 
  extern void Charger_plugins ( void );                                                                      /* Dans plugins.c */
  extern void Decharger_plugins ( void );

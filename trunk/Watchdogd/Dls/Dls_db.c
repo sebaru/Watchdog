@@ -69,7 +69,7 @@
 /* Entrées: le tech_id (unique) et le nom associé                                                                             */
 /* Sortie: -1 si pb, id sinon                                                                                                 */
 /******************************************************************************************************************************/
- gint Dls_auto_create_plugin( gchar *tech_id, gchar *nom_src )
+ gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *nom_src )
   { gchar requete[1024], *nom;
     gboolean retour;
     struct DB *db;
@@ -78,7 +78,7 @@
     nom = Normaliser_chaine ( nom_src );                                                     /* Formatage correct des chaines */
     if (!nom)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation nom impossible", __func__ );
-       return(-1);
+       return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
@@ -91,14 +91,12 @@
     db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(-1);
+       return(FALSE);
      }
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if ( retour == FALSE ) { id=-1; }
-    else { id = Recuperer_last_ID_SQL ( db ); }
     Libere_DB_SQL(&db);
-    return(id);
+    return(retour);
   }
 /******************************************************************************************************************************/
 /* Ajouter_dlsDB: Ajout d'un programme DLS dans la base de données                                                            */
