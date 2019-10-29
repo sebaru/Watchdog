@@ -446,6 +446,7 @@
   { struct CMD_TYPE_MESSAGE msg;
 
     g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
+    g_snprintf(msg.dls_shortname, sizeof(msg.dls_shortname), "%s", Cfg_smsg.tech_id );
     msg.num    = 0;
     msg.enable = TRUE;
     msg.sms    = MSG_SMS_SMSBOX_ONLY;
@@ -461,6 +462,7 @@
   { struct CMD_TYPE_MESSAGE msg;
 
     g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
+    g_snprintf(msg.dls_shortname, sizeof(msg.dls_shortname), "%s", Cfg_smsg.tech_id );
     msg.num    = 0;
     msg.enable = TRUE;
     msg.sms    = MSG_SMS_GSM_ONLY;
