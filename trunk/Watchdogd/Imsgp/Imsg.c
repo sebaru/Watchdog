@@ -535,7 +535,7 @@
           gchar chaine[256];
           if (histo->alive)
            { g_snprintf( chaine, sizeof(chaine), "%s : %s", histo->msg.dls_shortname, histo->msg.libelle );
-             Imsgp_Envoi_message_to_all_available ( histo->msg.libelle );
+             Imsgp_Envoi_message_to_all_available ( chaine );
            }
         }
 
