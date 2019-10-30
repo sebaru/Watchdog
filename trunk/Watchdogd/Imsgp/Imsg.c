@@ -242,7 +242,9 @@
      }
 
     if ( db->nbr_result == 0 )                                                /* Si pas d'enregistrement, demande de préciser */
-     { Imsgp_Envoi_message_to( from, "Error... No result found .. Sorry .." ); }
+     { Imsgp_Envoi_message_to( from, "Error... No result found .. Sorry .." );
+       Libere_DB_SQL ( &db );
+     }
     else if ( db->nbr_result > 1 )                                           /* Si trop d'enregistrement, demande de préciser */
      { Imsgp_Envoi_message_to( from, " Need to choose ... :" );
        while ( Recuperer_mnemos_DI_suite( &db ) )
@@ -259,7 +261,6 @@
         if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
         { Envoyer_commande_dls_data ( tech_id, acro ); }
      }
-    Libere_DB_SQL ( &db );
   }
 /******************************************************************************************************************************/
 /* Imsgp_Sauvegarder_statut_contact : Sauvegarde en mémoire le statut du contact en parametre                                 */
