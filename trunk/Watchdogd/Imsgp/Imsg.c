@@ -383,6 +383,7 @@
     Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
              "%s: Account '%s' disconnected for protocol id '%s'", __func__,
               purple_account_get_username(account), purple_account_get_protocol_id(account));
+    Cfg_imsgp.signed_off = TRUE;
   }
 /******************************************************************************************************************************/
 /* Définition spécifique pour la librairie libpurple                                                                          */
@@ -463,6 +464,7 @@
 
     Cfg_imsgp.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
     MainLoop = g_main_loop_new( NULL, FALSE );
+    zmq_msg = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 
 	/* libpurple's built-in DNS resolution forks processes to perform
 	 * blocking lookups without blocking the main process.  It does not
@@ -470,9 +472,9 @@
 	 * of zombie subprocesses marching around.
 	 */
    	signal(SIGCHLD, SIG_IGN);
-
+reconnect:
    	purple_util_set_user_dir(Config.home);
-   	purple_debug_set_enabled(FALSE);
+   	purple_debug_set_enabled(TRUE);
    	purple_core_set_ui_ops(&Imsgp_core_uiops);
 	   purple_eventloop_set_ui_ops(&glib_eventloops);
     if (!purple_core_init("Watchdog"))
@@ -517,9 +519,8 @@
     purple_signal_connect( purple_conversations_get_handle(), "buddy-typing-stopped", &handle,
                            PURPLE_CALLBACK(Imsgp_buddy_typing_stopped), NULL);
 
-    zmq_msg = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 
-    while( Cfg_imsgp.lib->Thread_run == TRUE )                                               /* On tourne tant que necessaire */
+    while( Cfg_imsgp.lib->Thread_run == TRUE && Cfg_imsgp.signed_off == FALSE)               /* On tourne tant que necessaire */
      { struct CMD_TYPE_HISTO *histo, histo_buf;
        g_usleep(200000);
        sched_yield();
@@ -544,8 +545,13 @@
      }                                                                                         /* Fin du while partage->arret */
 
     g_main_context_unref (g_main_loop_get_context (MainLoop));
-    Close_zmq ( zmq_msg );
     purple_core_quit();
+    if (Cfg_imsgp.signed_off)
+     { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "%s: Account signed off. Why ?? Reconnect !", __func__ );
+       goto reconnect;
+     }
+
+    Close_zmq ( zmq_msg );
 end:
     Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_imsgp.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */

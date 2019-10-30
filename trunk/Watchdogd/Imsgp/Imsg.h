@@ -53,6 +53,7 @@
     gchar username[80];
     gchar password[80];
     gboolean enable;
+    gboolean signed_off;
   } Cfg_imsgp;
 /****************************************** Déclarations des prototypes ***********************************/
  extern gboolean Imsgp_Lire_config ( void );
