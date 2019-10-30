@@ -445,6 +445,7 @@
  void Envoyer_smsg_smsbox_text ( gchar *texte )
   { struct CMD_TYPE_MESSAGE msg;
 
+    memset ( &msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );
     g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
     g_snprintf(msg.dls_shortname, sizeof(msg.dls_shortname), "%s", Cfg_smsg.tech_id );
     msg.num    = 0;
@@ -461,6 +462,7 @@
  void Envoyer_smsg_gsm_text ( gchar *texte )
   { struct CMD_TYPE_MESSAGE msg;
 
+    memset ( &msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );
     g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
     g_snprintf(msg.dls_shortname, sizeof(msg.dls_shortname), "%s", Cfg_smsg.tech_id );
     msg.num    = 0;
