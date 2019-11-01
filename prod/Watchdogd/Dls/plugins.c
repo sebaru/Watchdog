@@ -154,11 +154,11 @@
                           dlerror(), plugin->plugindb.id, plugin->plugindb.shortname );
               }
              plugin->handle = NULL;
-             Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin %06d unloaded (%s)", __func__,
+             Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin %06d (%s) unloaded", __func__,
                        plugin->plugindb.id, plugin->plugindb.shortname );
            }
           Charger_un_plugin ( plugin );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin %06d loaded (%s)", __func__,
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin %06d (%s) loaded", __func__,
                     plugin->plugindb.id, plugin->plugindb.shortname );
           return;
         }

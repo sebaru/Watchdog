@@ -42,18 +42,7 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Menu_want_client_leger ( void )
-  { gint pid;
-    printf( "%s: Lancement d'un firefox\n", __func__ );
-    pid = fork();
-    if (pid<0) return;
-    else if (!pid)                                                   /* Lancement de la ligne de commande */
-     { gchar chaine[256];
-       g_snprintf( chaine, sizeof(chaine), "http://%s/index.html", Client.host );
-       execlp( "firefox", "firefox", chaine, NULL );
-       printf("Lancement de firefox failed\n");
-       _exit(0);
-     }
-  }
+  { Firefox_exec ("/"); }
 /**********************************************************************************************************/
 /* Menu_want_plugin_dls: l'utilisateur desire editer la base plugin_dls                                   */
 /* Entrée/Sortie: rien                                                                                    */

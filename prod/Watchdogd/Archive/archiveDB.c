@@ -36,7 +36,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure arch                                              */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
- static Ajouter_archDB_by_num ( struct DB *db, struct ARCHDB *arch )
+ static gboolean Ajouter_archDB_by_num ( struct DB *db, struct ARCHDB *arch )
   { gchar requete[512], table[512];
 
     setlocale ( LC_NUMERIC, "C" );
@@ -60,7 +60,8 @@
        Info_new( Config.log, Config.log_arch, LOG_NOTICE,
                 "%s: Creation de la table %s_%03d_%06d avant Insert", __func__, NOM_TABLE_ARCH, arch->type, arch->num );
        Lancer_requete_SQL ( db, requete );                             /* Une fois la table créé, on peut y stocker l'archive */
-	    }
+     }
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Ajouter_archDB: Ajout d'une entree archive dans la Base de Données                                                         */
@@ -99,7 +100,7 @@
                    "%s: Ajout (2ième essai) dans la table %s_%s_%s FAILED", __func__, NOM_TABLE_ARCH, arch->tech_id, arch->nom );
           return(FALSE);
         }
-	    }
+     }
     return(TRUE);
   }
 /******************************************************************************************************************************/

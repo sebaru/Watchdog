@@ -60,7 +60,7 @@
   };
 
  GnomeUIInfo Menu_client_leger[]=                                    /*!< Définition du menu d'administration du client leger */
-  { GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
+  { GNOMEUIINFO_ITEM_STOCK( N_("Lancer le client léger"), N_("Client léger"),
                             Menu_want_client_leger, GNOME_STOCK_PIXMAP_MAIL ),
     GNOMEUIINFO_END
   };

@@ -57,6 +57,7 @@ newline       [\n\r]+
 
  /******************************************** Methodes ***************************************************/
 "_EA"                      { DlsScanner_lval.val = EANA;        return EANA;        }
+"_AO"                      { DlsScanner_lval.val = T_SORTIEANA; return T_SORTIEANA; }
 "_E"                       { DlsScanner_lval.val = ENTREE;      return ENTREE;      }
 "_A"                       { DlsScanner_lval.val = SORTIE;      return SORTIE;      }
 "_I"                       { DlsScanner_lval.val = T_ICONE;     return T_ICONE;     }

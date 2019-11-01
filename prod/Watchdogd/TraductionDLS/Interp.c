@@ -656,7 +656,7 @@
     action->alors = New_chaine( taille );
     switch (coul)
      { case ROUGE   : rouge = 255; vert =   0; bleu =   0; color="red"; break;
-       case VERT    : rouge =   0; vert = 255; bleu =   0; color="green"; break;
+       case VERT    : rouge =   0; vert = 255; bleu =   0; color="lime"; break;
        case BLEU    : rouge =   0; vert =   0; bleu = 255; color="blue"; break;
        case JAUNE   : rouge = 255; vert = 255; bleu =   0; color="yellow"; break;
        case ORANGE  : rouge = 255; vert = 190; bleu =   0; color="orange"; break;
@@ -819,6 +819,7 @@
     alias->barre    = 0;
     alias->options  = NULL;
     alias->used     = 1;
+    alias->external = TRUE;
 
     if (!strcmp(tech_id,"THIS")) tech_id=Dls_plugin.tech_id;
 
@@ -1180,7 +1181,8 @@
            { Emettre_erreur_new( "Warning: %s not used", alias->acronyme );
              retour = TRAD_DLS_WARNING;
            }
-          if (alias->type == ALIAS_TYPE_DYNAMIC && !strcmp(alias->tech_id, Dls_plugin.tech_id))/* Alias Dynamiques uniquement */
+                                                                                               /* Alias Dynamiques uniquement */
+          if (alias->type == ALIAS_TYPE_DYNAMIC && !strcmp(alias->tech_id, Dls_plugin.tech_id) && alias->external == FALSE )
            { gchar *libelle = Get_option_chaine( alias->options, T_LIBELLE );
              if (!libelle) libelle="no libelle";
              switch(alias->type_bit)
@@ -1194,6 +1196,10 @@
                  }
                 case MNEMO_SORTIE:
                  { Mnemo_auto_create_DO ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                   break;
+                 }
+                case MNEMO_SORTIE_ANA:
+                 { Mnemo_auto_create_AO ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_TEMPO:

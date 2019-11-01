@@ -342,6 +342,29 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `mnemos_AO`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_AO` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `type` int(11) NOT NULL DEFAULT '0',
+  `min` float NOT NULL DEFAULT '0',
+  `max` float NOT NULL DEFAULT '0',
+  `valeur` float NOT NULL DEFAULT '0',
+  `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
+  `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
+  `map_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `dls_cpt_imp`
 --
 

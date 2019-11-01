@@ -65,6 +65,7 @@
   { struct LIBRAIRIE *lib;
     GSList *Modules_MODBUS;
     gboolean enable;                                                                               /* Thread enable at boot ? */
+    gint nbr_request_par_sec;
   } Cfg_modbus;
 
  struct TRAME_MODBUS_REQUETE                                                                 /* Definition d'une trame MODBUS */

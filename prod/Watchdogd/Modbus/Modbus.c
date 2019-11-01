@@ -55,6 +55,7 @@
 
     Cfg_modbus.lib->Thread_debug = FALSE;                                                      /* Settings default parameters */
     Cfg_modbus.enable            = FALSE;
+    Cfg_modbus.nbr_request_par_sec      = 50;
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
@@ -63,12 +64,13 @@
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,                                          /* Print Config */
-                "%s: '%s' = %s", __func__, nom, valeur );
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_modbus.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_modbus.lib->Thread_debug = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "nbr_request_par_sec" ) )
+        { Cfg_modbus.nbr_request_par_sec = atoi(valeur);  }
        else
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
@@ -681,7 +683,8 @@
                  map_text, tech_id, acro, libelle );
        if ( sscanf ( map_text, "%[^:]:AI%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_ana)
-           { Dls_data_set_AI ( tech_id, acro, &module->AI[num], 0.0 );
+           { Dls_data_get_AI ( tech_id, acro, &module->AI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
+             if(module->AI[num] == NULL) Dls_data_set_AI ( tech_id, acro, &module->AI[num], 0.0 );       /* Sinon, on le crée */
              Charger_conf_AI ( module->AI[num] );                                    /* Chargement de la conf AI depuis la DB */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
@@ -701,7 +704,9 @@
                  src_text, tech_id, acro, libelle );
        if ( sscanf ( src_text, "%[^:]:DI%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_tor)
-           { Dls_data_set_bool ( tech_id, acro, &module->DI[num], FALSE ); }
+           { Dls_data_get_bool ( tech_id, acro, &module->DI[num] );      /* bit déjà existant deja dans la structure DLS DATA */
+             if(module->DI[num] == NULL) Dls_data_set_bool ( tech_id, acro, &module->DI[num], FALSE );   /* Sinon, on le crée */
+           }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
                          src_text, num, module->nbr_entree_tor );
         }
@@ -719,7 +724,9 @@
                  dst_tag, tech_id, acro, libelle );
        if ( sscanf ( dst_tag, "%[^:]:DO%d", debut, &num ) == 2 )                      /* Découpage de la ligne ev_text */
         { if (num<module->nbr_sortie_tor)
-           { Dls_data_set_bool ( tech_id, acro, &module->DO[num], FALSE ); }
+           { Dls_data_get_bool ( tech_id, acro, &module->DO[num] );      /* bit déjà existant deja dans la structure DLS DATA */
+             if(module->DO[num] == NULL) Dls_data_set_bool ( tech_id, acro, &module->DO[num], FALSE );   /* Sinon, on le crée */
+           }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
                          dst_tag, num, module->nbr_entree_tor );
         }
@@ -1009,7 +1016,7 @@
        if (Partage->top>=module->last_top+10)                                                        /* Toutes les 1 secondes */
         { module->nbr_request_par_sec = module->nbr_request;
           module->nbr_request = 0;
-          if(module->nbr_request_par_sec > 100) module->delai += 10;
+          if(module->nbr_request_par_sec > Cfg_modbus.nbr_request_par_sec) module->delai += 10;
                        else if(module->delai>0) module->delai -= 10;
           module->last_top = Partage->top;
         }

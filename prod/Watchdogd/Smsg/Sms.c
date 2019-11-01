@@ -212,16 +212,18 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean Envoi_sms_gsm ( struct CMD_TYPE_MESSAGE *msg, gchar *telephone )
-  { GSM_SMSMessage sms;
-    GSM_Error error;
+  { GSM_StateMachine *s;
+    GSM_SMSMessage sms;
     GSM_SMSC PhoneSMSC;
-    GSM_StateMachine *s;
+    gchar chaine[256];
     INI_Section *cfg;
+    GSM_Error error;
     gint wait;
 
     GSM_InitLocales(NULL);
    	memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
-	  	EncodeUnicode( sms.Text, msg->libelle_sms, strlen(msg->libelle_sms));                              /* Encode message text */
+    g_snprintf( chaine, sizeof(chaine), "%s: %s", msg->dls_shortname, msg->libelle_sms );
+	  	EncodeUnicode( sms.Text, chaine, strlen(chaine));                                                  /* Encode message text */
     EncodeUnicode( sms.Number, telephone, strlen(telephone));
 
 	   sms.PDU = SMS_Submit;                                                                        /* We want to submit message */
@@ -318,9 +320,11 @@
   { gchar erreur[CURL_ERROR_SIZE+1];
     struct curl_httppost *formpost;
     struct curl_httppost *lastptr;
+    gchar chaine[256];
     CURLcode res;
     CURL *curl;
 
+    g_snprintf( chaine, sizeof(chaine), "%s: %s", msg->dls_shortname, msg->libelle_sms );
     formpost = lastptr = NULL;
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "apikey",
@@ -336,7 +340,7 @@
                   CURLFORM_END); */
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "msg",
-                  CURLFORM_COPYCONTENTS, msg->libelle_sms,
+                  CURLFORM_COPYCONTENTS, chaine,
                   CURLFORM_END);
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "charset",
@@ -441,7 +445,9 @@
  void Envoyer_smsg_smsbox_text ( gchar *texte )
   { struct CMD_TYPE_MESSAGE msg;
 
+    memset ( &msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );
     g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
+    g_snprintf(msg.dls_shortname, sizeof(msg.dls_shortname), "%s", Cfg_smsg.tech_id );
     msg.num    = 0;
     msg.enable = TRUE;
     msg.sms    = MSG_SMS_SMSBOX_ONLY;
@@ -456,7 +462,9 @@
  void Envoyer_smsg_gsm_text ( gchar *texte )
   { struct CMD_TYPE_MESSAGE msg;
 
+    memset ( &msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );
     g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
+    g_snprintf(msg.dls_shortname, sizeof(msg.dls_shortname), "%s", Cfg_smsg.tech_id );
     msg.num    = 0;
     msg.enable = TRUE;
     msg.sms    = MSG_SMS_GSM_ONLY;

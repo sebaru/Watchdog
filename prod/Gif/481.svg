@@ -175,7 +175,7 @@
        style="fill:#1a9a1a;fill-opacity:1"
        id="g15475"
        transform="matrix(0.48381643,0,0,0.48381643,510.34626,378.53629)"
-       class="WTD-ActiveColor">
+       class="WTD-ActiveFillColor">
       <path
          style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:50;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
          d="m -28.5625,395.9375 c -13.806547,10e-4 -24.99862,11.19345 -25,25 v 454.28125 c 0.0014,13.80657 11.193473,24.9986 25,25 h 3.1875 c -6.646817,4.45233 -11.0304,12.18872 -11.03125,21 v 73 h 48.25 v -48 H 862.4375 v 48 h 48.25 v -73 c -8.6e-4,-8.81126 -4.38444,-16.54768 -11.03125,-21 h 3.1875 c 13.80649,-10e-4 24.9986,-11.19345 25,-25 V 420.9375 c -10e-4,-13.80656 -11.1935,-24.99862 -25,-25 z m 25,50 H 22.53125 V 850.21875 H -3.5625 Z m 58.8125,0 H 94.9375 V 850.21875 H 55.25 Z m 72.40625,0 H 167.375 v 404.28125 h -39.71875 z m 72.40625,0 h 39.71875 V 850.21875 H 200.0625 Z m 72.40625,0 h 39.71875 v 404.28125 h -39.71875 z m 72.40625,0 h 39.71875 V 850.21875 H 344.875 Z m 72.40625,0 H 457 v 404.28125 h -39.71875 z m 72.40625,0 h 39.71875 V 850.21875 H 489.6875 Z m 72.40625,0 h 39.71875 v 404.28125 h -39.71875 z m 72.40625,0 h 39.71875 V 850.21875 H 634.5 Z m 72.40625,0 H 746.625 v 404.28125 h -39.71875 z m 72.4375,0 h 39.6875 v 404.28125 h -39.6875 z m 72.40625,0 h 26.09375 V 850.21875 H 851.75 Z"

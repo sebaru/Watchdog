@@ -67,35 +67,35 @@
        height="15.875"
        x="1.3229166"
        y="278.47916"
-       class="WTD-ActiveColor" />
+       class="WTD-ActiveFillColor" />
     <circle
        style="fill:none;fill-opacity:1;stroke:#c8c8c8;stroke-width:0.35277778;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path4867"
        cx="10.583333"
        cy="281.65411"
        r="0.88194442"
-       class="WTD-ActiveColor" />
+       class="WTD-ActiveFillColor" />
     <circle
        style="fill:none;fill-opacity:1;stroke:#c8c8c8;stroke-width:0.35277778;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path4867-3"
        cx="10.583333"
        cy="291.1792"
        r="0.88194442"
-       class="WTD-ActiveColor" />
+       class="WTD-ActiveFillColor" />
     <circle
        style="fill:none;fill-opacity:1;stroke:#c8c8c8;stroke-width:0.35277778;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path4867-6"
        cx="15.874997"
        cy="281.65405"
        r="0.88194442"
-       class="WTD-ActiveColor" />
+       class="WTD-ActiveFillColor" />
     <circle
        style="fill:none;fill-opacity:1;stroke:#c8c8c8;stroke-width:0.35277778;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path4867-3-7"
        cx="15.874997"
        cy="291.17914"
        r="0.88194442"
-       class="WTD-ActiveColor" />
+       class="WTD-ActiveFillColor" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.52916666;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:0.52916666,0.52916666;stroke-dashoffset:0;stroke-opacity:1"
        d="M 6.6145832,286.41665 H 21.166666"
@@ -108,7 +108,7 @@
        height="15.875006"
        x="12.7"
        y="278.47916"
-       class="WTD-ActiveColor" />
+       class="WTD-ActiveFillColor" />
     <rect
        style="fill:#c8c8c8;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.3939344;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect4287-3"
@@ -116,7 +116,7 @@
        height="15.875006"
        x="17.991667"
        y="278.47916"
-       class="WTD-ActiveColor" />
+       class="WTD-ActiveFillColor" />
     <flowRoot
        xml:space="preserve"
        id="flowRoot4304"

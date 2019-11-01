@@ -40,6 +40,7 @@
          struct OPTION *option;
          struct ACTION *action;
          struct COMPARATEUR *comparateur;
+         struct ALIAS *t_alias;
        };
 
 %token <val>    T_ERROR PVIRGULE VIRGULE T_DPOINTS DONNE EQUIV T_MOINS T_POUV T_PFERM T_EGAL T_PLUS ET BARRE T_FOIS
@@ -63,7 +64,7 @@
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
 %type  <val>    modulateur jour_semaine
 
-%token <val>    T_BI T_MONO ENTREE SORTIE T_TEMPO T_HORLOGE T_DYN_STRING
+%token <val>    T_BI T_MONO ENTREE SORTIE T_SORTIEANA T_TEMPO T_HORLOGE T_DYN_STRING
 %token <val>    T_MSG T_ICONE CPT_H T_CPT_IMP EANA T_START T_REGISTRE
 %type  <val>    alias_bit
 
@@ -74,13 +75,14 @@
 %token <val>    ENTIER
 %token <valf>   VALF
 
-%type  <val>         barre calcul_ea_result
+%type  <val>         barre
 %type  <gliste>      liste_options options
 %type  <option>      une_option dyn_string
 %type  <chaine>      unite facteur expr suffixe listeCase
 %type  <action>      action une_action
 %type  <comparateur> comparateur
 %type  <chaine>      calcul_expr calcul_expr2 calcul_expr3
+%type  <t_alias>     calcul_ea_result
 
 %%
 fichier: ligne_source_dls;
@@ -132,19 +134,20 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                    g_free($2);
                 }}
                 ;
-alias_bit:        T_BI       {{ $$=MNEMO_BISTABLE;   }}
-                | T_MONO     {{ $$=MNEMO_MONOSTABLE; }}
-                | ENTREE     {{ $$=MNEMO_ENTREE;     }}
-                | SORTIE     {{ $$=MNEMO_SORTIE;     }}
-                | T_MSG      {{ $$=MNEMO_MSG;        }}
-                | T_TEMPO    {{ $$=MNEMO_TEMPO;      }}
-                | T_ICONE    {{ $$=MNEMO_MOTIF;      }}
-                | CPT_H      {{ $$=MNEMO_CPTH;       }}
-                | T_CPT_IMP  {{ $$=MNEMO_CPT_IMP;    }}
-                | EANA       {{ $$=MNEMO_ENTREE_ANA; }}
-                | T_REGISTRE {{ $$=MNEMO_REGISTRE;   }}
-                | T_HORLOGE  {{ $$=MNEMO_HORLOGE;    }}
-                | T_BUS      {{ $$=MNEMO_BUS;        }}
+alias_bit:        T_BI        {{ $$=MNEMO_BISTABLE;   }}
+                | T_MONO      {{ $$=MNEMO_MONOSTABLE; }}
+                | ENTREE      {{ $$=MNEMO_ENTREE;     }}
+                | SORTIE      {{ $$=MNEMO_SORTIE;     }}
+                | T_MSG       {{ $$=MNEMO_MSG;        }}
+                | T_TEMPO     {{ $$=MNEMO_TEMPO;      }}
+                | T_ICONE     {{ $$=MNEMO_MOTIF;      }}
+                | CPT_H       {{ $$=MNEMO_CPTH;       }}
+                | T_CPT_IMP   {{ $$=MNEMO_CPT_IMP;    }}
+                | EANA        {{ $$=MNEMO_ENTREE_ANA; }}
+                | T_SORTIEANA {{ $$=MNEMO_SORTIE_ANA; }}
+                | T_REGISTRE  {{ $$=MNEMO_REGISTRE;   }}
+                | T_HORLOGE   {{ $$=MNEMO_HORLOGE;    }}
+                | T_BUS       {{ $$=MNEMO_BUS;        }}
                 ;
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
@@ -176,10 +179,14 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                 | T_MOINS expr T_MOINS T_POUV calcul_expr T_PFERM DONNE calcul_ea_result PVIRGULE
                 {{ int taille;
                    char *instr;
-                   taille = strlen($5)+strlen($2)+35;
-                   instr = New_chaine( taille );
-                   g_snprintf( instr, taille, "if(%s) { SR(%d,%s); }\n", $2, $8, $5 );
-                   Emettre( instr ); g_free(instr);
+                   if ($8)
+                    { taille = strlen($5)+strlen($2)+strlen($8->tech_id)+strlen($8->acronyme)+100;
+                      instr = New_chaine( taille );
+                      g_snprintf( instr, taille,
+                                  "if(%s) { Dls_data_set_AO ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
+                                  $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
+                      Emettre( instr ); g_free(instr);
+                    }
                    g_free($2);
                    g_free($5);
                 }}
@@ -269,23 +276,11 @@ calcul_expr3:   VALF
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "%d", $1 );
                 }}
-                | EANA ENTIER
-                {{ int taille;
-                   taille = 15;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "EA_ech(%d)", $2 );
-                }}
                 | T_REGISTRE ENTIER
                 {{ int taille;
                    taille = 15;
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "R(%d)", $2 );
-                }}
-                | T_CPT_IMP ENTIER
-                {{ int taille;
-                   taille = 15;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "CI(%d)", $2 );
                 }}
                 | T_POUV calcul_expr T_PFERM
                 {{ $$=$2; }}
@@ -295,22 +290,10 @@ calcul_expr3:   VALF
                    alias = Get_alias_par_acronyme(NULL,$1);                                  /* On recupere l'alias */
                    if (alias)
                     { switch(alias->type_bit)               /* On traite que ce qui peut passer en "condition" */
-                       { case MNEMO_ENTREE_ANA:
-                          { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
-                            g_snprintf( $$, taille, "EA_ech(%d)", alias->num );
-                            break;
-                          }
-                         case MNEMO_REGISTRE:
+                       { case MNEMO_REGISTRE:
                           { taille = 15;
                             $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                             g_snprintf( $$, taille, "R(%d)", alias->num );
-                            break;
-                          }
-                         case MNEMO_CPT_IMP:
-                          { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
-                            g_snprintf( $$, taille, "CI(%d)", alias->num );
                             break;
                           }
                          default:
@@ -329,27 +312,24 @@ calcul_expr3:   VALF
                 }}
                 ;
 
-calcul_ea_result: T_REGISTRE ENTIER
-                {{ $$ = $2;
-                }}
-                | ID
+calcul_ea_result: ID
                 {{ struct ALIAS *alias;
-                   alias = Get_alias_par_acronyme(NULL,$1);                                  /* On recupere l'alias */
+                   alias = Get_alias_par_acronyme(NULL,$1);                                            /* On recupere l'alias */
                    if (alias)
                     { switch(alias->type_bit)               /* On traite que ce qui peut passer en "condition" */
-                       { case MNEMO_REGISTRE:
-                          { $$ = alias->num;
+                       { case MNEMO_SORTIE_ANA:
+                          { $$ = alias;
                             break;
                           }
                          default:
                           { Emettre_erreur_new( "Ligne %d :'%s' ne peut s'utiliser dans un résultat de calcul", DlsScanner_get_lineno(), $1 );
-                            $$=0;
+                            $$=NULL;
                           }
                        }
                     }
                    else
                     { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $1 );
-                      $$=0;
+                      $$=NULL;
                     }
                    g_free($1);                                     /* On n'a plus besoin de l'identifiant */
                 }}

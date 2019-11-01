@@ -86,6 +86,18 @@
     guint   inrange;
   };
 
+ struct DLS_AO
+  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gfloat  min;
+    gfloat  max;
+    guint   type;                                                                                  /* Type de gestion de l'EA */
+    gchar   unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                                         /* Km, h, ° ... */
+    gfloat  val_ech;
+    gfloat  val_avant_ech;
+    guint   last_arch;                                                                         /* Date de la derniere archive */
+  };
+
  struct DIGITAL_INPUT
   { gboolean etat;
   };
@@ -227,7 +239,7 @@
  extern gboolean Set_compil_status_plugin_dlsDB( gint id, gint status, gchar *log_buffer );
  extern gboolean Get_source_dls_from_DB ( gint id, gchar **result_buffer, gint *result_taille );
  extern gboolean Save_source_dls_to_DB( gint id, gchar *buffer, gint taille );
- extern gint Dls_auto_create_plugin( gchar *tech_id, gchar *nom );
+ extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *nom );
 
  extern void Charger_plugins ( void );                                                                      /* Dans plugins.c */
  extern void Decharger_plugins ( void );
@@ -244,6 +256,7 @@
  extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech );
  extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p );
  extern gint Dls_data_get_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p );
+ extern gfloat Dls_data_get_AO ( gchar *tech_id, gchar *acronyme, gpointer *ao_p );
  extern void SEA( int num, float val_avant_ech );
  extern void SEA_range( int num, int range );
  extern void SEA_ech( int num, float val_ech );
