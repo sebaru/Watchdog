@@ -450,34 +450,6 @@
                else if ( ! strcasecmp ( url, "/log/info" ) )    { Info_change_log_level ( Config.log, LOG_INFO    ); return(1); }
                else if ( ! strcasecmp ( url, "/log/warning" ) ) { Info_change_log_level ( Config.log, LOG_WARNING ); return(1); }
                else if ( ! strcasecmp ( url, "/log/error" ) )   { Info_change_log_level ( Config.log, LOG_ERR     ); return(1); }
-/****************************************** WS get Running config library *****************************************************/
-               else if ( ! strncasecmp( url, "/library/", 9 ) )
-                { gchar *target = url+9;
-                  GSList *liste;
-                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                            "%s: Searching for CLI commande %s", __func__, target );
-                  liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
-                  while(liste)
-                   { struct LIBRAIRIE *lib = liste->data;
-                     if ( ! strncmp( target, lib->admin_prompt, strlen(lib->admin_prompt) ) )
-                      { if (!lib->Admin_json)
-                         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                                    "%s: library %s do not have Admin_json.", __func__, lib->admin_prompt );
-                         }
-                        else
-                         { gint taille_buf;
-                           gchar *buffer;
-                           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                                    "%s: library %s has a Admin_json. Calling with %s.", __func__,
-                                    lib->admin_prompt, target+strlen(lib->admin_prompt) );
-                           lib->Admin_json ( target+strlen(lib->admin_prompt), &buffer, &taille_buf );
-                           return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buffer, taille_buf ));
-                         }
-                      }
-                     liste = g_slist_next(liste);
-                   }
-                  return(Http_Send_response_code ( wsi, HTTP_200_OK ));
-                }
                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Unknown Request from %s/%s : %s",
                          __func__, remote_name, remote_ip, url );
                return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                      /* Bad Request */

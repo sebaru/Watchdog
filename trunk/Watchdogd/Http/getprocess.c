@@ -202,6 +202,32 @@
         }
        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }
+/****************************************** WS get Running config library *****************************************************/
+    else
+     { GSList *liste;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Searching for CLI commande %s", __func__, url );
+       liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
+       while(liste)
+        { struct LIBRAIRIE *lib = liste->data;
+          if ( ! strncmp( url, lib->admin_prompt, strlen(lib->admin_prompt) ) )
+           { if (!lib->Admin_json)
+              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                          "%s: library %s do not have Admin_json.", __func__, lib->admin_prompt );
+              }
+             else
+              { gint taille_buf;
+                gchar *buffer;
+                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                         "%s: library %s has a Admin_json. Calling with %s.", __func__,
+                          lib->admin_prompt, url+strlen(lib->admin_prompt) );
+                lib->Admin_json ( url+strlen(lib->admin_prompt), &buffer, &taille_buf );
+                return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buffer, taille_buf ));
+              }
+            }
+           liste = g_slist_next(liste);
+        }
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
     return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
