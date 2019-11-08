@@ -48,35 +48,32 @@
   };
 
  #define DMX_RETRY       100                                             /* 10 secondes entre chaque retry si pb de connexion */
-
+ #define DMX_CHANNEL     512
  #define NOM_THREAD      "dmx"
 
- struct DMX_CONFIG                                                                       /* Communication entre DLS et la DMX */
-  { struct LIBRAIRIE *lib;
-    gchar tech_id[32];                                                                               /* Tech_id du module DMX */
-    gchar device[64];                                                               /* Nom du device USB associé au canal DMX */
-    gboolean enable;                                                                               /* Thread enable at boot ? */
-    gint nbr_request;                                                                        /* Nombre de requete par seconde */
-    gint fd;                                                                       /* File Descriptor d'accès au port USB DMX */
-    gboolean comm_status;
-    void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
-    struct DLS_AO *Canal;                                                      /* Tableau dynamique d'accès aux bits internes */
-    gint taille_trame_dmx;
-    guchar *Trame_dmx;
-  } Cfg_dmx;
-
- struct TRAME_DMX_PRE                                                                           /* Definition d'une trame DMX */
+ struct TRAME_DMX                                                                               /* Definition d'une trame DMX */
   { guchar start_delimiter;                                                            /* Start of message delimiter, hex 7E. */
     guchar label;                                                                       /* Label to identify type of message. */
     guchar length_lsb;                                            /* Data length LSB. Valid range for data length is 0 to 600 */
     guchar length_msb;                                            /* Data length MSB. Valid range for data length is 0 to 600 */
     guchar start_code;                                                                 /* 1 Start Code + 24 canaux minimums ! */
-  };
- struct TRAME_DMX_POST
-  { guchar end_delimiter;                                        /* (0xE7). Ne pas oublier le end_delimiter en fin de trame ! */
+    guchar channel[DMX_CHANNEL];                                                       /* 1 Start Code + 24 canaux minimums ! */
+    guchar end_delimiter;                                        /* (0xE7). Ne pas oublier le end_delimiter en fin de trame ! */
   };
 
- #define TAILLE_ENTETE_DMX   4                                     /* Nombre d'octet avant d'etre sur d'avoir la taille trame */
+ struct DMX_CONFIG                                                                       /* Communication entre DLS et la DMX */
+  { struct LIBRAIRIE *lib;
+    gchar tech_id[32];                                                                               /* Tech_id du module DMX */
+    gchar device[128];                                                              /* Nom du device USB associé au canal DMX */
+    gboolean enable;                                                                               /* Thread enable at boot ? */
+    gint nbr_request;                                                                        /* Nombre de requete par seconde */
+    gint fd;                                                                       /* File Descriptor d'accès au port USB DMX */
+    gboolean comm_status;
+    void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
+    struct DLS_AO Canal[DMX_CHANNEL];                                         /* Tableau dynamique d'accès aux bits internes */
+    gint taille_trame_dmx;
+    struct TRAME_DMX Trame_dmx;
+  } Cfg_dmx;
 
 /****************************************************** Déclaration des prototypes ********************************************/
 #endif
