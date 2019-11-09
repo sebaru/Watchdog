@@ -35,9 +35,9 @@
   {	NULL,	NULL, NULL, NULL, /* padding */	NULL, NULL, NULL,	NULL };
 
 /******************************************************************************************************************************/
-/* Imsgp_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* Imsgp_Lire_config : Lit la config Watchdog et rempli la structure mÃ©moire                                                  */
+/* EntrÃ©e: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Imsgp_Lire_config ( void )
   { gchar *nom, *valeur;
@@ -48,13 +48,13 @@
     g_snprintf( Cfg_imsgp.username, sizeof(Cfg_imsgp.username), IMSGP_DEFAUT_USERNAME );
     g_snprintf( Cfg_imsgp.password, sizeof(Cfg_imsgp.password), IMSGP_DEFAUT_PASSWORD );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de donnÃ©es */
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_WARNING,
                 "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* RÃ©cupÃ©ration d'une config dans la DB */
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO,                                           /* Print Config */
                 "%s: '%s' = %s", __func__, nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "username" ) )
@@ -73,8 +73,8 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Recuperer_imsgpDB: Recupération de la liste des users users IM                                                             */
-/* Entrée: Un pointeur vers une database                                                                                      */
+/* Recuperer_imsgpDB: RecupÃ©ration de la liste des users users IM                                                             */
+/* EntrÃ©e: Un pointeur vers une database                                                                                      */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Recuperer_imsgpDB ( struct DB *db )
@@ -86,8 +86,8 @@
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
 /******************************************************************************************************************************/
-/* Recuperer_all_available_imsgDB: Recupération de la liste des uses IM actifs                                                */
-/* Entrée: Un pointeur vers une database                                                                                      */
+/* Recuperer_all_available_imsgDB: RecupÃ©ration de la liste des uses IM actifs                                                */
+/* EntrÃ©e: Un pointeur vers une database                                                                                      */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  static gboolean Recuperer_all_available_imsgDB ( struct DB *db )
@@ -99,8 +99,8 @@
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
 /******************************************************************************************************************************/
-/* Recuperer_imsgDB_suite: Recupération de la liste des champs des users                                                      */
-/* Entrée: un log et une database                                                                                             */
+/* Recuperer_imsgDB_suite: RecupÃ©ration de la liste des champs des users                                                      */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  struct IMSGPDB *Recuperer_imsgpDB_suite( struct DB *db )
@@ -113,7 +113,7 @@
      }
 
     imsg = (struct IMSGPDB *)g_try_malloc0( sizeof(struct IMSGPDB) );
-    if (!imsg) Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
+    if (!imsg) Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_ERR, "%s: Erreur allocation mÃ©moire", __func__ );
     else
      { g_snprintf( imsg->user_jabberid, sizeof(imsg->user_jabberid), "%s", db->row[5] );
        g_snprintf( imsg->user_name,     sizeof(imsg->user_name),     "%s", db->row[1] );
@@ -128,8 +128,8 @@
   }
 /******************************************************************************************************************************/
 /* Imsgp_Envoi_message_to : Envoi un message a un contact xmpp                                                                */
-/* Entrée: le nom du destinataire et le message                                                                               */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: le nom du destinataire et le message                                                                               */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Imsgp_Envoi_message_to ( const gchar *dest, gchar *message )
   { PurpleConversation *conv;
@@ -144,7 +144,7 @@
   }
 /******************************************************************************************************************************/
 /* Imsgp_recipient_allow_command : Renvoie un contact IMSGDB si delui-ci dispose du flag allow_cde                            */
-/* Entrée: le jabber_id                                                                                                       */
+/* EntrÃ©e: le jabber_id                                                                                                       */
 /* Sortie: struct IMSGPDB *imsg                                                                                                */
 /******************************************************************************************************************************/
  static struct IMSGPDB *Imsgp_recipient_allow_command ( gchar *jabber_id )
@@ -186,8 +186,8 @@
   }
 /******************************************************************************************************************************/
 /* Imsgp_Envoi_message_to_all_available : Envoi un message aux contacts disponibles                                           */
-/* Entrée: le message                                                                                                         */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: le message                                                                                                         */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Imsgp_Envoi_message_to_all_available ( gchar *message )
   { struct IMSGPDB *imsg;
@@ -212,9 +212,9 @@
     Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
-/* Imsgp_recevoir_imsg : CB appellé lorsque l'on recoit un message xmpp                                                       */
-/* Entrée : Le Handler, la connexion, le message                                                                              */
-/* Sortie : Néant                                                                                                             */
+/* Imsgp_recevoir_imsg : CB appellÃ© lorsque l'on recoit un message xmpp                                                       */
+/* EntrÃ©e : Le Handler, la connexion, le message                                                                              */
+/* Sortie : NÃ©ant                                                                                                             */
 /******************************************************************************************************************************/
  static void Imsgp_recevoir_imsg(PurpleAccount *account, char *from, char *message, PurpleConversation *conv, PurpleMessageFlags flags)
   { struct IMSGPDB *imsg;
@@ -241,11 +241,11 @@
        return;
      }
 
-    if ( db->nbr_result == 0 )                                                /* Si pas d'enregistrement, demande de préciser */
+    if ( db->nbr_result == 0 )                                                /* Si pas d'enregistrement, demande de prÃ©ciser */
      { Imsgp_Envoi_message_to( from, "Error... No result found .. Sorry .." );
        Libere_DB_SQL ( &db );
      }
-    else if ( db->nbr_result > 1 )                                           /* Si trop d'enregistrement, demande de préciser */
+    else if ( db->nbr_result > 1 )                                           /* Si trop d'enregistrement, demande de prÃ©ciser */
      { Imsgp_Envoi_message_to( from, " Need to choose ... :" );
        while ( Recuperer_mnemos_DI_suite( &db ) )
         { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
@@ -263,9 +263,9 @@
      }
   }
 /******************************************************************************************************************************/
-/* Imsgp_Sauvegarder_statut_contact : Sauvegarde en mémoire le statut du contact en parametre                                 */
-/* Entrée: le contact et le statut                                                                                            */
-/* Sortie: Néant                                                                                                              */
+/* Imsgp_Sauvegarder_statut_contact : Sauvegarde en mÃ©moire le statut du contact en parametre                                 */
+/* EntrÃ©e: le contact et le statut                                                                                            */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Imsgp_Sauvegarder_statut_contact ( const gchar *jabber_id, gboolean available )
   { gchar *jabberid, requete[512], hostonly[80], *ptr;
@@ -304,23 +304,23 @@
   }
 /******************************************************************************************************************************/
 /* Imsgp_buddy_signed_on : Un contact bien d'arriver                                                                          */
-/* Entrée: le buddy                                                                                                           */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: le buddy                                                                                                           */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Imsgp_buddy_signed_on(PurpleBuddy *buddy)
   { Imsgp_Sauvegarder_statut_contact ( purple_buddy_get_name(buddy), TRUE ); }
 /******************************************************************************************************************************/
 /* Imsgp_buddy_signed_off : Un contact bien de partir                                                                         */
-/* Entrée: le buddy                                                                                                           */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: le buddy                                                                                                           */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Imsgp_buddy_signed_off(PurpleBuddy *buddy)
   { Imsgp_Sauvegarder_statut_contact ( purple_buddy_get_name(buddy), FALSE ); }
 
 /******************************************************************************************************************************/
 /* Imsgp_buddy_xxx : Ensemble de fonctions de notification sur le statut des contacts                                         */
-/* Entrée: le buddy                                                                                                           */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: le buddy                                                                                                           */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Imsgp_buddy_away(PurpleBuddy *buddy, PurpleStatus *old_status, PurpleStatus *status)
   { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO,
@@ -352,8 +352,8 @@
               name, purple_account_get_protocol_id(account));
   }
 /******************************************************************************************************************************/
-/* Imsgp_account_authorization_requested : Fonction appellé quand un user veut nous ajouter dans sa liste de buddy            */
-/* Entrée: le compte et le user                                                                                               */
+/* Imsgp_account_authorization_requested : Fonction appellÃ© quand un user veut nous ajouter dans sa liste de buddy            */
+/* EntrÃ©e: le compte et le user                                                                                               */
 /* Sortie: 1 = OK pour ajouter                                                                                                */
 /******************************************************************************************************************************/
  static int Imsgp_account_authorization_requested(PurpleAccount *account, const char *user)
@@ -364,9 +364,9 @@
     return 1; //authorize buddy request automatically (-1 denies it)
   }
 /******************************************************************************************************************************/
-/* Imsgp_signed_on: Appelé lorsque nous venons de nous connecter                                                              */
-/* Entrée: La connextion Purple                                                                                               */
-/* Sortie: Néant                                                                                                              */
+/* Imsgp_signed_on: AppelÃ© lorsque nous venons de nous connecter                                                              */
+/* EntrÃ©e: La connextion Purple                                                                                               */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Imsgp_signed_on ( PurpleConnection *gc, gpointer null )
   {	PurpleAccount *account = purple_connection_get_account(gc);
@@ -375,9 +375,9 @@
               purple_account_get_username(account), purple_account_get_protocol_id(account));
   }
 /******************************************************************************************************************************/
-/* Imsgp_signed_off: Appelé lorsque nous venons de nous déconnecter                                                           */
-/* Entrée: La connextion Purple                                                                                               */
-/* Sortie: Néant                                                                                                              */
+/* Imsgp_signed_off: AppelÃ© lorsque nous venons de nous dÃ©connecter                                                           */
+/* EntrÃ©e: La connextion Purple                                                                                               */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Imsgp_signed_off ( PurpleConnection *gc, gpointer null )
   {	PurpleAccount *account = purple_connection_get_account(gc);
@@ -387,7 +387,7 @@
     Cfg_imsgp.signed_off = TRUE;
   }
 /******************************************************************************************************************************/
-/* Définition spécifique pour la librairie libpurple                                                                          */
+/* DÃ©finition spÃ©cifique pour la librairie libpurple                                                                          */
 /******************************************************************************************************************************/
  #define PURPLE_GLIB_READ_COND  (G_IO_IN | G_IO_HUP | G_IO_ERR)
  #define PURPLE_GLIB_WRITE_COND (G_IO_OUT | G_IO_HUP | G_IO_ERR | G_IO_NVAL)
@@ -549,6 +549,7 @@ reconnect:
     purple_core_quit();
     if (Cfg_imsgp.signed_off)
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "%s: Account signed off. Why ?? Reconnect !", __func__ );
+       Cfg_imsgp.signed_off = FALSE;
        goto reconnect;
      }
 
