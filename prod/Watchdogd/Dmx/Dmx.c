@@ -32,7 +32,7 @@
  #include <sys/stat.h>
  #include <errno.h>
  #include <sys/prctl.h>
- #include <termios.h>
+ #include <sys/ioctl.h>
  #include <unistd.h>
  #include <string.h>
  #include <stdlib.h>
@@ -116,24 +116,25 @@
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( Recuperer_mnemos_AO_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *map_text = db->row[2], *libelle = db->row[3];
-       gchar *min = db->row[4], *max = db->row[5], *type=db->row[5], *valeur = db->row[6];
+       gchar *min = db->row[4], *max = db->row[5], *type=db->row[6], *valeur = db->row[7];
        gchar debut[80];
        gint num;
-       Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
+       Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_DEBUG, "%s: Match found '%s' '%s:%s' - %s", __func__,
                  map_text, tech_id, acro, libelle );
        if ( sscanf ( map_text, "%[^:]:AO%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
-        { if (num<=24)
-           { g_snprintf( Cfg_dmx.Canal[num].tech_id, sizeof(Cfg_dmx.Canal[num].tech_id), "%s", tech_id );
-             g_snprintf( Cfg_dmx.Canal[num].acronyme, sizeof(Cfg_dmx.Canal[num].acronyme), "%s", acro );
-             Cfg_dmx.Canal[num].min  = atof(min);
-             Cfg_dmx.Canal[num].max  = atof(max);
-             Cfg_dmx.Canal[num].type = atoi(type);
-             Cfg_dmx.Canal[num].val_avant_ech = atof(valeur);
-             Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO, "%s: AO '%s:%s' loaded", __func__, tech_id, acro );
+        { if (1<=num && num<=DMX_CHANNEL)
+           { g_snprintf( Cfg_dmx.Canal[num-1].tech_id, sizeof(Cfg_dmx.Canal[num-1].tech_id), "%s", tech_id );
+             g_snprintf( Cfg_dmx.Canal[num-1].acronyme, sizeof(Cfg_dmx.Canal[num-1].acronyme), "%s", acro );
+             Cfg_dmx.Canal[num-1].min  = atof(min);
+             Cfg_dmx.Canal[num-1].max  = atof(max);
+             Cfg_dmx.Canal[num-1].type = atoi(type);
+             Cfg_dmx.Canal[num-1].val_avant_ech = atof(valeur);
+             Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO,
+                       "%s: AO Canal %d : '%s:%s'=%s ('%s') loaded", __func__, num, tech_id, acro, valeur, libelle );
              cpt++;
            }
           else Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
-                         map_text, num, 24 );
+                         map_text, num, DMX_CHANNEL );
         }
        else Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, map_text );
      }
@@ -147,26 +148,16 @@
 /* Sortie: -1 si erreur, sinon, le FileDescriptor associé                                                                     */
 /******************************************************************************************************************************/
  static void Dmx_init ( void )
-  { Cfg_dmx.fd = open( Cfg_dmx.device, O_WRONLY | O_NOCTTY /*| O_NONBLOCK*/ );
+  {
+    Cfg_dmx.fd = open( Cfg_dmx.device, O_RDWR | O_NOCTTY /*| O_NONBLOCK*/ );
     if (Cfg_dmx.fd<0)
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Impossible d'ouvrir le device '%s', retour=%d (%s)", __func__,
                  Cfg_dmx.device, Cfg_dmx.fd, strerror(errno) );
        return;
      }
-    Cfg_dmx.Canal = g_try_malloc0( sizeof(struct DLS_AO) * 24 );                                  /* 24 Canaux pour commencer */
-    if (!Cfg_dmx.Canal)
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Memory Error for Canal", __func__ );
-       close(Cfg_dmx.fd); Cfg_dmx.fd=-1;
-       return;
-     }
-    Cfg_dmx.taille_trame_dmx = sizeof(struct TRAME_DMX_PRE) + 24 + sizeof(struct TRAME_DMX_POST);
-    Cfg_dmx.Trame_dmx = g_try_malloc0( Cfg_dmx.taille_trame_dmx );      /* 24 Canaux */
-    if (!Cfg_dmx.Trame_dmx)
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Memory Error for Trame_DMX", __func__ );
-       g_free(Cfg_dmx.Canal); Cfg_dmx.Canal = NULL;
-       close(Cfg_dmx.fd);     Cfg_dmx.fd=-1;
-       return;
-     }
+
+    Cfg_dmx.taille_trame_dmx = sizeof(struct TRAME_DMX);
+    memset ( &Cfg_dmx.Trame_dmx, 0, sizeof(struct TRAME_DMX) );
     Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Ouverture port dmx okay %s", __func__, Cfg_dmx.device );
     Dmx_send_status_to_master( TRUE );
     Dmx_do_mapping();
@@ -181,7 +172,6 @@
        close(Cfg_dmx.fd);
        Cfg_dmx.fd = -1;
      }
-    if (Cfg_dmx.Canal) { g_free(Cfg_dmx.Canal); Cfg_dmx.Canal = NULL; }
     Dmx_send_status_to_master( FALSE );
   }
 /******************************************************************************************************************************/
@@ -190,17 +180,15 @@
 /******************************************************************************************************************************/
  static gboolean Envoyer_trame_dmx_request( void )
   { gint cpt;
-    Cfg_dmx.Trame_dmx[0] = 0x7E;
-    Cfg_dmx.Trame_dmx[1] = DMX_Output_Only_Send_DMX_Packet_Request;
-/*  trame_dmx.length_lsb =  sizeof(trame_dmx.data) & 0xFF;
-    trame_dmx.length_msb = (sizeof(trame_dmx.data) & 0xFF00) >> 8; */
-    Cfg_dmx.Trame_dmx[2] = 24 + 1; /* Spécifiquement pour une taille_data < 256 */
-    Cfg_dmx.Trame_dmx[3] = 0;
-    Cfg_dmx.Trame_dmx[4] = 0; /* Start Code DMX = 0 */
-    for (cpt=0; cpt<24; cpt++)
-     { Cfg_dmx.Trame_dmx[5+cpt] = (guchar)Cfg_dmx.Canal[cpt].val_avant_ech; }
-    Cfg_dmx.Trame_dmx[29] = 0xE7; /* End delimiter */
-    if ( write( Cfg_dmx.fd, Cfg_dmx.Trame_dmx, Cfg_dmx.taille_trame_dmx ) != Cfg_dmx.taille_trame_dmx )/* Ecriture de la trame */
+    if (Cfg_dmx.comm_status == FALSE) return(FALSE);
+    Cfg_dmx.Trame_dmx.start_delimiter = 0x7E;
+    Cfg_dmx.Trame_dmx.label      = DMX_Output_Only_Send_DMX_Packet_Request;
+    Cfg_dmx.Trame_dmx.length_lsb =  (sizeof(Cfg_dmx.Trame_dmx.channel)+1) & 0xFF;
+    Cfg_dmx.Trame_dmx.length_msb =  ((sizeof(Cfg_dmx.Trame_dmx.channel)+1) >> 8) & 0xFF;
+    Cfg_dmx.Trame_dmx.start_code = 0; /* Start Code DMX = 0 */
+    for (cpt=0; cpt<DMX_CHANNEL; cpt++) { Cfg_dmx.Trame_dmx.channel[cpt] = (guchar)Cfg_dmx.Canal[cpt].val_avant_ech; }
+    Cfg_dmx.Trame_dmx.end_delimiter = 0xE7; /* End delimiter */
+    if ( write( Cfg_dmx.fd, &Cfg_dmx.Trame_dmx, sizeof(struct TRAME_DMX) ) != sizeof(struct TRAME_DMX) )/* Ecriture de la trame */
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Write Trame Error '%s'", __func__, strerror(errno) );
        return(FALSE);
      }
@@ -217,18 +205,13 @@
     struct DB *db;
     gint cpt = 0;
 
-    if (!Cfg_dmx.Canal)
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Aucun bit à sauver", __func__ );
-       return;
-     }
-
     db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Connexion DB impossible", __func__ );
        return;
      }
 
-    for (cpt=0; cpt<24; cpt++)
+    for (cpt=0; cpt<DMX_CHANNEL; cpt++)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE mnemos_AO as m SET valeur='%f' "
                    "WHERE m.tech_id='%s' AND m.acronyme='%s';",
@@ -243,7 +226,8 @@
 /* Main: Fonction principale du MODBUS                                                                                        */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { prctl(PR_SET_NAME, "W-DMX", 0, 0, 0 );
+  { struct ZMQUEUE *zmq_from_bus;
+    prctl(PR_SET_NAME, "W-DMX", 0, 0, 0 );
     memset( &Cfg_dmx, 0, sizeof(Cfg_dmx) );                                         /* Mise a zero de la structure de travail */
     Cfg_dmx.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_dmx.lib->TID = pthread_self();                                                      /* Sauvegarde du TID pour le pere */
@@ -255,9 +239,9 @@
     g_snprintf( Cfg_dmx.lib->admin_help,   sizeof(Cfg_dmx.lib->admin_help),   "Manage Dmx system" );
 
 reload:
+    zmq_from_bus          = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     Cfg_dmx.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Dmx_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
-
 
     if (!Cfg_dmx.enable)
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE,
@@ -271,8 +255,13 @@ reload:
     Mnemo_auto_create_DI ( Cfg_dmx.tech_id, "COMM", "Statut de la communication avec le token DMX" );
 
     Dmx_init();
+    Envoyer_trame_dmx_request();
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { usleep(100000);
+     { struct ZMQ_TARGET *event;
+       gchar buffer[256];
+       void *payload;
+       gint byte;
+       usleep(10000);
        sched_yield();
 
        if (Cfg_dmx.comm_status == FALSE)
@@ -281,11 +270,51 @@ reload:
           lib->Thread_reload = TRUE;
           break;
         }
-       if (Envoyer_trame_dmx_request()==FALSE)
-        { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Write error, sleeping 5s before retrying.", __func__);
-          sleep(5);
-          lib->Thread_reload = TRUE;
-          break;
+
+       if ( (byte=Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer)-1, &event, &payload )) > 0) /* Reception d'un paquet master ? */
+        { JsonObject *object;
+          JsonNode *Query;
+          buffer[byte] = 0;
+
+          if ( !strcasecmp( event->tag, "SET_AO" ) )
+           { gchar *tech_id, *acronyme;
+             gdouble valeur;
+             gint num;
+             Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_AO from bus .", __func__);
+             Query = json_from_string ( payload, NULL );
+
+             if (!Query)
+              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ ); continue; }
+
+             object = json_node_get_object (Query);
+             if (!object)
+              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
+                json_node_unref (Query);
+                continue;
+              }
+
+             tech_id  = json_object_get_string_member ( object, "tech_id" );
+             acronyme = json_object_get_string_member ( object, "acronyme" );
+             valeur   = json_object_get_double_member ( object, "valeur" );
+             if (!tech_id || !acronyme || !valeur)
+              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: requete mal formée", __func__ );
+                json_node_unref (Query);
+                continue;
+              }
+
+             for (num=0; num<DMX_CHANNEL; num++)
+              { if (!strcasecmp( Cfg_dmx.Canal[num].tech_id, tech_id) &&
+                    !strcasecmp( Cfg_dmx.Canal[num].acronyme, acronyme))
+                 { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Setting %s:%s=%f (Canal %d)", __func__,
+                             tech_id, acronyme, valeur, num );
+                   Cfg_dmx.Canal[num].val_avant_ech = valeur;
+                   break;
+                 }
+
+              }
+             json_node_unref (Query);
+             Envoyer_trame_dmx_request();
+           }
         }
      }                                                                     /* Fin du while partage->arret */
 
@@ -293,6 +322,7 @@ reload:
     Dmx_Updater_DB();
     Dmx_close();
     Close_zmq ( Cfg_dmx.zmq_to_master );
+    Close_zmq ( zmq_from_bus );
 
     if (lib->Thread_reload == TRUE && lib->Thread_run == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

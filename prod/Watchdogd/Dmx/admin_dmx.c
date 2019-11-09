@@ -44,10 +44,10 @@
     Json_add_bool   ( builder, "comm", Cfg_dmx.comm_status );
 
     if (Cfg_dmx.Canal)
-     { for (cpt=0; cpt<24; cpt++)
+     { for (cpt=0; cpt<64; cpt++)
         { gchar canal[12];
-          g_snprintf( canal, sizeof(canal), "canal_%d", cpt );
-          Json_add_int ( builder, canal, Cfg_dmx.Canal[cpt].val_avant_ech );
+          g_snprintf( canal, sizeof(canal), "canal_%d", cpt+1 );
+          Json_add_int ( builder, canal, Cfg_dmx.Trame_dmx.channel[cpt] ); /*Canal[cpt].val_avant_ech );*/
         }
      }
     json_builder_end_object (builder);                                                                    /* End Module Array */

@@ -205,7 +205,7 @@
 /****************************************** WS get Running config library *****************************************************/
     else
      { GSList *liste;
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Searching for CLI commande %s", __func__, url );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Searching for CLI commande %s", __func__, url );
        liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
        while(liste)
         { struct LIBRAIRIE *lib = liste->data;
@@ -218,7 +218,7 @@
               { gint taille_buf;
                 gchar *buffer;
                 Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                         "%s: library %s has a Admin_json. Calling with %s.", __func__,
+                         "%s: Admin_json call for %s%s.", __func__,
                           lib->admin_prompt, url+strlen(lib->admin_prompt) );
                 lib->Admin_json ( url+strlen(lib->admin_prompt), &buffer, &taille_buf );
                 return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buffer, taille_buf ));

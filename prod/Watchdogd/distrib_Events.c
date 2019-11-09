@@ -92,8 +92,8 @@ suite_AO:
     json_builder_end_object (builder);                                                                        /* End Document */
     buffer = Json_get_buf ( builder, &taille_buf );
 
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "msrv", "SET_AO", buffer, taille_buf );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "SET_AO", buffer, taille_buf );
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "*", "SET_AO", buffer, taille_buf );
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "SET_AO", buffer, taille_buf );
     g_free(buffer);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
