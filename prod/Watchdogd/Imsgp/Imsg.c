@@ -234,8 +234,12 @@
      }
     g_free(imsg);
 
-    if ( ! strcasecmp( message, "ping" ) ) { Imsgp_Envoi_message_to( from, "Pong !" ); }               /* Interfacage de test */
-    else if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, message ) )
+    if ( ! strcasecmp( message, "ping" ) )                                                             /* Interfacage de test */
+     { Imsgp_Envoi_message_to( from, "Pong !" );
+       return;
+     }
+
+    if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, message ) )
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, message );
        Imsgp_Envoi_message_to( from, "Error searching Database .. Sorry .." );
        return;
