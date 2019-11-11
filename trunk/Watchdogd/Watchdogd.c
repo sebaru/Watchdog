@@ -356,6 +356,12 @@
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s/%s to %s/%s",
                        __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
            }
+          else if ( !strcmp(event->tag, "SLAVE_STOP") )
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' stopped !", __func__, event->src_instance);
+           }
+          else if ( !strcmp(event->tag, "SLAVE_START") )
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' started !", __func__, event->src_instance);
+           }
           else if ( !strcmp(event->tag, "SNIPS_QUESTION") )
            { struct DB *db;
              Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SNIPS_QUESTION from %s/%s to %s/%s : '%s'",
@@ -474,6 +480,7 @@
 
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, NULL, "msrv", "*", "msrv", "SLAVE_START", NULL, 0 );
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
      { struct ZMQ_TARGET *event;                                                    /* Instance is slave, listening to master */
        gchar buffer[2048];
@@ -528,6 +535,7 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, NULL, "msrv", "*", "msrv", "SLAVE_STOP", NULL, 0 );
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
