@@ -156,4 +156,56 @@
 
     return(TRUE);                                                                                    /* Résultat dans db->row */
   }
+/******************************************************************************************************************************/
+/* Updater_confDB_AO: Met a jour les valeurs des Sortie analogiques dans la base de données                                   */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Updater_confDB_AO ( void )
+  { gchar requete[200];
+    struct DB *db;
+    GSList *liste;
+    gint cpt;
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
+       return;
+     }
+
+    cpt=0;
+    liste = Partage->Dls_data_AO;
+    while ( liste )
+     { struct DLS_AO *ao = (struct DLS_AO *)liste->data;
+       g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                   "UPDATE mnemos_AO as m SET valeur='%f' "
+                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                   ao->val_avant_ech, ao->tech_id, ao->acronyme );
+       Lancer_requete_SQL ( db, requete );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
+
+    Libere_DB_SQL( &db );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d AO updated", __func__, cpt );
+  }
+/******************************************************************************************************************************/
+/* Dls_AO_to_Json: Convertir un AO en JSON                                                                                    */
+/* Entrée: l'AO en question et un pointeur recevant la taille du buffer créé                                                  */
+/* Sortie: le buffer et sa taille                                                                                             */
+/******************************************************************************************************************************/
+ gchar *Dls_AO_to_Json ( struct DLS_AO *ao, gsize *taille_buf_p )
+  { JsonBuilder *builder;
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       return(NULL);
+     }
+    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+    Json_add_string ( builder, "tech_id",  ao->tech_id );
+    Json_add_string ( builder, "acronyme", ao->acronyme );
+    Json_add_double ( builder, "valeur",   ao->val_ech );
+    json_builder_end_object (builder);                                                                        /* End Document */
+    return(Json_get_buf ( builder, taille_buf_p ));
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

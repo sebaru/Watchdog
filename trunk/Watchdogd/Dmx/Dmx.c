@@ -197,33 +197,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Dmx_updater_DB: Met a jour les valeurs des Entrées/Sorties dans la base de données                                         */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dmx_Updater_DB ( void )
-  { gchar requete[200];
-    struct DB *db;
-    gint cpt = 0;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Connexion DB impossible", __func__ );
-       return;
-     }
-
-    for (cpt=0; cpt<DMX_CHANNEL; cpt++)
-     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE mnemos_AO as m SET valeur='%f' "
-                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                   Cfg_dmx.Canal[cpt].val_avant_ech, Cfg_dmx.Canal[cpt].tech_id, Cfg_dmx.Canal[cpt].acronyme );
-       Lancer_requete_SQL ( db, requete );
-     }
-
-    Libere_DB_SQL( &db );
-    Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: %d AO updated", __func__, cpt );
-  }
-/******************************************************************************************************************************/
 /* Main: Fonction principale du MODBUS                                                                                        */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
@@ -325,7 +298,6 @@ reload:
      }                                                                     /* Fin du while partage->arret */
 
     Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Preparing to stop . . . TID = %p", __func__, pthread_self() );
-    Dmx_Updater_DB();
     Dmx_close();
     Close_zmq ( Cfg_dmx.zmq_to_master );
     Close_zmq ( zmq_from_bus );

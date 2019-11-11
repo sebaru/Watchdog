@@ -259,6 +259,7 @@
     Updater_cpt_impDB();                                                              /* Sauvegarde des compteurs d'impulsion */
     Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
     Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
+    Updater_confDB_AO();                                                               /* Sauvegarde des valeurs des messages */
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
@@ -360,7 +361,22 @@
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' stopped !", __func__, event->src_instance);
            }
           else if ( !strcmp(event->tag, "SLAVE_START") )
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' started !", __func__, event->src_instance);
+           { struct DLS_AO *ao;
+             gsize taille_buf;
+             GSList *liste;
+             gchar *result;
+             Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' started. Sending AO !", __func__, event->src_instance);
+             liste = Partage->Dls_data_AO;
+             while (liste)
+              { ao = (struct DLS_AO *)Partage->com_msrv.Liste_AO->data;                        /* Recuperation du numero de a */
+                result = Dls_AO_to_Json( ao, &taille_buf );
+                if (result)
+                 { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", event->src_instance, "*", "SET_AO", result, taille_buf );
+                   Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance, "*", "SET_AO", result, taille_buf );
+                   g_free(result);
+                 }
+                liste = g_slist_next(liste);
+              }
            }
           else if ( !strcmp(event->tag, "SNIPS_QUESTION") )
            { struct DB *db;
