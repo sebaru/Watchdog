@@ -1852,7 +1852,7 @@
 
     last_top_1hz = last_top_2hz = last_top_5hz = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
-     { gpointer dls_top_1hz, dls_top_2hz, dls_top_5hz;
+     { gpointer dls_top_1hz=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL;
 
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
