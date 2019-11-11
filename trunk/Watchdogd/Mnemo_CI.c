@@ -320,6 +320,6 @@
      }
 
     Libere_DB_SQL( &db );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CptIMP updated", __func__ );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d CptIMP updated", __func__, cpt );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
