@@ -751,11 +751,7 @@
         { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Context OK", __func__ ); }
 
        if (Config.instance_is_master)
-        { Mnemo_auto_create_AI ( "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
-          Mnemo_auto_create_AI ( "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
-          Mnemo_auto_create_AI ( "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
-          Mnemo_auto_create_AI ( "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
-          if ( pthread_create( &TID, NULL, (void *)Boucle_pere_master, NULL ) )
+        { if ( pthread_create( &TID, NULL, (void *)Boucle_pere_master, NULL ) )
            { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                       "%s: Demarrage boucle sans fin pthread_create failed %s", __func__, strerror(errno) );
            }

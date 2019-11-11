@@ -1826,7 +1826,8 @@
 /* Main: Fonction principale du DLS                                                                                           */
 /******************************************************************************************************************************/
  void Run_dls ( void )
-  { gint Update_heure=0;
+  { gint last_top_1hz, last_top_2hz, last_top_5hz;
+    gint Update_heure=0;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
@@ -1837,12 +1838,21 @@
     Charger_plugins();                                                                          /* Chargement des modules dls */
     SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
     SB_SYS(2, 1);                                                                                      /* B2 est toujours à 1 */
+    Mnemo_auto_create_AI ( "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
+    Mnemo_auto_create_AI ( "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
+    Mnemo_auto_create_AI ( "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
+    Mnemo_auto_create_AI ( "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
+    Mnemo_auto_create_DI ( "SYS", "TOP_1HZ", "Impulsion toutes les secondes" );
+    Mnemo_auto_create_DI ( "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
+    Mnemo_auto_create_DI ( "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
+
     sleep(30);                    /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
 
     Partage->com_dls.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
+    last_top_1hz = last_top_2hz = last_top_5hz = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
-     {
+     { gpointer dls_top_1hz, dls_top_2hz, dls_top_5hz;
 
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
@@ -1850,6 +1860,19 @@
           Decharger_plugins();
           Charger_plugins();
           Partage->com_dls.Thread_reload = FALSE;
+        }
+
+       if (Partage->top-last_top_1hz>=10)                                                              /* Toutes les secondes */
+        { Dls_data_set_bool ( "SYS", "TOP_1HZ", &dls_top_1hz, TRUE );
+          last_top_1hz = Partage->top;
+        }
+       if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
+        { Dls_data_set_bool ( "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
+          last_top_2hz = Partage->top;
+        }
+       if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
+        { Dls_data_set_bool ( "SYS", "TOP_5HZ", &dls_top_5hz, TRUE );
+          last_top_5hz = Partage->top;
         }
 
        if (Partage->top-Update_heure>=600)                          /* Gestion des changements d'horaire (toutes les minutes) */
@@ -1876,6 +1899,9 @@
        Dls_run_dls_tree( Partage->com_dls.Dls_tree );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
        SB_SYS(3, 1);                                                  /* B3 est toujours à un apres le premier tour programme */
+       Dls_data_set_bool ( "SYS", "TOP_1HZ", &dls_top_1hz, FALSE );
+       Dls_data_set_bool ( "SYS", "TOP_2HZ", &dls_top_2hz, FALSE );
+       Dls_data_set_bool ( "SYS", "TOP_5HZ", &dls_top_5hz, FALSE );
        Partage->com_dls.Top_check_horaire = FALSE;                         /* Cotrole horaire effectué un fois par minute max */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
        Partage->audit_tour_dls_per_sec++;                                   /* Gestion de l'audit nbr de tour DLS par seconde */

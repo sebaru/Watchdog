@@ -70,7 +70,7 @@
 /* Entrée: le builder, le nom du parametre, la valeur                                                                         */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Json_add_double ( JsonBuilder *builder, gchar *name, gfloat valeur )
+ void Json_add_double ( JsonBuilder *builder, gchar *name, gdouble valeur )
   { json_builder_set_member_name  ( builder, name );
     json_builder_add_double_value ( builder, valeur );
   }
