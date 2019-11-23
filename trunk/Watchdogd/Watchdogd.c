@@ -723,7 +723,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Shared memory failed to allocate" ); }
     else
      { pthread_mutexattr_t attr;                                                       /* Initialisation des mutex de synchro */
-       gint nbr_essai_db = 20;
+       gint nbr_essai_db = 0;
        memset( Partage, 0, sizeof(struct PARTAGE) );                                                 /* RAZ des bits internes */
        Importer();                                                      /* Tente d'importer les données juste après un reload */
        time ( &Partage->start_time );
@@ -746,20 +746,18 @@
        Partage->Dls_data_TEMPO  = NULL;
        Partage->Dls_data_VISUEL = NULL;
 
-       while (nbr_essai_db > 0)                                                   /* Test itératif de connexion a la database */
+       while (TRUE)                                                               /* Test itératif de connexion a la database */
         { struct DB *db = Init_DB_SQL();
-          if (db) { Libere_DB_SQL ( &db ); break; }
+          if (db)
+           { Libere_DB_SQL ( &db );
+             Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connection to DB OK.", __func__ );
+             break;
+           }
+          nbr_essai_db++;
           Info_new( Config.log, Config.log_msrv, LOG_ERR,
                     "%s: Connection to DB failed (test %d). Retrying in 5s.", __func__, nbr_essai_db );
-          nbr_essai_db--;
           sleep(5);
         }
-       if (nbr_essai_db == 0)
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connection to DB failed many times. Stopping.", __func__ );
-          close(fd_lock);                                     /* Fermeture du FileDescriptor correspondant au fichier de lock */
-          exit(EXIT_FAILURE);
-        }
-       else { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connection to DB OK.", __func__ ); }
 
        sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
