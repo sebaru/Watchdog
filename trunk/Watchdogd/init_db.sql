@@ -702,6 +702,7 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `map_EA` int(11) NOT NULL,
   `map_A` int(11) NOT NULL,
   `map_AA` int(11) NOT NULL,
+  `mode_old_static` BOOLEAN NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 

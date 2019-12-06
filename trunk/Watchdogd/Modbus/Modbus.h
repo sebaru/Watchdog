@@ -106,6 +106,7 @@
     guint map_EA;
     guint map_A;
     guint map_AA;
+    gboolean mode_old_static;
   };
 
  struct MODULE_MODBUS

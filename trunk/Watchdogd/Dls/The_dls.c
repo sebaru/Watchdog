@@ -168,7 +168,7 @@
 /* Utilisé directement par les threads locaux, via Envoyer_entree_furtive_dls pour les evenements                             */
 /******************************************************************************************************************************/
  void SE( int num, int etat )
-  { if ( (E(num) && !etat) || (!E(num) && etat) )
+  { if ( (num>=0) && (num<NBR_ENTRE_TOR) && ((E(num) && !etat) || (!E(num) && etat)) )
      { Ajouter_arch( MNEMO_ENTREE, num, 1.0*E(num) );                       /* Archivage etat n-1 pour les courbes historique */
        Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );                                            /* Archivage de l'etat courant */
        Partage->e[num].etat = etat;                                                          /* Changement d'etat de l'entrée */

@@ -20,7 +20,7 @@ debug_arch = false
 [GLOBAL]
 
 # Répertoire home de user "Watchdog" qui fait tourner le serveur. (default : g_get_home_dir)
-home        = /var/lib/watchdog
+#home        = /var/lib/watchdog
 # Nom du user sous lequel le serveur tourne. (Default : g_get_user_name)
 run_as      = usertobechanged
 # true s'il s'agit de l'instance master (Default true)

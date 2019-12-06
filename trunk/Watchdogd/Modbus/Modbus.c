@@ -87,7 +87,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,date_create,enable,hostname,tech_id,bit,watchdog,description,map_E,map_EA,map_A,map_AA,max_nbr_E "
+                "SELECT id,date_create,enable,hostname,tech_id,bit,watchdog,description,map_E,map_EA,map_A,map_AA,max_nbr_E,mode_old_static "
                 " FROM %s ORDER BY description",
                 NOM_TABLE_MODULE_MODBUS );
 
@@ -124,6 +124,7 @@
        modbus->map_A    = atoi(db->row[10]);
        modbus->map_AA   = atoi(db->row[11]);
        modbus->max_nbr_E= atoi(db->row[12]);
+       modbus->mode_old_static= atoi(db->row[13]);
      }
     return(modbus);
   }
@@ -143,13 +144,17 @@
     module->request = FALSE;
     module->nbr_deconnect++;
     module->date_retente = Partage->top + MODBUS_RETRY;
-    for ( cpt = module->modbus.map_EA; cpt<module->nbr_entree_ana; cpt++) { SEA_range( cpt, 0 ); }
-    if (module->DI) g_free(module->DI);
-    if (module->AI) g_free(module->AI);
-    if (module->DO) g_free(module->DO);
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s : Module %d disconnected", __func__, module->modbus.id );
-    Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
-    SB( module->modbus.bit, 0 );                                                  /* Mise a zero du bit interne lié au module */
+    if( module->modbus.mode_old_static)
+     { for ( cpt = module->modbus.map_EA; cpt<module->nbr_entree_ana; cpt++) { SEA_range( cpt, 0 ); }
+       SB( module->modbus.bit, 0 );                                               /* Mise a zero du bit interne lié au module */
+     }
+    else
+     { if (module->DI) g_free(module->DI);
+       if (module->AI) g_free(module->AI);
+       if (module->DO) g_free(module->DO);
+       Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
+     }
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s : '%s': Module disconnected", __func__, module->modbus.tech_id );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -171,13 +176,13 @@
     sndtimeout.tv_sec  = 10;
     sndtimeout.tv_usec =  0;
 
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-             "%s: Trying to connect module %d to %s", __func__, module->modbus.id, module->modbus.hostname );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: '%s' : Trying to connect module %d to %s", __func__,
+              module->modbus.tech_id, module->modbus.id, module->modbus.hostname );
 
     s = getaddrinfo( module->modbus.hostname, "502", &hints, &result);
     if (s != 0)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                "%s: getaddrinfo Failed for module %d (%s) (%s)", __func__,
+                "%s: '%s': getaddrinfo Failed for module %d (%s) (%s)", __func__, module->modbus.tech_id,
                  module->modbus.id, module->modbus.hostname, gai_strerror(s) );
        return(FALSE);
      }
@@ -191,28 +196,28 @@
      { connexion = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
        if (connexion == -1)
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                   "%s: Socket creation failed for modbus %d (%s)", __func__,
+                   "%s: '%s': Socket creation failed for modbus %d (%s)", __func__, module->modbus.tech_id,
                     module->modbus.id, module->modbus.hostname );
           continue;
         }
 
        if ( setsockopt ( connexion, SOL_SOCKET, SO_SNDTIMEO, (char *)&sndtimeout, sizeof(sndtimeout)) < 0 )
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                   "%s: Socket Set Options failed for modbus %d (%s)", __func__,
+                   "%s: '%s': Socket Set Options failed for modbus %d (%s)", __func__, module->modbus.tech_id,
                     module->modbus.id, module->modbus.hostname );
           continue;
         }
 
        if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                   "%s: %d (%s) family=%d", __func__,
+                   "%s: '%s': %d (%s) family=%d", __func__, module->modbus.tech_id,
                     module->modbus.id, module->modbus.hostname, rp->ai_family );
 
           break;  /* Success */
         }
        else
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
-                   "%s: connexion refused by module %d (%s) family=%d error '%s'", __func__,
+                   "%s: '%s': connexion refused by module %d (%s) family=%d error '%s'", __func__, module->modbus.tech_id,
                     module->modbus.id, module->modbus.hostname, rp->ai_family, strerror(errno) );
         }
        close(connexion);                                                       /* Suppression de la socket qui n'a pu aboutir */
@@ -253,12 +258,13 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "%s: failed for module %d (%s): error %d", __func__,
+               "%s: '%s': failed for module %d (%s): error %d", __func__, module->modbus.tech_id,
                module->modbus.id, module->modbus.hostname, retour );
        Deconnecter_module( module );
      }
     else
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: OK for %d", __func__, module->modbus.id );
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK for %d",
+                 __func__, module->modbus.tech_id, module->modbus.id );
        module->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -282,12 +288,13 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "%s: failed for module %d (%s): error %d", __func__,
+               "%s: '%s': failed for module %d (%s): error %d", __func__, module->modbus.tech_id,
                module->modbus.id, module->modbus.hostname, retour );
        Deconnecter_module( module );
      }
     else
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: OK for %d", __func__, module->modbus.id );
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK for %d",
+                 __func__, module->modbus.tech_id, module->modbus.id );
        module->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -312,12 +319,12 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "%s: 'stop watchdog failed' for %d (error %d)", __func__, module->modbus.id, retour );
+               "%s: '%s': 'stop watchdog failed' for %d (error %d)", __func__, module->modbus.tech_id, module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "%s: 'stop watchdog OK' for %d", __func__, module->modbus.id );
+               "%s: '%s': 'stop watchdog OK' for %d", __func__, module->modbus.tech_id, module->modbus.id );
        module->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -342,13 +349,13 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "%s: 'close modbus tcp on watchdog' failed for %d (error %d)", __func__,
+               "%s: '%s': 'close modbus tcp on watchdog' failed for %d (error %d)", __func__, module->modbus.tech_id,
                module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "%s: 'close modbus tcp on watchdog' OK for %d", __func__, module->modbus.id );
+               "%s: '%s': 'close modbus tcp on watchdog' OK for %d", __func__, module->modbus.tech_id, module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -376,13 +383,13 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "%s: 'init watchdog timer' failed for %d (error %d)", __func__,
+               "%s: '%s': 'init watchdog timer' failed for %d (error %d)", __func__, module->modbus.tech_id,
                module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "%s: 'init watchdog timer' OK for %d", __func__, module->modbus.id );
+               "%s: '%s': 'init watchdog timer' OK for %d", __func__, module->modbus.tech_id, module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -407,232 +414,234 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                "%s: 'watchdog start' failed for %d (error %d)", __func__,
+                "%s: '%s': 'watchdog start' failed for %d (error %d)", __func__, module->modbus.tech_id,
                  module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                "%s: Init_watchdog_modbus: 'watchdog start' OK for %d", __func__, module->modbus.id );
+                "%s: '%s': Init_watchdog_modbus: 'watchdog start' OK for %d", __func__, module->modbus.tech_id, module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
-/**********************************************************************************************************/
-/* Interroger_nbr_entree_ANA : Demander au module d'envoyer son nombre d'entree ANALOGIQUE                */
-/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_nbr_entree_ANA : Demander au module d'envoyer son nombre d'entree ANALOGIQUE                                    */
+/* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
+/******************************************************************************************************************************/
  static void Interroger_nbr_entree_ANA( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.taille         = htons( 0x006 );                            /* taille, en comptant le unit_id */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x006 );                                                /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_READ_REGISTER;
     requete.adresse        = htons( 0x1023 );
     requete.nbr            = htons( 0x0001 );
 
     retour = write ( module->connexion, &requete, 12 );
-    if ( retour != 12 )                                                            /* Envoi de la requete */
+    if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "Interroger_nbr_entree_ANA: failed for %d (error %d)",
+               "%s: '%s': failed for %d (error %d)", __func__, module->modbus.tech_id,
                 module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "Interroger_nbr_entree_ANA: OK for %d", module->modbus.id );
-       module->request = TRUE;                                                /* Une requete a élé lancée */
+               "%d: '%s': OK for %d", __func__, module->modbus.tech_id, module->modbus.id );
+       module->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
-/**********************************************************************************************************/
-/* Interroger_nbr_entree_ANA : Demander au module d'envoyer son nombre de sortie ANALOGIQUE               */
-/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_nbr_entree_ANA : Demander au module d'envoyer son nombre de sortie ANALOGIQUE                                   */
+/* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
+/******************************************************************************************************************************/
  static void Interroger_nbr_sortie_ANA( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.taille         = htons( 0x006 );                            /* taille, en comptant le unit_id */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x006 );                                                /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_READ_REGISTER;
     requete.adresse        = htons( 0x1022 );
     requete.nbr            = htons( 0x0001 );
 
     retour = write ( module->connexion, &requete, 12 );
-    if ( retour != 12 )                                                            /* Envoi de la requete */
+    if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "Interroger_nbr_sortie_ANA: failed %d (error %d)",
+               "%s: '%s': failed %d (error %d)", __func__, module->modbus.tech_id,
                 module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "Interroger_nbr_sortie_ANA: OK", module->modbus.id );
-       module->request = TRUE;                                                /* Une requete a élé lancée */
+               "%s: '%s': OK", __func__, module->modbus.tech_id, module->modbus.id );
+       module->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
-/**********************************************************************************************************/
-/* Interroger_nbr_entree_TOR : Demander au module d'envoyer son nombre d'entree TOR                       */
-/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_nbr_entree_TOR : Demander au module d'envoyer son nombre d'entree TOR                                           */
+/* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
+/******************************************************************************************************************************/
  static void Interroger_nbr_entree_TOR( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.taille         = htons( 0x006 );                            /* taille, en comptant le unit_id */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x006 );                                                /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_READ_REGISTER;
     requete.adresse        = htons( 0x1025 );
     requete.nbr            = htons( 0x0001 );
 
     retour = write ( module->connexion, &requete, 12 );
-    if ( retour != 12 )                                                            /* Envoi de la requete */
+    if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "%s: failed %d (error %d - '%s')", __func__, module->modbus.id, retour, strerror(errno) );
+               "%s: '%s': failed %d (error %d - '%s')", __func__, module->modbus.tech_id, module->modbus.id, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                "%s: OK for %d", __func__, module->modbus.id );
-       module->request = TRUE;                                                /* Une requete a élé lancée */
+                "%s: '%s': OK for %d", __func__, module->modbus.tech_id, module->modbus.id );
+       module->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
-/**********************************************************************************************************/
-/* Interroger_nbr_sortie_TOR : Demander au module d'envoyer son nombre de sortie TOR                      */
-/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_nbr_sortie_TOR : Demander au module d'envoyer son nombre de sortie TOR                                          */
+/* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
+/******************************************************************************************************************************/
  static void Interroger_nbr_sortie_TOR( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.taille         = htons( 0x006 );                            /* taille, en comptant le unit_id */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x006 );                                                /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_READ_REGISTER;
     requete.adresse        = htons( 0x1024 );
     requete.nbr            = htons( 0x0001 );
 
     retour = write ( module->connexion, &requete, 12 );
-    if ( retour != 12 )                                                            /* Envoi de la requete */
+    if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                 "%s: write error Module %d (error %d, '%s')", __func__, module->modbus.id, retour, strerror(errno) );
+                 "%s: '%s': write error Module %d (error %d, '%s')", __func__, module->modbus.tech_id,
+                 module->modbus.id, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                 "%s: OK for %d", __func__, module->modbus.id );
-       module->request = TRUE;                                                /* Une requete a élé lancée */
+                 "%s: '%s': OK for %d", __func__, module->modbus.tech_id, module->modbus.id );
+       module->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
-/**********************************************************************************************************/
-/* Interroger_borne: Interrogation d'une borne du module                                                  */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_borne: Interrogation d'une borne du module                                                                      */
+/* Entrée: identifiants des modules et borne                                                                                  */
+/* Sortie: ?                                                                                                                  */
+/******************************************************************************************************************************/
  static void Interroger_entree_tor( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x0006 );                                               /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_READ_COIL;
     requete.adresse        = 0x00;
     requete.nbr            = htons( module->nbr_entree_tor );
 
-    if ( write ( module->connexion, &requete, 12 ) != 12 )                         /* Envoi de la requete */
+    if ( write ( module->connexion, &requete, 12 ) != 12 )                                             /* Envoi de la requete */
      { Deconnecter_module( module ); }
-    else module->request = TRUE;                                              /* Une requete a élé lancée */
+    else module->request = TRUE;                                                                  /* Une requete a élé lancée */
   }
-/**********************************************************************************************************/
-/* Interroger_entree_ana: Interrogation des entrees analogique d'un module wago                           */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_entree_ana: Interrogation des entrees analogique d'un module wago                                               */
+/* Entrée: identifiants des modules et borne                                                                                  */
+/* Sortie: ?                                                                                                                  */
+/******************************************************************************************************************************/
  static void Interroger_entree_ana( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x0006 );                                               /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_READ_REGISTER;
     requete.adresse        = 0x00;
     requete.nbr            = htons( module->nbr_entree_ana );
 
-    if ( write ( module->connexion, &requete, 12 ) != 12 )                         /* Envoi de la requete */
+    if ( write ( module->connexion, &requete, 12 ) != 12 )                                             /* Envoi de la requete */
      { Deconnecter_module( module ); }
-    else module->request = TRUE;                                              /* Une requete a élé lancée */
+    else module->request = TRUE;                                                                  /* Une requete a élé lancée */
   }
-/**********************************************************************************************************/
-/* Interroger_borne: Interrogation d'une borne du module                                                  */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_borne: Interrogation d'une borne du module                                                                      */
+/* Entrée: identifiants des modules et borne                                                                                  */
+/* Sortie: ?                                                                                                                  */
+/******************************************************************************************************************************/
  static void Interroger_sortie_tor( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint cpt_a, cpt_poid, cpt_byte, cpt, taille, nbr_data;
 
-    memset(&requete, 0, sizeof(requete) );                           /* Mise a zero globale de la requete */
+    memset(&requete, 0, sizeof(requete) );                                               /* Mise a zero globale de la requete */
     nbr_data = ((module->nbr_sortie_tor-1)/8)+1;
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
     taille                 = 0x0007 + nbr_data;
-    requete.taille         = htons( taille );                                                   /* taille */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.taille         = htons( taille );                                                                       /* taille */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_WRITE_MULTIPLE_COIL;
     requete.adresse        = 0x00;
-    requete.nbr            = htons( module->nbr_sortie_tor );                                /* bit count */
-    requete.data[2]        = nbr_data;                                                      /* Byte count */
+    requete.nbr            = htons( module->nbr_sortie_tor );                                                    /* bit count */
+    requete.data[2]        = nbr_data;                                                                          /* Byte count */
     cpt_a = module->modbus.map_A;
     for ( cpt_poid = 1, cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_tor; cpt++, cpt_a++)
       { if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
-        if ( module->DO && module->DO[cpt] )
+        if (module->modbus.mode_old_static)
+         { if (A(cpt_a)) requete.data[cpt_byte] |= cpt_poid; }
+        else if ( module->DO && module->DO[cpt] )
          { if (Dls_data_get_bool( NULL, NULL, &module->DO[cpt] ) )
             { requete.data[cpt_byte] |= cpt_poid; }
          }
-        else if (A(cpt_a)) requete.data[cpt_byte] |= cpt_poid;
         cpt_poid = cpt_poid << 1;
       }
 
-    if ( write ( module->connexion, &requete, taille+6 ) != taille+6 )/* Envoi de la requete (taille + header )*/
+    if ( write ( module->connexion, &requete, taille+6 ) != taille+6 )               /* Envoi de la requete (taille + header )*/
      { Deconnecter_module( module ); }
-    else module->request = TRUE;                                              /* Une requete a élé lancée */
+    else module->request = TRUE;                                                                  /* Une requete a élé lancée */
   }
-/**********************************************************************************************************/
-/* Interroger_sortie_ana: Envoie les informations liées aux sorties ANA du module                         */
-/* Entrée: le module à interroger                                                                         */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_sortie_ana: Envoie les informations liées aux sorties ANA du module                                             */
+/* Entrée: le module à interroger                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Interroger_sortie_ana( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint cpt_a, cpt_byte, cpt, taille;
 
-    memset(&requete, 0, sizeof(requete) );                           /* Mise a zero globale de la requete */
+    memset(&requete, 0, sizeof(requete) );                                               /* Mise a zero globale de la requete */
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
     taille                 = 0x0006 + (module->nbr_sortie_ana*2 + 1);
-    requete.taille         = htons( taille );                                                   /* taille */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.taille         = htons( taille );                                                                       /* taille */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_WRITE_MULTIPLE_REGISTER;
     requete.adresse        = 0x00;
-    requete.nbr            = htons( module->nbr_sortie_ana );                                /* bit count */
-    requete.data[2]        = (module->nbr_sortie_ana*2);                                    /* Byte count */
+    requete.nbr            = htons( module->nbr_sortie_ana );                                                    /* bit count */
+    requete.data[2]        = (module->nbr_sortie_ana*2);                                                        /* Byte count */
     cpt_a = module->modbus.map_AA;
     for ( cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_ana; cpt++)
       { /* Attention, parser selon le type de sortie ! (12 bits ? 10 bits ? conversion ??? */
@@ -641,9 +650,9 @@
         cpt_a++; cpt_byte += 2;
       }
 
-    if ( write ( module->connexion, &requete, taille+6 ) != taille+6 )/* Envoi de la requete (taille + header )*/
+    if ( write ( module->connexion, &requete, taille+6 ) != taille+6 )               /* Envoi de la requete (taille + header )*/
      { Deconnecter_module( module ); }
-    else module->request = TRUE;                                              /* Une requete a élé lancée */
+    else module->request = TRUE;                                                                  /* Une requete a élé lancée */
   }
 /******************************************************************************************************************************/
 /* Modbus_do_mapping : mappe les entrees/sorties Wago avec la zone de mémoire interne dynamique                               */
@@ -654,89 +663,101 @@
   { gchar critere[80];
     struct DB *db;
 
+    if(module->modbus.mode_old_static) return;
+
     module->AI = g_try_malloc0( sizeof(gpointer) * module->nbr_entree_ana );
     if (!module->AI)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error for AI", __func__ );
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AI", __func__, module->modbus.tech_id );
        return;
      }
+
     module->DI = g_try_malloc0( sizeof(gpointer) * module->nbr_entree_tor );
     if (!module->DI)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error for DI", __func__ );
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__ , module->modbus.tech_id);
        return;
      }
 
     module->DO = g_try_malloc0( sizeof(gpointer) * module->nbr_sortie_tor );
     if (!module->DO)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error for DO", __func__ );
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DO", __func__, module->modbus.tech_id );
        return;
      }
 
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     g_snprintf( critere, sizeof(critere),"%s:AI%%", module->modbus.tech_id );
     if ( ! Recuperer_mnemos_AI_by_text ( &db, NOM_THREAD, critere ) )
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
+                 __func__, module->modbus.tech_id, critere );
+     }
     else while ( Recuperer_mnemos_AI_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *map_text = db->row[2], *libelle = db->row[3];
        gchar debut[80];
        gint num;
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
-                 map_text, tech_id, acro, libelle );
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Match found '%s' '%s:%s' - %s",
+                 __func__, module->modbus.tech_id, map_text, tech_id, acro, libelle );
        if ( sscanf ( map_text, "%[^:]:AI%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_ana)
            { Dls_data_get_AI ( tech_id, acro, &module->AI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
              if(module->AI[num] == NULL) Dls_data_set_AI ( tech_id, acro, &module->AI[num], 0.0 );       /* Sinon, on le crée */
              Charger_conf_AI ( module->AI[num] );                                    /* Chargement de la conf AI depuis la DB */
            }
-          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
-                         map_text, num, module->nbr_entree_ana );
+          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
+                         __func__, module->modbus.tech_id, map_text, num, module->nbr_entree_ana );
         }
-       else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, map_text );
+       else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
+                      __func__, module->modbus.tech_id, map_text );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     g_snprintf( critere, sizeof(critere),"%s:DI%%", module->modbus.tech_id );
     if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, critere ) )
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
+                 __func__, module->modbus.tech_id, critere );
+     }
     else while ( Recuperer_mnemos_DI_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
        char debut[80];
        gint num;
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
-                 src_text, tech_id, acro, libelle );
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Match found '%s' '%s:%s' - %s",
+                 __func__, module->modbus.tech_id, src_text, tech_id, acro, libelle );
        if ( sscanf ( src_text, "%[^:]:DI%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_tor)
            { Dls_data_get_bool ( tech_id, acro, &module->DI[num] );      /* bit déjà existant deja dans la structure DLS DATA */
              if(module->DI[num] == NULL) Dls_data_set_bool ( tech_id, acro, &module->DI[num], FALSE );   /* Sinon, on le crée */
            }
-          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
-                         src_text, num, module->nbr_entree_tor );
+          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
+                         __func__, module->modbus.tech_id, src_text, num, module->nbr_entree_tor );
         }
-       else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, src_text );
+       else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
+                      __func__, module->modbus.tech_id, src_text );
      }
 /*********************************** Recherche des events DO a raccrocher aux bits internes ***********************************/
     g_snprintf( critere, sizeof(critere),"%s:DO%%", module->modbus.tech_id );
     if ( ! Recuperer_mnemos_DO_by_tag ( &db, NOM_THREAD, critere ) )
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
+                 __func__, module->modbus.tech_id, critere );
+     }
     else while ( Recuperer_mnemos_DO_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *dst_tag = db->row[2];
        char debut[80];
        gint num;
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
-                 dst_tag, tech_id, acro, libelle );
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Match found '%s' '%s:%s' - %s",
+                 __func__, module->modbus.tech_id, dst_tag, tech_id, acro, libelle );
        if ( sscanf ( dst_tag, "%[^:]:DO%d", debut, &num ) == 2 )                      /* Découpage de la ligne ev_text */
         { if (num<module->nbr_sortie_tor)
            { Dls_data_get_bool ( tech_id, acro, &module->DO[num] );      /* bit déjà existant deja dans la structure DLS DATA */
              if(module->DO[num] == NULL) Dls_data_set_bool ( tech_id, acro, &module->DO[num], FALSE );   /* Sinon, on le crée */
            }
-          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
-                         dst_tag, num, module->nbr_entree_tor );
+          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
+                         __func__, module->modbus.tech_id, dst_tag, num, module->nbr_entree_tor );
         }
-       else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, dst_tag );
+       else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
+                      __func__, module->modbus.tech_id, dst_tag );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
 
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Module '%s' : mapping done", __func__,
-              module->modbus.description );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: '%s': Module '%s' : mapping done",
+              __func__, module->modbus.tech_id, module->modbus.description );
   }
 /******************************************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
@@ -748,22 +769,23 @@
     module->request = FALSE;                                                                     /* Une requete a été traitée */
 
     if ( (guint16) module->response.proto_id )
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: wrong proto_id", __func__ );
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': wrong proto_id", __func__, module->modbus.tech_id );
        Deconnecter_module( module );
      }
     else
      { int cpt_e, cpt_byte, cpt_poid, cpt;
        module->date_last_reponse = Partage->top;                                                   /* Estampillage de la date */
-       Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, TRUE );
-       SB( module->modbus.bit, 1 );                                                  /* Mise a 1 du bit interne lié au module */
+       if( module->modbus.mode_old_static)
+        { SB( module->modbus.bit, 1 ); }                                             /* Mise a 1 du bit interne lié au module */
+       else Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, TRUE );
        if (ntohs(module->response.transaction_id) != module->transaction_id)                              /* Mauvaise reponse */
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                   "%s: wrong transaction_id for module %d  attendu %d, recu %d", __func__,
+                   "%s: '%s': wrong transaction_id for module %d  attendu %d, recu %d", __func__, module->modbus.tech_id,
                     module->modbus.id, module->transaction_id, ntohs(module->response.transaction_id) );
         }
        if ( module->response.fct >=0x80 )
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                   "%s: Erreur Reponse Module %d, Error %d, Exception code %d", __func__,
+                   "%s: '%s': Erreur Reponse Module %d, Error %d, Exception code %d", __func__, module->modbus.tech_id,
                     module->modbus.id, module->response.fct, (int)module->response.data[0] );
           Deconnecter_module( module );
         }
@@ -771,8 +793,8 @@
         { case MODBUS_GET_DI:
                cpt_e = module->modbus.map_E;
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
-                { SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
-                  Dls_data_set_bool ( NULL, NULL, (gpointer)&module->DI[cpt], (module->response.data[ cpt_byte ] & cpt_poid) );
+                { if(module->modbus.mode_old_static) SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
+                  else Dls_data_set_bool ( NULL, NULL, (gpointer)&module->DI[cpt], (module->response.data[ cpt_byte ] & cpt_poid) );
                   cpt_e++;
                   cpt_poid = cpt_poid << 1;
                   if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
@@ -781,48 +803,52 @@
                break;
           case MODBUS_GET_AI:
                cpt_e = module->modbus.map_EA;
-               for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)         /* Old style : positionnement par ancienne interface */
-                { switch(Partage->ea[cpt_e].confDB.type)
-                   { case ENTREEANA_WAGO_750455:
-                          if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
-                           { int reponse;
-                             reponse  = module->response.data[ 2*cpt + 1 ] << 5;
-                             reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
-                             SEA( cpt_e, reponse );
-                           }
-                          else SEA_range( cpt_e, 0 );
-                          break;
-                     case ENTREEANA_WAGO_750461:                                                               /* Borne PT100 */
-                           { gint16 reponse;
-                             reponse  = module->response.data[ 2*cpt + 1 ] << 8;
-                             reponse |= module->response.data[ 2*cpt + 2 ];
-                             SEA ( cpt_e, 1.0*reponse );
-                           }
-                          break;
-                     default : SEA_range( cpt_e, 0 );
+               if (module->modbus.mode_old_static)
+                { for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)      /* Old style : positionnement par ancienne interface */
+                   { switch(Partage->ea[cpt_e].confDB.type)
+                      { case ENTREEANA_WAGO_750455:
+                             if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
+                              { int reponse;
+                                reponse  = module->response.data[ 2*cpt + 1 ] << 5;
+                                reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
+                                SEA( cpt_e, reponse );
+                              }
+                             else SEA_range( cpt_e, 0 );
+                             break;
+                        case ENTREEANA_WAGO_750461:                                                            /* Borne PT100 */
+                              { gint16 reponse;
+                                reponse  = module->response.data[ 2*cpt + 1 ] << 8;
+                                reponse |= module->response.data[ 2*cpt + 2 ];
+                                SEA ( cpt_e, 1.0*reponse );
+                              }
+                             break;
+                        default : SEA_range( cpt_e, 0 );
+                      }
+                     cpt_e++;
                    }
-                  cpt_e++;
                 }
-               for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
-                { struct DLS_AI *ai = module->AI[cpt];
-                  if (!ai) continue;
-                  switch(ai->type)
-                   { case ENTREEANA_WAGO_750455:                                      /* data[0] est la taille de data recue. */
-                          if ( ! (module->response.data[ 1 + (2*cpt + 1) ] & 0x03) )
-                           { gfloat reponse;
-                             reponse  = module->response.data[ 1 + (2*cpt + 0) ] << 5;                /* Valeur de poids fort */
-                             reponse += module->response.data[ 1 + (2*cpt + 1) ] >> 3;               /* Valeur de poid faible */
-                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
-                           }
-                          break;
-                     case ENTREEANA_WAGO_750461:                                                               /* Borne PT100 */
-                           { gfloat reponse;                                          /* data[0] est la taille de data recue. */
-                             reponse  = module->response.data[ 2*cpt + 1 ] << 8;
-                             reponse += module->response.data[ 2*cpt + 2 ];
-                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
-                           }
-                          break;
-                     default : SEA_range( cpt_e, 0 );
+               else
+                { for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
+                   { struct DLS_AI *ai = module->AI[cpt];
+                     if (!ai) continue;
+                     switch(ai->type)
+                      { case ENTREEANA_WAGO_750455:                                   /* data[0] est la taille de data recue. */
+                             if ( ! (module->response.data[ 1 + (2*cpt + 1) ] & 0x03) )
+                              { gfloat reponse;
+                                reponse  = module->response.data[ 1 + (2*cpt + 0) ] << 5;             /* Valeur de poids fort */
+                                reponse += module->response.data[ 1 + (2*cpt + 1) ] >> 3;            /* Valeur de poid faible */
+                                Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
+                              }
+                             break;
+                        case ENTREEANA_WAGO_750461:                                                            /* Borne PT100 */
+                              { gfloat reponse;                                       /* data[0] est la taille de data recue. */
+                                reponse  = module->response.data[ 2*cpt + 1 ] << 8;
+                                reponse += module->response.data[ 2*cpt + 2 ];
+                                Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
+                              }
+                             break;
+                        default : break;
+                      }
                    }
                 }
                module->mode = MODBUS_SET_DO;
@@ -842,8 +868,8 @@
                chaine[0] = ntohs( (gint16)module->response.data[1] );
                chaine[2] = ntohs( (gint16)module->response.data[3] );
                chaine[taille] = 0;
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                         "%s: Module %d Get Description (size %d) '%s'", __func__, module->modbus.id, taille, chaine );
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get Description (size %d) '%s'",
+                         __func__, module->modbus.tech_id, module->modbus.id, taille, chaine );
                module->mode = MODBUS_GET_FIRMWARE;
                break;
             }
@@ -856,38 +882,38 @@
                chaine[0] = ntohs( (gint16)module->response.data[1] );
                chaine[2] = ntohs( (gint16)module->response.data[3] );
                chaine[taille] = 0;
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                         "%s: Module %d Get Firmware (size %d) %s", __func__, module->modbus.id, taille, chaine );
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get Firmware (size %d) %s",
+                         __func__, module->modbus.tech_id, module->modbus.id, taille, chaine );
                module->mode = MODBUS_INIT_WATCHDOG1;
                break;
             }
           case MODBUS_INIT_WATCHDOG1:
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                        "%s: Module %d Watchdog1 = %d %d", __func__, module->modbus.id,
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Module %d Watchdog1 = %d %d",
+                         __func__, module->modbus.tech_id, module->modbus.id,
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ),
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
                        );
                module->mode = MODBUS_INIT_WATCHDOG2;
                break;
           case MODBUS_INIT_WATCHDOG2:
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                        "%s: Module %d Watchdog2 = %d %d", __func__, module->modbus.id,
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Module %d Watchdog2 = %d %d",
+                         __func__, module->modbus.tech_id, module->modbus.id,
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ),
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
                        );
                module->mode = MODBUS_INIT_WATCHDOG3;
                break;
           case MODBUS_INIT_WATCHDOG3:
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                        "%s: Module %d Watchdog3 = %d %d", __func__, module->modbus.id,
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Module %d Watchdog3 = %d %d",
+                         __func__, module->modbus.tech_id, module->modbus.id,
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ),
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
                        );
                module->mode = MODBUS_INIT_WATCHDOG4;
                break;
           case MODBUS_INIT_WATCHDOG4:
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                        "%s: Module %d Watchdog4 = %d %d", __func__, module->modbus.id,
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Module %d Watchdog4 = %d %d",
+                         __func__, module->modbus.tech_id, module->modbus.id,
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ),
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
                        );
@@ -895,15 +921,15 @@
                break;
           case MODBUS_GET_NBR_AI:
                module->nbr_entree_ana = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) ) / 16;
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Module %d Get number Entree ANA = %d",
-                         __func__, module->modbus.id, module->nbr_entree_ana
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get number Entree ANA = %d",
+                         __func__, module->modbus.tech_id, module->modbus.id, module->nbr_entree_ana
                        );
                module->mode = MODBUS_GET_NBR_AO;
                break;
           case MODBUS_GET_NBR_AO:
                module->nbr_sortie_ana = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) ) / 16;
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Module %d Get number Sortie ANA = %d",
-                         __func__, module->modbus.id, module->nbr_sortie_ana
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get number Sortie ANA = %d",
+                         __func__, module->modbus.tech_id, module->modbus.id, module->nbr_sortie_ana
                        );
                module->mode = MODBUS_GET_NBR_DI;
                break;
@@ -913,22 +939,20 @@
                   if (module->modbus.max_nbr_E>0) module->nbr_entree_tor = module->modbus.max_nbr_E;
                                              else module->nbr_entree_tor = nbr;
                   if (module->modbus.max_nbr_E>0)
-                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                               "%s: Module %d Get number Entree TOR = %d (forced)", __func__,
-                               module->modbus.id, module->nbr_entree_tor );
+                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get number Entree TOR = %d (forced)",
+                               __func__, module->modbus.tech_id, module->modbus.id, module->nbr_entree_tor );
                    }
                   else
-                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                               "%s: Module %d Get number Entree TOR = %d", __func__,
-                               module->modbus.id, module->nbr_entree_tor );
+                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get number Entree TOR = %d",
+                               __func__, module->modbus.tech_id, module->modbus.id, module->nbr_entree_tor );
                    }
                   module->mode = MODBUS_GET_NBR_DO;
                 }
                break;
           case MODBUS_GET_NBR_DO:
                module->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) );
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                         "%s: Module %d Get number Sortie TOR = %d", __func__, module->modbus.id, module->nbr_sortie_tor );
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get number Sortie TOR = %d",
+                         __func__, module->modbus.tech_id, module->modbus.id, module->nbr_sortie_tor );
                module->mode = MODBUS_GET_DI;
                Modbus_do_mapping( module );                                        /* Initialise le mapping des I/O du module */
                break;
@@ -948,9 +972,9 @@
 
     if (module->date_last_reponse + 600 < Partage->top)                                      /* Detection attente trop longue */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                "%s: Timeout module %d, enable=%d, started=%d, mode=%02d, "
+                "%s: '%s': Timeout module %d, enable=%d, started=%d, mode=%02d, "
                 "transactionID=%06d, nbr_deconnect=%02d, last_reponse=%03ds ago, retente=in %03ds, date_next_eana=in %03ds",
-                 __func__, module->modbus.id, module->modbus.enable, module->started, module->mode,
+                 __func__, module->modbus.tech_id, module->modbus.id, module->modbus.enable, module->started, module->mode,
                  module->transaction_id, module->nbr_deconnect,
                 (Partage->top - module->date_last_reponse)/10,
                 (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1),
@@ -974,7 +998,7 @@
 
        if (bute>=sizeof(struct TRAME_MODBUS_REPONSE))
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_CRIT,
-                   "%s: bute = %d >= %d (sizeof(module->reponse)=%d, taille recue = %d)", __func__,
+                   "%s: '%s': bute = %d >= %d (sizeof(module->reponse)=%d, taille recue = %d)", __func__, module->modbus.tech_id,
                     bute, sizeof(struct TRAME_MODBUS_REPONSE), sizeof(module->response), ntohs(module->response.taille) );
           Deconnecter_module( module );
           return;
@@ -990,7 +1014,7 @@
         }
        else
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                    "%s: Read Error for %d. Get %d, error %s", __func__,
+                    "%s: '%s': Read Error for %d. Get %d, error %s", __func__, module->modbus.tech_id,
                     module->modbus.id, cpt, strerror(errno) );
           Deconnecter_module ( module );
         }
@@ -1032,8 +1056,8 @@
 /********************************************* Début de l'interrogation du module *********************************************/
        if ( ! module->started )                                                                  /* Communication OK ou non ? */
         { if ( ! Connecter_module( module ) )
-           { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                       "%s: Module %03d DOWN. retrying in %ds", __func__, module->modbus.id, MODBUS_RETRY/10 );
+           { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %03d DOWN. retrying in %ds",
+                       __func__, module->modbus.tech_id, module->modbus.id, MODBUS_RETRY/10 );
              module->date_retente = Partage->top + MODBUS_RETRY;
            }
         }
@@ -1073,7 +1097,6 @@
                                              module->do_check_eana = FALSE;                              /* Le check est fait */
                                              module->nbr_request++;
                                              break;
-
               }
            }
        }
