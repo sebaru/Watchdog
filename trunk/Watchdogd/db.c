@@ -1546,7 +1546,7 @@
      }
 
     if (database_version < 4412)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE 'modbus_modules' ADD `mode_old_static` BOOLEAN NOT NULL DEFAULT 0,");
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` ADD `mode_old_static` TINYINT(1) NOT NULL DEFAULT '0'");
        Lancer_requete_SQL ( db, requete );
      }
 

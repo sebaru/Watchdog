@@ -268,7 +268,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_BOOL` (
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
-  `etat` BOOLEAN NOT NULL DEFAULT 0,
+  `etat` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE
@@ -702,7 +702,7 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `map_EA` int(11) NOT NULL,
   `map_A` int(11) NOT NULL,
   `map_AA` int(11) NOT NULL,
-  `mode_old_static` BOOLEAN NOT NULL DEFAULT 0,
+  `mode_old_static` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
