@@ -669,19 +669,22 @@
     if (!module->AI)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AI", __func__, module->modbus.tech_id );
        return;
-     } else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d AI", __func__, module->nbr_entree_ana );
+     } else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+                      "%s: '%s': Allocated %d AI", __func__, module->modbus.tech_id, module->nbr_entree_ana );
 
     module->DI = g_try_malloc0( sizeof(gpointer) * module->nbr_entree_tor );
     if (!module->DI)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__ , module->modbus.tech_id);
        return;
-     } else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DI", __func__, module->nbr_entree_tor );
+     } else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+                      "%s: '%s': Allocated %d DI", __func__, module->modbus.tech_id, module->nbr_entree_tor );
 
     module->DO = g_try_malloc0( sizeof(gpointer) * module->nbr_sortie_tor );
     if (!module->DO)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DO", __func__, module->modbus.tech_id );
        return;
-     } else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DO", __func__, module->nbr_sortie_tor );
+     } else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+                      "%s: '%s': Allocated %d DO", __func__, module->modbus.tech_id, module->nbr_sortie_tor );
 
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     g_snprintf( critere, sizeof(critere),"%s:AI%%", module->modbus.tech_id );
