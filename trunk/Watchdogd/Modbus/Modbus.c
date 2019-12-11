@@ -961,8 +961,6 @@
                break;
         }
      }
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-              "%s: '%s': module en mode %d", __func__, module->modbus.tech_id, module->mode );
     memset (&module->response, 0, sizeof(struct TRAME_MODBUS_REPONSE) );
   }
 /******************************************************************************************************************************/
