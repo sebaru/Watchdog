@@ -479,7 +479,7 @@
    	signal(SIGCHLD, SIG_IGN);
 reconnect:
    	purple_util_set_user_dir(Config.home);
-   	purple_debug_set_enabled(TRUE);
+   	purple_debug_set_enabled(Cfg_imsgp.lib->Thread_debug);
    	purple_core_set_ui_ops(&Imsgp_core_uiops);
 	   purple_eventloop_set_ui_ops(&glib_eventloops);
     if (!purple_core_init("Watchdog"))
