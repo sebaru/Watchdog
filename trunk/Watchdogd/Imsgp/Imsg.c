@@ -551,7 +551,7 @@ reconnect:
 
     g_main_context_unref (g_main_loop_get_context (MainLoop));
     purple_core_quit();
-    if (Cfg_imsgp.signed_off)
+    if (Cfg_imsgp.lib->Thread_run == TRUE && Cfg_imsgp.signed_off == TRUE)
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "%s: Account signed off. Why ?? Reconnect !", __func__ );
        Cfg_imsgp.signed_off = FALSE;
        goto reconnect;
