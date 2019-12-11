@@ -259,6 +259,7 @@
     Updater_cpt_impDB();                                                              /* Sauvegarde des compteurs d'impulsion */
     Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
     Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
+    Updater_confDB_AO();                                                               /* Sauvegarde des valeurs des messages */
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
@@ -355,6 +356,27 @@
           else if ( !strcmp(event->tag, "ping") )
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s/%s to %s/%s",
                        __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
+           }
+          else if ( !strcmp(event->tag, "SLAVE_STOP") )
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' stopped !", __func__, event->src_instance);
+           }
+          else if ( !strcmp(event->tag, "SLAVE_START") )
+           { struct DLS_AO *ao;
+             gsize taille_buf;
+             GSList *liste;
+             gchar *result;
+             Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' started. Sending AO !", __func__, event->src_instance);
+             liste = Partage->Dls_data_AO;
+             while (liste)
+              { ao = (struct DLS_AO *)Partage->com_msrv.Liste_AO->data;                        /* Recuperation du numero de a */
+                result = Dls_AO_to_Json( ao, &taille_buf );
+                if (result)
+                 { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", event->src_instance, "*", "SET_AO", result, taille_buf );
+                   Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance, "*", "SET_AO", result, taille_buf );
+                   g_free(result);
+                 }
+                liste = g_slist_next(liste);
+              }
            }
           else if ( !strcmp(event->tag, "SNIPS_QUESTION") )
            { struct DB *db;
@@ -474,6 +496,7 @@
 
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, NULL, "msrv", "*", "msrv", "SLAVE_START", NULL, 0 );
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
      { struct ZMQ_TARGET *event;                                                    /* Instance is slave, listening to master */
        gchar buffer[2048];
@@ -528,6 +551,7 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, NULL, "msrv", "*", "msrv", "SLAVE_STOP", NULL, 0 );
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
@@ -699,7 +723,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Shared memory failed to allocate" ); }
     else
      { pthread_mutexattr_t attr;                                                       /* Initialisation des mutex de synchro */
-       gint nbr_essai_db = 20;
+       gint nbr_essai_db = 0;
        memset( Partage, 0, sizeof(struct PARTAGE) );                                                 /* RAZ des bits internes */
        Importer();                                                      /* Tente d'importer les données juste après un reload */
        time ( &Partage->start_time );
@@ -722,20 +746,18 @@
        Partage->Dls_data_TEMPO  = NULL;
        Partage->Dls_data_VISUEL = NULL;
 
-       while (nbr_essai_db > 0)                                                   /* Test itératif de connexion a la database */
+       while (TRUE)                                                               /* Test itératif de connexion a la database */
         { struct DB *db = Init_DB_SQL();
-          if (db) { Libere_DB_SQL ( &db ); break; }
+          if (db)
+           { Libere_DB_SQL ( &db );
+             Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connection to DB OK.", __func__ );
+             break;
+           }
+          nbr_essai_db++;
           Info_new( Config.log, Config.log_msrv, LOG_ERR,
                     "%s: Connection to DB failed (test %d). Retrying in 5s.", __func__, nbr_essai_db );
-          nbr_essai_db--;
           sleep(5);
         }
-       if (nbr_essai_db == 0)
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connection to DB failed many times. Stopping.", __func__ );
-          close(fd_lock);                                     /* Fermeture du FileDescriptor correspondant au fichier de lock */
-          exit(EXIT_FAILURE);
-        }
-       else { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connection to DB OK.", __func__ ); }
 
        sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
@@ -751,11 +773,7 @@
         { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Context OK", __func__ ); }
 
        if (Config.instance_is_master)
-        { Mnemo_auto_create_AI ( "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
-          Mnemo_auto_create_AI ( "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
-          Mnemo_auto_create_AI ( "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
-          Mnemo_auto_create_AI ( "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
-          if ( pthread_create( &TID, NULL, (void *)Boucle_pere_master, NULL ) )
+        { if ( pthread_create( &TID, NULL, (void *)Boucle_pere_master, NULL ) )
            { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                       "%s: Demarrage boucle sans fin pthread_create failed %s", __func__, strerror(errno) );
            }

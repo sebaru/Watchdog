@@ -109,5 +109,8 @@
  extern struct DB *Rechercher_AO ( gchar *tech_id, gchar *acronyme );
  extern gboolean Recuperer_mnemos_AO_by_text ( struct DB **db_retour, gchar *thread, gchar *text );
  extern gboolean Recuperer_mnemos_AO_suite( struct DB **db_orig );
+ extern void Updater_confDB_AO ( void );
+ extern gchar *Dls_AO_to_Json ( struct DLS_AO *ao, gsize *taille_buf_p );
+
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -37,8 +37,7 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Gerer_arrive_Axxx_dls ( void )
-  { JsonBuilder *builder;
-    gsize taille_buf;
+  { gsize taille_buf;
     struct DLS_BOOL *bool;
     struct DLS_AO *ao;
     gchar *buffer;
@@ -79,21 +78,11 @@ suite_AO:
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending SET_AO '%s':'%s' = %f to Slave/Bus (reste %d)", __func__,
               ao->tech_id, ao->acronyme, ao->val_ech, reste );
 
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-       return;
+    buffer = Dls_AO_to_Json( ao, &taille_buf );
+    if (buffer)
+     { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "*", "SET_AO", buffer, taille_buf );
+       Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "SET_AO", buffer, taille_buf );
+       g_free(buffer);
      }
-
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-    Json_add_string ( builder, "tech_id",  ao->tech_id );
-    Json_add_string ( builder, "acronyme", ao->acronyme );
-    Json_add_double ( builder, "valeur",   ao->val_ech );
-    json_builder_end_object (builder);                                                                        /* End Document */
-    buffer = Json_get_buf ( builder, &taille_buf );
-
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "*", "SET_AO", buffer, taille_buf );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "SET_AO", buffer, taille_buf );
-    g_free(buffer);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

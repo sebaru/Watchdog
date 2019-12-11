@@ -179,7 +179,7 @@
 /******************************************************************************************************************************/
  static void WS_send_histo ( struct lws *wsi, struct CMD_TYPE_HISTO *histo )
   { struct WS_PER_SESSION_DATA *pss;
-    gchar *buf, *buf_to_send;
+    gchar *buf;
     JsonBuilder *builder;
     gsize taille_buf;
 
@@ -220,7 +220,7 @@
  static gint CB_ws_live_motifs ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
   {
     struct WS_PER_SESSION_DATA *pss;
-    gchar *util;
+/*    gchar *util;*/
     pss = lws_wsi_user ( wsi );
     switch (tag)
      { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);
@@ -291,7 +291,7 @@
  static gint CB_ws_histos ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
   {
     struct WS_PER_SESSION_DATA *pss;
-    gchar *util;
+  /*  gchar *util;*/
     pss = lws_wsi_user ( wsi );
     switch (tag)
      { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);

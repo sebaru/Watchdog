@@ -73,7 +73,6 @@
   { gchar requete[1024], *nom;
     gboolean retour;
     struct DB *db;
-    gint id;
 
     nom = Normaliser_chaine ( nom_src );                                                     /* Formatage correct des chaines */
     if (!nom)

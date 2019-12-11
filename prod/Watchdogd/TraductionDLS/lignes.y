@@ -276,12 +276,6 @@ calcul_expr3:   VALF
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "%d", $1 );
                 }}
-                | T_REGISTRE ENTIER
-                {{ int taille;
-                   taille = 15;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "R(%d)", $2 );
-                }}
                 | T_POUV calcul_expr T_PFERM
                 {{ $$=$2; }}
                 | ID
@@ -294,6 +288,13 @@ calcul_expr3:   VALF
                           { taille = 15;
                             $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                             g_snprintf( $$, taille, "R(%d)", alias->num );
+                            break;
+                          }
+                         case MNEMO_SORTIE_ANA:
+                          { taille = 256;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            g_snprintf( $$, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)",
+                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                             break;
                           }
                          default:
@@ -484,7 +485,8 @@ unite:          modulateur ENTIER HEURE ENTIER
                          $$=New_chaine(2);
                          g_snprintf( $$, 2, "0" );
                        } else
-                      if (!$5 && (alias->type_bit==MNEMO_REGISTRE ||
+                      if (!$5 && (alias->type_bit==MNEMO_SORTIE_ANA ||
+                                  alias->type_bit==MNEMO_REGISTRE ||
                                   alias->type_bit==MNEMO_CPT_IMP ||
                                   alias->type_bit==MNEMO_CPTH)
                          )
@@ -521,6 +523,10 @@ unite:          modulateur ENTIER HEURE ENTIER
                           }
                          case MNEMO_ENTREE_ANA:
                           { $$ = New_condition_entree_ana( $1, alias, $4, $5 );
+                            break;
+                          }
+                         case MNEMO_SORTIE_ANA:
+                          { $$ = New_condition_sortie_ana( $1, alias, $4, $5 );
                             break;
                           }
                          case MNEMO_REGISTRE:
