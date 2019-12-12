@@ -355,7 +355,7 @@
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "%s: '%s': 'close modbus tcp on watchdog' OK for %d", __func__, module->modbus.tech_id, module->modbus.id );
+                "%s: '%s': 'close modbus tcp on watchdog' OK for %d", __func__, module->modbus.tech_id, module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -389,7 +389,7 @@
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "%s: '%s': 'init watchdog timer' OK for %d", __func__, module->modbus.tech_id, module->modbus.id );
+                "%s: '%s': 'init watchdog timer' OK for %d", __func__, module->modbus.tech_id, module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -450,7 +450,7 @@
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "%d: '%s': OK for %d", __func__, module->modbus.tech_id, module->modbus.id );
+                "%s: '%s': OK for %d", __func__, module->modbus.tech_id, module->modbus.id );
        module->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
