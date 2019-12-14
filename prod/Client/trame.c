@@ -312,6 +312,8 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     gint cpt;
     if (!(trame_cadran && trame_cadran->cadran)) return;
 
+    if (trame_cadran->cadran->fleche == 0) return;
+
     memcpy( &trame_cadran->old_valeur[0], &trame_cadran->old_valeur[1], 19*sizeof(gfloat) );
     trame_cadran->old_valeur[19] = trame_cadran->valeur;
     for (moyenne = 0.0, cpt =0; cpt<20; cpt++)
@@ -329,13 +331,13 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     else Trame_set_svg ( trame_cadran->fleche_droite, "vert", 0, FALSE );
 
     cairo_matrix_init_identity ( &trame_cadran->transform );
-    if (trame_cadran->cadran->fleche_left)
+    if (trame_cadran->cadran->fleche == 2)
      { cairo_matrix_translate ( &trame_cadran->transform,
                                 (gdouble)trame_cadran->cadran->position_x-65.0,
                                 (gdouble)trame_cadran->cadran->position_y
                               );
      }
-    else
+    else if (trame_cadran->cadran->fleche == 1)
      { cairo_matrix_translate ( &trame_cadran->transform,
                                 (gdouble)trame_cadran->cadran->position_x+65.0,
                                 (gdouble)trame_cadran->cadran->position_y
