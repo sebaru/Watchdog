@@ -89,6 +89,7 @@
 
  struct WS_PER_SESSION_DATA
   { struct ZMQUEUE *zmq;
+    struct ZMQUEUE *zmq_local_bus;
     gchar sid[40];
     gchar util[40];
   };
