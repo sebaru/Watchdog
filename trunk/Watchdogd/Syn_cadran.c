@@ -85,7 +85,7 @@
                 "INSERT INTO %s(syn_id,type,bitctrl,posx,posy,angle,tech_id,acronyme,fleche_left,nb_decimal)"
                 " VALUES (%d,%d,%d,%d,%d,'%d','%s','%s','%d','%d')", NOM_TABLE_CADRAN,
                 cadran->syn_id, cadran->type, cadran->bit_controle,
-                cadran->position_x, cadran->position_y, cadran->angle, tech_id, acronyme, cadran->fleche_left, cadran->nb_decimal );
+                cadran->position_x, cadran->position_y, cadran->angle, tech_id, acronyme, cadran->fleche, cadran->nb_decimal );
     g_free(tech_id);
     g_free(acronyme);
 
@@ -164,7 +164,7 @@
        cadran->angle        = atoi(db->row[6]);
        g_snprintf( cadran->tech_id,  sizeof(cadran->tech_id),  "%s" ,db->row[7] );               /* Recopie dans la structure */
        g_snprintf( cadran->acronyme, sizeof(cadran->acronyme), "%s" ,db->row[8] );               /* Recopie dans la structure */
-       cadran->fleche_left  = atof(db->row[9]);
+       cadran->fleche       = atoi(db->row[9]);
        cadran->nb_decimal   = atof(db->row[10]);
      }
     return(cadran);
@@ -232,7 +232,7 @@
                 " WHERE id=%d;", NOM_TABLE_CADRAN,
                 cadran->type, cadran->bit_controle,
                 cadran->position_x, cadran->position_y, cadran->angle,
-                tech_id, acronyme, cadran->fleche_left, cadran->nb_decimal, cadran->id );
+                tech_id, acronyme, cadran->fleche, cadran->nb_decimal, cadran->id );
     g_free(tech_id);
     g_free(acronyme);
 

@@ -45,7 +45,7 @@
  static GtkWidget *Entry_acronyme;                                                                  /* Libelle proprement dit */
  static GtkWidget *Spin_bitctrl;
  static GtkWidget *Spin_nb_decimal;
- static GtkWidget *Option_left;                                                /* Type de capteur (totalisateur/moyenneur/..) */
+ static GtkWidget *Option_fleche;                                                /* Type de capteur (totalisateur/moyenneur/..) */
  static GtkWidget *Combo_type;
 
 /******************************************************************************************************************************/
@@ -120,7 +120,7 @@
              add_cadran.position_y = TAILLE_SYNOPTIQUE_Y/2;
              add_cadran.syn_id  = infos->syn.id;
              add_cadran.angle   = 0;
-             add_cadran.fleche_left = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_left) );
+             add_cadran.fleche      = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_fleche) );
              add_cadran.nb_decimal  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_nb_decimal) );
              type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
              add_cadran.type = Type_bit_interne_int( type );
@@ -138,7 +138,7 @@
            { type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
              trame_cadran->cadran->type = Type_bit_interne_int( type );
              g_free(type);
-             trame_cadran->cadran->fleche_left = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_left) );
+             trame_cadran->cadran->fleche      = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_fleche) );
              trame_cadran->cadran->nb_decimal  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_nb_decimal) );
              trame_cadran->cadran->bit_controle = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitctrl) );
              g_snprintf( trame_cadran->cadran->tech_id, sizeof(trame_cadran->cadran->tech_id),
@@ -219,11 +219,12 @@
 /**************************************************** Entrys de commande ******************************************************/
     label = gtk_label_new( _("Position Flèche") );
     gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 4, 5 );
-    Option_left = gtk_combo_box_new_text();
-    gtk_combo_box_append_text( GTK_COMBO_BOX(Option_left), "Droite" );
-    gtk_combo_box_append_text( GTK_COMBO_BOX(Option_left), "Gauche" );
-    gtk_combo_box_set_active( GTK_COMBO_BOX(Option_left), 0 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Option_left, 1, 2, 4, 5 );
+    Option_fleche = gtk_combo_box_new_text();
+    gtk_combo_box_append_text( GTK_COMBO_BOX(Option_fleche), "Droite" );
+    gtk_combo_box_append_text( GTK_COMBO_BOX(Option_fleche), "Gauche" );
+    gtk_combo_box_append_text( GTK_COMBO_BOX(Option_fleche), "Aucune" );
+    gtk_combo_box_set_active( GTK_COMBO_BOX(Option_fleche), 0 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Option_fleche, 1, 2, 4, 5 );
 
     label = gtk_label_new( _("Nombre de décimales") );
     gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 5, 6 );
@@ -241,7 +242,7 @@
           case MNEMO_CPT_IMP   : gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 4 ); break;
           case MNEMO_REGISTRE  : gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 5 ); break;
         }
-       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_left), trame_cadran->cadran->fleche_left );
+       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_fleche), trame_cadran->cadran->fleche );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_nb_decimal), trame_cadran->cadran->nb_decimal );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bitctrl), trame_cadran->cadran->bit_controle );
        gtk_entry_set_text( GTK_ENTRY(Entry_tech_id), trame_cadran->cadran->tech_id );

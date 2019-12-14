@@ -109,7 +109,7 @@
     guint   position_x;                                                                          /* en abscisses et ordonnées */
     guint   position_y;
     gint    angle;
-    gboolean fleche_left;                                                 /* TRUE si la fleche de tendance doit etre à gauche */
+    gint    fleche;                                                       /* TRUE si la fleche de tendance doit etre à gauche */
     gint    nb_decimal;                                                                       /* Nombre de decimal a afficher */
   };
 
