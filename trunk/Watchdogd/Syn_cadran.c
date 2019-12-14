@@ -82,7 +82,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s(syn_id,type,bitctrl,posx,posy,angle,tech_id,acronyme,fleche_left,nb_decimal)"
+                "INSERT INTO %s(syn_id,type,bitctrl,posx,posy,angle,tech_id,acronyme,fleche,nb_decimal)"
                 " VALUES (%d,%d,%d,%d,%d,'%d','%s','%s','%d','%d')", NOM_TABLE_CADRAN,
                 cadran->syn_id, cadran->type, cadran->bit_controle,
                 cadran->position_x, cadran->position_y, cadran->angle, tech_id, acronyme, cadran->fleche, cadran->nb_decimal );
@@ -123,7 +123,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.posx,%s.posy,%s.angle,"
-                "syns_cadrans.tech_id,syns_cadrans.acronyme, fleche_left, nb_decimal"
+                "syns_cadrans.tech_id,syns_cadrans.acronyme, fleche, nb_decimal"
                 " FROM %s WHERE syn_id=%d",
                 NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
                 NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
@@ -187,7 +187,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.posx,%s.posy,%s.angle,"
-                "syns_cadrans.tech_id,syns_cadrans.acronyme, fleche_left, nb_decimal"
+                "syns_cadrans.tech_id,syns_cadrans.acronyme, fleche, nb_decimal"
                 " FROM %s WHERE %s.id=%d",
                 NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
                 NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
@@ -228,7 +228,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "
-                "type=%d,bitctrl=%d,posx=%d,posy=%d,angle='%d',tech_id='%s',acronyme='%s',fleche_left='%d',nb_decimal='%d'"
+                "type=%d,bitctrl=%d,posx=%d,posy=%d,angle='%d',tech_id='%s',acronyme='%s',fleche='%d',nb_decimal='%d'"
                 " WHERE id=%d;", NOM_TABLE_CADRAN,
                 cadran->type, cadran->bit_controle,
                 cadran->position_x, cadran->position_y, cadran->angle,
