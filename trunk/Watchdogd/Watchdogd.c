@@ -393,8 +393,8 @@
                 Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s - %s", __func__,
                           map_question_vocale, tech_id, acronyme, libelle, map_reponse_vocale );
                 result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_ENTREE_ANA, tech_id, acronyme, &ai_p );
-                Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending 'audio':'play_google':'%s' to '%s'", __func__,
-                          result_string, event->src_instance );
+                Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
+                          event->src_instance, result_string );
                 Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
                                     "audio", "play_google", result_string, strlen(result_string)+1 );
                 Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
