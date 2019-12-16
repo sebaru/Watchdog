@@ -1055,8 +1055,7 @@
           json_builder_end_object (builder);                                                                        /* End Document */
           buffer =  Json_get_buf ( builder, &taille_buf );
           if (buffer)
-           { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "*", "DLS_EVENT", buffer, taille_buf );
-             /*Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "DLS_EVENT", buffer, taille_buf );*/
+           { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "msrv", "*", "*", "DLS_EVENT", buffer, taille_buf );
              g_free(buffer);
            }
         }
