@@ -963,11 +963,8 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech )
-  { JsonBuilder *builder;
-    struct DLS_AI *ai;
+  { struct DLS_AI *ai;
     gboolean need_arch;
-    gsize taille_buf;
-    gchar *buffer;
 
     if (!ai_p || !*ai_p)
      { GSList *liste;
@@ -1042,22 +1039,6 @@
           default:
                ai->val_ech = 0.0;
                ai->inrange = 0;
-        }
-       builder = Json_create ();
-       if (builder == NULL)
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ ); }
-       else
-        { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-          Json_add_string ( builder, "tech_id",  ai->tech_id );
-          Json_add_string ( builder, "acronyme", ai->acronyme );
-          Json_add_string ( builder, "type",     "AI" );
-          Json_add_double ( builder, "valeur",   ai->val_ech );
-          json_builder_end_object (builder);                                                                        /* End Document */
-          buffer =  Json_get_buf ( builder, &taille_buf );
-          if (buffer)
-           { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "msrv", "*", "*", "DLS_EVENT", buffer, taille_buf );
-             g_free(buffer);
-           }
         }
      }
     else if ( ai->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
