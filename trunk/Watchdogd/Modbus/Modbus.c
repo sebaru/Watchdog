@@ -793,9 +793,9 @@
                break;
           case MODBUS_GET_AI:
                cpt_e = module->modbus.map_EA;
-               struct DLS_AI *ai = module->AI[cpt];
                for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
-                { switch(Partage->ea[cpt_e].confDB.type)
+                { struct DLS_AI *ai = module->AI[cpt];
+                  switch( (ai ? ai->type : Partage->ea[cpt_e].confDB.type) )
                    { case ENTREEANA_WAGO_750455:
                           if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
                            { int reponse;
