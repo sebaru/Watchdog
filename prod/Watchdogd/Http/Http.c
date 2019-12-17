@@ -213,39 +213,109 @@
     g_free(buf);
   }
 /******************************************************************************************************************************/
+/* Rechercher_utilisateurDB_by_sid: Recuperation de tous les champs de l'utilisateur dont le sid est en parametre             */
+/* Entrées: le Session ID                                                                                                     */
+/* Sortie: une structure utilisateur, ou null si erreur                                                                       */
+/******************************************************************************************************************************/
+ struct DB *Rechercher_utilisateurDB_by_sid( gchar *sid_brut )
+  { gchar requete[512], *sid;
+    struct DB *db;
+
+    sid = Normaliser_chaine ( sid_brut );                                                    /* Formatage correct des chaines */
+    if (!sid)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+       return(NULL);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT username,id,access_level,enable "
+                "FROM users WHERE session_id='%s' LIMIT 1", sid );
+    g_free(sid);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed for sid '%s'", __func__, sid_brut );
+       return(NULL);
+     }
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       return(NULL);
+     }
+    return(db);
+  }
+/******************************************************************************************************************************/
 /* CB_ws_histos : Gere le protocole WS histos (appellée par libwebsockets)                                                    */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
  static gint CB_ws_live_motifs ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
-  {
-    struct WS_PER_SESSION_DATA *pss;
-/*    gchar *util;*/
+  { struct WS_PER_SESSION_DATA *pss;
+    gchar buffer[256];
+    struct DB*db;
     pss = lws_wsi_user ( wsi );
+/*    gchar *util;*/
     switch (tag)
-     { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);
-/*            if (Get_phpsessionid_cookie(wsi)==FALSE)                                              /* Recupere le PHPSessionID */
-/*             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No PHPSESSID. Killing.", __func__ );
+     { case LWS_CALLBACK_ESTABLISHED:
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Checking cookie", __func__ );
+            if ( lws_hdr_total_length( wsi, WSI_TOKEN_HTTP_COOKIE ) <= 0)
+             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: No Cookie found", __func__ );
                return(1);
              }
-/*            util = Rechercher_util_by_phpsessionid ( pss->sid );*/
-/*            if (!util)
+            lws_callback_on_writable(wsi);
+            if ( lws_hdr_copy( wsi, buffer, sizeof(buffer), WSI_TOKEN_HTTP_COOKIE ) != -1 )/* Récupération de la valeur du token */
+             { gchar *cookies, *cookie, *savecookies;
+               gchar *cookie_name, *cookie_value, *savecookie;
+               cookies = buffer;
+               while ( (cookie=strtok_r( cookies, ";", &savecookies)) != NULL )                          /* Découpage par ';' */
+                { cookies=NULL;
+                  cookie_name=strtok_r( cookie, "=", &savecookie);                                       /* Découpage par "=" */
+                  if (cookie_name)
+                   { cookie_value = strtok_r ( NULL, "=", &savecookie );
+                     if (!strcasecmp(cookie_name, "ci_session"))
+                      { g_snprintf( pss->sid, sizeof(pss->sid), "%s", cookie_value ); }
+                   }
+                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                           "%s: Cookie found for: %s=%s", __func__,
+                           (cookie_name ? cookie_name : "none"), (cookie_value ? cookie_value : "none") );
+                }
+             }
+            db = Rechercher_utilisateurDB_by_sid ( pss->sid );
+            if (!db)
              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No user found for session %s.", __func__, pss->sid );
                return(1);
              }
-            g_snprintf( pss->util, sizeof(pss->util), "%s", util );
-            g_free(util);
+            g_snprintf( pss->username, sizeof(pss->username), "%s", db->row[0] );
+            pss->user_id     = atoi(db->row[1]);
+            pss->user_level  = atoi(db->row[2]);
+            pss->user_enable = atoi(db->row[3]);
+            Libere_DB_SQL ( &db );
+            if (!pss->user_enable)
+             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                         "%s: user '%s' found but disabled for session %s.", __func__, pss->username, pss->sid );
+               return(1);
+             }
 
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established for %s", __func__, pss->util );*/
             pss->zmq = Connect_zmq ( ZMQ_SUB, "listen-to-motifs",   "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback connected", __func__ );
+            pss->zmq_local_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",   "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established for %s", __func__, pss->username );
             break;
        case LWS_CALLBACK_CLOSED:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback closed", __func__ );
             if (pss->zmq) Close_zmq(pss->zmq);
+            if (pss->zmq_local_bus) Close_zmq(pss->zmq_local_bus);
             break;
        case LWS_CALLBACK_SERVER_WRITEABLE:
              { struct DLS_VISUEL visu;
+               gchar json_buffer[2048];
+               gint taille_buf;
                if ( pss->zmq && Recv_zmq ( pss->zmq, &visu, sizeof(struct DLS_VISUEL) ) == sizeof(struct DLS_VISUEL) )
                 { JsonBuilder *builder;
                   gsize taille_buf;
@@ -273,6 +343,16 @@
                    }
                   memcpy ( result + LWS_SEND_BUFFER_PRE_PADDING , buf, taille_buf );
                   g_free(buf);
+                  lws_write	(	wsi,	result+LWS_SEND_BUFFER_PRE_PADDING, taille_buf, LWS_WRITE_TEXT );
+                  g_free(result);
+                }
+               if ( pss->zmq_local_bus && (taille_buf = Recv_zmq ( pss->zmq_local_bus, &json_buffer, sizeof(json_buffer) )) > 0 )
+                { gchar *result = (gchar *)g_malloc(LWS_SEND_BUFFER_PRE_PADDING + taille_buf);
+                  if (result == NULL)
+                   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon Result creation failed", __func__ );
+                     return(1);
+                   }
+                  memcpy ( result + LWS_SEND_BUFFER_PRE_PADDING , json_buffer, taille_buf );
                   lws_write	(	wsi,	result+LWS_SEND_BUFFER_PRE_PADDING, taille_buf, LWS_WRITE_TEXT );
                   g_free(result);
                 }
