@@ -87,7 +87,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,date_create,enable,hostname,tech_id,bit,watchdog,description,map_E,map_EA,map_A,map_AA,max_nbr_E,mode_old_static "
+                "SELECT id,date_create,enable,hostname,tech_id,watchdog,description,map_E,map_EA,map_A,map_AA,max_nbr_E "
                 " FROM %s ORDER BY description",
                 NOM_TABLE_MODULE_MODBUS );
 
@@ -111,20 +111,18 @@
     if (!modbus) Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
                           "%s: Erreur allocation mémoire", __func__ );
     else
-     { g_snprintf( modbus->description, sizeof(modbus->description), "%s", db->row[7] );
+     { g_snprintf( modbus->description, sizeof(modbus->description), "%s", db->row[6] );
        g_snprintf( modbus->tech_id, sizeof(modbus->tech_id), "%s", db->row[4] );
        g_snprintf( modbus->hostname, sizeof(modbus->hostname), "%s", db->row[3] );
        g_snprintf( modbus->date_create, sizeof(modbus->date_create), "%s", db->row[1] );
        modbus->id       = atoi(db->row[0]);
        modbus->enable   = atoi(db->row[2]);
-       modbus->bit      = atoi(db->row[5]);
-       modbus->watchdog = atoi(db->row[6]);
-       modbus->map_E    = atoi(db->row[8]);
-       modbus->map_EA   = atoi(db->row[9]);
-       modbus->map_A    = atoi(db->row[10]);
-       modbus->map_AA   = atoi(db->row[11]);
-       modbus->max_nbr_E= atoi(db->row[12]);
-       modbus->mode_old_static= atoi(db->row[13]);
+       modbus->watchdog = atoi(db->row[5]);
+       modbus->map_E    = atoi(db->row[7]);
+       modbus->map_EA   = atoi(db->row[8]);
+       modbus->map_A    = atoi(db->row[9]);
+       modbus->map_AA   = atoi(db->row[10]);
+       modbus->max_nbr_E= atoi(db->row[11]);
      }
     return(modbus);
   }
@@ -144,16 +142,12 @@
     module->request = FALSE;
     module->nbr_deconnect++;
     module->date_retente = Partage->top + MODBUS_RETRY;
-    if( module->modbus.mode_old_static)
-     { for ( cpt = module->modbus.map_EA; cpt<module->nbr_entree_ana; cpt++) { SEA_range( cpt, 0 ); }
-       SB( module->modbus.bit, 0 );                                               /* Mise a zero du bit interne lié au module */
-     }
-    else
-     { if (module->DI) g_free(module->DI);
-       if (module->AI) g_free(module->AI);
-       if (module->DO) g_free(module->DO);
-       Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
-     }
+    for ( cpt = module->modbus.map_EA; cpt<module->nbr_entree_ana; cpt++)
+     { if (!module->AI[cpt]) SEA_range( cpt, 0 ); }
+    if (module->DI) g_free(module->DI);
+    if (module->AI) g_free(module->AI);
+    if (module->DO) g_free(module->DO);
+    Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s : '%s': Module disconnected", __func__, module->modbus.tech_id );
   }
 /******************************************************************************************************************************/
@@ -609,12 +603,9 @@
     cpt_a = module->modbus.map_A;
     for ( cpt_poid = 1, cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_tor; cpt++, cpt_a++)
       { if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
-        if (module->modbus.mode_old_static)
-         { if (A(cpt_a)) requete.data[cpt_byte] |= cpt_poid; }
-        else if ( module->DO && module->DO[cpt] )
-         { if (Dls_data_get_bool( NULL, NULL, &module->DO[cpt] ) )
-            { requete.data[cpt_byte] |= cpt_poid; }
-         }
+        if ( module->DO && module->DO[cpt] )
+         { if (Dls_data_get_bool( NULL, NULL, &module->DO[cpt] ) ) { requete.data[cpt_byte] |= cpt_poid; } }
+        else if (A(cpt_a)) requete.data[cpt_byte] |= cpt_poid;
         cpt_poid = cpt_poid << 1;
       }
 
@@ -662,8 +653,6 @@
  static void Modbus_do_mapping ( struct MODULE_MODBUS *module )
   { gchar critere[80];
     struct DB *db;
-
-    if(module->modbus.mode_old_static) return;
 
     module->AI = g_try_malloc0( sizeof(gpointer) * module->nbr_entree_ana );
     if (!module->AI)
@@ -778,9 +767,7 @@
     else
      { int cpt_e, cpt_byte, cpt_poid, cpt;
        module->date_last_reponse = Partage->top;                                                   /* Estampillage de la date */
-       if( module->modbus.mode_old_static)
-        { SB( module->modbus.bit, 1 ); }                                             /* Mise a 1 du bit interne lié au module */
-       else Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, TRUE );
+       Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, TRUE );
        if (ntohs(module->response.transaction_id) != module->transaction_id)                              /* Mauvaise reponse */
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                    "%s: '%s': wrong transaction_id for module %d  attendu %d, recu %d", __func__, module->modbus.tech_id,
@@ -796,7 +783,7 @@
         { case MODBUS_GET_DI:
                cpt_e = module->modbus.map_E;
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
-                { if(module->modbus.mode_old_static) SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
+                { if(!module->DI[cpt]) SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
                   else Dls_data_set_bool ( NULL, NULL, (gpointer)&module->DI[cpt], (module->response.data[ cpt_byte ] & cpt_poid) );
                   cpt_e++;
                   cpt_poid = cpt_poid << 1;
@@ -806,53 +793,30 @@
                break;
           case MODBUS_GET_AI:
                cpt_e = module->modbus.map_EA;
-               if (module->modbus.mode_old_static)
-                { for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)      /* Old style : positionnement par ancienne interface */
-                   { switch(Partage->ea[cpt_e].confDB.type)
-                      { case ENTREEANA_WAGO_750455:
-                             if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
-                              { int reponse;
-                                reponse  = module->response.data[ 2*cpt + 1 ] << 5;
-                                reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
-                                SEA( cpt_e, reponse );
-                              }
-                             else SEA_range( cpt_e, 0 );
-                             break;
-                        case ENTREEANA_WAGO_750461:                                                            /* Borne PT100 */
-                              { gint16 reponse;
-                                reponse  = module->response.data[ 2*cpt + 1 ] << 8;
-                                reponse |= module->response.data[ 2*cpt + 2 ];
-                                SEA ( cpt_e, 1.0*reponse );
-                              }
-                             break;
-                        default : SEA_range( cpt_e, 0 );
-                      }
-                     cpt_e++;
+               struct DLS_AI *ai = module->AI[cpt];
+               for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
+                { switch(Partage->ea[cpt_e].confDB.type)
+                   { case ENTREEANA_WAGO_750455:
+                          if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
+                           { int reponse;
+                             reponse  = module->response.data[ 2*cpt + 1 ] << 5;
+                             reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
+                             if (!ai) SEA( cpt_e, reponse );             /* Old style : positionnement par ancienne interface */
+                             else Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
+                           }
+                          else SEA_range( cpt_e, 0 );
+                          break;
+                     case ENTREEANA_WAGO_750461:                                                               /* Borne PT100 */
+                           { gint16 reponse;
+                             reponse  = module->response.data[ 2*cpt + 1 ] << 8;
+                             reponse |= module->response.data[ 2*cpt + 2 ];
+                             if (!ai) SEA ( cpt_e, 1.0*reponse );        /* Old style : positionnement par ancienne interface */
+                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
+                           }
+                          break;
+                     default : if(!ai) SEA_range( cpt_e, 0 );
                    }
-                }
-               else
-                { for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
-                   { struct DLS_AI *ai = module->AI[cpt];
-                     if (!ai) continue;
-                     switch(ai->type)
-                      { case ENTREEANA_WAGO_750455:                                   /* data[0] est la taille de data recue. */
-                             if ( ! (module->response.data[ 1 + (2*cpt + 1) ] & 0x03) )
-                              { gfloat reponse;
-                                reponse  = module->response.data[ 1 + (2*cpt + 0) ] << 5;             /* Valeur de poids fort */
-                                reponse += module->response.data[ 1 + (2*cpt + 1) ] >> 3;            /* Valeur de poid faible */
-                                Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
-                              }
-                             break;
-                        case ENTREEANA_WAGO_750461:                                                            /* Borne PT100 */
-                              { gfloat reponse;                                       /* data[0] est la taille de data recue. */
-                                reponse  = module->response.data[ 2*cpt + 1 ] << 8;
-                                reponse += module->response.data[ 2*cpt + 2 ];
-                                Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
-                              }
-                             break;
-                        default : break;
-                      }
-                   }
+                  cpt_e++;
                 }
                module->mode = MODBUS_SET_DO;
                break;
