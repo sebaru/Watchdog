@@ -97,7 +97,6 @@
     gchar date_create[20];
     gboolean enable;                                                                           /* Le module doit-il tourner ? */
     guint watchdog;                                           /* Le module doit-il etre auto-supervisé ? en dixeme de seconde */
-    guint bit;                                                           /* Bit interne B d'etat communication avec le module */
     gchar hostname[32];                                                                       /* Adresses IP du module MODBUS */
     gchar tech_id[32];                                                                            /* Tech_id du module MODBUS */
     gchar description[128];                                                                              /* Libelle du modbus */
