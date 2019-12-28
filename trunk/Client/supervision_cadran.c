@@ -92,10 +92,10 @@
              }
             break;
        case MNEMO_CPTH:
-            if (cadran->valeur < 60)
-             { g_snprintf( libelle, sizeof(libelle), "%02d min", (int)cadran->valeur ); }
+            if (cadran->valeur < 3600)
+             { g_snprintf( libelle, sizeof(libelle), "%02dm%02ds", (int)cadran->valeur/60, ((int)cadran->valeur%60) ); }
             else
-             { g_snprintf( libelle, sizeof(libelle), "%05dh", (int)cadran->valeur/60 ); }
+             { g_snprintf( libelle, sizeof(libelle), "%04dh%02dm", (int)cadran->valeur/3600, ((int)cadran->valeur%3600)/60 ); }
             break;
        case MNEMO_CPT_IMP:
             g_snprintf( libelle, sizeof(libelle), "%8.2f %s", cadran->valeur, cadran->unite );
