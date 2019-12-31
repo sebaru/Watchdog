@@ -1281,18 +1281,18 @@
         { int new_top, delta;
           new_top = Partage->top;
           delta = new_top - cpt_h->old_top;
-          if (delta > 600)                                           /* On compte +1 toutes les minutes ! */
+          if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
            { cpt_h->valeur++;
              cpt_h->old_top = new_top;
-             Ajouter_arch_by_nom( cpt_h->acronyme, cpt_h->tech_id, 1.0*cpt_h->valeur );
            }
+          if (!(Partage->top % 600)) Ajouter_arch_by_nom( cpt_h->acronyme, cpt_h->tech_id, 1.0*cpt_h->valeur );
         }
      }
     else
      { cpt_h->etat = FALSE; }
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_CI : Recupere la valeur de l'EA en parametre                                                             */
+/* Dls_data_get_CI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
  gint Dls_data_get_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p )

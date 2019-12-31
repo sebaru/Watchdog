@@ -1562,9 +1562,24 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4433)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` DROP FOREIGN KEY `mnemos_Tempo_tech_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` ADD CONSTRAINT `mnemos_Tempo_tech_id`"
+                  " FOREIGN KEY (`tech_id`) REFERENCES `dls`(`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 4435)
+     { g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_CptHoraire` SET valeur = valeur * 60;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_CH` SET valeur = valeur * 60;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 fin:
-    database_version=4430;
+    database_version=4435;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
