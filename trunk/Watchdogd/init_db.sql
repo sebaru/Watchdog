@@ -560,6 +560,8 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `font` text COLLATE utf8_unicode_ci NOT NULL,
+  `font_size` int(11) NOT NULL DEFAULT '20',
+  `def_color` VARCHAR(12) COLLATE utf8_unicode_ci NOT NULL DEFAULT "white",
   `rouge` int(11) NOT NULL DEFAULT '0',
   `vert` int(11) NOT NULL DEFAULT '0',
   `bleu` int(11) NOT NULL DEFAULT '0',
