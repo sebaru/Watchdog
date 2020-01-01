@@ -1578,9 +1578,9 @@
      }
 
     if (database_version < 4437)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `syn_comments` ADD `font_size` int(11) NOT NULL DEFAULT '20'");
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_comments` ADD `font_size` int(11) NOT NULL DEFAULT '20'");
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syn_comments` ADD `def_color` VARCHAR(12) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'white'");
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_comments` ADD `def_color` VARCHAR(12) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'white'");
        Lancer_requete_SQL ( db, requete );
      }
 
