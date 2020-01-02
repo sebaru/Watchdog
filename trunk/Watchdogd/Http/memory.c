@@ -83,6 +83,7 @@
         }
        Json_add_int  ( builder, "valeur", cpt_h->valeur );
        Json_add_bool ( builder, "etat",   cpt_h->etat );
+       Json_add_int  ( builder, "last_arch", cpt_h->last_arch );
      }
 /*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
     else if (!strcasecmp(type,"EA"))

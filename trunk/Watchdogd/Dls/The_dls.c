@@ -1285,7 +1285,10 @@
            { cpt_h->valeur++;
              cpt_h->old_top = new_top;
            }
-          if (!(Partage->top % 600)) Ajouter_arch_by_nom( cpt_h->acronyme, cpt_h->tech_id, 1.0*cpt_h->valeur );
+          if (cpt_h->last_arch + 600 < Partage->top)
+           { Ajouter_arch_by_nom( cpt_h->acronyme, cpt_h->tech_id, 1.0*cpt_h->valeur );
+             cpt_h->last_arch = Partage->top;
+           }
         }
      }
     else
