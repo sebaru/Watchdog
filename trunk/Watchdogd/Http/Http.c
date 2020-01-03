@@ -299,16 +299,29 @@
             Libere_DB_SQL ( &db );
             if (!pss->user_enable)
              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                         "%s: user '%s' found but disabled for session %s.", __func__, pss->username, pss->sid );
+                         "%s: %s: user found but disabled for session %s.", __func__, pss->username, pss->sid );
                return(1);
              }
 
-            pss->zmq = Connect_zmq ( ZMQ_SUB, "listen-to-motifs",   "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+            pss->zmq = Connect_zmq ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
             pss->zmq_local_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",   "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established for %s", __func__, pss->username );
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: %s: WS callback established", __func__, pss->username );
+            break;
+       case LWS_CALLBACK_RECEIVE:
+             { gchar *buffer;
+               buffer = g_try_malloc0(taille+1);
+               if (!buffer)
+                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: %s: Malloc Error %s.", __func__, pss->username );
+                  return(1);
+                }
+               memcpy ( buffer, data, taille );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                      "%s: WS callback receive %d bytes: %s", __func__, taille, buffer );
+               g_free(buffer);
+             }
             break;
        case LWS_CALLBACK_CLOSED:
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback closed", __func__ );
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: %s: WS callback closed", __func__, pss->username );
             if (pss->zmq) Close_zmq(pss->zmq);
             if (pss->zmq_local_bus) Close_zmq(pss->zmq_local_bus);
             break;
@@ -321,10 +334,10 @@
                   gsize taille_buf;
                   gchar *buf, *result;
                   Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                            "%s: Visuel %s:%s received", __func__, visu.tech_id, visu.acronyme );
+                            "%s: %s: Visuel %s:%s received", __func__, pss->username, visu.tech_id, visu.acronyme );
                   builder = Json_create ();
                   if (builder == NULL)
-                   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+                   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
                      return(1);
                    }
                   json_builder_begin_object (builder);                                         /* Création du noeud principal */
@@ -337,7 +350,8 @@
                   buf = Json_get_buf ( builder, &taille_buf );
                   result = (gchar *)g_malloc(LWS_SEND_BUFFER_PRE_PADDING + taille_buf);
                   if (result == NULL)
-                   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon Result creation failed", __func__ );
+                   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                               "%s: %s: JSon Result creation failed", __func__, pss->username );
                      g_free(buf);
                      return(1);
                    }
