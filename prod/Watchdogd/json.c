@@ -94,7 +94,7 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* Json_get_from_stirng: Recupere l'object de plus haut niveau dans une chiane JSON                                           */
+/* Json_get_from_stirng: Recupere l'object de plus haut niveau dans une chaine JSON                                           */
 /* Entrée: la chaine de caractere                                                                                             */
 /* Sortie: l'objet                                                                                                            */
 /******************************************************************************************************************************/
