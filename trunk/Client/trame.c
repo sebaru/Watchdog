@@ -129,7 +129,7 @@
 /******************************************************************************************************************************/
  void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran )
   { if (trame_cadran->item_groupe) goo_canvas_item_remove( trame_cadran->item_groupe );
-    Trame_del_SVG (trame_cadran->fleche_droite);                                         /* Désactive la gestion clignotement */
+    Trame_del_SVG (trame_cadran->fleche_tendance);                                         /* Désactive la gestion clignotement */
   }
 /******************************************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                                                */
@@ -326,9 +326,9 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     if (ratio<-3.0) ratio=-3.0;
     angle = -90.0*ratio/3.0;
 
-         if (ratio < -2.0 || ratio > 2.0) { Trame_set_svg ( trame_cadran->fleche_droite, "rouge", 0, FALSE ); }
-    else if (ratio < -1.0 || ratio > 1.0) { Trame_set_svg ( trame_cadran->fleche_droite, "orange", 0, FALSE ); }
-    else Trame_set_svg ( trame_cadran->fleche_droite, "vert", 0, FALSE );
+         if (ratio < -2.0 || ratio > 2.0) { Trame_set_svg ( trame_cadran->fleche_tendance, "rouge", 0, FALSE ); }
+    else if (ratio < -1.0 || ratio > 1.0) { Trame_set_svg ( trame_cadran->fleche_tendance, "orange", 0, FALSE ); }
+    else Trame_set_svg ( trame_cadran->fleche_tendance, "vert", 0, FALSE );
 
     cairo_matrix_init_identity ( &trame_cadran->transform );
     if (trame_cadran->cadran->fleche == 2)
@@ -346,9 +346,9 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     cairo_matrix_rotate ( &trame_cadran->transform, (gdouble)angle*FACTEUR_PI );
     cairo_matrix_scale  ( &trame_cadran->transform, 0.5, 0.5 );
     cairo_matrix_translate ( &trame_cadran->transform,
-                             -trame_cadran->fleche_droite->taillex/2.0,
-                             -trame_cadran->fleche_droite->tailley/2.0 );
-    goo_canvas_item_set_transform ( trame_cadran->fleche_droite->item, &trame_cadran->transform );
+                             -trame_cadran->fleche_tendance->taillex/2.0,
+                             -trame_cadran->fleche_tendance->tailley/2.0 );
+    goo_canvas_item_set_transform ( trame_cadran->fleche_tendance->item, &trame_cadran->transform );
   }
 /**********************************************************************************************************/
 /* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                         */
@@ -1037,10 +1037,10 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                      "font", "arial italic 12",
                                                      NULL);
 
-    if (!flag && trame_cadran->cadran->type == MNEMO_ENTREE_ANA)
-     { trame_cadran->item_groupe_fleche = goo_canvas_group_new ( trame->canvas_root, NULL );                    /* Groupe cadran */
-       trame_cadran->fleche_droite = Trame_new_SVG ( trame, trame_cadran->item_groupe_fleche,
-                                                     "fleche_droite", "noir", 0, -1, -1, 0, 0 );
+    if (!flag && trame_cadran->cadran->type == MNEMO_ENTREE_ANA && trame_cadran->cadran->fleche != 2)        /* 2 = No Fleche */
+     { trame_cadran->item_groupe_fleche = goo_canvas_group_new ( trame->canvas_root, NULL );                 /* Groupe cadran */
+       trame_cadran->fleche_tendance = Trame_new_SVG ( trame, trame_cadran->item_groupe_fleche,
+                                                     "fleche_tendance", "noir", 0, -1, -1, 0, 0 );
      }
 
     if ( flag )                                                                                    /* flag == TRUE si ATELIER */

@@ -156,7 +156,7 @@
     cairo_matrix_t transform;
     struct CMD_TYPE_CADRAN *cadran;
     GooCanvasItem *item_groupe_fleche;
-    struct TRAME_ITEM_SVG *fleche_droite;
+    struct TRAME_ITEM_SVG *fleche_tendance;
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
     gint selection;
     gfloat valeur;
