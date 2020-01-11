@@ -34,7 +34,7 @@
  #include <string.h>
 
  #define MSGS_SQL_SELECT  "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,parent_syn.page,syn.page," \
-                          "sms,libelle_audio,libelle_sms,time_repeat,dls.id,dls.shortname,syn.id,persist,is_mp3" \
+                          "sms,libelle_audio,libelle_sms,time_repeat,dls.id,dls.shortname,syn.id,persist,is_mp3,profil_audio" \
                           " FROM msgs as msg" \
                           " INNER JOIN dls as dls ON msg.dls_id=dls.id" \
                           " INNER JOIN syns as syn ON dls.syn_id=syn.id" \
@@ -325,6 +325,7 @@
        g_snprintf( msg->libelle_audio,   sizeof(msg->libelle_audio),   "%s", db->row[11] );
        g_snprintf( msg->libelle_sms,     sizeof(msg->libelle_sms  ),   "%s", db->row[12] );
        g_snprintf( msg->dls_shortname,   sizeof(msg->dls_shortname),   "%s", db->row[15] );
+       g_snprintf( msg->profil_audio,    sizeof(msg->profil_audio ),   "%s", db->row[19] );
        msg->id          = atoi(db->row[0]);
        msg->num         = atoi(db->row[1]);
        msg->type        = atoi(db->row[3]);

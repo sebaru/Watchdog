@@ -164,7 +164,6 @@
     g_free( date_create );
     g_snprintf( histo.nom_ack, sizeof(histo.nom_ack), "None" );
     Ajouter_histo_msgsDB( &histo );                                                                    /* Si ajout dans DB OK */
-
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
     Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "histo",

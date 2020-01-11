@@ -195,6 +195,9 @@
        goto end;
      }
 
+    if (Config.instance_is_master && Dls_auto_create_plugin( "SONO", "Gestion de la sonorisation" ) == FALSE)
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR, "%s: DLS Create 'SONO' ERROR\n", __func__ ); }
+
     zmq_msg      = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
     zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
 
@@ -251,8 +254,8 @@
                    "%s : Envoi du message audio %d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
 
           if (Config.instance_is_master)
-           { Envoyer_commande_dls( histo->msg.bit_audio );                   /* Positionnement du profil audio via monostable */
-             Envoyer_commande_dls( NUM_BIT_M_AUDIO_START );                  /* Positionné quand on envoi une diffusion audio */
+           { Envoyer_commande_dls_data( "SONO", histo->msg.profil_audio );   /* Positionnement du profil audio via monostable */
+             /*Envoyer_commande_dls( NUM_BIT_M_AUDIO_START );                /* Positionné quand on envoi une diffusion audio */
            }
 
           if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)                              /* Si Pas de message depuis xx */
