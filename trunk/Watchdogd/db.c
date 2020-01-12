@@ -1585,7 +1585,7 @@
      }
 
     if (database_version < 4446)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` ADD `profil_audio` VARCHAR(80) NOT NULL DEFAULT 'ALL'");
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` ADD `profil_audio` VARCHAR(80) NOT NULL DEFAULT 'P_ALL'");
        Lancer_requete_SQL ( db, requete );
      }
 

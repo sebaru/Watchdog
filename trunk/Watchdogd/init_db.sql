@@ -731,7 +731,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `time_repeat` int(11) NOT NULL DEFAULT '0',
   `is_mp3` tinyint(1) NOT NULL DEFAULT '0',
   `etat` tinyint(1) NOT NULL DEFAULT '0',
-  `profil_audio` VARCHAR(80) NOT NULL DEFAULT 'ALL',
+  `profil_audio` VARCHAR(80) NOT NULL DEFAULT 'P_ALL',
   PRIMARY KEY (`id`),
   UNIQUE(`dls_id`,`acronyme`),
   FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
