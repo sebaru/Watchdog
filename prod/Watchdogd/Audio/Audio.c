@@ -46,6 +46,7 @@
 
     Cfg_audio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_audio.enable            = FALSE;
+    Cfg_audio.diffusion_enabled = TRUE;
     g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", AUDIO_DEFAUT_LANGUAGE );
     g_snprintf( Cfg_audio.device,   sizeof(Cfg_audio.device), "plughw" );
 
@@ -173,7 +174,6 @@
   { struct CMD_TYPE_HISTO *histo, histo_buf;
     struct ZMQUEUE *zmq_msg;
     struct ZMQUEUE *zmq_from_bus;
-    static gboolean audio_stop = TRUE;
 
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
     memset( &Cfg_audio, 0, sizeof(Cfg_audio) );                                     /* Mise a zero de la structure de travail */
@@ -195,6 +195,12 @@
        goto end;
      }
 
+    if (Config.instance_is_master)
+     { if (Dls_auto_create_plugin( "SONO", "Gestion de la sonorisation" ) == FALSE)
+        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR, "%s: DLS Create 'SONO' ERROR\n", __func__ ); }
+       Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SONO", "P_ALL", "Profil Audio : All Hps Enabled" );
+     }
+
     zmq_msg      = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
     zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
 
@@ -209,13 +215,6 @@
           Cfg_audio.lib->Thread_reload = FALSE;
         }
 
-       if (Cfg_audio.last_audio + 100 < Partage->top)                                /* Au bout de 10 secondes sans diffusion */
-        { if (audio_stop == TRUE)                                /* Avons-nous deja envoyé une commande de STOP AUDIO a DLS ? */
-           { audio_stop = FALSE;                                         /* Positionné quand il n'y a plus de diffusion audio */
-             if (Config.instance_is_master) Envoyer_commande_dls( NUM_BIT_M_AUDIO_END );
-           }
-        } else audio_stop = TRUE;
-
        if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
         { if ( !strcmp( event->tag, "play_wav" ) )
            { gchar fichier[80];
@@ -229,6 +228,14 @@
                       "%s : Reception d'un message PLAY_GOOGLE : %s", __func__, (gchar *)payload );
              Jouer_google_speech ( payload );
            }
+          else if ( !strcmp( event->tag, "disable" ) )
+           { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s : Diffusion disabled by master", __func__ );
+             Cfg_audio.diffusion_enabled = FALSE;
+           }
+          else if ( !strcmp( event->tag, "enable" ) )
+           { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s : Diffusion enabled by master", __func__ );
+             Cfg_audio.diffusion_enabled = TRUE;
+           }
         }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
@@ -239,20 +246,22 @@
                 "%s : Recu message num=%d (histo->msg.audio=%d, alive=%d)", __func__,
                 histo->msg.num, histo->msg.audio, histo->alive );
 
-       if ( M(NUM_BIT_M_AUDIO_INHIB) == 1 &&
-           ! (histo->msg.type == MSG_ALERTE || histo->msg.type == MSG_DANGER || histo->msg.type == MSG_ALARME)
+       if ( Cfg_audio.diffusion_enabled == FALSE &&
+            ! (histo->msg.type == MSG_ALERTE || histo->msg.type == MSG_DANGER)
           )                                                                     /* Bit positionné quand arret diffusion audio */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                   "%s : Envoi audio inhibe pour num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
+                   "%s : Envoi audio inhibé pour %d:%s (%d)",
+                    __func__, histo->msg.dls_id, histo->msg.acronyme, histo->msg.num );
           continue;
         }
+
        if ( histo->alive == 1 && histo->msg.audio )                                                 /* Si le message apparait */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
-                   "%s : Envoi du message audio %d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
+                   "%s : Envoi du message audio %d:%s (%d) (histo->msg.audio=%d)",
+                    __func__, histo->msg.dls_id, histo->msg.acronyme, histo->msg.num );
 
           if (Config.instance_is_master)
-           { Envoyer_commande_dls( histo->msg.bit_audio );                   /* Positionnement du profil audio via monostable */
-             Envoyer_commande_dls( NUM_BIT_M_AUDIO_START );                  /* Positionné quand on envoi une diffusion audio */
+           { Envoyer_commande_dls_data( "SONO", histo->msg.profil_audio );   /* Positionnement du profil audio via monostable */
            }
 
           if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)                              /* Si Pas de message depuis xx */

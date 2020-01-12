@@ -34,9 +34,6 @@
 
  #define AUDIO_JINGLE                3000                                    /* Jingle si pas de message au bout de 5 minutes */
  #define AUDIO_DEFAUT_LANGUAGE       "fr"                                                  /* Language par défaut pour le TTS */
- #define NUM_BIT_M_AUDIO_START       4                                          /* bit positionné quand start diffusion audio */
- #define NUM_BIT_M_AUDIO_END         5                                          /* Bit positionné quand arret diffusion audio */
- #define NUM_BIT_M_AUDIO_INHIB       6                                    /* Bit positionné si inhibition des messages vocaux */
 
  struct AUDIO_CONFIG
   { struct LIBRAIRIE *lib;
@@ -46,6 +43,7 @@
     gchar device[32];
     guint nbr_diffusion_wav;
     guint nbr_diffusion_google;
+    gboolean diffusion_enabled;                                                        /* Diffusion autorisée pourle thread ? */
   } Cfg_audio;
 
 /*********************************************** Définitions des prototypes ***************************************************/

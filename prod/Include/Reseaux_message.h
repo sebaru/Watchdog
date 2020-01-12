@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -72,19 +72,20 @@
     guint  time_repeat;                                               /* Temps entre deux répétitions (si non nul) en minutes */
     gboolean persist;                                                                               /* Persistence du message */
     gboolean is_mp3;                                                            /* Un mp3 a-t'il été chargé pour ce message ? */
+    gchar  profil_audio[81];
   };
 
  struct CMD_TYPE_MESSAGES
   { guint nbr_messages;                                                     /* Nombre de structure CMD_TYPE_MESSAGE suivantes */
     struct CMD_TYPE_MESSAGE msg[];
   };
- 
+
  struct CMD_TYPE_MESSAGE_MP3                                                       /* Structure pour l'échange du fichier mp3 */
   { guint num;
     guint taille;                                                     /* Taille des données qui suivent dans le paquet reseau */
   };
 
- enum 
+ enum
   { SSTAG_CLIENT_WANT_PAGE_MESSAGE,
     SSTAG_SERVEUR_CREATE_PAGE_MESSAGE_OK,                                                    /* Affichage de la page onduleur */
     SSTAG_SERVEUR_ADDPROGRESS_MESSAGE,                                             /* Ajout d'un groupe dans la liste cliente */

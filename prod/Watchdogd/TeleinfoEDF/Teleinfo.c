@@ -106,7 +106,7 @@
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
                 "%s: %s: Initialise le DLS et charge les AI ", __func__, Cfg_teleinfo.tech_id );
        if (Dls_auto_create_plugin( Cfg_teleinfo.tech_id, "Gestion du compteur EDF" ) == FALSE)
-        { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", Cfg_teleinfo.tech_id ); }
+        { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_teleinfo.tech_id ); }
 
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ADCO",  "N° d’identification du compteur", "numéro" );
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ISOUS", "Intensité EDF souscrite ", "A" );
