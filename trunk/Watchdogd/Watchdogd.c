@@ -353,6 +353,21 @@
                                  Json_get_string ( query, "acronyme" ),
                                  NULL, Json_get_bool ( query, "etat" ) );
            }
+          else if ( !strcmp(event->tag,"SET_DI") )
+           { JsonNode *query;
+             buffer[byte] = 0;                                                                       /* Caractère nul d'arret */
+             query = Json_get_from_string ( payload );
+             if (!query)
+              { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); continue; }
+
+             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                       "%s: receive SET_DI from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
+                       event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
+                       Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
+             Dls_data_set_DI ( Json_get_string ( query, "tech_id" ),
+                               Json_get_string ( query, "acronyme" ),
+                               NULL, Json_get_bool ( query, "etat" ) );
+           }
           else if ( !strcmp(event->tag, "ping") )
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s/%s to %s/%s",
                        __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );

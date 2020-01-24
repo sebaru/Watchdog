@@ -84,7 +84,7 @@
 /******************************************************************************************************************************/
  static void Smsg_send_status_to_master ( gboolean status )
   { if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
-     { Dls_data_set_bool ( Cfg_smsg.tech_id, "COMM", &Cfg_smsg.bit_comm, status ); }                      /* Communication OK */
+     { Dls_data_set_DI ( Cfg_smsg.tech_id, "COMM", &Cfg_smsg.bit_comm, status ); }                      /* Communication OK */
     else /* Envoi au master via thread HTTP */
      { JsonBuilder *builder;
        gchar *result;
@@ -96,7 +96,7 @@
        Json_add_bool   ( builder, "etat", status );
        json_builder_end_object ( builder );
        result = Json_get_buf ( builder, &taille );
-       Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BOOL", result, taille );
+       Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_DI", result, taille );
        g_free(result);
      }
     Cfg_smsg.comm_status = status;
@@ -688,6 +688,8 @@
 
     if (Dls_auto_create_plugin( Cfg_smsg.tech_id, "Gestion du GSM" ) == FALSE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_smsg.tech_id ); }
+
+    Mnemo_auto_create_DI ( Cfg_smsg.tech_id, "COMM", "Statut de la communication avec le GSM" );
 
     zmq_msg                = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
     zmq_from_bus           = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
