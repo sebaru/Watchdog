@@ -139,6 +139,14 @@
     gboolean edge_down;
   };
 
+ struct DLS_DI
+  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gboolean etat;
+    gboolean edge_up;
+    gboolean edge_down;
+  };
+
  struct DLS_CI
   { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
@@ -254,6 +262,7 @@
  extern void SB_SYS( int num, int etat );
  extern void SE( int num, int etat );
  extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech );
+ extern void Dls_data_set_DI ( gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur );
  extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p );
  extern gint Dls_data_get_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p );
  extern void SEA( int num, float val_avant_ech );

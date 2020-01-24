@@ -244,20 +244,20 @@
        result = New_chaine( taille ); /* 10 caractères max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
             { if (Get_option_entier( options, T_EDGE_UP) == 1)
-               { g_snprintf( result, taille, "Dls_data_get_bool_up ( \"%s\", \"%s\", &_%s_%s )",
+               { g_snprintf( result, taille, "Dls_data_get_DI_up ( \"%s\", \"%s\", &_%s_%s )",
                              alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                }
               else
-               { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
+               { g_snprintf( result, taille, "Dls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
                              alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                }
             }
        else { if (Get_option_entier( options, T_EDGE_UP) == 1)
-               { g_snprintf( result, taille, "!Dls_data_get_bool_up ( \"%s\", \"%s\", &_%s_%s )",
+               { g_snprintf( result, taille, "!Dls_data_get_DI_up ( \"%s\", \"%s\", &_%s_%s )",
                              alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                }
               else
-               { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
+               { g_snprintf( result, taille, "!Dls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
                              alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                }
             }
