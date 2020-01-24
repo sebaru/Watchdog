@@ -77,6 +77,30 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
+/* Entrée: le status du GSM                                                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Teleinfo_send_status_to_master ( gboolean status )
+  { if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
+     { Dls_data_set_DI ( Cfg_teleinfo.tech_id, "COMM", &Cfg_teleinfo.bit_comm, status ); }                /* Communication OK */
+    else /* Envoi au master via thread HTTP */
+     { JsonBuilder *builder;
+       gchar *result;
+       gsize taille;
+       builder = Json_create ();
+       json_builder_begin_object ( builder );
+       Json_add_string ( builder, "tech_id",  Cfg_teleinfo.tech_id );
+       Json_add_string ( builder, "acronyme", "COMM" );
+       Json_add_bool   ( builder, "etat", status );
+       json_builder_end_object ( builder );
+       result = Json_get_buf ( builder, &taille );
+       Send_zmq_with_tag ( Cfg_teleinfo.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_DI", result, taille );
+       g_free(result);
+     }
+    Cfg_teleinfo.comm_status = status;
+  }
+/******************************************************************************************************************************/
 /* Init_teleinfo: Initialisation de la ligne TELEINFO                                                                         */
 /* Sortie: l'identifiant de la connexion                                                                                      */
 /******************************************************************************************************************************/
@@ -108,6 +132,8 @@
        if (Dls_auto_create_plugin( Cfg_teleinfo.tech_id, "Gestion du compteur EDF" ) == FALSE)
         { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_teleinfo.tech_id ); }
 
+       Mnemo_auto_create_DI ( Cfg_teleinfo.tech_id, "COMM", "Statut de la communication avec le copteur EDF" );
+
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ADCO",  "N° d’identification du compteur", "numéro" );
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ISOUS", "Intensité EDF souscrite ", "A" );
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "BASE",  "Index option BASE", "Wh" );
@@ -117,6 +143,7 @@
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IMAX",  "Intensité EDF maximale", "A" );
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "PAPP",  "Puissance apparente EDF consommée", "VA" );
      }
+    Teleinfo_send_status_to_master(TRUE);
     Cfg_teleinfo.nbr_connexion++;
     return(fd);
   }
@@ -234,6 +261,7 @@
        if ( lib->Thread_reload == TRUE )
         { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Reloading in progress", __func__ );
           close(Cfg_teleinfo.fd);                                                             /* Fermeture de la connexion FD */
+          Teleinfo_send_status_to_master(FALSE);
           Teleinfo_Lire_config ();                                          /* Lecture de la configuration logiciel du thread */
           Cfg_teleinfo.fd = Init_teleinfo();
           if (Cfg_teleinfo.fd<0)                                                               /* On valide l'acces aux ports */
@@ -318,6 +346,7 @@
            { close(Cfg_teleinfo.fd);
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
+             Teleinfo_send_status_to_master(FALSE);
            }
         }
      }

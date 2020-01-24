@@ -42,6 +42,8 @@
 
  struct TELEINFO_CONFIG
   { struct LIBRAIRIE *lib;
+    gboolean comm_status;
+    gpointer bit_comm;                                                            /* Pointer de raccourci pour le bit de comm */
     gint  mode;                                                                    /* Statut de connexion au port TeleInfoEDF */
     gint  date_next_retry;                                                 /* Date de la prochaine connexion au port teleinfo */
     gchar tech_id[32];
