@@ -22,6 +22,7 @@
  #define POS_TL             <-> _E(libelle="Position Télérupteur"); /* Position du Télérupteur des luminaires centre  */
  #define OSMS_TL_ON         <-> _E(libelle="Demande SMS d'allumage TL"); /* Ordre TL  ON */
  #define OSMS_TL_OFF        <-> _E(libelle="Demande SMS d'extinction TL"); /* Ordre TL  OFF */
+ #define OSYN_TL_TOGGLE     <-> _E(libelle="Demande SYN de bascule du TL");
  #define ODLS_TL_OFF        <-> _M(libelle="Demande DLS d'extinction TL");
  #define ODLS_TL_ON         <-> _M(libelle="Demande DLS d'allumage TL");
  #define ODLS_TL_TOGGLE     <-> _M(libelle="Demande DLS de bascule du TL");
@@ -81,8 +82,8 @@
 
 /* ORDRES DU MODULE ----------------------------------------------------------------------------------------------------------*/
 
-  - _MEMSA_OK. ODLS_TL_TOGGLE ./POS_TL -> ODLS_TL_TOGGLE_ON;                                       /* Commande de bascule DLS */
-  - _MEMSA_OK. ODLS_TL_TOGGLE . POS_TL -> ODLS_TL_TOGGLE_OFF;
+  - _MEMSA_OK. (OSYN_TL_TOGGLE + ODLS_TL_TOGGLE) ./POS_TL -> ODLS_TL_TOGGLE_ON;                    /* Commande de bascule DLS */
+  - _MEMSA_OK. (OSYN_TL_TOGGLE + ODLS_TL_TOGGLE) . POS_TL -> ODLS_TL_TOGGLE_OFF;
 
 /* CALCUL ETAT ATTENDU TELERUPTEUR */
   - _MEMSA_OK. (OSMS_TL_ON  + ODLS_TL_ON  + ODLS_TL_TOGGLE_ON  + OVOC_TL_ON ). /POS_TL -> MEWANTTL, MEACTELE;
