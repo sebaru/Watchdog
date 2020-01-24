@@ -217,9 +217,9 @@
   {
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    if (!strcasecmp(type,"M"))
+    if (!strcasecmp(type,"DI"))
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                 "%s: HTTP/ request for SET M %s:%s", __func__, tech_id, acronyme );
+                 "%s: HTTP/ request for SET DI %s:%s", __func__, tech_id, acronyme );
        Envoyer_commande_dls_data ( tech_id, acronyme );
        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }

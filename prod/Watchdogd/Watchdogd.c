@@ -346,7 +346,7 @@
               { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); continue; }
 
              Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                       "%s: receive SET_BOOL=1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
+                       "%s: receive SET_BOOL from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
                        event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
                        Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
              Dls_data_set_bool ( Json_get_string ( query, "tech_id" ),
@@ -739,6 +739,7 @@
        pthread_mutex_init( &Partage->com_db.synchro, &attr );
 
 /************************************* Création des zones de bits internes dynamiques *****************************************/
+       Partage->Dls_data_DI     = NULL;
        Partage->Dls_data_AI     = NULL;
        Partage->Dls_data_AO     = NULL;
        Partage->Dls_data_BOOL   = NULL;
@@ -817,6 +818,9 @@
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique BOOL", __func__ );
        g_slist_foreach (Partage->Dls_data_BOOL, (GFunc) g_free, NULL );
        g_slist_free (Partage->Dls_data_BOOL);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique DI", __func__ );
+       g_slist_foreach (Partage->Dls_data_DI, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_DI);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique AI", __func__ );
        g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
        g_slist_free (Partage->Dls_data_AI);
