@@ -49,7 +49,9 @@
 /************************************************ Préparation du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/status"))
-				 { json_builder_begin_object(builder);Json_add_string ( builder, "tech_id", Cfg_teleinfo.tech_id );
+				 { json_builder_begin_object(builder);
+       Json_add_string ( builder, "tech_id", Cfg_teleinfo.tech_id );
+				   Json_add_bool   ( builder, "comm_status", Cfg_teleinfo.comm_status );
 				   Json_add_string ( builder, "port", Cfg_teleinfo.port );
 				   Json_add_int ( builder, "mode", Cfg_teleinfo.mode );
 				   Json_add_int ( builder, "retry_in", (Partage->top - Cfg_teleinfo.date_next_retry)/10.0 );

@@ -49,7 +49,6 @@
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%06d.so", dls->plugindb.id );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
-    dls->vars.starting = 1;                                                        /* au chargement, le bit de start vaut 1 ! */
     dls->conso    = 0.0;
 
     if (Partage->com_dls.Compil_at_boot) Compiler_source_dls( FALSE, dls->plugindb.id, NULL, 0 );
@@ -159,6 +158,7 @@
                        plugin->plugindb.id, plugin->plugindb.shortname );
            }
           Charger_un_plugin ( plugin );
+          plugin->vars.starting = 1;                                               /* au chargement, le bit de start vaut 1 ! */
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin %06d (%s) loaded", __func__,
                     plugin->plugindb.id, plugin->plugindb.shortname );
           return;

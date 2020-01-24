@@ -78,7 +78,7 @@
 /******************************************************************************************************************************/
  static void Ups_send_status_to_master ( struct MODULE_UPS *ups, gboolean status )
   { if (Config.instance_is_master==TRUE)                                                        /* si l'instance est Maitre */
-     { Dls_data_set_bool ( ups->tech_id, "COMM", &ups->bit_comm, status ); }                              /* Communication OK */
+     { Dls_data_set_DI ( ups->tech_id, "COMM", &ups->bit_comm, status ); }                              /* Communication OK */
 /*    else
      {
      }*/
@@ -529,15 +529,15 @@
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
-     { Dls_data_set_bool ( module->tech_id, "OUTLET_1_STATUS", &module->di_outlet_1_status, !strcmp(reponse, "\"on\"") ); }
+     { Dls_data_set_DI ( module->tech_id, "OUTLET_1_STATUS", &module->di_outlet_1_status, !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
-     { Dls_data_set_bool ( module->tech_id, "OUTLET_2_STATUS", &module->di_outlet_2_status, !strcmp(reponse, "\"on\"") ); }
+     { Dls_data_set_DI ( module->tech_id, "OUTLET_2_STATUS", &module->di_outlet_2_status, !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { Dls_data_set_bool ( module->tech_id, "UPS_ONLINE",   &module->di_ups_online,   !strncmp(reponse, "\"OL", 3) );
-       Dls_data_set_bool ( module->tech_id, "UPS_CHARGING", &module->di_ups_charging, !strcmp(reponse, "\"OL CHRG\"") );
-       Dls_data_set_bool ( module->tech_id, "UPS_ON_BATT",  &module->di_ups_on_batt,  !strcmp(reponse, "\"OB\"") );
+     { Dls_data_set_DI ( module->tech_id, "UPS_ONLINE",   &module->di_ups_online,   !strncmp(reponse, "\"OL", 3) );
+       Dls_data_set_DI ( module->tech_id, "UPS_CHARGING", &module->di_ups_charging, !strcmp(reponse, "\"OL CHRG\"") );
+       Dls_data_set_DI ( module->tech_id, "UPS_ON_BATT",  &module->di_ups_on_batt,  !strcmp(reponse, "\"OB\"") );
      }
     Ups_send_status_to_master ( module, TRUE );
 
