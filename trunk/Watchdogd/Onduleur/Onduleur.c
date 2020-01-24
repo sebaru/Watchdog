@@ -78,7 +78,7 @@
 /******************************************************************************************************************************/
  static void Ups_send_status_to_master ( struct MODULE_UPS *ups, gboolean status )
   { if (Config.instance_is_master==TRUE)                                                        /* si l'instance est Maitre */
-     { Dls_data_set_bool ( ups->tech_id, "COMM", &ups->bit_comm, status ); }                              /* Communication OK */
+     { Dls_data_set_DI ( ups->tech_id, "COMM", &ups->bit_comm, status ); }                              /* Communication OK */
 /*    else
      {
      }*/
