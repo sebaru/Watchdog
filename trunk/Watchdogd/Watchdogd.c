@@ -287,15 +287,15 @@
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
      { if (!Demarrer_arch())                                                                   /* Demarrage gestion Archivage */
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb ARCH" ); }
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb ARCH", __func__ ); }
 
        if (!Demarrer_dls())                                                                               /* Démarrage D.L.S. */
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb DLS" ); }
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb DLS", __func__ ); }
 
        Charger_librairies();                                                  /* Chargement de toutes les librairies Watchdog */
      }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: NOT starting threads (single mode=true)", __func__ ); }
 
 /***************************************** Debut de la boucle sans fin ********************************************************/
     cpt_5_minutes = Partage->top + 3000;
@@ -337,21 +337,6 @@
                        event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
                        Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
              Envoyer_commande_dls_data ( Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
-           }
-          else if ( !strcmp(event->tag,"SET_BOOL") )
-           { JsonNode *query;
-             buffer[byte] = 0;                                                                       /* Caractère nul d'arret */
-             query = Json_get_from_string ( payload );
-             if (!query)
-              { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); continue; }
-
-             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                       "%s: receive SET_BOOL from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
-                       event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
-                       Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
-             Dls_data_set_bool ( Json_get_string ( query, "tech_id" ),
-                                 Json_get_string ( query, "acronyme" ),
-                                 NULL, Json_get_bool ( query, "etat" ) );
            }
           else if ( !strcmp(event->tag,"SET_DI") )
            { JsonNode *query;
