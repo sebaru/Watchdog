@@ -541,6 +541,6 @@
      }
 
     Libere_DB_SQL( &db );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: %d MSG updated", __func__, cpt );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d MSG updated", __func__, cpt );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

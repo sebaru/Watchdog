@@ -42,7 +42,7 @@
 /******************************************************************************************************************************/
 /* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                                              */
 /* Entrée: Le plugin D.L.S                                                                                                    */
-/* Sortie: FALSE si problÃ¨me                                                                                                  */
+/* Sortie: FALSE si problème                                                                                                  */
 /******************************************************************************************************************************/
  static gboolean Charger_un_plugin ( struct PLUGIN_DLS *dls )
   { gchar nom_fichier_absolu[60];
@@ -99,6 +99,7 @@
      }
     if (dls->plugindb.on) dls->start_date = time(NULL);
                      else dls->start_date = 0;
+    Partage->com_dls.Compil_at_boot = FALSE;
     return(TRUE);
   }
 /******************************************************************************************************************************/
