@@ -8,6 +8,7 @@
 /* Fonctionnalités                                                                                                            */
 /*  - Allumage/Extinction depuis une commande SMS                                                                             */
 /*  - Allumage/Extinction depuis une commande VOCALE                                                                          */
+/*  - Allumage/Extinction depuis une commande SYNoptique                                                                      */
 /*  - Allumage/Extinction depuis une commande DLS                                                                             */
 /*  - Changement d'état (bascule) depuis une commande DLS                                                                     */
 /*  - Gestion des défauts travail et repos                                                                                    */
