@@ -198,7 +198,7 @@
     if (Config.instance_is_master)
      { if (Dls_auto_create_plugin( "SONO", "Gestion de la sonorisation" ) == FALSE)
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR, "%s: DLS Create 'SONO' ERROR\n", __func__ ); }
-       Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SONO", "P_ALL", "Profil Audio : All Hps Enabled" );
+       Mnemo_auto_create_DI ( "SONO", "P_ALL", "Profil Audio : All Hps Enabled" );
      }
 
     zmq_msg      = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );

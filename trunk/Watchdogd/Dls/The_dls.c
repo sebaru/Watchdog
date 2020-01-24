@@ -773,14 +773,14 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme )
-  { gpointer bool=NULL;
-    Dls_data_get_bool ( tech_id, acronyme, &bool );
-    if (!bool) { Dls_data_set_bool ( tech_id, acronyme, &bool, TRUE ); }
+  { gpointer di=NULL;
+    Dls_data_get_DI ( tech_id, acronyme, &di );
+    if (!di) { Dls_data_set_DI ( tech_id, acronyme, &di, TRUE ); }
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bool );
+    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, di );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a un du bit '%s:%s' demandée", __func__, tech_id, acronyme );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a un du bit DI '%s:%s' demandée", __func__, tech_id, acronyme );
   }
 /******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
@@ -797,12 +797,13 @@
        Partage->com_dls.Reset_M = g_slist_append ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
        SM( num, 1 );                                                                           /* Mise a un du bit monostable */
      }
-    while( Partage->com_dls.Set_Dls_Data )                                               /* A-t-on un monostable a allumer ?? */
-     { struct DLS_BOOL *bool = Partage->com_dls.Set_Dls_Data->data;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a 1 du bit %s:%s", __func__, bool->tech_id, bool->acronyme );
-       Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, bool );
-       Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, bool );
-       Dls_data_set_bool ( NULL, NULL, (gpointer *)&bool, TRUE );                              /* Mise a un du bit monostable */
+    while( Partage->com_dls.Set_Dls_Data )                                                  /* A-t-on une entrée a allumer ?? */
+     { struct DLS_DI *di = Partage->com_dls.Set_Dls_Data->data;
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a 1 du bit DI %s:%s",
+                 __func__, di->tech_id, di->acronyme );
+       Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, di );
+       Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, di );
+       Dls_data_set_DI ( NULL, NULL, (gpointer *)&di, TRUE );                                    /* Mise a un du bit d'entrée */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
@@ -821,10 +822,11 @@
        SM( num, 0 );
      }
     while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
-     { struct DLS_BOOL *bool = Partage->com_dls.Reset_Dls_Data->data;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a 0 du bit %s:%s", __func__, bool->tech_id, bool->acronyme );
-       Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, bool );
-       Dls_data_set_bool ( NULL, NULL, (gpointer *)&bool, FALSE );                             /* Mise a un du bit monostable */
+     { struct DLS_DI *di = Partage->com_dls.Reset_Dls_Data->data;
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a 0 du bit DI %s:%s",
+                 __func__, di->tech_id, di->acronyme );
+       Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, di );
+       Dls_data_set_DI ( NULL, NULL, (gpointer *)&di, FALSE );                                   /* Mise a un du bit d'entrée */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
