@@ -98,7 +98,6 @@
      }
     if (dls->plugindb.on) dls->start_date = time(NULL);
                      else dls->start_date = 0;
-    Partage->com_dls.Compil_at_boot = FALSE;
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -323,6 +322,7 @@
   { pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.Dls_tree = Dls_charger_plugins_for_syn(1);                              /* Chargement du root synoptique */
     pthread_mutex_unlock( &Partage->com_dls.synchro );
+    Partage->com_dls.Compil_at_boot = FALSE;/* Apres le chargement initial, on considere que la recompil n'est pas necessaire */
   }
 /******************************************************************************************************************************/
 /* Activer_plugin_by_id_dls_tree: Active ou non un plugin by id                                                               */
