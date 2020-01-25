@@ -395,11 +395,12 @@ unite:          modulateur ENTIER HEURE ENTIER
                    $$ = New_chaine(taille);
                    g_snprintf( $$, taille, "(0)" );
                 }}
-                | T_TOP_ALERTE
+                | barre T_TOP_ALERTE
                 {{ int taille;
-                   taille = 22;
+                   taille = 25;
                    $$ = New_chaine(taille);
-                   g_snprintf( $$, taille, "Dls_get_top_alerte()" );
+                   if ($1) g_snprintf( $$, taille, "(!Dls_get_top_alerte())" );
+                   else    g_snprintf( $$, taille, "( Dls_get_top_alerte())" );
                 }}
                 | T_OSYN_ACQ
                 {{ $$ = g_strdup("vars->bit_acquit");
