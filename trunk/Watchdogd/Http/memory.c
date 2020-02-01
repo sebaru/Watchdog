@@ -155,16 +155,16 @@
      }
 /*---------------------------------------------------------- Tempo -----------------------------------------------------------*/
     else if (!strcasecmp(type,"E"))
-     { struct DLS_BOOL *bool=NULL;
+     { struct DLS_DI *di=NULL;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                 "%s: HTTP/ request for GET E %s:%s", __func__, tech_id, acronyme );
-       Dls_data_get_bool ( tech_id, acronyme, (gpointer *)&bool );
-       if (!bool)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: bool '%s:%s' non trouvé", __func__, tech_id, acronyme );
+                 "%s: HTTP/ request for GET DI %s:%s", __func__, tech_id, acronyme );
+       Dls_data_get_DI ( tech_id, acronyme, (gpointer *)&di );
+       if (!di)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: DI '%s:%s' non trouvé", __func__, tech_id, acronyme );
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
-       Json_add_bool  ( builder, "etat", bool->etat );
+       Json_add_bool  ( builder, "etat", di->etat );
      }
 /*---------------------------------------------------- Visuels ---------------------------------------------------------------*/
     else if (!strcasecmp(type,"I"))

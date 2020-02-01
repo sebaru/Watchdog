@@ -216,10 +216,17 @@
        g_snprintf( chaine, sizeof(chaine), " | - B%03d = %d", num, B(num) );
        response = Admin_write ( response, chaine );
      } else
-    if ( ! strcmp ( commande, "new_b" ) || ! strcmp ( commande, "new_m" ) || ! strcmp ( commande, "new_e" ))
+    if ( ! strcmp ( commande, "new_b" ) || ! strcmp ( commande, "new_m" ) )
      { gchar tech_id[80], acronyme[80];
-       if (sscanf ( ligne, "%s %[^:]%s", commande, tech_id, acronyme ) == 3)             /* Découpage de la ligne de commande */
+       if (sscanf ( ligne, "%s %[^:]:%s", commande, tech_id, acronyme ) == 3)             /* Découpage de la ligne de commande */
         { g_snprintf( chaine, sizeof(chaine), " | - %s:%s = %d", tech_id, acronyme, Dls_data_get_bool ( tech_id, acronyme, NULL ) ); }
+       else { g_snprintf( chaine, sizeof(chaine), " | - Wrong number of parameters" ); }
+       response = Admin_write ( response, chaine );
+     } else
+    if ( ! strcmp ( commande, "new_e" ) )
+     { gchar tech_id[80], acronyme[80];
+       if (sscanf ( ligne, "%s %[^:]:%s", commande, tech_id, acronyme ) == 3)             /* Découpage de la ligne de commande */
+        { g_snprintf( chaine, sizeof(chaine), " | - %s:%s = %d", tech_id, acronyme, Dls_data_get_DI ( tech_id, acronyme, NULL ) ); }
        else { g_snprintf( chaine, sizeof(chaine), " | - Wrong number of parameters" ); }
        response = Admin_write ( response, chaine );
      } else
