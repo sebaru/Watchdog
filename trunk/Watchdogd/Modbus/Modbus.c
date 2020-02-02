@@ -1000,6 +1000,10 @@
     module->nbr_request_par_sec = 0;
     module->delai = 0;
 
+    if (Dls_auto_create_plugin( module->modbus.tech_id, "Gestion du Wago" ) == FALSE)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->modbus.tech_id ); }
+    Mnemo_auto_create_DI ( module->modbus.tech_id, "COMM", "Statut de la communication avec le wago" );
+
     while(Cfg_modbus.lib->Thread_run == TRUE && Cfg_modbus.lib->Thread_reload == FALSE)      /* On tourne tant que necessaire */
      { sched_yield();
        usleep(module->delai);
@@ -1007,8 +1011,8 @@
        if (Partage->top>=module->last_top+10)                                                        /* Toutes les 1 secondes */
         { module->nbr_request_par_sec = module->nbr_request;
           module->nbr_request = 0;
-          if(module->nbr_request_par_sec > Cfg_modbus.nbr_request_par_sec) module->delai += 10;
-                       else if(module->delai>0) module->delai -= 10;
+          if(module->nbr_request_par_sec > Cfg_modbus.nbr_request_par_sec) module->delai += 50;
+          else if(module->delai>0) module->delai -= 50;
           module->last_top = Partage->top;
         }
        if ( module->modbus.enable == FALSE && module->started )                                     /* Module a deconnecter ! */

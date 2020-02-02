@@ -78,11 +78,11 @@
     Envoyer_camera_sup_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,
                                                       SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN );
 
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
+              "%s: Sending Synoptique %d finished", __func__, client->syn_to_send->id );
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;
     Unref_client( client );                                                               /* Déréférence la structure cliente */
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-              "%s: Sending Synoptique %d finished", __func__, client->syn_to_send );
     pthread_exit ( NULL );
   }
 /******************************************************************************************************************************/
@@ -141,7 +141,7 @@
                               (gchar *)client->syn_to_send, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                Ref_client( client, "Send supervision" );
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-                         "%s: Starting Send Synoptique %d", __func__, client->syn_to_send );
+                         "%s: Starting Send Synoptique %d", __func__, client->syn_to_send->id );
                pthread_create( &tid, NULL, (void *)Proto_Envoyer_supervision_thread, client );
                pthread_detach( tid );
              }
