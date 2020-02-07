@@ -12,11 +12,11 @@
  #define MSG_WAGO_DOWN <-> _MSG(type=defaut,libelle="Communication Failed !");
  #define MSG_WAGO_UP   <-> _MSG(type=info  ,libelle="Communication OK");
 
-/* VISU_SAT_RASPI3 <->_I0005;  /* VIsuel de l'etat du satellite RASPI3 */
+ #define VISU_WAGO     <-> _I;                                                                    /* VIsuel de l'etat du Wago */
 
 /*------------------------------------------------- Logique fonctionnelle ----------------------------------------------------*/
- - COMM -> MSG_WAGO_UP;                                                  /* Si le thread dit que le wago est UP, on l'affiche */
- -/COMM -> _MEMSA_DEFAUT, _MEMSA_COMOUT, MSG_WAGO_DOWN;
+ - COMM -> MSG_WAGO_UP,VISU_WAGO(mode=0,color=vert);                     /* Si le thread dit que le wago est UP, on l'affiche */
+ -/COMM -> _MEMSA_DEFAUT, _MEMSA_COMOUT, MSG_WAGO_DOWN,VISU_WAGO(mode=0,color=kaki,cligno);
 
 /* Pilotage des bits de remontées */
  - _TRUE -> _MEMSSB_VEILLE;
