@@ -453,6 +453,8 @@
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
              "%s: %s: Reading GET VAR %s Failed : error %s (buffer %s)", __func__, module->tech_id,
               nom_var, (char *)upscli_strerror(&module->upsconn), buffer );
+    Deconnecter_module ( module );
+    module->date_next_connexion = Partage->top + UPS_RETRY;
     return(NULL);
   }
 /******************************************************************************************************************************/
