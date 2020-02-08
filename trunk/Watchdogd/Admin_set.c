@@ -52,6 +52,7 @@
        response = Admin_write ( response, " | - ci num val              - Set CI[num]  = val" );
        response = Admin_write ( response, " | - help                    - This help" );
      } else
+#ifdef bouh
     if ( ! strcmp ( commande, "ch" ) )
      { int num, val, actif;
        sscanf ( ligne, "%s %d %d %d", commande, &num, &val, &actif );                    /* Découpage de la ligne de commande */
@@ -75,6 +76,7 @@
         { g_snprintf( chaine, sizeof(chaine), " | - CI -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
      } else
+#endif
     if ( ! strcmp ( commande, "i" ) )
      { int num, etat, rouge, vert, bleu, cligno;                                         /* Découpage de la ligne de commande */
        sscanf ( ligne, "%s %d %d %d %d %d %d", commande, &num, &etat, &rouge, &vert, &bleu, &cligno );

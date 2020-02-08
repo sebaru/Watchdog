@@ -37,6 +37,7 @@
 /******************************************************************************************************************************/
  gboolean Tester_update_cadran( struct CMD_ETAT_BIT_CADRAN *cadran )
   { if (!cadran) return(FALSE);
+#ifdef bouh
     if (cadran->bit_controle!=-1)                                                                   /* Ancienne mode statique */
      { switch(cadran->type)
         { case MNEMO_ENTREE:
@@ -54,7 +55,7 @@
           default: return(FALSE);
         }
      }
-
+#endif
     switch(cadran->type)
      { case MNEMO_ENTREE:
        case MNEMO_BISTABLE:
@@ -149,20 +150,25 @@
             break;
        case MNEMO_CPTH:
              { cadran->in_range = TRUE;
+#ifdef bouh
                if(cadran->bit_controle!=-1)
                 { cadran->valeur = (time_t)Partage->ch[cadran->bit_controle].confDB.valeur; }
                else
+#endif
                 { cadran->valeur = Dls_data_get_CH(cadran->tech_id, cadran->acronyme, &cadran->dls_data ); }
              }
             break;
        case MNEMO_CPT_IMP:
-             { if(cadran->bit_controle!=-1)
+             {
+#ifdef bouh
+               if(cadran->bit_controle!=-1)
                 { cadran->valeur = Partage->ci[cadran->bit_controle].confDB.valeur;
                   cadran->valeur *= (gfloat)Partage->ci[cadran->bit_controle].confDB.multi;               /* Multiplication ! */
                   g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", Partage->ci[cadran->bit_controle].confDB.unite );
                   cadran->in_range = TRUE;
                 }
                else
+#endif
                 { cadran->valeur = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
                   struct DLS_CI *ci=cadran->dls_data;
                   if (!ci)                                       /* si AI pas trouvée, on remonte le nom du cadran en libellé */

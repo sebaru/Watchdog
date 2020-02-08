@@ -236,6 +236,7 @@
        g_snprintf( chaine, sizeof(chaine), " | - A%03d = %d", num, A(num) );
        response = Admin_write ( response, chaine );
      } else
+#ifdef bouh
     if ( ! strcmp ( commande, "ci" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
@@ -261,6 +262,7 @@
         { g_snprintf( chaine, sizeof(chaine), " | - CH -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
      } else
+#endif
      { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s", ligne );
        response = Admin_write ( response, chaine );
      }

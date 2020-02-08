@@ -109,16 +109,16 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                                  if ( New_alias(ALIAS_TYPE_STATIC, NULL, $2, $5, $6, $4, NULL) == FALSE )    /* Deja defini ? */
                                   { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                                  break;
+                      case MNEMO_CPTH:
+                      case MNEMO_CPT_IMP:
                       case MNEMO_TEMPO:
-                                 Emettre_erreur_new( "Ligne %d: Use of #static _T is obsolete", DlsScanner_get_lineno() );
+                      case MNEMO_MSG:
+                                 Emettre_erreur_new( "Ligne %d: Use of #static is obsolete. Migrate to #define.", DlsScanner_get_lineno() );
                                  break;
                       case MNEMO_SORTIE:
                       case MNEMO_BISTABLE:
                       case MNEMO_ENTREE_ANA:
                       case MNEMO_MONOSTABLE  :
-                      case MNEMO_CPTH:
-                      case MNEMO_CPT_IMP:
-                      case MNEMO_MSG:
                       case MNEMO_REGISTRE :
                       case MNEMO_MOTIF:
                                  if ($4==1)                                                                   /* Barre = 1 ?? */

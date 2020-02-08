@@ -232,7 +232,9 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
+#ifdef bouh
     if (mnemo_full->mnemo_cptimp.reset) Partage->ci[mnemo_full->mnemo_base.num].val_en_cours1 = 0;
+#endif
     return(retour);
   }
 /******************************************************************************************************************************/
@@ -243,7 +245,7 @@
  void Charger_cpt_imp ( void )
   { gchar requete[512];
     struct DB *db;
-
+#ifdef bouh
     db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_cpt_impDB: Connexion DB impossible" );
@@ -279,6 +281,7 @@
      }
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_cpt_imp: DB reloaded" );
     Libere_DB_SQL (&db);
+#endif
   }
 /******************************************************************************************************************************/
 /* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */
@@ -298,7 +301,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
        return;
      }
-
+#ifdef bouh
     for( cpt=0; cpt<NBR_COMPTEUR_IMP; cpt++)
      { cpt_imp = &Partage->ci[cpt].confDB;
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
@@ -307,7 +310,9 @@
                    cpt_imp->valeur, cpt );
        Lancer_requete_SQL ( db, requete );
      }
+#endif
 
+    cpt = 0;
     liste = Partage->Dls_data_CI;
     while ( liste )
      { struct DLS_CI *cpt_imp = (struct DLS_CI *)liste->data;
@@ -317,6 +322,7 @@
                    cpt_imp->valeur, cpt_imp->etat, cpt_imp->tech_id, cpt_imp->acronyme );
        Lancer_requete_SQL ( db, requete );
        liste = g_slist_next(liste);
+       cpt++;
      }
 
     Libere_DB_SQL( &db );

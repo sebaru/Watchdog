@@ -119,7 +119,7 @@
                 change=TRUE;
               }
              break;
-           }*/
+           }
           case MNEMO_CPT_IMP:
            { if (CI(Tableau_num[cpt])!=Tableau_val[cpt])
               { g_snprintf( chaine, sizeof(chaine), "CI[%04d]=%f, ", Tableau_num[cpt], CI(Tableau_num[cpt]) );
@@ -128,7 +128,7 @@
                 change=TRUE;
               }
              break;
-           }
+           }*/
         }
        cpt++;
      }
@@ -264,6 +264,7 @@
      }
     return(0);
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
@@ -275,6 +276,7 @@
      }
     return(0.0);
   }
+#endif
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
@@ -598,6 +600,7 @@
        Partage->audit_bit_interne_per_sec++;
      }
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Met à jour le compteur horaire                                                                         */
 /* Le compteur compte les MINUTES !!                                                                      */
@@ -688,6 +691,7 @@
      }
     if (changed == TRUE) Ajouter_arch( MNEMO_CPT_IMP, num, Partage->ci[num].confDB.valeur );
   }
+#endif
 /******************************************************************************************************************************/
 /* MSG: Positionnement des messages DLS                                                                                       */
 /* Entrée: numero, etat                                                                                                       */
