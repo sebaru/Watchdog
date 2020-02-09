@@ -300,6 +300,8 @@
        Mnemo_auto_create_DI ( module->tech_id, "UPS_ONLINE", "UPS Online" );
        Mnemo_auto_create_DI ( module->tech_id, "UPS_CHARGING", "UPS en charge" );
        Mnemo_auto_create_DI ( module->tech_id, "UPS_ON_BATT",  "UPS sur batterie" );
+       Mnemo_auto_create_DI ( module->tech_id, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
+       Mnemo_auto_create_DI ( module->tech_id, "UPS_ALARM",  "UPS en alarme !" );
 
        Mnemo_auto_create_AI ( module->tech_id, "LOAD", "Charge onduleur", "%" );
        Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, 0.0 );
@@ -537,9 +539,11 @@
      { Dls_data_set_DI ( module->tech_id, "OUTLET_2_STATUS", &module->di_outlet_2_status, !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { Dls_data_set_DI ( module->tech_id, "UPS_ONLINE",   &module->di_ups_online,   !strncmp(reponse, "\"OL", 3) );
-       Dls_data_set_DI ( module->tech_id, "UPS_CHARGING", &module->di_ups_charging, !strcmp(reponse, "\"OL CHRG\"") );
-       Dls_data_set_DI ( module->tech_id, "UPS_ON_BATT",  &module->di_ups_on_batt,  !strcmp(reponse, "\"OB\"") );
+     { Dls_data_set_DI ( module->tech_id, "UPS_ONLINE",       &module->di_ups_online,       (g_strrstr("OL", reponse)?TRUE:FALSE) );
+       Dls_data_set_DI ( module->tech_id, "UPS_CHARGING",     &module->di_ups_charging,     (g_strrstr("CHRG", reponse)?TRUE:FALSE) );
+       Dls_data_set_DI ( module->tech_id, "UPS_ON_BATT",      &module->di_ups_on_batt,      (g_strrstr("OB", reponse)?TRUE:FALSE) );
+       Dls_data_set_DI ( module->tech_id, "UPS_REPLACE_BATT", &module->di_ups_replace_batt, (g_strrstr("RB", reponse)?TRUE:FALSE) );
+       Dls_data_set_DI ( module->tech_id, "UPS_ALARM",        &module->di_ups_alarm,        (g_strrstr("ALARM", reponse)?TRUE:FALSE) );
      }
     Ups_send_status_to_master ( module, TRUE );
 

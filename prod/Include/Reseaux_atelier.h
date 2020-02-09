@@ -105,7 +105,6 @@
     gchar   acronyme[64];                                                                        /* Visuel Acronyme du cadran */
     gint    syn_id;                                                                    /* Numéro du synoptique ou est l'icone */
     gint    type;                                                                                  /* type du bit de controle */
-    gint    bit_controle;                                                                                       /* Ixxx, Cxxx */
     guint   position_x;                                                                          /* en abscisses et ordonnées */
     guint   position_y;
     gint    angle;

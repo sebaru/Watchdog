@@ -71,17 +71,11 @@
  extern void Charger_conf_CI ( struct DLS_CI *cpt_imp );
  extern gboolean Mnemo_auto_create_CI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );
  extern struct DB *Rechercher_CI ( gchar *tech_id, gchar *acronyme );
- extern void Charger_cpt_imp ( void );
- extern struct CMD_TYPE_MNEMO_CPT_IMP *Rechercher_mnemo_cptimpDB ( guint id );
- extern gboolean Modifier_mnemo_cptimpDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
- extern void Updater_cpthDB ( void );                                                                   /* Dans Mnemo_CPT_H.c */
+ extern void Updater_cpthDB ( void );                                                                      /* Dans Mnemo_CH.c */
  extern void Charger_conf_CH ( struct DLS_CH *cpt_h );
  extern gboolean Mnemo_auto_create_CH ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );
  extern struct DB *Rechercher_CH ( gchar *tech_id, gchar *acronyme );
- extern void Charger_cpth ( void );
- extern struct CMD_TYPE_MNEMO_CPT_H *Rechercher_mnemo_cpthDB ( guint id );
- extern gboolean Modifier_mnemo_cpthDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
  extern gboolean Mnemo_auto_create_TEMPO ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );       /* Dans Mnemo_tempo.c */
  extern struct DB *Rechercher_Tempo ( gchar *tech_id, gchar *acronyme );

@@ -56,8 +56,6 @@
        response = Admin_write ( response, " | - a $num                    - Get A[$num]" );
        response = Admin_write ( response, " | - msg $num                  - Get MSG[$num]" );
        response = Admin_write ( response, " | - i $num                    - Get I[$num]" );
-       response = Admin_write ( response, " | - ci $num                   - Get CI[$num]" );
-       response = Admin_write ( response, " | - ch $num                   - Get CH[$num]" );
        response = Admin_write ( response, " | - r $num                    - Get Registre $num _R[$num]" );
        response = Admin_write ( response, " | - help                      - This help" );
      } else
@@ -236,33 +234,6 @@
        g_snprintf( chaine, sizeof(chaine), " | - A%03d = %d", num, A(num) );
        response = Admin_write ( response, chaine );
      } else
-#ifdef bouh
-    if ( ! strcmp ( commande, "ci" ) )
-     { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
-       if (num<NBR_COMPTEUR_IMP)
-        { g_snprintf( chaine, sizeof(chaine), " | - CI%03d = %8.2f, type=%d, actif=%d, unite=%s, multi=%8.2f, val1=%8.2f, val2=%8.2f",
-                      num, Partage->ci[num].val_en_cours2 * Partage->ci[num].confDB.multi,
-                      Partage->ci[num].confDB.type, Partage->ci[num].actif,
-                      Partage->ci[num].confDB.unite, Partage->ci[num].confDB.multi,
-                      Partage->ci[num].val_en_cours1, Partage->ci[num].val_en_cours2
-                    );
-        } else
-        { g_snprintf( chaine, sizeof(chaine), " | - CI -> num '%d' out of range", num ); }
-       response = Admin_write ( response, chaine );
-     } else
-    if ( ! strcmp ( commande, "ch" ) )
-     { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
-       if (num<NBR_COMPTEUR_H)
-        { g_snprintf( chaine, sizeof(chaine), " | - CH%03d = %6d, actif=%d",
-                      num, Partage->ch[num].confDB.valeur, Partage->ch[num].actif
-                    );
-        } else
-        { g_snprintf( chaine, sizeof(chaine), " | - CH -> num '%d' out of range", num ); }
-       response = Admin_write ( response, chaine );
-     } else
-#endif
      { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s", ligne );
        response = Admin_write ( response, chaine );
      }

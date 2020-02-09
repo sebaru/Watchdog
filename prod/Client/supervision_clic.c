@@ -192,8 +192,8 @@
 /******************************************************************************************************************************/
  static void Clic_cadran_supervision_action ( gchar *period )
   { gint pid;
-    printf( "Clic_sur_cadran_supervision : Lancement d'un firefox type=%d, num=%d\n",
-             appui_cadran->cadran->type, appui_cadran->cadran->bit_controle );
+    printf( "Clic_sur_cadran_supervision : Lancement d'un firefox type=%d, %s:%s\n",
+             appui_cadran->cadran->type, appui_cadran->cadran->tech_id, appui_cadran->cadran->acronyme );
     pid = fork();
     if (pid<0) return;
     else if (!pid)                                                                       /* Lancement de la ligne de commande */
@@ -257,9 +257,9 @@
                                                   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                                                   GTK_STOCK_OK, GTK_RESPONSE_OK,
                                                   NULL);
-    g_signal_connect( F_set_registre, "response",
+/*    g_signal_connect( F_set_registre, "response",
                       G_CALLBACK(CB_Cadran_Set_registre),
-                      GINT_TO_POINTER(trame_cadran->cadran->bit_controle) );
+                      GINT_TO_POINTER(trame_cadran->cadran->bit_controle) );*/
 
     frame = gtk_frame_new("Settings");                                                   /* Création de l'interface graphique */
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );

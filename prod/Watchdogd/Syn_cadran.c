@@ -82,9 +82,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s(syn_id,type,bitctrl,posx,posy,angle,tech_id,acronyme,fleche,nb_decimal)"
-                " VALUES (%d,%d,%d,%d,%d,'%d','%s','%s','%d','%d')", NOM_TABLE_CADRAN,
-                cadran->syn_id, cadran->type, cadran->bit_controle,
+                "INSERT INTO %s(syn_id,type,posx,posy,angle,tech_id,acronyme,fleche,nb_decimal)"
+                " VALUES (%d,%d,%d,%d,'%d','%s','%s','%d','%d')", NOM_TABLE_CADRAN,
+                cadran->syn_id, cadran->type,
                 cadran->position_x, cadran->position_y, cadran->angle, tech_id, acronyme, cadran->fleche, cadran->nb_decimal );
     g_free(tech_id);
     g_free(acronyme);
@@ -158,14 +158,13 @@
      { cadran->id           = atoi(db->row[0]);
        cadran->syn_id       = atoi(db->row[1]);                                         /* Synoptique ou est placée le cadran */
        cadran->type         = atoi(db->row[2]);
-       cadran->bit_controle = atoi(db->row[3]);                                                                 /* Ixxx, Cxxx */
-       cadran->position_x   = atoi(db->row[4]);                                                  /* en abscisses et ordonnées */
-       cadran->position_y   = atoi(db->row[5]);
-       cadran->angle        = atoi(db->row[6]);
-       g_snprintf( cadran->tech_id,  sizeof(cadran->tech_id),  "%s" ,db->row[7] );               /* Recopie dans la structure */
-       g_snprintf( cadran->acronyme, sizeof(cadran->acronyme), "%s" ,db->row[8] );               /* Recopie dans la structure */
-       cadran->fleche       = atoi(db->row[9]);
-       cadran->nb_decimal   = atof(db->row[10]);
+       cadran->position_x   = atoi(db->row[3]);                                                  /* en abscisses et ordonnées */
+       cadran->position_y   = atoi(db->row[4]);
+       cadran->angle        = atoi(db->row[5]);
+       g_snprintf( cadran->tech_id,  sizeof(cadran->tech_id),  "%s" ,db->row[6] );               /* Recopie dans la structure */
+       g_snprintf( cadran->acronyme, sizeof(cadran->acronyme), "%s" ,db->row[7] );               /* Recopie dans la structure */
+       cadran->fleche       = atoi(db->row[8]);
+       cadran->nb_decimal   = atof(db->row[9]);
      }
     return(cadran);
   }
@@ -228,9 +227,9 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "
-                "type=%d,bitctrl=%d,posx=%d,posy=%d,angle='%d',tech_id='%s',acronyme='%s',fleche='%d',nb_decimal='%d'"
+                "type=%d,posx=%d,posy=%d,angle='%d',tech_id='%s',acronyme='%s',fleche='%d',nb_decimal='%d'"
                 " WHERE id=%d;", NOM_TABLE_CADRAN,
-                cadran->type, cadran->bit_controle,
+                cadran->type,
                 cadran->position_x, cadran->position_y, cadran->angle,
                 tech_id, acronyme, cadran->fleche, cadran->nb_decimal, cadran->id );
     g_free(tech_id);

@@ -203,8 +203,6 @@
  static gboolean Modifier_mnemo_optionsDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { switch (mnemo_full->mnemo_base.type)
      { case MNEMO_ENTREE_ANA: return( Modifier_mnemo_aiDB      ( mnemo_full ) );
-       case MNEMO_CPT_IMP   : return( Modifier_mnemo_cptimpDB  ( mnemo_full ) );
-       case MNEMO_CPTH      : return( Modifier_mnemo_cpthDB    ( mnemo_full ) );
        case MNEMO_REGISTRE  : return( Modifier_mnemo_registreDB( mnemo_full ) );
        default : return(TRUE);
      }
@@ -495,15 +493,6 @@
           if (mnemo_ai)
            { memcpy ( &mnemo_full->mnemo_ai, mnemo_ai, sizeof(struct CMD_TYPE_MNEMO_AI) );
              g_free(mnemo_ai);
-           }
-          break;
-        }
-       case MNEMO_CPT_IMP:
-        { struct CMD_TYPE_MNEMO_CPT_IMP *mnemo_cpt;
-          mnemo_cpt = Rechercher_mnemo_cptimpDB ( id );
-          if (mnemo_cpt)
-           { memcpy ( &mnemo_full->mnemo_cptimp, mnemo_cpt, sizeof(struct CMD_TYPE_MNEMO_CPT_IMP) );
-             g_free(mnemo_cpt);
            }
           break;
         }

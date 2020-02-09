@@ -37,25 +37,6 @@
 /******************************************************************************************************************************/
  gboolean Tester_update_cadran( struct CMD_ETAT_BIT_CADRAN *cadran )
   { if (!cadran) return(FALSE);
-#ifdef bouh
-    if (cadran->bit_controle!=-1)                                                                   /* Ancienne mode statique */
-     { switch(cadran->type)
-        { case MNEMO_ENTREE:
-               return( cadran->valeur != E(cadran->bit_controle) );
-          case MNEMO_BISTABLE:
-               return( cadran->valeur != B(cadran->bit_controle) );
-          case MNEMO_ENTREE_ANA:
-               return( TRUE );
-          case MNEMO_CPTH:
-               return( cadran->valeur != Partage->ch[cadran->bit_controle].confDB.valeur );
-          case MNEMO_CPT_IMP:
-               return( cadran->valeur != Partage->ci[cadran->bit_controle].confDB.valeur );
-          case MNEMO_REGISTRE:
-               return( cadran->valeur != Partage->registre[cadran->bit_controle].val );
-          default: return(FALSE);
-        }
-     }
-#endif
     switch(cadran->type)
      { case MNEMO_ENTREE:
        case MNEMO_BISTABLE:
@@ -90,10 +71,10 @@
 /* Sortie: une structure prete à l'envoie                                                                                     */
 /******************************************************************************************************************************/
  void Formater_cadran( struct CMD_ETAT_BIT_CADRAN *cadran )
-  { 
+  {
     if (!cadran) return;
 
-    if (cadran->bit_controle==-1 && cadran->dls_data == NULL)
+    if (cadran->dls_data == NULL)
      { struct DB *db;
        if ( (db=Rechercher_CI ( cadran->tech_id, cadran->acronyme )) != NULL )
         { cadran->type = MNEMO_CPT_IMP;
@@ -117,25 +98,13 @@
     switch(cadran->type)
      { case MNEMO_BISTABLE:
             cadran->in_range = TRUE;
-            if (cadran->bit_controle!=-1)
-             { cadran->valeur = 1.0 * B(cadran->bit_controle); }
-            else
-             { cadran->valeur = 1.0 * Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data ); }
+            cadran->valeur = 1.0 * Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
             break;
        case MNEMO_ENTREE:
             cadran->in_range = TRUE;
-            if (cadran->bit_controle!=-1)
-             { cadran->valeur = 1.0 * E(cadran->bit_controle); }
-            else
-             { cadran->valeur = 1.0 * Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data ); }
+            cadran->valeur = 1.0 * Dls_data_get_DI ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
             break;
        case MNEMO_ENTREE_ANA:
-            if(cadran->bit_controle!=-1)
-             { cadran->valeur = Partage->ea[cadran->bit_controle].val_ech;
-               cadran->in_range = EA_inrange(cadran->bit_controle);
-               g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", Partage->ea[cadran->bit_controle].confDB.unite );
-             }
-            else
              { struct DLS_AI *ai;
                cadran->valeur = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
                if (!cadran->dls_data)                            /* si AI pas trouvée, on remonte le nom du cadran en libellé */
@@ -150,45 +119,27 @@
             break;
        case MNEMO_CPTH:
              { cadran->in_range = TRUE;
-#ifdef bouh
-               if(cadran->bit_controle!=-1)
-                { cadran->valeur = (time_t)Partage->ch[cadran->bit_controle].confDB.valeur; }
-               else
-#endif
-                { cadran->valeur = Dls_data_get_CH(cadran->tech_id, cadran->acronyme, &cadran->dls_data ); }
+               cadran->valeur = Dls_data_get_CH(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
              }
             break;
        case MNEMO_CPT_IMP:
-             {
-#ifdef bouh
-               if(cadran->bit_controle!=-1)
-                { cadran->valeur = Partage->ci[cadran->bit_controle].confDB.valeur;
-                  cadran->valeur *= (gfloat)Partage->ci[cadran->bit_controle].confDB.multi;               /* Multiplication ! */
-                  g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", Partage->ci[cadran->bit_controle].confDB.unite );
-                  cadran->in_range = TRUE;
+             { cadran->valeur = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+               struct DLS_CI *ci=cadran->dls_data;
+               if (!ci)                                       /* si AI pas trouvée, on remonte le nom du cadran en libellé */
+                { cadran->in_range = FALSE;
+                  break;
                 }
-               else
-#endif
-                { cadran->valeur = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-                  struct DLS_CI *ci=cadran->dls_data;
-                  if (!ci)                                       /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-                   { cadran->in_range = FALSE;
-                     break;
-                   }
-                  cadran->in_range = TRUE;
-                  cadran->valeur *= ci->multi;                                                            /* Multiplication ! */
-                  g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ci->unite );
-                }
+               cadran->in_range = TRUE;
+               cadran->valeur *= ci->multi;                                                            /* Multiplication ! */
+               g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ci->unite );
              }
             break;
        case MNEMO_REGISTRE:
-            if(cadran->bit_controle==-1) break;
-            cadran->valeur = Partage->registre[cadran->bit_controle].val;
-            g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", Partage->registre[cadran->bit_controle].confDB.unite );
+            cadran->valeur = -1.0;
+            g_snprintf( cadran->unite, sizeof(cadran->unite), "?" );
             cadran->in_range = TRUE;
             break;
        case MNEMO_TEMPO:
-            if(cadran->bit_controle!=-1) break;
             Dls_data_get_tempo ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
             struct DLS_TEMPO *tempo = cadran->dls_data;
             if (!tempo)
@@ -196,7 +147,7 @@
                break;
              }
             cadran->in_range = FALSE;
-               
+
             if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON)                     /* Temporisation Retard en train de compter */
              { cadran->valeur = (tempo->date_on - Partage->top); }
             else if (tempo->status == DLS_TEMPO_NOT_COUNTING)                  /* Tempo ne compte pas: on affiche la consigne */

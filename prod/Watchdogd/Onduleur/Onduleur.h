@@ -88,6 +88,8 @@
     gpointer di_ups_online;
     gpointer di_ups_charging;
     gpointer di_ups_on_batt;
+    gpointer di_ups_replace_batt;
+    gpointer di_ups_alarm;
     gpointer do_load_off;
     gpointer do_load_on;
     gpointer do_outlet_1_off;
