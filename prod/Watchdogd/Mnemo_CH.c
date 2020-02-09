@@ -231,7 +231,7 @@
  void Charger_cpth ( void )
   { gchar requete[512];
     struct DB *db;
-
+#ifdef bouh
     db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, FALSE, LOG_ERR, "Charger_cpth: Connexion DB failed" );
@@ -267,6 +267,7 @@
      }
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_cpth: DB reloaded" );
     Libere_DB_SQL (&db);
+#endif
   }
 /******************************************************************************************************************************/
 /* Updater_cpthDB : Met à jour l'ensemble des CompteurHoraire dans la base de données                                         */
@@ -286,6 +287,7 @@
        return;
      }
 
+#ifdef bouh
     for( cpt=0; cpt<NBR_COMPTEUR_H; cpt++)
      { cpth = &Partage->ch[cpt].confDB;
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
@@ -294,7 +296,9 @@
                    cpth->valeur, cpt );
        Lancer_requete_SQL ( db, requete );
      }
+#endif
 
+    cpt=0;
     liste = Partage->Dls_data_CH;
     while ( liste )
      { struct DLS_CH *cpt_h = (struct DLS_CH *)liste->data;
@@ -304,9 +308,10 @@
                    cpt_h->valeur, cpt_h->etat, cpt_h->tech_id, cpt_h->acronyme );
        Lancer_requete_SQL ( db, requete );
        liste = g_slist_next(liste);
+       cpt++;
      }
 
     Libere_DB_SQL( &db );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d CptH updated", __func__, cpt );
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

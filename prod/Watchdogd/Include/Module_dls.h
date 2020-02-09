@@ -92,8 +92,10 @@
  extern float CI( int num );
  extern void SI( int num, int etat, int rouge, int vert, int bleu, int cligno );
  extern void SB( int num, int etat );
+#ifdef bouh
  extern void SCH( int num, int etat, int reset );
  extern void SCI( int num, int etat, int reset, int ratio );
+#endif
  extern void SM( int num, int etat );
  extern void SA( int num, int etat );
  extern void MSG( int num, int etat );
