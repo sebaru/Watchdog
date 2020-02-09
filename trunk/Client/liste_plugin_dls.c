@@ -52,20 +52,6 @@
      COLONNE_COLOR_TEXTE,*/
      NBR_COLONNE
   };
-#ifdef bouh
- static GdkColor COULEUR_PLUGIN_FOND[]=
-  { { 0x0, 0xFFFF, 0xFFFF, 0xFFFF }, /* Module */
-    { 0x0, 0x0,    0x0,    0x7FFF }, /* Sous-groupe */
-    { 0x0, 0x0,    0x7FFF, 0x0    }, /* Groupe */
-    { 0x0, 0x7FFF, 0x0,    0x0    }, /* Top level */
-  };
- static GdkColor COULEUR_PLUGIN_TEXTE[]=
-  { { 0x0, 0x0,    0x0,    0x0    },
-    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
-    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
-    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
-  };
-#endif
  static gchar *DLS_COMPIL_STATUS[]=                                          /* Status en français de la derniere compilation */
   { "Never compiled yet",
     "Export from Database failed",

@@ -43,7 +43,6 @@
  static GtkWidget *Entry_bitctrl;                                                                   /* Libelle proprement dit */
  static GtkWidget *Entry_tech_id;                                                                   /* Libelle proprement dit */
  static GtkWidget *Entry_acronyme;                                                                  /* Libelle proprement dit */
- static GtkWidget *Spin_bitctrl;
  static GtkWidget *Spin_nb_decimal;
  static GtkWidget *Option_fleche;                                                /* Type de capteur (totalisateur/moyenneur/..) */
  static GtkWidget *Combo_type;
@@ -66,35 +65,6 @@
        return(NULL);
      }
     return( (struct TRAME_ITEM_CADRAN *)(liste->data) );
-  }
-/******************************************************************************************************************************/
-/* Afficher_mnemo: Changement du mnemonique et affichage                                                                      */
-/* Entre: widget, data.                                                                                                       */
-/* Sortie: void                                                                                                               */
-/******************************************************************************************************************************/
- void Proto_afficher_mnemo_cadran_atelier ( struct CMD_TYPE_MNEMO_BASE *mnemo )
-  { gchar chaine[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+10];
-    snprintf( chaine, sizeof(chaine), "%s%04d  %s",
-              Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );                                 /* Formatage */
-    gtk_entry_set_text( GTK_ENTRY(Entry_bitctrl), chaine );
-  }
-/******************************************************************************************************************************/
-/* Afficher_mnemo: Changement du mnemonique et affichage                                                                      */
-/* Entre: widget, data.                                                                                                       */
-/* Sortie: void                                                                                                               */
-/******************************************************************************************************************************/
- static void Afficher_mnemo_cadran_ctrl ( void )
-  { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
-    gchar *type_char;
-
-    type_char = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
-    mnemo.type = Type_bit_interne_int( type_char );
-    g_free(type_char);
-
-    mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_bitctrl) );
-
-    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_EA,
-                   (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
 /******************************************************************************************************************************/
 /* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface                                  */
@@ -125,10 +95,8 @@
              type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
              add_cadran.type = Type_bit_interne_int( type );
              g_free(type);
-             add_cadran.bit_controle = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitctrl) );
              g_snprintf( add_cadran.tech_id, sizeof(add_cadran.tech_id), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tech_id) ) );
              g_snprintf( add_cadran.acronyme, sizeof(add_cadran.acronyme), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acronyme) ) );
-             if (strlen(add_cadran.tech_id)) add_cadran.bit_controle = -1;
              Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CADRAN,
                             (gchar *)&add_cadran, sizeof(struct CMD_TYPE_CADRAN) );
              printf("Requete d'ajout de cadran envoyée au serveur....\n");
@@ -140,12 +108,10 @@
              g_free(type);
              trame_cadran->cadran->fleche      = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_fleche) );
              trame_cadran->cadran->nb_decimal  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_nb_decimal) );
-             trame_cadran->cadran->bit_controle = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitctrl) );
              g_snprintf( trame_cadran->cadran->tech_id, sizeof(trame_cadran->cadran->tech_id),
                          "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tech_id) ) );
              g_snprintf( trame_cadran->cadran->acronyme, sizeof(trame_cadran->cadran->acronyme),
                          "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acronyme) ) );
-             if (strlen(trame_cadran->cadran->tech_id)) trame_cadran->cadran->bit_controle = -1;
              printf("Maj cadran  type=%d\n", trame_cadran->cadran->type );
            }
           break;
@@ -192,15 +158,7 @@
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_bit_interne(MNEMO_CPT_IMP) );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_bit_interne(MNEMO_REGISTRE) );
     gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 0 );
-    g_signal_connect( G_OBJECT(Combo_type), "changed",
-                      G_CALLBACK(Afficher_mnemo_cadran_ctrl), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 0, 1, 0, 1 );
-
-    adj = gtk_adjustment_new( -1, -1, NBR_BIT_DLS-1, 1, 100, 0 );
-    Spin_bitctrl = gtk_spin_button_new( (GtkAdjustment *)adj, 0.5, 0.5);
-    g_signal_connect( G_OBJECT(Spin_bitctrl), "changed",
-                      G_CALLBACK(Afficher_mnemo_cadran_ctrl), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bitctrl, 1, 2, 0, 1 );
 
     label = gtk_label_new( _("Tech_ID") );
     gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 1, 2 );
@@ -244,11 +202,9 @@
         }
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_fleche), trame_cadran->cadran->fleche );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_nb_decimal), trame_cadran->cadran->nb_decimal );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bitctrl), trame_cadran->cadran->bit_controle );
        gtk_entry_set_text( GTK_ENTRY(Entry_tech_id), trame_cadran->cadran->tech_id );
        gtk_entry_set_text( GTK_ENTRY(Entry_acronyme), trame_cadran->cadran->acronyme );
      }
-    Afficher_mnemo_cadran_ctrl();                                                 /* Pour mettre a jour le mnemonique associé */
     gtk_widget_show_all( F_ajout_cadran );
   }
 /******************************************************************************************************************************/

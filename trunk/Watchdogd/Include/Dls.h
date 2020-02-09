@@ -110,22 +110,6 @@
     guint   inrange;
   };
 
- struct CPT_IMP
-  { struct CMD_TYPE_MNEMO_CPT_IMP confDB;
-    gboolean actif;                                                                           /* Mémorisation de l'etat du CI */
-    gfloat val_en_cours1;                                                     /* valeur en cours pour le calcul via les ratio */
-    gfloat val_en_cours2;                                         /* valeur en cours avant interprétation selon le type de CI */
-    time_t last_update;                                                   /* date de derniere update de la valeur du compteur */
-    guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
-  };
-
- struct CPT_HORAIRE
-  { struct CMD_TYPE_MNEMO_CPT_H confDB;
-    guint last_arch;                                 /* Date de dernier enregistrement en base de données */
-    guint old_top;                                                     /* Date de debut du comptage du CH */
-    gboolean actif;
-  };
-
  struct SORTIE_TOR                                                                             /* Définition d'une sortie TOR */
   { gchar etat;                                                                                   /* Etat de la sortie 0 ou 1 */
     gint last_change;                                                                    /* Date du dernier changement d'etat */

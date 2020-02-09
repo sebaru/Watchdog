@@ -108,9 +108,7 @@
 /* Sortie: 0 si present, 1 sinon                                                                                              */
 /******************************************************************************************************************************/
  static gint Chercher_bit_cadrans ( struct CMD_ETAT_BIT_CADRAN *element, struct CMD_ETAT_BIT_CADRAN *cherche )
-  { if (element->bit_controle != -1 && element->bit_controle == cherche->bit_controle && element->type == cherche->type) return 0;
-    if (element->bit_controle == -1 &&
-        (!strcasecmp(element->tech_id, cherche->tech_id) && !strcasecmp(element->acronyme, cherche->acronyme))) return 0;
+  { if ( (!strcasecmp(element->tech_id, cherche->tech_id) && !strcasecmp(element->acronyme, cherche->acronyme)) ) return 0;
     return 1;
   }
 /******************************************************************************************************************************/
@@ -145,7 +143,6 @@
           init_cadran = (struct CMD_ETAT_BIT_CADRAN *)g_try_malloc0(sizeof(struct CMD_ETAT_BIT_CADRAN));
           if (init_cadran)
            { init_cadran->type = cadran->type;
-             init_cadran->bit_controle = cadran->bit_controle;
              g_snprintf( init_cadran->tech_id, sizeof(init_cadran->tech_id), "%s", cadran->tech_id );
              g_snprintf( init_cadran->acronyme, sizeof(init_cadran->acronyme), "%s", cadran->acronyme );
 

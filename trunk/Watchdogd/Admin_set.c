@@ -48,35 +48,8 @@
        response = Admin_write ( response, " | - a num val               - Set A[num]   = val" );
        response = Admin_write ( response, " | - msg num val             - Set MSG[num] = val" );
        response = Admin_write ( response, " | - i num E R V B C         - Set I[num]   = Etat Rouge Vert Bleu Cligno" );
-       response = Admin_write ( response, " | - ch num val actif        - Set CH[num]  = val, actif" );
-       response = Admin_write ( response, " | - ci num val              - Set CI[num]  = val" );
        response = Admin_write ( response, " | - help                    - This help" );
      } else
-#ifdef bouh
-    if ( ! strcmp ( commande, "ch" ) )
-     { int num, val, actif;
-       sscanf ( ligne, "%s %d %d %d", commande, &num, &val, &actif );                    /* Découpage de la ligne de commande */
-       if (num<NBR_COMPTEUR_H)
-        { Partage->ch[num].confDB.valeur = val;
-          Partage->ch[num].actif = actif;
-          g_snprintf( chaine, sizeof(chaine), " | - CH%03d = %d", num, val );
-        } else
-        { g_snprintf( chaine, sizeof(chaine), " | - CH -> num '%d' out of range", num ); }
-       response = Admin_write ( response, chaine );
-     } else
-    if ( ! strcmp ( commande, "ci" ) )
-     { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
-       if (num<NBR_COMPTEUR_IMP)
-        { Partage->ci[num].confDB.valeur = (gfloat)val;
-          Partage->ci[num].val_en_cours1 = 0.0;
-          Partage->ci[num].val_en_cours2 = (gfloat)val;
-          g_snprintf( chaine, sizeof(chaine), " | - CI%03d = %d", num, val );
-        } else
-        { g_snprintf( chaine, sizeof(chaine), " | - CI -> num '%d' out of range", num ); }
-       response = Admin_write ( response, chaine );
-     } else
-#endif
     if ( ! strcmp ( commande, "i" ) )
      { int num, etat, rouge, vert, bleu, cligno;                                         /* Découpage de la ligne de commande */
        sscanf ( ligne, "%s %d %d %d %d %d %d", commande, &num, &etat, &rouge, &vert, &bleu, &cligno );

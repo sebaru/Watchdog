@@ -55,8 +55,8 @@
     cadran = (struct CMD_TYPE_CADRAN *)g_try_malloc0( sizeof(struct CMD_TYPE_CADRAN) );
     if (!cadran) return;
     memcpy ( cadran, rezo_cadran, sizeof( struct CMD_TYPE_CADRAN ) );
-    printf("%s: add cadran type %d:%d %s:%s\n", __func__,
-                          cadran->type, cadran->bit_controle, cadran->tech_id, cadran->acronyme );
+    printf("%s: add cadran type %d %s:%s\n", __func__,
+                          cadran->type, cadran->tech_id, cadran->acronyme );
     trame_cadran = Trame_ajout_cadran ( FALSE, infos->Trame, cadran );
     trame_cadran->groupe_dpl = Nouveau_groupe();                 /* Numéro de groupe pour le deplacement */
     g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "button-press-event",
@@ -141,20 +141,12 @@
            { case TYPE_CADRAN    :
               { cpt++;                                                                   /* Nous updatons un cadran de plus ! */
                 trame_cadran = (struct TRAME_ITEM_CADRAN *)liste_cadrans->data;
-                if ( (etat_cadran->bit_controle != -1 &&
-                      (etat_cadran->bit_controle == trame_cadran->cadran->bit_controle &&
-                       etat_cadran->type == trame_cadran->cadran->type))
-                     ||
-                     (etat_cadran->bit_controle == -1 &&
-                      (!strcmp(etat_cadran->tech_id, trame_cadran->cadran->tech_id) &&
-                       !strcmp(etat_cadran->acronyme, trame_cadran->cadran->acronyme)))
+                if ( (!strcmp(etat_cadran->tech_id, trame_cadran->cadran->tech_id) &&
+                      !strcmp(etat_cadran->acronyme, trame_cadran->cadran->acronyme))
                    )
                  { Updater_cadran ( etat_cadran, trame_cadran );
-                   printf("%s: change cadran type %d:%d %s:%s\n", __func__,
-                               etat_cadran->type, etat_cadran->bit_controle, etat_cadran->tech_id, etat_cadran->acronyme );
-                   /*printf("Proto_changer_etat_cadran: change %d:%d %s:%s in_range=%d valeur=%f\n",
-                          etat_cadran->type, etat_cadran->bit_controle, etat_cadran->tech_id, etat_cadran->acronyme,
-                          etat_cadran->in_range, etat_cadran->valeur );*/
+                   printf("%s: change cadran type %d %s:%s\n", __func__,
+                               etat_cadran->type, etat_cadran->tech_id, etat_cadran->acronyme );
                  }
                 break;
               }
