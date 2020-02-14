@@ -537,7 +537,6 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `syn_id` int(11) NOT NULL DEFAULT '0',
-  `bitctrl` int(11) NOT NULL DEFAULT '0',
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
   `type` int(11) NOT NULL DEFAULT '0',
