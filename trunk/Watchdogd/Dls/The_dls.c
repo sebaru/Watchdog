@@ -589,41 +589,6 @@
   }
 #ifdef bouh
 /**********************************************************************************************************/
-/* Met à jour le compteur horaire                                                                         */
-/* Le compteur compte les MINUTES !!                                                                      */
-/**********************************************************************************************************/
- void SCH( int num, int etat, int reset )
-  { if (num<0 || num>=NBR_COMPTEUR_H)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SCH : num %d out of range", num );
-       return;
-     }
-
-    if (reset)
-     { if (etat)
-        { Partage->ch[num].confDB.valeur = 0;
-          Partage->ch[num].actif = FALSE;
-        }
-     }
-    else if (etat)
-     { if ( ! Partage->ch[ num ].actif )
-        { Partage->ch[num].actif = TRUE;
-          Partage->ch[num].old_top = Partage->top;
-        }
-       else
-        { int new_top, delta;
-          new_top = Partage->top;
-          delta = new_top - Partage->ch[num].old_top;
-          if (delta > 600)                                           /* On compte +1 toutes les minutes ! */
-           { Partage->ch[num].confDB.valeur ++;
-             Partage->ch[num].old_top = new_top;
-             Ajouter_arch( MNEMO_CPTH, num, 1.0*Partage->ch[num].confDB.valeur );
-           }
-        }
-     }
-    else
-     { Partage->ch[ num ].actif = FALSE; }
-  }
-/**********************************************************************************************************/
 /* Met à jour le compteur impulsion                                                                       */
 /* Le compteur compte les impulsions !!                                                                   */
 /**********************************************************************************************************/
@@ -1292,23 +1257,29 @@
     if (etat)
      { if (reset)                                                                       /* Le compteur doit-il etre resetté ? */
         { if (cpt_imp->valeur!=0)
-           { cpt_imp->val_en_cours1 = 0;                                          /* Valeur transitoire pour gérer les ratio */
-             cpt_imp->valeur = 0;                                                 /* Valeur transitoire pour gérer les ratio */
+           { cpt_imp->val_en_cours1 = 0;                                           /* Valeur transitoire pour gérer les ratio */
+             cpt_imp->valeur = 0;                                                  /* Valeur transitoire pour gérer les ratio */
              need_arch = TRUE;
            }
         }
-       else if ( cpt_imp->etat == FALSE )                                                             /* Passage en actif */
+       else if ( cpt_imp->etat == FALSE )                                                                 /* Passage en actif */
         { cpt_imp->etat = TRUE;
           cpt_imp->val_en_cours1++;
           if (cpt_imp->val_en_cours1>=ratio)
            { cpt_imp->valeur++;
-             cpt_imp->val_en_cours1=0;                                                    /* RAZ de la valeur de calcul 1 */
+             cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
              need_arch = TRUE;
            }
         }
      }
     else
      { if (reset==0) cpt_imp->etat = FALSE; }
+
+    if ( cpt_imp->last_update + 10 <= Partage->top )                                                    /* Toutes les secondes */
+     { memcpy( &cpt_imp->valeurs[0], &cpt_imp->valeurs[1], 59*sizeof(cpt_imp->valeurs[0]) );
+       cpt_imp->valeurs[59] = cpt_imp->valeur;
+       cpt_imp->imp_par_minute = cpt_imp->valeur - cpt_imp->valeurs[0];
+     }
 
     if (need_arch == TRUE)
      { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 ); }  /* Archivage si besoin */

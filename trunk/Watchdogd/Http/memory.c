@@ -67,6 +67,7 @@
         }
        Json_add_bool   ( builder, "etat",   cpt_imp->etat );
        Json_add_int    ( builder, "valeur", cpt_imp->valeur );
+       Json_add_int    ( builder, "imp_par_minute", cpt_imp->imp_par_minute );
        Json_add_double ( builder, "multi",  cpt_imp->multi );
        Json_add_string ( builder, "unite",  cpt_imp->unite );
      }
