@@ -148,11 +148,11 @@
      }
   }
 /******************************************************************************************************************************/
-/* Updater_cpthDB : Met à jour l'ensemble des CompteurHoraire dans la base de données                                         */
+/* Updater_confDB_CH : Met à jour l'ensemble des CompteurHoraire dans la base de données                                      */
 /* Entrée: néant                                                                                                              */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Updater_cpthDB ( void )
+ void Updater_confDB_CH ( void )
   { struct CMD_TYPE_MNEMO_CPT_H *cpth;
     gchar requete[200];
     GSList *liste;
