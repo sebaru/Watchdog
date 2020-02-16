@@ -1716,6 +1716,68 @@
     return( visu->mode );
   }
 /******************************************************************************************************************************/
+/* Dls_data_set_R: Positionne un registre                                                                                     */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_R ( gchar *tech_id, gchar *acronyme, gpointer *reg_p, gfloat valeur )
+  { struct DLS_REGISTRE *reg;
+
+    if (!reg_p || !*reg_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_REGISTRE;
+       while (liste)
+        { reg = (struct DLS_REGISTRE *)liste->data;
+          if ( !strcasecmp ( reg->acronyme, acronyme ) && !strcasecmp( reg->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+
+       if (!liste)
+        { reg = g_try_malloc0 ( sizeof(struct DLS_REGISTRE) );
+          if (!reg)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
+                       "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( reg->acronyme, sizeof(reg->acronyme), "%s", acronyme );
+          g_snprintf( reg->tech_id,  sizeof(reg->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_REGISTRE = g_slist_prepend ( Partage->Dls_data_REGISTRE, reg );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
+                    "%s : adding DLS_REGISTRE '%s:%s'", __func__, tech_id, acronyme );
+        }
+       if (reg_p) *reg_p = (gpointer)reg;                                           /* Sauvegarde pour acceleration si besoin */
+      }
+    else reg = (struct DLS_REGISTRE *)*reg_p;
+
+    reg->val = valeur;
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_reg: Remonte l'etat d'un registre                                                                             */
+/* Sortie : TRUE sur le regean est UP                                                                                         */
+/******************************************************************************************************************************/
+ gfloat Dls_data_get_R ( gchar *tech_id, gchar *acronyme, gpointer *reg_p )
+  { struct DLS_REGISTRE *reg;
+    GSList *liste;
+    if (reg_p && *reg_p)                                                             /* Si pointeur d'acceleration disponible */
+     { reg = (struct DLS_REGISTRE *)*reg_p;
+       return( reg->val );
+     }
+    if (!tech_id || !acronyme) return(FALSE);
+
+    liste = Partage->Dls_data_REGISTRE;
+    while (liste)
+     { reg = (struct DLS_REGISTRE *)liste->data;
+       if ( !strcasecmp ( reg->acronyme, acronyme ) && !strcasecmp( reg->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste) return(FALSE);
+    if (reg_p) *reg_p = (gpointer)reg;                                              /* Sauvegarde pour acceleration si besoin */
+    return( reg->val );
+  }
+/******************************************************************************************************************************/
 /* Dls_dyn_string: Formate la chaine en parametre avec le bit également en parametre                                          */
 /* Entrée : La chaine source, le type de bit, le tech_id/acronyme, le pointeur de raccourci                                   */
 /* sortie : Une nouvelle chaine de caractere à g_freer                                                                        */

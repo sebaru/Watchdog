@@ -74,6 +74,8 @@
  extern gint Dls_data_get_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p );
  extern void Dls_data_set_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p, gboolean etat, gint reset );
  extern gint Dls_data_get_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p );
+ extern void Dls_data_set_R ( gchar *tech_id, gchar *acronyme, gpointer *reg_p, gfloat valeur );
+ extern gfloat Dls_data_get_R ( gchar *tech_id, gchar *acronyme, gpointer *reg_p );
  extern gchar *Dls_dyn_string ( gchar *format, gint type_bit, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p );
  extern void Dls_data_set_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visuel_p, gint mode,
                                    gchar *color, gboolean cligno );

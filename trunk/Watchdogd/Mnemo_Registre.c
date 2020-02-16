@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Mnemo_Registre.c              Déclaration des fonctions pour la gestion des registre.c                              */
+/* Watchdogd/Mnemo_Registre.c              DÃ©claration des fonctions pour la gestion des registre.c                              */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    22.03.2017 10:29:53 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -36,9 +36,52 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Rechercher_registreDB: Recupération du registre dont l'id est en parametre                                                 */
-/* Entrée: l'id a récupérer                                                                                                   */
-/* Sortie: une structure hébergeant le registre                                                                               */
+/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
+/* EntrÃ©e: un mnemo, et un flag d'edition ou d'ajout                                                                          */
+/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/******************************************************************************************************************************/
+ gboolean Mnemo_auto_create_REGISTRE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src )
+  { gchar *acro, *libelle;
+    gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+/******************************************** PrÃ©paration de la base du mnemo *************************************************/
+    acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
+    if ( !acro )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
+       return(FALSE);
+     }
+
+    libelle    = Normaliser_chaine ( libelle_src );                                          /* Formatage correct des chaines */
+    if ( !libelle )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation libelle impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "INSERT INTO mnemos_R SET tech_id='%s',acronyme='%s',libelle='%s' "
+                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
+                tech_id, acro, libelle );
+    g_free(libelle);
+    g_free(acro);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return (retour);
+  }
+/******************************************************************************************************************************/
+/* Rechercher_registreDB: RecupÃ©ration du registre dont l'id est en parametre                                                 */
+/* EntrÃ©e: l'id a rÃ©cupÃ©rer                                                                                                   */
+/* Sortie: une structure hÃ©bergeant le registre                                                                               */
 /******************************************************************************************************************************/
  struct CMD_TYPE_MNEMO_REGISTRE *Rechercher_mnemo_registreDB ( guint id )
   { struct CMD_TYPE_MNEMO_REGISTRE *registre;
@@ -71,7 +114,7 @@
      }
 
     registre = (struct CMD_TYPE_MNEMO_REGISTRE *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_REGISTRE) );
-    if (!registre) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
+    if (!registre) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mÃ©moire", __func__ );
     else
      { g_snprintf( registre->unite, sizeof(registre->unite), "%s", db->row[0] );
      }
@@ -80,7 +123,7 @@
   }
 /******************************************************************************************************************************/
 /* Modifier_registreDB: Modification d'une registre Watchdog                                                                  */
-/* Entrées: une structure hébergeant la registrerisation a modifier                                                           */
+/* EntrÃ©es: une structure hÃ©bergeant la registrerisation a modifier                                                           */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Modifier_mnemo_registreDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
@@ -115,7 +158,7 @@
   }
 /******************************************************************************************************************************/
 /* Charger_registre: Chargement des infos sur les Registres                                                                   */
-/* Entrée: rien                                                                                                               */
+/* EntrÃ©e: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_registre ( void )
