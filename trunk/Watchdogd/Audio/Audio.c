@@ -196,9 +196,10 @@
      }
 
     if (Config.instance_is_master)
-     { if (Dls_auto_create_plugin( "SONO", "Gestion de la sonorisation" ) == FALSE)
+     { if (Dls_auto_create_plugin( "AUDIO", "Gestion de la sonorisation" ) == FALSE)
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR, "%s: DLS Create 'SONO' ERROR\n", __func__ ); }
-       Mnemo_auto_create_DI ( "SONO", "P_ALL", "Profil Audio : All Hps Enabled" );
+       Mnemo_auto_create_DI ( "AUDIO", "P_ALL", "Profil Audio: All Hps Enabled" );
+       Mnemo_auto_create_DI ( "AUDIO", "P_NONE", "Profil audio: All Hps disabled" );
      }
 
     zmq_msg      = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
@@ -261,7 +262,7 @@
                     __func__, histo->msg.dls_id, histo->msg.acronyme, histo->msg.num );
 
           if (Config.instance_is_master)
-           { Envoyer_commande_dls_data( "SONO", histo->msg.profil_audio );   /* Positionnement du profil audio via monostable */
+           { Envoyer_commande_dls_data( "AUDIO", histo->msg.profil_audio );  /* Positionnement du profil audio via monostable */
            }
 
           if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)                              /* Si Pas de message depuis xx */
@@ -274,6 +275,11 @@
              else
               { Jouer_google_speech( histo->msg.libelle ); }
            }
+
+          if (Config.instance_is_master)
+           { Envoyer_commande_dls_data( "AUDIO", "P_NONE" );                                 /* Bit de fin d'emission message */
+           }
+
         }
      }
     Close_zmq ( zmq_msg );
