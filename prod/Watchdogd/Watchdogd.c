@@ -253,8 +253,8 @@
  static void Save_dls_data_to_DB ( void )
   { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saving DLS_DATA", __func__ );
-    Updater_cpthDB();                                                                     /* Sauvegarde des compteurs Horaire */
-    Updater_cpt_impDB();                                                              /* Sauvegarde des compteurs d'impulsion */
+    Updater_confDB_CH();                                                                  /* Sauvegarde des compteurs Horaire */
+    Updater_confDB_CI();                                                              /* Sauvegarde des compteurs d'impulsion */
     Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
     Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
     Updater_confDB_AO();                                                               /* Sauvegarde des valeurs des messages */

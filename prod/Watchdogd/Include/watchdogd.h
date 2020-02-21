@@ -141,7 +141,8 @@
     GSList *Dls_data_MSG;                                                                               /* Liste des messages */
     GSList *Dls_data_CI;                                                                  /* Liste des compteurs d'impulsions */
     GSList *Dls_data_CH;                                                                      /* Liste des compteurs horaires */
-    GSList *Dls_data_VISUEL;                                                                     /* Liste des visuel (bits I) */
+    GSList *Dls_data_VISUEL;                                                                    /* Liste des visuels (bits I) */
+    GSList *Dls_data_REGISTRE;                                                                /* Liste des registres (bits R) */
   };
 
 /************************************************ Définitions des prototypes **************************************************/

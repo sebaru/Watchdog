@@ -151,11 +151,11 @@
      }
   }
 /******************************************************************************************************************************/
-/* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */
+/* Updater_confDB_CI: Mise a jour des valeurs de CI en base                                                                   */
 /* Entrée: néant                                                                                                              */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Updater_cpt_impDB ( void )
+ void Updater_confDB_CI ( void )
   { struct CMD_TYPE_MNEMO_CPT_IMP *cpt_imp;
     gchar requete[200];
     GSList *liste;

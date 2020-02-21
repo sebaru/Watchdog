@@ -589,41 +589,6 @@
   }
 #ifdef bouh
 /**********************************************************************************************************/
-/* Met à jour le compteur horaire                                                                         */
-/* Le compteur compte les MINUTES !!                                                                      */
-/**********************************************************************************************************/
- void SCH( int num, int etat, int reset )
-  { if (num<0 || num>=NBR_COMPTEUR_H)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SCH : num %d out of range", num );
-       return;
-     }
-
-    if (reset)
-     { if (etat)
-        { Partage->ch[num].confDB.valeur = 0;
-          Partage->ch[num].actif = FALSE;
-        }
-     }
-    else if (etat)
-     { if ( ! Partage->ch[ num ].actif )
-        { Partage->ch[num].actif = TRUE;
-          Partage->ch[num].old_top = Partage->top;
-        }
-       else
-        { int new_top, delta;
-          new_top = Partage->top;
-          delta = new_top - Partage->ch[num].old_top;
-          if (delta > 600)                                           /* On compte +1 toutes les minutes ! */
-           { Partage->ch[num].confDB.valeur ++;
-             Partage->ch[num].old_top = new_top;
-             Ajouter_arch( MNEMO_CPTH, num, 1.0*Partage->ch[num].confDB.valeur );
-           }
-        }
-     }
-    else
-     { Partage->ch[ num ].actif = FALSE; }
-  }
-/**********************************************************************************************************/
 /* Met à jour le compteur impulsion                                                                       */
 /* Le compteur compte les impulsions !!                                                                   */
 /**********************************************************************************************************/
@@ -1292,23 +1257,29 @@
     if (etat)
      { if (reset)                                                                       /* Le compteur doit-il etre resetté ? */
         { if (cpt_imp->valeur!=0)
-           { cpt_imp->val_en_cours1 = 0;                                          /* Valeur transitoire pour gérer les ratio */
-             cpt_imp->valeur = 0;                                                 /* Valeur transitoire pour gérer les ratio */
+           { cpt_imp->val_en_cours1 = 0;                                           /* Valeur transitoire pour gérer les ratio */
+             cpt_imp->valeur = 0;                                                  /* Valeur transitoire pour gérer les ratio */
              need_arch = TRUE;
            }
         }
-       else if ( cpt_imp->etat == FALSE )                                                             /* Passage en actif */
+       else if ( cpt_imp->etat == FALSE )                                                                 /* Passage en actif */
         { cpt_imp->etat = TRUE;
           cpt_imp->val_en_cours1++;
           if (cpt_imp->val_en_cours1>=ratio)
            { cpt_imp->valeur++;
-             cpt_imp->val_en_cours1=0;                                                    /* RAZ de la valeur de calcul 1 */
+             cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
              need_arch = TRUE;
            }
         }
      }
     else
      { if (reset==0) cpt_imp->etat = FALSE; }
+
+    if ( cpt_imp->last_update + 10 <= Partage->top )                                                    /* Toutes les secondes */
+     { memcpy( &cpt_imp->valeurs[0], &cpt_imp->valeurs[1], 59*sizeof(cpt_imp->valeurs[0]) );
+       cpt_imp->valeurs[59] = cpt_imp->valeur;
+       cpt_imp->imp_par_minute = cpt_imp->valeur - cpt_imp->valeurs[0];
+     }
 
     if (need_arch == TRUE)
      { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 ); }  /* Archivage si besoin */
@@ -1743,6 +1714,68 @@
     if (!liste) return(FALSE);
     if (visu_p) *visu_p = (gpointer)visu;                                           /* Sauvegarde pour acceleration si besoin */
     return( visu->mode );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_R: Positionne un registre                                                                                     */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_R ( gchar *tech_id, gchar *acronyme, gpointer *reg_p, gfloat valeur )
+  { struct DLS_REGISTRE *reg;
+
+    if (!reg_p || !*reg_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_REGISTRE;
+       while (liste)
+        { reg = (struct DLS_REGISTRE *)liste->data;
+          if ( !strcasecmp ( reg->acronyme, acronyme ) && !strcasecmp( reg->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+
+       if (!liste)
+        { reg = g_try_malloc0 ( sizeof(struct DLS_REGISTRE) );
+          if (!reg)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
+                       "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( reg->acronyme, sizeof(reg->acronyme), "%s", acronyme );
+          g_snprintf( reg->tech_id,  sizeof(reg->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_REGISTRE = g_slist_prepend ( Partage->Dls_data_REGISTRE, reg );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
+                    "%s : adding DLS_REGISTRE '%s:%s'", __func__, tech_id, acronyme );
+        }
+       if (reg_p) *reg_p = (gpointer)reg;                                           /* Sauvegarde pour acceleration si besoin */
+      }
+    else reg = (struct DLS_REGISTRE *)*reg_p;
+
+    reg->val = valeur;
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_reg: Remonte l'etat d'un registre                                                                             */
+/* Sortie : TRUE sur le regean est UP                                                                                         */
+/******************************************************************************************************************************/
+ gfloat Dls_data_get_R ( gchar *tech_id, gchar *acronyme, gpointer *reg_p )
+  { struct DLS_REGISTRE *reg;
+    GSList *liste;
+    if (reg_p && *reg_p)                                                             /* Si pointeur d'acceleration disponible */
+     { reg = (struct DLS_REGISTRE *)*reg_p;
+       return( reg->val );
+     }
+    if (!tech_id || !acronyme) return(FALSE);
+
+    liste = Partage->Dls_data_REGISTRE;
+    while (liste)
+     { reg = (struct DLS_REGISTRE *)liste->data;
+       if ( !strcasecmp ( reg->acronyme, acronyme ) && !strcasecmp( reg->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste) return(FALSE);
+    if (reg_p) *reg_p = (gpointer)reg;                                              /* Sauvegarde pour acceleration si besoin */
+    return( reg->val );
   }
 /******************************************************************************************************************************/
 /* Dls_dyn_string: Formate la chaine en parametre avec le bit également en parametre                                          */

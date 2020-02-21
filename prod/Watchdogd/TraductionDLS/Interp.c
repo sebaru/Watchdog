@@ -1224,8 +1224,7 @@
 
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)
-        { struct CMD_TYPE_MNEMO_FULL mnemo;
-          alias = (struct ALIAS *)liste->data;
+        { alias = (struct ALIAS *)liste->data;
           if ( (!alias->used) )
            { Emettre_erreur_new( "Warning: %s not used", alias->acronyme );
              retour = TRAD_DLS_WARNING;
@@ -1263,6 +1262,10 @@
                  { Mnemo_auto_create_HORLOGE ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
+                case MNEMO_REGISTRE:
+                 { Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                   break;
+                 }
                 case MNEMO_ENTREE_ANA:
                  { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
                    if (!unite) unite="no unit";
@@ -1289,15 +1292,6 @@
                    Mnemo_auto_create_MSG ( &msg );
                    break;
                  }
-                default: g_snprintf( mnemo.mnemo_base.acronyme, sizeof(mnemo.mnemo_base.acronyme), "%s", alias->acronyme );
-                         g_snprintf( mnemo.mnemo_base.libelle,  sizeof(mnemo.mnemo_base.libelle),
-                                     "%s", libelle );
-                         /*g_snprintf( mnemo.mnemo_base.acro_syn, sizeof(mnemo.mnemo_base.acro_syn),
-                                     "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );*/
-                         mnemo.mnemo_base.dls_id = Dls_plugin.id;
-                         mnemo.mnemo_base.type = alias->type_bit;
-                         Mnemo_auto_create_for_dls ( &mnemo );
-                         break;
               }
            }
           liste = liste->next;

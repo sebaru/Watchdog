@@ -135,10 +135,13 @@
   { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gint    valeur;
+    gint    val_en_cours1;                                                    /* valeur en cours pour le calcul via les ratio */
     gfloat  ratio;
     gfloat  multi;
+    guint   last_update;
+    gint    imp_par_minute;
+    gint    valeurs[60];                                                                              /* 60 dernieres valeurs */
     gchar   unite[32];
-    gint    val_en_cours1;                                                     /* valeur en cours pour le calcul via les ratio */
     gboolean etat;
   };
 
@@ -175,6 +178,12 @@
   { gint num;
     gchar etat;
     struct DLS_MESSAGES *msg;
+  };
+
+ struct DLS_REGISTRE
+  { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gfloat val;
   };
 
  struct REGISTRE

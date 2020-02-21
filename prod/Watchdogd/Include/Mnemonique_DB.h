@@ -67,12 +67,12 @@
  extern gboolean Mnemo_auto_create_HORLOGE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src ); /* Dans Mnemos_Horloges.c */
  extern void Activer_horlogeDB ( void );
 
- extern void Updater_cpt_impDB ( void );                                                                   /* Dans Mnemo_CI.c */
+ extern void Updater_confDB_CI ( void );                                                                   /* Dans Mnemo_CI.c */
  extern void Charger_conf_CI ( struct DLS_CI *cpt_imp );
  extern gboolean Mnemo_auto_create_CI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );
  extern struct DB *Rechercher_CI ( gchar *tech_id, gchar *acronyme );
 
- extern void Updater_cpthDB ( void );                                                                      /* Dans Mnemo_CH.c */
+ extern void Updater_confDB_CH ( void );                                                                   /* Dans Mnemo_CH.c */
  extern void Charger_conf_CH ( struct DLS_CH *cpt_h );
  extern gboolean Mnemo_auto_create_CH ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );
  extern struct DB *Rechercher_CH ( gchar *tech_id, gchar *acronyme );
@@ -83,6 +83,7 @@
  extern void Charger_registre ( void );                                                              /* Dans Mnemo_registre.c */
  extern struct CMD_TYPE_MNEMO_REGISTRE *Rechercher_mnemo_registreDB ( guint id );
  extern gboolean Modifier_mnemo_registreDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
+ extern gboolean Mnemo_auto_create_REGISTRE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );
 
  extern gboolean Mnemo_auto_create_DI ( gchar *tech_id, gchar *acronyme, gchar *libelle );                /* Dans mnemos_DI.c */
  extern struct DB *Rechercher_DI ( gchar *tech_id, gchar *acronyme );
