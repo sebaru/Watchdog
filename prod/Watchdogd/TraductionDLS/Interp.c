@@ -448,7 +448,7 @@
     taille = strlen(nom)+5;
     result = New_chaine( taille ); /* 10 caractères max */
     if (!barre) { g_snprintf( result, taille, "%s", nom ); }
-           else { g_snprintf( result, taille, "!%s", nom ); }
+           else { g_snprintf( result, taille, "(!%s)", nom ); }
     return(result);
   }
 /******************************************************************************************************************************/

@@ -46,7 +46,6 @@
        response = Admin_write ( response, " | - m num val               - Set M[num]   = val" );
        response = Admin_write ( response, " | - b num val               - Set B[num]   = val" );
        response = Admin_write ( response, " | - a num val               - Set A[num]   = val" );
-       response = Admin_write ( response, " | - msg num val             - Set MSG[num] = val" );
        response = Admin_write ( response, " | - i num E R V B C         - Set I[num]   = Etat Rouge Vert Bleu Cligno" );
        response = Admin_write ( response, " | - help                    - This help" );
      } else
@@ -65,17 +64,6 @@
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - I -> num '%d' out of range", num ); }
         response = Admin_write ( response, chaine );
-     } else
-    if ( ! strcmp ( commande, "msg" ) )
-     { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
-       if (num<NBR_MESSAGE_ECRITS)
-        { if (val) val = 1;
-          MSG ( num, val );
-          g_snprintf( chaine, sizeof(chaine), " | - MSG%03d = %d", num, val );
-        } else
-        { g_snprintf( chaine, sizeof(chaine), " | - MSG -> num '%d' out of range", num ); }
-       response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "e" ) )
      { int num, val;

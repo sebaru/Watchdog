@@ -196,7 +196,7 @@
      }
 
     if (Config.instance_is_master)
-     { if (Dls_auto_create_plugin( "AUDIO", "Gestion de la sonorisation" ) == FALSE)
+     { if (Dls_auto_create_plugin( "AUDIO", "Gestion de l'audio diffusion" ) == FALSE)
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR, "%s: DLS Create 'SONO' ERROR\n", __func__ ); }
        Mnemo_auto_create_DI ( "AUDIO", "P_ALL", "Profil Audio: All Hps Enabled" );
        Mnemo_auto_create_DI ( "AUDIO", "P_NONE", "Profil audio: All Hps disabled" );

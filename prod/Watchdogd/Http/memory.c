@@ -200,6 +200,19 @@
           Json_add_bool   ( builder, "cligno", visu->cligno );
         }
      }
+/*------------------------------------------------ Compteur horaire ----------------------------------------------------------*/
+    else if (!strcasecmp(type,"MSG"))
+     { struct DLS_MESSAGES *msg=NULL;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                 "%s: HTTP/ request for GET MSG %s:%s", __func__, tech_id, acronyme );
+       Dls_data_get_MSG ( tech_id, acronyme, (gpointer *)&msg );
+       if (!msg)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: msg '%s:%s' non trouvée", __func__, tech_id, acronyme );
+          g_object_unref(builder);
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
+        }
+       Json_add_bool ( builder, "etat",   msg->etat );
+     }
 /*------------------------------------------------------- sinon --------------------------------------------------------------*/
     else { Json_add_bool ( builder, "found", FALSE ); }
 

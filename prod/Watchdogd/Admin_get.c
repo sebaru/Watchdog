@@ -54,7 +54,6 @@
        response = Admin_write ( response, " | - m $num                    - Get M[$num]" );
        response = Admin_write ( response, " | - b $num                    - Get B[$num]" );
        response = Admin_write ( response, " | - a $num                    - Get A[$num]" );
-       response = Admin_write ( response, " | - msg $num                  - Get MSG[$num]" );
        response = Admin_write ( response, " | - i $num                    - Get I[$num]" );
        response = Admin_write ( response, " | - r $num                    - Get Registre $num _R[$num]" );
        response = Admin_write ( response, " | - help                      - This help" );
@@ -92,17 +91,6 @@
                       Partage->top );
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - I -> num '%d' out of range", num ); }
-       response = Admin_write ( response, chaine );
-     } else
-    if ( ! strcmp ( commande, "msg" ) )
-     { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
-       if (num<NBR_MESSAGE_ECRITS)
-        { g_snprintf( chaine, sizeof(chaine), " | - MSG%03d = %d, persist = %d, changes = %d, last_change = %d top=%d",
-                      num, Partage->g[num].etat, Partage->g[num].persist, Partage->g[num].changes,
-                      Partage->g[num].last_change, Partage->top );
-        } else
-        { g_snprintf( chaine, sizeof(chaine), " | - MSG -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "new_msg" ) )
