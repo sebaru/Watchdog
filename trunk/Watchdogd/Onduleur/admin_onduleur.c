@@ -61,11 +61,13 @@
     Json_add_double ( builder, "ups_output_voltage", Dls_data_get_AI( NULL, NULL, &module->ai_output_voltage ) );
     Json_add_double ( builder, "ups_output_frequency", Dls_data_get_AI( NULL, NULL, &module->ai_output_frequency ) );
 
-    Json_add_bool ( builder, "ups_outlet_1_status", Dls_data_get_bool( NULL, NULL, &module->di_outlet_1_status ) );
-    Json_add_bool ( builder, "ups_outlet_2_status", Dls_data_get_bool( NULL, NULL, &module->di_outlet_2_status ) );
-    Json_add_bool ( builder, "ups_online", Dls_data_get_bool( NULL, NULL, &module->di_ups_online ) );
-    Json_add_bool ( builder, "ups_charging", Dls_data_get_bool( NULL, NULL, &module->di_ups_charging ) );
-    Json_add_bool ( builder, "ups_on_batt", Dls_data_get_bool( NULL, NULL, &module->di_ups_on_batt ) );
+    Json_add_bool ( builder, "ups_outlet_1_status", Dls_data_get_DI( NULL, NULL, &module->di_outlet_1_status ) );
+    Json_add_bool ( builder, "ups_outlet_2_status", Dls_data_get_DI( NULL, NULL, &module->di_outlet_2_status ) );
+    Json_add_bool ( builder, "ups_online",          Dls_data_get_DI( NULL, NULL, &module->di_ups_online ) );
+    Json_add_bool ( builder, "ups_charging",        Dls_data_get_DI( NULL, NULL, &module->di_ups_charging ) );
+    Json_add_bool ( builder, "ups_on_batt",         Dls_data_get_DI( NULL, NULL, &module->di_ups_on_batt ) );
+    Json_add_bool ( builder, "ups_replace_batt",    Dls_data_get_DI( NULL, NULL, &module->di_ups_replace_batt ) );
+    Json_add_bool ( builder, "ups_alarm",           Dls_data_get_DI( NULL, NULL, &module->di_ups_alarm ) );
 
     json_builder_end_object (builder);                                                                        /* End Document */
   }

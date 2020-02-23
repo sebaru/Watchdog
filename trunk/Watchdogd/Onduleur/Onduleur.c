@@ -460,7 +460,7 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Envoyer_sortie_ups: Envoi des sorties/InstantCommand Ã  l'ups                                                               */
+/* Envoyer_sortie_ups: Envoi des sorties/InstantCommand à l'ups                                                               */
 /* Entrée: identifiants des modules ups                                                                                       */
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
