@@ -185,10 +185,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.posx,%s.posy,%s.angle,"
+                "SELECT %s.id,%s.syn_id,%s.type,%s.posx,%s.posy,%s.angle,"
                 "syns_cadrans.tech_id,syns_cadrans.acronyme, fleche, nb_decimal"
                 " FROM %s WHERE %s.id=%d",
-                NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
+                NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
                 NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
                 NOM_TABLE_CADRAN,                                                                /* From */
                 NOM_TABLE_CADRAN, id );
