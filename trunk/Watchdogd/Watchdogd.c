@@ -857,7 +857,6 @@
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
     curl_global_cleanup();
-    Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
     if (Partage->com_msrv.Thread_reboot == TRUE)                                         /* Devons-nous rebooter le process ? */
@@ -873,6 +872,7 @@
           exit(EXIT_ERREUR);
         }
      }
+    Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
 
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Stopped", __func__ );
     return(EXIT_OK);
