@@ -1151,7 +1151,7 @@
                    "FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "DROP TABLE mnamos_Horloge");
+       g_snprintf( requete, sizeof(requete), "DROP TABLE mnemos_Horloge");
        Lancer_requete_SQL ( db, requete );
      }
 
@@ -1594,9 +1594,14 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4494)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_HORLOGE` ADD `libelle` VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default' AFTER `acronyme`; ");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 fin:
-    database_version=4480;
+    database_version=4494;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

@@ -429,7 +429,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
