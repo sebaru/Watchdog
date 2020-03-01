@@ -549,8 +549,11 @@ reconnect:
 
      }                                                                                         /* Fin du while partage->arret */
 
+    Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "%s: Sortie Boucle", __func__ );
     g_main_context_unref (g_main_loop_get_context (MainLoop));
+    Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO, "%s: main_context_unref OK", __func__ );
     purple_core_quit();
+    Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO, "%s: Purple_core_quit OK", __func__ );
     if (Cfg_imsgp.lib->Thread_run == TRUE && Cfg_imsgp.signed_off == TRUE)
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "%s: Account signed off. Why ?? Reconnect !", __func__ );
        Cfg_imsgp.signed_off = FALSE;
