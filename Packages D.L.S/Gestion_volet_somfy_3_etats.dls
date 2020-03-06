@@ -79,7 +79,7 @@
  - (CMD_OUVRE + CMD_FERME) . (BP_OUVRE + BP_FERME) -> /CMD_OUVRE, /CMD_FERME, CMD_STOP_WAIT_BP;
 
 /*************************************************** En mode automatique ******************************************************/
- - MODE_AUTO . CMD_STOP . 21 _HEURE 00 -> /CMD_STOP, CMD_FERME;
+/* - MODE_AUTO . CMD_STOP . xx -> /CMD_STOP, CMD_FERME; */
 
 /******************************************* Reviens en mode Stop après manoeuvre *********************************************/
  - CMD_OUVRE + CMD_FERME -> TC_MANOEUVRE, /VOLET_SUPPOSE_FERME;
