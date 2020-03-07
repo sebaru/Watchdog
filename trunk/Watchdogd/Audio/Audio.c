@@ -259,7 +259,7 @@
        if ( histo->alive == 1 && histo->msg.audio )                                                 /* Si le message apparait */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
                    "%s : Envoi du message audio %d:%s (%d) (histo->msg.audio=%d)",
-                    __func__, histo->msg.dls_id, histo->msg.acronyme, histo->msg.num );
+                    __func__, histo->msg.dls_id, histo->msg.acronyme, histo->msg.num, histo->msg.audio);
 
           if (Config.instance_is_master)
            { Envoyer_commande_dls_data( "AUDIO", histo->msg.profil_audio );  /* Positionnement du profil audio via monostable */
