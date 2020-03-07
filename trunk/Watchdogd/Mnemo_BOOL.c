@@ -64,7 +64,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO mnemos_BOOL SET type='%d',tech_id='%s',acronyme='%s',libelle='%s' "
-                "ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
+                "ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), type=VALUES(type)",
                 type, tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);
