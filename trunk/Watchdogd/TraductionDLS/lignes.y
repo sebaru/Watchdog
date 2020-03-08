@@ -47,7 +47,7 @@
 %token <val>    T_SWITCH T_ACCOUV T_ACCFERM T_PIPE
 %token <val>    T_DEFINE T_STATIC
 
-%token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_TOP_ALERTE
+%token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_SBIEN_ALE_FUGITIVE T_TOP_ALERTE T_TOP_ALERTE_FUGITIVE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_SPERS_OK T_OSYN_ACQ
 %token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_OK
 %token <val>    T_BUS T_HOST T_THREAD T_TAG T_PARAM1
@@ -410,6 +410,13 @@ unite:          modulateur ENTIER HEURE ENTIER
                    if ($1) g_snprintf( $$, taille, "(!Dls_get_top_alerte())" );
                    else    g_snprintf( $$, taille, "( Dls_get_top_alerte())" );
                 }}
+                | barre T_TOP_ALERTE_FUGITIVE
+                {{ int taille;
+                   taille = 35;
+                   $$ = New_chaine(taille);
+                   if ($1) g_snprintf( $$, taille, "(!Dls_get_top_alerte_fugitive())" );
+                   else    g_snprintf( $$, taille, "( Dls_get_top_alerte_fugitive())" );
+                }}
                 | T_OSYN_ACQ
                 {{ $$ = g_strdup("vars->bit_acquit");
                 }}
@@ -454,6 +461,8 @@ unite:          modulateur ENTIER HEURE ENTIER
                   {{ $$=New_condition_vars( $1, "vars->bit_veille"); }}
                 | barre T_SBIEN_ALE
                   {{ $$=New_condition_vars( $1, "vars->bit_alerte"); }}
+                | barre T_SBIEN_ALE_FUGITIVE
+                  {{ $$=New_condition_vars( $1, "vars->bit_alerte_fugitive"); }}
                 | barre T_SBIEN_ALEF
                   {{ $$=New_condition_vars( $1, "vars->bit_alerte_fixe"); }}
                 | barre T_SPERS_DER

@@ -143,6 +143,13 @@
  gboolean Dls_get_top_alerte ( void )
   { return( Partage->com_dls.Dls_tree->syn_vars.bit_alerte ); }
 /******************************************************************************************************************************/
+/* Dls_get_top_alerte_fugitive: Remonte la valeur du plus haut bit d'alerte fugitive dans l'arbre DLS                         */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: TRUE ou FALSe                                                                                                      */
+/******************************************************************************************************************************/
+ gboolean Dls_get_top_alerte_fugitive ( void )
+  { return( Partage->com_dls.Dls_tree->syn_vars.bit_alerte_fugitive ); }
+/******************************************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                                        */
 /* Entrée: le temps avant, et le temps apres l'action                                                                         */
 /* Sortie: un float                                                                                                           */
@@ -1869,13 +1876,14 @@
   { struct timeval tv_avant, tv_apres;
     gboolean bit_comm_out, bit_defaut, bit_defaut_fixe, bit_alarme, bit_alarme_fixe;                              /* Activité */
     gboolean bit_veille_partielle, bit_veille_totale, bit_alerte, bit_alerte_fixe;             /* Synthese Sécurité des Biens */
+    gboolean bit_alerte_fugitive;
     gboolean bit_derangement, bit_derangement_fixe, bit_danger, bit_danger_fixe;           /* synthèse Sécurité des Personnes */
     GSList *liste;
 
     bit_comm_out = bit_defaut = bit_defaut_fixe = bit_alarme = bit_alarme_fixe = FALSE;
     bit_veille_partielle = FALSE;
     bit_veille_totale = TRUE;
-    bit_alerte = bit_alerte_fixe = FALSE;
+    bit_alerte = bit_alerte_fixe = bit_alerte_fugitive = FALSE;
     bit_derangement = bit_derangement_fixe = bit_danger = bit_danger_fixe = FALSE;
 
     liste = dls_tree->Liste_plugin_dls;
@@ -1904,6 +1912,7 @@
           bit_veille_totale    &= plugin_actuel->vars.bit_veille;
           bit_alerte           |= plugin_actuel->vars.bit_alerte;
           bit_alerte_fixe      |= plugin_actuel->vars.bit_alerte_fixe;
+          bit_alerte_fugitive  |= plugin_actuel->vars.bit_alerte_fugitive;
 
           bit_derangement      |= plugin_actuel->vars.bit_derangement;
           bit_derangement_fixe |= plugin_actuel->vars.bit_derangement_fixe;
@@ -1927,6 +1936,7 @@
        bit_veille_totale    &= sub_tree->syn_vars.bit_veille_totale;
        bit_alerte           |= sub_tree->syn_vars.bit_alerte;
        bit_alerte_fixe      |= sub_tree->syn_vars.bit_alerte_fixe;
+       bit_alerte_fugitive  |= sub_tree->syn_vars.bit_alerte_fugitive;
        bit_derangement      |= sub_tree->syn_vars.bit_derangement;
        bit_derangement_fixe |= sub_tree->syn_vars.bit_derangement_fixe;
        bit_danger           |= sub_tree->syn_vars.bit_danger;
@@ -1943,6 +1953,7 @@
          bit_veille_totale    != dls_tree->syn_vars.bit_veille_totale ||
          bit_alerte           != dls_tree->syn_vars.bit_alerte ||
          bit_alerte_fixe      != dls_tree->syn_vars.bit_alerte_fixe ||
+         bit_alerte_fugitive  != dls_tree->syn_vars.bit_alerte_fugitive ||
          bit_derangement      != dls_tree->syn_vars.bit_derangement ||
          bit_derangement_fixe != dls_tree->syn_vars.bit_derangement_fixe ||
          bit_danger           != dls_tree->syn_vars.bit_danger ||
@@ -1956,6 +1967,7 @@
        dls_tree->syn_vars.bit_veille_totale    = bit_veille_totale;
        dls_tree->syn_vars.bit_alerte           = bit_alerte;
        dls_tree->syn_vars.bit_alerte_fixe      = bit_alerte_fixe;
+       dls_tree->syn_vars.bit_alerte_fugitive  = bit_alerte_fugitive;
        dls_tree->syn_vars.bit_derangement      = bit_derangement;
        dls_tree->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
        dls_tree->syn_vars.bit_danger           = bit_danger;
