@@ -943,7 +943,8 @@
      { struct OPTION *option = (struct OPTION *)options->data;
        options = g_list_remove (options, option);
        switch (option->type)
-        { case T_LIBELLE:
+        { case T_FORME:
+          case T_LIBELLE:
           case T_ETIQUETTE:
           case T_HOST:
           case T_THREAD:

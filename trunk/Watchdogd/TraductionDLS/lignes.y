@@ -52,7 +52,7 @@
 %token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_OK
 %token <val>    T_BUS T_HOST T_THREAD T_TAG T_PARAM1
 
-%token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE
+%token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
 %token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM
 
 %token <val>    T_TYPE T_INFO T_ATTENTE T_DEFAUT T_ALARME T_VEILLE T_ALERTE T_DERANGEMENT T_DANGER
@@ -844,6 +844,11 @@ une_option:     MODE T_EGAL ENTIER
                 | T_LIBELLE T_EGAL T_CHAINE
                 {{ $$=New_option();
                    $$->type = T_LIBELLE;
+                   $$->chaine = $3;
+                }}
+                | T_FORME T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->type = T_FORME;
                    $$->chaine = $3;
                 }}
                 | T_ETIQUETTE T_EGAL T_CHAINE

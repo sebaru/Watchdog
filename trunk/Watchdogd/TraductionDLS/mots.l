@@ -146,6 +146,7 @@ newline       [\n\r]+
 "thread"                   { DlsScanner_lval.val = T_THREAD;    return T_THREAD;    }
 "tag"                      { DlsScanner_lval.val = T_TAG;       return T_TAG;       }
 "param1"                   { DlsScanner_lval.val = T_PARAM1;    return T_PARAM1;    }
+"forme"                    { DlsScanner_lval.val = T_FORME;     return T_FORME;     }
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }
 "#static"                  { DlsScanner_lval.val = T_STATIC;    return T_STATIC;    }

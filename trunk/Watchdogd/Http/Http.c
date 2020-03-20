@@ -318,6 +318,7 @@
                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "%s: WS callback receive %d bytes: %s", __func__, taille, buffer );
                g_free(buffer);
+               lws_callback_on_writable(wsi);
              }
             break;
        case LWS_CALLBACK_CLOSED:
