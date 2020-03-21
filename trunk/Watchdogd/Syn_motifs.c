@@ -36,8 +36,75 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Synoptique_auto_create_VISUEL: CrÃ©ation automatique d'un visuel depuis la compilation DLS                                  */
+/* EntrÃ©e: un mnemo, et un flag d'edition ou d'ajout                                                                          */
+/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/******************************************************************************************************************************/
+ gboolean Synoptique_auto_create_VISUEL ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *forme_src )
+  { gchar *acro, *libelle, *forme;
+    gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+/******************************************** PrÃ©paration de la base du mnemo *************************************************/
+    acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
+    if ( !acro )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
+       return(FALSE);
+     }
+
+    libelle    = Normaliser_chaine ( libelle_src );                                          /* Formatage correct des chaines */
+    if ( !libelle )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation libelle impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
+       return(FALSE);
+     }
+
+    forme      = Normaliser_chaine ( forme_src );                                            /* Formatage correct des chaines */
+    if ( !forme )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation forme impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
+       g_free(libelle);
+       return(FALSE);
+     }
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       g_free(forme);
+       g_free(libelle);
+       g_free(acro);
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "INSERT IGNORE INTO %s SET "
+                "syn_id=(SELECT syns.id FROM dls INNER JOIN syns ON dls.syn_id = syns.id WHERE dls.tech_id='%s'), "
+                "tech_id='%s', acronyme='%s', forme='%s', icone='-1', libelle='%s', access_level=0, bitctrl='-1', bitclic='-1', "
+                "posx='150', posy='150', larg='-1', haut='-1', angle='0', auto_create=1 ",
+                NOM_TABLE_MOTIF, tech_id, tech_id, acro, forme, libelle );
+    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "UPDATE %s SET forme='%s', libelle='%s' "
+                "WHERE tech_id='%s' AND acronyme='%s';",
+                NOM_TABLE_MOTIF, forme, libelle, tech_id, acro );
+    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
+
+    g_free(forme);
+    g_free(libelle);
+    g_free(acro);
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return (retour);
+  }
+/******************************************************************************************************************************/
 /* Retirer_motifDB: Elimination d'un motif                                                                                    */
-/* Entrée: une structure referencant le motif a supprimer                                                                     */
+/* EntrÃ©e: une structure referencant le motif a supprimer                                                                     */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Retirer_motifDB ( struct CMD_TYPE_MOTIF *motif )
@@ -59,8 +126,8 @@
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Ajouter_motifDB: Ajout d'un motif en base de données                                                                       */
-/* Entrée: une structure referencant le motif a supprimer                                                                     */
+/* Ajouter_motifDB: Ajout d'un motif en base de donnÃ©es                                                                       */
+/* EntrÃ©e: une structure referencant le motif a supprimer                                                                     */
 /* Sortie: last_sql_id ou -1 si erreur                                                                                        */
 /******************************************************************************************************************************/
  gint Ajouter_motifDB ( struct CMD_TYPE_MOTIF *motif )
@@ -128,8 +195,8 @@
     return(id);
   }
 /******************************************************************************************************************************/
-/* Recuperer_motifDB: Recupération de la liste des motifs d'un synoptique                                                     */
-/* Entrée: un log et une database                                                                                             */
+/* Recuperer_motifDB: RecupÃ©ration de la liste des motifs d'un synoptique                                                     */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  gboolean Recuperer_motifDB ( struct DB **db_retour, gint id_syn )
@@ -156,15 +223,15 @@
     return ( retour );
   }
 /******************************************************************************************************************************/
-/* Recuperer_motifDB_suite : Contination de la recupération de la liste des motifs d'un synoptique                            */
-/* Entrée: un log et une database                                                                                             */
+/* Recuperer_motifDB_suite : Contination de la recupÃ©ration de la liste des motifs d'un synoptique                            */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  struct CMD_TYPE_MOTIF *Recuperer_motifDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_MOTIF *motif;
     struct DB *db;
 
-    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
+    db = *db_orig;                                          /* RÃ©cupÃ©ration du pointeur initialisÃ© par la fonction prÃ©cÃ©dente */
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
@@ -173,7 +240,7 @@
      }
 
     motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
-    if (!motif) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
+    if (!motif) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mÃ©moire", __func__ );
     else
      { g_snprintf ( motif->libelle, sizeof(motif->libelle), "%s", db->row[1] );                  /* Recopie dans la structure */
        motif->id           = atoi(db->row[0]);
@@ -181,8 +248,8 @@
        motif->syn_id       = atoi(db->row[3]);
        motif->access_level = atoi(db->row[4]);                                       /* Nom du groupe d'appartenance du motif */
        motif->bit_controle = atoi(db->row[5]);                                                                  /* Ixxx, Cxxx */
-       motif->bit_clic     = atoi(db->row[6]);                    /* Bit à activer quand on clic avec le bouton gauche souris */
-       motif->position_x   = atoi(db->row[7]);                                                   /* en abscisses et ordonnées */
+       motif->bit_clic     = atoi(db->row[6]);                    /* Bit Ã  activer quand on clic avec le bouton gauche souris */
+       motif->position_x   = atoi(db->row[7]);                                                   /* en abscisses et ordonnÃ©es */
        motif->position_y   = atoi(db->row[8]);
        motif->largeur      = atoi(db->row[9]);                                         /* Taille de l'image sur le synoptique */
        motif->hauteur      = atoi(db->row[10]);
@@ -206,8 +273,8 @@
     return(motif);
   }
 /******************************************************************************************************************************/
-/* Rechercher_motifDB: Recupération du motif dont l'id est en parametre                                                       */
-/* Entrée: un id de motif a rechercher                                                                                        */
+/* Rechercher_motifDB: RecupÃ©ration du motif dont l'id est en parametre                                                       */
+/* EntrÃ©e: un id de motif a rechercher                                                                                        */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  struct CMD_TYPE_MOTIF *Rechercher_motifDB ( guint id )
@@ -242,7 +309,7 @@
      }
 
     motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
-    if (!motif) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
+    if (!motif) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mÃ©moire", __func__ );
     else
      { memcpy( &motif->libelle, db->row[1], sizeof(motif->libelle) );                            /* Recopie dans la structure */
        motif->id           = atoi(db->row[0]);
@@ -250,8 +317,8 @@
        motif->syn_id       = atoi(db->row[3]);
        motif->access_level = atoi(db->row[4]);                                       /* Nom du groupe d'appartenance du motif */
        motif->bit_controle = atoi(db->row[5]);                                                                  /* Ixxx, Cxxx */
-       motif->bit_clic     = atoi(db->row[6]);                    /* Bit à activer quand on clic avec le bouton gauche souris */
-       motif->position_x   = atoi(db->row[7]);                                                   /* en abscisses et ordonnées */
+       motif->bit_clic     = atoi(db->row[6]);                    /* Bit Ã  activer quand on clic avec le bouton gauche souris */
+       motif->position_x   = atoi(db->row[7]);                                                   /* en abscisses et ordonnÃ©es */
        motif->position_y   = atoi(db->row[8]);
        motif->largeur      = atoi(db->row[9]);                                         /* Taille de l'image sur le synoptique */
        motif->hauteur      = atoi(db->row[10]);
@@ -271,7 +338,7 @@
   }
 /******************************************************************************************************************************/
 /* Modifier_motifDB: Modification d'un motif Watchdog                                                                         */
-/* Entrées: une structure motif referancant les modifications a appliquer.                                                    */
+/* EntrÃ©es: une structure motif referancant les modifications a appliquer.                                                    */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Modifier_motifDB( struct CMD_TYPE_MOTIF *motif )

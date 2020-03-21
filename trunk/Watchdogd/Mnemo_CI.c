@@ -156,8 +156,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Updater_confDB_CI ( void )
-  { struct CMD_TYPE_MNEMO_CPT_IMP *cpt_imp;
-    gchar requete[200];
+  { gchar requete[200];
     GSList *liste;
     struct DB *db;
     gint cpt;

@@ -579,6 +579,8 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
 
 CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `auto_create` tinyint(1) NULL DEFAULT NULL,
+  `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',
   `icone` int(11) NOT NULL DEFAULT '0',
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
@@ -605,6 +607,7 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `clic_tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `clic_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   PRIMARY KEY (`id`),
+  UNIQUE (`tech_id`, `acronyme`, `auto_create`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
