@@ -78,7 +78,7 @@
 %type  <val>         barre
 %type  <gliste>      liste_options options
 %type  <option>      une_option dyn_string
-%type  <chaine>      unite facteur expr suffixe listeCase
+%type  <chaine>      unite facteur expr suffixe unSwitch listeCase une_instr listeInstr
 %type  <action>      action une_action
 %type  <comparateur> comparateur
 %type  <chaine>      calcul_expr calcul_expr2 calcul_expr3
@@ -87,9 +87,9 @@
 %%
 fichier: ligne_source_dls;
 
-ligne_source_dls:         listeAlias listeInstr
+ligne_source_dls:         listeAlias listeInstr {{ if($2) { Emettre( $2 ); g_free($2); } }}
                         | listeAlias
-                        | listeInstr
+                        | listeInstr {{ if($1) { Emettre( $1 ); g_free($1); } }}
                         |
                         ;
 
@@ -151,56 +151,72 @@ alias_bit:        T_BI        {{ $$=MNEMO_BISTABLE;   }}
                 ;
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
+                {{ int taille = strlen($1)+strlen($2)+1;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "%s%s", $1, $2 );
+                   g_free($1);
+                   g_free($2);
+                }}
                 | une_instr
+                {{ $$=$1; }}
                 ;
 
 une_instr:      T_MOINS expr DONNE action PVIRGULE
                 {{ int taille;
-                   char *instr;
                    taille = strlen($2)+strlen($4->alors)+100;
                    if ($4->sinon)
                     { taille += (strlen($4->sinon) + 10);
-                      instr = New_chaine( taille );
-                      g_snprintf( instr, taille,
-                                  "/* Ligne %d ----------------------*/\nif(%s)\n { %s }\nelse\n { %s }\n\n",
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille,
+                                  "/* Ligne %d une_instr-------------*/\nif(%s)\n { %s }\nelse\n { %s }\n\n",
                                   DlsScanner_get_lineno(), $2, $4->alors, $4->sinon );
                     }
                    else
-                    { instr = New_chaine( taille );
-                      g_snprintf( instr, taille, "/* Ligne %d ----------------------*/\nif(%s)\n { %s }\n\n",
+                    { $$ = New_chaine( taille );
+                      g_snprintf( $$, taille, "/* Ligne %d une_instr-------------*/\nif(%s)\n { %s }\n\n",
                                   DlsScanner_get_lineno(), $2, $4->alors );
                     }
 
-                   Emettre( instr ); g_free(instr);
                    if ($4->sinon) g_free($4->sinon);
-                   g_free($4->alors); g_free($4);
+                   g_free($4->alors);
+                   g_free($4);
                    g_free($2);
                 }}
                 | T_MOINS expr T_MOINS T_POUV calcul_expr T_PFERM DONNE calcul_ea_result PVIRGULE
                 {{ int taille;
-                   char *instr;
                    if ($8)
                     { taille = strlen($5)+strlen($2)+strlen($8->tech_id)+strlen($8->acronyme)+100;
-                      instr = New_chaine( taille );
-                      g_snprintf( instr, taille,
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille,
                                   "if(%s) { Dls_data_set_AO ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
                                   $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
-                      Emettre( instr ); g_free(instr);
-                    }
+                    } else $$=NULL;
                    g_free($2);
                    g_free($5);
                 }}
-                | unSwitch
+                | T_MOINS expr DONNE T_ACCOUV listeInstr T_ACCFERM
+                {{ int taille;
+                   taille = strlen($2)+strlen($5)+100;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille,
+                               "/* Ligne %d une_instr if----------*/\nif(%s)\n { %s }\n\n",
+                                  DlsScanner_get_lineno(), $2, $5 );
+                   g_free($5);
+                   g_free($2);
+                }}
+                | unSwitch {{ $$=$1; }}
                 ;
 
 /****************************************************** Partie SWITCH *********************************************************/
 unSwitch:       T_SWITCH listeCase
-                {{ gchar chaine[80];
-                   g_snprintf( chaine, sizeof(chaine), "/* Ligne %d (CASE BEGIN)------------*/\n", DlsScanner_get_lineno() );
-                   Emettre( chaine );
-                   Emettre( $2 ); g_free($2);
-                   g_snprintf( chaine, sizeof(chaine), "/* Ligne %d (CASE END)--------------*/\n", DlsScanner_get_lineno() );
-                   Emettre( chaine );
+                {{ gint taille;
+                   taille = strlen($2)+100;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "/* Ligne %d (CASE BEGIN)------------*/\n"
+                                           "%s\n"
+                                           "/* Ligne %d (CASE END)--------------*/\n",
+                                           DlsScanner_get_lineno(), $2, DlsScanner_get_lineno() );
+                   g_free($2);
                 }}
                 ;
 
