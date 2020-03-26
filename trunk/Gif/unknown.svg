@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:version="1.0beta2 (unknown)" sodipodi:docname="unknown.svg" version="1.1" viewBox="0 0 128 128" id="unknown" width="64" height="64">
+  <metadata id="metadata15">
+    <rdf:RDF>
+      <cc:Work rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs id="defs13" />
+  <sodipodi:namedview inkscape:current-layer="unknown" inkscape:window-maximized="0" inkscape:window-y="48" inkscape:window-x="0" inkscape:cy="64" inkscape:cx="64" inkscape:zoom="6.5078125" showgrid="false" id="namedview11" inkscape:window-height="480" inkscape:window-width="871" inkscape:pageshadow="2" inkscape:pageopacity="0" guidetolerance="10" gridtolerance="10" objecttolerance="10" borderopacity="1" inkscape:document-rotation="0" bordercolor="#666666" pagecolor="#ffffff" />
+  <path id="path4" d="M64,85a2,2,0,0,1-2-2c0-12,5.79-18.16,10.9-23.63,4.17-4.46,7.76-8.31,7.76-14.69a16.66,16.66,0,0,0-33.32,0,2,2,0,0,1-4,0,20.66,20.66,0,0,1,41.32,0c0,8-4.49,12.77-8.83,17.42C71,67.25,66,72.59,66,83A2,2,0,0,1,64,85Z" />
+  <path id="path6" d="M64,96.26a2.25,2.25,0,1,0,2.25,2.25A2.25,2.25,0,0,0,64,96.26Z" />
+  <path id="path8" d="M64,128a64,64,0,1,1,64-64A64.07,64.07,0,0,1,64,128ZM64,4a60,60,0,1,0,60,60A60.07,60.07,0,0,0,64,4Z" />
+  <script
+     type="text/javascript"
+     id="SetMode">
+   { console.log("Appel au svg "+this.motif.libelle+" avec mode="+mode+" color="+color);
+   }
+ </script>
+</svg>
