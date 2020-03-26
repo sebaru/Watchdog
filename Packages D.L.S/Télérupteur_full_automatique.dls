@@ -41,7 +41,7 @@
  #define MSG_TELE_ON    <-> _MSG(type=info,libelle="Allumé"); /* TL activé */
  #define MSG_DEF_REPOS  <-> _MSG(type=defaut,libelle="Défaut repos"); /* Defaut repos */
  #define MSG_DEF_TRAVAIL<-> _MSG(type=defaut,libelle="Défaut travail"); /* Defaut travail */
- #define VISU_POS_TL    <-> _I(libelle="Position Télérupteur"); /* Position du Télérupteur */
+ #define VISU_POS_TL    <-> _I(forme="lampe",libelle="Lampe"); /* Position du Télérupteur */
  #define CI_TL          <-> _CI(libelle="Compteur d'impulsion Télérupteur");
  #define CH_TL          <-> _CH(libelle="Compteur horaire de temps d'allumage");
 
