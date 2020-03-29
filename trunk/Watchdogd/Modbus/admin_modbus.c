@@ -28,6 +28,8 @@
  #include "watchdogd.h"
  #include "Modbus.h"
 
+ extern struct MODBUS_CONFIG Cfg_modbus;
+
 /******************************************************************************************************************************/
 /* Modbus_mode_to_string: Convertit le mode modbus (int) en sa version chaine de caractere                                    */
 /* Entrée : le module_modbus                                                                                                  */

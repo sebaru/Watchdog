@@ -28,7 +28,7 @@
  #include <glib.h>
  #include "watchdogd.h"
  #include "Rs485.h"
-
+ extern struct RS485_CONFIG Cfg_rs485;
 /******************************************************************************************************************************/
 /* Admin_rs485_reload: Demande le rechargement des conf RS485                                                                 */
 /* Entrée: Le buffer d'entrée a compléter                                                                                     */

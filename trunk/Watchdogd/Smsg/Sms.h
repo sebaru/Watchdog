@@ -43,7 +43,7 @@
     gboolean comm_status;
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
     guint nbr_sms;
-  } Cfg_smsg;
+  };
 
  struct SMSDB
   { gint     user_id;                                                                                     /* From users table */

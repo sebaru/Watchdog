@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <fcntl.h>
@@ -32,6 +32,7 @@
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Http.h"
+ extern struct HTTP_CONFIG Cfg_http;
 
  static const char *PARAM_POSTFILE[] =
   { "type", "id" };
@@ -148,7 +149,7 @@
      { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
        return(1);
      }
-         
+
     lws_spa_destroy ( pss->spa	);
     Http_Send_response_code ( wsi, code );
     pss->post_data_length = 0;

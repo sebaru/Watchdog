@@ -35,6 +35,7 @@
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Snips.h"
+ struct SNIPS_CONFIG Cfg_snips;
 /******************************************************************************************************************************/
 /* Snips_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */

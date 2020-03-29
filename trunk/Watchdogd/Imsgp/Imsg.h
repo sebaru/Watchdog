@@ -54,8 +54,8 @@
     gchar password[80];
     gboolean enable;
     gboolean signed_off;
-  } Cfg_imsgp;
-/****************************************** Déclarations des prototypes ***********************************/
+  };
+/*********************************************** Déclarations des prototypes **************************************************/
  extern gboolean Imsgp_Lire_config ( void );
  void Imsgp_Envoi_message_to_all_available ( gchar *message );
  extern gboolean Recuperer_imsgpDB ( struct DB *db );

@@ -27,7 +27,7 @@
 
  #include "watchdogd.h"
  #include "Audio.h"
-
+ extern struct AUDIO_CONFIG Cfg_audio;
 /******************************************************************************************************************************/
 /* Admin_json_list : fonction appelée pour lister les modules modbus                                                          */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */

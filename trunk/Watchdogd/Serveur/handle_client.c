@@ -32,7 +32,7 @@
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Envoyer_new_motif_au_client: Parcours la liste des motifs et les envoi                                                     */
 /* Entrée : le client a gerer                                                                                                 */

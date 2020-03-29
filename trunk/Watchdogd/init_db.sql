@@ -718,6 +718,7 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
 
 CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `num` int(11) NOT NULL DEFAULT '0',
   `dls_id` int(11) NOT NULL DEFAULT '1',
@@ -735,8 +736,8 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `etat` tinyint(1) NOT NULL DEFAULT '0',
   `profil_audio` VARCHAR(80) NOT NULL DEFAULT 'P_ALL',
   PRIMARY KEY (`id`),
-  UNIQUE(`dls_id`,`acronyme`),
-  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  UNIQUE(`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `msgs` (`id`, `num`, `dls_id`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `enable`, `sms` ) VALUES

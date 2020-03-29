@@ -35,6 +35,7 @@
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Audio.h"
+ struct AUDIO_CONFIG Cfg_audio;
 /******************************************************************************************************************************/
 /* Audio_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */

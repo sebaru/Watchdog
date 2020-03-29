@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _RADIO_H_
  #define _RADIO_H_
 
@@ -38,7 +38,7 @@
     guint nbr_diffusion;
     gchar radio_en_cours;
     gint  radio_pid;
-  } Cfg_radio;
+  };
 
 /*********************************************** Définitions des prototypes ***************************************************/
 #endif

@@ -34,7 +34,7 @@
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Proto_editer_mnemonique: Le client desire editer un mnemo                                                                  */
 /* Entrée: le client demandeur et le mnemo en question                                                                        */

@@ -1289,9 +1289,9 @@
                 case MNEMO_MSG:
                  { struct CMD_TYPE_MESSAGE msg;
                    gint param;
+                   g_snprintf( msg.tech_id,  sizeof(msg.tech_id),  "%s", Dls_plugin.tech_id );
                    g_snprintf( msg.acronyme, sizeof(msg.acronyme), "%s", alias->acronyme );
-                   g_snprintf( msg.libelle,  sizeof(msg.libelle), "%s", libelle );
-                   msg.dls_id = Dls_plugin.id;
+                   g_snprintf( msg.libelle,  sizeof(msg.libelle),  "%s", libelle );
                    param = Get_option_entier ( alias->options, T_TYPE );
                    if (param!=-1) msg.type = param;
                              else msg.type = MSG_ETAT;

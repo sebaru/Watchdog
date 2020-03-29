@@ -42,7 +42,7 @@
     GSList *Modules_UPS;
     gboolean enable;                                                           /* Thread enable at boot ? */
     gchar tech_id[32];                                                                                /* Tech_id du telephone */
-  } Cfg_ups;
+  };
 
  #define NBR_CARAC_HOST_UPS           32
  #define NBR_CARAC_HOST_UPS_UTF8      (2*NBR_CARAC_HOST_UPS)

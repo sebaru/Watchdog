@@ -27,7 +27,7 @@
 
  #include "watchdogd.h"
  #include "Imsg.h"
-
+ extern struct IMSGP_CONFIG Cfg_imsgp;
 /******************************************************************************************************************************/
 /* Admin_json_list : fonction appelée pour vérifier la liste des destinataires                                                */
 /* Entrée : un JSon Builder                                                                                                   */

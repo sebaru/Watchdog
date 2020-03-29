@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/prctl.h>
  #include <string.h>
@@ -39,9 +39,10 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /**********************************************************************************************************/
 /* Proto_editer_msg: Le client desire editer un msg                                                       */
-/* Entrée: le client demandeur et le msg en question                                                      */
+/* EntrÃ©e: le client demandeur et le msg en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
@@ -52,7 +53,7 @@
     if (msg)
      { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_EDIT_MESSAGE_OK,
                   (gchar *)msg, sizeof(struct CMD_TYPE_MESSAGE) );
-       g_free(msg);                                                                 /* liberation mémoire */
+       g_free(msg);                                                                 /* liberation mÃ©moire */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -64,7 +65,7 @@
   }
 /**********************************************************************************************************/
 /* Proto_valider_editer_msg: Le client valide l'edition d'un msg                                          */
-/* Entrée: le client demandeur et le msg en question                                                      */
+/* EntrÃ©e: le client demandeur et le msg en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_valider_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
@@ -80,7 +81,7 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { msg = Rechercher_messageDB_par_id( rezo_msg->id );
-           if (msg) 
+           if (msg)
             { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_VALIDE_EDIT_MESSAGE_OK,
                             (gchar *)msg, sizeof(struct CMD_TYPE_MESSAGE) );
               g_free(msg);
@@ -96,7 +97,7 @@
   }
 /**********************************************************************************************************/
 /* Proto_effacer_msg: Retrait du msg en parametre                                                         */
-/* Entrée: le client demandeur et le msg en question                                                      */
+/* EntrÃ©e: le client demandeur et le msg en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_effacer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
@@ -118,7 +119,7 @@
   }
 /**********************************************************************************************************/
 /* Proto_ajouter_msg: Un client nous demande d'ajouter un msg Watchdog                                    */
-/* Entrée: le msg à créer                                                                                 */
+/* EntrÃ©e: le msg Ã  crÃ©er                                                                                 */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_ajouter_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
@@ -134,7 +135,7 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { msg = Rechercher_messageDB_par_id( id );
-           if (!msg) 
+           if (!msg)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
                           "Unable to locate message %s", rezo_msg->libelle);
@@ -150,8 +151,8 @@
   }
 /**********************************************************************************************************/
 /* Envoyer_msgs: Envoi des msgs au client GID_MESSAGE                                                     */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: NÃ©ant                                                                                          */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_messages_thread ( struct CLIENT *client )
   { struct CMD_TYPE_MESSAGES *msgs;
@@ -163,7 +164,7 @@
     prctl(PR_SET_NAME, "W-EnvoiMSG", 0, 0, 0 );
 
     if ( ! Recuperer_messageDB( &db ) )
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
+     { Unref_client( client );                                        /* DÃ©rÃ©fÃ©rence la structure cliente */
        pthread_exit( NULL );
      }
 
@@ -175,7 +176,7 @@
      }
 
     max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MESSAGES)) / sizeof(struct CMD_TYPE_MESSAGE);
-    msgs = (struct CMD_TYPE_MESSAGES *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
+    msgs = (struct CMD_TYPE_MESSAGES *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );
     if (!msgs)
      { struct CMD_GTK_MESSAGE erreur;
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
@@ -183,13 +184,13 @@
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Unref_client( client );                                        /* Déréférence la structure cliente */
+       Unref_client( client );                                        /* DÃ©rÃ©fÃ©rence la structure cliente */
        pthread_exit ( NULL );
      }
     msgs->nbr_messages = 0;                                 /* Valeurs par defaut si pas d'enregistrement */
 
     do
-     { msg = Recuperer_messageDB_suite( &db );                    /* Récupération d'un message dans la DB */
+     { msg = Recuperer_messageDB_suite( &db );                    /* RÃ©cupÃ©ration d'un message dans la DB */
        if (msg)                                                /* Si enregegistrement, alors on le pousse */
         { memcpy ( &msgs->msg[msgs->nbr_messages], msg, sizeof(struct CMD_TYPE_MESSAGE) );
           msgs->nbr_messages++;          /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
@@ -205,7 +206,7 @@
     while (msg);                                              /* Tant que l'on a des messages e envoyer ! */
     g_free(msgs);
     Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN, NULL, 0 );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
+    Unref_client( client );                                           /* DÃ©rÃ©fÃ©rence la structure cliente */
     pthread_exit ( NULL );
   }
 /*--------------------------------------------------------------------------------------------------------*/

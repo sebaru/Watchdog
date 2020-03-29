@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Enocean/Enocean.c  Gestion des capteurs ENOCEAN Watchdog 2.0                                 */
-/* Projet WatchDog version 3.0       Gestion d'habitat                     dim. 28 déc. 2014 15:46:44 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                     dim. 28 dÃ©c. 2014 15:46:44 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/time.h>
  #include <sys/prctl.h>
@@ -37,7 +37,7 @@
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
  #include "Enocean.h"
-
+ struct ENOCEAN_CONFIG Cfg_enocean;
  unsigned char ENOCEAN_CRC8TABLE[256] =
   { 0x00, 0x07, 0x0e, 0x09, 0x1c, 0x1b, 0x12, 0x15,
     0x38, 0x3f, 0x36, 0x31, 0x24, 0x23, 0x2a, 0x2d,
@@ -74,25 +74,25 @@
   };
 
 /**********************************************************************************************************/
-/* Enocean_Lire_config : Lit la config Watchdog et rempli la structure mémoire                             */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
-/* Sortie: Néant                                                                                          */
+/* Enocean_Lire_config : Lit la config Watchdog et rempli la structure mÃ©moire                             */
+/* EntrÃ©e: le pointeur sur la LIBRAIRIE                                                                   */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  gboolean Enocean_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 
     Cfg_enocean.lib->Thread_debug = FALSE;                                  /* Settings default parameters */
-    Cfg_enocean.enable            = FALSE; 
+    Cfg_enocean.enable            = FALSE;
     g_snprintf( Cfg_enocean.port, sizeof(Cfg_enocean.port), "%s", DEFAUT_PORT_ENOCEAN );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                      /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                      /* Connexion a la base de donnÃ©es */
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                 "Enocean_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* RÃ©cupÃ©ration d'une config dans la DB */
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,                     /* Print Config */
                 "Enocean_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
@@ -139,8 +139,8 @@
     return(fd);
   }
 /**********************************************************************************************************/
-/* Chercher_enocean: Retrouve un module/capteur dans la liste gérée en fonction des paramètres             */
-/* Entrée: les paramètres de critères de recherche                                                        */
+/* Chercher_enocean: Retrouve un module/capteur dans la liste gÃ©rÃ©e en fonction des paramÃ¨tres             */
+/* EntrÃ©e: les paramÃ¨tres de critÃ¨res de recherche                                                        */
 /* Sortie: le module, ou NULL si erreur                                                                   */
 /**********************************************************************************************************/
  static void Enocean_Envoyer_sortie ( gint num_a )
@@ -156,7 +156,7 @@
     while ( liste_modules )
      { module = (struct MODULE_ENOCEAN *)liste_modules->data;
 
-       if (module->enocean.type == 0x11 && module->enocean.sous_type == 0x00 && 
+       if (module->enocean.type == 0x11 && module->enocean.sous_type == 0x00 &&
            module->enocean.a_min == num_a
           )
         { gint cpt;
@@ -192,7 +192,7 @@
   }
 /**********************************************************************************************************/
 /* Enocean_crc_header: Calcul le Header CRC de la trame en parametre                                      */
-/* Entrée: la trame recue                                                                                 */
+/* EntrÃ©e: la trame recue                                                                                 */
 /* Sortie: le CRC sur 8 bits !                                                                            */
 /**********************************************************************************************************/
  static unsigned char Enocean_crc_header( struct TRAME_ENOCEAN *trame )
@@ -206,7 +206,7 @@
   }
 /**********************************************************************************************************/
 /* Enocean_crc_data: Calcul le Data CRC de la trame en parametre                                          */
-/* Entrée: la trame recue                                                                                 */
+/* EntrÃ©e: la trame recue                                                                                 */
 /* Sortie: le CRC sur 8 bits !                                                                            */
 /**********************************************************************************************************/
  static unsigned char Enocean_crc_data( struct TRAME_ENOCEAN *trame )
@@ -220,7 +220,7 @@
   }
 /**********************************************************************************************************/
 /* Processer_trame_ERP1: traitement de la trame ERP1 recue par le controleur EnOcean                      */
-/* Entrée: la trame a recue                                                                               */
+/* EntrÃ©e: la trame a recue                                                                               */
 /* Sortie: TRUE si processed                                                                              */
 /**********************************************************************************************************/
  static gboolean Processer_trame_ERP1( struct TRAME_ENOCEAN *trame )
@@ -265,8 +265,8 @@
   }
 /**********************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                   */
-/* Entrée: la trame a recue                                                                               */
-/* Sortie: néant                                                                                          */
+/* EntrÃ©e: la trame a recue                                                                               */
+/* Sortie: nÃ©ant                                                                                          */
 /**********************************************************************************************************/
  static void Processer_trame( struct TRAME_ENOCEAN *trame )
   { gchar chaine[32];
@@ -277,7 +277,7 @@
     Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
              "Processer_trame: Received RADIO_ERP1-%s", chaine );
 
-    if (trame->packet_type == 1 && Processer_trame_ERP1 ( trame )) return;                  /* RADIO_ERP1 */ 
+    if (trame->packet_type == 1 && Processer_trame_ERP1 ( trame )) return;                  /* RADIO_ERP1 */
 
     Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
              "Processer_trame: Unmanaged telegram: packet type %0X - %02X-%02X-%02X",
@@ -285,10 +285,10 @@
   }
 /**********************************************************************************************************/
 /* Enocean_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois ENOCEAN                   */
-/* Entrées: le numéro de la sortie                                                                        */
+/* EntrÃ©es: le numÃ©ro de la sortie                                                                        */
 /**********************************************************************************************************/
  void Enocean_Gerer_sortie( gint num_a )                                   /* Num_a est l'id de la sortie */
-  { 
+  {
 #ifdef bouh
     pthread_mutex_lock( &Cfg_enocean.lib->synchro );             /* Ajout dans la liste de tell a traiter */
     taille = g_slist_length( Cfg_enocean.Liste_sortie );
@@ -306,8 +306,8 @@
 #endif
   }
 /**********************************************************************************************************/
-/* Enocean_select: Permet d'estimer la disponibilité d'une information reçue à traiter                    */
-/* Entrée : Néant                                                                                         */
+/* Enocean_select: Permet d'estimer la disponibilitÃ© d'une information reÃ§ue Ã  traiter                    */
+/* EntrÃ©e : NÃ©ant                                                                                         */
 /* Sortie : 0 - pas d'info, 1 presence d'info, -1, erreur                                                 */
 /**********************************************************************************************************/
  static gint Enocean_select ( void )
@@ -412,7 +412,7 @@
               { Cfg_enocean.nbr_oct_lu = Cfg_enocean.nbr_oct_lu + cpt;
 
                 if (Cfg_enocean.nbr_oct_lu == ENOCEAN_HEADER_LENGTH)
-                 { if (Trame.crc_header != Enocean_crc_header( &Trame ))    /* Vérification du CRC Header */
+                 { if (Trame.crc_header != Enocean_crc_header( &Trame ))    /* VÃ©rification du CRC Header */
                     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                                "Run_thread: Wrong CRC HEADER. Dropping Frame" );
                       Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
@@ -448,7 +448,7 @@
              if (cpt>0)
               { Cfg_enocean.nbr_oct_lu = Cfg_enocean.nbr_oct_lu + cpt;
 
-                if (Cfg_enocean.nbr_oct_lu == Cfg_enocean.index_bute)         /* Vérification du CRC Data */
+                if (Cfg_enocean.nbr_oct_lu == Cfg_enocean.index_bute)         /* VÃ©rification du CRC Data */
                  { if ( ((unsigned char *)&Trame)[Cfg_enocean.index_bute-1] != Enocean_crc_data( &Trame ) )
                     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                                "Run_thread: Wrong CRC DATA. Dropping Frame" );

@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Serveur/accept.c        Gestion des connexions securisées                                    */
+/* Watchdogd/Serveur/accept.c        Gestion des connexions securisÃ©es                                    */
 /* Projet WatchDog version 3.0       Gestion d'habitat                      mar 24 jun 2003 12:58:56 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -33,23 +33,24 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /**********************************************************************************************************/
-/* Connecter_ssl: Tentative de connexion sécurisée                                                        */
-/* Entrée: le pointeur du client                                                                          */
+/* Connecter_ssl: Tentative de connexion sÃ©curisÃ©e                                                        */
+/* EntrÃ©e: le pointeur du client                                                                          */
 /**********************************************************************************************************/
  void Connecter_ssl( struct CLIENT *client )
   { struct CONNEXION *connexion;
     gint retour;
 
     connexion = client->connexion;
-  
+
     if (!connexion->ssl)                                                  /* Premier appel de la fonction */
      { connexion->ssl = SSL_new( Cfg_ssrv.Ssl_ctx );                           /* Creation d'une instance */
-       if (!connexion->ssl)                                                   /* Si réussite d'allocation */
+       if (!connexion->ssl)                                                   /* Si rÃ©ussite d'allocation */
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
                    "Connecter_ssl: unable to create a ssl object" );
-          client->mode = DECONNECTE;  
-          return;         
+          client->mode = DECONNECTE;
+          return;
         }
 
        SSL_set_fd( connexion->ssl, connexion->socket );
@@ -66,7 +67,7 @@
                    "Connecter_ssl: need more data", client->connexion->socket );*/
           return;
         }
-       
+
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
                 "Connecter_ssl: SSL_accept get error %d (%s)",
                  retour, ERR_error_string( retour, NULL ) );
@@ -82,7 +83,7 @@
              "Connecter_ssl: Secured Connexion with %s, (%d bits)",
              (gchar *)SSL_get_cipher_name( connexion->ssl ), SSL_get_cipher_bits( connexion->ssl, NULL ) );
 
-          /* Ici, la connexion a été effectuée, il faut maintenant tester les certificats si necessaire ! */ 
+          /* Ici, la connexion a Ã©tÃ© effectuÃ©e, il faut maintenant tester les certificats si necessaire ! */
     client->certif = SSL_get_peer_certificate( connexion->ssl );      /* On prend le certificat du client */
     if (!client->certif && Cfg_ssrv.ssl_peer_cert)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,

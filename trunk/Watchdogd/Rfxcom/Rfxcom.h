@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _RFXCOM_H_
  #define _RFXCOM_H_
 
@@ -49,7 +49,7 @@
 	   RFXCOM_RETRING,
 	   RFXCOM_CONNECTED
   };
-  
+
  struct RFXCOM_CONFIG
   { struct LIBRAIRIE *lib;
     gint  mode;                                                                                /* Mode de connexion au RFXCOM */
@@ -60,7 +60,7 @@
     gboolean reload;
     GSList *Modules_RFXCOM;                                                                      /* Listes des modules RFXCOM */
     GSList *Liste_events;                                                                  /* Liste des sorties a positionner */
- } Cfg_rfxcom;
+ };
 
 /************************************************** Définitions des prototypes ************************************************/
  extern gboolean Rfxcom_Lire_config ( void );

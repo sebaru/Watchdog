@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <stdio.h>
  #include <openssl/err.h>
  #include <sys/types.h>
@@ -37,10 +37,10 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
-/* Entrée: la connexion avec le serveur                                                                   */
+/* EntrÃ©e: la connexion avec le serveur                                                                   */
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
  static void Gerer_protocole ( struct CLIENT *client )
@@ -54,7 +54,7 @@
           }
 /********************************************* Client VALIDE **********************************************/
     else if (client->mode == VALIDE )
-          { 
+          {
 /********************************* Client en VALIDE, gestion des groupes **********************************/
             switch ( Reseau_tag(connexion) )
              { case TAG_DLS         : Gerer_protocole_dls          ( client ); break;
@@ -85,8 +85,8 @@
   }
 /**********************************************************************************************************/
 /* Ecouter_serveur: Gestion des messages de controle du serveur                                           */
-/* Entrées: data, source, type    inutilisé                                                               */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©es: data, source, type    inutilisÃ©                                                               */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Ecouter_client ( struct CLIENT *client )
   { gint recu;
@@ -107,6 +107,6 @@
                                       break;
         }
        Client_mode ( client, DECONNECTE );
-     }             
+     }
   }
 /*--------------------------------------------------------------------------------------------------------*/

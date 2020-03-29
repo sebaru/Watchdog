@@ -32,7 +32,7 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
-
+ extern struct HTTP_CONFIG Cfg_http;
 /******************************************************************************************************************************/
 /* Http_dls_do_plugin: Produit un enregistrement json pour un plugin dls                                                      */
 /* Entrées: la connexion Websocket                                                                                            */

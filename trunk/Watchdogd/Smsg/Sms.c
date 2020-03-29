@@ -40,6 +40,7 @@
  static GSM_Error sms_send_status;
  static GSM_StateMachine *s=NULL;
  static INI_Section *cfg=NULL;
+ struct SMS_CONFIG Cfg_smsg;
 /******************************************************************************************************************************/
 /* Smsg_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */

@@ -73,7 +73,7 @@
     struct DLS_AO Canal[DMX_CHANNEL];                                         /* Tableau dynamique d'accès aux bits internes */
     gint taille_trame_dmx;
     struct TRAME_DMX Trame_dmx;
-  } Cfg_dmx;
+  };
 
 /****************************************************** Déclaration des prototypes ********************************************/
 #endif

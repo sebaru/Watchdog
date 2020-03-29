@@ -34,7 +34,7 @@
 
  #define NOM_TABLE_UTIL      "users"
 
- enum                                                                    /* Enumeration des utilisateurs spéciaux de watchdog */
+ enum                                                                    /* Enumeration des utilisateurs spÃ©ciaux de watchdog */
   { UID_ROOT,
     UID_GUEST,
     NBR_UTILISATEUR_RESERVE

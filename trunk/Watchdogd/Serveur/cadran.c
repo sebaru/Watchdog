@@ -30,6 +30,7 @@
 /************************************************ Prototypes de fonctions *****************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Tester_update_cadran renvoie TRUE si le cadran doit etre updaté sur le client                                            */
 /* Entrée: un cadran                                                                                                         */

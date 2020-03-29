@@ -37,7 +37,7 @@
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Teleinfo.h"
-
+ struct TELEINFO_CONFIG Cfg_teleinfo;
 /******************************************************************************************************************************/
 /* Teleinfo_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                               */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
@@ -158,9 +158,10 @@
     gsize taille;
     builder = Json_create ();
     json_builder_begin_object ( builder );
-    Json_add_string ( builder, "tech_id",  Cfg_teleinfo.tech_id );
-    Json_add_string ( builder, "acronyme", name );
-    Json_add_double ( builder, "valeur",   atof( chaine ) );
+    Json_add_string  ( builder, "tech_id",  Cfg_teleinfo.tech_id );
+    Json_add_string  ( builder, "acronyme", name );
+    Json_add_double  ( builder, "valeur",   atof( chaine ) );
+    Json_add_bool    ( builder, "in_range", TRUE );
     json_builder_end_object ( builder );
     result = Json_get_buf ( builder, &taille );
     Send_zmq_with_tag ( Cfg_teleinfo.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_AI", result, taille );
@@ -173,53 +174,21 @@
 /******************************************************************************************************************************/
  static void Processer_trame( void )
   { if ( ! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 ) )
-     { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "ADCO", &Cfg_teleinfo.adco, atof( Cfg_teleinfo.buffer + 5) ); }
-       else /* Envoi au master via ZMQ */
-        { Send_AI_to_master ( "ADCO", Cfg_teleinfo.buffer + 5 ); }
-     }
+     { Send_AI_to_master ( "ADCO", Cfg_teleinfo.buffer + 5 ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 ) )
-     { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "ISOUS", &Cfg_teleinfo.isous, atof( Cfg_teleinfo.buffer + 6) ); }
-       else /* Envoi au master via ZMQ */
-        { Send_AI_to_master ( "ISOUS", Cfg_teleinfo.buffer + 6 ); }
-     }
+     { Send_AI_to_master ( "ISOUS", Cfg_teleinfo.buffer + 6 ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "BASE", 4 ) )
-     { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "BASE", &Cfg_teleinfo.base, atof( Cfg_teleinfo.buffer + 5) ); }
-       else /* Envoi au master via ZMQ */
-        { Send_AI_to_master ( "BASE", Cfg_teleinfo.buffer + 5 ); }
-     }
+     { Send_AI_to_master ( "BASE", Cfg_teleinfo.buffer + 5 ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )
-     { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "HCHC", &Cfg_teleinfo.hchc, atof( Cfg_teleinfo.buffer + 5) ); }
-       else /* Envoi au master via ZMQ */
-        { Send_AI_to_master ( "HCHC", Cfg_teleinfo.buffer + 5 ); }
-     }
+     { Send_AI_to_master ( "HCHC", Cfg_teleinfo.buffer + 5 ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 ) )
-     { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "HCHP", &Cfg_teleinfo.hchp, atof( Cfg_teleinfo.buffer + 5) ); }
-       else /* Envoi au master via ZMQ */
-        { Send_AI_to_master ( "HCHP", Cfg_teleinfo.buffer + 5 ); }
-     }
+     { Send_AI_to_master ( "HCHP", Cfg_teleinfo.buffer + 5 ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 ) )
-     { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "IINST", &Cfg_teleinfo.iinst, atof( Cfg_teleinfo.buffer + 6) ); }
-       else /* Envoi au master via ZMQ */
-        { Send_AI_to_master ( "IINST", Cfg_teleinfo.buffer + 6 ); }
-     }
+     { Send_AI_to_master ( "IINST", Cfg_teleinfo.buffer + 6 ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 ) )
-     { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "IMAX", &Cfg_teleinfo.imax, atof( Cfg_teleinfo.buffer + 5) ); }
-       else /* Envoi au master via ZMQ */
-        { Send_AI_to_master ( "IMAX", Cfg_teleinfo.buffer + 5 ); }
-     }
+     { Send_AI_to_master ( "IMAX", Cfg_teleinfo.buffer + 5 ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 ) )
-     { if (Config.instance_is_master==TRUE)
-        { Dls_data_set_AI ( Cfg_teleinfo.tech_id, "PAPP", &Cfg_teleinfo.papp, atof( Cfg_teleinfo.buffer + 5) ); }
-       else /* Envoi au master via ZMQ */
-        { Send_AI_to_master ( "PAPP", Cfg_teleinfo.buffer + 5 ); }
-     }
+     { Send_AI_to_master ( "PAPP", Cfg_teleinfo.buffer + 5 ); }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     Cfg_teleinfo.last_view = Partage->top;
   }

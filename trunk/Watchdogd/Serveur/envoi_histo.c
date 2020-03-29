@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Serveur/envoi_histo.c        Envoi de l'ihstorique à la connexion client                                         */
+/* Watchdogd/Serveur/envoi_histo.c        Envoi de l'ihstorique Ã  la connexion client                                         */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                           sam 13 mar 2004 18:41:14 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -33,9 +33,10 @@
 /***************************************************** Prototypes de fonctions ************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Proto_acquitter_histo: le client demande l'acquittement d'un histo                                                         */
-/* Entrée: le client demandeur et le histo en question                                                                        */
+/* EntrÃ©e: le client demandeur et le histo en question                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_acquitter_histo ( struct CLIENT *client, struct CMD_TYPE_HISTO *rezo_histo )
@@ -44,7 +45,7 @@
 
     if (!rezo_histo) return;
     time( (time_t *)&rezo_histo->date_fixe );
-    rezo_histo->alive = TRUE;                                                          /* Le message est toujours d'actualité */
+    rezo_histo->alive = TRUE;                                                          /* Le message est toujours d'actualitÃ© */
     g_snprintf( rezo_histo->nom_ack, sizeof(rezo_histo->nom_ack), "%s", client->util->username );
 
     retour = Modifier_histo_msgsDB ( rezo_histo );
@@ -72,8 +73,8 @@
   }
 /******************************************************************************************************************************/
 /* Envoyer_histos: Envoi des histos au client GID_USERS                                                                       */
-/* Entrée: Le client                                                                                                          */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: Le client                                                                                                          */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void *Envoyer_histo_thread ( struct CLIENT *client )
   { struct CMD_TYPE_HISTO *histo;
@@ -86,7 +87,7 @@
 
     if ( ! Recuperer_histo_msgsDB_alive( &db ) )                                                     /* Si pas de histos (??) */
      { Client_mode( client, VALIDE );                             /* Le client est maintenant valide aux yeux du sous-serveur */
-       Unref_client( client );                                                            /* Déréférence la structure cliente */
+       Unref_client( client );                                                            /* DÃ©rÃ©fÃ©rence la structure cliente */
        pthread_exit( NULL );
      }                                                                                               /* Si pas de histos (??) */
 
@@ -101,7 +102,7 @@
      }
     Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN, NULL, 0 );
     Client_mode( client, VALIDE );                                /* Le client est maintenant valide aux yeux du sous-serveur */
-    Unref_client( client );                                                               /* Déréférence la structure cliente */
+    Unref_client( client );                                                               /* DÃ©rÃ©fÃ©rence la structure cliente */
     pthread_exit( NULL );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

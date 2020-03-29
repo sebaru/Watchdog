@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Serveur/envoi_synoptique_motifs.c        Envoi des motifs à l'atelier et supervision                             */
+/* Watchdogd/Serveur/envoi_synoptique_motifs.c        Envoi des motifs Ã  l'atelier et supervision                             */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                          dim 22 mai 2005 17:25:01 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/time.h>
  #include <string.h>
@@ -33,9 +33,10 @@
 /****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Proto_effacer_syn: Retrait du syn en parametre                                                                             */
-/* Entrée: le client demandeur et le syn en question                                                                          */
+/* EntrÃ©e: le client demandeur et le syn en question                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_effacer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif )
@@ -57,14 +58,14 @@
   }
 /******************************************************************************************************************************/
 /* Proto_ajouter_motif_atelier: Ajout d'un motif dans un synoptique                                                           */
-/* Entrée: le client demandeur et le syn en question                                                                          */
+/* EntrÃ©e: le client demandeur et le syn en question                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif )
   { struct CMD_TYPE_MOTIF *result;
     gint id;
 
-    rezo_motif->access_level = ACCESS_LEVEL_ALL;                         /* Par défaut, tout le monde peut acceder a ce motif */
+    rezo_motif->access_level = ACCESS_LEVEL_ALL;                         /* Par dÃ©faut, tout le monde peut acceder a ce motif */
     rezo_motif->position_x = 120;
     rezo_motif->position_y = 50;
     id = Ajouter_motifDB ( rezo_motif );
@@ -76,7 +77,7 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { result = Rechercher_motifDB( id );
-           if (!result) 
+           if (!result)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
                           "Unable to locate motif %s", rezo_motif->libelle);
@@ -92,7 +93,7 @@
   }
 /******************************************************************************************************************************/
 /* Proto_editer_syn: Le client desire editer un syn                                                                           */
-/* Entrée: le client demandeur et le syn en question                                                                          */
+/* EntrÃ©e: le client demandeur et le syn en question                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif )
@@ -109,8 +110,8 @@
   }
 /******************************************************************************************************************************/
 /* Envoyer_bit_init_motif: Envoi le status des bits motifs dans la liste en parametre en client en parametre                  */
-/* Entrée: Le client et la liste de bits                                                                                      */
-/* Sortie: Néant. La liste est free-ée                                                                                        */
+/* EntrÃ©e: Le client et la liste de bits                                                                                      */
+/* Sortie: NÃ©ant. La liste est free-Ã©e                                                                                        */
 /******************************************************************************************************************************/
  void Envoyer_bit_init_motif ( struct CLIENT *client, GSList *liste_bit_init )
   { struct CMD_ETAT_BIT_CTRL init_etat;
@@ -140,8 +141,8 @@
   }
 /******************************************************************************************************************************/
 /* Envoyer_motif_tag: Envoi des syns au client selon les tags retenus                                                         */
-/* Entrée: Le client destinataire et les tags de connexion                                                                    */
-/* Sortie: La liste des bit d'init syn lié au synoptique                                                                      */
+/* EntrÃ©e: Le client destinataire et les tags de connexion                                                                    */
+/* Sortie: La liste des bit d'init syn liÃ© au synoptique                                                                      */
 /******************************************************************************************************************************/
  void Envoyer_motif_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { GSList *liste_bit_init = NULL;
@@ -152,7 +153,7 @@
     struct DB *db;
 
     max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MOTIFS)) / sizeof(struct CMD_TYPE_MOTIF);
-    motifs = (struct CMD_TYPE_MOTIFS *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
+    motifs = (struct CMD_TYPE_MOTIFS *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );
     if (!motifs)
      { struct CMD_GTK_MESSAGE erreur;
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
@@ -163,7 +164,7 @@
        return;
      }
 
-    if ( ! Recuperer_motifDB( &db, client->syn_to_send->id ) )                                  /* Si pas de motifs a envoyer */ 
+    if ( ! Recuperer_motifDB( &db, client->syn_to_send->id ) )                                  /* Si pas de motifs a envoyer */
      { g_free(motifs);
        return;
      }
@@ -178,7 +179,7 @@
     motifs->nbr_motifs = 0;                                                     /* Valeurs par defaut si pas d'enregistrement */
 
     do
-     { motif = Recuperer_motifDB_suite( &db );                                            /* Récupération du motif dans la DB */
+     { motif = Recuperer_motifDB_suite( &db );                                            /* RÃ©cupÃ©ration du motif dans la DB */
        if (motif)                                                                  /* Si enregegistrement, alors on le pousse */
         { memcpy ( &motifs->motif[motifs->nbr_motifs], motif, sizeof(struct CMD_TYPE_MOTIF) );
           motifs->nbr_motifs++;                              /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
@@ -201,7 +202,7 @@
         }
      }
     while (motif);                                                                /* Tant que l'on a des messages e envoyer ! */
-    g_free(motifs);                                                                      /* Libération du tampon multi-motifs */
+    g_free(motifs);                                                                      /* LibÃ©ration du tampon multi-motifs */
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
     Envoyer_bit_init_motif ( client, liste_bit_init );                                     /* Envoi des bits d'initialisation */
   }

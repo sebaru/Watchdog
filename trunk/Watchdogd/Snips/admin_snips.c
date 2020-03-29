@@ -27,7 +27,7 @@
 
  #include "watchdogd.h"
  #include "Snips.h"
-
+ extern struct SNIPS_CONFIG Cfg_snips;
 /******************************************************************************************************************************/
 /* Admin_json_list : fonction appelée pour lister les modules modbus                                                          */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */

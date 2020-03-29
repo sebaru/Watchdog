@@ -28,7 +28,7 @@
  #include <glib.h>
  #include "watchdogd.h"
  #include "Teleinfo.h"
-
+ extern struct TELEINFO_CONFIG Cfg_teleinfo;
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */

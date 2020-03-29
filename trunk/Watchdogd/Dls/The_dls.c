@@ -1041,7 +1041,7 @@
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech )
+ void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech, gboolean in_range )
   { struct DLS_AI *ai;
     gboolean need_arch;
 
@@ -1080,7 +1080,7 @@
        switch ( ai->type )
         { case ENTREEANA_NON_INTERP:
                ai->val_ech = val_avant_ech;                                                        /* Pas d'interprétation !! */
-               ai->inrange = 1;
+               ai->inrange = in_range;
                break;
           case ENTREEANA_4_20_MA_10BITS:
                if (val_avant_ech < 100)                                                /* 204) Modification du range pour 4mA */
@@ -1105,11 +1105,12 @@
                 }
                break;
           case ENTREEANA_WAGO_750455:                                                                              /* 4/20 mA */
-               ai->val_ech = (gfloat) (val_avant_ech*(ai->max - ai->min))/4095.0 + ai->min;
-               ai->inrange = 1;
+               if (in_range)
+                { ai->val_ech = (gfloat) (val_avant_ech*(ai->max - ai->min))/4095.0 + ai->min; }
+               ai->inrange = in_range;                                           /* InRange dependant d'un autre champ ModBus */
                break;
           case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
-               if (val_avant_ech > -32767 && val_avant_ech < 8500)
+               if (val_avant_ech > -2000 && val_avant_ech < 8500)
                 { ai->val_ech = (gfloat)(val_avant_ech/10.0);                                           /* Valeur à l'echelle */
                   ai->inrange = 1;
                 }

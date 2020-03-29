@@ -30,6 +30,7 @@
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */

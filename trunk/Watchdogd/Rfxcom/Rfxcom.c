@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/time.h>
  #include <sys/prctl.h>
@@ -37,27 +37,27 @@
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Rfxcom.h"
-
+ struct RFXCOM_CONFIG Cfg_rfxcom;
 /******************************************************************************************************************************/
-/* Rfxcom_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* Rfxcom_Lire_config : Lit la config Watchdog et rempli la structure mÃ©moire                                                 */
+/* EntrÃ©e: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Rfxcom_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 
     Cfg_rfxcom.lib->Thread_debug = FALSE;                                                      /* Settings default parameters */
-    Cfg_rfxcom.enable            = FALSE; 
+    Cfg_rfxcom.enable            = FALSE;
     g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "%s", DEFAUT_PORT_RFXCOM );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de donnÃ©es */
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
                 "Rfxcom_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* RÃ©cupÃ©ration d'une config dans la DB */
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,                                          /* Print Config */
                 "Rfxcom_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
@@ -126,15 +126,15 @@
   }
 #ifdef bouh
 /******************************************************************************************************************************/
-/* Rfxcom_Envoyer_event : Process un evenement en entrée                                                                      */
-/* Entrée: l'evenement a processer                                                                                            */
-/* Sortie: néant                                                                                                              */
+/* Rfxcom_Envoyer_event : Process un evenement en entrÃ©e                                                                      */
+/* EntrÃ©e: l'evenement a processer                                                                                            */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Rfxcom_Envoyer_event ( struct CMD_TYPE_MSRV_EVENT *event )
   { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     gint type,sstype,id1,id2,id3,id4,housecode,unitcode,val, cpt;
     gchar instance[24], thread[24];
-    
+
     if ( strcmp ( event->thread, "MSRV" ) ) return;                                               /* On ecoute que le MSRV ?? */
 
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
@@ -151,7 +151,7 @@
 
     if ( strcmp ( instance, g_get_host_name() ) ) return;                                       /* Are we the right thread ?? */
     if ( strcmp ( thread, NOM_THREAD ) ) return;
-    
+
     if ( type == 0x11 && sstype == 0x00 )                                                             /* Envoi de lighting ?? */
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
            "Rfxcom_envoyer_sortie: Envoi de %s au module ids=%02d %02d %02d %02d unit %02d",
@@ -187,11 +187,11 @@
 #endif
 /******************************************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
-/* Entrée: la trame a recue                                                                                                   */
-/* Sortie: néant                                                                                                              */
+/* EntrÃ©e: la trame a recue                                                                                                   */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static int Processer_trame( struct TRAME_RFXCOM *trame )
-  { 
+  {
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
               "Processer_trame taille=%d, type=%02d(0x%02x), sous_type=%02d(0x%02X), seqno=%03d",
                trame->taille, trame->type, trame->type, trame->sous_type, trame->sous_type, trame->seqno );
@@ -200,59 +200,59 @@
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame get_status Cmd= %d (0x%2X)", trame->data[0], trame->data[0] );
        if (trame->data[1] == 0x52) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                             "Processer_trame get_status 433MHz receiver only" );   
+                                             "Processer_trame get_status 433MHz receiver only" );
        if (trame->data[1] == 0x53) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                             "Processer_trame get_status 433MHz transceiver" );   
+                                             "Processer_trame get_status 433MHz transceiver" );
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame get_status firmware %d (0x%2X)", trame->data[2], trame->data[2] );
        if (trame->data[3] & 0x80) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Unencoded Frame" );   
+                                            "Processer_trame get_status proto Unencoded Frame" );
        if (trame->data[3] & 0x40) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU6" );   
+                                            "Processer_trame get_status proto RFU6" );
        if (trame->data[3] & 0x20) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU5" );   
+                                            "Processer_trame get_status proto RFU5" );
        if (trame->data[3] & 0x10) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU4" );   
+                                            "Processer_trame get_status proto RFU4" );
        if (trame->data[3] & 0x08) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU3" );   
+                                            "Processer_trame get_status proto RFU3" );
        if (trame->data[3] & 0x04) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto FineOffset/Viking" );   
+                                            "Processer_trame get_status proto FineOffset/Viking" );
        if (trame->data[3] & 0x02) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Rubicson" );   
+                                            "Processer_trame get_status proto Rubicson" );
        if (trame->data[3] & 0x01) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto AE" );   
+                                            "Processer_trame get_status proto AE" );
        if (trame->data[4] & 0x80) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto BlindsT1" );   
+                                            "Processer_trame get_status proto BlindsT1" );
        if (trame->data[4] & 0x40) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto BlindsT0" );   
+                                            "Processer_trame get_status proto BlindsT0" );
        if (trame->data[4] & 0x20) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto ProGuard" );   
+                                            "Processer_trame get_status proto ProGuard" );
        if (trame->data[4] & 0x10) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto FS20" );   
+                                            "Processer_trame get_status proto FS20" );
        if (trame->data[4] & 0x08) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto LaCrosse" );   
+                                            "Processer_trame get_status proto LaCrosse" );
        if (trame->data[4] & 0x04) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Hideki" );   
+                                            "Processer_trame get_status proto Hideki" );
        if (trame->data[4] & 0x02) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto LightwaveRF" );   
+                                            "Processer_trame get_status proto LightwaveRF" );
        if (trame->data[4] & 0x01) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Mertik" );   
+                                            "Processer_trame get_status proto Mertik" );
        if (trame->data[5] & 0x80) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Visonic" );   
+                                            "Processer_trame get_status proto Visonic" );
        if (trame->data[5] & 0x40) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto ATI" );   
+                                            "Processer_trame get_status proto ATI" );
        if (trame->data[5] & 0x20) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto OregonScientific" );   
+                                            "Processer_trame get_status proto OregonScientific" );
        if (trame->data[5] & 0x10) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto MeianTech" );   
+                                            "Processer_trame get_status proto MeianTech" );
        if (trame->data[5] & 0x08) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto HomeEasy/EU" );   
+                                            "Processer_trame get_status proto HomeEasy/EU" );
        if (trame->data[5] & 0x04) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto AC" );   
+                                            "Processer_trame get_status proto AC" );
        if (trame->data[5] & 0x02) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto ARC" );   
+                                            "Processer_trame get_status proto ARC" );
        if (trame->data[5] & 0x01) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto X10" );   
+                                            "Processer_trame get_status proto X10" );
      }
     else if (trame->type == 0x02)
      { switch (trame->sous_type)
@@ -283,7 +283,7 @@
           default :  Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                               "Processer_trame : Transceiver message : unknown packet ssous_type %d", trame->sous_type);
         }
-     } 
+     }
     else if (trame->type == 0x52 && trame->sous_type == 0x01)                                                       /* Oregon */
      { gchar chaine[128];
 
@@ -291,7 +291,7 @@
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
        /*Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, chaine,
                      (trame->data[2] & 0x80 ? -1.0 : 1.0)* ( ((trame->data[2] & 0x7F)<<8) + trame->data[3]) / 10.0 );*/
-                  
+
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:HUMIDITY",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
        /*Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, chaine, 1.0 * trame->data[4] );*/
@@ -299,18 +299,18 @@
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:BATTERY",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
        /*Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, chaine, 1.0 * (trame->data[6] >> 4) );*/
-       
+
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:RSSI",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
        /*Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, chaine, 1.0 * (trame->data[6] & 0x0F) );*/
-       
+
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame : get status type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, high=%03d, "
                  "signe=%02d, low=%03d, hum=%02d, humstatus=%02d, battery=%02d, rssi=%02d",
                  trame->type, trame->type, trame->sous_type, trame->sous_type, trame->data[0], trame->data[1],
                  trame->data[2] & 0x7F, trame->data[2] & 0x80, trame->data[3], trame->data[4], trame->data[5],
                  trame->data[6] >> 4, trame->data[6] & 0x0F
-               );   
+               );
      }
     else if (trame->type == 0x11 && trame->sous_type == 0x00)                                                /* Lighting 2 AC */
      { gchar chaine[128];
@@ -327,7 +327,7 @@
                  trame->type, trame->type, trame->sous_type, trame->sous_type, trame->data[0] & 0x03, trame->data[1],
                  trame->data[2], trame->data[3], trame->data[4], trame->data[5],
                  trame->data[6], trame->data[7] & 0x0F
-               );   
+               );
      }
     else Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                    "Processer_trame unknown packet type %02d(0x%02X), sous_type=%02d(0x%02X)",
@@ -335,9 +335,9 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Rfxcom_Pick_event: Récpère un evenement de la liste des events                                                             */
-/* Entrées: néant                                                                                                             */
-/* Sortie: l'evenement, à freer a la fin                                                                                      */
+/* Rfxcom_Pick_event: RÃ©cpÃ¨re un evenement de la liste des events                                                             */
+/* EntrÃ©es: nÃ©ant                                                                                                             */
+/* Sortie: l'evenement, Ã  freer a la fin                                                                                      */
 /******************************************************************************************************************************/
  static struct CMD_TYPE_MSRV_EVENT *Rfxcom_Pick_event ( void )
   { struct CMD_TYPE_MSRV_EVENT *event;
@@ -353,7 +353,7 @@
   }
 /******************************************************************************************************************************/
 /* Rfxcom_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois RFXCOM                                         */
-/* Entrées: le numéro de la sortie                                                                                            */
+/* EntrÃ©es: le numÃ©ro de la sortie                                                                                            */
 /******************************************************************************************************************************/
  void Rfxcom_Gerer_event( struct CMD_TYPE_MSRV_EVENT *event )                                  /* Num_a est l'id de la sortie */
   { gint taille;

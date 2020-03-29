@@ -75,7 +75,7 @@
     gchar ssl_private_key_filepath[80];
     gchar ssl_ca_filepath[80];
     gboolean authenticate;
- } Cfg_http;
+ };
 
  struct HTTP_PER_SESSION_DATA
   { gchar url[80];

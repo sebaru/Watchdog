@@ -39,7 +39,7 @@
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Rs485.h"
-
+ struct RS485_CONFIG Cfg_rs485;
 /******************************************************************************************************************************/
 /* Rs485_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */

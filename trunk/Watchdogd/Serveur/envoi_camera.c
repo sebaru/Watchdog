@@ -35,9 +35,10 @@
 /*************************************************** Prototypes de fonctions **************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Proto_editer_camera: Le client desire editer un camera                                                                     */
-/* Entrée: le client demandeur et le camera en question                                                                       */
+/* EntrÃ©e: le client demandeur et le camera en question                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_editer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
@@ -48,7 +49,7 @@
     if (camera)
      { Envoi_client( client, TAG_LOWLEVEL, SSTAG_SERVEUR_EDIT_CAMERA_OK,
                      (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
-       g_free(camera);                                                                                  /* liberation mémoire */
+       g_free(camera);                                                                                  /* liberation mÃ©moire */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -60,7 +61,7 @@
   }
 /******************************************************************************************************************************/
 /* Proto_valider_editer_camera: Le client valide l'edition d'un camera                                                        */
-/* Entrée: le client demandeur et le camera en question                                                                       */
+/* EntrÃ©e: le client demandeur et le camera en question                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_valider_editer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
@@ -92,7 +93,7 @@
   }
 /******************************************************************************************************************************/
 /* Proto_effacer_camera: Retrait du camera en parametre                                                                       */
-/* Entrée: le client demandeur et le camera en question                                                                       */
+/* EntrÃ©e: le client demandeur et le camera en question                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_effacer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
@@ -114,7 +115,7 @@
   }
 /******************************************************************************************************************************/
 /* Proto_ajouter_camera: Un client nous demande d'ajouter un camera Watchdog                                                  */
-/* Entrée: le camera à créer                                                                                                  */
+/* EntrÃ©e: le camera Ã  crÃ©er                                                                                                  */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_ajouter_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
@@ -146,8 +147,8 @@
   }
 /******************************************************************************************************************************/
 /* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                                    */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: NÃ©ant                                                                                                              */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void *Envoyer_cameras_thread_tag ( struct CLIENT *client, guint tag, guint sstag, guint sstag_fin )
   { struct CMD_TYPE_CAMERA *camera;
@@ -157,7 +158,7 @@
     prctl(PR_SET_NAME, "W-EnvoiCAMERA", 0, 0, 0 );
 
     if ( ! Recuperer_cameraDB( &db ) )
-     { Unref_client( client );                                                            /* Déréférence la structure cliente */
+     { Unref_client( client );                                                            /* DÃ©rÃ©fÃ©rence la structure cliente */
        Libere_DB_SQL( &db );
        pthread_exit( NULL );
      }
@@ -176,13 +177,13 @@
 
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
     Libere_DB_SQL( &db );
-    Unref_client( client );                                                               /* Déréférence la structure cliente */
+    Unref_client( client );                                                               /* DÃ©rÃ©fÃ©rence la structure cliente */
     pthread_exit ( NULL );
   }
 /******************************************************************************************************************************/
 /* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                                    */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: NÃ©ant                                                                                                              */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void *Envoyer_cameras_thread ( struct CLIENT *client )
   { Envoyer_cameras_thread_tag( client, TAG_LOWLEVEL, SSTAG_SERVEUR_ADDPROGRESS_CAMERA,
@@ -191,8 +192,8 @@
   }
 /******************************************************************************************************************************/
 /* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                                   */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: NÃ©ant                                                                                                              */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void *Envoyer_cameras_for_atelier_thread ( struct CLIENT *client )
   { Envoyer_cameras_thread_tag( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER,

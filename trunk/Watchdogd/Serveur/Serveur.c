@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Serveur/serveur.c                Comportement d'un sous-serveur Watchdog                                         */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                           jeu 02 fév 2006 13:01:57 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           jeu 02 fÃ©v 2006 13:01:57 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Serveur.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <openssl/err.h>
  #include <openssl/rsa.h>
@@ -37,7 +37,7 @@
  #include <sys/socket.h>
  #include <sys/prctl.h>
  #include <netinet/tcp.h>
- #include <netinet/in.h>                                                              /* Pour les structures d'entrées SOCKET */
+ #include <netinet/in.h>                                                              /* Pour les structures d'entrÃ©es SOCKET */
  #include <arpa/inet.h>
  #include <netdb.h>
  #include <fcntl.h>
@@ -48,11 +48,11 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-
+ struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
-/* Ssrv_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* Ssrv_Lire_config : Lit la config Watchdog et rempli la structure mÃ©moire                                                   */
+/* EntrÃ©e: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Ssrv_Lire_config ( void )
   { gchar *nom, *valeur;
@@ -69,13 +69,13 @@
     g_snprintf( Cfg_ssrv.ssl_file_key,  sizeof(Cfg_ssrv.ssl_file_key),  "%s", SSRV_DEFAUT_FILE_KEY );
     g_snprintf( Cfg_ssrv.ssl_file_ca,   sizeof(Cfg_ssrv.ssl_file_ca),   "%s", SSRV_DEFAUT_FILE_CA  );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de donnÃ©es */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
                 "Ssrv_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* RÃ©cupÃ©ration d'une config dans la DB */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,                                            /* Print Config */
                 "Ssrv_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "ssl_file_cert" ) )
@@ -102,9 +102,9 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Ref_client et Unref_client servent a referencer ou non une structure CLIENT en mémoire                                     */
-/* Entrée: un client                                                                                                          */
-/* Sortie: néant                                                                                                              */
+/* Ref_client et Unref_client servent a referencer ou non une structure CLIENT en mÃ©moire                                     */
+/* EntrÃ©e: un client                                                                                                          */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Unref_client ( struct CLIENT *client )
   { pthread_mutex_lock( &client->mutex_struct_used );
@@ -124,7 +124,7 @@
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Unref_client: %03d clients managed left", g_slist_length( Cfg_ssrv.Clients ) );
        pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-    
+
        Fermer_connexion( client->connexion );
        pthread_mutex_destroy( &client->mutex_struct_used );
        if (client->util)            { g_free( client->util ); }
@@ -139,9 +139,9 @@
      }
   }
 /******************************************************************************************************************************/
-/* Ref_client et Unref_client servent a referencer ou non une structure CLIENT en mémoire                                     */
-/* Entrée: un client                                                                                                          */
-/* Sortie: néant                                                                                                              */
+/* Ref_client et Unref_client servent a referencer ou non une structure CLIENT en mÃ©moire                                     */
+/* EntrÃ©e: un client                                                                                                          */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Ref_client ( struct CLIENT *client, gchar *reason )
   { pthread_mutex_lock( &client->mutex_struct_used );
@@ -153,7 +153,7 @@
   }
 /******************************************************************************************************************************/
 /* Mode_vers_string: Conversion d'un mode vers une chaine de caracteres                                                       */
-/* Entrée: un mode                                                                                                            */
+/* EntrÃ©e: un mode                                                                                                            */
 /* Sortie: un gchar *                                                                                                         */
 /******************************************************************************************************************************/
  gchar *Mode_vers_string ( gint mode )
@@ -170,7 +170,7 @@
   }
 /******************************************************************************************************************************/
 /* Client_mode: Mise d'un client dans un mode precis                                                                          */
-/* Entrée: un client et un mode                                                                                               */
+/* EntrÃ©e: un client et un mode                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Client_mode ( struct CLIENT *client, gint mode )
@@ -190,7 +190,7 @@
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnection d'un client                                                                                      */
-/* Entrée: un client                                                                                                          */
+/* EntrÃ©e: un client                                                                                                          */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Deconnecter ( struct CLIENT *client )
@@ -198,14 +198,14 @@
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "%s: deconnexion client %s", __func__, client->machine );
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
     client->mode = DECONNECTE;
-                                                                        /* Le client n'est plus connecté, on en informe D.L.S */
+                                                                        /* Le client n'est plus connectÃ©, on en informe D.L.S */
     if (client->util && client->util->ssrv_bit_presence) SB(client->util->ssrv_bit_presence, 0);
-    Unref_client( client ); 
+    Unref_client( client );
   }
 /******************************************************************************************************************************/
-/* Accueillir_nouveaux_clients: Cette fonction permet de loguer d'éventuels nouveaux clients distants                         */
-/* Entrée: rien                                                                                                               */
-/* Sortie: TRUE si un nouveau client est arrivé                                                                               */
+/* Accueillir_nouveaux_clients: Cette fonction permet de loguer d'Ã©ventuels nouveaux clients distants                         */
+/* EntrÃ©e: rien                                                                                                               */
+/* Sortie: TRUE si un nouveau client est arrivÃ©                                                                               */
 /******************************************************************************************************************************/
  static struct CLIENT *Accueillir_un_client( void )
   { struct sockaddr_in distant;
@@ -222,7 +222,7 @@
        if (!client) { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                                "Accueillir_nouveaux_client: Not enought memory to connect %d", id );
                       close(id);
-                      return(NULL);                                                         /* On traite bien sûr les erreurs */
+                      return(NULL);                                                         /* On traite bien sÃ»r les erreurs */
                     }
 
        client->connexion = Nouvelle_connexion( Config.log, id, Cfg_ssrv.taille_bloc_reseau );
@@ -242,7 +242,7 @@
        time( &client->date_connexion );                                    /* Enregistrement de la date de debut de connexion */
        client->pulse = Partage->top;
        pthread_mutex_init( &client->mutex_struct_used, NULL );
-       client->struct_used = 1;                        /* Par défaut, la structure est utilisée par le thread de surveillance */
+       client->struct_used = 1;                        /* Par dÃ©faut, la structure est utilisÃ©e par le thread de surveillance */
 
        pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
        Cfg_ssrv.Clients = g_slist_prepend( Cfg_ssrv.Clients, client );
@@ -262,7 +262,7 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { gchar nom[32];
-    
+
     g_snprintf(nom, sizeof(nom), "W-SSRV-LISTEN" );
     prctl(PR_SET_NAME, nom, 0, 0, 0 );
 
@@ -294,8 +294,8 @@
                     "Run_thread: ssl_needed = FALSE. Warning, Network is not ciphered !" );
          }
 
-    Cfg_ssrv.Socket_ecoute = Activer_ecoute();                                        /* Initialisation de l'écoute via TCPIP */
-    if ( Cfg_ssrv.Socket_ecoute<0 )            
+    Cfg_ssrv.Socket_ecoute = Activer_ecoute();                                        /* Initialisation de l'Ã©coute via TCPIP */
+    if ( Cfg_ssrv.Socket_ecoute<0 )
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_CRIT, "Network down, foreign connexions disabled" );
        goto end;
      }
@@ -320,7 +320,7 @@
       }                                                                                        /* Fin du while partage->arret */
 
 end:
-    while (Cfg_ssrv.Clients)                                                      /* Tant que des clients sont encore managés */
+    while (Cfg_ssrv.Clients)                                                      /* Tant que des clients sont encore managÃ©s */
      { gint nbr;
        sleep(1);
        pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
@@ -331,7 +331,7 @@ end:
        sched_yield();
      }
     Cfg_ssrv.lib->Thread_run = FALSE;                                                           /* Le thread ne tourne plus ! */
-    Liberer_SSL ();                                                                                     /* Libération mémoire */
+    Liberer_SSL ();                                                                                     /* LibÃ©ration mÃ©moire */
     if (Cfg_ssrv.Socket_ecoute>0) close(Cfg_ssrv.Socket_ecoute);
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Down . . . TID = %p", pthread_self() );

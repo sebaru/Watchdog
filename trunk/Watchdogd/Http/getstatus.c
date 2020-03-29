@@ -32,6 +32,7 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
+ extern struct HTTP_CONFIG Cfg_http;
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getstatus: Traite une requete sur l'URI status                                                        */
 /* Entrées: la connexion Websocket                                                                                            */

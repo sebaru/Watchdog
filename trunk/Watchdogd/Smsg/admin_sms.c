@@ -28,7 +28,7 @@
  #include <unistd.h>                                                                                      /* Pour gethostname */
  #include "watchdogd.h"
  #include "Sms.h"
-
+ extern struct SMS_CONFIG Cfg_smsg;
 /******************************************************************************************************************************/
 /* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
 /* Entrée : un JSon Builder                                                                                                   */

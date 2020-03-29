@@ -21,15 +21,16 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/prctl.h>
- /**************************************************** Prototypes de fonctions ************************************************/
+/**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Proto_Envoyer_atelier_thread: Envoi du synoptique demandé par le client en mode atelier                                    */
 /* Entrée: Le client destinaire                                                                                               */
@@ -83,7 +84,7 @@
      }
 
     switch ( Reseau_ss_tag ( connexion ) )
-     { 
+     {
 /******************************************************** atelier *************************************************************/
        case SSTAG_CLIENT_ATELIER_SYNOPTIQUE:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
@@ -174,7 +175,7 @@
              }
             break;
 /************************************************* Gestion des commentaires synoptiques ***************************************/
-       case SSTAG_CLIENT_ATELIER_ADD_COMMENT: 
+       case SSTAG_CLIENT_ATELIER_ADD_COMMENT:
              { struct CMD_TYPE_COMMENT *comment;
                comment = (struct CMD_TYPE_COMMENT *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
@@ -205,7 +206,7 @@
                pthread_detach( tid );
              }
             break;
-       case SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP: 
+       case SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP:
              { struct CMD_TYPE_CAMERASUP *camera_sup;
                camera_sup = (struct CMD_TYPE_CAMERASUP *)connexion->donnees;
                Proto_ajouter_camera_sup_atelier( client, camera_sup );
@@ -257,7 +258,7 @@
              }
             break;
 /******************************************** Gestion des palettes synoptiques ************************************************/
-       case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER_PALETTE: 
+       case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER_PALETTE:
              { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire les syn pour palettes atelier" );
                Ref_client( client, "Send synoptique atelier palette" );

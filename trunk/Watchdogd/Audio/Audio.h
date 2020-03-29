@@ -44,7 +44,7 @@
     guint nbr_diffusion_wav;
     guint nbr_diffusion_google;
     gboolean diffusion_enabled;                                                        /* Diffusion autorisée pourle thread ? */
-  } Cfg_audio;
+  };
 
 /*********************************************** Définitions des prototypes ***************************************************/
  extern gboolean Audio_Lire_config ( void );

@@ -39,7 +39,7 @@
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
  #include "Http.h"
-
+ struct HTTP_CONFIG Cfg_http;
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */

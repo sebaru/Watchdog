@@ -27,7 +27,7 @@
 
  #include "watchdogd.h"
  #include "Dmx.h"
-
+ extern struct DMX_CONFIG Cfg_dmx;
 /******************************************************************************************************************************/
 /* Admin_json_list : fonction appelée pour lister les modules dmx                                                             */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */

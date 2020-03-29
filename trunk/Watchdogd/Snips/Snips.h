@@ -39,7 +39,7 @@
     void *zmq_to_master;                                                             /* Queue de remontée des infos au master */
     guint nbr_msg_recu;
     gchar snips_host[24];
-  } Cfg_snips;
+  };
 
 /*********************************************** Définitions des prototypes ***************************************************/
 #endif

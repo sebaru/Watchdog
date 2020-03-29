@@ -62,7 +62,7 @@
     gpointer iinst;
     gpointer imax;
     gpointer papp;
- } Cfg_teleinfo;
+ };
 
 /************************************************ Définitions des prototypes **************************************************/
 #endif

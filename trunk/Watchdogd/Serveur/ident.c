@@ -21,19 +21,20 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
  #include <glib.h>
  #include <string.h>
- 
+
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
-/* Autoriser_client: Autorise le client à se connecter                                                                        */
-/* Entrée/Sortie: rien                                                                                                        */
+/* Autoriser_client: Autorise le client Ã  se connecter                                                                        */
+/* EntrÃ©e/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  static void Autoriser_client ( struct CLIENT *client )
   { struct REZO_SRV_IDENT ident;
@@ -44,7 +45,7 @@
   }
 /******************************************************************************************************************************/
 /* Tester_autorisation: envoi de l'autorisation ou non au client                                                              */
-/* Entrée/Sortie: rien                                                                                                        */
+/* EntrÃ©e/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  gboolean Tester_autorisation ( struct CLIENT *client, struct REZO_CLI_IDENT *ident )
   { int client_major, client_minor, client_micro;
@@ -56,8 +57,8 @@
              "%s: Auth in progress for nom='%s', version='%s' (socket %d)", __func__,
               ident->nom, ident->version, client->connexion->socket );
     memcpy( &client->ident, ident, sizeof( struct REZO_CLI_IDENT ) );                              /* Recopie pour sauvegarde */
-            
-                                                                                            /* Vérification du MAJOR et MINOR */
+
+                                                                                            /* VÃ©rification du MAJOR et MINOR */
     sscanf ( ident->version, "%d.%d.%d", &client_major, &client_minor, &client_micro );
     sscanf ( VERSION,        "%d.%d.%d", &server_major, &server_minor, &server_micro );
 
@@ -95,7 +96,7 @@
 
 /*********************************************************** Compte du client *************************************************/
     if (!client->util->enable)                                                 /* Est-ce que son compte est toujours actif ?? */
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
                 "%s: Account disabled for %s(id=%d)", __func__, client->util->username, client->util->id );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_ACCOUNT_DISABLED, NULL, 0 );
        Client_mode (client, DECONNECTE);
@@ -105,7 +106,7 @@
 /*********************************************** Authentification du client par login mot de passe ****************************/
     if (!client->certif)                                                                            /* si pas de certificat ! */
      { if ( Check_utilisateur_password( client->util, ident->passwd ) == FALSE )                     /* Comparaison des codes */
-        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
                   "%s: Password error for '%s'(id=%d)", __func__, client->util->username, client->util->id );
           Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
           Client_mode (client, DECONNECTE);
@@ -116,10 +117,10 @@
     Autoriser_client ( client );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
              "%s: Autorisation sent for %s(id=%d)", __func__, client->util->username, client->util->id );
-                                                                               /* Le client est connecté, on en informe D.L.S */
+                                                                               /* Le client est connectÃ©, on en informe D.L.S */
     if (client->util->ssrv_bit_presence) SB(client->util->ssrv_bit_presence, 1);
     Client_mode (client, VALIDE);
-    Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CLI_VALIDE, NULL, 0 );                     /* Nous prévenons le client */
+    Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CLI_VALIDE, NULL, 0 );                     /* Nous prÃ©venons le client */
     return(TRUE);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -35,6 +35,7 @@
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Radio.h"
+ struct RADIO_CONFIG Cfg_radio;
 /******************************************************************************************************************************/
 /* Radio_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */

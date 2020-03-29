@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/envoi.c        Procedures d'envoi de données au(x) client(s) connecté(s)                                         */
+/* Watchdogd/envoi.c        Procedures d'envoi de donnÃ©es au(x) client(s) connectÃ©(s)                                         */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                           ven 04 mar 2005 10:16:04 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <string.h>
  #include <errno.h>
  #include <sys/stat.h>
@@ -35,10 +35,10 @@
 /****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Envoi_client: Envoi le buffer au client id                                                                                 */
-/* Entrée: structure identifiant le client, et le buffer à envoyer                                                            */
+/* EntrÃ©e: structure identifiant le client, et le buffer Ã  envoyer                                                            */
 /* Sortie: code d'erreur                                                                                                      */
 /******************************************************************************************************************************/
  gint Envoi_client( struct CLIENT *client, gint tag, gint ss_tag, gchar *buffer, gint taille )
@@ -53,12 +53,12 @@
 
     if ( Attendre_envoi_disponible( client->connexion ) )
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                "Envoi_client: SSRV%06d, Deconnexion client sur défaut d'attente envoi disponible", client->ssrv_id );
+                "Envoi_client: SSRV%06d, Deconnexion client sur dÃ©faut d'attente envoi disponible", client->ssrv_id );
        Client_mode ( client, DECONNECTE );
        return(0);
      }
-                                                                         /* Attente de la possibilité d'envoyer sur le reseau */
-          
+                                                                         /* Attente de la possibilitÃ© d'envoyer sur le reseau */
+
     retour = Envoyer_reseau( client->connexion, tag, ss_tag, buffer, taille );
     if (retour)
      { client->defaut++;
@@ -68,12 +68,12 @@
 
        if (client->defaut>=DEFAUT_MAX)
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                   "Envoi_client: SSRV%06d, Deconnexion client sur défaut", client->ssrv_id );
+                   "Envoi_client: SSRV%06d, Deconnexion client sur dÃ©faut", client->ssrv_id );
           Client_mode ( client, DECONNECTE );
         }
        else switch(retour)
         { case EPIPE:
-          case ECONNRESET: Client_mode ( client, DECONNECTE );                              /* Connection resettée par le clt */
+          case ECONNRESET: Client_mode ( client, DECONNECTE );                              /* Connection resettÃ©e par le clt */
                            Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
                                     "SSRV%06d, decision: deconnexion client", client->ssrv_id );
                            break;
