@@ -33,6 +33,7 @@
 /****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
 
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Gerer_message_repeat: Gestion de la répétition des messages                                                                */
 /* Entrée/Sortie: rien                                                                                                        */
@@ -131,6 +132,7 @@
         }
      }
   }
+#endif
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
@@ -169,6 +171,7 @@
     Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "histo",
                        &histo, sizeof(struct CMD_TYPE_HISTO) );
   }
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
@@ -216,6 +219,7 @@
     Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "histo",
                        &histo, sizeof(struct CMD_TYPE_HISTO) );
   }
+#endif
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
@@ -274,10 +278,12 @@
         {      if (event->etat == 0) Gerer_arrive_MSG_event_dls_off( event->msg );
           else if (event->etat == 1) Gerer_arrive_MSG_event_dls_on ( event->msg );
         }
+#ifdef bouh
        else
         {      if (event->etat == 0) Gerer_arrive_MSGxxx_dls_off( event->num );
           else if (event->etat == 1) Gerer_arrive_MSGxxx_dls_on ( event->num );
         }
+#endif
        g_free(event);
      }
   }

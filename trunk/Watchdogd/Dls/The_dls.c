@@ -650,7 +650,6 @@
      }
     if (changed == TRUE) Ajouter_arch( MNEMO_CPT_IMP, num, Partage->ci[num].confDB.valeur );
   }
-#endif
 /******************************************************************************************************************************/
 /* MSG: Positionnement des messages DLS                                                                                       */
 /* Entrée: numero, etat                                                                                                       */
@@ -722,6 +721,7 @@
         }
      }
   }
+#endif
 /******************************************************************************************************************************/
 /* Envoyer_commande_dls: Gestion des envois de commande DLS                                                                   */
 /* Entrée/Sortie: rien                                                                                                        */

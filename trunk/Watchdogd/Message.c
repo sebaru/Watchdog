@@ -42,6 +42,7 @@
 
  #include "watchdogd.h"
 
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Updater_msg_run: Update la running config du message en parametre                                                          */
 /* Entrée: une structure identifiant le message                                                                               */
@@ -200,6 +201,7 @@
     Updater_msg_run ( msg );
     return(id);
   }
+#endif
 /******************************************************************************************************************************/
 /* Ajouter_messageDB: Ajout ou edition d'un message                                                                           */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
@@ -254,7 +256,9 @@
      }
     id = Recuperer_last_ID_SQL ( db );
     Libere_DB_SQL(&db);
+#ifdef bouh
     Updater_msg_run ( msg );
+#endif
     return(id);
   }
 /******************************************************************************************************************************/
@@ -477,7 +481,9 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
+#ifdef bouh
     Updater_msg_run ( msg );
+#endif
     return(retour);
   }
 /******************************************************************************************************************************/

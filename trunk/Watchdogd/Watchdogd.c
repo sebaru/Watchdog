@@ -84,10 +84,12 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Bistable Export to %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
+#ifdef bouh
     if ( write (fd, Partage->g, sizeof(Partage->g)) != sizeof(Partage->g) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Messages Export to %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
+#endif
     if ( write (fd, Partage->i, sizeof(Partage->i)) != sizeof(Partage->i) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Icones Export to %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
@@ -143,10 +145,12 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Bistable Import from %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
+#ifdef bouh
     if ( read (fd, Partage->g, sizeof(Partage->g)) != sizeof(Partage->g) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Messages Import from %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
+#endif
     if ( read (fd, Partage->i, sizeof(Partage->i)) != sizeof(Partage->i) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Icones Import from %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
@@ -170,7 +174,9 @@
  void Charger_config_bit_interne( void )
   { if (Config.instance_is_master)
      { Charger_analogInput();
+#ifdef bouh
        Charger_messages();
+#endif
        Charger_registre();
        Charger_confDB_BOOL();
      }
@@ -434,7 +440,10 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Gerer_histo_repeat();
+        {
+#ifdef bouh
+          Gerer_histo_repeat();
+#endif
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
