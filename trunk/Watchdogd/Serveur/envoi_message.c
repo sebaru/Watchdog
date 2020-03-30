@@ -47,7 +47,7 @@
 /**********************************************************************************************************/
  void Proto_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
   { struct CMD_TYPE_MESSAGE *msg;
-
+#ifdef bouh
     msg = Rechercher_messageDB_par_id( rezo_msg->id );
 
     if (msg)
@@ -62,6 +62,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_valider_editer_msg: Le client valide l'edition d'un msg                                          */
@@ -71,7 +72,7 @@
  void Proto_valider_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
   { struct CMD_TYPE_MESSAGE *msg;
     gboolean retour;
-
+#ifdef bouh
     retour = Modifier_messageDB ( rezo_msg );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
@@ -94,6 +95,7 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
          }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_effacer_msg: Retrait du msg en parametre                                                         */
@@ -102,7 +104,7 @@
 /**********************************************************************************************************/
  void Proto_effacer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
   { gboolean retour;
-
+#ifdef bouh
     retour = Retirer_messageDB( rezo_msg );
 
     if (retour)
@@ -116,6 +118,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_ajouter_msg: Un client nous demande d'ajouter un msg Watchdog                                    */
@@ -125,7 +128,7 @@
  void Proto_ajouter_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
   { struct CMD_TYPE_MESSAGE *msg;
     gint id;
-
+#ifdef bouh
     id = Ajouter_messageDB ( rezo_msg );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
@@ -148,6 +151,7 @@
               g_free(msg);
             }
          }
+#endif
   }
 /**********************************************************************************************************/
 /* Envoyer_msgs: Envoi des msgs au client GID_MESSAGE                                                     */
@@ -162,7 +166,7 @@
     gint max_enreg;                                /* Nombre maximum d'enregistrement dans un bloc reseau */
 
     prctl(PR_SET_NAME, "W-EnvoiMSG", 0, 0, 0 );
-
+#ifdef bouh
     if ( ! Recuperer_messageDB( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
@@ -206,6 +210,7 @@
     while (msg);                                              /* Tant que l'on a des messages e envoyer ! */
     g_free(msgs);
     Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN, NULL, 0 );
+#endif
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit ( NULL );
   }
