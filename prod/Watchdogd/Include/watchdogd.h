@@ -7,7 +7,7 @@
  * watchdogd.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@
     struct DIGITAL_INPUT e [ NBR_ENTRE_TOR ];
     struct SORTIE_TOR a [ NBR_SORTIE_TOR ];
     guchar b [ (NBR_BIT_BISTABLE>>3) + 1 ];                                                                      /* Bistables */
-    struct DLS_MESSAGES g [ NBR_MESSAGE_ECRITS ];                                               /* Message vers veille et syn */
+    /*struct DLS_MESSAGES g [ NBR_MESSAGE_ECRITS ];                                               /* Message vers veille et syn */
     struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                                               /* DLS=rw, Sserveur=r */
     struct REGISTRE registre[NBR_REGISTRE];
     GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */

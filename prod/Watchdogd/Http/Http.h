@@ -7,7 +7,7 @@
  * http.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@
     gchar ssl_private_key_filepath[80];
     gchar ssl_ca_filepath[80];
     gboolean authenticate;
- } Cfg_http;
+ };
 
  struct HTTP_PER_SESSION_DATA
   { gchar url[80];

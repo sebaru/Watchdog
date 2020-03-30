@@ -7,7 +7,7 @@
  * admin_teleinfo.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
  #include <glib.h>
  #include "watchdogd.h"
  #include "Teleinfo.h"
-
+ extern struct TELEINFO_CONFIG Cfg_teleinfo;
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */

@@ -7,7 +7,7 @@
  * admin_serveur.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,11 @@
 
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
-/* Admin_ssrv_msgs : Envoi un message à un user ou tous                                                                       */
-/* Entrée: La response d'admin le message et le nom du user ('all' si tous)                                                  */
-/* Sortie: néant                                                                                                              */
+/* Admin_ssrv_msgs : Envoi un message Ã  un user ou tous                                                                       */
+/* EntrÃ©e: La response d'admin le message et le nom du user ('all' si tous)                                                  */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static gchar *Admin_ssrv_msgs( gchar *response, gchar *msg, gchar *name )
   { struct CMD_GTK_MESSAGE erreur;
@@ -59,8 +59,8 @@
   }
 /******************************************************************************************************************************/
 /* Admin_ssrv_list : Liste m'ensemble des response actives                                                                   */
-/* Entrée: La response d'admin                                                                                               */
-/* Sortie: néant                                                                                                              */
+/* EntrÃ©e: La response d'admin                                                                                               */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static gchar *Admin_ssrv_list( gchar *response )
   { struct CLIENT *client;
@@ -89,8 +89,8 @@
   }
 /******************************************************************************************************************************/
 /* Admin_ssrv_kill : Termine l'ensemble des responses d'un utilisateur                                                       */
-/* Entrée: La response d'admin et le nom du client a kicker                                                                  */
-/* Sortie: néant                                                                                                              */
+/* EntrÃ©e: La response d'admin et le nom du client a kicker                                                                  */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static gchar *Admin_ssrv_kill_name( gchar *response, gchar *name )
   { struct CLIENT *client;
@@ -117,8 +117,8 @@
   }
 /******************************************************************************************************************************/
 /* Admin_ssrv_killid : Termine la session dont l'id est en parametre                                                          */
-/* Entrée: La response d'admin et l'id de la response a kicker                                                              */
-/* Sortie: néant                                                                                                              */
+/* EntrÃ©e: La response d'admin et l'id de la response a kicker                                                              */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static gchar *Admin_ssrv_kill_id( gchar *response, gint id )
   { struct CLIENT *client;
@@ -145,8 +145,8 @@
   }
 /******************************************************************************************************************************/
 /* Admin_ssrv_status : Affiche le statut du thread                                                                            */
-/* Entrée: Le response d'admin                                                                                               */
-/* Sortie: néant                                                                                                              */
+/* EntrÃ©e: Le response d'admin                                                                                               */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static gchar *Admin_ssrv_status( gchar *response )
   { gchar chaine[256];
@@ -169,13 +169,13 @@
   }
 /******************************************************************************************************************************/
 /* Admin_command : Appeller par le thread admin pour traiter une commande                                                     */
-/* Entrée: Le response d'admin, la ligne a traiter                                                                           */
-/* Sortie: néant                                                                                                              */
+/* EntrÃ©e: Le response d'admin, la ligne a traiter                                                                           */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  gchar *Admin_command( gchar *response, gchar *ligne )
   { gchar commande[128];
 
-    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                                    /* DÃ©coupage de la ligne de commande */
 
     if ( ! strcmp ( commande, "list" ) )
      { response = Admin_ssrv_list ( response );
@@ -188,17 +188,17 @@
      } else
     if ( ! strcmp ( commande, "msg" ) )
      { gchar name[80];
-       sscanf ( ligne, "%s %s", commande, name );                                        /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s", commande, name );                                        /* DÃ©coupage de la ligne de commande */
        response = Admin_ssrv_msgs ( response, ligne + 5 + strlen(name), name );
      } else
     if ( ! strcmp ( commande, "kill" ) )
      { gchar name[80];
-       sscanf ( ligne, "%s %s", commande, name );                                        /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s", commande, name );                                        /* DÃ©coupage de la ligne de commande */
        response = Admin_ssrv_kill_name ( response, name );
      } else
     if ( ! strcmp ( commande, "killid" ) )
      { gint id;
-       sscanf ( ligne, "%s %d", commande, &id );                                         /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &id );                                         /* DÃ©coupage de la ligne de commande */
        response = Admin_ssrv_kill_id ( response, id );
      } else
     if ( ! strcmp ( commande, "help" ) )

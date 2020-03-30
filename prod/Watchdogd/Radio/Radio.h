@@ -7,7 +7,7 @@
  * Radio.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _RADIO_H_
  #define _RADIO_H_
 
@@ -38,7 +38,7 @@
     guint nbr_diffusion;
     gchar radio_en_cours;
     gint  radio_pid;
-  } Cfg_radio;
+  };
 
 /*********************************************** Définitions des prototypes ***************************************************/
 #endif

@@ -7,7 +7,7 @@
  * Snips.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@
     void *zmq_to_master;                                                             /* Queue de remontée des infos au master */
     guint nbr_msg_recu;
     gchar snips_host[24];
-  } Cfg_snips;
+  };
 
 /*********************************************** Définitions des prototypes ***************************************************/
 #endif

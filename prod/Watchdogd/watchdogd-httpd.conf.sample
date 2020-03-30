@@ -1,0 +1,16 @@
+<VirtualHost *:80>
+DocumentRoot "/var/www/html/WEB/public"
+Alias / /var/www/html/WEB/public/
+
+<Location /ws>
+ProxyPass "ws://localhost:5560/ws"
+ProxyPassReverse "ws://localhost/ws"
+</Location>
+
+<Directory /var/www/html/WEB/public>
+   AddDefaultCharset UTF-8
+   Require all granted
+   AllowOverride All
+   DirectoryIndex index.php
+</Directory>
+</VirtualHost>

@@ -7,7 +7,7 @@
  * Modbus.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@
     GSList *Modules_MODBUS;
     gboolean enable;                                                                               /* Thread enable at boot ? */
     gint nbr_request_par_sec;
-  } Cfg_modbus;
+  };
 
  struct TRAME_MODBUS_REQUETE                                                                 /* Definition d'une trame MODBUS */
   { guint16 transaction_id;
@@ -133,6 +133,7 @@
     struct TRAME_MODBUS_REPONSE response;
     gpointer *DI;                                                              /* Tableau dynamique d'accès aux bits internes */
     gpointer *AI;                                                              /* Tableau dynamique d'accès aux bits internes */
+    gpointer *MSG_AI_OUT_OF_RANGE;                                             /* Tableau dynamique d'accès aux bits internes */
     gpointer *DO;                                                              /* Tableau dynamique d'accès aux bits internes */
     gpointer bit_comm;                                                                       /* Bit interne d'etat de la comm */
   };

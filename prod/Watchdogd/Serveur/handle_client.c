@@ -7,7 +7,7 @@
  * handle_client.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2020 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Envoyer_new_motif_au_client: Parcours la liste des motifs et les envoi                                                     */
 /* Entrée : le client a gerer                                                                                                 */

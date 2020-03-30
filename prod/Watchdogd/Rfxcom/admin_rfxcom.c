@@ -7,7 +7,7 @@
  * admin_rfxcom.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,31 +21,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <unistd.h>
  #include "watchdogd.h"
  #include "Rfxcom.h"
-
+ extern struct RFXCOM_CONFIG Cfg_rfxcom;
 /******************************************************************************************************************************/
-/* Admin_rfxcom: Fonction gerant les différentes commandes possible pour l'administration rfxcom                              */
-/* Entrée: le connexion d'admin et la ligne de commande                                                                       */
-/* Sortie: néant                                                                                                              */
+/* Admin_rfxcom: Fonction gerant les diffÃ©rentes commandes possible pour l'administration rfxcom                              */
+/* EntrÃ©e: le connexion d'admin et la ligne de commande                                                                       */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  gchar *Admin_command( gchar *response, gchar *ligne )
   { gchar commande[128], chaine[128];
 
-    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                                    /* DÃ©coupage de la ligne de commande */
 
     if ( ! strcmp ( commande, "light" ) )
      { gchar trame_send_AC[] = { 0x07, 0x10, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
        gint housecode, unitcode, cmd, retour;
        gchar proto[32];
 
-       if (sscanf ( ligne, "%s %[^,],%d,%d,%d", commande,                                /* Découpage de la ligne de commande */
+       if (sscanf ( ligne, "%s %[^,],%d,%d,%d", commande,                                /* DÃ©coupage de la ligne de commande */
                     proto, &housecode, &unitcode, &cmd ) != 5) return(response);
 
        trame_send_AC[0] = 0x07; /* Taille */
@@ -74,7 +74,7 @@
      { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
        gint id1, id2, id3, id4, unitcode, cmd, retour;
 
-       sscanf ( ligne, "%s (%d,%d,%d,%d),%d,%d", commande,                               /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s (%d,%d,%d,%d),%d,%d", commande,                               /* DÃ©coupage de la ligne de commande */
                 &id1, &id2, &id3, &id4, &unitcode, &cmd );
 
        trame_send_AC[0]  = 0x0B; /* Taille */

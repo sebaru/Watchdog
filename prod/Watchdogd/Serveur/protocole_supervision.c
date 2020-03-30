@@ -7,7 +7,7 @@
  * protocole_supervision.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */

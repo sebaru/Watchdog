@@ -7,7 +7,7 @@
  * Synoptiques_DB.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@
  extern gboolean Retirer_synoptiqueDB ( struct CMD_TYPE_SYNOPTIQUE *syn );
  extern gboolean Modifier_synoptiqueDB( struct CMD_TYPE_SYNOPTIQUE *syn );
 
+ extern gboolean Synoptique_auto_create_VISUEL ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *forme_src );
  extern gboolean Retirer_motifDB ( struct CMD_TYPE_MOTIF *motif );
  extern gint Ajouter_motifDB ( struct CMD_TYPE_MOTIF *motif );
  extern gboolean Recuperer_motifDB ( struct DB **db, gint id_syn );

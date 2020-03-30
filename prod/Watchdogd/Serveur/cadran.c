@@ -7,7 +7,7 @@
  * cadran.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 /************************************************ Prototypes de fonctions *****************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Tester_update_cadran renvoie TRUE si le cadran doit etre updaté sur le client                                            */
 /* Entrée: un cadran                                                                                                         */

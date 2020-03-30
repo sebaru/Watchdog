@@ -7,7 +7,7 @@
  * Module_dls.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,10 +48,12 @@
     gboolean bit_acquit;
     gboolean bit_activite_ok;
     gboolean bit_secupers_ok;
+    gboolean bit_alerte_fugitive;
   };
 
  extern void     Dls_print_debug ( gint id, gint *Tableau_bit, gint *Tableau_num, gfloat *Tableau_val );
  extern gboolean Dls_get_top_alerte ( void );
+ extern gboolean Dls_get_top_alerte_fugitive ( void );
  extern gboolean Dls_data_get_bool      ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_bool_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_bool_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );

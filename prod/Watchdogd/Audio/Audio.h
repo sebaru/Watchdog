@@ -7,7 +7,7 @@
  * Audio.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
     guint nbr_diffusion_wav;
     guint nbr_diffusion_google;
     gboolean diffusion_enabled;                                                        /* Diffusion autorisée pourle thread ? */
-  } Cfg_audio;
+  };
 
 /*********************************************** Définitions des prototypes ***************************************************/
  extern gboolean Audio_Lire_config ( void );

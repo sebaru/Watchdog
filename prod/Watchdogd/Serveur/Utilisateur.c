@@ -7,7 +7,7 @@
  * Utilisateur.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,9 +37,10 @@
  #include "watchdogd.h"
  #include "Utilisateur_DB.h"
 
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Tester_level_util: renvoie true si l'utilisateur fait partie du groupe en parametre                                       */
-/* Entrées: une structure UTIL et un id de groupe                                                                             */
+/* EntrÃ©es: une structure UTIL et un id de groupe                                                                             */
 /* Sortie: false si pb                                                                                                        */
 /******************************************************************************************************************************/
  gboolean Tester_level_util( struct CMD_TYPE_UTILISATEUR *util, guint level )
@@ -49,8 +50,8 @@
     return( util->access_level >= level );
   }
 /******************************************************************************************************************************/
-/* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */
-/* Entrées: une structure util, un code confidentiel                                                                          */
+/* Check_utilisateur_password: VÃ©rifie le mot de passe fourni                                                                 */
+/* EntrÃ©es: une structure util, un code confidentiel                                                                          */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Check_utilisateur_password( struct CMD_TYPE_UTILISATEUR *util, gchar *pwd )
@@ -71,14 +72,14 @@
   }
 /******************************************************************************************************************************/
 /* Rechercher_utilsDB: Recuperation de tous les champs des utilisateurs                                                       */
-/* Entrées: un log, une db et un id d'utilisateur                                                                             */
+/* EntrÃ©es: un log, une db et un id d'utilisateur                                                                             */
 /* Sortie: une structure utilisateur, ou null si erreur                                                                       */
 /******************************************************************************************************************************/
  struct CMD_TYPE_UTILISATEUR *Recuperer_utilisateurDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_UTILISATEUR *util;
     struct DB *db;
 
-    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
+    db = *db_orig;                                          /* RÃ©cupÃ©ration du pointeur initialisÃ© par la fonction prÃ©cÃ©dente */
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
@@ -87,7 +88,7 @@
      }
 
     util = (struct CMD_TYPE_UTILISATEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_UTILISATEUR) );
-    if (!util) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
+    if (!util) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mÃ©moire", __func__ );
     else
      { g_snprintf( util->username,       sizeof(util->username),      "%s", db->row[0] );        /* Recopie dans la structure */
        g_snprintf( util->commentaire,    sizeof(util->commentaire),   "%s", db->row[2] );
@@ -110,7 +111,7 @@
   }
 /******************************************************************************************************************************/
 /* Rechercher_utilDB: Recuperation de tous les champs des utilisateurs                                                        */
-/* Entrées: un log, une db et un id d'utilisateur                                                                             */
+/* EntrÃ©es: un log, une db et un id d'utilisateur                                                                             */
 /* Sortie: une structure utilisateur, ou null si erreur                                                                       */
 /******************************************************************************************************************************/
  struct CMD_TYPE_UTILISATEUR *Rechercher_utilisateurDB_by_name( gchar *nom )

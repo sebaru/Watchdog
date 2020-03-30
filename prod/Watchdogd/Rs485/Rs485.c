@@ -7,7 +7,7 @@
  * Rs485.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2020 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Rs485.h"
-
+ struct RS485_CONFIG Cfg_rs485;
 /******************************************************************************************************************************/
 /* Rs485_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */

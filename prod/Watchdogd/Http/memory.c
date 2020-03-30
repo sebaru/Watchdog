@@ -7,7 +7,7 @@
  * memory.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Http.h"
+ extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
 /* Http_Memory_get : Renvoi, au format json, la valeur d'un bit interne                                                       */

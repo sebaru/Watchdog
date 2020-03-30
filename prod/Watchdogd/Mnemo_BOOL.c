@@ -7,7 +7,7 @@
  * Mnemo_BOOL.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO mnemos_BOOL SET type='%d',tech_id='%s',acronyme='%s',libelle='%s' "
-                "ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
+                "ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), type=VALUES(type)",
                 type, tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);

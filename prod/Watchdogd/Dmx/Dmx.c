@@ -7,7 +7,7 @@
  * Dmx.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Dmx.h"
-
+ struct DMX_CONFIG Cfg_dmx;
 /******************************************************************************************************************************/
 /* Dmx_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                    */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */

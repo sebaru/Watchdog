@@ -7,7 +7,7 @@
  * The_dls.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -142,6 +142,13 @@
 /******************************************************************************************************************************/
  gboolean Dls_get_top_alerte ( void )
   { return( Partage->com_dls.Dls_tree->syn_vars.bit_alerte ); }
+/******************************************************************************************************************************/
+/* Dls_get_top_alerte_fugitive: Remonte la valeur du plus haut bit d'alerte fugitive dans l'arbre DLS                         */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: TRUE ou FALSe                                                                                                      */
+/******************************************************************************************************************************/
+ gboolean Dls_get_top_alerte_fugitive ( void )
+  { return( Partage->com_dls.Dls_tree->syn_vars.bit_alerte_fugitive ); }
 /******************************************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                                        */
 /* Entrée: le temps avant, et le temps apres l'action                                                                         */
@@ -643,7 +650,6 @@
      }
     if (changed == TRUE) Ajouter_arch( MNEMO_CPT_IMP, num, Partage->ci[num].confDB.valeur );
   }
-#endif
 /******************************************************************************************************************************/
 /* MSG: Positionnement des messages DLS                                                                                       */
 /* Entrée: numero, etat                                                                                                       */
@@ -715,6 +721,7 @@
         }
      }
   }
+#endif
 /******************************************************************************************************************************/
 /* Envoyer_commande_dls: Gestion des envois de commande DLS                                                                   */
 /* Entrée/Sortie: rien                                                                                                        */
@@ -1034,7 +1041,7 @@
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech )
+ void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech, gboolean in_range )
   { struct DLS_AI *ai;
     gboolean need_arch;
 
@@ -1073,7 +1080,7 @@
        switch ( ai->type )
         { case ENTREEANA_NON_INTERP:
                ai->val_ech = val_avant_ech;                                                        /* Pas d'interprétation !! */
-               ai->inrange = 1;
+               ai->inrange = in_range;
                break;
           case ENTREEANA_4_20_MA_10BITS:
                if (val_avant_ech < 100)                                                /* 204) Modification du range pour 4mA */
@@ -1098,11 +1105,12 @@
                 }
                break;
           case ENTREEANA_WAGO_750455:                                                                              /* 4/20 mA */
-               ai->val_ech = (gfloat) (val_avant_ech*(ai->max - ai->min))/4095.0 + ai->min;
-               ai->inrange = 1;
+               if (in_range)
+                { ai->val_ech = (gfloat) (val_avant_ech*(ai->max - ai->min))/4095.0 + ai->min; }
+               ai->inrange = in_range;                                           /* InRange dependant d'un autre champ ModBus */
                break;
           case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
-               if (val_avant_ech > -32767 && val_avant_ech < 8500)
+               if (val_avant_ech > -2000 && val_avant_ech < 8500)
                 { ai->val_ech = (gfloat)(val_avant_ech/10.0);                                           /* Valeur à l'echelle */
                   ai->inrange = 1;
                 }
@@ -1869,13 +1877,14 @@
   { struct timeval tv_avant, tv_apres;
     gboolean bit_comm_out, bit_defaut, bit_defaut_fixe, bit_alarme, bit_alarme_fixe;                              /* Activité */
     gboolean bit_veille_partielle, bit_veille_totale, bit_alerte, bit_alerte_fixe;             /* Synthese Sécurité des Biens */
+    gboolean bit_alerte_fugitive;
     gboolean bit_derangement, bit_derangement_fixe, bit_danger, bit_danger_fixe;           /* synthèse Sécurité des Personnes */
     GSList *liste;
 
     bit_comm_out = bit_defaut = bit_defaut_fixe = bit_alarme = bit_alarme_fixe = FALSE;
     bit_veille_partielle = FALSE;
     bit_veille_totale = TRUE;
-    bit_alerte = bit_alerte_fixe = FALSE;
+    bit_alerte = bit_alerte_fixe = bit_alerte_fugitive = FALSE;
     bit_derangement = bit_derangement_fixe = bit_danger = bit_danger_fixe = FALSE;
 
     liste = dls_tree->Liste_plugin_dls;
@@ -1904,6 +1913,7 @@
           bit_veille_totale    &= plugin_actuel->vars.bit_veille;
           bit_alerte           |= plugin_actuel->vars.bit_alerte;
           bit_alerte_fixe      |= plugin_actuel->vars.bit_alerte_fixe;
+          bit_alerte_fugitive  |= plugin_actuel->vars.bit_alerte_fugitive;
 
           bit_derangement      |= plugin_actuel->vars.bit_derangement;
           bit_derangement_fixe |= plugin_actuel->vars.bit_derangement_fixe;
@@ -1927,6 +1937,7 @@
        bit_veille_totale    &= sub_tree->syn_vars.bit_veille_totale;
        bit_alerte           |= sub_tree->syn_vars.bit_alerte;
        bit_alerte_fixe      |= sub_tree->syn_vars.bit_alerte_fixe;
+       bit_alerte_fugitive  |= sub_tree->syn_vars.bit_alerte_fugitive;
        bit_derangement      |= sub_tree->syn_vars.bit_derangement;
        bit_derangement_fixe |= sub_tree->syn_vars.bit_derangement_fixe;
        bit_danger           |= sub_tree->syn_vars.bit_danger;
@@ -1943,6 +1954,7 @@
          bit_veille_totale    != dls_tree->syn_vars.bit_veille_totale ||
          bit_alerte           != dls_tree->syn_vars.bit_alerte ||
          bit_alerte_fixe      != dls_tree->syn_vars.bit_alerte_fixe ||
+         bit_alerte_fugitive  != dls_tree->syn_vars.bit_alerte_fugitive ||
          bit_derangement      != dls_tree->syn_vars.bit_derangement ||
          bit_derangement_fixe != dls_tree->syn_vars.bit_derangement_fixe ||
          bit_danger           != dls_tree->syn_vars.bit_danger ||
@@ -1956,6 +1968,7 @@
        dls_tree->syn_vars.bit_veille_totale    = bit_veille_totale;
        dls_tree->syn_vars.bit_alerte           = bit_alerte;
        dls_tree->syn_vars.bit_alerte_fixe      = bit_alerte_fixe;
+       dls_tree->syn_vars.bit_alerte_fugitive  = bit_alerte_fugitive;
        dls_tree->syn_vars.bit_derangement      = bit_derangement;
        dls_tree->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
        dls_tree->syn_vars.bit_danger           = bit_danger;

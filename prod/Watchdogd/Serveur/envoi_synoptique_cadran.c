@@ -7,7 +7,7 @@
  * envoi_synoptique_cadran.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Proto_effacer_cadran_atelier: Retrait du cadran en parametre                                                               */
 /* Entrée: le client demandeur et le cadran en question                                                                       */

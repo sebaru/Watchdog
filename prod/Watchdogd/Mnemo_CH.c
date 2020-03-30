@@ -7,7 +7,7 @@
  * Mnemo_CH.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -153,8 +153,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Updater_confDB_CH ( void )
-  { struct CMD_TYPE_MNEMO_CPT_H *cpth;
-    gchar requete[200];
+  { gchar requete[200];
     GSList *liste;
     struct DB *db;
     gint cpt;

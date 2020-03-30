@@ -73,6 +73,7 @@ newline       [\n\r]+
 "_TRUE"                    { DlsScanner_lval.val = T_TRUE;      return T_TRUE;      }
 "_FALSE"                   { DlsScanner_lval.val = T_FALSE;     return T_FALSE;     }
 "_TOP_ALERTE"              { DlsScanner_lval.val = T_TOP_ALERTE;return T_TOP_ALERTE;}
+"_TOP_ALERTE_FUGITIVE"     { DlsScanner_lval.val = T_TOP_ALERTE_FUGITIVE;return T_TOP_ALERTE_FUGITIVE;}
 "_BUS"                     { DlsScanner_lval.val = T_BUS;       return T_BUS;       }
 
  /***************************************** Methodes speciales ********************************************/
@@ -97,6 +98,7 @@ newline       [\n\r]+
 "_MEMSA_OK"                { DlsScanner_lval.val = T_ACT_OK;     return T_ACT_OK;     }
 "_MEMSSB_VEILLE"           { DlsScanner_lval.val = T_SBIEN_VEILLE;return T_SBIEN_VEILLE; }
 "_MEMSSB_ALERTE_FIXE"      { DlsScanner_lval.val = T_SBIEN_ALEF; return T_SBIEN_ALEF; }
+"_MEMSSB_ALERTE_FUGITIVE"  { DlsScanner_lval.val = T_SBIEN_ALE_FUGITIVE; return T_SBIEN_ALE_FUGITIVE; }
 "_MEMSSB_ALERTE"           { DlsScanner_lval.val = T_SBIEN_ALE;  return T_SBIEN_ALE;  }
 "_MEMSSP_DERANGEMENT_FIXE" { DlsScanner_lval.val = T_SPERS_DERF; return T_SPERS_DERF; }
 "_MEMSSP_DERANGEMENT"      { DlsScanner_lval.val = T_SPERS_DER;  return T_SPERS_DER;  }
@@ -144,6 +146,7 @@ newline       [\n\r]+
 "thread"                   { DlsScanner_lval.val = T_THREAD;    return T_THREAD;    }
 "tag"                      { DlsScanner_lval.val = T_TAG;       return T_TAG;       }
 "param1"                   { DlsScanner_lval.val = T_PARAM1;    return T_PARAM1;    }
+"forme"                    { DlsScanner_lval.val = T_FORME;     return T_FORME;     }
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }
 "#static"                  { DlsScanner_lval.val = T_STATIC;    return T_STATIC;    }

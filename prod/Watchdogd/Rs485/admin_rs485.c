@@ -7,7 +7,7 @@
  * admin_rs485.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
  #include <glib.h>
  #include "watchdogd.h"
  #include "Rs485.h"
-
+ extern struct RS485_CONFIG Cfg_rs485;
 /******************************************************************************************************************************/
 /* Admin_rs485_reload: Demande le rechargement des conf RS485                                                                 */
 /* Entrée: Le buffer d'entrée a compléter                                                                                     */

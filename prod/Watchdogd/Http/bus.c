@@ -7,7 +7,7 @@
  * bus.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Http.h"
-
+ extern struct HTTP_CONFIG Cfg_http;
 /******************************************************************************************************************************/
 /* Http_Traiter_request_body_completion_bus: le payload est arrivé, il faut traiter le fichier                                */
 /* Entrées: la connexion Websocket                                                                                            */

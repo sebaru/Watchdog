@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/ssl.c               Gestion des connexions securisées                                        */
+/* Watchdogd/ssl.c               Gestion des connexions securisÃ©es                                        */
 /* Projet WatchDog version 3.0       Gestion d'habitat                      mar 24 jun 2003 12:58:56 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -7,7 +7,7 @@
  * ssl.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2020 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -33,9 +33,10 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /**********************************************************************************************************/
 /* Init_SSL: Initialisation de l'environnement SSL                                                        */
-/* Entrée: rien                                                                                           */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: un contexte SSL                                                                                */
 /**********************************************************************************************************/
  SSL_CTX *Init_ssl ( void )
@@ -43,10 +44,10 @@
     SSL_CTX *ssl_ctx;
     gint retour;
     FILE *fd;
-    
+
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Init_ssl SSL init" );
     SSL_load_error_strings();                                                    /* Initialisation de SSL */
-    SSL_library_init();                                             /* Init SSL et PRNG: number générator */
+    SSL_library_init();                                             /* Init SSL et PRNG: number gÃ©nÃ©rator */
 
 
     while(!RAND_status())
@@ -55,7 +56,7 @@
      }
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: SSL random ok" );
 
-    ssl_ctx = SSL_CTX_new ( TLS_server_method() );                          /* Création d'un contexte SSL */
+    ssl_ctx = SSL_CTX_new ( TLS_server_method() );                          /* CrÃ©ation d'un contexte SSL */
     if (!ssl_ctx)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                  "Init_ssl : set server method failed (%s)", ERR_error_string( ERR_get_error(), NULL ) );
@@ -64,7 +65,7 @@
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: SSL server method ok" );
 
     SSL_CTX_set_mode( ssl_ctx, SSL_MODE_AUTO_RETRY );                                /* Mode non bloquant */
-    SSL_CTX_set_options( ssl_ctx, SSL_OP_SINGLE_DH_USE );                    /* Options externe à OpenSSL */
+    SSL_CTX_set_options( ssl_ctx, SSL_OP_SINGLE_DH_USE );                    /* Options externe Ã  OpenSSL */
 
 
     retour = SSL_CTX_load_verify_locations( ssl_ctx, Cfg_ssrv.ssl_file_ca, NULL );
@@ -91,7 +92,7 @@
        return(NULL);
      }
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: open certif server OK (%s)", Cfg_ssrv.ssl_file_cert );
-       
+
     Cfg_ssrv.ssrv_certif = PEM_read_X509( fd, NULL, NULL, NULL );                /* Lecture du certificat */
     fclose(fd);
     if (!Cfg_ssrv.ssrv_certif)
@@ -137,7 +138,7 @@
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, 
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
              "Init_ssl: use master ca certificate %s", Cfg_ssrv.ssl_file_ca );
     SSL_CTX_set_client_CA_list( ssl_ctx, stack );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
@@ -146,10 +147,10 @@
   }
 /**********************************************************************************************************/
 /* Init_SSL: Initialisation de l'environnement SSL                                                        */
-/* Entrée: rien                                                                                           */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: un contexte SSL                                                                                */
 /**********************************************************************************************************/
  void Liberer_SSL ( void )
-  { if (Cfg_ssrv.Ssl_ctx) SSL_CTX_free( Cfg_ssrv.Ssl_ctx );                         /* Libération mémoire */
-  } 
+  { if (Cfg_ssrv.Ssl_ctx) SSL_CTX_free( Cfg_ssrv.Ssl_ctx );                         /* LibÃ©ration mÃ©moire */
+  }
 /*--------------------------------------------------------------------------------------------------------*/

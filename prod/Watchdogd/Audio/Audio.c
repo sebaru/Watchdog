@@ -7,7 +7,7 @@
  * Archive.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Audio.h"
+ struct AUDIO_CONFIG Cfg_audio;
 /******************************************************************************************************************************/
 /* Audio_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
@@ -259,7 +260,7 @@
        if ( histo->alive == 1 && histo->msg.audio )                                                 /* Si le message apparait */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
                    "%s : Envoi du message audio %d:%s (%d) (histo->msg.audio=%d)",
-                    __func__, histo->msg.dls_id, histo->msg.acronyme, histo->msg.num );
+                    __func__, histo->msg.dls_id, histo->msg.acronyme, histo->msg.num, histo->msg.audio);
 
           if (Config.instance_is_master)
            { Envoyer_commande_dls_data( "AUDIO", histo->msg.profil_audio );  /* Positionnement du profil audio via monostable */

@@ -7,7 +7,7 @@
  * sms.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@
     gboolean comm_status;
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
     guint nbr_sms;
-  } Cfg_smsg;
+  };
 
  struct SMSDB
   { gint     user_id;                                                                                     /* From users table */

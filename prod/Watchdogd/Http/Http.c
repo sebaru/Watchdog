@@ -7,7 +7,7 @@
  * Http.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
  #include "Http.h"
-
+ struct HTTP_CONFIG Cfg_http;
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
@@ -318,6 +318,7 @@
                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "%s: WS callback receive %d bytes: %s", __func__, taille, buffer );
                g_free(buffer);
+               lws_callback_on_writable(wsi);
              }
             break;
        case LWS_CALLBACK_CLOSED:

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Include/Sous_serveur.h      Définition des prototypes du serveur watchdog                                        */
+/* Watchdogd/Include/Sous_serveur.h      DÃ©finition des prototypes du serveur watchdog                                        */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                          mar 03 jun 2003 10:39:28 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -7,7 +7,7 @@
  * Sous_serveur.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 
  struct SSRV_CONFIG
   { struct LIBRAIRIE *lib;
-    gint Socket_ecoute;                                                          /* Socket de connexion (d'écoute) du serveur */
+    gint Socket_ecoute;                                                          /* Socket de connexion (d'Ã©coute) du serveur */
     SSL_CTX *Ssl_ctx;                                                                  /* Contexte de cryptage des connexions */
     X509 *ssrv_certif;
     gint  port;                                                                        /* Port d'ecoute des requetes clientes */
@@ -57,9 +57,9 @@
     gint  timeout_connexion;                                           /* Temps max d'attente de reponse de la part du client */
     GSList *Clients;                                                                 /* Liste des clients en cours de gestion */
     GSList *Liste_motif;                                                                     /* Destruction d'un histo client */
-  } Cfg_ssrv;
+  };
 
-/*---------------------------------------- Déclarations des prototypes de fonctions ------------------------------------------*/
+/*---------------------------------------- DÃ©clarations des prototypes de fonctions ------------------------------------------*/
                                                                                                             /* Dans serveur.c */
  extern gboolean Ssrv_Lire_config ( void );
  extern void Unref_client ( struct CLIENT *client );

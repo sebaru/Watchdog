@@ -7,7 +7,7 @@
  * Interp.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -943,7 +943,8 @@
      { struct OPTION *option = (struct OPTION *)options->data;
        options = g_list_remove (options, option);
        switch (option->type)
-        { case T_LIBELLE:
+        { case T_FORME:
+          case T_LIBELLE:
           case T_ETIQUETTE:
           case T_HOST:
           case T_THREAD:
@@ -1235,7 +1236,6 @@
              if (!libelle) libelle="no libelle";
              switch(alias->type_bit)
               { case MNEMO_BUS:
-                case MNEMO_MOTIF:
                    break;
                 case MNEMO_BISTABLE:
                 case MNEMO_MONOSTABLE:
@@ -1266,6 +1266,12 @@
                  { Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
+                case MNEMO_MOTIF:
+                 { gchar *forme = Get_option_chaine( alias->options, T_FORME );
+                   if (!forme) forme="none";
+                   Synoptique_auto_create_VISUEL ( Dls_plugin.tech_id, alias->acronyme, libelle, forme );
+                   break;
+                 }
                 case MNEMO_ENTREE_ANA:
                  { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
                    if (!unite) unite="no unit";
@@ -1283,9 +1289,9 @@
                 case MNEMO_MSG:
                  { struct CMD_TYPE_MESSAGE msg;
                    gint param;
+                   g_snprintf( msg.tech_id,  sizeof(msg.tech_id),  "%s", Dls_plugin.tech_id );
                    g_snprintf( msg.acronyme, sizeof(msg.acronyme), "%s", alias->acronyme );
-                   g_snprintf( msg.libelle,  sizeof(msg.libelle), "%s", libelle );
-                   msg.dls_id = Dls_plugin.id;
+                   g_snprintf( msg.libelle,  sizeof(msg.libelle),  "%s", libelle );
                    param = Get_option_entier ( alias->options, T_TYPE );
                    if (param!=-1) msg.type = param;
                              else msg.type = MSG_ETAT;

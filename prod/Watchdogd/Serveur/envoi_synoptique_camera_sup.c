@@ -7,7 +7,7 @@
  * envoi_synoptique_camera_sup.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/prctl.h>
  #include <sys/time.h>
@@ -34,9 +34,10 @@
 /*************************************************** Prototypes de fonctions **************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Proto_effacer_syn: Retrait du syn en parametre                                                                             */
-/* Entrée: le client demandeur et le syn en question                                                                          */
+/* EntrÃ©e: le client demandeur et le syn en question                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_effacer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup )
@@ -56,7 +57,7 @@
   }
 /******************************************************************************************************************************/
 /* Proto_ajouter_comment_atelier: Ajout d'un commentaire dans un synoptique                                                   */
-/* Entrée: le client demandeur et le syn en question                                                                          */
+/* EntrÃ©e: le client demandeur et le syn en question                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_ajouter_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup )
@@ -72,7 +73,7 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { result = Rechercher_camera_supDB( id );
-           if (!result) 
+           if (!result)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
                           "Unable to locate camera_sup %s", rezo_camera_sup->libelle );
@@ -88,7 +89,7 @@
   }
 /******************************************************************************************************************************/
 /* Proto_editer_syn: Le client desire editer un syn                                                                           */
-/* Entrée: le client demandeur et le syn en question                                                                          */
+/* EntrÃ©e: le client demandeur et le syn en question                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client,
@@ -103,8 +104,8 @@
   }
 /******************************************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                                      */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: NÃ©ant                                                                                                              */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Envoyer_camera_sup_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;

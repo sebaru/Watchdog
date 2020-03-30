@@ -7,7 +7,7 @@
  * Archive.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -198,7 +198,7 @@
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
     Mnemo_auto_create_AI ( "SYS", "ARCH_REQUEST_NUMBER", "Nb enregistrement dans le tampon d'archivage", "enreg." );
-    Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 0.0 );
+    Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 0.0, TRUE );
 
     last_update = Partage->top;
     while(Partage->com_arch.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
@@ -254,7 +254,7 @@
        Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
                  nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch );
        Libere_DB_SQL( &db );                                                                               /* pour historique */
-       Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 1.0*Partage->com_arch.taille_arch );
+       Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 1.0*Partage->com_arch.taille_arch, TRUE );
      }
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Cleaning Arch List before stop", __func__);

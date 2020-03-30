@@ -7,7 +7,7 @@
  * db.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2020 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1151,7 +1151,7 @@
                    "FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "DROP TABLE mnamos_Horloge");
+       g_snprintf( requete, sizeof(requete), "DROP TABLE mnemos_Horloge");
        Lancer_requete_SQL ( db, requete );
      }
 
@@ -1594,9 +1594,35 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4494)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_HORLOGE` ADD `libelle` VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default' AFTER `acronyme`; ");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+
+    if (database_version < 4503)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_motifs` ADD `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown' AFTER`id`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_motifs` ADD `auto_create` tinyint(1) NULL DEFAULT NULL AFTER `id`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_motifs` ADD UNIQUE (`tech_id`, `acronyme`, `auto_create`);");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 4511)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` ADD `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' AFTER `id`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE `msgs` INNER JOIN dls ON msgs.dls_id=dls.id SET msgs.tech_id=dls.tech_id;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` ADD UNIQUE(`tech_id`,`acronyme`);" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` ADD FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 fin:
-    database_version=4480;
+    database_version=4511;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

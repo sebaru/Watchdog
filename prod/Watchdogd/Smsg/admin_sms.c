@@ -7,7 +7,7 @@
  * admin_sms.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
  #include <unistd.h>                                                                                      /* Pour gethostname */
  #include "watchdogd.h"
  #include "Sms.h"
-
+ extern struct SMS_CONFIG Cfg_smsg;
 /******************************************************************************************************************************/
 /* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
 /* Entrée : un JSon Builder                                                                                                   */

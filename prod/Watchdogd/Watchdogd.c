@@ -7,7 +7,7 @@
  * Watchdogd.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2020 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,10 +84,12 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Bistable Export to %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
+#ifdef bouh
     if ( write (fd, Partage->g, sizeof(Partage->g)) != sizeof(Partage->g) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Messages Export to %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
+#endif
     if ( write (fd, Partage->i, sizeof(Partage->i)) != sizeof(Partage->i) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Icones Export to %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
@@ -143,10 +145,12 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Bistable Import from %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
+#ifdef bouh
     if ( read (fd, Partage->g, sizeof(Partage->g)) != sizeof(Partage->g) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Messages Import from %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
+#endif
     if ( read (fd, Partage->i, sizeof(Partage->i)) != sizeof(Partage->i) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Icones Import from %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
@@ -170,8 +174,11 @@
  void Charger_config_bit_interne( void )
   { if (Config.instance_is_master)
      { Charger_analogInput();
+#ifdef bouh
        Charger_messages();
+#endif
        Charger_registre();
+       Charger_confDB_MSG();
        Charger_confDB_BOOL();
      }
   }
@@ -197,17 +204,17 @@
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;
-          Dls_data_set_AI ( "SYS", "DLS_BIT_PER_SEC", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold );  /* historique */
+          Dls_data_set_AI ( "SYS", "DLS_BIT_PER_SEC", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold, TRUE );  /* historique */
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
-          Dls_data_set_AI ( "SYS", "DLS_TOUR_PER_SEC", &dls_tour_per_sec, Partage->audit_tour_dls_per_sec_hold );
+          Dls_data_set_AI ( "SYS", "DLS_TOUR_PER_SEC", &dls_tour_per_sec, Partage->audit_tour_dls_per_sec_hold, TRUE );
           if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          Dls_data_set_AI ( "SYS", "DLS_WAIT", &dls_wait, Partage->com_dls.temps_sched );                       /* historique */
+          Dls_data_set_AI ( "SYS", "DLS_WAIT", &dls_wait, Partage->com_dls.temps_sched, TRUE );                 /* historique */
         }
 
        Partage->top_cdg_plugin_dls++;                                                            /* Chien de garde plugin DLS */
@@ -257,7 +264,7 @@
     Updater_confDB_CI();                                                              /* Sauvegarde des compteurs d'impulsion */
     Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
     Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
-    Updater_confDB_AO();                                                               /* Sauvegarde des valeurs des messages */
+    Updater_confDB_AO();                                                    /* Sauvegarde des valeurs des Sorties Analogiques */
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
@@ -320,7 +327,7 @@
               { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); continue; }
              Dls_data_set_AI ( Json_get_string ( query, "tech_id" ),
                                Json_get_string ( query, "acronyme" ),
-                               NULL, Json_get_float ( query, "valeur" ) );
+                               NULL, Json_get_float ( query, "valeur" ), Json_get_bool ( query, "in_range" ) );
              json_node_unref (query);
            }
           else if ( !strcmp(event->tag,"SET_CDE") )
@@ -434,7 +441,10 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Gerer_histo_repeat();
+        {
+#ifdef bouh
+          Gerer_histo_repeat();
+#endif
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */

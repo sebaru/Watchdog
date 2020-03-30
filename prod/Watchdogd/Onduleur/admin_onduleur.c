@@ -7,7 +7,7 @@
  * admin_ups.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 
  #include "watchdogd.h"
  #include "Onduleur.h"
-
+ extern struct UPS_CONFIG Cfg_ups;
 /******************************************************************************************************************************/
 /* Admin_json_list : fonction appelée pour lister les modules modbus                                                          */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */

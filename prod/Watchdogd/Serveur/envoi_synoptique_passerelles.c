@@ -7,7 +7,7 @@
  * envoi_synoptique_passerelles.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,9 +33,10 @@
 /*************************************************** Prototypes de fonctions **************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
 /* Proto_effacer_syn: Retrait du syn en parametre                                                                             */
-/* Entrée: le client demandeur et le syn en question                                                                          */
+/* EntrÃ©e: le client demandeur et le syn en question                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_effacer_passerelle_atelier ( struct CLIENT *client, struct CMD_TYPE_PASSERELLE *rezo_pass )
@@ -56,7 +57,7 @@
   }
 /******************************************************************************************************************************/
 /* Proto_ajouter_comment_atelier: Ajout d'un commentaire dans un synoptique                                                   */
-/* Entrée: le client demandeur et le syn en question                                                                          */
+/* EntrÃ©e: le client demandeur et le syn en question                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_ajouter_passerelle_atelier ( struct CLIENT *client, struct CMD_TYPE_PASSERELLE *rezo_pass )
@@ -87,7 +88,7 @@
   }
 /******************************************************************************************************************************/
 /* Proto_editer_syn: Le client desire editer un syn                                                                           */
-/* Entrée: le client demandeur et le syn en question                                                                          */
+/* EntrÃ©e: le client demandeur et le syn en question                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_valider_editer_passerelle_atelier ( struct CLIENT *client, struct CMD_TYPE_PASSERELLE *rezo_pass )
@@ -102,9 +103,9 @@
      }
   }
 /******************************************************************************************************************************/
-/* Envoyer_bit_init_pass: Envoi des passerelles à l'initialisation                                                            */
-/* Entrée: Le client destinataire et les tags reseaux                                                                         */
-/* Sortie: Néant                                                                                                              */
+/* Envoyer_bit_init_pass: Envoi des passerelles Ã  l'initialisation                                                            */
+/* EntrÃ©e: Le client destinataire et les tags reseaux                                                                         */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Envoyer_bit_init_pass ( void *user_data, struct DLS_TREE *dls_tree )
   { struct CLIENT *client = user_data;
@@ -118,8 +119,8 @@
   }
 /******************************************************************************************************************************/
 /* Envoyer_passerelle_tag: Envoi des passerelles au client en parametre                                                       */
-/* Entrée: Le client destinataire et les tags reseaux                                                                         */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: Le client destinataire et les tags reseaux                                                                         */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Envoyer_passerelle_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_TYPE_PASSERELLE *pass;

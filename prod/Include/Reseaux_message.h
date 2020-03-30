@@ -7,7 +7,7 @@
  * Reseaux_message.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2020 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,7 @@
   { guint  id;
     guint  num;                                                                        /* Numero du message dans la structure */
     guint  dls_id;                                                           /* Numéro ID du plugin D.L.S rattaché au message */
+    gchar  tech_id[32];
     gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];

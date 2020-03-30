@@ -7,7 +7,7 @@
  * Onduleur.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 /*********************************************************** Headers **********************************************************/
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Onduleur.h"
-
+ struct UPS_CONFIG Cfg_ups;
 /******************************************************************************************************************************/
 /* Ups_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                    */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
@@ -304,71 +304,71 @@
        Mnemo_auto_create_DI ( module->tech_id, "UPS_ALARM",  "UPS en alarme !" );
 
        Mnemo_auto_create_AI ( module->tech_id, "LOAD", "Charge onduleur", "%" );
-       Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, 0.0 );
+       Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, 0.0, FALSE );
        Charger_conf_AI ( module->ai_load );
 
        Mnemo_auto_create_AI ( module->tech_id, "REALPOWER", "Charge onduleur", "W" );
-       Dls_data_set_AI ( module->tech_id, "REALPOWER", &module->ai_realpower, 0.0 );
+       Dls_data_set_AI ( module->tech_id, "REALPOWER", &module->ai_realpower, 0.0, FALSE );
        Charger_conf_AI ( module->ai_realpower );
 
        Mnemo_auto_create_AI ( module->tech_id, "BATTERY_CHARGE", "Charge batterie", "%" );
-       Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", &module->ai_battery_charge, 0.0 );
+       Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", &module->ai_battery_charge, 0.0, FALSE );
        Charger_conf_AI ( module->ai_battery_charge );
 
        Mnemo_auto_create_AI ( module->tech_id, "INPUT_VOLTAGE", "Tension d'entrée", "V" );
-       Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", &module->ai_input_voltage, 0.0 );
+       Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", &module->ai_input_voltage, 0.0, FALSE );
        Charger_conf_AI ( module->ai_input_voltage );
 
        Mnemo_auto_create_AI ( module->tech_id, "BATTERY_RUNTIME", "Durée de batterie restante", "s" );
-       Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", &module->ai_battery_runtime, 0.0 );
+       Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", &module->ai_battery_runtime, 0.0, FALSE );
        Charger_conf_AI ( module->ai_battery_runtime );
 
        Mnemo_auto_create_AI ( module->tech_id, "BATTERY_VOLTAGE", "Tension batterie", "V" );
-       Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", &module->ai_battery_voltage, 0.0 );
+       Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", &module->ai_battery_voltage, 0.0, FALSE );
        Charger_conf_AI ( module->ai_battery_voltage );
 
        Mnemo_auto_create_AI ( module->tech_id, "INPUT_HZ", "Fréquence d'entrée", "HZ" );
-       Dls_data_set_AI ( module->tech_id, "INPUT_HZ", &module->ai_input_frequency, 0.0 );
+       Dls_data_set_AI ( module->tech_id, "INPUT_HZ", &module->ai_input_frequency, 0.0, FALSE );
        Charger_conf_AI ( module->ai_input_frequency );
 
        Mnemo_auto_create_AI ( module->tech_id, "OUTPUT_CURRENT", "Courant de sortie", "A" );
-       Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", &module->ai_output_current, 0.0 );
+       Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", &module->ai_output_current, 0.0, FALSE );
        Charger_conf_AI ( module->ai_output_current );
 
        Mnemo_auto_create_AI ( module->tech_id, "OUTPUT_HZ", "Fréquence de sortie", "HZ" );
-       Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", &module->ai_output_frequency, 0.0 );
+       Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", &module->ai_output_frequency, 0.0, FALSE );
        Charger_conf_AI ( module->ai_output_frequency );
 
        Mnemo_auto_create_AI ( module->tech_id, "OUTPUT_VOLTAGE", "Tension de sortie", "V" );
-       Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", &module->ai_output_voltage, 0.0 );
+       Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", &module->ai_output_voltage, 0.0, FALSE );
        Charger_conf_AI ( module->ai_output_voltage );
 
        Mnemo_auto_create_DO ( module->tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
-       Dls_data_set_DO ( module->tech_id, "LOAD_OFF", &module->do_load_off, 0.0 );
+       Dls_data_set_DO ( module->tech_id, "LOAD_OFF", &module->do_load_off, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "LOAD_ON", "Active la sortie ondulée" );
-       Dls_data_set_DO ( module->tech_id, "LOAD_ON", &module->do_load_on, 0.0 );
+       Dls_data_set_DO ( module->tech_id, "LOAD_ON", &module->do_load_on, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "OUTLET_1_OFF", "Désactive la prise n°1" );
-       Dls_data_set_DO ( module->tech_id, "OUTLET_1_OFF", &module->do_outlet_1_off, 0.0 );
+       Dls_data_set_DO ( module->tech_id, "OUTLET_1_OFF", &module->do_outlet_1_off, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "OUTLET_1_ON", "Active la prise n°1" );
-       Dls_data_set_DO ( module->tech_id, "OUTLET_1_ON", &module->do_outlet_1_on, 0.0 );
+       Dls_data_set_DO ( module->tech_id, "OUTLET_1_ON", &module->do_outlet_1_on, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "OUTLET_2_OFF", "Désactive la prise n°2" );
-       Dls_data_set_DO ( module->tech_id, "OUTLET_2_OFF", &module->do_outlet_2_off, 0.0 );
+       Dls_data_set_DO ( module->tech_id, "OUTLET_2_OFF", &module->do_outlet_2_off, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "OUTLET_2_ON", "Active la prise n°2" );
-       Dls_data_set_DO ( module->tech_id, "OUTLET_2_ON", &module->do_outlet_2_on, 0.0 );
+       Dls_data_set_DO ( module->tech_id, "OUTLET_2_ON", &module->do_outlet_2_on, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "START_DEEP_BAT", "Active un test de decharge profond" );
-       Dls_data_set_DO ( module->tech_id, "START_DEEP_BAT", &module->do_start_deep_bat, 0.0 );
+       Dls_data_set_DO ( module->tech_id, "START_DEEP_BAT", &module->do_start_deep_bat, FALSE);
 
        Mnemo_auto_create_DO ( module->tech_id, "START_QUICK_BAT", "Active un test de decharge léger" );
-       Dls_data_set_DO ( module->tech_id, "START_QUICK_BAT", &module->do_start_quick_bat, 0.0 );
+       Dls_data_set_DO ( module->tech_id, "START_QUICK_BAT", &module->do_start_quick_bat, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
-       Dls_data_set_DO ( module->tech_id, "STOP_TEST_BAT", &module->do_start_quick_bat, 0.0 );
+       Dls_data_set_DO ( module->tech_id, "STOP_TEST_BAT", &module->do_start_quick_bat, FALSE );
      }
 
     module->date_next_connexion = 0;
@@ -502,34 +502,34 @@
   { gchar *reponse;
 
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, atof(reponse+1) ); }
+     { Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "REALPOWER", &module->ai_realpower, atof(reponse+1) ); }
+     { Dls_data_set_AI ( module->tech_id, "REALPOWER", &module->ai_realpower, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", &module->ai_battery_charge, atof(reponse+1) ); }
+     { Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", &module->ai_battery_charge, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", &module->ai_input_voltage, atof(reponse+1) ); }
+     { Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", &module->ai_input_voltage, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", &module->ai_battery_runtime, atof(reponse+1) ); }
+     { Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", &module->ai_battery_runtime, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", &module->ai_battery_voltage, atof(reponse+1) ); }
+     { Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", &module->ai_battery_voltage, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "INPUT_HZ", &module->ai_input_frequency, atof(reponse+1) ); }
+     { Dls_data_set_AI ( module->tech_id, "INPUT_HZ", &module->ai_input_frequency, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", &module->ai_output_current, atof(reponse+1) ); }
+     { Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", &module->ai_output_current, atof(reponse+1), TRUE); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", &module->ai_output_frequency, atof(reponse+1) ); }
+     { Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", &module->ai_output_frequency, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", &module->ai_output_voltage, atof(reponse+1) ); }
+     { Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", &module->ai_output_voltage, atof(reponse+1), TRUE ); }
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )

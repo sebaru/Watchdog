@@ -7,7 +7,7 @@
  * trame.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2020 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -7,7 +7,7 @@
  * Onduleur.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@
     GSList *Modules_UPS;
     gboolean enable;                                                           /* Thread enable at boot ? */
     gchar tech_id[32];                                                                                /* Tech_id du telephone */
-  } Cfg_ups;
+  };
 
  #define NBR_CARAC_HOST_UPS           32
  #define NBR_CARAC_HOST_UPS_UTF8      (2*NBR_CARAC_HOST_UPS)

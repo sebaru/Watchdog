@@ -7,7 +7,7 @@
  * envoi_synoptique.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/prctl.h>
  #include <sys/time.h>
@@ -34,9 +34,10 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /**********************************************************************************************************/
 /* Proto_editer_syn: Le client desire editer un syn                                                       */
-/* Entrée: le client demandeur et le syn en question                                                      */
+/* EntrÃ©e: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
@@ -47,7 +48,7 @@
     if (syn)
      { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_EDIT_SYNOPTIQUE_OK,
                   (gchar *)syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-       g_free(syn);                                                                 /* liberation mémoire */
+       g_free(syn);                                                                 /* liberation mÃ©moire */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -59,7 +60,7 @@
   }
 /**********************************************************************************************************/
 /* Proto_valider_editer_syn: Le client valide l'edition d'un syn                                          */
-/* Entrée: le client demandeur et le syn en question                                                      */
+/* EntrÃ©e: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_valider_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
@@ -75,7 +76,7 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { result = Rechercher_synoptiqueDB( rezo_syn->id );
-           if (result) 
+           if (result)
             { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_VALIDE_EDIT_SYNOPTIQUE_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
               g_free(result);
@@ -91,7 +92,7 @@
   }
 /**********************************************************************************************************/
 /* Proto_effacer_syn: Retrait du syn en parametre                                                         */
-/* Entrée: le client demandeur et le syn en question                                                      */
+/* EntrÃ©e: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_effacer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
@@ -113,7 +114,7 @@
   }
 /**********************************************************************************************************/
 /* Proto_ajouter_syn: Un client nous demande d'ajouter un syn Watchdog                                    */
-/* Entrée: le syn à créer                                                                                 */
+/* EntrÃ©e: le syn Ã  crÃ©er                                                                                 */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_ajouter_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
@@ -129,7 +130,7 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { result = Rechercher_synoptiqueDB( id );
-           if (!result) 
+           if (!result)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
                           "Unable to locate synoptique %s", rezo_syn->libelle);
@@ -145,8 +146,8 @@
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: NÃ©ant                                                                                          */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_synoptiques_tag ( struct CLIENT *client, int tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;
@@ -179,46 +180,46 @@
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: NÃ©ant                                                                                          */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_synoptiques_thread ( struct CLIENT *client )
   { Envoyer_synoptiques_tag( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE,
                                                      SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FIN );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
+    Unref_client( client );                                           /* DÃ©rÃ©fÃ©rence la structure cliente */
     pthread_exit( NULL );
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: NÃ©ant                                                                                          */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_synoptiques_pour_atelier_thread ( struct CLIENT *client )
   { Envoyer_synoptiques_tag( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER,
                                                   SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_FIN );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
+    Unref_client( client );                                           /* DÃ©rÃ©fÃ©rence la structure cliente */
     pthread_exit( NULL );
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: NÃ©ant                                                                                          */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_synoptiques_pour_atelier_palette_thread ( struct CLIENT *client )
   { Envoyer_synoptiques_tag( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE,
                                                   SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE_FIN );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
+    Unref_client( client );                                           /* DÃ©rÃ©fÃ©rence la structure cliente */
     pthread_exit( NULL );
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: NÃ©ant                                                                                          */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_synoptiques_pour_plugin_dls_thread ( struct CLIENT *client )
   { Envoyer_synoptiques_tag( client, TAG_DLS, SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS,
                                               SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS_FIN );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
+    Unref_client( client );                                           /* DÃ©rÃ©fÃ©rence la structure cliente */
     pthread_exit( NULL );
   }
 /*--------------------------------------------------------------------------------------------------------*/

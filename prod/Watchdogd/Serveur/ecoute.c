@@ -7,7 +7,7 @@
  * ecoute.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2020 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -31,7 +31,7 @@
  #include <sys/socket.h>
  #include <netinet/tcp.h>
  #include <sys/wait.h>
- #include <netinet/in.h>                                          /* Pour les structures d'entrées SOCKET */
+ #include <netinet/in.h>                                          /* Pour les structures d'entrÃ©es SOCKET */
  #include <fcntl.h>
  #include <unistd.h>
  #include <stdio.h>
@@ -40,9 +40,10 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+ extern struct SSRV_CONFIG Cfg_ssrv;
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
+/* EntrÃ©e: NÃ©ant                                                                                          */
 /* Sortie: -1 si erreur                                                                                   */
 /**********************************************************************************************************/
  gint Activer_ecoute ( void )
@@ -77,14 +78,14 @@
        return(-1);
      }
 
-    if (listen(ecoute, 1) == -1)                                       /* On demande d'écouter aux portes */
+    if (listen(ecoute, 1) == -1)                                       /* On demande d'Ã©couter aux portes */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Listen failure (%s)", strerror(errno));
        close(ecoute);
        return(-1);
      }
-    fcntl( ecoute, F_SETFL, O_NONBLOCK );        /* Mode non bloquant, ça aide pour une telle application */
+    fcntl( ecoute, F_SETFL, O_NONBLOCK );        /* Mode non bloquant, Ã§a aide pour une telle application */
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
               "Ecoute du port %d with socket %d", Cfg_ssrv.port, ecoute );
-    return( ecoute );                                                            /* Tout s'est bien passé */
+    return( ecoute );                                                            /* Tout s'est bien passÃ© */
   }
 /*--------------------------------------------------------------------------------------------------------*/

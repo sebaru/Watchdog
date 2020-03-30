@@ -429,7 +429,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -579,6 +579,8 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
 
 CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `auto_create` tinyint(1) NULL DEFAULT NULL,
+  `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',
   `icone` int(11) NOT NULL DEFAULT '0',
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
@@ -605,6 +607,7 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `clic_tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `clic_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   PRIMARY KEY (`id`),
+  UNIQUE (`tech_id`, `acronyme`, `auto_create`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
@@ -715,6 +718,7 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
 
 CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `num` int(11) NOT NULL DEFAULT '0',
   `dls_id` int(11) NOT NULL DEFAULT '1',
@@ -732,8 +736,8 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `etat` tinyint(1) NOT NULL DEFAULT '0',
   `profil_audio` VARCHAR(80) NOT NULL DEFAULT 'P_ALL',
   PRIMARY KEY (`id`),
-  UNIQUE(`dls_id`,`acronyme`),
-  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  UNIQUE(`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `msgs` (`id`, `num`, `dls_id`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `enable`, `sms` ) VALUES

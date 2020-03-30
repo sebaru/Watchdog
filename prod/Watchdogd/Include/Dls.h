@@ -6,7 +6,7 @@
  * Dls.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -254,7 +254,7 @@
  extern int EA_inrange( int num );
  extern void SB_SYS( int num, int etat );
  extern void SE( int num, int etat );
- extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech );
+ extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech, gboolean in_range );
  extern void Dls_data_set_DI ( gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur );
  extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p );
  extern gint Dls_data_get_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p );

@@ -7,7 +7,7 @@
  * Rs485.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _RS485_H_
  #define _RS485_H_
 
@@ -35,7 +35,7 @@
  #define RS485_FCT_ENTRE_ANA  0x03
  #define RS485_FCT_SORTIE_TOR 0x04
  #define RS485_FCT_PING       0xFF
- 
+
  #define RS485_TEMPS_UPDATE_IO_ANA  50                              /* Get IO/ANA toutes les 5 secondes ! */
 
  #define RS485_TEMPS_SEUIL_DOWN     20                  /* Temps avant de considérer un module comme DOWN */
@@ -92,7 +92,7 @@
     gboolean enable;                                                           /* Thread enable at boot ? */
     gint  fd;                                         /* File Descriptor de la connexion a la ligne RS485 */
     gchar port[80];                                                            /* Port d'accès a la RS485 */
-  } Cfg_rs485;
+  };
 /*********************************************** Déclaration des prototypes *******************************/
  extern gboolean Rs485_Lire_config ( void );
  extern gboolean Retirer_rs485DB ( struct RS485DB *rs485 );
