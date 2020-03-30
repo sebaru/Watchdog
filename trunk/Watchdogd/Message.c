@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Message/Message.c        Déclaration des fonctions pour la gestion des message                                   */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                         jeu. 29 déc. 2011 14:55:42 CET */
+/* Watchdogd/Message/Message.c        DÃ©claration des fonctions pour la gestion des message                                   */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                         jeu. 29 dÃ©c. 2011 14:55:42 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -45,7 +45,7 @@
 #ifdef bouh
 /******************************************************************************************************************************/
 /* Updater_msg_run: Update la running config du message en parametre                                                          */
-/* Entrée: une structure identifiant le message                                                                               */
+/* EntrÃ©e: une structure identifiant le message                                                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  static gboolean Updater_msg_run ( struct CMD_TYPE_MESSAGE *msg )
@@ -56,7 +56,7 @@
   }
 /******************************************************************************************************************************/
 /* Charger_messages: Chargement de la configuration des messages depuis la DB vers la running config                          */
-/* Entrée: rien                                                                                                               */
+/* EntrÃ©e: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_messages ( void )
@@ -96,7 +96,7 @@
   }
 /******************************************************************************************************************************/
 /* Retirer_messageDB: Elimination d'un message                                                                                */
-/* Entrée: une structure identifiant le message a retirer                                                                     */
+/* EntrÃ©e: une structure identifiant le message a retirer                                                                     */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Retirer_messageDB ( struct CMD_TYPE_MESSAGE *msg )
@@ -121,7 +121,7 @@
   }
 /******************************************************************************************************************************/
 /* Retirer_messageDB: Elimination d'un message                                                                                */
-/* Entrée: une structure identifiant le message a retirer                                                                     */
+/* EntrÃ©e: une structure identifiant le message a retirer                                                                     */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Modifier_messageDB_set_mp3 ( gint id, gboolean valeur )
@@ -144,7 +144,7 @@
   }
 /******************************************************************************************************************************/
 /* Ajouter_messageDB: Ajout ou edition d'un message                                                                           */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
+/* EntrÃ©e: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gint Ajouter_messageDB ( struct CMD_TYPE_MESSAGE *msg )
@@ -204,7 +204,7 @@
 #endif
 /******************************************************************************************************************************/
 /* Ajouter_messageDB: Ajout ou edition d'un message                                                                           */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
+/* EntrÃ©e: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gint Mnemo_auto_create_MSG ( struct CMD_TYPE_MESSAGE *msg )
@@ -262,8 +262,8 @@
     return(id);
   }
 /******************************************************************************************************************************/
-/* Recuperer_messageDB_with_conditions: Recupération de la liste des ids des messages avec conditions en paramètre            */
-/* Entrée: une database et des conditions                                                                                     */
+/* Recuperer_messageDB_with_conditions: RecupÃ©ration de la liste des ids des messages avec conditions en paramÃ¨tre            */
+/* EntrÃ©e: une database et des conditions                                                                                     */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length )
@@ -296,22 +296,22 @@
     return ( retour );
   }
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                                */
-/* Entrée: un log et une database                                                                                             */
+/* Recuperer_liste_id_messageDB: RecupÃ©ration de la liste des ids des messages                                                */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  gboolean Recuperer_messageDB ( struct DB **db_retour )
   { return( Recuperer_messageDB_with_conditions ( db_retour, NULL, -1, -1 ) ); }
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                                */
-/* Entrée: un log et une database                                                                                             */
+/* Recuperer_liste_id_messageDB: RecupÃ©ration de la liste des ids des messages                                                */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_MESSAGE *msg;
     struct DB *db;
 
-    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
+    db = *db_orig;                                          /* RÃ©cupÃ©ration du pointeur initialisÃ© par la fonction prÃ©cÃ©dente */
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
@@ -320,7 +320,7 @@
      }
 
     msg = (struct CMD_TYPE_MESSAGE *)g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!msg) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
+    if (!msg) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mÃ©moire", __func__ );
     else
      { g_snprintf( msg->libelle,         sizeof(msg->libelle      ),   "%s", db->row[2]  );      /* Recopie dans la structure */
        g_snprintf( msg->syn_libelle,     sizeof(msg->syn_libelle  ),   "%s", db->row[4]  );
@@ -346,8 +346,8 @@
     return(msg);
   }
 /******************************************************************************************************************************/
-/* Rechercher_messageDB: Recupération du message dont le num est en parametre                                                 */
-/* Entrée: un log et une database                                                                                             */
+/* Rechercher_messageDB: RecupÃ©ration du message dont le num est en parametre                                                 */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num )
@@ -375,8 +375,8 @@
     return(message);
   }
 /******************************************************************************************************************************/
-/* Rechercher_messageDB_par_id: Recupération du message dont l'id est en parametre                                            */
-/* Entrée: un log et une database                                                                                             */
+/* Rechercher_messageDB_par_id: RecupÃ©ration du message dont l'id est en parametre                                            */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( guint id )
@@ -403,8 +403,8 @@
     return(message);
   }
 /******************************************************************************************************************************/
-/* Rechercher_messageDB_par_id: Recupération du message dont l'id est en parametre                                            */
-/* Entrée: un log et une database                                                                                             */
+/* Rechercher_messageDB_par_id: RecupÃ©ration du message dont l'id est en parametre                                            */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_acronyme ( gchar *tech_id, gchar *acronyme )
@@ -432,7 +432,7 @@
   }
 /******************************************************************************************************************************/
 /* Modifier_messageDB: Modification d'un message Watchdog                                                                     */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
+/* EntrÃ©es: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
 /* Sortie: -1 si pb, id sinon                                                                                                 */
 /******************************************************************************************************************************/
  gboolean Modifier_messageDB( struct CMD_TYPE_MESSAGE *msg )
@@ -487,9 +487,9 @@
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
-/* Entrée: l'id a récupérer                                                                                                   */
-/* Sortie: une structure hébergeant l'entrée analogique                                                                       */
+/* Charger_conf_ai: RecupÃ©ration de la conf de l'entrÃ©e analogique en parametre                                               */
+/* EntrÃ©e: l'id a rÃ©cupÃ©rer                                                                                                   */
+/* Sortie: une structure hÃ©bergeant l'entrÃ©e analogique                                                                       */
 /******************************************************************************************************************************/
  void Charger_confDB_MSG ( void )
   { gchar requete[512];
@@ -519,8 +519,8 @@
   }
 /******************************************************************************************************************************/
 /* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
+/* EntrÃ©e: nÃ©ant                                                                                                              */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Updater_confDB_MSG ( void )
   { gchar requete[200];
@@ -538,8 +538,8 @@
     while ( liste )
      { struct DLS_MESSAGES *msg = (struct DLS_MESSAGES *)liste->data;
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE msgs as m INNER JOIN dls as d ON m.dls_id = d.id SET m.etat='%d' "
-                   "WHERE d.tech_id='%s' AND m.acronyme='%s';",
+                   "UPDATE msgs as m SET m.etat='%d' "
+                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
                    msg->etat, msg->tech_id, msg->acronyme );
        Lancer_requete_SQL ( db, requete );
        liste = g_slist_next(liste);

@@ -178,6 +178,7 @@
        Charger_messages();
 #endif
        Charger_registre();
+       Charger_confDB_MSG();
        Charger_confDB_BOOL();
      }
   }
@@ -263,7 +264,7 @@
     Updater_confDB_CI();                                                              /* Sauvegarde des compteurs d'impulsion */
     Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
     Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
-    Updater_confDB_AO();                                                               /* Sauvegarde des valeurs des messages */
+    Updater_confDB_AO();                                                    /* Sauvegarde des valeurs des Sorties Analogiques */
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
