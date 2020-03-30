@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS = Include Dls TraductionDLS Archive Enocean \
-	  Smsg Modbus Audio Onduleur Rfxcom Imsgp TeleinfoEDF Http Radio Snips
+	  Smsg Modbus Audio Onduleur Rfxcom Imsgp TeleinfoEDF Http Radio Snips Imsgs
 
 bin_SCRIPTS = Wtd_set_volume.sh Wtd_play_google.sh
 bin_PROGRAMS = Watchdogd
