@@ -216,6 +216,11 @@
 
     from = xmpp_stanza_get_attribute	( stanza, "from" );
     message = xmpp_message_get_body 	( stanza );
+    if (!from || !message)
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Error : from or message = NULL", __func__ );
+       return(1);
+     }
+
     Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: From '%s' -> '%s'", __func__, from, message );
 
     imsg = Imsgs_recipient_allow_command ( from );
@@ -270,15 +275,14 @@ end:
  static void Imsgs_Sauvegarder_statut_contact ( const gchar *jabber_id, gboolean available )
   { gchar *jabberid, requete[512], hostonly[80], *ptr;
     struct DB *db;
-#ifdef bouh
+
     g_snprintf( hostonly, sizeof(hostonly), "%s", jabber_id );
     ptr = strstr( hostonly, "/" );
     if (ptr) *ptr=0;
 
     jabberid = Normaliser_chaine ( hostonly );
     if (!jabberid)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation jabberid impossible", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation jabberid '%s' impossible", __func__, hostonly );
        return;
      }
 
@@ -288,71 +292,19 @@ end:
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING,
-                "%s: Database Connection Failed", __func__ );
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return;
      }
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )                                         /* Execution de la requete SQL */
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING,
-                "%s: Requete failed", __func__ );
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Requete failed", __func__ );
      }
     else { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG,
                     "%s : jabber_id %s -> Availability updated to %d.", __func__, jabber_id, available );
          }
     Libere_DB_SQL( &db );
-#endif
   }
 #ifdef bouh
-/******************************************************************************************************************************/
-/* Imsgs_buddy_signed_on : Un contact bien d'arriver                                                                          */
-/* Entrée: le buddy                                                                                                           */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Imsgs_buddy_signed_on(PurpleBuddy *buddy)
-  { Imsgs_Sauvegarder_statut_contact ( purple_buddy_get_name(buddy), TRUE ); }
-/******************************************************************************************************************************/
-/* Imsgs_buddy_signed_off : Un contact bien de partir                                                                         */
-/* Entrée: le buddy                                                                                                           */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Imsgs_buddy_signed_off(PurpleBuddy *buddy)
-  { Imsgs_Sauvegarder_statut_contact ( purple_buddy_get_name(buddy), FALSE ); }
-
-/******************************************************************************************************************************/
-/* Imsgs_buddy_xxx : Ensemble de fonctions de notification sur le statut des contacts                                         */
-/* Entrée: le buddy                                                                                                           */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Imsgs_buddy_away(PurpleBuddy *buddy, PurpleStatus *old_status, PurpleStatus *status)
-  { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO,
-             "%s: '%s' with proto %s", __func__,
-              purple_buddy_get_name(buddy), purple_account_get_protocol_id(purple_buddy_get_account(buddy)));
-  }
-
- static void Imsgs_buddy_idle(PurpleBuddy *buddy, gboolean old_idle, gboolean idle)
-  { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO,
-             "%s: '%s' with proto %s", __func__,
-              purple_buddy_get_name(buddy), purple_account_get_protocol_id(purple_buddy_get_account(buddy)));
-  }
-
- static void Imsgs_buddy_typing(PurpleAccount *account, const char *name)
-  { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG,
-             "%s: '%s' with proto %s", __func__,
-              name, purple_account_get_protocol_id(account));
-  }
-
- static void Imsgs_buddy_typed(PurpleAccount *account, const char *name) //not supported on all protocols
-  { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG,
-             "%s: '%s' with proto %s", __func__,
-              name, purple_account_get_protocol_id(account));
-  }
-
- static void Imsgs_buddy_typing_stopped(PurpleAccount *account, const char *name)
-  { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG,
-             "%s: '%s' with proto %s", __func__,
-              name, purple_account_get_protocol_id(account));
-  }
 /******************************************************************************************************************************/
 /* Imsgs_account_authorization_requested : Fonction appellé quand un user veut nous ajouter dans sa liste de buddy            */
 /* Entrée: le compte et le user                                                                                               */
@@ -365,161 +317,61 @@ end:
     purple_account_add_buddy( account, purple_buddy_new 	( account, user, user ) );
     return 1; //authorize buddy request automatically (-1 denies it)
   }
-/******************************************************************************************************************************/
-/* Imsgs_signed_on: Appelé lorsque nous venons de nous connecter                                                              */
-/* Entrée: La connextion Purple                                                                                               */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Imsgs_signed_on ( PurpleConnection *gc, gpointer null )
-  {	PurpleAccount *account = purple_connection_get_account(gc);
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE,
-             "%s: Account '%s' connected for protocol id '%s'", __func__,
-              purple_account_get_username(account), purple_account_get_protocol_id(account));
-  }
-/******************************************************************************************************************************/
-/* Imsgs_signed_off: Appelé lorsque nous venons de nous déconnecter                                                           */
-/* Entrée: La connextion Purple                                                                                               */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Imsgs_signed_off ( PurpleConnection *gc, gpointer null )
-  {	PurpleAccount *account = purple_connection_get_account(gc);
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE,
-             "%s: Account '%s' disconnected for protocol id '%s'", __func__,
-              purple_account_get_username(account), purple_account_get_protocol_id(account));
-    Cfg_imsgs.signed_off = TRUE;
-  }
-/******************************************************************************************************************************/
-/* Définition spécifique pour la librairie libpurple                                                                          */
-/******************************************************************************************************************************/
- #define PURPLE_GLIB_READ_COND  (G_IO_IN | G_IO_HUP | G_IO_ERR)
- #define PURPLE_GLIB_WRITE_COND (G_IO_OUT | G_IO_HUP | G_IO_ERR | G_IO_NVAL)
-
- typedef struct _PurpleGLibIOClosure
-  {	PurpleInputFunction function;
-	   guint result;
-	   gpointer data;
-  } PurpleGLibIOClosure;
-
- static void purple_glib_io_destroy(gpointer data)
-  {	g_free(data); }
-
- static gboolean purple_glib_io_invoke(GIOChannel *source, GIOCondition condition, gpointer data)
-  {	PurpleGLibIOClosure *closure = data;
-	   PurpleInputCondition purple_cond = 0;
-
-	   if (condition & PURPLE_GLIB_READ_COND)	 purple_cond |= PURPLE_INPUT_READ;
-	   if (condition & PURPLE_GLIB_WRITE_COND)	purple_cond |= PURPLE_INPUT_WRITE;
-
-	   closure->function(closure->data, g_io_channel_unix_get_fd(source), purple_cond);
-
-   	return TRUE;
-  }
-
- static guint glib_input_add(gint fd, PurpleInputCondition condition, PurpleInputFunction function, gpointer data)
-  { PurpleGLibIOClosure *closure = g_new0(PurpleGLibIOClosure, 1);
-	   GIOChannel *channel;
-	   GIOCondition cond = 0;
-
-	   closure->function = function;
-	   closure->data = data;
-
-	   if (condition & PURPLE_INPUT_READ)  cond |= PURPLE_GLIB_READ_COND;
-	   if (condition & PURPLE_INPUT_WRITE)	cond |= PURPLE_GLIB_WRITE_COND;
-
-   	channel = g_io_channel_unix_new(fd);
-   	closure->result = g_io_add_watch_full(channel, G_PRIORITY_DEFAULT, cond, purple_glib_io_invoke, closure, purple_glib_io_destroy);
-
-   	g_io_channel_unref(channel);
-	   return closure->result;
-  }
-
- static PurpleEventLoopUiOps glib_eventloops =
-  {	g_timeout_add,	g_source_remove,	glib_input_add,	g_source_remove,
-	   NULL,	g_timeout_add_seconds,
-	   /* padding */
-	   NULL,	NULL,	NULL
-  };
-
-
 #endif
+/******************************************************************************************************************************/
+/* Imsgs_set_presence: Défini le statut présenté aux partenaires                                                              */
+/* Entrée : le statut au format chaine de caratères                                                                           */
+/******************************************************************************************************************************/
+  static void Imsgs_set_presence ( const char *status_to_send )
+  { xmpp_stanza_t *pres = xmpp_presence_new(Cfg_imsgs.ctx);
 
+    xmpp_stanza_t *show = xmpp_stanza_new(Cfg_imsgs.ctx);
+    xmpp_stanza_set_name  ( show,"show" ) ;
+    xmpp_stanza_t *show_text = xmpp_stanza_new(Cfg_imsgs.ctx);
+    xmpp_stanza_set_text  ( show_text, "chat" );
+    xmpp_stanza_add_child ( show, show_text ) ;
+    xmpp_stanza_add_child ( pres, show ) ;
 
+    xmpp_stanza_t *status = xmpp_stanza_new(Cfg_imsgs.ctx);
+    xmpp_stanza_set_name  ( status,"status" ) ;
+    xmpp_stanza_t *status_text = xmpp_stanza_new(Cfg_imsgs.ctx);
+    xmpp_stanza_set_text  ( status_text, status_to_send );
+    xmpp_stanza_add_child ( status, status_text ) ;
+    xmpp_stanza_add_child ( pres, status ) ;
 
-#ifdef bouh
+    gchar *buf; size_t buflen;
+    xmpp_stanza_to_text ( pres, &buf, &buflen );
+    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
+    xmpp_free(Cfg_imsgs.ctx, buf);
 
-int message_handler(xmpp_conn_t *const conn,
-                    xmpp_stanza_t *const stanza,
-                    void *const userdata)
-{
-    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
-    xmpp_stanza_t *new_msg, *reply;
-    const char *type;
-    char *intext, *replytext;
-    int quit = 0;
-
-    new_msg = xmpp_stanza_get_child_by_name(stanza, "new_msg");
-    if (new_msg == NULL)
-        return 1;
-    type = xmpp_stanza_get_type(stanza);
-    if (type != NULL && strcmp(type, "error") == 0)
-        return 1;
-
-    intext = xmpp_stanza_get_text(new_msg);
-
-    printf("Incoming message from %s: %s\n", xmpp_stanza_get_from(stanza),
-           intext);
-
-    reply = xmpp_stanza_reply(stanza);
-    if (xmpp_stanza_get_type(reply) == NULL)
-        xmpp_stanza_set_type(reply, "chat");
-
-    if (strcmp(intext, "quit") == 0) {
-        replytext = strdup("bye!");
-        quit = 1;
-    } else {
-        replytext = (char *)malloc(strlen(" to you too!") + strlen(intext) + 1);
-        strcpy(replytext, intext);
-        strcat(replytext, " to you too!");
-    }
-    xmpp_free(ctx, intext);
-    xmpp_message_set_new_msg(reply, replytext);
-
-    xmpp_send(conn, reply);
-    xmpp_stanza_release(reply);
-    free(replytext);
-
-    if (quit)
-        xmpp_disconnect(conn);
-
-    return 1;
-}
-
-stanza = xmpp_stanza_new ( Cfg_imsgs.ctx );
-xmpp_stanza_set_name ( stanza,"message" ) ;
-xmpp_stanza_set_type ( stanza,"normal" ) ;
-xmpp_stanza_set_attribute ( stanza , "to" , jid ) ;
-xmpp_stanza_set_attribute ( stanza , "xmlns" , "jabber:client ");
-
-body = xmpp_stanza_new ( Cfg_imsgs.ctx ) ;
-xmpp_stanza_set_name ( new_msg , "body" ) ;
-text = xmpp_stanza_new ( Cfg_imsgs.ctx ) ;
-xmpp_stanza_set_text ( text , "my message" ) ;
-xmpp_stanza_add_child ( stanza , body ) ;
-xmpp_stanza_add_child ( stanza , text ) ;
-xmpp_send ( conn , stanza ) ;
-xmpp_stanza_release ( stanza )
-#endif
- void Imsgs_connexion_CB ( xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
-                           xmpp_stream_error_t *const stream_error, void *const userdata )
+    xmpp_send(Cfg_imsgs.conn, pres);
+    xmpp_stanza_release(pres);
+  }
+/******************************************************************************************************************************/
+/* Imsgs_get_presence_CB: appellé par libstrophe lors d'un changement de statut d'un partenaire                               */
+/* Entrée : les infos de la librairie                                                                                         */
+/******************************************************************************************************************************/
+ static int Imsgs_get_presence_CB ( xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata )
+  { const char *type, *from;
+    type = xmpp_stanza_get_type ( stanza );
+    from = xmpp_stanza_get_from ( stanza );
+    Imsgs_Sauvegarder_statut_contact ( from, (type ? strcmp(type,"unavailable") : TRUE) );
+    return(1);
+  }
+/******************************************************************************************************************************/
+/* Imsgs_connexion_CB: appellé par libstrophe lors d'un changement de statut de la connexion                                  */
+/* Entrée : les infos de la librairie                                                                                         */
+/******************************************************************************************************************************/
+ static void Imsgs_connexion_CB ( xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
+                                  xmpp_stream_error_t *const stream_error, void *const userdata )
   { if (status == XMPP_CONN_CONNECT)
      {
        Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: Account '%s' connected and %s secure",
                  __func__, Cfg_imsgs.username, (xmpp_conn_is_secured (conn) ? "IS" : "IS NOT") );
-       xmpp_handler_add	( Cfg_imsgs.conn, Imsgs_recevoir_imsg, NULL, "message", NULL, NULL );
+       xmpp_handler_add	( Cfg_imsgs.conn, Imsgs_recevoir_imsg,   NULL, "message",  NULL, NULL );
+       xmpp_handler_add	( Cfg_imsgs.conn, Imsgs_get_presence_CB, NULL, "presence", NULL, NULL );
 
-       xmpp_stanza_t *pres = xmpp_presence_new(Cfg_imsgs.ctx);
-       xmpp_send(conn, pres);
-       xmpp_stanza_release(pres);
+       Imsgs_set_presence( "A votre écoute !" );
 
        xmpp_stanza_t *stanza = xmpp_message_new ( Cfg_imsgs.ctx, "msg type", "lefevre.seb@jabber.fr", "this is id" );
        xmpp_message_set_body ( stanza, "premier message avec libstrophe !");
@@ -568,12 +420,6 @@ reconnect:
     xmpp_conn_set_jid (Cfg_imsgs.conn, Cfg_imsgs.username);
     xmpp_conn_set_pass(Cfg_imsgs.conn, Cfg_imsgs.password);
 
-/*    if (!purple_core_init("Watchdog"))
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR,
-                "%s: LibPurple Init failed. Shutting Down %p", __func__, pthread_self() );
-       goto end;
-     }
-*/
     xmpp_connect_client ( Cfg_imsgs.conn, NULL, 0, Imsgs_connexion_CB, NULL );
 
     while( Cfg_imsgs.lib->Thread_run == TRUE && Cfg_imsgs.signed_off == FALSE)               /* On tourne tant que necessaire */
@@ -588,7 +434,7 @@ reconnect:
           Cfg_imsgs.lib->Thread_reload = FALSE;
         }
 
-/*       if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
+       if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
         { histo = &histo_buf;
           gchar chaine[256];
           if (histo->alive)
@@ -596,9 +442,6 @@ reconnect:
              Imsgs_Envoi_message_to_all_available ( chaine );
            }
         }
-
-       g_main_context_iteration ( g_main_loop_get_context (MainLoop), FALSE );
-*/
      }                                                                                         /* Fin du while partage->arret */
     xmpp_disconnect(Cfg_imsgs.conn);
     xmpp_conn_release(Cfg_imsgs.conn);

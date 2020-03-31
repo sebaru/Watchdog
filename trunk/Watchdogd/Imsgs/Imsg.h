@@ -25,8 +25,8 @@
  * Boston, MA  02110-1301  USA
  */
 
-#ifndef _IMSG_H_
- #define _IMSG_H_
+#ifndef _IMSGS_H_
+ #define _IMSGS_H_
 
  #include <strophe.h>
 
