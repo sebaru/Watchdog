@@ -163,18 +163,11 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
                              (gdouble)trame_motif->motif->position_x,
                              (gdouble)trame_motif->motif->position_y
                            );
-    if (trame_motif->motif->mnemo_id!=0)                      /* Les motifs spéciaux ne tournent pas, et pas de zoom non plus */
-     { cairo_matrix_rotate ( &trame_motif->transform, 0.0 );
-       cairo_matrix_scale  ( &trame_motif->transform, 1.0, 1.0 );
-     }
-    else
-     { cairo_matrix_rotate ( &trame_motif->transform, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
-       cairo_matrix_scale  ( &trame_motif->transform,
-                              (gdouble)trame_motif->motif->largeur/trame_motif->gif_largeur,
-                              (gdouble)trame_motif->motif->hauteur/trame_motif->gif_hauteur
-                           );
-     }
-
+    cairo_matrix_rotate ( &trame_motif->transform, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
+    cairo_matrix_scale  ( &trame_motif->transform,
+                           (gdouble)trame_motif->motif->largeur/trame_motif->gif_largeur,
+                           (gdouble)trame_motif->motif->hauteur/trame_motif->gif_hauteur
+                        );
     goo_canvas_item_set_transform ( trame_motif->item_groupe, &trame_motif->transform );
 
     if (trame_motif->select_hd)
@@ -694,39 +687,6 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- static struct TRAME_ITEM_MOTIF *Trame_ajout_motif_special ( struct TRAME *trame, struct TRAME_ITEM_MOTIF *trame_motif )
-  { gdouble haut = 0.0, larg = 0.0;
-
-    switch (trame_motif->motif->mnemo_type)
-     { case MNEMO_HORLOGE: trame_motif->pixbuf = Charger_svg_pixbuf ( "Horloge", "neutre", 0, 40, 40 );
-                           haut = larg = 40.0;
-                           break;
-     }
-
-    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
-    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe, trame_motif->pixbuf,
-                                                  (-(gdouble)(larg/2)), (-(gdouble)(haut/2)),
-                                                  "scale-to-fit", TRUE, "height", haut, "width", larg,
-                                                  NULL );
-    switch (trame_motif->motif->mnemo_type)
-     { case MNEMO_HORLOGE:
-        {  goo_canvas_text_new ( trame_motif->item_groupe,
-                                 trame_motif->motif->mnemo_acro_syn, 30.0, 0.0, -1, GTK_ANCHOR_WEST,
-                                "font", "courier bold 16", "fill-color", "yellow",
-                                NULL );
-           break;
-        }
-     }
-printf("New motif special : posx=%d posy=%d\n", trame_motif->motif->position_x, trame_motif->motif->position_y );
-    trame_motif->motif->largeur = larg;
-    trame_motif->motif->hauteur = haut;
-    return(trame_motif);
-  }
-/******************************************************************************************************************************/
-/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
-/* Sortie: reussite                                                                                                           */
-/******************************************************************************************************************************/
  struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame, struct CMD_TYPE_MOTIF *motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
 
@@ -738,27 +698,23 @@ printf("New motif special : posx=%d posy=%d\n", trame_motif->motif->position_x, 
     trame_motif->motif = motif;
     trame_motif->type = TYPE_MOTIF;
 
-    if (motif->mnemo_id!=0)                                                               /* Chargement de l'icone id associé */
-     { Trame_ajout_motif_special ( trame, trame_motif ); }
-    else
-     { Charger_pixbuf_id( trame_motif, motif->icone_id );
-       if (!trame_motif->images)                                                               /* En cas de probleme, on sort */
-        { Trame_del_item(trame_motif);
-          g_free(trame_motif);
-          return(NULL);
-        }
-       Trame_peindre_motif( trame_motif, motif->rouge0, motif->vert0, motif->bleu0 );
-
-       trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
-       trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
-                                                  trame_motif->pixbuf,
-                                                  (-(gdouble)(trame_motif->gif_largeur/2)),
-                                                  (-(gdouble)(trame_motif->gif_hauteur/2)),
-                                                  NULL );
-
-       if (!motif->largeur) motif->largeur = trame_motif->gif_largeur;
-       if (!motif->hauteur) motif->hauteur = trame_motif->gif_hauteur;
+    Charger_pixbuf_id( trame_motif, motif->icone_id );
+    if (!trame_motif->images)                                                               /* En cas de probleme, on sort */
+     { Trame_del_item(trame_motif);
+       g_free(trame_motif);
+       return(NULL);
      }
+
+    Trame_peindre_motif( trame_motif, motif->rouge0, motif->vert0, motif->bleu0 );
+    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
+    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
+                                               trame_motif->pixbuf,
+                                               (-(gdouble)(trame_motif->gif_largeur/2)),
+                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
+                                               NULL );
+
+    if (!motif->largeur) motif->largeur = trame_motif->gif_largeur;
+    if (!motif->hauteur) motif->hauteur = trame_motif->gif_hauteur;
 
     if ( flag )
      { GdkPixbuf *pixbuf;

@@ -40,7 +40,6 @@
 
  enum
   { COLONNE_ID,
-    COLONNE_NUM,
     COLONNE_MSG_ID,
     COLONNE_GROUPE_PAGE,
     COLONNE_TYPE,
@@ -88,6 +87,25 @@
     GNOMEUIINFO_ITEM_STOCK ( N_("Go to Syn"), NULL, Menu_go_to_syn, GNOME_STOCK_PIXMAP_SEARCH ),
     GNOMEUIINFO_END
   };
+
+/******************************************************************************************************************************/
+/* Type_vers_string: renvoie le type string associé                                                                           */
+/* Entrée: le type numérique                                                                                                  */
+/* Sortie: la chaine de caractère                                                                                             */
+/******************************************************************************************************************************/
+ gchar *Type_vers_string ( guint32 type )
+  { switch (type)
+     { case MSG_ETAT        : return( _("Info        (I) ") );
+       case MSG_ALERTE      : return( _("Alerte      (AK)") );
+       case MSG_ALARME      : return( _("Alarme      (AL)") );
+       case MSG_DEFAUT      : return( _("Trouble     (T) ") );
+       case MSG_VEILLE      : return( _("Veille      (V) ") );
+       case MSG_ATTENTE     : return( _("Attente     (A) ") );
+       case MSG_DANGER      : return( _("Danger      (DA)") );
+       case MSG_DERANGEMENT : return( _("Derangement (DE)") );
+     }
+    return( _("Unknown") );
+  }
 /**********************************************************************************************************/
 /* Menu_acquitter_histo: Acquittement d'un des messages histo                                             */
 /* Entrée: rien                                                                                           */
@@ -107,7 +125,6 @@
     while ( lignes )
      { gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_ID, &histo.id, -1 );                      /* Recup du id */
-       gtk_tree_model_get( store, &iter, COLONNE_NUM, &histo.msg.num, -1 );               /* Recup du num */
 
        Envoi_serveur( TAG_HISTO, SSTAG_CLIENT_ACK_HISTO, (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
        gtk_tree_selection_unselect_iter( selection, &iter );
@@ -200,7 +217,6 @@
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) );               /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, histo->id,
-                         COLONNE_NUM, histo->msg.num,
                          COLONNE_MSG_ID, histo->msg.id,
                          COLONNE_SYN_ID, histo->msg.syn_id,
                          COLONNE_GROUPE_PAGE, groupe_page,
@@ -269,15 +285,14 @@
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
-    guint num, id;
+    guint id;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_MSG_ID, &id, COLONNE_NUM, &num, -1 );
-       if ( (histo->msg.num != -1 && num == histo->msg.num) ||
-            (histo->msg.num == -1 && id == histo->msg.id) )
+     { gtk_tree_model_get( store, &iter, COLONNE_MSG_ID, &id, -1 );
+       if ( id == histo->msg.id )
         { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
        valide = gtk_tree_model_iter_next( store, &iter );
      }
@@ -321,7 +336,6 @@
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* ID */
-                                              G_TYPE_INT,                                          /* NUM */
                                               G_TYPE_UINT,                                         /* MSG_ID */
                                               G_TYPE_STRING,
                                               G_TYPE_STRING,                               /* Groupe page */
@@ -337,14 +351,6 @@
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
     gtk_container_add( GTK_CONTAINER(scroll), Liste_histo );
-
-    renderer = gtk_cell_renderer_text_new();                                    /* Colonne de l'id du msg */
-    g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Num"), renderer,
-                                                         "text", COLONNE_NUM,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NUM);                    /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page"), renderer,

@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -108,7 +108,7 @@
                                                     Trame_motif_p0 );
        g_object_unref( Trame_motif_p0->pixbuf );
        g_free(Trame_motif_p0);
-     }    
+     }
                                                                                    /* Affichage à l'ecran */
     Trame_motif_p0 = Trame_ajout_motif( TRUE, Trame_preview0, &Motif_preview0 );
     Reduire_en_vignette( &Motif_preview0 );
@@ -172,7 +172,7 @@
     else if (curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response ) != CURLE_OK)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "%s: Wrong Response code for %s", __func__, url );
      }
-    else                                                                 
+    else
      { JsonNode *Response;
        JsonArray *Icones;
        gint cpt;
@@ -197,7 +197,7 @@
                                -1
                              );
         }
-       json_node_unref(Response);      
+       json_node_unref(Response);
        g_free(Package_received_buffer);                                                           /* On libere le tampon reçu */
        Package_received_buffer = NULL;
      }
@@ -240,7 +240,7 @@
        g_object_unref( Trame_motif_p0->pixbuf );
        g_free(Trame_motif_p0);
        Trame_motif_p0 = NULL;
-     }    
+     }
   }
 /**********************************************************************************************************/
 /* Choisir_motif_a_ajouter: Affichage de la fenetre de choix du motif a ajouter                           */
@@ -294,7 +294,6 @@
                                  add_motif.angle = 0.0; /*infos->Adj_angle->value;*/
                                  add_motif.type_dialog = 0;               /* Type de la boite de dialogue */
                                  add_motif.type_gestion = 0;
-                                 add_motif.mnemo_id = 0;
                                  /*add_motif.position_x et posy positionné par le serveur */
                                  add_motif.largeur = Trame_motif_p0->gif_largeur;
                                  add_motif.hauteur = Trame_motif_p0->gif_hauteur;
@@ -348,7 +347,7 @@
     else if (curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response ) != CURLE_OK)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "%s: Wrong Response code for %s", __func__, url );
      }
-    else                                                                 
+    else
      { JsonNode *Response;
        JsonArray *Classes;
        gint cpt;
@@ -373,7 +372,7 @@
                                -1
                              );
         }
-       json_node_unref(Response);      
+       json_node_unref(Response);
        g_free(Package_received_buffer);                                                           /* On libere le tampon reçu */
        Package_received_buffer = NULL;
      }
@@ -404,7 +403,7 @@
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_ajout_motif)->vbox ), hboite, TRUE, TRUE, 0 );
-    
+
 /************************************************ La liste des classes ********************************************************/
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
@@ -436,7 +435,7 @@
 /***************************************** La liste des icones ********************************************/
     vboite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), vboite, TRUE, TRUE, 0 );
-    
+
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(vboite), scroll, TRUE, TRUE, 0 );

@@ -63,14 +63,6 @@
 /* Menu_want_message: l'utilisateur desire editer la base msgs                                            */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- void Menu_want_message ( void )
-  { if (Chercher_page_notebook( TYPE_PAGE_MESSAGE, 0, TRUE )) return;
-    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_WANT_PAGE_MESSAGE, NULL, 0 );
-  }
-/**********************************************************************************************************/
-/* Menu_want_message: l'utilisateur desire editer la base msgs                                            */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
  void Menu_want_camera ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_CAMERA, 0, TRUE )) return;
     Envoi_serveur( TAG_LOWLEVEL, SSTAG_CLIENT_WANT_PAGE_CAMERA, NULL, 0 );

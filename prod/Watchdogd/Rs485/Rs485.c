@@ -494,8 +494,8 @@
      }
 
     switch( trame->fonction )
-     { case RS485_FCT_IDENT: printf("bouh\n");
-	               trame_ident = (struct TRAME_RS485_IDENT *)trame->donnees;
+     { case RS485_FCT_IDENT:
+	                      trame_ident = (struct TRAME_RS485_IDENT *)trame->donnees;
                        Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
                                 "%s: Recu Ident de %d: version %d.%d, nbr ana %d, nbr tor %d (%d choc), sortie %d\n", __func__,
                                 trame->source, trame_ident->version_major, trame_ident->version_minor,

@@ -127,17 +127,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Jouer_wav: Jouer un fichier wav dont le nom est en paramètre                                                               */
-/* Entrée : le nom du fichier wav                                                                                             */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static gboolean Jouer_wav_by_id ( struct CMD_TYPE_MESSAGE *msg )
-  { gchar nom_fichier[80];
-
-    g_snprintf( nom_fichier, sizeof(nom_fichier), "%d", msg->num );
-    return(Jouer_wav_by_file( nom_fichier ) );
-  }
-/******************************************************************************************************************************/
 /* Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                                    */
 /* Entrée : le message à jouer                                                                                                */
 /* Sortie : True si OK, False sinon                                                                                           */
@@ -245,22 +234,21 @@
 
        histo = &histo_buf;
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "%s : Recu message num=%d (histo->msg.audio=%d, alive=%d)", __func__,
-                histo->msg.num, histo->msg.audio, histo->alive );
+                "%s : Recu message '%s:%s' (histo->msg.audio=%d, alive=%d)", __func__,
+                histo->msg.tech_id, histo->msg.acronyme, histo->msg.audio, histo->alive );
 
        if ( Cfg_audio.diffusion_enabled == FALSE &&
             ! (histo->msg.type == MSG_ALERTE || histo->msg.type == MSG_DANGER)
           )                                                                     /* Bit positionné quand arret diffusion audio */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                   "%s : Envoi audio inhibé pour %d:%s (%d)",
-                    __func__, histo->msg.dls_id, histo->msg.acronyme, histo->msg.num );
+                   "%s : Envoi audio inhibé pour '%s:%s'", __func__, histo->msg.tech_id, histo->msg.acronyme );
           continue;
         }
 
        if ( histo->alive == 1 && histo->msg.audio )                                                 /* Si le message apparait */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
-                   "%s : Envoi du message audio %d:%s (%d) (histo->msg.audio=%d)",
-                    __func__, histo->msg.dls_id, histo->msg.acronyme, histo->msg.num, histo->msg.audio);
+                   "%s : Envoi du message audio '%s:%s' (histo->msg.audio=%d)",
+                    __func__, histo->msg.tech_id, histo->msg.acronyme, histo->msg.audio);
 
           if (Config.instance_is_master)
            { Envoyer_commande_dls_data( "AUDIO", histo->msg.profil_audio );  /* Positionnement du profil audio via monostable */
@@ -270,12 +258,10 @@
            { Jouer_wav_by_file("jingle"); }                                                         /* On balance le jingle ! */
           Cfg_audio.last_audio = Partage->top;
 
-          if (Jouer_wav_by_id ( &histo->msg ) == FALSE)                /* Par priorité : wav d'abord, synthèse vocale ensuite */
-           { if (strlen(histo->msg.libelle_audio))          /* Si libelle_audio, le jouer, sinon jouer le libelle tout court) */
-              { Jouer_google_speech( histo->msg.libelle_audio ); }
-             else
-              { Jouer_google_speech( histo->msg.libelle ); }
-           }
+          if (strlen(histo->msg.libelle_audio))             /* Si libelle_audio, le jouer, sinon jouer le libelle tout court) */
+           { Jouer_google_speech( histo->msg.libelle_audio ); }
+          else
+           { Jouer_google_speech( histo->msg.libelle ); }
 
           if (Config.instance_is_master)
            { Envoyer_commande_dls_data( "AUDIO", "P_NONE" );                                 /* Bit de fin d'emission message */
