@@ -720,29 +720,19 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-  `num` int(11) NOT NULL DEFAULT '0',
-  `dls_id` int(11) NOT NULL DEFAULT '1',
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No libelle",
   `libelle_audio` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No audio",
   `libelle_sms` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No sms",
   `type` int(11) NOT NULL DEFAULT '0',
   `audio` tinyint(1) NOT NULL DEFAULT '0',
-  `bit_audio` int(11) NULL DEFAULT '0',
   `enable` tinyint(1) NOT NULL DEFAULT '0',
-  `persist` tinyint(1) NOT NULL DEFAULT '0',
   `sms` int(11) NOT NULL DEFAULT '0',
-  `time_repeat` int(11) NOT NULL DEFAULT '0',
-  `is_mp3` tinyint(1) NOT NULL DEFAULT '0',
   `etat` tinyint(1) NOT NULL DEFAULT '0',
   `profil_audio` VARCHAR(80) NOT NULL DEFAULT 'P_ALL',
   PRIMARY KEY (`id`),
   UNIQUE(`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
-INSERT INTO `msgs` (`id`, `num`, `dls_id`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `enable`, `sms` ) VALUES
-(1, 0, 1, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 1, TRUE, FALSE ),
-(2, 1, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 1, TRUE, FALSE );
 
 -- --------------------------------------------------------
 

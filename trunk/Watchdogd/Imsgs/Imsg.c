@@ -372,15 +372,12 @@ end:
        xmpp_handler_add	( Cfg_imsgs.conn, Imsgs_get_presence_CB, NULL, "presence", NULL, NULL );
 
        Imsgs_set_presence( "A votre écoute !" );
-
-       xmpp_stanza_t *stanza = xmpp_message_new ( Cfg_imsgs.ctx, "msg type", "lefevre.seb@jabber.fr", "this is id" );
-       xmpp_message_set_body ( stanza, "premier message avec libstrophe !");
-       xmpp_send ( conn , stanza ) ;
-       xmpp_stanza_release ( stanza );
+       Imsgs_Envoi_message_to_all_available ( "Instance démarrée. A l'écoute !" );
      }
     else
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: Account '%s' disconnected",
-                  __func__, Cfg_imsgs.username );
+                 __func__, Cfg_imsgs.username );
+       Cfg_imsgs.signed_off = TRUE;
      }
   }
 /******************************************************************************************************************************/

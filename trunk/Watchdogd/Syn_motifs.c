@@ -179,11 +179,6 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(-1);
      }
-    if (motif->mnemo_id>0)
-     { gchar chaine[32];
-       g_snprintf( chaine, sizeof(chaine), ",mnemo_id='%d'", motif->mnemo_id );
-       g_strlcat ( requete, chaine, sizeof(requete) );
-     }
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
@@ -212,7 +207,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,rafraich,layer,mnemo_id,m.libelle,m.type,m.acro_syn,"
+                "dialog,gestion,rouge,vert,bleu,rafraich,layer,"
                 "sm.clic_tech_id, sm.clic_acronyme"
                 " FROM syns_motifs AS sm LEFT JOIN mnemos AS m ON sm.mnemo_id = m.id"
                 " WHERE syn_id='%d' ORDER BY layer", id_syn );
@@ -261,14 +256,8 @@
        motif->bleu0        = atoi(db->row[16]);
        motif->rafraich     = atoi(db->row[17]);
        motif->layer        = atoi(db->row[18]);
-       if (db->row[19])
-        { motif->mnemo_id = atoi(db->row[19]);
-          g_snprintf ( motif->mnemo_libelle, sizeof(motif->mnemo_libelle), "%s", db->row[20] );  /* Recopie dans la structure */
-          g_snprintf ( motif->mnemo_acro_syn, sizeof(motif->mnemo_acro_syn), "%s", db->row[22] );/* Recopie dans la structure */
-          motif->mnemo_type = atoi(db->row[21]);
-        } else motif->mnemo_id = 0;
-       g_snprintf ( motif->clic_tech_id, sizeof(motif->clic_tech_id), "%s", db->row[23] );       /* Recopie dans la structure */
-       g_snprintf ( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", db->row[24] );     /* Recopie dans la structure */
+       g_snprintf ( motif->clic_tech_id, sizeof(motif->clic_tech_id), "%s", db->row[19] );       /* Recopie dans la structure */
+       g_snprintf ( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", db->row[20] );     /* Recopie dans la structure */
      }
     return(motif);
   }
@@ -290,7 +279,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,rafraich,layer,mnemo_id,m.libelle,m.type,"
+                "dialog,gestion,rouge,vert,bleu,rafraich,layer,"
                 "sm.clic_tech_id, sm.clic_acronyme"
                 " FROM syns_motifs AS sm LEFT JOIN mnemos AS m ON sm.mnemo_id = m.id"
                 " WHERE sm.id=%d", id );

@@ -465,31 +465,6 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_action_msg: Prepare une struct action avec une commande MSG                                                            */
-/* Entrées: numero du message                                                                                                 */
-/* Sortie: la structure action                                                                                                */
-/******************************************************************************************************************************/
- static struct ACTION *New_action_msg_old( int num )
-  { struct ACTION *action;
-    GSList *liste;
-    int taille;
-
-    taille = 15;
-    liste = Liste_Actions_msg;
-    while (liste)
-     { if (GPOINTER_TO_INT(liste->data) == num) break;
-       liste=liste->next;
-     }
-    if(!liste)
-     { Liste_Actions_msg = g_slist_prepend ( Liste_Actions_msg, GINT_TO_POINTER(num) ); }
-    action = New_action();
-    action->alors = New_chaine( taille );
-    g_snprintf( action->alors, taille, "MSG(%d,1);", num );
-    action->sinon = New_chaine( taille );
-    g_snprintf( action->sinon, taille, "MSG(%d,0);", num );
-    return(action);
-  }
-/******************************************************************************************************************************/
 /* New_action_msg_by_alias: Prepare une struct action avec une commande de type MSG                                           */
 /* Entrées: L'alias decouvert                                                                                                 */
 /* Sortie: la structure action                                                                                                */
@@ -497,9 +472,6 @@
  struct ACTION *New_action_msg( struct ALIAS *alias )
   { struct ACTION *action;
     int taille;
-
-    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
-     { return(New_action_msg_old ( alias->num )); }
 
     taille = 256;
     action = New_action();
@@ -976,7 +948,6 @@
   { g_slist_foreach( Alias, (GFunc) Liberer_alias, NULL );
     g_slist_free( Alias );
     Alias = NULL;
-    g_slist_free(Liste_Actions_msg);    Liste_Actions_msg    = NULL;
     g_slist_free(Liste_Actions_bit);    Liste_Actions_bit    = NULL;
     g_slist_free(Liste_Actions_num);    Liste_Actions_num    = NULL;
     g_slist_free(Liste_edge_up_bi);     Liste_edge_up_bi     = NULL;
@@ -1030,7 +1001,6 @@
     Alias = NULL;                                                                                  /* Par défaut, pas d'alias */
     Liste_Actions_bit = NULL;                                                                    /* Par défaut, pas d'actions */
     Liste_Actions_num = NULL;                                                                    /* Par défaut, pas d'actions */
-    Liste_Actions_msg = NULL;                                                                    /* Par défaut, pas d'actions */
     Liste_edge_up_bi  = NULL;                                               /* Liste des bits B utilisé avec l'option EDGE UP */
     DlsScanner_set_lineno(1);                                                                     /* Reset du numéro de ligne */
     nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
@@ -1063,11 +1033,9 @@
         { gchar *include = " #include <Module_dls.h>\n";
           gchar *Chaine_bit= " static gint Tableau_bit[]= { ";
           gchar *Chaine_num= " static gint Tableau_num[]= { ";
-          gchar *Chaine_msg= " static gint Tableau_msg[]= { ";
           gchar *Tableau_end=" -1 };\n";
           gchar *Fonction= " gint Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
-                           " gint Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
-                           " gint Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
+                           " gint Get_Tableau_num(int n) { return(Tableau_num[n]); }\n";
           gchar *Start_Go = " void Go ( struct DLS_TO_PLUGIN *vars )\n"
                             "  {\n"
                             "    Update_edge_up_value();\n"
@@ -1111,16 +1079,6 @@
 
           write(fd, Chaine_num, strlen(Chaine_num) );                                                 /* Ecriture du prologue */
           liste = Liste_Actions_num;                                       /* Initialise les tableaux des actions rencontrées */
-          while(liste)
-           { gchar chaine[12];
-             g_snprintf(chaine, sizeof(chaine), "%d, ", GPOINTER_TO_INT(liste->data) );
-             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
-             liste = liste->next;
-           }
-          write(fd, Tableau_end, strlen(Tableau_end) );                                               /* Ecriture du prologue */
-
-          write(fd, Chaine_msg, strlen(Chaine_msg) );                                                 /* Ecriture du prologue */
-          liste = Liste_Actions_msg;                                       /* Initialise les tableaux des actions rencontrées */
           while(liste)
            { gchar chaine[12];
              g_snprintf(chaine, sizeof(chaine), "%d, ", GPOINTER_TO_INT(liste->data) );

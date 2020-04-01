@@ -45,7 +45,6 @@
  #include "Camera_DB.h"
  #include "Dls.h"
  #include "Histo_DB.h"
- #include "Scenario_DB.h"
  #include "Synoptiques_DB.h"
  #include "Mnemonique_DB.h"
  #include "Proto_traductionDLS.h"

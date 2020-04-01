@@ -1620,6 +1620,21 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4511)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` DROP `dls_id`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` DROP `mnemo_id`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` DROP `num`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` DROP `bit_audio`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` DROP `time_repeat`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` DROP `persist`");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 fin:
     database_version=4511;
