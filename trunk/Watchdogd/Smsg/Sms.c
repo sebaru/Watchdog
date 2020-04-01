@@ -449,7 +449,6 @@
     memset ( &msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );
     g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
     g_snprintf(msg.dls_shortname, sizeof(msg.dls_shortname), "%s", Cfg_smsg.tech_id );
-    msg.num    = 0;
     msg.enable = TRUE;
     msg.sms    = MSG_SMS_SMSBOX_ONLY;
 
@@ -466,7 +465,6 @@
     memset ( &msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );
     g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
     g_snprintf(msg.dls_shortname, sizeof(msg.dls_shortname), "%s", Cfg_smsg.tech_id );
-    msg.num    = 0;
     msg.enable = TRUE;
     msg.sms    = MSG_SMS_GSM_ONLY;
 
@@ -725,7 +723,7 @@
 
           if ( histo && histo->alive == TRUE && histo->msg.sms != MSG_SMS_NONE)             /* On n'envoie que si MSGnum == 1 */
            { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
-                      "%s : Sending msg %d (%s)", __func__, histo->msg.num, histo->msg.libelle_sms );
+                      "%s : Sending msg '%s:%s' (%s)", __func__, histo->msg.tech_id, histo->msg.acronyme, histo->msg.libelle_sms );
 
 /*************************************************** Envoi en mode GSM ********************************************************/
              if (Partage->top < TOP_MIN_ENVOI_SMS)
@@ -738,8 +736,8 @@
            }
           else
            { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG,
-                       "%s : msg %d not sent (alive=%d, msg.sms = %d) (%s)", __func__,
-                       histo->msg.num, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
+                       "%s : msg '%s:'%s' not sent (alive=%d, msg.sms = %d) (%s)", __func__,
+                       histo->msg.tech_id, histo->msg.acronyme, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
            }
         }
      }

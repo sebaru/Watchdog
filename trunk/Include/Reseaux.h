@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -82,7 +82,6 @@
     TAG_DLS,                                                                        /* Gestion des plugins et des sources DLS */
     TAG_SYNOPTIQUE,                                                                                /* Gestion des synoptiques */
     TAG_MNEMONIQUE,                                                                                /* Gestion des mnemoniques */
-    TAG_MESSAGE,                                                                                      /* Gestion des messages */
     TAG_SUPERVISION,                                                                     /* Gestions de la partie supervision */
     TAG_HISTO,                                                                                          /* Gestions des histo */
     TAG_ATELIER,                                                                                     /* Gestions de l'atelier */

@@ -51,7 +51,6 @@
  enum
   { TYPE_PAGE_PLUGIN_DLS,                                                                         /* Listes des plugins D.L.S */
     TYPE_PAGE_HISTO,                                                               /* Page de garde: messages au fil de l'eau */
-    TYPE_PAGE_MESSAGE,                                                                       /* Edition des messages Watchdog */
     TYPE_PAGE_SYNOPTIQUE,                                                     /* Edition des noms/mnémoniques des synoptiques */
     TYPE_PAGE_ALL_MNEMONIQUE,                                                /* Page de visualisation de tous les mnemoniques */
     TYPE_PAGE_MNEMONIQUE,                                                            /* Page de visualisation des mnemoniques */
@@ -61,13 +60,6 @@
     TYPE_PAGE_ATELIER,                                                                   /* Il s'agit d'un atelier synoptique */
     TYPE_PAGE_SUPERVISION,                                                                /* Supervision graphique synoptique */
     TYPE_PAGE_CAMERA,                                                                                   /* Gestion des camera */
-#ifdef bouh
-    TYPE_PAGE_ENTREEANA,                                                                 /* Il s'agit d'un atelier synoptique */
-    TYPE_PAGE_ONDULEUR,                                                            /* Page affichant la liste des onduleurs ! */
-    TYPE_PAGE_RS485,                                                                      /* Page affichant les modules RS485 */
-    TYPE_PAGE_MODBUS,                                                                    /* Page affichant les modules MODBUS */
-    TYPE_PAGE_RFXCOM,                                                                    /* Page affichant les modules RFXCOM */
-#endif
     TYPE_PAGE_ADMIN,                                               /* Page de gestion des commandes/requests d'administration */
     TYPE_PAGE_HORLOGE
   };
@@ -196,7 +188,6 @@
  extern void Gerer_protocole_gtk_message ( struct CONNEXION *connexion );
  extern void Gerer_protocole_icone ( struct CONNEXION *connexion );
  extern void Gerer_protocole_dls ( struct CONNEXION *connexion );
- extern void Gerer_protocole_message ( struct CONNEXION *connexion );
  extern void Gerer_protocole_synoptique ( struct CONNEXION *connexion );
  extern void Gerer_protocole_mnemonique ( struct CONNEXION *connexion );
  extern void Gerer_protocole_supervision ( struct CONNEXION *connexion );
@@ -230,17 +221,8 @@
  extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
  extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
  extern void Creer_page_histo( void );
-
- extern void Proto_afficher_un_message( struct CMD_TYPE_MESSAGE *message );                           /* Dans liste_message.c */
- extern void Proto_cacher_un_message( struct CMD_TYPE_MESSAGE *message );
- extern void Proto_rafraichir_un_message( struct CMD_TYPE_MESSAGE *message );
- extern void Creer_page_message( void );
  extern gchar *Type_vers_string ( guint type );
  extern gchar *Type_sms_vers_string ( guint type );
-
- extern void Menu_ajouter_editer_message ( struct CMD_TYPE_MESSAGE *edit_msg );                       /* Dans ajout_message.c */
- extern void Proto_afficher_mnemo_voc_message ( struct CMD_TYPE_MNEMO_BASE *mnemo );
- extern void Proto_afficher_un_dls_for_message ( struct CMD_TYPE_PLUGIN_DLS *dls );
 
  extern void Proto_cacher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );                  /* Dans liste_synoptique.c*/
  extern void Proto_afficher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );
@@ -265,7 +247,6 @@
 
  extern void Menu_want_plugin_dls ( void );                                                                    /* Dans menu.c */
  extern void Menu_want_client_leger ( void );
- extern void Menu_want_message ( void );
  extern void Menu_want_synoptique ( void );
  extern void Menu_want_camera ( void );
  extern void Menu_want_histo_msgs ( void );

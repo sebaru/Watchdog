@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -51,22 +51,22 @@
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
  static void Gerer_protocole ( struct CONNEXION *connexion )
-  { 
+  {
     switch ( Reseau_tag(connexion) )
      { case TAG_GTK_MESSAGE : Gerer_protocole_gtk_message ( connexion ); return;
-       case TAG_INTERNAL    : if ( Reseau_ss_tag(connexion) == SSTAG_INTERNAL_SSLNEEDED ) 
+       case TAG_INTERNAL    : if ( Reseau_ss_tag(connexion) == SSTAG_INTERNAL_SSLNEEDED )
                                { Client.ssl_needed = TRUE;
-                                 Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
+                                 Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                                          _("Gerer_protocole: SSL Needed received") );
                                }
-                              else if ( Reseau_ss_tag(connexion) == SSTAG_INTERNAL_SSLNEEDED_WITH_CERT ) 
+                              else if ( Reseau_ss_tag(connexion) == SSTAG_INTERNAL_SSLNEEDED_WITH_CERT )
                                { Client.ssl_needed_with_cert = TRUE;
-                                 Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
+                                 Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                                          _("Gerer_protocole: SSL Needed_with_cert received") );
                                }
                               else if (Reseau_ss_tag(connexion) == SSTAG_INTERNAL_END)/* Fin echange interne ? */
                                { if (Client.ssl_needed)
-                                  { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
+                                  { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                                            _("Gerer_protocole: Start SSL connexion") );
                                     if ( ! Connecter_ssl() )                   /* Gere les parametres SSL */
                                      { Deconnecter();
@@ -77,7 +77,6 @@
                                }
                               return;
       case TAG_DLS         : Gerer_protocole_dls          ( connexion ); break;
-      case TAG_MESSAGE     : Gerer_protocole_message      ( connexion ); break;
       case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( connexion ); break;
       case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( connexion ); break;
       case TAG_SUPERVISION : Gerer_protocole_supervision  ( connexion ); break;

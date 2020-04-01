@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl define([gittag], esyscmd([sh -c "git describe --always  | tr -d '\n'"]))
 define([SVNVERSION], esyscmd([sh -c "svnversion -n | sed s/M//g"]))
-AC_INIT([Watchdog], [3.1.SVNVERSION], [sebastien.lefevre@abls-habitat.fr], [Watchdog], [https://wiki.abls-habitat.fr] )
+AC_INIT([Watchdog], [3.2.SVNVERSION], [sebastien.lefevre@abls-habitat.fr], [Watchdog], [https://wiki.abls-habitat.fr] )
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
 AM_INIT_AUTOMAKE
@@ -64,7 +64,7 @@ AC_SUBST(LEXLIB)
 dnl parametres par defaut
 CFLAGS="-Wall -Wno-unused-result -Wno-comment -Wno-pointer-sign -Wno-discarded-qualifiers -pipe -g -ggdb -D_GNU_SOURCE"
 
-LIBW_MAJOR_VERSION=5
+LIBW_MAJOR_VERSION=6
 LIBW_MINOR_VERSION=0
 LIBW_MICRO_VERSION=0
 
@@ -72,7 +72,7 @@ AC_SUBST(LIBW_MAJOR_VERSION)
 AC_SUBST(LIBW_MINOR_VERSION)
 AC_SUBST(LIBW_MICRO_VERSION)
 
-LIBDLS_MAJOR_VERSION=5
+LIBDLS_MAJOR_VERSION=6
 LIBDLS_MINOR_VERSION=0
 LIBDLS_MICRO_VERSION=0
 

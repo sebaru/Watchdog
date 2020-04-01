@@ -191,7 +191,6 @@
     Json_add_bool ( builder, "alive", histo->alive );
     Json_add_string ( builder, "date_create",   histo->date_create );
     Json_add_string ( builder, "nom_ack",       histo->nom_ack );
-    Json_add_int    ( builder, "num",           histo->msg.num );
     Json_add_string ( builder, "libelle",       histo->msg.libelle );
     Json_add_string ( builder, "syn_groupe",    histo->msg.syn_parent_page );
     Json_add_string ( builder, "syn_page",      histo->msg.syn_page );

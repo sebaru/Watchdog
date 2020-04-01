@@ -103,7 +103,6 @@
  extern void Client_mode ( struct CLIENT *client, gint mode );                                              /* Dans Serveur.c */
 
  extern void *Envoyer_plugins_dls_thread ( struct CLIENT *client );                                       /* Dans envoi_dls.c */
- extern void *Envoyer_plugins_dls_pour_message_thread ( struct CLIENT *client );
  extern void Proto_effacer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
  extern void Proto_ajouter_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
  extern void Proto_editer_source_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
@@ -114,15 +113,6 @@
  extern void Proto_effacer_source_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls );
  extern void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
  extern void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
-
- extern void *Envoyer_messages_thread ( struct CLIENT *client );                                      /* Dans envoi_message.c */
- extern void Proto_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
- extern void Proto_valider_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
- extern void Proto_effacer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
- extern void Proto_ajouter_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
- extern void Proto_effacer_message_mp3 ( struct CLIENT *client, struct CMD_TYPE_MESSAGE_MP3 *msg_mp3 );
- extern void Proto_valider_message_mp3( struct CLIENT *client, struct CMD_TYPE_MESSAGE_MP3 *msg_mp3,
-                                        gchar *buffer );
 
                                                                                                    /* Dans envoi_synoptique.c */
  extern void *Envoyer_synoptiques_thread ( struct CLIENT *client );

@@ -293,12 +293,12 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "
-                "num=%d,libelle='%s',type=%d,audio=%d,bit_audio=%d,enable=%d,sms=%d,"
-                "libelle_audio='%s',libelle_sms='%s',time_repeat=%d,dls_id=%d,persist=%d "
+                "libelle='%s',type=%d,audio=%d,enable=%d,sms=%d,"
+                "libelle_audio='%s',libelle_sms='%s' "
                 "WHERE id=%d",
-                NOM_TABLE_MSG, msg->num, libelle, msg->type, (msg->audio ? 1 : 0), msg->bit_audio,
+                NOM_TABLE_MSG, libelle, msg->type, (msg->audio ? 1 : 0),
                                (msg->enable ? 1 : 0), msg->sms,
-                               libelle_audio, libelle_sms, msg->time_repeat, msg->dls_id, (msg->persist ? 1 : 0),
+                               libelle_audio, libelle_sms,
                 msg->id );
     g_free(libelle);
     g_free(libelle_audio);
@@ -312,9 +312,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
-#ifdef bouh
-    Updater_msg_run ( msg );
-#endif
+
     return(retour);
   }
 /******************************************************************************************************************************/

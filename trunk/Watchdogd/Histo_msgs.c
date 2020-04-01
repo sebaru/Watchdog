@@ -205,7 +205,6 @@
        g_snprintf( histo_msgs->msg.dls_shortname,   sizeof(histo_msgs->msg.dls_shortname),   "%s", db->row[12] );
        histo_msgs->id               = atoi(db->row[0]);
        histo_msgs->alive            = atoi(db->row[1]);
-       histo_msgs->msg.num          = atoi(db->row[2]);
        histo_msgs->msg.type         = atoi(db->row[4]);
        histo_msgs->msg.syn_id       = atoi(db->row[5]);
        g_snprintf ( histo_msgs->date_create, sizeof(histo_msgs->date_create), "%s", db->row[9] );
