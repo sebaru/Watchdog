@@ -103,6 +103,7 @@
        Json_add_double ( builder, "valeur_max",   ai->max );
        Json_add_double ( builder, "valeur",       ai->val_ech );
        Json_add_int    ( builder, "type",         ai->type );
+       Json_add_int    ( builder, "in_range",     ai->inrange );
      }
 /*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
     else if (!strcasecmp(type,"AO"))
