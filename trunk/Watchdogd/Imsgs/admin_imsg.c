@@ -34,7 +34,7 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_list ( JsonBuilder *builder )
-  { struct IMSGSDB *imsgp;
+  { struct IMSGSDB *imsgs;
     struct DB *db;
 
     db = Init_DB_SQL();
@@ -43,23 +43,23 @@
        return;
      }
 
-    if ( ! Recuperer_imsgpDB( db ) )
+    if ( ! Recuperer_imsgsDB( db ) )
      { Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_imsgp Failed", __func__ );
+       Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_imsgs Failed", __func__ );
        return;
      }
 
-    while ( (imsgp = Recuperer_imsgpDB_suite( db )) != NULL)
+    while ( (imsgs = Recuperer_imsgsDB_suite( db )) != NULL)
      { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
 
-       Json_add_int    ( builder, "user_id", imsgp->user_id );
-       Json_add_string ( builder, "user_name", imsgp->user_name );
-       Json_add_bool   ( builder, "user_enable", imsgp->user_enable );
-       Json_add_bool   ( builder, "user_imsg_enable", imsgp->user_imsg_enable );
-       Json_add_string ( builder, "user_jabber_id", imsgp->user_jabberid );
-       Json_add_bool   ( builder, "user_allow_command", imsgp->user_allow_cde );
-       Json_add_bool   ( builder, "user_available", imsgp->user_available );
-       Json_add_string ( builder, "user_comment", imsgp->user_comment );
+       Json_add_int    ( builder, "user_id", imsgs->user_id );
+       Json_add_string ( builder, "user_name", imsgs->user_name );
+       Json_add_bool   ( builder, "user_enable", imsgs->user_enable );
+       Json_add_bool   ( builder, "user_imsg_enable", imsgs->user_imsg_enable );
+       Json_add_string ( builder, "user_jabber_id", imsgs->user_jabberid );
+       Json_add_bool   ( builder, "user_allow_command", imsgs->user_allow_cde );
+       Json_add_bool   ( builder, "user_available", imsgs->user_available );
+       Json_add_string ( builder, "user_comment", imsgs->user_comment );
 
        json_builder_end_object (builder);                                                                     /* End Document */
      }

@@ -59,7 +59,7 @@
 /*********************************************** Déclarations des prototypes **************************************************/
  extern gboolean Imsgs_Lire_config ( void );
  void Imsgs_Envoi_message_to_all_available ( gchar *message );
- extern gboolean Recuperer_imsgpDB ( struct DB *db );
- extern struct IMSGSDB *Recuperer_imsgpDB_suite( struct DB *db );
+ extern gboolean Recuperer_imsgsDB ( struct DB *db );
+ extern struct IMSGSDB *Recuperer_imsgsDB_suite( struct DB *db );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
