@@ -174,12 +174,6 @@
     gboolean persist;
   };
 
- struct MESSAGES_EVENT
-  { gint num;
-    gchar etat;
-    struct DLS_MESSAGES *msg;
-  };
-
  struct DLS_REGISTRE
   { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
