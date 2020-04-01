@@ -383,13 +383,11 @@ end:
                   __func__, Cfg_imsgs.username );
      }
   }
-
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread Imsg                                                                                   */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct ZMQUEUE *zmq_msg;
-    int handle;
 
     prctl(PR_SET_NAME, "W-IMSGS", 0, 0, 0 );
     memset( &Cfg_imsgs, 0, sizeof(Cfg_imsgs) );                                     /* Mise a zero de la structure de travail */

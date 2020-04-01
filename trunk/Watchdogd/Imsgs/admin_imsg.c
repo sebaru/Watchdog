@@ -27,11 +27,11 @@
 
  #include "watchdogd.h"
  #include "Imsg.h"
- extern struct IMSGS_CONFIG Cfg_imsgp;
+ extern struct IMSGS_CONFIG Cfg_imsgs;
 /******************************************************************************************************************************/
-/* Admin_json_list : fonction appelée pour vérifier la liste des destinataires                                                */
-/* Entrée : un JSon Builder                                                                                                   */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_json_list : fonction appelÃ©e pour vÃ©rifier la liste des destinataires                                                */
+/* EntrÃ©e : un JSon Builder                                                                                                   */
+/* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_list ( JsonBuilder *builder )
   { struct IMSGSDB *imsgp;
@@ -39,18 +39,18 @@
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return;
      }
 
     if ( ! Recuperer_imsgpDB( db ) )
      { Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_imsgp Failed", __func__ );
+       Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_imsgp Failed", __func__ );
        return;
      }
 
     while ( (imsgp = Recuperer_imsgpDB_suite( db )) != NULL)
-     { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+     { json_builder_begin_object (builder);                                                       /* CrÃ©ation du noeud principal */
 
        Json_add_int    ( builder, "user_id", imsgp->user_id );
        Json_add_string ( builder, "user_name", imsgp->user_name );
@@ -67,9 +67,9 @@
     Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_json : fonction appelÃ© par le thread http lors d'une requete /run/                                                   */
+/* EntrÃ©e : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                           */
 /******************************************************************************************************************************/
  void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
   { JsonBuilder *builder;
@@ -80,28 +80,26 @@
 
     builder = Json_create ();
     if (builder == NULL)
-     { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
      }
-/************************************************ Préparation du buffer JSON **************************************************/
+/************************************************ PrÃ©paration du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/list")) { Admin_json_list ( builder ); }
     else if ( ! strcmp ( commande, "/add_buddy/" ) )
-				 { json_builder_begin_object (builder);                                                    /* Création du noeud principal */
+				 { json_builder_begin_object (builder);                                                    /* CrÃ©ation du noeud principal */
        Json_add_string ( builder, "buddy_name", commande+11 );
        json_builder_end_object (builder);                                                                     /* End Document */
-       /*purple_account_add_buddy( Cfg_imsgp.account, purple_buddy_new	( Cfg_imsgp.account, commande + 11, commande + 11 ) );*/
+       /*purple_account_add_buddy( Cfg_imsgs.account, purple_buddy_new	( Cfg_imsgs.account, commande + 11, commande + 11 ) );*/
      }
     else if ( ! strcmp ( commande, "/send/" ) )
-				 { json_builder_begin_object (builder);                                                    /* Création du noeud principal */
+				 { json_builder_begin_object (builder);                                                    /* CrÃ©ation du noeud principal */
        Json_add_string ( builder, "message_sent", commande+6 );
        json_builder_end_object (builder);                                                                     /* End Document */
-#ifdef bouh
        Imsgs_Envoi_message_to_all_available ( commande+6 );
-#endif
      }
 
-/************************************************ Génération du JSON **********************************************************/
+/************************************************ GÃ©nÃ©ration du JSON **********************************************************/
     *buffer_p = Json_get_buf ( builder, &taille_buf );
     *taille_p = taille_buf;
     return;
