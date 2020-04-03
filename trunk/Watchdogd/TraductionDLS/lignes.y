@@ -301,24 +301,24 @@ calcul_expr3:   VALF
                 }}
                 | T_POUV calcul_expr T_PFERM
                 {{ $$=$2; }}
-                | ID
-                {{ struct ALIAS *alias;
+                | ID suffixe
+                {{ char *tech_id, *acro;
+                   struct ALIAS *alias;
                    int taille;
-                   alias = Get_alias_par_acronyme(NULL,$1);                                  /* On recupere l'alias */
+                   if ($2) { tech_id = $1; acro = $2; }
+                      else { tech_id = NULL; acro = $1; }
+                   alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
+                   if (!alias)
+                    { if ($2) { alias = Set_new_external_alias(tech_id,acro); }      /* Si dependance externe, on va chercher */
+                         else { alias = Set_new_external_alias("THIS",acro); }/* Si dependance pseudo-externe, on va chercher */
+                    }
                    if (alias)
                     { switch(alias->type_bit)               /* On traite que ce qui peut passer en "condition" */
                        { case MNEMO_REGISTRE:
-                          { if (alias->type==ALIAS_TYPE_STATIC)
-                             { taille = 15;
-                               $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
-                               g_snprintf( $$, taille, "R(%d)", alias->num );
-                             }
-                            else if(alias->type==ALIAS_TYPE_DYNAMIC)
-                             { taille = 256;
-                               $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
-                               g_snprintf( $$, taille, "Dls_data_get_R(\"%s\",\"%s\",&_%s_%s)",
-                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-                             }
+                          { taille = 256;
+                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
+                            g_snprintf( $$, taille, "Dls_data_get_R(\"%s\",\"%s\",&_%s_%s)",
+                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                             break;
                           }
                          case MNEMO_SORTIE_ANA:
@@ -340,7 +340,8 @@ calcul_expr3:   VALF
                       $$=New_chaine(2);
                       g_snprintf( $$, 2, "0" );
                     }
-                   g_free($1);                                     /* On n'a plus besoin de l'identifiant */
+                   if ($2) g_free($2);                                                   /* Libération du prefixe s'il existe */
+                   g_free($1);                                                         /* On n'a plus besoin de l'identifiant */
                 }}
                 ;
 
@@ -348,7 +349,7 @@ calcul_ea_result: ID
                 {{ struct ALIAS *alias;
                    alias = Get_alias_par_acronyme(NULL,$1);                                            /* On recupere l'alias */
                    if (alias)
-                    { switch(alias->type_bit)               /* On traite que ce qui peut passer en "condition" */
+                    { switch(alias->type_bit)                              /* On traite que ce qui peut passer en "condition" */
                        { case MNEMO_REGISTRE:
                          case MNEMO_SORTIE_ANA:
                           { $$ = alias;
