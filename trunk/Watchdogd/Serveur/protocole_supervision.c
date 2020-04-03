@@ -172,8 +172,6 @@
                 { switch( bit->type )
                    { case MNEMO_MONOSTABLE: Envoyer_commande_dls( bit->num );
                                             break;
-                     case MNEMO_REGISTRE:   SR( bit->num, bit->valeur );
-                                            break;
                    }
                 }
                else

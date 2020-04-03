@@ -1596,11 +1596,15 @@
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
                     "%s : adding DLS_REGISTRE '%s:%s'", __func__, tech_id, acronyme );
         }
-       if (r_p) *r_p = (gpointer)reg;                                           /* Sauvegarde pour acceleration si besoin */
+       if (r_p) *r_p = (gpointer)reg;                                               /* Sauvegarde pour acceleration si besoin */
       }
     else reg = (struct DLS_REGISTRE *)*r_p;
 
-    reg->valeur = valeur;
+    if (valeur != reg->valeur || reg->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top)
+     { reg->valeur = valeur;
+       Ajouter_arch_by_nom( reg->acronyme, reg->tech_id, reg->valeur );                                /* Archivage si besoin */
+       reg->last_arch = Partage->top;
+     }
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_reg: Remonte l'etat d'un registre                                                                             */

@@ -316,7 +316,7 @@ calcul_expr3:   VALF
                     { switch(alias->type_bit)               /* On traite que ce qui peut passer en "condition" */
                        { case MNEMO_REGISTRE:
                           { taille = 256;
-                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
+                            $$ = New_chaine( taille ); /* 10 caractères max */
                             g_snprintf( $$, taille, "Dls_data_get_R(\"%s\",\"%s\",&_%s_%s)",
                                         alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                             break;

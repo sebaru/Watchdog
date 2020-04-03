@@ -149,8 +149,8 @@
   { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     guint valeur;
-    guint last_arch;                                 /* Date de dernier enregistrement en base de données */
-    guint old_top;                                                     /* Date de debut du comptage du CH */
+    guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
+    guint old_top;                                                                         /* Date de debut du comptage du CH */
     gboolean etat;
   };
 
@@ -178,6 +178,7 @@
   { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gfloat   valeur;
+    guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
   };
 
  struct I_MOTIF
