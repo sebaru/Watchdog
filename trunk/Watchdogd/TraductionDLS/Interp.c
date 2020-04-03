@@ -999,20 +999,13 @@
         }
        else
         { gchar *include = " #include <Module_dls.h>\n";
-          gchar *Chaine_bit= " static gint Tableau_bit[]= { ";
-          gchar *Chaine_num= " static gint Tableau_num[]= { ";
-          gchar *Tableau_end=" -1 };\n";
-          gchar *Fonction= " gint Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
-                           " gint Get_Tableau_num(int n) { return(Tableau_num[n]); }\n";
           gchar *Start_Go = " void Go ( struct DLS_TO_PLUGIN *vars )\n"
                             "  {\n"
-                            "    Update_edge_up_value();\n"
-                            "    if (vars->debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";
+                            "    Update_edge_up_value();\n";
           gchar *End_Go =   "  }\n";
           gchar chaine[4096], date[64];
           struct tm *temps;
           time_t ltime;
-          gint cpt=0;                                                                                   /* Compteur d'actions */
 
           write(fd, include, strlen(include));
 
@@ -1026,36 +1019,8 @@
              liste = liste->next;
            }
 
-
-          cpt = g_slist_length(Liste_Actions_bit);
-          if (cpt==0) cpt=1;
-          g_snprintf( chaine, sizeof(chaine), " static gfloat Tableau_val[%d];\n", cpt );
-          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
-
           g_snprintf( chaine, sizeof(chaine), " static gint Dls_id = %d;\n", id );
           write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
-
-          write(fd, Chaine_bit, strlen(Chaine_bit) );                                                 /* Ecriture du prologue */
-          liste = Liste_Actions_bit;                                       /* Initialise les tableaux des actions rencontrées */
-          while(liste)
-           { gchar chaine[12];
-             g_snprintf(chaine, sizeof(chaine), "%d, ", GPOINTER_TO_INT(liste->data) );
-             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
-             liste = liste->next;
-           }
-          write(fd, Tableau_end, strlen(Tableau_end) );                                               /* Ecriture du prologue */
-
-          write(fd, Chaine_num, strlen(Chaine_num) );                                                 /* Ecriture du prologue */
-          liste = Liste_Actions_num;                                       /* Initialise les tableaux des actions rencontrées */
-          while(liste)
-           { gchar chaine[12];
-             g_snprintf(chaine, sizeof(chaine), "%d, ", GPOINTER_TO_INT(liste->data) );
-             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
-             liste = liste->next;
-           }
-          write(fd, Tableau_end, strlen(Tableau_end) );                                               /* Ecriture du prologue */
-
-          write(fd, Fonction, strlen(Fonction) );                                                     /* Ecriture du prologue */
 
           liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
@@ -1088,7 +1053,7 @@
           g_snprintf(chaine, sizeof(chaine),
                     "/*******************************************************/\n"
                     " gchar *version (void)\n"
-                    "  { return(\"V%s - %s\"); \n  }\n", VERSION, date );
+                    "  { return(\"V%s - %s - ID%d\"); \n  }\n", VERSION, date, id );
           write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
 
           g_snprintf(chaine, sizeof(chaine),

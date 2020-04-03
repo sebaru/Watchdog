@@ -42,9 +42,6 @@
     void *handle;                                                                              /* Handle du fichier librairie */
     void (*go)(struct DLS_TO_PLUGIN *);                                                   /* Fonction de traitement du module */
     float conso;                                                                         /* Consommation temporelle du plugin */
-    gint (*Get_Tableau_bit)(gint);                                             /* Fonction d'identification des bits utilisés */
-    gint (*Get_Tableau_num)(gint);                                             /* Fonction d'identification des bits utilisés */
-    gint (*Get_Tableau_msg)(gint);                                             /* Fonction d'identification des bits utilisés */
     gchar *(*version)(void);                                                       /* Retourne le numéro de version du plugin */
     struct DLS_TO_PLUGIN vars;
   };

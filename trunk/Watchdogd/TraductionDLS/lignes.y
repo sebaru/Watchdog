@@ -100,7 +100,7 @@ listeAlias:     un_alias listeAlias
 
 un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                 {{ if ( New_alias(ALIAS_TYPE_DYNAMIC, NULL, $2, $4, -1, 0, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
                 }}
                 | T_STATIC ID EQUIV barre alias_bit ENTIER PVIRGULE
@@ -187,17 +187,19 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                    if ($8)
                     { taille = strlen($5)+strlen($2)+strlen($8->tech_id)+strlen($8->acronyme)+100;
                       $$ = New_chaine( taille );
-                      if ($8->type==MNEMO_SORTIE_ANA)
+                      if ($8->type_bit==MNEMO_SORTIE_ANA)
                        { g_snprintf( $$, taille,
                                      "if(%s) { Dls_data_set_AO ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
                                      $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
                        }
-                      else if ($8->type==MNEMO_REGISTRE)
+                      else if ($8->type_bit==MNEMO_REGISTRE)
                        { g_snprintf( $$, taille,
                                      "if(%s) { Dls_data_set_R ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
                                      $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
                        }
-                    } else $$=NULL;
+                      else
+                       { Emettre_erreur_new( "'%s:%s' is unknown", $8->tech_id, $8->acronyme ); }
+                    } else $$=g_strdup("/* test ! */");
                    g_free($2);
                    g_free($5);
                 }}
@@ -343,7 +345,7 @@ calcul_expr3:   VALF
                        }
                     }
                    else
-                    { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $1 );
+                    { Emettre_erreur_new( "'%s' is not defined", $1 );
                       $$=New_chaine(2);
                       g_snprintf( $$, 2, "0" );
                     }

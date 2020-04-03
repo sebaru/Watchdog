@@ -67,28 +67,7 @@
           dls->handle = NULL;
         }
        if (dls->handle)
-        { dls->Get_Tableau_bit = dlsym( dls->handle, "Get_Tableau_bit" );                         /* Recherche de la fonction */
-          if (!dls->Get_Tableau_bit)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                      "%s: Candidat %06d does not provide Get_Tableau_bit function", __func__, dls->plugindb.id );
-             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
-           }
-
-          dls->Get_Tableau_num = dlsym( dls->handle, "Get_Tableau_num" );                         /* Recherche de la fonction */
-          if (!dls->Get_Tableau_num)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                      "%s: Candidat %06d does not provide Get_Tableau_num function", __func__, dls->plugindb.id );
-             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
-           }
-
-          dls->Get_Tableau_msg = dlsym( dls->handle, "Get_Tableau_msg" );                         /* Recherche de la fonction */
-          if (!dls->Get_Tableau_msg)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                      "%s: Candidat %06d does not provide Get_Tableau_msg function", __func__, dls->plugindb.id );
-             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
-           }
-
-          dls->version = dlsym( dls->handle, "version" );                                     /* Recherche de la fonction */
+        { dls->version = dlsym( dls->handle, "version" );                                     /* Recherche de la fonction */
           if (!dls->version)
            { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                       "%s: Candidat %06d does not provide version function", __func__, dls->plugindb.id );
