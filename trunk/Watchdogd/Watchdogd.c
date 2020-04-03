@@ -162,7 +162,7 @@
  void Charger_config_bit_interne( void )
   { if (Config.instance_is_master)
      { Charger_analogInput();
-       Charger_registre();
+       Charger_confDB_Registre();
        Charger_confDB_MSG();
        Charger_confDB_BOOL();
      }

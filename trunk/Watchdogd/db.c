@@ -1635,9 +1635,30 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4531)
+     { g_snprintf( requete, sizeof(requete), "update mnemos_DI set src_thread='imsgs' where src_thread='imsgp'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "DROP TABLE `mnemos_CptImp`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "DROP TABLE `mnemos_CptHoraire`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "DROP TABLE `mnemos_Registre`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `mnemos_R` ("
+                                             "`id` int(11) NOT NULL,"
+                                             "`tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,"
+                                             "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                                             "`valeur` float NOT NULL DEFAULT '0',"
+                                             "`unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
+                                             "UNIQUE (`tech_id`,`acronyme`),"
+                                             "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                                             ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 fin:
-    database_version=4511;
+    database_version=4531;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

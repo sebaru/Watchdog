@@ -177,12 +177,7 @@
  struct DLS_REGISTRE
   { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gfloat val;
-  };
-
- struct REGISTRE
-  { struct CMD_TYPE_MNEMO_REGISTRE confDB;
-    gfloat val;
+    gfloat   valeur;
   };
 
  struct I_MOTIF
@@ -248,6 +243,7 @@
  extern int EA_inrange( int num );
  extern void SB_SYS( int num, int etat );
  extern void SE( int num, int etat );
+ extern void Dls_data_set_R  ( gchar *tech_id, gchar *acronyme, gpointer *r_p, float val );
  extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech, gboolean in_range );
  extern void Dls_data_set_DI ( gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur );
  extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p );

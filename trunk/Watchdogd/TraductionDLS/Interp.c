@@ -602,27 +602,15 @@
     int taille, reset;
 
     reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
-    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
-     { /*taille = 15;
-       Add_bit_to_list(MNEMO_CPTH, alias->num);
-       action = New_action();
-       action->alors = New_chaine( taille );
-       action->sinon = New_chaine( taille );
+    taille = 256;
+    action = New_action();
+    action->alors = New_chaine( taille );
+    action->sinon = New_chaine( taille );
 
-       g_snprintf( action->alors, taille, "SCH(%d,1,%d);", alias->num, reset );
-       g_snprintf( action->sinon, taille, "SCH(%d,0,%d);", alias->num, reset );*/
-     }
-    else /* Alias par nom */
-     { taille = 256;
-       action = New_action();
-       action->alors = New_chaine( taille );
-       action->sinon = New_chaine( taille );
-
-       g_snprintf( action->alors, taille, "   Dls_data_set_CH ( \"%s\", \"%s\", &_%s_%s, TRUE, %d );\n",
-                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset );
-       g_snprintf( action->sinon, taille, "   Dls_data_set_CH ( \"%s\", \"%s\", &_%s_%s, FALSE, %d );\n",
-                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset );
-     }
+    g_snprintf( action->alors, taille, "   Dls_data_set_CH ( \"%s\", \"%s\", &_%s_%s, TRUE, %d );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset );
+    g_snprintf( action->sinon, taille, "   Dls_data_set_CH ( \"%s\", \"%s\", &_%s_%s, FALSE, %d );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset );
     return(action);
   }
 /******************************************************************************************************************************/
@@ -637,26 +625,15 @@
     reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
     ratio = Get_option_entier ( options, RATIO ); if (ratio == -1) ratio = 1;
 
-    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
-     { /*taille = 20;
-       action = New_action();
-       action->alors = New_chaine( taille );
-       action->sinon = New_chaine( taille );
+    taille = 256;
+    action = New_action();
+    action->alors = New_chaine( taille );
+    action->sinon = New_chaine( taille );
 
-       g_snprintf( action->alors, taille, "SCI(%d,1,%d,%d);", alias->num, reset, ratio );
-       g_snprintf( action->sinon, taille, "SCI(%d,0,%d,%d);", alias->num, reset, ratio );*/
-     }
-    else /* Alias par nom */
-     { taille = 256;
-       action = New_action();
-       action->alors = New_chaine( taille );
-       action->sinon = New_chaine( taille );
-
-       g_snprintf( action->alors, taille, "   Dls_data_set_CI ( \"%s\", \"%s\", &_%s_%s, TRUE, %d, %d );\n",
-                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset, ratio );
-       g_snprintf( action->sinon, taille, "   Dls_data_set_CI ( \"%s\", \"%s\", &_%s_%s, FALSE, %d, %d );\n",
-                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset, ratio );
-     }
+    g_snprintf( action->alors, taille, "   Dls_data_set_CI ( \"%s\", \"%s\", &_%s_%s, TRUE, %d, %d );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset, ratio );
+    g_snprintf( action->sinon, taille, "   Dls_data_set_CI ( \"%s\", \"%s\", &_%s_%s, FALSE, %d, %d );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset, ratio );
     return(action);
   }
 /******************************************************************************************************************************/
@@ -748,25 +725,16 @@
 
     action = New_action();
     taille = 256;
-    if (alias->type == ALIAS_TYPE_DYNAMIC)
-     { action->alors = New_chaine( taille );
-       g_snprintf( action->alors, taille,
-                   "   Dls_data_set_tempo ( \"%s\", \"%s\", &_%s_%s, 1, %d, %d, %d, %d, %d );\n",
-                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
-                   daa, dma, dMa, dad, random );
-       action->sinon = New_chaine( taille );
-       g_snprintf( action->sinon, taille,
-                   "   Dls_data_set_tempo ( \"%s\", \"%s\", &_%s_%s, 0, %d, %d, %d, %d, %d );\n",
-                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
-                   daa, dma, dMa, dad, random );
-     }
-    else
-     { taille = 40;
-       action->alors = New_chaine( taille );
-       g_snprintf( action->alors, taille, "ST(%d,1);", alias->num );
-       action->sinon = New_chaine( taille );
-       g_snprintf( action->sinon, taille, "ST(%d,0);", alias->num );
-    }
+    action->alors = New_chaine( taille );
+    g_snprintf( action->alors, taille,
+                "   Dls_data_set_tempo ( \"%s\", \"%s\", &_%s_%s, 1, %d, %d, %d, %d, %d );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
+                daa, dma, dMa, dad, random );
+    action->sinon = New_chaine( taille );
+    g_snprintf( action->sinon, taille,
+                "   Dls_data_set_tempo ( \"%s\", \"%s\", &_%s_%s, 0, %d, %d, %d, %d, %d );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
+                daa, dma, dMa, dad, random );
     return(action);
   }
 /******************************************************************************************************************************/

@@ -151,11 +151,11 @@ alias_bit:        T_BI        {{ $$=MNEMO_BISTABLE;   }}
                 ;
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
-                {{ int taille = strlen($1)+strlen($2)+1;
+                {{ int taille = ($1 ? strlen($1) : 0) + ($2 ? strlen($2) : 0) + 1;
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "%s%s", $1, $2 );
-                   g_free($1);
-                   g_free($2);
+                   if ($1) g_free($1);
+                   if ($2) g_free($2);
                 }}
                 | une_instr
                 {{ $$=$1; }}
@@ -187,9 +187,16 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                    if ($8)
                     { taille = strlen($5)+strlen($2)+strlen($8->tech_id)+strlen($8->acronyme)+100;
                       $$ = New_chaine( taille );
-                      g_snprintf( $$, taille,
-                                  "if(%s) { Dls_data_set_AO ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
-                                  $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
+                      if ($8->type==MNEMO_SORTIE_ANA)
+                       { g_snprintf( $$, taille,
+                                     "if(%s) { Dls_data_set_AO ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
+                                     $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
+                       }
+                      else if ($8->type==MNEMO_REGISTRE)
+                       { g_snprintf( $$, taille,
+                                     "if(%s) { Dls_data_set_R ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
+                                     $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
+                       }
                     } else $$=NULL;
                    g_free($2);
                    g_free($5);
@@ -342,18 +349,19 @@ calcul_ea_result: ID
                    alias = Get_alias_par_acronyme(NULL,$1);                                            /* On recupere l'alias */
                    if (alias)
                     { switch(alias->type_bit)               /* On traite que ce qui peut passer en "condition" */
-                       { case MNEMO_SORTIE_ANA:
+                       { case MNEMO_REGISTRE:
+                         case MNEMO_SORTIE_ANA:
                           { $$ = alias;
                             break;
                           }
                          default:
-                          { Emettre_erreur_new( "Ligne %d :'%s' ne peut s'utiliser dans un résultat de calcul", DlsScanner_get_lineno(), $1 );
+                          { Emettre_erreur_new( "'%s' ne peut s'utiliser dans un résultat de calcul", $1 );
                             $$=NULL;
                           }
                        }
                     }
                    else
-                    { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $1 );
+                    { Emettre_erreur_new( "'%s' is not defined", $1 );
                       $$=NULL;
                     }
                    g_free($1);                                     /* On n'a plus besoin de l'identifiant */

@@ -202,7 +202,7 @@
           Json_add_bool   ( builder, "cligno", visu->cligno );
         }
      }
-/*------------------------------------------------ Compteur horaire ----------------------------------------------------------*/
+/*---------------------------------------------------- Messages --------------------------------------------------------------*/
     else if (!strcasecmp(type,"MSG"))
      { struct DLS_MESSAGES *msg=NULL;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
@@ -214,6 +214,19 @@
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
        Json_add_bool ( builder, "etat",   msg->etat );
+     }
+/*--------------------------------------------------- Registres --------------------------------------------------------------*/
+    else if (!strcasecmp(type,"R"))
+     { struct DLS_REGISTRE *r=NULL;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                 "%s: HTTP/ request for GET R %s:%s", __func__, tech_id, acronyme );
+       Dls_data_get_R ( tech_id, acronyme, (gpointer *)&r );
+       if (!r)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: r '%s:%s' non trouvée", __func__, tech_id, acronyme );
+          g_object_unref(builder);
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
+        }
+       Json_add_double ( builder, "valeur_brute", r->valeur );
      }
 /*------------------------------------------------------- sinon --------------------------------------------------------------*/
     else { Json_add_bool ( builder, "found", FALSE ); }
@@ -296,6 +309,21 @@
        Dls_data_get_AO ( tech_id, acronyme, (gpointer *)&ao );
        if (ao)
         { ao->val_avant_ech = atof(valeur); }
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    else if (!strcasecmp(type,"R"))
+     { struct DLS_REGISTRE *r=NULL;
+       gchar *valeur = json_object_get_string_member ( object, "valeur" );
+       if (!valeur)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: valeur non trouvée", __func__ );
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+        }
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                 "%s: HTTP/ request for SET R '%s:%s' = %s", __func__, tech_id, acronyme, valeur );
+       Dls_data_get_R ( tech_id, acronyme, (gpointer *)&r );
+       if (r)
+        { r->valeur = atof(valeur); }
        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }
 /*************************************************** Envoi au client **********************************************************/

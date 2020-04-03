@@ -182,26 +182,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* R : Renvoie la valeur du registre dont le numéro est en parametre                                                          */
-/******************************************************************************************************************************/
- float R( int num )
-  { if (num>=0 && num<NBR_REGISTRE)
-     { return ( Partage->registre[ num ].val );
-     }
-    if (!(Partage->top % 600))
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : num %d out of range", __func__, num ); }
-    return(0.0);
-  }
-/******************************************************************************************************************************/
-/* SR : Positionne la valeur du registre dont le numéro est en parametre                                                      */
-/******************************************************************************************************************************/
- void SR( int num, float val )
-  { if (num>=0 && num<NBR_REGISTRE)
-     { Partage->registre[ num ].val = val; }
-    else if (!(Partage->top % 600))
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : num %d out of range", __func__, num ); }
-  }
-/******************************************************************************************************************************/
 /* EA_inrange : Renvoie 1 si l'EA en paramètre est dans le range de mesure                                                    */
 /******************************************************************************************************************************/
  int EA_inrange( int num )
@@ -1588,10 +1568,10 @@
 /* Dls_data_set_R: Positionne un registre                                                                                     */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_R ( gchar *tech_id, gchar *acronyme, gpointer *reg_p, gfloat valeur )
+ void Dls_data_set_R ( gchar *tech_id, gchar *acronyme, gpointer *r_p, gfloat valeur )
   { struct DLS_REGISTRE *reg;
 
-    if (!reg_p || !*reg_p)
+    if (!r_p || !*r_p)
      { GSList *liste;
        if ( !(acronyme && tech_id) ) return;
        liste = Partage->Dls_data_REGISTRE;
@@ -1616,22 +1596,22 @@
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
                     "%s : adding DLS_REGISTRE '%s:%s'", __func__, tech_id, acronyme );
         }
-       if (reg_p) *reg_p = (gpointer)reg;                                           /* Sauvegarde pour acceleration si besoin */
+       if (r_p) *r_p = (gpointer)reg;                                           /* Sauvegarde pour acceleration si besoin */
       }
-    else reg = (struct DLS_REGISTRE *)*reg_p;
+    else reg = (struct DLS_REGISTRE *)*r_p;
 
-    reg->val = valeur;
+    reg->valeur = valeur;
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_reg: Remonte l'etat d'un registre                                                                             */
 /* Sortie : TRUE sur le regean est UP                                                                                         */
 /******************************************************************************************************************************/
- gfloat Dls_data_get_R ( gchar *tech_id, gchar *acronyme, gpointer *reg_p )
+ gfloat Dls_data_get_R ( gchar *tech_id, gchar *acronyme, gpointer *r_p )
   { struct DLS_REGISTRE *reg;
     GSList *liste;
-    if (reg_p && *reg_p)                                                             /* Si pointeur d'acceleration disponible */
-     { reg = (struct DLS_REGISTRE *)*reg_p;
-       return( reg->val );
+    if (r_p && *r_p)                                                             /* Si pointeur d'acceleration disponible */
+     { reg = (struct DLS_REGISTRE *)*r_p;
+       return( reg->valeur );
      }
     if (!tech_id || !acronyme) return(FALSE);
 
@@ -1643,8 +1623,8 @@
      }
 
     if (!liste) return(FALSE);
-    if (reg_p) *reg_p = (gpointer)reg;                                              /* Sauvegarde pour acceleration si besoin */
-    return( reg->val );
+    if (r_p) *r_p = (gpointer)reg;                                              /* Sauvegarde pour acceleration si besoin */
+    return( reg->valeur );
   }
 /******************************************************************************************************************************/
 /* Dls_dyn_string: Formate la chaine en parametre avec le bit également en parametre                                          */

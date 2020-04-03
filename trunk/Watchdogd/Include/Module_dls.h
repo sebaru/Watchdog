@@ -76,8 +76,8 @@
  extern gint Dls_data_get_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p );
  extern void Dls_data_set_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p, gboolean etat, gint reset );
  extern gint Dls_data_get_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p );
- extern void Dls_data_set_R ( gchar *tech_id, gchar *acronyme, gpointer *reg_p, gfloat valeur );
- extern gfloat Dls_data_get_R ( gchar *tech_id, gchar *acronyme, gpointer *reg_p );
+ extern void Dls_data_set_R ( gchar *tech_id, gchar *acronyme, gpointer *r_p, gfloat valeur );
+ extern gfloat Dls_data_get_R ( gchar *tech_id, gchar *acronyme, gpointer *r_p );
  extern gchar *Dls_dyn_string ( gchar *format, gint type_bit, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p );
  extern void Dls_data_set_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visuel_p, gint mode,
                                    gchar *color, gboolean cligno );
@@ -90,9 +90,7 @@
  extern int EA_ech_sup_egal( float val, int num );
  extern int EA_inrange( int num );
  extern void SEA( int num, float val_avant_ech );
- extern void SR( int num, float val );
  extern float EA_ech( int num );
- extern float R( int num );
  extern void SI( int num, int etat, int rouge, int vert, int bleu, int cligno );
  extern void SB( int num, int etat );
  extern void SM( int num, int etat );

@@ -130,7 +130,6 @@
     struct SORTIE_TOR a [ NBR_SORTIE_TOR ];
     guchar b [ (NBR_BIT_BISTABLE>>3) + 1 ];                                                                      /* Bistables */
     struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                                               /* DLS=rw, Sserveur=r */
-    struct REGISTRE registre[NBR_REGISTRE];
     GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */
     GSList *Dls_data_BOOL;                                                              /* Liste des bistables et monostables */
     GSList *Dls_data_DI;                                                                   /* Liste des entrees dynamique TOR */
