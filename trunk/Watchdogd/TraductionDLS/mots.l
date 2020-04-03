@@ -65,7 +65,7 @@ newline       [\n\r]+
 "_M"                       { DlsScanner_lval.val = T_MONO;      return T_MONO;      }
 "_T"                       { DlsScanner_lval.val = T_TEMPO;     return T_TEMPO;     }
 "_R"                       { DlsScanner_lval.val = T_REGISTRE;  return T_REGISTRE;  }
-"_CH"                      { DlsScanner_lval.val = CPT_H;       return CPT_H;       }
+"_CH"                      { DlsScanner_lval.val = T_CPT_H;     return T_CPT_H;     }
 "_CI"                      { DlsScanner_lval.val = T_CPT_IMP;   return T_CPT_IMP;   }
 "_HORLOGE"                 { DlsScanner_lval.val = T_HORLOGE;   return T_HORLOGE;   }
 "_MSG"                     { DlsScanner_lval.val = T_MSG;       return T_MSG;       }

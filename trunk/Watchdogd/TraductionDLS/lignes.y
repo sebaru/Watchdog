@@ -65,7 +65,7 @@
 %type  <val>    modulateur jour_semaine
 
 %token <val>    T_BI T_MONO ENTREE SORTIE T_SORTIEANA T_TEMPO T_HORLOGE T_DYN_STRING
-%token <val>    T_MSG T_ICONE CPT_H T_CPT_IMP EANA T_START T_REGISTRE
+%token <val>    T_MSG T_ICONE T_CPT_H T_CPT_IMP EANA T_START T_REGISTRE
 %type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_IN_RANGE
@@ -141,7 +141,7 @@ alias_bit:        T_BI        {{ $$=MNEMO_BISTABLE;   }}
                 | T_MSG       {{ $$=MNEMO_MSG;        }}
                 | T_TEMPO     {{ $$=MNEMO_TEMPO;      }}
                 | T_ICONE     {{ $$=MNEMO_MOTIF;      }}
-                | CPT_H       {{ $$=MNEMO_CPTH;       }}
+                | T_CPT_H     {{ $$=MNEMO_CPTH;       }}
                 | T_CPT_IMP   {{ $$=MNEMO_CPT_IMP;    }}
                 | EANA        {{ $$=MNEMO_ENTREE_ANA; }}
                 | T_SORTIEANA {{ $$=MNEMO_SORTIE_ANA; }}
@@ -321,6 +321,13 @@ calcul_expr3:   VALF
                                         alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                             break;
                           }
+                         case MNEMO_ENTREE_ANA:
+                          { taille = 256;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
+                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+                            break;
+                          }
                          case MNEMO_SORTIE_ANA:
                           { taille = 256;
                             $$ = New_chaine( taille ); /* 10 caractères max */
@@ -329,7 +336,7 @@ calcul_expr3:   VALF
                             break;
                           }
                          default:
-                          { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser dans un calcul", DlsScanner_get_lineno(), $1 );
+                          { Emettre_erreur_new( "'%s:%s' ne peut s'utiliser dans un calcul", alias->tech_id, alias->acronyme );
                             $$=New_chaine(2);
                             g_snprintf( $$, 2, "0" );
                           }
