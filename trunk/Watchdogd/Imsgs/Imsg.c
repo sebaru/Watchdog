@@ -409,7 +409,7 @@ end:
 
 reconnect:
     xmpp_initialize();
-    Cfg_imsgs.ctx  = xmpp_ctx_new(NULL, xmpp_get_default_logger(XMPP_LEVEL_DEBUG));
+    Cfg_imsgs.ctx  = xmpp_ctx_new(NULL, xmpp_get_default_logger(XMPP_LEVEL_INFO));
     Cfg_imsgs.conn = xmpp_conn_new(Cfg_imsgs.ctx);
     xmpp_conn_set_keepalive(Cfg_imsgs.conn, 60, 1);
     xmpp_conn_set_jid (Cfg_imsgs.conn, Cfg_imsgs.username);

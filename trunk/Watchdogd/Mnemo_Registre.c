@@ -138,7 +138,7 @@
 
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
      { Dls_data_set_R ( db->row[0], db->row[1], NULL, atof(db->row[2]) );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: REGISTRE '%s:%s'=%f loaded", __func__,
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: REGISTRE '%s:%s'=%f loaded", __func__,
                  db->row[0], db->row[1], atof(db->row[2]) );
      }
     Libere_DB_SQL( &db );
