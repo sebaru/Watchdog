@@ -80,9 +80,8 @@
  extern gboolean Mnemo_auto_create_TEMPO ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );       /* Dans Mnemo_tempo.c */
  extern struct DB *Rechercher_Tempo ( gchar *tech_id, gchar *acronyme );
 
- extern void Charger_registre ( void );                                                              /* Dans Mnemo_registre.c */
- extern struct CMD_TYPE_MNEMO_REGISTRE *Rechercher_mnemo_registreDB ( guint id );
- extern gboolean Modifier_mnemo_registreDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
+ extern void Charger_confDB_Registre ( void );                                                       /* Dans Mnemo_registre.c */
+ extern void Updater_confDB_Registre ( void );
  extern gboolean Mnemo_auto_create_REGISTRE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );
 
  extern gboolean Mnemo_auto_create_DI ( gchar *tech_id, gchar *acronyme, gchar *libelle );                /* Dans mnemos_DI.c */

@@ -42,9 +42,6 @@
     void *handle;                                                                              /* Handle du fichier librairie */
     void (*go)(struct DLS_TO_PLUGIN *);                                                   /* Fonction de traitement du module */
     float conso;                                                                         /* Consommation temporelle du plugin */
-    gint (*Get_Tableau_bit)(gint);                                             /* Fonction d'identification des bits utilisés */
-    gint (*Get_Tableau_num)(gint);                                             /* Fonction d'identification des bits utilisés */
-    gint (*Get_Tableau_msg)(gint);                                             /* Fonction d'identification des bits utilisés */
     gchar *(*version)(void);                                                       /* Retourne le numéro de version du plugin */
     struct DLS_TO_PLUGIN vars;
   };
@@ -149,8 +146,8 @@
   { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     guint valeur;
-    guint last_arch;                                 /* Date de dernier enregistrement en base de données */
-    guint old_top;                                                     /* Date de debut du comptage du CH */
+    guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
+    guint old_top;                                                                         /* Date de debut du comptage du CH */
     gboolean etat;
   };
 
@@ -177,12 +174,8 @@
  struct DLS_REGISTRE
   { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gfloat val;
-  };
-
- struct REGISTRE
-  { struct CMD_TYPE_MNEMO_REGISTRE confDB;
-    gfloat val;
+    gfloat   valeur;
+    guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
   };
 
  struct I_MOTIF
@@ -248,6 +241,7 @@
  extern int EA_inrange( int num );
  extern void SB_SYS( int num, int etat );
  extern void SE( int num, int etat );
+ extern void Dls_data_set_R  ( gchar *tech_id, gchar *acronyme, gpointer *r_p, float val );
  extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech, gboolean in_range );
  extern void Dls_data_set_DI ( gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur );
  extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p );

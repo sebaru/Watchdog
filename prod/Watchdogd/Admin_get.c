@@ -55,7 +55,6 @@
        response = Admin_write ( response, " | - b $num                    - Get B[$num]" );
        response = Admin_write ( response, " | - a $num                    - Get A[$num]" );
        response = Admin_write ( response, " | - i $num                    - Get I[$num]" );
-       response = Admin_write ( response, " | - r $num                    - Get Registre $num _R[$num]" );
        response = Admin_write ( response, " | - help                      - This help" );
      } else
     if ( ! strcmp ( commande, "t" ) )
@@ -184,17 +183,6 @@
         { g_snprintf( chaine, sizeof(chaine), " | - Usage: get list $tech_id" );
           response = Admin_write ( response, chaine );
 	       }
-     } else
-    if ( ! strcmp ( commande, "r" ) )
-     { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
-       if (num<NBR_REGISTRE)
-        { g_snprintf( chaine, sizeof(chaine),
-                      " | - R%03d = %8.2f", num, R(num)
-                    );
-        } else
-        { g_snprintf( chaine, sizeof(chaine), " | - R -> num '%d' out of range (max=%d)", num, NBR_REGISTRE ); }
-       response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "b" ) )
      { int num;

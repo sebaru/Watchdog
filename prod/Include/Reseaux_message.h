@@ -70,16 +70,6 @@
     gchar  profil_audio[81];
   };
 
- struct CMD_TYPE_MESSAGES
-  { guint nbr_messages;                                                     /* Nombre de structure CMD_TYPE_MESSAGE suivantes */
-    struct CMD_TYPE_MESSAGE msg[];
-  };
-
- struct CMD_TYPE_MESSAGE_MP3                                                       /* Structure pour l'échange du fichier mp3 */
-  { guint num;
-    guint taille;                                                     /* Taille des données qui suivent dans le paquet reseau */
-  };
-
  enum
   { SSTAG_CLIENT_WANT_PAGE_MESSAGE,
     SSTAG_SERVEUR_CREATE_PAGE_MESSAGE_OK,                                                    /* Affichage de la page onduleur */

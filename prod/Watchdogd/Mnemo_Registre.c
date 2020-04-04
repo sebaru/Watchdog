@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -32,6 +32,7 @@
  #include <unistd.h>
  #include <fcntl.h>
  #include <string.h>
+ #include <locale.h>
 
  #include "watchdogd.h"
 
@@ -79,122 +80,101 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Rechercher_registreDB: Recupération du registre dont l'id est en parametre                                                 */
-/* Entrée: l'id a récupérer                                                                                                   */
-/* Sortie: une structure hébergeant le registre                                                                               */
+/* Rechercher_R: Recupération des champs de base de données pour le R tech_id:acro en parametre                             */
+/* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
+/* Sortie: la struct DB                                                                                                       */
 /******************************************************************************************************************************/
- struct CMD_TYPE_MNEMO_REGISTRE *Rechercher_mnemo_registreDB ( guint id )
-  { struct CMD_TYPE_MNEMO_REGISTRE *registre;
-    gchar requete[512];
+ struct DB *Rechercher_R ( gchar *tech_id, gchar *acronyme )
+  { gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT r.unite FROM %s as r INNER JOIN %s as m ON r.id_mnemo = m.id"
-                " WHERE r.id_mnemo=%d",
-                NOM_TABLE_MNEMO_REGISTRE,
-                NOM_TABLE_MNEMO,
-                id                                                                                                   /* WHERE */
+                "SELECT r.valeur, r.unite"
+                " FROM mnemos_R as r"
+                " WHERE r.tech_id='%s' AND r.acronyme='%s' LIMIT 1",
+                tech_id, acronyme
               );
 
-   if (Lancer_requete_SQL ( db, requete ) == FALSE)                                            /* Execution de la requete SQL */
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);
        return(NULL);
      }
-
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Libere_DB_SQL( &db );
        return(NULL);
      }
-
-    registre = (struct CMD_TYPE_MNEMO_REGISTRE *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_REGISTRE) );
-    if (!registre) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
-    else
-     { g_snprintf( registre->unite, sizeof(registre->unite), "%s", db->row[0] );
-     }
-    Libere_DB_SQL( &db );
-    return(registre);
+    return(db);
   }
 /******************************************************************************************************************************/
-/* Modifier_registreDB: Modification d'une registre Watchdog                                                                  */
-/* Entrées: une structure hébergeant la registrerisation a modifier                                                           */
-/* Sortie: FALSE si probleme                                                                                                  */
+/* Charger_conf_R: Recupération de la conf de l'entrée analogique en parametre                                               */
+/* Entrée: l'id a récupérer                                                                                                   */
+/* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
- gboolean Modifier_mnemo_registreDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
-  { gchar requete[1024];
-    gboolean retour;
-    struct DB *db;
-    gchar *unite;
-
-    unite = Normaliser_chaine ( mnemo_full->mnemo_r.unite );                                 /* Formatage correct des chaines */
-    if (!unite)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation unite impossible", __func__ );
-       return(FALSE);
-     }
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s (id_mnemo,unite) VALUES "
-                "('%d','%s') "
-                "ON DUPLICATE KEY UPDATE "
-                "unite=VALUES(unite) ",
-                NOM_TABLE_MNEMO_REGISTRE, mnemo_full->mnemo_base.id, unite
-              );
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-    return(retour);
-  }
-/******************************************************************************************************************************/
-/* Charger_registre: Chargement des infos sur les Registres                                                                   */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- void Charger_registre ( void )
+ void Charger_confDB_Registre ( void )
   { gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return;
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT m.tech_id, m.acronyme, m.valeur FROM mnemos_R as m"
+              );
+
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+     { Libere_DB_SQL (&db);
+       return;
+     }
+
+    while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
+     { Dls_data_set_R ( db->row[0], db->row[1], NULL, atof(db->row[2]) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: REGISTRE '%s:%s'=%f loaded", __func__,
+                 db->row[0], db->row[1], atof(db->row[2]) );
+     }
+    Libere_DB_SQL( &db );
+  }
+/******************************************************************************************************************************/
+/* Updater_confDB_R: Mise a jour des valeurs de R en base                                                                   */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Updater_confDB_Registre( void )
+  { gchar requete[200];
+    GSList *liste;
+    struct DB *db;
+    gint cpt;
+
+    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
        return;
      }
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT m.num, r.unite FROM %s as r"
-                " INNER JOIN %s as m ON r.id_mnemo = m.id ORDER BY num",
-                NOM_TABLE_MNEMO_REGISTRE,
-                NOM_TABLE_MNEMO                                                                                 /* INNER JOIN */
-              );
-
-   if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
-     { Libere_DB_SQL (&db);
-       return;
+    cpt = 0;
+    liste = Partage->Dls_data_REGISTRE;
+    while ( liste )
+     { struct DLS_REGISTRE *r = (struct DLS_REGISTRE *)liste->data;
+       g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                   "UPDATE mnemos_R as m SET valeur='%f' "
+                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                   r->valeur, r->tech_id, r->acronyme );
+       Lancer_requete_SQL ( db, requete );
+       liste = g_slist_next(liste);
+       cpt++;
      }
 
-    while ( Recuperer_ligne_SQL(db) )                                                      /* Chargement d'une ligne resultat */
-     { gint num;
-       num = atoi( db->row[0] );
-       if (num < NBR_REGISTRE)
-        { g_snprintf( Partage->registre[num].confDB.unite, sizeof(Partage->registre[num].confDB.unite), "%s", db->row[1] );
-          Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Chargement config R[%04d]", __func__, num );
-        }
-       else
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-			       "%s: num (%d) out of range (max=%d)", __func__, num, NBR_REGISTRE ); }
-      }
-    Libere_DB_SQL (&db);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: DB reloaded", __func__ );
+    Libere_DB_SQL( &db );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d REGISTRE updated", __func__, cpt );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

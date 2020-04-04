@@ -65,7 +65,7 @@
 %type  <val>    modulateur jour_semaine
 
 %token <val>    T_BI T_MONO ENTREE SORTIE T_SORTIEANA T_TEMPO T_HORLOGE T_DYN_STRING
-%token <val>    T_MSG T_ICONE CPT_H T_CPT_IMP EANA T_START T_REGISTRE
+%token <val>    T_MSG T_ICONE T_CPT_H T_CPT_IMP EANA T_START T_REGISTRE
 %type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_IN_RANGE
@@ -100,7 +100,7 @@ listeAlias:     un_alias listeAlias
 
 un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                 {{ if ( New_alias(ALIAS_TYPE_DYNAMIC, NULL, $2, $4, -1, 0, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
                 }}
                 | T_STATIC ID EQUIV barre alias_bit ENTIER PVIRGULE
@@ -141,7 +141,7 @@ alias_bit:        T_BI        {{ $$=MNEMO_BISTABLE;   }}
                 | T_MSG       {{ $$=MNEMO_MSG;        }}
                 | T_TEMPO     {{ $$=MNEMO_TEMPO;      }}
                 | T_ICONE     {{ $$=MNEMO_MOTIF;      }}
-                | CPT_H       {{ $$=MNEMO_CPTH;       }}
+                | T_CPT_H     {{ $$=MNEMO_CPTH;       }}
                 | T_CPT_IMP   {{ $$=MNEMO_CPT_IMP;    }}
                 | EANA        {{ $$=MNEMO_ENTREE_ANA; }}
                 | T_SORTIEANA {{ $$=MNEMO_SORTIE_ANA; }}
@@ -151,11 +151,11 @@ alias_bit:        T_BI        {{ $$=MNEMO_BISTABLE;   }}
                 ;
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
-                {{ int taille = strlen($1)+strlen($2)+1;
+                {{ int taille = ($1 ? strlen($1) : 0) + ($2 ? strlen($2) : 0) + 1;
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "%s%s", $1, $2 );
-                   g_free($1);
-                   g_free($2);
+                   if ($1) g_free($1);
+                   if ($2) g_free($2);
                 }}
                 | une_instr
                 {{ $$=$1; }}
@@ -187,10 +187,19 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                    if ($8)
                     { taille = strlen($5)+strlen($2)+strlen($8->tech_id)+strlen($8->acronyme)+100;
                       $$ = New_chaine( taille );
-                      g_snprintf( $$, taille,
-                                  "if(%s) { Dls_data_set_AO ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
-                                  $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
-                    } else $$=NULL;
+                      if ($8->type_bit==MNEMO_SORTIE_ANA)
+                       { g_snprintf( $$, taille,
+                                     "if(%s) { Dls_data_set_AO ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
+                                     $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
+                       }
+                      else if ($8->type_bit==MNEMO_REGISTRE)
+                       { g_snprintf( $$, taille,
+                                     "if(%s) { Dls_data_set_R ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
+                                     $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
+                       }
+                      else
+                       { Emettre_erreur_new( "'%s:%s' is unknown", $8->tech_id, $8->acronyme ); }
+                    } else $$=g_strdup("/* test ! */");
                    g_free($2);
                    g_free($5);
                 }}
@@ -294,24 +303,31 @@ calcul_expr3:   VALF
                 }}
                 | T_POUV calcul_expr T_PFERM
                 {{ $$=$2; }}
-                | ID
-                {{ struct ALIAS *alias;
+                | ID suffixe
+                {{ char *tech_id, *acro;
+                   struct ALIAS *alias;
                    int taille;
-                   alias = Get_alias_par_acronyme(NULL,$1);                                  /* On recupere l'alias */
+                   if ($2) { tech_id = $1; acro = $2; }
+                      else { tech_id = NULL; acro = $1; }
+                   alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
+                   if (!alias)
+                    { if ($2) { alias = Set_new_external_alias(tech_id,acro); }      /* Si dependance externe, on va chercher */
+                         else { alias = Set_new_external_alias("THIS",acro); }/* Si dependance pseudo-externe, on va chercher */
+                    }
                    if (alias)
                     { switch(alias->type_bit)               /* On traite que ce qui peut passer en "condition" */
                        { case MNEMO_REGISTRE:
-                          { if (alias->type==ALIAS_TYPE_STATIC)
-                             { taille = 15;
-                               $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
-                               g_snprintf( $$, taille, "R(%d)", alias->num );
-                             }
-                            else if(alias->type==ALIAS_TYPE_DYNAMIC)
-                             { taille = 256;
-                               $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
-                               g_snprintf( $$, taille, "Dls_data_get_R(\"%s\",\"%s\",&_%s_%s)",
-                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-                             }
+                          { taille = 256;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            g_snprintf( $$, taille, "Dls_data_get_R(\"%s\",\"%s\",&_%s_%s)",
+                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+                            break;
+                          }
+                         case MNEMO_ENTREE_ANA:
+                          { taille = 256;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
+                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                             break;
                           }
                          case MNEMO_SORTIE_ANA:
@@ -322,18 +338,19 @@ calcul_expr3:   VALF
                             break;
                           }
                          default:
-                          { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser dans un calcul", DlsScanner_get_lineno(), $1 );
+                          { Emettre_erreur_new( "'%s:%s' ne peut s'utiliser dans un calcul", alias->tech_id, alias->acronyme );
                             $$=New_chaine(2);
                             g_snprintf( $$, 2, "0" );
                           }
                        }
                     }
                    else
-                    { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $1 );
+                    { Emettre_erreur_new( "'%s' is not defined", $1 );
                       $$=New_chaine(2);
                       g_snprintf( $$, 2, "0" );
                     }
-                   g_free($1);                                     /* On n'a plus besoin de l'identifiant */
+                   if ($2) g_free($2);                                                   /* Libération du prefixe s'il existe */
+                   g_free($1);                                                         /* On n'a plus besoin de l'identifiant */
                 }}
                 ;
 
@@ -341,19 +358,20 @@ calcul_ea_result: ID
                 {{ struct ALIAS *alias;
                    alias = Get_alias_par_acronyme(NULL,$1);                                            /* On recupere l'alias */
                    if (alias)
-                    { switch(alias->type_bit)               /* On traite que ce qui peut passer en "condition" */
-                       { case MNEMO_SORTIE_ANA:
+                    { switch(alias->type_bit)                              /* On traite que ce qui peut passer en "condition" */
+                       { case MNEMO_REGISTRE:
+                         case MNEMO_SORTIE_ANA:
                           { $$ = alias;
                             break;
                           }
                          default:
-                          { Emettre_erreur_new( "Ligne %d :'%s' ne peut s'utiliser dans un résultat de calcul", DlsScanner_get_lineno(), $1 );
+                          { Emettre_erreur_new( "'%s' ne peut s'utiliser dans un résultat de calcul", $1 );
                             $$=NULL;
                           }
                        }
                     }
                    else
-                    { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $1 );
+                    { Emettre_erreur_new( "'%s' is not defined", $1 );
                       $$=NULL;
                     }
                    g_free($1);                                     /* On n'a plus besoin de l'identifiant */

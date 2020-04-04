@@ -328,7 +328,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `type` int(11) NOT NULL DEFAULT '0',
   `min` float NOT NULL DEFAULT '0',
   `max` float NOT NULL DEFAULT '0',
-  `unite` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
   `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
   `map_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
@@ -371,12 +371,12 @@ CREATE TABLE IF NOT EXISTS `mnemos_AO` (
 CREATE TABLE IF NOT EXISTS `mnemos_CI` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-  `etat` BOOLEAN NOT NULL DEFAULT '0',
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `etat` BOOLEAN NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `valeur` INT(11) NOT NULL DEFAULT '0',
   `multi` float NOT NULL DEFAULT '1',
-  `unite` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'fois',
+  `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'fois',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -455,35 +455,6 @@ CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE_ticks` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `mnemos_CptHoraire`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_CptHoraire` (
-  `id_mnemo` int(11) NOT NULL DEFAULT '0',
-  `valeur` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id_mnemo`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `dls_cpt_imp`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_CptImp` (
-  `id_mnemo` int(11) NOT NULL,
-  `valeur` float NOT NULL DEFAULT '0',
-  `type_ci` int(11) NOT NULL DEFAULT '0',
-  `multi` float NOT NULL DEFAULT '1',
-  `unite_string` text COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id_mnemo`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `mnemos_AnalogInput`
 --
 
@@ -492,7 +463,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
   `type` int(11) NOT NULL,
   `min` float NOT NULL DEFAULT '0',
   `max` float NOT NULL DEFAULT '0',
-  `unite` text COLLATE utf8_unicode_ci NOT NULL,
+  `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id_mnemo`),
   FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -500,14 +471,20 @@ CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `mnemos_Registre`
+-- Structure de la table `mnemos_R`
 --
 
-CREATE TABLE IF NOT EXISTS `mnemos_Registre` (
-  `id_mnemo` int(11) NOT NULL,
-  `unite` text COLLATE utf8_unicode_ci NOT NULL,
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+CREATE TABLE IF NOT EXISTS `mnemos_R` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL,
+  `valeur` float NOT NULL DEFAULT '0',
+  `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
