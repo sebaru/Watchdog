@@ -1843,10 +1843,10 @@
     Mnemo_auto_create_AI ( "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
     Mnemo_auto_create_AI ( "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
     Mnemo_auto_create_AI ( "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
-    Mnemo_auto_create_DI ( "SYS", "TOP_1MIN", "Impulsion toutes les minutes" );
-    Mnemo_auto_create_DI ( "SYS", "TOP_1HZ", "Impulsion toutes les secondes" );
-    Mnemo_auto_create_DI ( "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
-    Mnemo_auto_create_DI ( "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1MIN", "Impulsion toutes les minutes" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1HZ", "Impulsion toutes les secondes" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
 
     sleep(30);                    /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
 

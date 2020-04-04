@@ -186,7 +186,7 @@
  void Run_arch ( void )
   { static gpointer arch_request_number;
 	   struct DB *db;
-    gint top, last_update, nb_enreg;
+    gint top, last_delete, last_arch, nb_enreg;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
@@ -200,7 +200,7 @@
     Mnemo_auto_create_AI ( "SYS", "ARCH_REQUEST_NUMBER", "Nb enregistrement dans le tampon d'archivage", "enreg." );
     Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 0.0, TRUE );
 
-    last_update = Partage->top;
+    last_delete = last_arch = Partage->top;
     while(Partage->com_arch.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
 
@@ -214,13 +214,18 @@
           Arch_Lire_config();
         }
 
-       if ( (Partage->top - last_update) >= 864000 )                                                     /* Une fois par jour */
+       if ( (Partage->top - last_delete) >= 864000 )                                                     /* Une fois par jour */
         { pthread_t tid;
           if (pthread_create( &tid, NULL, (void *)Arch_Update_SQL_Partitions_thread, NULL ))
            { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: pthread_create failed for Update SQL Partitions", __func__ ); }
           else
            { pthread_detach( tid ); }                                /* On le detache pour qu'il puisse se terminer tout seul */
-          last_update=Partage->top;
+          last_delete=Partage->top;
+        }
+
+       if ( (Partage->top - last_arch) >= 100 )                                                     /* Toutes les 10 secondes */
+        { Arch_All_Dls_Data ();
+          last_arch=Partage->top;
         }
 
        if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */

@@ -132,16 +132,14 @@
        return;
      }
 
-    Info_new( Config.log, Config.log_arch, LOG_NOTICE,
-             "%s: Starting Update SQL Partition on %s with days=%d", __func__,
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Starting Update SQL Partition on %s with days=%d", __func__,
               Partage->com_arch.archdb_database, Partage->com_arch.duree_retention );
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT table_name FROM information_schema.tables WHERE table_schema='%s' "
                 "AND table_name like 'histo_bit_%%'", Partage->com_arch.archdb_database );
     if (Lancer_requete_SQL ( db, requete )==FALSE)                                             /* Execution de la requete SQL */
      { Libere_DB_SQL(&db);
-	      Info_new( Config.log, Config.log_arch, LOG_ERR,
-                "%s: Searching table names failed", __func__ );
+	      Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Searching table names failed", __func__ );
        return;
      }
 
@@ -151,30 +149,21 @@
 
     db = Init_ArchDB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_arch, LOG_ERR,
-                "%s: Unable to open database %s for deleting", __func__, Partage->com_arch.archdb_database );
-       while (Liste_tables)
-        { gchar *table;
-	         table = Liste_tables->data;
-	         Liste_tables = g_slist_remove ( Liste_tables, table );
-   	      g_free(table);
-        }
-       return;
+     { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Unable to open database %s for deleting", __func__,
+                 Partage->com_arch.archdb_database );
      }
 
-    while (Liste_tables && Partage->com_arch.Thread_run == TRUE)
+    while (db && Liste_tables && Partage->com_arch.Thread_run == TRUE)
      { gchar *table;
        gint top;
 	      table = Liste_tables->data;
 	      Liste_tables = g_slist_remove ( Liste_tables, table );
-       Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                "%s: Starting Update SQL Partition table %s", __func__, table );
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Starting Update SQL Partition table %s", __func__, table );
 	      g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "DELETE FROM %s WHERE date_time < NOW() - INTERVAL %d DAY", table, Partage->com_arch.duree_retention );
        top = Partage->top;
        if (Lancer_requete_SQL ( db, requete )==FALSE)                                          /* Execution de la requete SQL */
-        { Info_new( Config.log, Config.log_arch, LOG_ERR,
-                   "%s: Unable to delete from table '%s'", __func__, table );
+        { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Unable to delete from table '%s'", __func__, table );
         }
        Info_new( Config.log, Config.log_arch, LOG_NOTICE,
                 "%s: Update SQL Partition table %s OK in %05.1fs", __func__, table, (Partage->top-top)/10.0 );
@@ -185,7 +174,86 @@
     g_slist_free( Liste_tables );
 
     Libere_DB_SQL(&db);
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Update SQL Partition end", __func__ );
+  }
+/******************************************************************************************************************************/
+/* Ajouter_archDB: Ajout d'une entree archive dans la Base de Données                                                         */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure arch                                              */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ static gboolean Arch_create_table ( struct DB *db, gchar *tech_id, gchar *acronyme )
+  { gchar table[512];
+    g_snprintf( table, sizeof(table),                                                                       /* Requete SQL */
+                "CREATE TABLE `histo_bit_%s_%s`("
+                "`date_time` datetime(1) DEFAULT NULL,"
+                "`valeur` float NOT NULL DEFAULT '0',"
+                "UNIQUE `index_unique` (`date_time`, `valeur`),"
+                "KEY `index_date` (`date_time`)"
+                ") ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+                "  PARTITION BY LINEAR KEY (date_time) PARTITIONS 12;",
+                tech_id, acronyme );
+    if (Lancer_requete_SQL ( db, table )==FALSE)                                            /* Execution de la requete SQL */
+     { Info_new( Config.log, Config.log_arch, LOG_ERR,
+                "%s: Creation de la table histo_bit_%s_%s FAILED", __func__, tech_id, acronyme );
+       return(FALSE);
+     }
     Info_new( Config.log, Config.log_arch, LOG_NOTICE,
-             "%s: Update SQL Partition end", __func__ );
+             "%s: Creation de la table histo_bit_%s_%s avant Insert", __func__, tech_id, acronyme );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Ajouter_archDB: Ajout d'une entree archive dans la Base de Données                                                         */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure arch                                              */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ static gboolean Arch_One_Dls_Data ( struct DB *db, time_t sec, time_t usec, gchar *tech_id, gchar *acronyme, gfloat valeur )
+  { gchar requete[512];
+    gboolean retour;
+    g_snprintf( requete, sizeof(requete), "INSERT INTO histo_bit_%s_%s(date_time,valeur) VALUES (FROM_UNIXTIME(%d.%d),'%f')",
+                tech_id, acronyme, (int)sec, (int)usec, valeur );
+    if ( (retour=Lancer_requete_SQL ( db, requete )) == FALSE )                                /* Execution de la requete SQL */
+     {                               /* Si erreur, c'est peut etre parce que la table n'existe pas, on tente donc de la créer */
+       if (Arch_create_table ( db, tech_id, acronyme ) == TRUE)                                /* Execution de la requete SQL */
+        { if ( (retour=Lancer_requete_SQL ( db, requete )) == FALSE )  /* Une fois la table créé, on peut y stocker l'archive */
+           { Info_new( Config.log, Config.log_arch, LOG_ERR,
+                      "%s: Ajout (2ième essai) dans la table histo_bit_%s_%s FAILED", __func__, tech_id, acronyme );
+           }
+        }
+     }
+    return(retour);
+  }
+/******************************************************************************************************************************/
+/* Ajouter_archDB: Ajout d'une entree archive dans la Base de Données                                                         */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure arch                                              */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ void Arch_All_Dls_Data ( void )
+  { gint top, nb_enreg;
+    struct timeval tv;
+    gboolean retour;
+    struct DB *db;
+    GSList *liste;
+
+    setlocale ( LC_NUMERIC, "C" );
+    db = Init_ArchDB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Unable to open database %s/%s/%s.", __func__,
+                 Partage->com_arch.archdb_host, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
+       return;
+     }
+
+    gettimeofday( &tv, NULL );                                                                   /* On prend l'heure actuelle */
+    liste = Partage->Dls_data_AI;
+    top = Partage->top;
+    nb_enreg = 0; retour = TRUE;
+    while (liste && Partage->com_arch.Thread_run == TRUE && retour==TRUE)
+     { struct DLS_AI *ai = (struct DLS_AI *)liste->data;
+       retour = Arch_One_Dls_Data ( db, (int)tv.tv_sec, (int)tv.tv_usec, ai->tech_id, ai->acronyme, ai->val_ech );
+       nb_enreg++;
+     }
+    Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: %d DLS_AI archivés en %06.1fs!", __func__,
+              nb_enreg, (Partage->top-top)/10.0 );
+
+    Libere_DB_SQL(&db);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
