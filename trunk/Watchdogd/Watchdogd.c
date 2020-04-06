@@ -50,8 +50,8 @@
  struct PARTAGE *Partage;                                                        /* Accès aux données partagées des processes */
 
 /******************************************************************************************************************************/
-/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                                  */
-/* Entrée: rien                                                                                                              */
+/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                                    */
+/* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Exporter ( void )
@@ -188,8 +188,8 @@
         { SB_SYS(4, !B(4));
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
-          Partage->audit_bit_interne_per_sec = 0;
-          Dls_data_set_AI ( "SYS", "DLS_BIT_PER_SEC", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold, TRUE );  /* historique */
+          Partage->audit_bit_interne_per_sec = 0;                                                               /* historique */
+          Dls_data_set_AI ( "SYS", "DLS_BIT_PER_SEC", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold, TRUE ); 
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;

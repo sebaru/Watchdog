@@ -105,7 +105,7 @@
 /* Ajouter_arch: Ajoute une archive dans la base de données                                                                   */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
 /******************************************************************************************************************************/
- static void Ajouter_arch_all( gint type, gint num, gchar *nom, gchar *tech_id, gfloat valeur )
+ static void Ajouter_arch_all( gchar *nom, gchar *tech_id, gfloat valeur )
   { struct timeval tv;
     struct ARCHDB *arch;
 
@@ -113,10 +113,8 @@
     if (!arch) return;
 
     gettimeofday( &tv, NULL );                                                                   /* On prend l'heure actuelle */
-    arch->type      = type;
-    arch->num       = num;
-    if (nom)     g_snprintf( arch->nom,     sizeof(arch->nom),     "%s", nom );
-    if (tech_id) g_snprintf( arch->tech_id, sizeof(arch->tech_id), "%s", tech_id );
+    g_snprintf( arch->nom,     sizeof(arch->nom),     "%s", nom );
+    g_snprintf( arch->tech_id, sizeof(arch->tech_id), "%s", tech_id );
     arch->valeur    = valeur;
     arch->date_sec  = tv.tv_sec;
     arch->date_usec = tv.tv_usec;
@@ -125,33 +123,6 @@
     Partage->com_arch.liste_arch = g_slist_prepend( Partage->com_arch.liste_arch, arch );
     Partage->com_arch.taille_arch++;
     pthread_mutex_unlock( &Partage->com_arch.synchro );
-  }
-/******************************************************************************************************************************/
-/* Ajouter_arch: Ajoute une archive dans la base de données                                                                   */
-/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
-/******************************************************************************************************************************/
- void Ajouter_arch( gint type, gint num, gfloat valeur )
-  { static gint last_log = 0;
-
-    if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
-    else if (Partage->com_arch.taille_arch > Partage->com_arch.max_buffer_size)
-     { if ( last_log + 600 < Partage->top )
-        { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "%s: DROP arch (taille>%d) type=%d, num=%d", __func__, Partage->com_arch.max_buffer_size, type, num );
-          last_log = Partage->top;
-        }
-       return;
-     }
-    else if (Partage->com_arch.Thread_run == FALSE)                                      /* Si administratively DOWN, on sort */
-     { if ( last_log + 600 < Partage->top )
-        { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "%s: Thread is down. Dropping type=%d, num=%d", __func__, type, num );
-          last_log = Partage->top;
-        }
-       return;
-     }
-    Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Add Arch in list: type=%d, num=%d", __func__, type, num );
-    Ajouter_arch_all( type, num, NULL, NULL, valeur );
   }
 /******************************************************************************************************************************/
 /* Ajouter_arch: Ajoute une archive dans la base de données                                                                   */
@@ -178,14 +149,14 @@
        return;
      }
     Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Add Arch in list: '%s:%s'=%f", __func__, tech_id, nom, valeur );
-    Ajouter_arch_all( -1, -1, nom, tech_id, valeur );
+    Ajouter_arch_all( nom, tech_id, valeur );
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread                                                                                        */
 /******************************************************************************************************************************/
  void Run_arch ( void )
   { static gpointer arch_request_number;
-	   struct DB *db;
+    struct DB *db;
     gint top, last_delete, nb_enreg;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 

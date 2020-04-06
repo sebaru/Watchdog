@@ -176,8 +176,8 @@
 /******************************************************************************************************************************/
  void SE( int num, int etat )
   { if ( (num>=0) && (num<NBR_ENTRE_TOR) && ((E(num) && !etat) || (!E(num) && etat)) )
-     { Ajouter_arch( MNEMO_ENTREE, num, 1.0*E(num) );                       /* Archivage etat n-1 pour les courbes historique */
-       Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );                                            /* Archivage de l'etat courant */
+     { /*Ajouter_arch( MNEMO_ENTREE, num, 1.0*E(num) );                       /* Archivage etat n-1 pour les courbes historique */
+       /*Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );                                            /* Archivage de l'etat courant */
        Partage->e[num].etat = etat;                                                          /* Changement d'etat de l'entrée */
      }
   }
@@ -367,7 +367,7 @@
      { need_arch = TRUE; }                                           /* Archive au pire toutes les 10 min */
 
     if (need_arch)
-     { Ajouter_arch( MNEMO_ENTREE_ANA, num, Partage->ea[num].val_ech );            /* Archivage si besoin */
+     { /*Ajouter_arch( MNEMO_ENTREE_ANA, num, Partage->ea[num].val_ech );            /* Archivage si besoin */
        Partage->ea[ num ].last_arch = Partage->top;                       /* Communications aux threads ! */
      }
   }
@@ -568,7 +568,7 @@
            { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: last_change trop tot pour A%d !", __func__, num ); }
         }
        else
-        { Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );                                              /* Sauvegarde de l'etat n */
+        { /*Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );                                              /* Sauvegarde de l'etat n */
         }
        Partage->a[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
