@@ -186,7 +186,7 @@
  void Run_arch ( void )
   { static gpointer arch_request_number;
 	   struct DB *db;
-    gint top, last_delete, last_arch, nb_enreg;
+    gint top, last_delete, nb_enreg;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
@@ -200,7 +200,7 @@
     Mnemo_auto_create_AI ( "SYS", "ARCH_REQUEST_NUMBER", "Nb enregistrement dans le tampon d'archivage", "enreg." );
     Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 0.0, TRUE );
 
-    last_delete = last_arch = Partage->top;
+    last_delete = Partage->top;
     while(Partage->com_arch.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
 
@@ -221,11 +221,6 @@
           else
            { pthread_detach( tid ); }                                /* On le detache pour qu'il puisse se terminer tout seul */
           last_delete=Partage->top;
-        }
-
-       if ( (Partage->top - last_arch) >= 100 )                                                     /* Toutes les 10 secondes */
-        { Arch_All_Dls_Data ();
-          last_arch=Partage->top;
         }
 
        if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */

@@ -65,7 +65,6 @@
  extern void Run_arch ( void );                                                                             /* Dans Archive.c */
  extern gboolean Arch_Lire_config ( void );
  extern gint Arch_Clear_list ( void );
- extern void Arch_All_Dls_Data ( void );
  extern void Ajouter_arch( gint type, gint num, gfloat valeur );
  extern void Ajouter_arch_by_nom( gchar *nom, gchar *tech_id, gfloat valeur );
  extern gboolean Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );
