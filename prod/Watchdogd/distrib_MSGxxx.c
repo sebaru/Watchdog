@@ -107,19 +107,20 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Gerer_arrive_MSGxxx_dls ( void )
-  { struct DLS_MESSAGES *msg;
+  { struct DLS_MESSAGES_EVENT *event;
 
     while (Partage->com_msrv.liste_msg)
-     { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
-       msg = Partage->com_msrv.liste_msg->data;                                              /* Recuperation du numero de msg */
-       Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, msg );
+     { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
+       event = Partage->com_msrv.liste_msg->data;                        /* Recuperation du numero de msg */
+       Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
                 "%s: Handle MSG'%s:%s'=%d, Reste a %d a traiter", __func__,
-                 msg->tech_id, msg->acronyme, msg->etat, g_slist_length(Partage->com_msrv.liste_msg) );
+                 event->msg->tech_id, event->msg->acronyme, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
 
-            if (msg->etat == 0) Gerer_arrive_MSG_event_dls_off( msg );
-       else if (msg->etat == 1) Gerer_arrive_MSG_event_dls_on ( msg );
+            if (event->etat == 0) Gerer_arrive_MSG_event_dls_off( event->msg );
+       else if (event->etat == 1) Gerer_arrive_MSG_event_dls_on ( event->msg );
+       g_free(event);
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

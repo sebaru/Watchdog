@@ -132,16 +132,14 @@
        return;
      }
 
-    Info_new( Config.log, Config.log_arch, LOG_NOTICE,
-             "%s: Starting Update SQL Partition on %s with days=%d", __func__,
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Starting Update SQL Partition on %s with days=%d", __func__,
               Partage->com_arch.archdb_database, Partage->com_arch.duree_retention );
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT table_name FROM information_schema.tables WHERE table_schema='%s' "
                 "AND table_name like 'histo_bit_%%'", Partage->com_arch.archdb_database );
     if (Lancer_requete_SQL ( db, requete )==FALSE)                                             /* Execution de la requete SQL */
      { Libere_DB_SQL(&db);
-	      Info_new( Config.log, Config.log_arch, LOG_ERR,
-                "%s: Searching table names failed", __func__ );
+	      Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Searching table names failed", __func__ );
        return;
      }
 
@@ -151,30 +149,21 @@
 
     db = Init_ArchDB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_arch, LOG_ERR,
-                "%s: Unable to open database %s for deleting", __func__, Partage->com_arch.archdb_database );
-       while (Liste_tables)
-        { gchar *table;
-	         table = Liste_tables->data;
-	         Liste_tables = g_slist_remove ( Liste_tables, table );
-   	      g_free(table);
-        }
-       return;
+     { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Unable to open database %s for deleting", __func__,
+                 Partage->com_arch.archdb_database );
      }
 
-    while (Liste_tables && Partage->com_arch.Thread_run == TRUE)
+    while (db && Liste_tables && Partage->com_arch.Thread_run == TRUE)
      { gchar *table;
        gint top;
 	      table = Liste_tables->data;
 	      Liste_tables = g_slist_remove ( Liste_tables, table );
-       Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                "%s: Starting Update SQL Partition table %s", __func__, table );
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Starting Update SQL Partition table %s", __func__, table );
 	      g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "DELETE FROM %s WHERE date_time < NOW() - INTERVAL %d DAY", table, Partage->com_arch.duree_retention );
        top = Partage->top;
        if (Lancer_requete_SQL ( db, requete )==FALSE)                                          /* Execution de la requete SQL */
-        { Info_new( Config.log, Config.log_arch, LOG_ERR,
-                   "%s: Unable to delete from table '%s'", __func__, table );
+        { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Unable to delete from table '%s'", __func__, table );
         }
        Info_new( Config.log, Config.log_arch, LOG_NOTICE,
                 "%s: Update SQL Partition table %s OK in %05.1fs", __func__, table, (Partage->top-top)/10.0 );
@@ -185,7 +174,6 @@
     g_slist_free( Liste_tables );
 
     Libere_DB_SQL(&db);
-    Info_new( Config.log, Config.log_arch, LOG_NOTICE,
-             "%s: Update SQL Partition end", __func__ );
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Update SQL Partition end", __func__ );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -171,6 +171,11 @@
     gboolean persist;
   };
 
+ struct DLS_MESSAGES_EVENT
+  { struct DLS_MESSAGES *msg;
+    gboolean etat;
+  };
+
  struct DLS_REGISTRE
   { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
