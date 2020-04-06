@@ -1446,9 +1446,20 @@
                     msg->tech_id, msg->acronyme );
         }
        else
-        { pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
-          Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, msg );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+        { struct DLS_MESSAGES_EVENT *event;
+          event = (struct DLS_MESSAGES_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGES_EVENT) );
+          if (!event)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
+                      "%s: malloc Event failed. Memory error for MSG'%s:%s'", __func__, msg->tech_id, msg->acronyme );
+           }
+          else
+           { event->etat = etat;                                                        /* Recopie de l'état dans l'evenement */
+             event->msg  = msg;
+             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
+
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_MSG '%s:%s'=%d",
                     __func__, msg->tech_id, msg->acronyme, msg->etat );
           msg->changes++;
