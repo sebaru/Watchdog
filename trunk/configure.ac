@@ -101,7 +101,6 @@ Watchdogd/Archive/Makefile \
 Watchdogd/Rfxcom/Makefile \
 Watchdogd/Enocean/Makefile \
 Watchdogd/Imsgs/Makefile \
-Watchdogd/Imsgp/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Http/Makefile \
 Watchdogd/Serveur/Makefile \
