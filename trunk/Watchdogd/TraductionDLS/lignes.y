@@ -337,6 +337,28 @@ calcul_expr3:   VALF
                                         alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                             break;
                           }
+                         case MNEMO_CPTH:
+                          { taille = 256;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            g_snprintf( $$, taille, "Dls_data_get_CH(\"%s\",\"%s\",&_%s_%s)",
+                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+                            break;
+                          }
+                         case MNEMO_CPT_IMP:
+                          { taille = 256;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)",
+                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+                            break;
+                          }
+                         case MNEMO_MONOSTABLE:
+                         case MNEMO_BISTABLE:
+                          { taille = 256;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            g_snprintf( $$, taille, "Dls_data_get_bool(\"%s\",\"%s\",&_%s_%s)",
+                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+                            break;
+                          }
                          default:
                           { Emettre_erreur_new( "'%s:%s' ne peut s'utiliser dans un calcul", alias->tech_id, alias->acronyme );
                             $$=New_chaine(2);
