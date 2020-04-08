@@ -226,8 +226,9 @@
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
-       Json_add_double ( builder, "valeur_brute", r->valeur );
+       Json_add_double ( builder, "valeur", r->valeur );
        Json_add_string ( builder, "unite", r->unite );
+       Json_add_bool   ( builder, "archivage", r->archivage );
        Json_add_int    ( builder, "last_arch", r->last_arch );
      }
 /*------------------------------------------------------- sinon --------------------------------------------------------------*/
