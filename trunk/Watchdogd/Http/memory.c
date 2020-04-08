@@ -227,6 +227,7 @@
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
        Json_add_double ( builder, "valeur_brute", r->valeur );
+       Json_add_string ( builder, "unite", r->unite );
        Json_add_int    ( builder, "last_arch", r->last_arch );
      }
 /*------------------------------------------------------- sinon --------------------------------------------------------------*/
@@ -315,16 +316,19 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     else if (!strcasecmp(type,"R"))
      { struct DLS_REGISTRE *r=NULL;
-       gchar *valeur = json_object_get_string_member ( object, "valeur" );
-       if (!valeur)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: valeur non trouvée", __func__ );
+       gboolean archivage = json_object_get_boolean_member ( object, "archivage" );
+       gchar *unite = json_object_get_string_member ( object, "unite" );
+       if (!unite)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: unite non trouvée", __func__ );
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
         }
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                 "%s: HTTP/ request for SET R '%s:%s' = %s", __func__, tech_id, acronyme, valeur );
+                 "%s: HTTP/ request for SET R '%s:%s' -> archiavge=%d unite='%s'", __func__, tech_id, acronyme, archivage, unite );
        Dls_data_get_R ( tech_id, acronyme, (gpointer *)&r );
        if (r)
-        { r->valeur = atof(valeur); }
+        { r->archivage = archivage;
+          g_snprintf( r->unite, sizeof(r->unite), "%s", unite );
+        }
        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }
 /*************************************************** Envoi au client **********************************************************/

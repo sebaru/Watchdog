@@ -1154,7 +1154,9 @@
                    break;
                  }
                 case MNEMO_REGISTRE:
-                 { Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                 { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
+                   if (!unite) unite="no unit";
+                   Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle, unite );
                    break;
                  }
                 case MNEMO_MOTIF:

@@ -1613,8 +1613,10 @@
 
     if (valeur != reg->valeur || reg->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top)
      { reg->valeur = valeur;
-       Ajouter_arch_by_nom( reg->acronyme, reg->tech_id, reg->valeur );                                /* Archivage si besoin */
-       reg->last_arch = Partage->top;
+       if(reg->archivage)
+        { Ajouter_arch_by_nom( reg->acronyme, reg->tech_id, reg->valeur );                             /* Archivage si besoin */
+          reg->last_arch = Partage->top;
+        }
      }
   }
 /******************************************************************************************************************************/
@@ -1648,16 +1650,13 @@
 /******************************************************************************************************************************/
  gchar *Dls_dyn_string ( gchar *format, gint type_bit, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p )
   { gchar result[128], *debut, chaine[64];
-    struct DB *db;
     debut = g_strrstr ( format, "$1" );                            /* Début pointe sur le $ de "$1" si présent dans la chaine */
     if (!debut) return(g_strdup(format));
     g_snprintf( result, debut-format+1, "%s", format );                                                           /* Prologue */
     switch (type_bit)
      { case MNEMO_CPT_IMP:
-            if ( (db=Rechercher_CI ( tech_id, acronyme )) != NULL )
-             { gint valeur = Dls_data_get_CI ( tech_id, acronyme, dlsdata_p );
-               g_snprintf( chaine, sizeof(chaine), "%d %s", valeur, db->row[1] ); /* Row1 = unite */
-               Libere_DB_SQL (&db);
+             { struct DLS_CI *ci = *dlsdata_p;
+               g_snprintf( chaine, sizeof(chaine), "%d %s", ci->valeur, ci->unite ); /* Row1 = unite */
              }
             break;
        case MNEMO_ENTREE_ANA:
@@ -1676,6 +1675,18 @@
                    { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
                   else
                    { g_snprintf( chaine, sizeof(chaine), "%.2f %s", ai->val_ech, ai->unite ); }
+                }
+               else g_snprintf( chaine, sizeof(chaine), "erreur" );
+             }
+            break;
+       case MNEMO_REGISTRE:
+             { Dls_data_get_R ( tech_id, acronyme, dlsdata_p );
+               struct DLS_REGISTRE *reg = *dlsdata_p;
+               if (reg)
+                { if (reg->valeur-roundf(reg->valeur) == 0.0)
+                   { g_snprintf( chaine, sizeof(chaine), "%.0f %s", reg->valeur, reg->unite ); }
+                  else
+                   { g_snprintf( chaine, sizeof(chaine), "%.2f %s", reg->valeur, reg->unite ); }
                 }
                else g_snprintf( chaine, sizeof(chaine), "erreur" );
              }

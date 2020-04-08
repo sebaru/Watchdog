@@ -98,8 +98,8 @@
         { struct DLS_MESSAGES *msg = NULL;
           Dls_data_get_MSG ( tech_id, acronyme, (gpointer)&msg );
           if (msg)
-           { g_snprintf( chaine, sizeof(chaine), " | - MSG %s:%s = %d, persist = %d, changes = %d, last_change = %d top=%d",
-                      tech_id,acronyme, msg->etat, msg->persist, msg->changes, msg->last_change, Partage->top );
+           { g_snprintf( chaine, sizeof(chaine), " | - MSG %s:%s = %d, changes = %d, last_change = %d top=%d",
+                      tech_id,acronyme, msg->etat, msg->changes, msg->last_change, Partage->top );
              response = Admin_write ( response, chaine );
            } else
            { g_snprintf( chaine, sizeof(chaine), " | - MSG: %s:%s not found", tech_id, acronyme );

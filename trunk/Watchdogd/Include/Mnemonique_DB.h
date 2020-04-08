@@ -82,7 +82,9 @@
 
  extern void Charger_confDB_Registre ( void );                                                       /* Dans Mnemo_registre.c */
  extern void Updater_confDB_Registre ( void );
- extern gboolean Mnemo_auto_create_REGISTRE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );
+ extern gboolean Mnemo_auto_create_REGISTRE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src );
+ extern gboolean Recuperer_mnemos_R_by_map_question_vocale ( struct DB **db_retour, gchar *map_snips );
+ extern gboolean Recuperer_mnemos_R_suite( struct DB **db_orig );
 
  extern gboolean Mnemo_auto_create_DI ( gchar *tech_id, gchar *acronyme, gchar *libelle );                /* Dans mnemos_DI.c */
  extern struct DB *Rechercher_DI ( gchar *tech_id, gchar *acronyme );

@@ -167,8 +167,6 @@
     gboolean etat;
     gint last_change;
     gint changes;
-    gint next_repeat;
-    gboolean persist;
   };
 
  struct DLS_MESSAGES_EVENT
@@ -180,6 +178,8 @@
   { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gfloat   valeur;
+    gboolean archivage;
+    gchar   unite[32];
     guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
   };
 
