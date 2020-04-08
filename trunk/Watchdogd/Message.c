@@ -34,7 +34,7 @@
  #include <string.h>
 
  #define MSGS_SQL_SELECT  "SELECT msg.id,msg.libelle,msg.type,syn.libelle,audio,enable,parent_syn.page,syn.page," \
-                          "sms,libelle_audio,libelle_sms,dls.shortname,syn.id,profil_audio" \
+                          "sms,libelle_audio,libelle_sms,dls.shortname,syn.id,profil_audio,msg.tech_id,msg.acronyme" \
                           " FROM msgs as msg" \
                           " INNER JOIN dls as dls ON msg.tech_id=dls.tech_id" \
                           " INNER JOIN syns as syn ON dls.syn_id=syn.id" \
@@ -103,7 +103,7 @@
 /* Entrée: une database et des conditions                                                                                     */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
- gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length )
+ static gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length )
   { gchar requete[512], critere[80];
     gboolean retour;
     struct DB *db;
@@ -167,6 +167,8 @@
        g_snprintf( msg->libelle_sms,     sizeof(msg->libelle_sms  ),   "%s", db->row[10] );
        g_snprintf( msg->dls_shortname,   sizeof(msg->dls_shortname),   "%s", db->row[11] );
        g_snprintf( msg->profil_audio,    sizeof(msg->profil_audio ),   "%s", db->row[13] );
+       g_snprintf( msg->tech_id,         sizeof(msg->tech_id      ),   "%s", db->row[14] );
+       g_snprintf( msg->acronyme,        sizeof(msg->acronyme     ),   "%s", db->row[15] );
        msg->id          = atoi(db->row[0]);
        msg->type        = atoi(db->row[2]);
        msg->audio       = atoi(db->row[4]);
@@ -176,35 +178,7 @@
      }
     return(msg);
   }
-/******************************************************************************************************************************/
-/* Rechercher_messageDB: Recupération du message dont le num est en parametre                                                 */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: une GList                                                                                                          */
-/******************************************************************************************************************************/
- struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num )
-  { struct CMD_TYPE_MESSAGE *message;
-    gchar requete[512];
-    struct DB *db;
 
-    g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
-                " WHERE num=%d LIMIT 1", num                                                                         /* Where */
-              );
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(NULL);
-     }
-
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { Libere_DB_SQL( &db );
-       return(NULL);
-     }
-
-    message = Recuperer_messageDB_suite( &db );
-    if (message) Libere_DB_SQL ( &db );
-    return(message);
-  }
 /******************************************************************************************************************************/
 /* Rechercher_messageDB_par_id: Recupération du message dont l'id est en parametre                                            */
 /* Entrée: un log et une database                                                                                             */
@@ -260,60 +234,6 @@
     message = Recuperer_messageDB_suite( &db );
     if (message) Libere_DB_SQL ( &db );
     return(message);
-  }
-/******************************************************************************************************************************/
-/* Modifier_messageDB: Modification d'un message Watchdog                                                                     */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
-/* Sortie: -1 si pb, id sinon                                                                                                 */
-/******************************************************************************************************************************/
- gboolean Modifier_messageDB( struct CMD_TYPE_MESSAGE *msg )
-  { gchar *libelle, *libelle_audio, *libelle_sms;
-    gchar requete[2048];
-    gboolean retour;
-    struct DB *db;
-
-    libelle = Normaliser_chaine ( msg->libelle );                   /* Formatage correct des chaines */
-    if (!libelle)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle impossible", __func__ );
-       return(-1);
-     }
-    libelle_audio = Normaliser_chaine ( msg->libelle_audio );       /* Formatage correct des chaines */
-    if (!libelle_audio)
-     { g_free(libelle);
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle_audio impossible", __func__ );
-       return(-1);
-     }
-    libelle_sms = Normaliser_chaine ( msg->libelle_sms );           /* Formatage correct des chaines */
-    if (!libelle_sms)
-     { g_free(libelle);
-       g_free(libelle_audio);
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle_sms impossible", __func__ );
-       return(-1);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET "
-                "libelle='%s',type=%d,audio=%d,enable=%d,sms=%d,"
-                "libelle_audio='%s',libelle_sms='%s' "
-                "WHERE id=%d",
-                NOM_TABLE_MSG, libelle, msg->type, (msg->audio ? 1 : 0),
-                               (msg->enable ? 1 : 0), msg->sms,
-                               libelle_audio, libelle_sms,
-                msg->id );
-    g_free(libelle);
-    g_free(libelle_audio);
-    g_free(libelle_sms);
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-
-    return(retour);
   }
 /******************************************************************************************************************************/
 /* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
