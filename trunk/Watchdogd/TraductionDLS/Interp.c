@@ -1019,9 +1019,6 @@
              liste = liste->next;
            }
 
-          g_snprintf( chaine, sizeof(chaine), " static gint Dls_id = %d;\n", id );
-          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
-
           liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
            { g_snprintf(chaine, sizeof(chaine),

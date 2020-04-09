@@ -32,6 +32,7 @@
  #include <unistd.h>
  #include <fcntl.h>
  #include <string.h>
+ #include <locale.h>
 
  #include "watchdogd.h"
 
@@ -275,7 +276,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT a.min,a.max,a.type,a.unite"
+                "SELECT a.min,a.max,a.type,a.unite,a.valeur"
                 " FROM mnemos_AI as a"
                 " WHERE a.tech_id='%s' AND a.acronyme='%s' LIMIT 1",
                 ai->tech_id, ai->acronyme
@@ -296,46 +297,9 @@
     ai->max      = atof(db->row[1]);
     ai->type     = atoi(db->row[2]);
     g_snprintf( ai->unite, sizeof(ai->unite), "%s", db->row[3] );
+    ai->val_avant_ech = atof(db->row[4]);
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s' loaded", __func__, ai->tech_id, ai->acronyme );
     Libere_DB_SQL( &db );
-  }
-/******************************************************************************************************************************/
-/* Modifier_analogInputDB: Modification d'un entreeANA Watchdog                                                               */
-/* Entrées: une structure hébergeant l'entrée analogique a modifier                                                           */
-/* Sortie: FALSE si pb                                                                                                        */
-/******************************************************************************************************************************/
- gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
-  { gchar requete[1024];
-    gboolean retour;
-    struct DB *db;
-    gchar *unite;
-
-    unite = Normaliser_chaine ( mnemo_full->mnemo_ai.unite );                                /* Formatage correct des chaines */
-    if (!unite)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_analogInputDB: Normalisation unite impossible" );
-       return(FALSE);
-     }
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_analogInputDB: DB connexion failed" );
-       g_free(unite);
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s (id_mnemo,min,max,unite,type) VALUES "
-                "('%d','%f','%f','%s','%d') "
-                "ON DUPLICATE KEY UPDATE "
-                "min=VALUES(min),max=VALUES(max),unite=VALUES(unite),type=VALUES(type)",
-                NOM_TABLE_MNEMO_AI, mnemo_full->mnemo_base.id,
-                mnemo_full->mnemo_ai.min, mnemo_full->mnemo_ai.max, unite, mnemo_full->mnemo_ai.type
-              );
-
-    g_free(unite);
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-    return(retour);
   }
 /******************************************************************************************************************************/
 /* Charger_analogInput: Chargement des infos sur les Entrees ANA                                                              */
@@ -384,5 +348,39 @@
      }
     Libere_DB_SQL (&db);
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_analogInput: DB reloaded" );
+  }
+/******************************************************************************************************************************/
+/* Updater_confDB_R: Mise a jour des valeurs de R en base                                                                   */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Updater_confDB_AI( void )
+  { gchar requete[200];
+    GSList *liste;
+    struct DB *db;
+    gint cpt;
+
+    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
+       return;
+     }
+
+    cpt = 0;
+    liste = Partage->Dls_data_AI;
+    while ( liste )
+     { struct DLS_AI *ai = (struct DLS_AI *)liste->data;
+       g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                   "UPDATE mnemos_AI as m SET valeur='%f' "
+                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                   ai->val_avant_ech, ai->tech_id, ai->acronyme );
+       Lancer_requete_SQL ( db, requete );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
+
+    Libere_DB_SQL( &db );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d AI updated", __func__, cpt );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

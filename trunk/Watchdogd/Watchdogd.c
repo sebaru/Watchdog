@@ -230,12 +230,11 @@
 /* Entrée: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Charger_config_bit_interne( void )
-  { if (Config.instance_is_master)
-     { Charger_analogInput();
-       Charger_confDB_Registre();
-       Charger_confDB_MSG();
-       Charger_confDB_BOOL();
-     }
+  { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
+    Charger_analogInput();
+    Charger_confDB_Registre();
+    Charger_confDB_MSG();
+    Charger_confDB_BOOL();
   }
 /******************************************************************************************************************************/
 /* Save_dls_data_to_DB : Envoie les infos DLS_DATA à la base de données pour sauvegarde !                                     */
@@ -248,6 +247,7 @@
     Updater_confDB_AO();                                                    /* Sauvegarde des valeurs des Sorties Analogiques */
     Updater_confDB_CH();                                                                  /* Sauvegarde des compteurs Horaire */
     Updater_confDB_CI();                                                              /* Sauvegarde des compteurs d'impulsion */
+    Updater_confDB_AI();                                                              /* Sauvegarde des compteurs d'impulsion */
     Updater_confDB_Registre();                                                                    /* Sauvegarde des registres */
     Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
     Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
