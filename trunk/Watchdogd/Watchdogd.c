@@ -156,18 +156,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de données                                   */
-/* Entrée: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Charger_config_bit_interne( void )
-  { if (Config.instance_is_master)
-     { Charger_analogInput();
-       Charger_confDB_Registre();
-       Charger_confDB_MSG();
-       Charger_confDB_BOOL();
-     }
-  }
-/******************************************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                                             */
 /* Entrée: numero du signal à gerer                                                                                           */
 /******************************************************************************************************************************/
@@ -238,6 +226,18 @@
      }
   }
 /******************************************************************************************************************************/
+/* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de données                                   */
+/* Entrée: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Charger_config_bit_interne( void )
+  { if (Config.instance_is_master)
+     { Charger_analogInput();
+       Charger_confDB_Registre();
+       Charger_confDB_MSG();
+       Charger_confDB_BOOL();
+     }
+  }
+/******************************************************************************************************************************/
 /* Save_dls_data_to_DB : Envoie les infos DLS_DATA à la base de données pour sauvegarde !                                     */
 /* Entrée : Néant                                                                                                             */
 /* Sortie : Néant                                                                                                             */
@@ -245,11 +245,12 @@
  static void Save_dls_data_to_DB ( void )
   { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saving DLS_DATA", __func__ );
+    Updater_confDB_AO();                                                    /* Sauvegarde des valeurs des Sorties Analogiques */
     Updater_confDB_CH();                                                                  /* Sauvegarde des compteurs Horaire */
     Updater_confDB_CI();                                                              /* Sauvegarde des compteurs d'impulsion */
-    Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
+    Updater_confDB_Registre();                                                                    /* Sauvegarde des registres */
     Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
-    Updater_confDB_AO();                                                    /* Sauvegarde des valeurs des Sorties Analogiques */
+    Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
