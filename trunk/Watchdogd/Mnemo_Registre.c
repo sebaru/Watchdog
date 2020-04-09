@@ -190,7 +190,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT m.tech_id, m.acronyme, m.valeur, m.archivage FROM mnemos_R as m"
+                "SELECT m.tech_id, m.acronyme, m.valeur, m.unite, m.archivage FROM mnemos_R as m"
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -202,9 +202,10 @@
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
      { reg = NULL;
        Dls_data_set_R ( db->row[0], db->row[1], (gpointer)&reg, atof(db->row[2]) );
-       reg->archivage = atoi(db->row[3]);
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: REGISTRE '%s:%s'=%f loaded (archivage=%d)", __func__,
-                 db->row[0], db->row[1], atof(db->row[2]), reg->archivage );
+       g_snprintf( reg->unite, sizeof(reg->unite), "%s", db->row[3] );
+       reg->archivage = atoi(db->row[4]);
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: REGISTRE '%s:%s'=%f %s loaded (archivage=%d)", __func__,
+                 db->row[0], db->row[1], atof(db->row[2]), reg->unite, reg->archivage );
      }
     Libere_DB_SQL( &db );
   }
