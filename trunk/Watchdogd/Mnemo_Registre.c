@@ -198,8 +198,9 @@
        return;
      }
 
+    struct DLS_REGISTRE *reg;
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { struct DLS_REGISTRE *reg;
+     { reg = NULL;
        Dls_data_set_R ( db->row[0], db->row[1], (gpointer)&reg, atof(db->row[2]) );
        reg->archivage = atoi(db->row[3]);
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: REGISTRE '%s:%s'=%f loaded (archivage=%d)", __func__,
