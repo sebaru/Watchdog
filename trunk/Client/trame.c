@@ -129,7 +129,6 @@
 /******************************************************************************************************************************/
  void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran )
   { if (trame_cadran->item_groupe) goo_canvas_item_remove( trame_cadran->item_groupe );
-    Trame_del_SVG (trame_cadran->fleche_tendance);                                         /* Désactive la gestion clignotement */
   }
 /******************************************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                                                */
@@ -294,54 +293,6 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     cairo_matrix_rotate ( &trame_cadran->transform, (gdouble)trame_cadran->cadran->angle*FACTEUR_PI );
     cairo_matrix_scale  ( &trame_cadran->transform, 1.0, 1.0 );
     goo_canvas_item_set_transform ( trame_cadran->item_groupe, &trame_cadran->transform );
-  }
-/******************************************************************************************************************************/
-/* Trame_rafraichir_cadran: remet à jour la position, rotation, echelle du cadran en parametre                                */
-/* Entrée: la structure graphique TRAME_ITEM_CADRAN                                                                           */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Trame_cadran_set_tendance ( struct TRAME_ITEM_CADRAN *trame_cadran )
-  { gfloat moyenne, ratio, angle;
-    gint cpt;
-    if (!(trame_cadran && trame_cadran->cadran && trame_cadran->fleche_tendance)) return;
-
-    if (trame_cadran->cadran->fleche == 0) return;
-
-    memcpy( &trame_cadran->old_valeur[0], &trame_cadran->old_valeur[1], 19*sizeof(gfloat) );
-    trame_cadran->old_valeur[19] = trame_cadran->valeur;
-    for (moyenne = 0.0, cpt =0; cpt<20; cpt++)
-     { moyenne += trame_cadran->old_valeur[cpt]; }
-    moyenne /= 20.0;
-
-    if (moyenne!=0.0) ratio = 1.0*(trame_cadran->valeur-moyenne)/moyenne;
-                 else ratio = 0.0;
-    if (ratio>3.0) ratio=3.0;
-    if (ratio<-3.0) ratio=-3.0;
-    angle = -90.0*ratio/3.0;
-
-         if (ratio < -2.0 || ratio > 2.0) { Trame_set_svg ( trame_cadran->fleche_tendance, "rouge", 0, FALSE ); }
-    else if (ratio < -1.0 || ratio > 1.0) { Trame_set_svg ( trame_cadran->fleche_tendance, "orange", 0, FALSE ); }
-    else Trame_set_svg ( trame_cadran->fleche_tendance, "vert", 0, FALSE );
-
-    cairo_matrix_init_identity ( &trame_cadran->transform );
-    if (trame_cadran->cadran->fleche == 2)
-     { cairo_matrix_translate ( &trame_cadran->transform,
-                                (gdouble)trame_cadran->cadran->position_x-65.0,
-                                (gdouble)trame_cadran->cadran->position_y
-                              );
-     }
-    else if (trame_cadran->cadran->fleche == 1)
-     { cairo_matrix_translate ( &trame_cadran->transform,
-                                (gdouble)trame_cadran->cadran->position_x+65.0,
-                                (gdouble)trame_cadran->cadran->position_y
-                              );
-     }
-    cairo_matrix_rotate ( &trame_cadran->transform, (gdouble)angle*FACTEUR_PI );
-    cairo_matrix_scale  ( &trame_cadran->transform, 0.5, 0.5 );
-    cairo_matrix_translate ( &trame_cadran->transform,
-                             -trame_cadran->fleche_tendance->taillex/2.0,
-                             -trame_cadran->fleche_tendance->tailley/2.0 );
-    goo_canvas_item_set_transform ( trame_cadran->fleche_tendance->item, &trame_cadran->transform );
   }
 /**********************************************************************************************************/
 /* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                         */
@@ -993,12 +944,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                      -1, GTK_ANCHOR_CENTER,
                                                      "font", "arial italic 12",
                                                      NULL);
-
-    if (!flag && trame_cadran->cadran->type == MNEMO_ENTREE_ANA && trame_cadran->cadran->fleche != 2)        /* 2 = No Fleche */
-     { trame_cadran->item_groupe_fleche = goo_canvas_group_new ( trame->canvas_root, NULL );                 /* Groupe cadran */
-       trame_cadran->fleche_tendance = Trame_new_SVG ( trame, trame_cadran->item_groupe_fleche,
-                                                     "fleche_tendance", "noir", 0, -1, -1, 0, 0 );
-     }
 
     if ( flag )                                                                                    /* flag == TRUE si ATELIER */
      { trame_cadran->select_mi = goo_canvas_rect_new (trame_cadran->item_groupe,

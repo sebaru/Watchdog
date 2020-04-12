@@ -160,7 +160,6 @@
 /**********************************************************************************************************/
  gboolean Timer ( gpointer data )
   { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
     static gboolean hidden=FALSE;
@@ -185,9 +184,7 @@
                                  break;
           case TYPE_COMMENTAIRE:
                                  break;
-          case TYPE_CADRAN:      trame_cadran = (struct TRAME_ITEM_CADRAN *)liste_motifs->data;
-                                 if (trame_cadran->cadran->type==MNEMO_ENTREE_ANA) Trame_cadran_set_tendance ( trame_cadran );
-                                 break;
+          case TYPE_CADRAN:      break;
           case TYPE_CAMERA_SUP : break;
           /*default: printf("Timer: type inconnu\n" );*/
         }

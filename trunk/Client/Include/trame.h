@@ -156,7 +156,6 @@
     cairo_matrix_t transform;
     struct CMD_TYPE_CADRAN *cadran;
     GooCanvasItem *item_groupe_fleche;
-    struct TRAME_ITEM_SVG *fleche_tendance;
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
     gint selection;
     gfloat valeur;
@@ -216,7 +215,6 @@
                                                          struct CMD_TYPE_PASSERELLE *pass );
  extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
                                                      struct CMD_TYPE_CADRAN *cadran );
- extern void Trame_cadran_set_tendance ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_ajout_motif_par_item ( struct TRAME *trame,
                                           struct TRAME_ITEM_MOTIF *trame_motif );
  extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );
