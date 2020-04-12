@@ -41,8 +41,8 @@
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_REGISTRE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src )
-  { gchar *acro, *libelle;
+ gboolean Mnemo_auto_create_REGISTRE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src )
+  { gchar *acro, *libelle, *unite;
     gchar requete[1024];
     gboolean retour;
     struct DB *db;
@@ -63,12 +63,22 @@
        return(FALSE);
      }
 
+    unite      = Normaliser_chaine ( unite_src );                                            /* Formatage correct des chaines */
+    if ( !unite )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation unite impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(libelle);
+       g_free(acro);
+       return(FALSE);
+     }
+
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_R SET tech_id='%s',acronyme='%s',libelle='%s' "
+                "INSERT INTO mnemos_R SET tech_id='%s',acronyme='%s',libelle='%s',unite='%s' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                tech_id, acro, libelle );
+                tech_id, acro, libelle, unite );
     g_free(libelle);
     g_free(acro);
+    g_free(unite);
 
     db = Init_DB_SQL();
     if (!db)
@@ -95,7 +105,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT r.valeur, r.unite"
+                "SELECT r.valeur, r.unite, r.archivage"
                 " FROM mnemos_R as r"
                 " WHERE r.tech_id='%s' AND r.acronyme='%s' LIMIT 1",
                 tech_id, acronyme
@@ -113,6 +123,58 @@
     return(db);
   }
 /******************************************************************************************************************************/
+/* Rechercher_AI_by_map_snips: Recupere l'AI lié au parametre snips                                                           */
+/* Entrée: le map_snips a rechercher                                                                                          */
+/* Sortie: la struct DB                                                                                                       */
+/******************************************************************************************************************************/
+ gboolean Recuperer_mnemos_R_by_map_question_vocale ( struct DB **db_retour, gchar *map_snips )
+  { gchar requete[1024];
+    gchar *commande;
+    gboolean retour;
+    struct DB *db;
+
+    commande = Normaliser_chaine ( map_snips );
+    if (!commande)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible commande", __func__ );
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),
+               "SELECT tech_id, acronyme, libelle, map_question_vocale, map_reponse_vocale "
+               "FROM mnemos_R"
+               " WHERE map_question_vocale LIKE '%s' ", commande );
+    g_free(commande);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
+  }
+/******************************************************************************************************************************/
+/* Recuperer_mnemo_base_DB_suite: Fonction itérative de récupération des mnémoniques de base                                  */
+/* Entrée: un pointeur sur la connexion de baase de données                                                                   */
+/* Sortie: une structure nouvellement allouée                                                                                 */
+/******************************************************************************************************************************/
+ gboolean Recuperer_mnemos_R_suite( struct DB **db_orig )
+  { struct DB *db;
+
+    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       return(FALSE);
+     }
+
+    return(TRUE);                                                                                    /* Résultat dans db->row */
+  }
+/******************************************************************************************************************************/
 /* Charger_conf_R: Recupération de la conf de l'entrée analogique en parametre                                               */
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
@@ -128,7 +190,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT m.tech_id, m.acronyme, m.valeur FROM mnemos_R as m"
+                "SELECT m.tech_id, m.acronyme, m.valeur, m.unite, m.archivage FROM mnemos_R as m"
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -136,10 +198,14 @@
        return;
      }
 
+    struct DLS_REGISTRE *reg;
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { Dls_data_set_R ( db->row[0], db->row[1], NULL, atof(db->row[2]) );
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: REGISTRE '%s:%s'=%f loaded", __func__,
-                 db->row[0], db->row[1], atof(db->row[2]) );
+     { reg = NULL;
+       Dls_data_set_R ( db->row[0], db->row[1], (gpointer)&reg, atof(db->row[2]) );
+       g_snprintf( reg->unite, sizeof(reg->unite), "%s", db->row[3] );
+       reg->archivage = atoi(db->row[4]);
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: REGISTRE '%s:%s'=%f %s loaded (archivage=%d)", __func__,
+                 db->row[0], db->row[1], atof(db->row[2]), reg->unite, reg->archivage );
      }
     Libere_DB_SQL( &db );
   }

@@ -34,18 +34,11 @@
  #define NOM_TABLE_MSG       "msgs"
 
 /******************************************** Définitions des prototypes ******************************************************/
- extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num );
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( guint id );
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_acronyme ( gchar *tech_id, gchar *acronyme );
  extern gboolean Recuperer_messageDB ( struct DB **db );
- extern gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length );
  extern struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db );
- extern gint Ajouter_messageDB ( struct CMD_TYPE_MESSAGE *msg );
  extern gint Mnemo_auto_create_MSG ( struct CMD_TYPE_MESSAGE *msg );
- extern gboolean Retirer_messageDB ( struct CMD_TYPE_MESSAGE *msg );
- extern gboolean Modifier_messageDB( struct CMD_TYPE_MESSAGE *msg );
- extern gboolean Modifier_messageDB_set_mp3 ( gint id, gboolean valeur );
- extern void Charger_messages ( void );
  extern void Charger_confDB_MSG ( void );
  extern void Updater_confDB_MSG ( void );
 #endif

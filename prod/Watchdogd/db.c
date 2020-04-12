@@ -1658,9 +1658,19 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4551)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_R` ADD `archivage` BOOLEAN NOT NULL DEFAULT '0'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_R` ADD `map_question_vocale` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_R` ADD `map_reponse_vocale` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun'");
+       Lancer_requete_SQL ( db, requete );
+
+     }
+
     Libere_DB_SQL(&db);
 fin:
-    database_version=4531;
+    database_version=4551;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

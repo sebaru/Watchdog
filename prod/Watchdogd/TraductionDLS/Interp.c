@@ -1019,9 +1019,6 @@
              liste = liste->next;
            }
 
-          g_snprintf( chaine, sizeof(chaine), " static gint Dls_id = %d;\n", id );
-          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
-
           liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
            { g_snprintf(chaine, sizeof(chaine),
@@ -1154,7 +1151,9 @@
                    break;
                  }
                 case MNEMO_REGISTRE:
-                 { Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                 { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
+                   if (!unite) unite="no unit";
+                   Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle, unite );
                    break;
                  }
                 case MNEMO_MOTIF:

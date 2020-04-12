@@ -874,6 +874,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 /******************************************************************************************************************************/
  void Trame_set_svg ( struct TRAME_ITEM_SVG *trame_svg, gchar *couleur, gint mode, gboolean cligno )
   { GdkPixbuf *pixbuf;
+    if (trame_svg == NULL) return;
     pixbuf = Charger_svg_pixbuf ( trame_svg->svg_name, couleur, mode, trame_svg->taillex, trame_svg->tailley );
     if (! (trame_svg->taillex>0 && trame_svg->tailley>0) )  /* Si chargement sans imposer la taille, reprend la taille du svg */
      { trame_svg->taillex = gdk_pixbuf_get_width(pixbuf);

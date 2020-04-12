@@ -196,24 +196,12 @@
     else return(0);
   }
 /******************************************************************************************************************************/
-/* Modifier_mnemo_fullDB: Modifie la configuration du mnemo paramètre                                                         */
-/* Entrée: une structure de mnemo FULL                                                                                        */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- static gboolean Modifier_mnemo_optionsDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
-  { switch (mnemo_full->mnemo_base.type)
-     { case MNEMO_ENTREE_ANA: return( Modifier_mnemo_aiDB      ( mnemo_full ) );
-       default : return(TRUE);
-     }
-  }
-/******************************************************************************************************************************/
 /* Ajouter_mnemo_baseDB: Ajout d'un nouvel mnemonique de base                                                                 */
 /* Entrée: une structure representant le mnemonique                                                                           */
 /* Sortie: l'id du nouveau mnemonique, ou -1 si erreur                                                                        */
 /******************************************************************************************************************************/
  gint Ajouter_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo )
   { mnemo->mnemo_base.id = Ajouter_Modifier_mnemo_baseDB( &mnemo->mnemo_base, TRUE );
-    Modifier_mnemo_optionsDB ( mnemo );
     return(mnemo->mnemo_base.id);
   }
 /******************************************************************************************************************************/
@@ -484,18 +472,6 @@
 
     memcpy ( &mnemo_full->mnemo_base, mnemo_base, sizeof( struct CMD_TYPE_MNEMO_BASE ) );
     g_free(mnemo_base);
-
-    switch( mnemo_full->mnemo_base.type )
-     { case MNEMO_ENTREE_ANA:
-        { struct CMD_TYPE_MNEMO_AI *mnemo_ai;
-          mnemo_ai = Rechercher_mnemo_aiDB ( id );
-          if (mnemo_ai)
-           { memcpy ( &mnemo_full->mnemo_ai, mnemo_ai, sizeof(struct CMD_TYPE_MNEMO_AI) );
-             g_free(mnemo_ai);
-           }
-          break;
-        }
-     }
     return(mnemo_full);
   }
 /******************************************************************************************************************************/
@@ -506,10 +482,6 @@
  gboolean Modifier_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { if (Modifier_mnemo_baseDB ( &mnemo_full->mnemo_base ) == FALSE )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Modifier_mnemo_baseDB failed", __func__ );
-       return(FALSE);
-     }
-    if (Modifier_mnemo_optionsDB ( mnemo_full ) == FALSE)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Modifier_mnemo_optionsDB failed", __func__ );
        return(FALSE);
      }
     return(TRUE);

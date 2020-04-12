@@ -476,11 +476,14 @@ CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_R` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL,
-  `valeur` float NOT NULL DEFAULT '0',
+  `valeur` FLOAT NOT NULL DEFAULT '0',
   `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `archivage` BOOLEAN NOT NULL DEFAULT '0',
+  `map_question_vocale` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `map_reponse_vocale` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE

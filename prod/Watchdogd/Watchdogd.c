@@ -50,8 +50,8 @@
  struct PARTAGE *Partage;                                                        /* Accès aux données partagées des processes */
 
 /******************************************************************************************************************************/
-/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                                  */
-/* Entrée: rien                                                                                                              */
+/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                                    */
+/* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Exporter ( void )
@@ -156,18 +156,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de données                                   */
-/* Entrée: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Charger_config_bit_interne( void )
-  { if (Config.instance_is_master)
-     { Charger_analogInput();
-       Charger_confDB_Registre();
-       Charger_confDB_MSG();
-       Charger_confDB_BOOL();
-     }
-  }
-/******************************************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                                             */
 /* Entrée: numero du signal à gerer                                                                                           */
 /******************************************************************************************************************************/
@@ -188,8 +176,8 @@
         { SB_SYS(4, !B(4));
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
-          Partage->audit_bit_interne_per_sec = 0;
-          Dls_data_set_AI ( "SYS", "DLS_BIT_PER_SEC", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold, TRUE );  /* historique */
+          Partage->audit_bit_interne_per_sec = 0;                                                               /* historique */
+          Dls_data_set_AI ( "SYS", "DLS_BIT_PER_SEC", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold, TRUE );
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
@@ -238,6 +226,17 @@
      }
   }
 /******************************************************************************************************************************/
+/* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de données                                   */
+/* Entrée: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Charger_config_bit_interne( void )
+  { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
+    Charger_analogInput();
+    Charger_confDB_Registre();
+    Charger_confDB_MSG();
+    Charger_confDB_BOOL();
+  }
+/******************************************************************************************************************************/
 /* Save_dls_data_to_DB : Envoie les infos DLS_DATA à la base de données pour sauvegarde !                                     */
 /* Entrée : Néant                                                                                                             */
 /* Sortie : Néant                                                                                                             */
@@ -245,11 +244,13 @@
  static void Save_dls_data_to_DB ( void )
   { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saving DLS_DATA", __func__ );
+    Updater_confDB_AO();                                                    /* Sauvegarde des valeurs des Sorties Analogiques */
     Updater_confDB_CH();                                                                  /* Sauvegarde des compteurs Horaire */
     Updater_confDB_CI();                                                              /* Sauvegarde des compteurs d'impulsion */
-    Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
+    Updater_confDB_AI();                                                              /* Sauvegarde des compteurs d'impulsion */
+    Updater_confDB_Registre();                                                                    /* Sauvegarde des registres */
     Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
-    Updater_confDB_AO();                                                    /* Sauvegarde des valeurs des Sorties Analogiques */
+    Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
@@ -383,6 +384,25 @@
                 Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s - %s", __func__,
                           map_question_vocale, tech_id, acronyme, libelle, map_reponse_vocale );
                 result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_ENTREE_ANA, tech_id, acronyme, &ai_p );
+                Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
+                          event->src_instance, result_string );
+                Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
+                                    "audio", "play_google", result_string, strlen(result_string)+1 );
+                Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
+                                    "audio", "play_google", result_string, strlen(result_string)+1 );
+                g_free(result_string);
+              }
+
+             if ( ! Recuperer_mnemos_R_by_map_question_vocale ( &db, (gchar *)payload ) )
+              { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Error searching Database for '%s'", __func__, payload ); }
+             else while ( Recuperer_mnemos_R_suite( &db ) )
+              { gchar *tech_id = db->row[0], *acronyme = db->row[1], *libelle = db->row[2];
+                gchar *map_question_vocale = db->row[3], *map_reponse_vocale = db->row[4];
+                gchar *result_string;
+                gpointer reg_p=NULL;
+                Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s - %s", __func__,
+                          map_question_vocale, tech_id, acronyme, libelle, map_reponse_vocale );
+                result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_REGISTRE, tech_id, acronyme, &reg_p );
                 Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
                           event->src_instance, result_string );
                 Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
@@ -732,6 +752,7 @@
        Partage->Dls_data_AI     = NULL;
        Partage->Dls_data_AO     = NULL;
        Partage->Dls_data_BOOL   = NULL;
+       Partage->Dls_data_REGISTRE = NULL;
        Partage->Dls_data_MSG    = NULL;
        Partage->Dls_data_CH     = NULL;
        Partage->Dls_data_CI     = NULL;
@@ -813,6 +834,9 @@
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique AI", __func__ );
        g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
        g_slist_free (Partage->Dls_data_AI);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique R", __func__ );
+       g_slist_foreach (Partage->Dls_data_REGISTRE, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_REGISTRE);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique AO", __func__ );
        g_slist_foreach (Partage->Dls_data_AO, (GFunc) g_free, NULL );
        g_slist_free (Partage->Dls_data_AO);
