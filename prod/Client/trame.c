@@ -303,7 +303,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
  void Trame_cadran_set_tendance ( struct TRAME_ITEM_CADRAN *trame_cadran )
   { gfloat moyenne, ratio, angle;
     gint cpt;
-    if (!(trame_cadran && trame_cadran->cadran)) return;
+    if (!(trame_cadran && trame_cadran->cadran && trame_cadran->fleche_tendance)) return;
 
     if (trame_cadran->cadran->fleche == 0) return;
 
