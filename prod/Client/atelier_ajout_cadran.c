@@ -44,7 +44,6 @@
  static GtkWidget *Entry_tech_id;                                                                   /* Libelle proprement dit */
  static GtkWidget *Entry_acronyme;                                                                  /* Libelle proprement dit */
  static GtkWidget *Spin_nb_decimal;
- static GtkWidget *Option_fleche;                                                /* Type de capteur (totalisateur/moyenneur/..) */
  static GtkWidget *Combo_type;
 
 /******************************************************************************************************************************/
@@ -90,7 +89,6 @@
              add_cadran.position_y = TAILLE_SYNOPTIQUE_Y/2;
              add_cadran.syn_id  = infos->syn.id;
              add_cadran.angle   = 0;
-             add_cadran.fleche      = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_fleche) );
              add_cadran.nb_decimal  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_nb_decimal) );
              type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
              add_cadran.type = Type_bit_interne_int( type );
@@ -106,7 +104,6 @@
            { type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
              trame_cadran->cadran->type = Type_bit_interne_int( type );
              g_free(type);
-             trame_cadran->cadran->fleche      = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_fleche) );
              trame_cadran->cadran->nb_decimal  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_nb_decimal) );
              g_snprintf( trame_cadran->cadran->tech_id, sizeof(trame_cadran->cadran->tech_id),
                          "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tech_id) ) );
@@ -144,7 +141,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_ajout_cadran)->vbox ), hboite, TRUE, TRUE, 0 );
 
-    table = gtk_table_new( 6, 2, TRUE );
+    table = gtk_table_new( 5, 2, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -175,20 +172,11 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_bitctrl, 0, 2, 3, 4 );
 
 /**************************************************** Entrys de commande ******************************************************/
-    label = gtk_label_new( _("Position Flèche") );
-    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 4, 5 );
-    Option_fleche = gtk_combo_box_new_text();
-    gtk_combo_box_append_text( GTK_COMBO_BOX(Option_fleche), "Droite" );
-    gtk_combo_box_append_text( GTK_COMBO_BOX(Option_fleche), "Gauche" );
-    gtk_combo_box_append_text( GTK_COMBO_BOX(Option_fleche), "Aucune" );
-    gtk_combo_box_set_active( GTK_COMBO_BOX(Option_fleche), 0 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Option_fleche, 1, 2, 4, 5 );
-
     label = gtk_label_new( _("Nombre de décimales") );
-    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 4, 5 );
     adj = gtk_adjustment_new( 0, 0, 2, 1, 1, 0 );
     Spin_nb_decimal = gtk_spin_button_new( (GtkAdjustment *)adj, 0.5, 0.5);
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_nb_decimal, 1, 2, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_nb_decimal, 1, 2, 4, 5 );
 
     if (trame_cadran)
      { switch(trame_cadran->cadran->type)
@@ -200,7 +188,6 @@
           case MNEMO_CPT_IMP   : gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 4 ); break;
           case MNEMO_REGISTRE  : gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 5 ); break;
         }
-       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_fleche), trame_cadran->cadran->fleche );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_nb_decimal), trame_cadran->cadran->nb_decimal );
        gtk_entry_set_text( GTK_ENTRY(Entry_tech_id), trame_cadran->cadran->tech_id );
        gtk_entry_set_text( GTK_ENTRY(Entry_acronyme), trame_cadran->cadran->acronyme );

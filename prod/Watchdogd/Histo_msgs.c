@@ -121,7 +121,7 @@
                 "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
-                " INNER JOIN %s as dls ON dls.id = msg.dls_id"
+                " INNER JOIN %s as dls ON dls.tech_id = msg.tech_id"
                 " INNER JOIN %s as syn ON syn.id = dls.syn_id"
                 " INNER JOIN %s as parent_syn ON parent_syn.id = syn.parent_id"
                 " WHERE alive = 1 ORDER BY histo.date_create",
@@ -155,7 +155,7 @@
                 "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
-                " INNER JOIN %s as dls ON dls.id = msg.dls_id"
+                " INNER JOIN %s as dls ON dls.tech_id = msg.tech_id"
                 " INNER JOIN %s as syn ON syn.id = dls.syn_id"
                 " WHERE histo.id = %d",
                 NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, /* From */

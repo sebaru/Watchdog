@@ -82,10 +82,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s(syn_id,type,posx,posy,angle,tech_id,acronyme,fleche,nb_decimal)"
-                " VALUES (%d,%d,%d,%d,'%d','%s','%s','%d','%d')", NOM_TABLE_CADRAN,
+                "INSERT INTO %s(syn_id,type,posx,posy,angle,tech_id,acronyme,nb_decimal)"
+                " VALUES (%d,%d,%d,%d,'%d','%s','%s','%d')", NOM_TABLE_CADRAN,
                 cadran->syn_id, cadran->type,
-                cadran->position_x, cadran->position_y, cadran->angle, tech_id, acronyme, cadran->fleche, cadran->nb_decimal );
+                cadran->position_x, cadran->position_y, cadran->angle, tech_id, acronyme, cadran->nb_decimal );
     g_free(tech_id);
     g_free(acronyme);
 
@@ -123,7 +123,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.type,%s.posx,%s.posy,%s.angle,"
-                "syns_cadrans.tech_id,syns_cadrans.acronyme, fleche, nb_decimal"
+                "syns_cadrans.tech_id,syns_cadrans.acronyme, nb_decimal"
                 " FROM %s WHERE syn_id=%d",
                 NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
                 NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
@@ -163,8 +163,7 @@
        cadran->angle        = atoi(db->row[5]);
        g_snprintf( cadran->tech_id,  sizeof(cadran->tech_id),  "%s" ,db->row[6] );               /* Recopie dans la structure */
        g_snprintf( cadran->acronyme, sizeof(cadran->acronyme), "%s" ,db->row[7] );               /* Recopie dans la structure */
-       cadran->fleche       = atoi(db->row[8]);
-       cadran->nb_decimal   = atof(db->row[9]);
+       cadran->nb_decimal   = atoi(db->row[8]);
      }
     return(cadran);
   }
@@ -227,11 +226,11 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "
-                "type=%d,posx=%d,posy=%d,angle='%d',tech_id='%s',acronyme='%s',fleche='%d',nb_decimal='%d'"
+                "type=%d,posx=%d,posy=%d,angle='%d',tech_id='%s',acronyme='%s',nb_decimal='%d'"
                 " WHERE id=%d;", NOM_TABLE_CADRAN,
                 cadran->type,
                 cadran->position_x, cadran->position_y, cadran->angle,
-                tech_id, acronyme, cadran->fleche, cadran->nb_decimal, cadran->id );
+                tech_id, acronyme, cadran->nb_decimal, cadran->id );
     g_free(tech_id);
     g_free(acronyme);
 
