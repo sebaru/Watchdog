@@ -204,11 +204,11 @@
     Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
-/* Imsgs_recevoir_imsg : CB appellé lorsque l'on recoit un message xmpp                                                       */
+/* Imsgs_handle_message_CB : CB appellé lorsque l'on recoit un message xmpp                                                       */
 /* Entrée : Le Handler, la connexion, le message                                                                              */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static int Imsgs_recevoir_imsg (xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
+ static int Imsgs_handle_message_CB (xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
   { struct IMSGSDB *imsg;
     struct DB *db;
     const char *from;
@@ -304,20 +304,6 @@ end:
          }
     Libere_DB_SQL( &db );
   }
-#ifdef bouh
-/******************************************************************************************************************************/
-/* Imsgs_account_authorization_requested : Fonction appellé quand un user veut nous ajouter dans sa liste de buddy            */
-/* Entrée: le compte et le user                                                                                               */
-/* Sortie: 1 = OK pour ajouter                                                                                                */
-/******************************************************************************************************************************/
- static int Imsgs_account_authorization_requested(PurpleAccount *account, const char *user)
-  { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE,
-             "%s: Buddy authorization request from '%s' for protocol '%s'", __func__,
-              user, purple_account_get_protocol_id(account) );
-    purple_account_add_buddy( account, purple_buddy_new 	( account, user, user ) );
-    return 1; //authorize buddy request automatically (-1 denies it)
-  }
-#endif
 /******************************************************************************************************************************/
 /* Imsgs_set_presence: Défini le statut présenté aux partenaires                                                              */
 /* Entrée : le statut au format chaine de caratères                                                                           */
@@ -348,14 +334,32 @@ end:
     xmpp_stanza_release(pres);
   }
 /******************************************************************************************************************************/
-/* Imsgs_get_presence_CB: appellé par libstrophe lors d'un changement de statut d'un partenaire                               */
+/* Imsgs_handle_presence_CB: appellé par libstrophe lors d'un changement de statut d'un partenaire                            */
 /* Entrée : les infos de la librairie                                                                                         */
 /******************************************************************************************************************************/
- static int Imsgs_get_presence_CB ( xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata )
+ static int Imsgs_handle_presence_CB ( xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata )
   { const char *type, *from;
     type = xmpp_stanza_get_type ( stanza );
     from = xmpp_stanza_get_from ( stanza );
     Imsgs_Sauvegarder_statut_contact ( from, (type ? strcmp(type,"unavailable") : TRUE) );
+    if (type && !strcmp(type,"subscribe"))                            /* Demande de souscription de la part d'un utilisateur */
+     { xmpp_stanza_t *pres;
+       pres = xmpp_presence_new(Cfg_imsgs.ctx);
+       xmpp_stanza_set_to  ( pres, from );
+       xmpp_stanza_set_type( pres, "subscribed" );
+       xmpp_send(Cfg_imsgs.conn, pres);
+       xmpp_stanza_release(pres);
+       pres = xmpp_presence_new(Cfg_imsgs.ctx);
+       xmpp_stanza_set_to  ( pres, Cfg_imsgs.username );
+       xmpp_stanza_set_type( pres, "subscribe" );
+       xmpp_send(Cfg_imsgs.conn, pres);
+       xmpp_stanza_release(pres);
+     }
+    gchar *buf; size_t buflen;
+    xmpp_stanza_to_text ( stanza, &buf, &buflen );
+    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
+    xmpp_free(Cfg_imsgs.ctx, buf);
+
     return(1);
   }
 /******************************************************************************************************************************/
@@ -368,8 +372,9 @@ end:
      {
        Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: Account '%s' connected and %s secure",
                  __func__, Cfg_imsgs.username, (xmpp_conn_is_secured (conn) ? "IS" : "IS NOT") );
-       xmpp_handler_add	( Cfg_imsgs.conn, Imsgs_recevoir_imsg,   NULL, "message",  NULL, NULL );
-       xmpp_handler_add	( Cfg_imsgs.conn, Imsgs_get_presence_CB, NULL, "presence", NULL, NULL );
+       xmpp_handler_add	( Cfg_imsgs.conn, Imsgs_handle_message_CB,  NULL, "message",  NULL, NULL );
+       xmpp_handler_add	( Cfg_imsgs.conn, Imsgs_handle_presence_CB, NULL, "presence", NULL, NULL );
+       /*xmpp_handler_add	( Cfg_imsgs.conn, Imsgs_test, NULL, NULL, NULL, NULL );*/
 
        Imsgs_set_presence( "A votre écoute !" );
        Imsgs_Envoi_message_to_all_available ( "Instance démarrée. A l'écoute !" );
@@ -410,12 +415,21 @@ end:
 reconnect:
     xmpp_initialize();
     Cfg_imsgs.ctx  = xmpp_ctx_new(NULL, xmpp_get_default_logger(XMPP_LEVEL_INFO));
+    if (!Cfg_imsgs.ctx)
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Ctx Init failed", __func__ ); }
+
     Cfg_imsgs.conn = xmpp_conn_new(Cfg_imsgs.ctx);
+    if (!Cfg_imsgs.conn)
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Connection New failed", __func__ ); }
+
     xmpp_conn_set_keepalive(Cfg_imsgs.conn, 60, 1);
     xmpp_conn_set_jid (Cfg_imsgs.conn, Cfg_imsgs.username);
     xmpp_conn_set_pass(Cfg_imsgs.conn, Cfg_imsgs.password);
 
-    xmpp_connect_client ( Cfg_imsgs.conn, NULL, 0, Imsgs_connexion_CB, NULL );
+    if (xmpp_connect_client ( Cfg_imsgs.conn, NULL, 0, Imsgs_connexion_CB, NULL ) != XMPP_EOK)
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Connexion failed", __func__ ); }
+    else
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Connexion to '%s' in progress.", __func__, Cfg_imsgs.username ); }
 
     while( Cfg_imsgs.lib->Thread_run == TRUE && Cfg_imsgs.signed_off == FALSE)               /* On tourne tant que necessaire */
      { struct CMD_TYPE_HISTO *histo, histo_buf;
@@ -444,8 +458,9 @@ reconnect:
     xmpp_shutdown();
 
     if (Cfg_imsgs.lib->Thread_run == TRUE && Cfg_imsgs.signed_off == TRUE)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: Account signed off. Why ?? Reconnect !", __func__ );
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Account signed off. Why ?? Reconnect in 5s!", __func__ );
        Cfg_imsgs.signed_off = FALSE;
+       sleep(5);
        goto reconnect;
      }
 
