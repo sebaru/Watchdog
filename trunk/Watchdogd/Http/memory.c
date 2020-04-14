@@ -74,6 +74,15 @@
     Json_add_bool ( builder, "etat", di->etat );
   }
 /******************************************************************************************************************************/
+/* Http_Memory_print_DI_to_json : Formate un bit au format JSON                                                               */
+/* Entrées: le builder et le bit                                                                                              */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ /*static void Http_Memory_print_DO_to_json ( JsonBuilder *builder, struct SORTIE_TOR *bit )
+  { Json_add_string ( builder, "acronyme",  bit->acronyme );
+    Json_add_bool ( builder, "etat", bit->etat );
+  }*/
+/******************************************************************************************************************************/
 /* Http_Memory_print_AI_to_json : Formate un bit au format JSON                                                               */
 /* Entrées: le builder et le bit                                                                                              */
 /* Sortie : néant                                                                                                             */
@@ -154,7 +163,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static gint Http_Memory_get_all ( struct lws *wsi, JsonObject *request, gchar *tech_id )
+ gint Http_Memory_get_all ( struct lws *wsi, gchar *tech_id )
   { JsonBuilder *builder;
     gsize taille_buf;
     GSList *liste;
@@ -252,7 +261,7 @@
      }
     Json_end_array( builder );
 /*----------------------------------------------- Entrées TOR ----------------------------------------------------------------*/
-    Json_add_array ( builder, "E" );
+    Json_add_array ( builder, "DI" );
     liste = Partage->Dls_data_DI;
     while(liste)
      { struct DLS_DI *bit=liste->data;
@@ -264,6 +273,19 @@
        liste = g_slist_next(liste);
      }
     Json_end_array( builder );
+/*----------------------------------------------- Sortie TOR -----------------------------------------------------------------*/
+/*    Json_add_array ( builder, "DO" );
+    liste = Partage->Dls_data_DO;
+    while(liste)
+     { struct SORTIE_TOR *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Http_Memory_print_DO_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );*/
 /*----------------------------------------------- Visuels --------------------------------------------------------------------*/
     Json_add_array ( builder, "I" );
     liste = Partage->Dls_data_VISUEL;
@@ -656,7 +678,7 @@
 
     mode = json_object_get_string_member ( request, "mode" );
     if (!mode)
-     { retour = Http_Memory_get_all ( wsi, request, tech_id );
+     { retour = Http_Memory_get_all ( wsi, tech_id );
        json_node_unref (Query);
        g_free(pss->post_data);
        return(retour);

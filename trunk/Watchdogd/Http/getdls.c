@@ -198,6 +198,8 @@
        while (Partage->com_dls.admin_stop) sched_yield();
        Partage->com_dls.admin_stop = id;
      }
+    else if ( ! strncasecmp( url, "run/", 4 ) )
+     { return(Http_Memory_get_all ( wsi, url+4 )); }
     else return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
     return(Http_Send_response_code ( wsi, HTTP_200_OK ));
   }

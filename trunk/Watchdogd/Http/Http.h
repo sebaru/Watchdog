@@ -125,5 +125,7 @@
  extern gint Http_Traiter_request_body_completion_memory ( struct lws *wsi );
  extern gboolean Http_Traiter_request_getdls ( struct lws *wsi, gchar *url ) ;
  extern gint Http_get_arg_int ( struct lws *wsi, gchar *arg );
+ extern gint Http_Memory_get_all ( struct lws *wsi, gchar *tech_id );
+
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
