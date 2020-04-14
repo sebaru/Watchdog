@@ -943,6 +943,54 @@
     dout->etat = valeur;
   }
 /******************************************************************************************************************************/
+/* Dls_data_get_bool_up: Remonte le front montant d'un boolean                                                                */
+/* Sortie : TRUE sur le boolean vient de passer à UP                                                                          */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_DO_up ( gchar *tech_id, gchar *acronyme, gpointer *dout_p )
+  { struct DLS_DO *dout;
+    GSList *liste;
+    if (dout_p && *dout_p)                                                           /* Si pointeur d'acceleration disponible */
+     { dout = (struct DLS_DO *)*dout_p;
+       return( dout->edge_up );
+     }
+    if (!tech_id || !acronyme) return(FALSE);
+
+    liste = Partage->Dls_data_DO;
+    while (liste)
+     { dout = (struct DLS_DO *)liste->data;
+       if ( !strcasecmp ( dout->acronyme, acronyme ) && !strcasecmp( dout->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste) return(FALSE);
+    if (dout_p) *dout_p = (gpointer)dout;                                           /* Sauvegarde pour acceleration si besoin */
+    return( dout->edge_up );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_bool_down: Remonte le front descendant d'un boolean                                                           */
+/* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                        */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_DO_down ( gchar *tech_id, gchar *acronyme, gpointer *dout_p )
+  { struct DLS_DO *dout;
+    GSList *liste;
+    if (dout_p && *dout_p)                                                           /* Si pointeur d'acceleration disponible */
+     { dout = (struct DLS_DO *)*dout_p;
+       return( dout->edge_down );
+     }
+    if (!tech_id || !acronyme) return(FALSE);
+
+    liste = Partage->Dls_data_DO;
+    while (liste)
+     { dout = (struct DLS_DO *)liste->data;
+       if ( !strcasecmp ( dout->acronyme, acronyme ) && !strcasecmp( dout->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste) return(FALSE);
+    if (dout_p) *dout_p = (gpointer)dout;                                           /* Sauvegarde pour acceleration si besoin */
+    return( dout->edge_down );
+  }
+/******************************************************************************************************************************/
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
