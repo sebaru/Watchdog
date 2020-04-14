@@ -76,7 +76,8 @@
     GNOMEUIINFO_SUBTREE(N_("_Low level"), Menu_lowlevel),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_SUBTREE(N_("_Client leger"), Menu_client_leger),
-    GNOMEUIINFO_SUBTREE(N_("Compilation forcée"), Menu_compilation_forcee),
+    GNOMEUIINFO_ITEM_STOCK( N_("Compilation forcée"), N_("Compilation forcée"),
+                            Menu_want_compilation_forcee, GNOME_STOCK_PIXMAP_JUMP_TO ),
     GNOMEUIINFO_END
   };
  GnomeUIInfo Menu_serveur[]=                                                  /*!< Définition du menu de connexion au serveur */

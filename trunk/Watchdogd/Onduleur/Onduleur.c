@@ -389,7 +389,7 @@
     if (module->started != TRUE) return(FALSE);
 
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->name, nom_cmd );
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "%s: %s: Sending '%s'", __func__, module->tech_id, buffer );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s'", __func__, module->tech_id, buffer );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                  "%s: %s: Sending INSTCMD failed (%s) error %s", __func__, module->tech_id,
@@ -406,7 +406,7 @@
        return(FALSE);
      }
     else
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
                 "%s: %s: Sending '%s' OK", __func__, module->tech_id, nom_cmd );
      }
     return(TRUE);

@@ -41,7 +41,22 @@
 /* Menu_want_client_leger: Appelle Firefox sur la page de garde de la nouvelle interface                  */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- void Menu_want_compliation_forcee ( void )
+ void Menu_want_compilation_forcee ( void )
+  { gchar chaine[256];
+    gint pid;
+    g_snprintf( chaine, sizeof(chaine), "cd ~/SRC; svn up; autogen.sh; sudo make install; kill %d;", getpid() );
+    pid = fork();
+    if (pid<0) return;
+    else if (!pid)                                                                       /* Lancement de la ligne de commande */
+     { system(chaine);
+       _exit(0);
+     }
+  }
+/**********************************************************************************************************/
+/* Menu_want_client_leger: Appelle Firefox sur la page de garde de la nouvelle interface                  */
+/* Entrée/Sortie: rien                                                                                    */
+/**********************************************************************************************************/
+ void Menu_want_client_leger ( void )
   { Firefox_exec ("/");
   }
 /**********************************************************************************************************/
