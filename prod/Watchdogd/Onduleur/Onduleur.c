@@ -389,7 +389,7 @@
     if (module->started != TRUE) return(FALSE);
 
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->name, nom_cmd );
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: %s: Sending '%s'", __func__, module->tech_id, buffer );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s'", __func__, module->tech_id, buffer );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                  "%s: %s: Sending INSTCMD failed (%s) error %s", __func__, module->tech_id,
@@ -406,8 +406,8 @@
        return(FALSE);
      }
     else
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-                "%s: %s: Sending '%s' OK", __func__, module->tech_id, buffer );
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
+                "%s: %s: Sending '%s' OK", __func__, module->tech_id, nom_cmd );
      }
     return(TRUE);
   }
@@ -465,31 +465,31 @@
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
  static gboolean Envoyer_sortie_ups( struct MODULE_UPS *module )
-  { if (Dls_data_get_bool_up ( module->tech_id, "LOAD_OFF", &module->do_load_off))
+  { if (Dls_data_get_DO_up ( module->tech_id, "LOAD_OFF", &module->do_load_off))
      { if (Onduleur_set_instcmd ( module, "load.off" ) == FALSE) return(FALSE); }
 
-    if (Dls_data_get_bool_up ( module->tech_id, "LOAD_ON", &module->do_load_on))
+    if (Dls_data_get_DO_up ( module->tech_id, "LOAD_ON", &module->do_load_on))
      { if (Onduleur_set_instcmd ( module, "load.on" ) == FALSE) return(FALSE); }
 
-    if (Dls_data_get_bool_up ( module->tech_id, "OUTLET_1_OFF", &module->do_outlet_1_off))
+    if (Dls_data_get_DO_up ( module->tech_id, "OUTLET_1_OFF", &module->do_outlet_1_off))
      { if (Onduleur_set_instcmd ( module, "outlet.1.load.off" ) == FALSE) return(FALSE); }
 
-    if (Dls_data_get_bool_up ( module->tech_id, "OUTLET_1_ON", &module->do_outlet_1_on))
+    if (Dls_data_get_DO_up ( module->tech_id, "OUTLET_1_ON", &module->do_outlet_1_on))
      { if (Onduleur_set_instcmd ( module, "outlet.1.load.on" ) == FALSE) return(FALSE); }
 
-    if (Dls_data_get_bool_up ( module->tech_id, "OUTLET_2_OFF", &module->do_outlet_2_off))
+    if (Dls_data_get_DO_up ( module->tech_id, "OUTLET_2_OFF", &module->do_outlet_2_off))
      { if (Onduleur_set_instcmd ( module, "outlet.2.load.off" ) == FALSE) return(FALSE); }
 
-    if (Dls_data_get_bool_up ( module->tech_id, "OUTLET_2_ON", &module->do_outlet_2_on))
+    if (Dls_data_get_DO_up ( module->tech_id, "OUTLET_2_ON", &module->do_outlet_2_on))
      { if (Onduleur_set_instcmd ( module, "outlet.2.load.on" ) == FALSE) return(FALSE); }
 
-    if (Dls_data_get_bool_up ( module->tech_id, "START_DEEP_BAT", &module->do_start_deep_bat))
+    if (Dls_data_get_DO_up ( module->tech_id, "START_DEEP_BAT", &module->do_start_deep_bat))
      { if (Onduleur_set_instcmd ( module, "test.battery.start.deep" ) == FALSE) return(FALSE); }
 
-    if (Dls_data_get_bool_up ( module->tech_id, "START_QUICK_BAT", &module->do_start_quick_bat))
+    if (Dls_data_get_DO_up ( module->tech_id, "START_QUICK_BAT", &module->do_start_quick_bat))
      { if (Onduleur_set_instcmd ( module, "test.battery.start.quick" ) == FALSE) return(FALSE); }
 
-    if (Dls_data_get_bool_up ( module->tech_id, "STOP_TEST_BAT", &module->do_stop_test_bat))
+    if (Dls_data_get_DO_up ( module->tech_id, "STOP_TEST_BAT", &module->do_stop_test_bat))
      { if (Onduleur_set_instcmd ( module, "test.battery.stop" ) == FALSE) return(FALSE); }
     return(TRUE);
   }

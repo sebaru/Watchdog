@@ -252,7 +252,7 @@
  extern void Menu_want_histo_msgs ( void );
  extern void Menu_want_supervision( void );
  extern void Menu_want_page_admin ( void );
-
+ extern void Menu_want_compilation_forcee ( void );
 
  extern void Proto_afficher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );                               /* Dans atelier.c */
  extern void Proto_cacher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );
