@@ -135,7 +135,7 @@
 /******************************************************************************************************************************/
  gint Http_Send_response_code ( struct lws *wsi, gint code )
   { unsigned char header[256], *header_cur, *header_end;
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s:  Sending Response code '%d'", __func__, code );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, (code == HTTP_200_OK ? LOG_INFO : LOG_WARNING), "%s:  Sending Response code '%d'", __func__, code );
 
     header_cur = header;
     header_end = header + sizeof(header);

@@ -132,9 +132,10 @@
     struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                                               /* DLS=rw, Sserveur=r */
     GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */
     GSList *Dls_data_BOOL;                                                              /* Liste des bistables et monostables */
-    GSList *Dls_data_DI;                                                                   /* Liste des entrees dynamique TOR */
-    GSList *Dls_data_AI;                                                                   /* Liste des entrees dynamique ANA */
-    GSList *Dls_data_AO;                                                                   /* Liste des sorties dynamique ANA */
+    GSList *Dls_data_DI;                                                                  /* Liste des entrees dynamiques TOR */
+    GSList *Dls_data_DO;                                                                  /* Liste des sorties dynamiques TOR */
+    GSList *Dls_data_AI;                                                                  /* Liste des entrees dynamiques ANA */
+    GSList *Dls_data_AO;                                                                  /* Liste des sorties dynamiques ANA */
     GSList *Dls_data_MSG;                                                                               /* Liste des messages */
     GSList *Dls_data_CI;                                                                  /* Liste des compteurs d'impulsions */
     GSList *Dls_data_CH;                                                                      /* Liste des compteurs horaires */

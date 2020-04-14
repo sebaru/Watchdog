@@ -875,19 +875,72 @@
     return( di->edge_down );
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_bool: Positionne un boolean                                                                                   */
-/* Sortie : TRUE sur le boolean est UP                                                                                        */
+/* Dls_data_get_DO: Remonte l'etat d'une sortie tor                                                                           */
+/* Sortie : TRUE sur la sortie est UP                                                                                         */
 /******************************************************************************************************************************/
- void Dls_data_set_DO ( gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur )
-  { struct DLS_BOOL *bool;
-    Dls_data_set_bool ( tech_id, acronyme, bool_p, valeur );
-    bool = *bool_p;
-
-    if ( bool->edge_up )
-     { pthread_mutex_lock( &Partage->com_msrv.synchro );
-       Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, bool );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+ gboolean Dls_data_get_DO ( gchar *tech_id, gchar *acronyme, gpointer *dout_p )
+  { struct DLS_DO *dout;
+    GSList *liste;
+    if (dout_p && *dout_p)                                                           /* Si pointeur d'acceleration disponible */
+     { dout = (struct DLS_DO *)*dout_p;
+       return( dout->etat );
      }
+    if (!tech_id || !acronyme) return(FALSE);
+
+    liste = Partage->Dls_data_DO;
+    while (liste)
+     { dout = (struct DLS_DO *)liste->data;
+       if ( !strcasecmp ( dout->acronyme, acronyme ) && !strcasecmp( dout->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste) return(FALSE);
+    if (dout_p) *dout_p = (gpointer)dout;                                           /* Sauvegarde pour acceleration si besoin */
+    return( dout->etat );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_DO: Positionne une bit de sortie TOR                                                                          */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_DO ( gchar *tech_id, gchar *acronyme, gpointer *dout_p, gboolean valeur )
+  { struct DLS_DO *dout;
+
+    if (!dout_p || !*dout_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_DO;
+       while (liste)
+        { dout = (struct DLS_DO *)liste->data;
+          if ( !strcasecmp ( dout->acronyme, acronyme ) && !strcasecmp( dout->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+
+       if (!liste)
+        { dout = g_try_malloc0 ( sizeof(struct DLS_DO) );
+          if (!dout)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( dout->acronyme, sizeof(dout->acronyme), "%s", acronyme );
+          g_snprintf( dout->tech_id,  sizeof(dout->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_DO = g_slist_prepend ( Partage->Dls_data_DO, dout );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding DLS_DO '%s:%s'", __func__, tech_id, acronyme );
+        }
+       if (dout_p) *dout_p = (gpointer)dout;                                              /* Sauvegarde pour acceleration si besoin */
+      }
+    else dout = (struct DLS_DO *)*dout_p;
+
+    if (dout->etat != valeur)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_DO '%s:%s'=%d ",
+                 __func__, dout->tech_id, dout->acronyme );
+       pthread_mutex_lock( &Partage->com_msrv.synchro );
+       Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, dout );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+
+     }
+    dout->etat = valeur;
   }
 /******************************************************************************************************************************/
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */

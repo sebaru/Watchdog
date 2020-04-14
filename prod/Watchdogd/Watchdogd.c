@@ -749,6 +749,7 @@
 
 /************************************* Création des zones de bits internes dynamiques *****************************************/
        Partage->Dls_data_DI     = NULL;
+       Partage->Dls_data_DO     = NULL;
        Partage->Dls_data_AI     = NULL;
        Partage->Dls_data_AO     = NULL;
        Partage->Dls_data_BOOL   = NULL;
@@ -831,6 +832,9 @@
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique DI", __func__ );
        g_slist_foreach (Partage->Dls_data_DI, (GFunc) g_free, NULL );
        g_slist_free (Partage->Dls_data_DI);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique DO", __func__ );
+       g_slist_foreach (Partage->Dls_data_DO, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_DO);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique AI", __func__ );
        g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
        g_slist_free (Partage->Dls_data_AI);
