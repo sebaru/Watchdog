@@ -51,7 +51,8 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Http_Memory_print_CH_to_json ( JsonBuilder *builder, struct DLS_CH *bit )
-  { Json_add_int  ( builder, "valeur", bit->valeur );
+  { Json_add_string ( builder, "acronyme",  bit->acronyme );
+    Json_add_int  ( builder, "valeur", bit->valeur );
     Json_add_bool ( builder, "etat",   bit->etat );
     Json_add_int  ( builder, "last_arch", bit->last_arch );
   };
