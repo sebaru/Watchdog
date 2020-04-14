@@ -54,6 +54,7 @@
     json_builder_begin_object (builder);                                                                 /* Contenu du Status */
     Json_add_string ( builder, "tech_id", tech_id );
     Json_add_string ( builder, "acronyme", acronyme );
+    Json_add_int    ( builder, "top", Partage->top );
 
 /*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
     if (!strcasecmp(type,"CI"))
@@ -104,6 +105,7 @@
        Json_add_double ( builder, "valeur",       ai->val_ech );
        Json_add_int    ( builder, "type",         ai->type );
        Json_add_int    ( builder, "in_range",     ai->inrange );
+       Json_add_int    ( builder, "last_arch",    ai->last_arch );
      }
 /*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
     else if (!strcasecmp(type,"AO"))

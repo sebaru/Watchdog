@@ -116,7 +116,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
+                "SELECT histo.id, histo.alive, msg.libelle, msg.type, dls.syn_id,"
                 "parent_syn.page, syn.page, histo.nom_ack, histo.date_create,"
                 "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
@@ -150,7 +150,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
+                "SELECT histo.id, histo.alive, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create,"
                 "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
@@ -198,19 +198,19 @@
     if (!histo_msgs) Info_new( Config.log, Config.log_msrv, LOG_ERR,
                               "%s: Erreur allocation mémoire", __func__ );
     else                                                                                         /* Recopie dans la structure */
-     { g_snprintf( histo_msgs->msg.libelle,         sizeof(histo_msgs->msg.libelle),         "%s", db->row[3]  );
-       g_snprintf( histo_msgs->msg.syn_parent_page, sizeof(histo_msgs->msg.syn_parent_page), "%s", db->row[6]  );
-       g_snprintf( histo_msgs->msg.syn_page,        sizeof(histo_msgs->msg.syn_page),        "%s", db->row[7]  );
-       g_snprintf( histo_msgs->nom_ack,             sizeof(histo_msgs->nom_ack),             "%s", db->row[8]  );
-       g_snprintf( histo_msgs->msg.dls_shortname,   sizeof(histo_msgs->msg.dls_shortname),   "%s", db->row[12] );
+     { g_snprintf( histo_msgs->msg.libelle,         sizeof(histo_msgs->msg.libelle),         "%s", db->row[2]  );
+       g_snprintf( histo_msgs->msg.syn_parent_page, sizeof(histo_msgs->msg.syn_parent_page), "%s", db->row[5]  );
+       g_snprintf( histo_msgs->msg.syn_page,        sizeof(histo_msgs->msg.syn_page),        "%s", db->row[6]  );
+       g_snprintf( histo_msgs->nom_ack,             sizeof(histo_msgs->nom_ack),             "%s", db->row[7]  );
+       g_snprintf( histo_msgs->msg.dls_shortname,   sizeof(histo_msgs->msg.dls_shortname),   "%s", db->row[11] );
        histo_msgs->id               = atoi(db->row[0]);
        histo_msgs->alive            = atoi(db->row[1]);
-       histo_msgs->msg.type         = atoi(db->row[4]);
-       histo_msgs->msg.syn_id       = atoi(db->row[5]);
-       g_snprintf ( histo_msgs->date_create, sizeof(histo_msgs->date_create), "%s", db->row[9] );
-       if (db->row[10]) g_snprintf ( histo_msgs->date_fixe,   sizeof(histo_msgs->date_fixe), "%s", db->row[10] );
-       if (db->row[11]) g_snprintf ( histo_msgs->date_fin,    sizeof(histo_msgs->date_fin), "%s", db->row[11] );
-       histo_msgs->msg.id           = atoi(db->row[13]);
+       histo_msgs->msg.type         = atoi(db->row[3]);
+       histo_msgs->msg.syn_id       = atoi(db->row[4]);
+       g_snprintf ( histo_msgs->date_create, sizeof(histo_msgs->date_create), "%s", db->row[8] );
+       if (db->row[9]) g_snprintf ( histo_msgs->date_fixe,   sizeof(histo_msgs->date_fixe), "%s", db->row[9] );
+       if (db->row[10]) g_snprintf ( histo_msgs->date_fin,    sizeof(histo_msgs->date_fin), "%s", db->row[10] );
+       histo_msgs->msg.id           = atoi(db->row[12]);
      }
     return(histo_msgs);
   }

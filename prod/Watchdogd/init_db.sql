@@ -328,6 +328,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `type` int(11) NOT NULL DEFAULT '0',
   `min` float NOT NULL DEFAULT '0',
   `max` float NOT NULL DEFAULT '0',
+  `valeur` float NOT NULL DEFAULT '0',
   `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
   `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
