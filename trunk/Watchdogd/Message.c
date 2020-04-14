@@ -75,7 +75,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s SET tech_id='%s',acronyme='%s',libelle='%s',libelle_audio='%s',libelle_sms='%s',"
-                "type='%d',audio='0',bit_audio='0',enable='1',sms='0' "
+                "type='%d',audio='0',enable='1',sms='0' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), type=VALUES(type)", NOM_TABLE_MSG, msg->tech_id, msg->acronyme,
                 libelle, libelle, libelle, msg->type
               );
