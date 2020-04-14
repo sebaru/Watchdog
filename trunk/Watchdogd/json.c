@@ -75,6 +75,40 @@
     json_builder_add_double_value ( builder, valeur );
   }
 /******************************************************************************************************************************/
+/* Json_add_object: Ajoute un enregistrement de type object dans le builder                                                   */
+/* Entrée: le builder, le nom du parametre                                                                                    */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_add_array ( JsonBuilder *builder, gchar *name )
+  { json_builder_set_member_name  ( builder, name );
+    json_builder_begin_array (builder);                                                                  /* Contenu du Status */
+  }
+/******************************************************************************************************************************/
+/* Json_end_object: Termine l'object en cours de ocnstruction dans le builder                                                 */
+/* Entrée: le builder                                                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_end_array ( JsonBuilder *builder )
+  { json_builder_end_array (builder);                                                                    /* Contenu du Status */
+  }
+/******************************************************************************************************************************/
+/* Json_add_object: Ajoute un enregistrement de type object dans le builder                                                   */
+/* Entrée: le builder, le nom du parametre                                                                                    */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_add_object ( JsonBuilder *builder, gchar *name )
+  { json_builder_set_member_name  ( builder, name );
+    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
+  }
+/******************************************************************************************************************************/
+/* Json_end_object: Termine l'object en cours de ocnstruction dans le builder                                                 */
+/* Entrée: le builder                                                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_end_object ( JsonBuilder *builder )
+  { json_builder_end_object (builder);                                                                 /* Contenu du Status */
+  }
+/******************************************************************************************************************************/
 /* Json_get_buf: Termine le buffer JSON en le formatant en chaine de caractere                                                */
 /* Entrée: le builder, un gsize * pour récupérer la taille du buffer                                                          */
 /* Sortie: le buffer, a g_freé quand plus besoin                                                                              */

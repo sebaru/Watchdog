@@ -36,6 +36,10 @@
  extern void Json_add_int ( JsonBuilder *builder, gchar *name, gint valeur );
  extern void Json_add_double ( JsonBuilder *builder, gchar *name, gdouble valeur );
  extern void Json_add_bool ( JsonBuilder *builder, gchar *name, gboolean bool );
+ extern void Json_add_object ( JsonBuilder *builder, gchar *name );
+ extern void Json_end_object ( JsonBuilder *builder );
+ extern void Json_add_array ( JsonBuilder *builder, gchar *name );
+ extern void Json_end_array ( JsonBuilder *builder );
  extern gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p );
  extern JsonNode *Json_get_from_string ( gchar *chaine );
  extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );
