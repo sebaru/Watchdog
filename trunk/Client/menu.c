@@ -7,7 +7,7 @@
  * menu.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sébastien Lefevre
+ * Copyright (C) 2010-2020 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,17 +35,18 @@
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
-/********************************* Définitions des prototypes programme ***********************************/
+/********************************* DÃ©finitions des prototypes programme ***********************************/
  #include "protocli.h"
 /**********************************************************************************************************/
-/* Menu_want_plugin_dls: l'utilisateur desire editer la base plugin_dls                                   */
-/* Entrée/Sortie: rien                                                                                    */
+/* Menu_want_client_leger: Appelle Firefox sur la page de garde de la nouvelle interface                  */
+/* EntrÃ©e/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- void Menu_want_client_leger ( void )
-  { Firefox_exec ("/"); }
+ void Menu_want_compliation_forcee ( void )
+  { Firefox_exec ("/");
+  }
 /**********************************************************************************************************/
 /* Menu_want_plugin_dls: l'utilisateur desire editer la base plugin_dls                                   */
-/* Entrée/Sortie: rien                                                                                    */
+/* EntrÃ©e/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Menu_want_plugin_dls ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_PLUGIN_DLS, 0, TRUE )) return;
@@ -53,7 +54,7 @@
   }
 /**********************************************************************************************************/
 /* Menu_want_page_admin: l'utilisateur desire envoyer des requetes d'administration                       */
-/* Entrée/Sortie: rien                                                                                    */
+/* EntrÃ©e/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Menu_want_page_admin ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_ADMIN, 0, TRUE )) return;
@@ -61,7 +62,7 @@
   }
 /**********************************************************************************************************/
 /* Menu_want_message: l'utilisateur desire editer la base msgs                                            */
-/* Entrée/Sortie: rien                                                                                    */
+/* EntrÃ©e/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Menu_want_camera ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_CAMERA, 0, TRUE )) return;
@@ -69,7 +70,7 @@
   }
 /**********************************************************************************************************/
 /* Menu_want_synoptique: l'utilisateur desire editer la base syns                                         */
-/* Entrée/Sortie: rien                                                                                    */
+/* EntrÃ©e/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Menu_want_synoptique ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_SYNOPTIQUE, 0, TRUE )) return;
@@ -77,7 +78,7 @@
   }
 /**********************************************************************************************************/
 /* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                             */
-/* Entrée/Sortie: rien                                                                                    */
+/* EntrÃ©e/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Menu_want_supervision ( void )
   { struct CMD_TYPE_SYNOPTIQUE cmd;
