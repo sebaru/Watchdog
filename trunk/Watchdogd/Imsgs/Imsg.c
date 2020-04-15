@@ -212,7 +212,7 @@
   { struct IMSGSDB *imsg;
     struct DB *db;
     const char *from;
-    gchar *message, *ptr, hostonly[80];
+    gchar *message;
 
     from = xmpp_stanza_get_attribute	( stanza, "from" );
     message = xmpp_message_get_body 	( stanza );
@@ -223,11 +223,7 @@
 
     Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: From '%s' -> '%s'", __func__, from, message );
 
-    g_snprintf( hostonly, sizeof(hostonly), "%s", from );
-    ptr = strstr( hostonly, "/" );
-    if (ptr) *ptr=0;
-
-    imsg = Imsgs_recipient_allow_command ( hostonly );
+    imsg = Imsgs_recipient_allow_command ( from );
     if ( imsg == NULL )
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING,
                 "%s : unknown sender '%s' or not allow to send command. Dropping message...", __func__, from );
