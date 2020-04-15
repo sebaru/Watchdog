@@ -390,7 +390,8 @@ end:
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct ZMQUEUE *zmq_msg;
-
+    gint retour;
+    
     prctl(PR_SET_NAME, "W-IMSGS", 0, 0, 0 );
     memset( &Cfg_imsgs, 0, sizeof(Cfg_imsgs) );                                     /* Mise a zero de la structure de travail */
     Cfg_imsgs.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
@@ -411,8 +412,8 @@ end:
 
     Cfg_imsgs.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
     zmq_msg = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-
 reconnect:
+    Cfg_imsgs.signed_off = FALSE;
     xmpp_initialize();
     Cfg_imsgs.ctx  = xmpp_ctx_new(NULL, xmpp_get_default_logger(XMPP_LEVEL_INFO));
     if (!Cfg_imsgs.ctx)
@@ -426,8 +427,11 @@ reconnect:
     xmpp_conn_set_jid (Cfg_imsgs.conn, Cfg_imsgs.username);
     xmpp_conn_set_pass(Cfg_imsgs.conn, Cfg_imsgs.password);
 
-    if (xmpp_connect_client ( Cfg_imsgs.conn, NULL, 0, Imsgs_connexion_CB, NULL ) != XMPP_EOK)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Connexion failed", __func__ ); }
+    retour = xmpp_connect_client ( Cfg_imsgs.conn, NULL, 0, Imsgs_connexion_CB, NULL );
+    if ( retour != XMPP_EOK)
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Connexion failed with error %d", __func__, retour );
+       Cfg_imsgs.signed_off = TRUE;
+     }
     else
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Connexion to '%s' in progress.", __func__, Cfg_imsgs.username ); }
 
@@ -453,9 +457,13 @@ reconnect:
         }
      }                                                                                         /* Fin du while partage->arret */
     xmpp_disconnect(Cfg_imsgs.conn);
+    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG, "%s: Disconnect OK", __func__ );
     xmpp_conn_release(Cfg_imsgs.conn);
+    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG, "%s: Connection Release OK", __func__ );
     xmpp_ctx_free(Cfg_imsgs.ctx);
+    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG, "%s: Ctx Free OK", __func__ );
     xmpp_shutdown();
+    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG, "%s: XMPPshutdown OK", __func__ );
 
     if (Cfg_imsgs.lib->Thread_run == TRUE && Cfg_imsgs.signed_off == TRUE)
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Account signed off. Why ?? Reconnect in 5s!", __func__ );
