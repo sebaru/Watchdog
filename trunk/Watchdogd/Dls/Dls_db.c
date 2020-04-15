@@ -84,7 +84,7 @@
                "INSERT INTO dls SET "
                "tech_id='%s',shortname='%s',name='%s',package='custom',"
                "actif=0,syn_id=1,compil_status=0,sourcecode='/* Default ! */' "
-               "ON DUPLICATE KEY UPDATE tech_id=VALUES(tech_id)", tech_id, tech_id, nom );
+               "ON DUPLICATE KEY UPDATE shortname=VALUES(shortname),name=VALUES(name)", tech_id, tech_id, nom );
     g_free(nom);
 
     db = Init_DB_SQL();

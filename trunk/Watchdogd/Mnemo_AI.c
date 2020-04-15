@@ -309,7 +309,8 @@
     ai->type     = atoi(db->row[2]);
     g_snprintf( ai->unite, sizeof(ai->unite), "%s", db->row[3] );
     ai->val_avant_ech = atof(db->row[4]);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s' loaded", __func__, ai->tech_id, ai->acronyme );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s'=%f %s loaded", __func__,
+              ai->tech_id, ai->acronyme, ai->val_avant_ech, ai->unite );
     Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/

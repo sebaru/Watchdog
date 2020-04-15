@@ -169,35 +169,11 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Rechercher_MODULE_UPS: Recupération du ups dont le num est en parametre                                                    */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: une GList                                                                                                          */
-/******************************************************************************************************************************/
- static void Decharger_un_UPS ( struct MODULE_UPS *module )
-  { if (!module) return;
-    pthread_mutex_lock( &Cfg_ups.lib->synchro );
-    Cfg_ups.Modules_UPS = g_slist_remove ( Cfg_ups.Modules_UPS, module );
-    g_free(module);
-    pthread_mutex_unlock( &Cfg_ups.lib->synchro );
-  }
-/******************************************************************************************************************************/
-/* Decharger_tous_Decharge l'ensemble des modules UPS                                                                         */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- static void Decharger_tous_UPS ( void  )
-  { struct MODULE_UPS *module;
-    while ( Cfg_ups.Modules_UPS )
-     { module = (struct MODULE_UPS *)Cfg_ups.Modules_UPS->data;
-       Decharger_un_UPS ( module );
-     }
-  }
-/******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
 /* Entrée: un id                                                                                                              */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Deconnecter_module ( struct MODULE_UPS *module )
+ static void Deconnecter_UPS ( struct MODULE_UPS *module )
   { if (!module) return;
 
     if (module->started == TRUE)
@@ -379,6 +355,31 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Rechercher_MODULE_UPS: Recupération du ups dont le num est en parametre                                                    */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
+ static void Decharger_un_UPS ( struct MODULE_UPS *module )
+  { if (!module) return;
+    pthread_mutex_lock( &Cfg_ups.lib->synchro );
+    Cfg_ups.Modules_UPS = g_slist_remove ( Cfg_ups.Modules_UPS, module );
+    pthread_mutex_unlock( &Cfg_ups.lib->synchro );
+    Deconnecter_UPS ( module );
+    g_free(module);
+  }
+/******************************************************************************************************************************/
+/* Decharger_tous_Decharge l'ensemble des modules UPS                                                                         */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Decharger_tous_UPS ( void  )
+  { struct MODULE_UPS *module;
+    while ( Cfg_ups.Modules_UPS )
+     { module = (struct MODULE_UPS *)Cfg_ups.Modules_UPS->data;
+       Decharger_un_UPS ( module );
+     }
+  }
+/******************************************************************************************************************************/
 /* Onduleur_set_instcmd: Envoi d'une instant commande à l'ups                                                                 */
 /* Entrée : l'ups, le nom de la commande                                                                                      */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
@@ -394,7 +395,7 @@
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                  "%s: %s: Sending INSTCMD failed (%s) error %s", __func__, module->tech_id,
                  buffer, (char *)upscli_strerror(&module->upsconn) );
-       Deconnecter_module ( module );
+       Deconnecter_UPS ( module );
        return(FALSE);
      }
 
@@ -402,7 +403,7 @@
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "%s: %s: Reading INSTCMD result failed (%s) error %s", __func__, module->tech_id,
                  nom_cmd, (char *)upscli_strerror(&module->upsconn) );
-       Deconnecter_module ( module );
+       Deconnecter_UPS ( module );
        return(FALSE);
      }
     else
@@ -427,7 +428,7 @@
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "%s: %s: Sending GET VAR failed (%s) error=%s", __func__, module->tech_id,
                 buffer, (char *)upscli_strerror(&module->upsconn) );
-       Deconnecter_module ( module );
+       Deconnecter_UPS ( module );
        return(NULL);
      }
 
@@ -455,7 +456,7 @@
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
              "%s: %s: Reading GET VAR %s Failed : error %s (buffer %s)", __func__, module->tech_id,
               nom_var, (char *)upscli_strerror(&module->upsconn), buffer );
-    Deconnecter_module ( module );
+    Deconnecter_UPS ( module );
     module->date_next_connexion = Partage->top + UPS_RETRY;
     return(NULL);
   }
@@ -613,7 +614,7 @@
        if (Cfg_ups.admin_stop)
         { module = Chercher_module_ups_by_id ( Cfg_ups.admin_stop );
           if (module) { module->enable = FALSE;
-                        Deconnecter_module  ( module );
+                        Deconnecter_UPS  ( module );
                         module->date_next_connexion = 0;                                         /* RAZ de la date de retente */
   /*                      Modifier_MODULE_UPS( &module->name );
                       }
@@ -637,7 +638,7 @@
            { if ( ! Connecter_ups( module ) )                                                 /* Demande de connexion a l'ups */
               { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                          "%s: %s: Module DOWN", __func__, module->tech_id );
-                Deconnecter_module ( module );                                         /* Sur erreur, on deconnecte le module */
+                Deconnecter_UPS ( module );                                         /* Sur erreur, on deconnecte le module */
                 module->date_next_connexion = Partage->top + UPS_RETRY;
               }
            }
@@ -645,14 +646,14 @@
            { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                       "%s: %s: Envoi des sorties ups", __func__, module->tech_id );
              if ( Envoyer_sortie_ups ( module ) == FALSE )
-              { Deconnecter_module ( module );                                         /* Sur erreur, on deconnecte le module */
+              { Deconnecter_UPS ( module );                                         /* Sur erreur, on deconnecte le module */
                 module->date_next_connexion = Partage->top + UPS_RETRY;                          /* On retente dans longtemps */
               }
              else
               { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                          "%s: %s: Interrogation ups", __func__, module->tech_id );
                 if ( Interroger_ups ( module ) == FALSE )
-                 { Deconnecter_module ( module );
+                 { Deconnecter_UPS ( module );
                    module->date_next_connexion = Partage->top + UPS_RETRY;                       /* On retente dans longtemps */
                  }
                 else module->date_next_connexion = Partage->top + UPS_POLLING;               /* Update toutes les xx secondes */
