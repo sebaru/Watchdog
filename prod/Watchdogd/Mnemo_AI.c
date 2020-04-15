@@ -63,22 +63,33 @@
        return(FALSE);
      }
 
-    unite      = Normaliser_chaine ( unite_src );                                            /* Formatage correct des chaines */
-    if ( !unite )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation unite impossible. Mnemo NOT added nor modified.", __func__ );
-       g_free(acro);
-       g_free(libelle);
-       return(FALSE);
-     }
+    if(unite_src)
+     { unite = Normaliser_chaine ( unite_src );                                              /* Formatage correct des chaines */
+       if ( !unite )
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                   "%s: Normalisation unite impossible. Mnemo NOT added nor modified.", __func__ );
+          g_free(acro);
+          g_free(libelle);
+          return(FALSE);
+        }
+     } else unite = NULL;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_AI SET tech_id='%s',acronyme='%s',libelle='%s', unite='%s' "
-                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle),unite=VALUES(unite)",
-                tech_id, acro, libelle, unite );
-    g_free(unite);
+                "INSERT INTO mnemos_AI SET tech_id='%s',acronyme='%s',libelle='%s' ",
+                tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);
+
+    if (unite)
+     { gchar add[128];
+       g_snprintf( add, sizeof(add), ",unite='%s'", unite );
+       g_strlcat ( requete, add, sizeof(requete) );
+     }
+    g_strlcat ( requete, " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle) ", sizeof(requete) );
+    if (unite)
+     { g_strlcat ( requete, ",unite=VALUES(unite)", sizeof(requete) );
+       g_free(unite);
+     }
 
     db = Init_DB_SQL();
     if (!db)
