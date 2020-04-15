@@ -28,14 +28,14 @@
  #ifndef _PROTOCLI_H_
  #define _PROTOCLI_H_
 
- #include <gnome.h>
+ #include <gtk/gtk.h>
  #include <openssl/ssl.h>
- #include <gtksourceview/gtksourceprintcompositor.h>
+ //#include <gtksourceview/gtksourceprintcompositor.h>
  #include <curl/curl.h>
  #include <json-glib/json-glib.h>
 
  #include "Reseaux.h"
- #include "trame.h"
+ //#include "trame.h"
 
 
  #define TEMPS_MAX_PULSE   10                                            /* 10 secondes de battements maximum pour le serveur */
@@ -156,6 +156,7 @@
   };
 
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
+#ifdef bouh
  extern gboolean WTD_Curl_post_request ( gchar *uri, gint post, gchar *post_data, gint post_length );
  extern CURL *WTD_Curl_init ( gchar *erreur );
  extern void Firefox_exec ( gchar *uri );
@@ -171,7 +172,6 @@
  extern void Raz_progress_pulse( void );
  extern struct PAGE_NOTEBOOK *Chercher_page_notebook ( guint type, guint id, gboolean affiche );
  extern gboolean Tester_page_notebook ( guint type );
- extern GtkWidget *Bobouton ( GdkPixmap *pix, GdkBitmap *bitmap, gchar *cadran );
  extern gint Nbr_page_type ( gint type );
  extern struct PAGE_NOTEBOOK *Page_actuelle ( void );
 
@@ -426,7 +426,7 @@
  extern void Proto_rafraichir_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo );
 
  extern void Menu_ajouter_editer_horloge ( struct CMD_TYPE_MNEMO_FULL *edit_horloge, gint id_mnemo);  /* Dans ajout_horloge.c */
-
+#endif
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
 

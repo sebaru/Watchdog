@@ -25,7 +25,8 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
+ #include <gtk/gtk.h>
+ #include <sys/stat.h>
  #include <string.h>
  #include <stdlib.h>
  #include <signal.h>
@@ -39,7 +40,7 @@
  #include "Config_cli.h"
  #include "client.h"
 
- #define TITRE_F_CONFIG     N_("Watchdog ver" VERSION)
+ #define TITRE_FENETRE "Watchdog ver" VERSION " - GTK3"
 
  GtkWidget *F_client;                                                                                /* Widget Fenetre Client */
 
@@ -53,6 +54,7 @@
  static gboolean Arret = FALSE;
 
 /***************************************************** Définition du menu *****************************************************/
+#ifdef bouh
  GnomeUIInfo Menu_lowlevel[]=                                            /*!< Définition du menu lowlevel */
   { GNOMEUIINFO_ITEM_STOCK( N_("_Camera"), N_("Edit Camera"),
                             Menu_want_camera, GNOME_STOCK_PIXMAP_MIC ),
@@ -113,7 +115,7 @@
                             Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
     GNOMEUIINFO_END
   };
-
+#endif
 /**********************************************************************************************************/
 /*!A_propos: Presentation du programme et des authors
  **********************************************************************************************************/
@@ -145,6 +147,7 @@
                                       "Boston, MA  02110-1301  USA\n",
                            NULL );
   }
+#ifdef bouh
 
 /******************************************************************************************************************************/
 /* Firefox_exec:Lance un navigateur avec l'URI en pj                                                                          */
@@ -312,6 +315,110 @@
 */
     return(TRUE);
   }
+#endif
+
+static void
+print_hello (GtkWidget *widget,
+             gpointer   data)
+{
+  g_print ("Hello World\n");
+}
+
+
+static void
+about (GSimpleAction *simple,
+            GVariant      *parameter,
+            gpointer       user_data)
+{
+   GtkWidget *about_dialog;
+
+   about_dialog = gtk_about_dialog_new ();
+
+   const gchar *authors[] = { "Sebastien Lefevre <sebastien.lefevre@abls-habitat.fr>",
+                              "Bruno Lefevre <bruno.lefevre@abls-habitat.fr>", NULL };
+   const gchar *documenters[] = {"A vot' bon coeur !", NULL};
+
+   /* Fill in the about_dialog with the desired information */
+   gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG (about_dialog), "About Watchdog");
+   gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG (about_dialog), "Gnu Public License");
+   gtk_about_dialog_set_authors (GTK_ABOUT_DIALOG (about_dialog), authors);
+   gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG (about_dialog), documenters);
+   gtk_about_dialog_set_website_label (GTK_ABOUT_DIALOG (about_dialog), "Wiki ABLS-Habitat.fr");
+   gtk_about_dialog_set_website (GTK_ABOUT_DIALOG (about_dialog), "https://abls-habitat.fr");
+
+   /* The "response" signal is emitted when the dialog receives a delete event,
+    * therefore we connect that signal to the on_close callback function
+    * created above.
+    */
+   g_signal_connect (GTK_DIALOG (about_dialog), "response", G_CALLBACK(gtk_widget_destroy), NULL);
+
+   /* Show the about dialog */
+   gtk_widget_show (about_dialog);
+}
+
+
+static GActionEntry app_entries[] = {
+  { "about", about, NULL, NULL, NULL }
+//  { "quit", quit_app, NULL, NULL, NULL },
+//  { "new", new_activated, NULL, NULL, NULL }
+};
+
+
+
+ static void ActivateCB ( GtkApplication *app, gpointer user_data)
+  { GtkWidget *window;
+    GtkWidget *button;
+    GtkWidget *button_box;
+
+
+
+    window = gtk_application_window_new (app);
+    gtk_window_set_title (GTK_WINDOW (window), TITRE_FENETRE );
+    gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+ g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app);
+
+
+GtkBuilder *builder = gtk_builder_new_from_string (
+    "<interface>"
+"<menu id='menubar'>"
+"    <submenu>"
+      "<attribute name='label'>File</attribute>"
+"<section>"
+  "      <item>"
+  "        <attribute name='label' translatable='yes'>_Uber ! </attribute>"
+  "        <attribute name='action'>app.about</attribute>"
+  "      </item>"
+  "      <item>"
+  "        <attribute name='label' translatable='yes'>_Section ! </attribute>"
+  "      </item>"
+"</section>"
+    "</submenu>"
+    "<submenu>"
+      "<attribute name='label'>Edit</attribute>"
+    "</submenu>"
+    "<submenu>"
+      "<attribute name='label'>Choices</attribute>"
+    "</submenu>"
+    "<submenu>"
+      "<attribute name='label'>Help</attribute>"
+    "</submenu>"
+  "</menu>"
+    "</interface>",
+    -1);
+GMenuModel *menubar = G_MENU_MODEL (gtk_builder_get_object (builder,
+                                                            "menubar"));
+gtk_application_set_menubar (GTK_APPLICATION (app), menubar);
+g_object_unref (builder);
+    button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
+    gtk_container_add (GTK_CONTAINER (window), button_box);
+
+    button = gtk_button_new_with_label ("Hello World");
+    g_signal_connect (button, "clicked", G_CALLBACK (print_hello), NULL);
+    g_signal_connect_swapped (button, "clicked", G_CALLBACK (gtk_widget_destroy), window);
+    gtk_container_add (GTK_CONTAINER (button_box), button);
+
+    gtk_widget_show_all (window);
+  }
 
 /******************************************************************************************************************************/
 /*!Main: Fonction principale du programme du client Watchdog
@@ -321,28 +428,6 @@
           )
   { gint help = 0, port = -1, gui_tech = -1, debug_level = -1;
     struct sigaction sig;
-    GnomeClient *client;
-
-    gchar *file = NULL, *host = NULL, *user = NULL, *passwd = NULL;
-    struct poptOption Options[]=
-     { { "conffile", 'c',   POPT_ARG_STRING,
-         &file,             0, _("Configuration file"), "FILE" },
-       { "host", 's',       POPT_ARG_STRING,
-         &host,             0, _("Server to connect to"), "HOST" },
-       { "user", 'u',       POPT_ARG_STRING,
-         &user,             0, _("User to connect to"), "USER" },
-       { "passwd", 'w',       POPT_ARG_STRING,
-         &passwd,           0, _("Passwd of User"), "PASSWD" },
-       { "port", 'p',       POPT_ARG_INT,
-         &port,             0, _("Port to connect to"), "PORT" },
-       { "debug",'d',       POPT_ARG_INT,
-         &debug_level,      0, _("log level"), "LEVEL" },
-       { "gui-tech", 't',   POPT_ARG_NONE,
-         &gui_tech,         0, _("Technical GUI"), NULL },
-       { "help", 'h',       POPT_ARG_NONE,
-         &help,             0, _("Help"), NULL },
-       POPT_TABLEEND
-     };
 
     if (chdir( g_get_home_dir() ))                                                      /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", g_get_home_dir() ); exit(EXIT_ERREUR); }
@@ -357,26 +442,16 @@
 
     Config_cli.log = Info_init( "Watchdog_client", LOG_DEBUG );                                        /* Init msgs d'erreurs */
 
-
-
-
-    Lire_config_cli( &Config_cli, file );                                               /* Lecture sur le fichier ~/.watchdog */
-    if (host)            g_snprintf( Config_cli.host,    sizeof(Config_cli.host),    "%s", host   );
-    if (user)            g_snprintf( Config_cli.user,    sizeof(Config_cli.user),    "%s", user   );
-    if (passwd)          g_snprintf( Config_cli.passwd,  sizeof(Config_cli.passwd),  "%s", passwd );
-    if (port!=-1)        Config_cli.port_ihm  = port;                                      /* Priorite à la ligne de commande */
-    if (gui_tech!=-1)    Config_cli.gui_tech  = gui_tech;                                  /* Priorite à la ligne de commande */
-    if (debug_level!=-1) Config_cli.log_level = debug_level;
     Info_change_log_level( Config_cli.log, Config_cli.log_level );
 
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, _("Main : Start v%s"), VERSION );
+    //Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, _("Main : Start v%s"), VERSION );
     Print_config_cli( &Config_cli );
 
     GtkApplication *app;
     int status;
 
     app = gtk_application_new ("fr.abls-habitat.watchdog", G_APPLICATION_FLAGS_NONE);
-    g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
+    g_signal_connect (app, "activate", G_CALLBACK (ActivateCB), NULL);
     status = g_application_run (G_APPLICATION (app), argc, argv);
     g_object_unref (app);
 

@@ -28,9 +28,9 @@
  #ifndef _TRAME_H_
  #define _TRAME_H_
 
- #include <gnome.h>
+ #include <gtk/gtk.h>
  #include <gdk-pixbuf/gdk-pixbuf.h>                                                              /* Gestion des images/motifs */
- #include <goocanvas.h>                                                                                /* Interface GooCanvas */
+// #include <goocanvas.h>                                                                                /* Interface GooCanvas */
  #include "Reseaux.h"
 
  #define TAILLE_SYNOPTIQUE_X        1024                                  /* Généralités sur la taille de la Trame synoptique */
