@@ -375,17 +375,16 @@ static GActionEntry app_entries[] = {
     window = gtk_application_window_new (app);
     gtk_window_set_title (GTK_WINDOW (window), TITRE_FENETRE );
     gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
- g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app);
+    g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app);
 
-
-GtkBuilder *builder = gtk_builder_new_from_string (
+    GtkBuilder *builder = gtk_builder_new_from_string (
     "<interface>"
-"<menu id='menubar'>"
-"    <submenu>"
+    "<menu id='menubar'>"
+     "<submenu>"
       "<attribute name='label'>File</attribute>"
-"<section>"
-  "      <item>"
-  "        <attribute name='label' translatable='yes'>_Uber ! </attribute>"
+       "<section>"
+        "<item>"
+          "<attribute name='label' translatable='yes'>_Uber ! </attribute>"
   "        <attribute name='action'>app.about</attribute>"
   "      </item>"
   "      <item>"
