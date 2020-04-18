@@ -42,6 +42,8 @@
     GSList *Modules_UPS;
     gboolean enable;                                                           /* Thread enable at boot ? */
     gchar tech_id[32];                                                                                /* Tech_id du telephone */
+    void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
+    void *zmq_from_bus;                                              /* Envoi des events au master si l'instance est un slave */
   };
 
  #define NBR_CARAC_HOST_UPS           32

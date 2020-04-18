@@ -393,8 +393,8 @@
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s'", __func__, module->tech_id, buffer );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                 "%s: %s: Sending INSTCMD failed (%s) error %s", __func__, module->tech_id,
-                 buffer, (char *)upscli_strerror(&module->upsconn) );
+                 "%s: %s: Sending INSTCMD failed with error '%s' for '%s'", __func__, module->tech_id,
+                 (char *)upscli_strerror(&module->upsconn), buffer );
        Deconnecter_UPS ( module );
        return(FALSE);
      }
@@ -466,32 +466,59 @@
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
  static gboolean Envoyer_sortie_ups( struct MODULE_UPS *module )
-  { if (Dls_data_get_DO_up ( module->tech_id, "LOAD_OFF", &module->do_load_off))
-     { if (Onduleur_set_instcmd ( module, "load.off" ) == FALSE) return(FALSE); }
+  { struct ZMQ_TARGET *event;
+    gchar buffer[256];
+    void *payload;
+    gint byte;
+                                                                                            /* Reception d'un paquet master ? */
+    if ( (byte=Recv_zmq_with_tag ( Cfg_ups.zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer)-1, &event, &payload )) > 0)
+     { JsonObject *object;
+       JsonNode *Query;
+       buffer[byte] = 0;
 
-    if (Dls_data_get_DO_up ( module->tech_id, "LOAD_ON", &module->do_load_on))
-     { if (Onduleur_set_instcmd ( module, "load.on" ) == FALSE) return(FALSE); }
+       if ( !strcasecmp( event->tag, "SET_DO" ) )
+        { gchar *tech_id, *acronyme;
+          Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s", __func__, payload );
+          Query = json_from_string ( payload, NULL );
 
-    if (Dls_data_get_DO_up ( module->tech_id, "OUTLET_1_OFF", &module->do_outlet_1_off))
-     { if (Onduleur_set_instcmd ( module, "outlet.1.load.off" ) == FALSE) return(FALSE); }
+          if (!Query)
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ ); return(TRUE); }
+          object = json_node_get_object (Query);
+          if (!object)
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
+             json_node_unref (Query);
+             return(TRUE);
+           }
 
-    if (Dls_data_get_DO_up ( module->tech_id, "OUTLET_1_ON", &module->do_outlet_1_on))
-     { if (Onduleur_set_instcmd ( module, "outlet.1.load.on" ) == FALSE) return(FALSE); }
+          tech_id  = json_object_get_string_member ( object, "tech_id" );
+          acronyme = json_object_get_string_member ( object, "acronyme" );
+          if (!tech_id)
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ );
+             json_node_unref (Query);
+             return(TRUE);
+           }
+          else if (!acronyme)
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ );
+             json_node_unref (Query);
+             return(TRUE);
+           }
 
-    if (Dls_data_get_DO_up ( module->tech_id, "OUTLET_2_OFF", &module->do_outlet_2_off))
-     { if (Onduleur_set_instcmd ( module, "outlet.2.load.off" ) == FALSE) return(FALSE); }
+          if (strcasecmp(module->tech_id, tech_id))
+           {  json_node_unref (Query);
+             return(TRUE);
+           }
 
-    if (Dls_data_get_DO_up ( module->tech_id, "OUTLET_2_ON", &module->do_outlet_2_on))
-     { if (Onduleur_set_instcmd ( module, "outlet.2.load.on" ) == FALSE) return(FALSE); }
-
-    if (Dls_data_get_DO_up ( module->tech_id, "START_DEEP_BAT", &module->do_start_deep_bat))
-     { if (Onduleur_set_instcmd ( module, "test.battery.start.deep" ) == FALSE) return(FALSE); }
-
-    if (Dls_data_get_DO_up ( module->tech_id, "START_QUICK_BAT", &module->do_start_quick_bat))
-     { if (Onduleur_set_instcmd ( module, "test.battery.start.quick" ) == FALSE) return(FALSE); }
-
-    if (Dls_data_get_DO_up ( module->tech_id, "STOP_TEST_BAT", &module->do_stop_test_bat))
-     { if (Onduleur_set_instcmd ( module, "test.battery.stop" ) == FALSE) return(FALSE); }
+          if (!strcasecmp(acronyme, "LOAD_OFF"))        return(Onduleur_set_instcmd ( module, "load.off" ));
+          if (!strcasecmp(acronyme, "LOAD_ON"))         return(Onduleur_set_instcmd ( module, "load.on" ));
+          if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    return(Onduleur_set_instcmd ( module, "outlet.1.load.off" ));
+          if (!strcasecmp(acronyme, "OUTLET_1_ON"))     return(Onduleur_set_instcmd ( module, "outlet.1.load.on" ));
+          if (!strcasecmp(acronyme, "OUTLET_2_OFF"))    return(Onduleur_set_instcmd ( module, "outlet.2.load.off" ));
+          if (!strcasecmp(acronyme, "OUTLET_2_ON"))     return(Onduleur_set_instcmd ( module, "outlet.2.load.on" ));
+          if (!strcasecmp(acronyme, "START_DEEP_BAT"))  return(Onduleur_set_instcmd ( module, "test.battery.start.deep" ));
+          if (!strcasecmp(acronyme, "START_QUICK_BAT")) return(Onduleur_set_instcmd ( module, "test.battery.start.quick" ));
+          if (!strcasecmp(acronyme, "STOP_TEST_BAT"))   return(Onduleur_set_instcmd ( module, "test.battery.stop" ));
+        }
+     }
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -570,6 +597,7 @@ reload:
     g_snprintf( Cfg_ups.lib->admin_prompt, sizeof(Cfg_ups.lib->admin_prompt), "ups" );
     g_snprintf( Cfg_ups.lib->admin_help,   sizeof(Cfg_ups.lib->admin_help),   "Manage UPS Modules" );
 
+
     if (!Cfg_ups.enable)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
@@ -582,6 +610,8 @@ reload:
        goto end;
      }
 
+    Cfg_ups.zmq_from_bus  = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    Cfg_ups.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Cfg_ups.Modules_UPS = NULL;                                                               /* Init des variables du thread */
 
     if ( Charger_tous_ups() == FALSE )                                                          /* Chargement des modules ups */
@@ -640,6 +670,8 @@ reload:
      }
 
     Decharger_tous_UPS();
+    Close_zmq ( Cfg_ups.zmq_to_master );
+    Close_zmq ( Cfg_ups.zmq_from_bus );
 end:
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
 
