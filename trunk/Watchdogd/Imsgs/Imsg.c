@@ -287,7 +287,7 @@ end:
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE users SET imsg_available=%d WHERE imsg_jabberid='%s'", available, jabberid );
+                "UPDATE users SET imsg_available='%d' WHERE imsg_jabberid='%s'", available, jabberid );
     g_free(jabberid);
 
     db = Init_DB_SQL();
@@ -341,7 +341,9 @@ end:
   { const char *type, *from;
     type = xmpp_stanza_get_type ( stanza );
     from = xmpp_stanza_get_from ( stanza );
-    Imsgs_Sauvegarder_statut_contact ( from, (type ? strcmp(type,"unavailable") : TRUE) );
+    if (type && !strcmp(type,"unavailable") ) Imsgs_Sauvegarder_statut_contact ( from, FALSE );
+    else Imsgs_Sauvegarder_statut_contact ( from, TRUE );
+
     if (type && !strcmp(type,"subscribe"))                            /* Demande de souscription de la part d'un utilisateur */
      { xmpp_stanza_t *pres;
        pres = xmpp_presence_new(Cfg_imsgs.ctx);
@@ -391,8 +393,9 @@ end:
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct ZMQUEUE *zmq_msg;
     gint retour;
-    
+
     prctl(PR_SET_NAME, "W-IMSGS", 0, 0, 0 );
+reload:
     memset( &Cfg_imsgs, 0, sizeof(Cfg_imsgs) );                                     /* Mise a zero de la structure de travail */
     Cfg_imsgs.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_imsgs.lib->TID = pthread_self();                                                    /* Sauvegarde du TID pour le pere */
@@ -443,8 +446,7 @@ reconnect:
        xmpp_run_once ( Cfg_imsgs.ctx, 500 ); /* En milliseconde */
        if (Cfg_imsgs.lib->Thread_reload == TRUE)
         { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: recu signal SIGUSR1", __func__ );
-          Imsgs_Lire_config ();                                             /* Lecture de la configuration logiciel du thread */
-          Cfg_imsgs.lib->Thread_reload = FALSE;
+          break;
         }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
@@ -473,8 +475,13 @@ reconnect:
      }
 
     Close_zmq ( zmq_msg );
+
 end:
     Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    if (Cfg_imsgs.lib->Thread_reload == TRUE)
+     { Cfg_imsgs.lib->Thread_reload = FALSE;
+       goto reload;
+     }
     Cfg_imsgs.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */
     Cfg_imsgs.lib->TID = 0;                                                   /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
