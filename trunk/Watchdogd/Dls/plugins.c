@@ -78,7 +78,7 @@
     if (dls->plugindb.on) dls->start_date = time(NULL);
                      else dls->start_date = 0;
     memset ( &dls->vars, 0, sizeof(dls->vars) );                                 /* Mise à zero de tous les bits de remontées */
-    dls->vars.bit_comm_out = 1;                             /* Par construction, on considere que la comm est HS au démarrage */
+  /*dls->vars.bit_comm_out = 1;                             /* Par construction, on considere que la comm est HS au démarrage */
     return(TRUE);
   }
 /******************************************************************************************************************************/
