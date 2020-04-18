@@ -530,7 +530,7 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_action_sortie: Prepare la structure ACTION associée à l'alias en paremetre                                             */
+/* New_action_sortie: Prepare la structure ACTION associée à l'alias en paramètre                                             */
 /* Entrées: l'alias, le complement si besoin, les options                                                                     */
 /* Sortie: la structure ACTION associée                                                                                       */
 /******************************************************************************************************************************/
@@ -548,6 +548,25 @@
     else { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( \"%s\", \"%s\", &_%s_%s, 0 );\n",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
+    return(action);
+  }
+/******************************************************************************************************************************/
+/* New_action_digital_output: Prepare la structure ACTION associée à l'alias en paramètre                                     */
+/* Entrées: l'alias, le complement si besoin, les options                                                                     */
+/* Sortie: la structure ACTION associée                                                                                       */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_digital_output( struct ALIAS *alias, GList *options )
+  { struct ACTION *action;
+    gint taille = 128;
+
+    action = New_action();
+    action->alors = New_chaine( taille );
+    action->sinon = New_chaine( taille );
+
+    g_snprintf( action->alors, taille, "   Dls_data_set_DO ( \"%s\", \"%s\", &_%s_%s, TRUE );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+    g_snprintf( action->sinon, taille, "   Dls_data_set_DO ( \"%s\", \"%s\", &_%s_%s, FALSE );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
     return(action);
   }
 /******************************************************************************************************************************/
@@ -841,7 +860,7 @@
     else if ( (db=Rechercher_DO ( tech_id, acronyme )) != NULL )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = MNEMO_SORTIE;
+       alias->type_bit = MNEMO_DIGITAL_OUTPUT;
        Libere_DB_SQL (&db);
      }
     else if ( (db=Rechercher_CI ( tech_id, acronyme )) != NULL )

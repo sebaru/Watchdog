@@ -344,7 +344,7 @@
        Dls_data_set_DO ( module->tech_id, "START_QUICK_BAT", &module->do_start_quick_bat, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
-       Dls_data_set_DO ( module->tech_id, "STOP_TEST_BAT", &module->do_start_quick_bat, FALSE );
+       Dls_data_set_DO ( module->tech_id, "STOP_TEST_BAT", &module->do_stop_test_bat, FALSE );
      }
 
     module->date_next_connexion = 0;
@@ -504,10 +504,10 @@
            }
 
           if (strcasecmp(module->tech_id, tech_id))
-           {  json_node_unref (Query);
+           { json_node_unref (Query);
              return(TRUE);
            }
-
+          json_node_unref (Query);
           if (!strcasecmp(acronyme, "LOAD_OFF"))        return(Onduleur_set_instcmd ( module, "load.off" ));
           if (!strcasecmp(acronyme, "LOAD_ON"))         return(Onduleur_set_instcmd ( module, "load.on" ));
           if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    return(Onduleur_set_instcmd ( module, "outlet.1.load.off" ));
