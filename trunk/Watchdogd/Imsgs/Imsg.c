@@ -438,14 +438,14 @@ reconnect:
     else
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Connexion to '%s' in progress.", __func__, Cfg_imsgs.username ); }
 
-    while( Cfg_imsgs.lib->Thread_run == TRUE && Cfg_imsgs.signed_off == FALSE)               /* On tourne tant que necessaire */
+    while(lib->Thread_run == TRUE && Cfg_imsgs.signed_off == FALSE && lib->Thread_reload == FALSE)/* On tourne tant que necessaire */
      { struct CMD_TYPE_HISTO *histo, histo_buf;
        /*g_usleep(200000);*/
        sched_yield();
 
        xmpp_run_once ( Cfg_imsgs.ctx, 500 ); /* En milliseconde */
        if (Cfg_imsgs.lib->Thread_reload == TRUE)
-        { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: recu signal SIGUSR1", __func__ );
+        { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: recu signal RELOAD", __func__ );
           break;
         }
 
@@ -478,10 +478,12 @@ reconnect:
 
 end:
     Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
-    if (Cfg_imsgs.lib->Thread_reload == TRUE)
-     { Cfg_imsgs.lib->Thread_reload = FALSE;
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
        goto reload;
      }
+
     Cfg_imsgs.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */
     Cfg_imsgs.lib->TID = 0;                                                   /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

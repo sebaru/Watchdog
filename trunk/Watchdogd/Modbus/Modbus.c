@@ -1146,10 +1146,10 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
+reload:
     memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );                                   /* Mise a zero de la structure de travail */
     Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_modbus.lib->TID = pthread_self();                                                   /* Sauvegarde du TID pour le pere */
-reload:
     Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
@@ -1178,13 +1178,13 @@ reload:
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
              "%s: Preparing to stop . . . TID = %p", __func__, pthread_self() );
     Decharger_tous_MODBUS();
+end:
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     if (lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;
      }
-end:
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_modbus.lib->Thread_run = FALSE;                                                         /* Le thread ne tourne plus ! */
     Cfg_modbus.lib->TID = 0;                                                  /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

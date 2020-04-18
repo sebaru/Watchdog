@@ -588,6 +588,7 @@
     struct stat sbuf;
 
     prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
+reload:
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_http.lib->TID = pthread_self();                                                     /* Sauvegarde du TID pour le pere */
@@ -663,17 +664,13 @@
              "%s: WebSocket Create OK. Listening on port %d with ssl=%d", __func__, Cfg_http.tcp_port, Cfg_http.ssl_enable );
 
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
-    while(Cfg_http.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
+    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { usleep(10000);
        sched_yield();
 
        if (Cfg_http.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
-        { pthread_mutex_lock( &Cfg_http.lib->synchro );                                      /* Ajout dans la liste a traiter */
-          pthread_mutex_unlock( &Cfg_http.lib->synchro );
-          Http_Lire_config();
-          /*Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                   "Run_thread: SIGUSR1. %03d sessions", nbr );*/
-          Cfg_http.lib->Thread_reload = FALSE;
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Thread Reload !", __func__ );
+          break;
         }
 
    	   lws_service( Cfg_http.ws_context, 1000);                                 /* On lance l'écoute des connexions websocket */
@@ -686,6 +683,11 @@
     Close_zmq ( Cfg_http.zmq_to_master );
 end:
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
+       goto reload;
+     }
     Cfg_http.lib->Thread_run = FALSE;                                                           /* Le thread ne tourne plus ! */
     Cfg_http.lib->TID = 0;                                                    /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

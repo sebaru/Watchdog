@@ -558,13 +558,13 @@
     GSList *liste;
 
     prctl(PR_SET_NAME, "W-UPS", 0, 0, 0 );
+reload:
     memset( &Cfg_ups, 0, sizeof(Cfg_ups) );                                         /* Mise a zero de la structure de travail */
     Cfg_ups.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_ups.lib->TID = pthread_self();                                                      /* Sauvegarde du TID pour le pere */
     Ups_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-              "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Cfg_ups.lib->Thread_run = TRUE;                                                                     /* Le thread tourne ! */
 
     g_snprintf( Cfg_ups.lib->admin_prompt, sizeof(Cfg_ups.lib->admin_prompt), "ups" );
@@ -596,37 +596,15 @@
 
        if (lib->Thread_reload == TRUE)
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
-          Ups_Lire_config();
-          Decharger_tous_UPS();
-          Charger_tous_ups();
-          lib->Thread_reload = FALSE;
+          break;
         }
-
-/*       if (Cfg_ups.admin_start)
-        { module = Chercher_module_ups_by_id ( Cfg_ups.admin_start );
-          if (module) { module->enable = TRUE;
-                        module->date_next_connexion = 0;
-                        Modifier_MODULE_UPS( &module->name );
-                      }
-          Cfg_ups.admin_start = 0;
-        }
-
-       if (Cfg_ups.admin_stop)
-        { module = Chercher_module_ups_by_id ( Cfg_ups.admin_stop );
-          if (module) { module->enable = FALSE;
-                        Deconnecter_UPS  ( module );
-                        module->date_next_connexion = 0;                                         /* RAZ de la date de retente */
-  /*                      Modifier_MODULE_UPS( &module->name );
-                      }
-          Cfg_ups.admin_stop = 0;
-        }*/
 
        if (Cfg_ups.Modules_UPS == NULL)                                             /* Si pas de module référencés, on attend */
         { sleep(2); continue; }
 
        pthread_mutex_lock ( &Cfg_ups.lib->synchro );                                   /* Car utilisation de la liste chainée */
        liste = Cfg_ups.Modules_UPS;
-       while (liste && (lib->Thread_run == TRUE))
+       while (liste && lib->Thread_run == TRUE && lib->Thread_reload == FALSE)
         { module = (struct MODULE_UPS *)liste->data;
           if ( module->enable != TRUE ||                            /* si le module n'est pas enable, on ne le traite pas */
                Partage->top < module->date_next_connexion )                        /* Si attente retente, on change de module */
@@ -636,22 +614,19 @@
 /******************************************** Début de l'interrogation du module **********************************************/
           if ( ! module->started )                                                               /* Communication OK ou non ? */
            { if ( ! Connecter_ups( module ) )                                                 /* Demande de connexion a l'ups */
-              { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                         "%s: %s: Module DOWN", __func__, module->tech_id );
+              { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: %s: Module DOWN", __func__, module->tech_id );
                 Deconnecter_UPS ( module );                                         /* Sur erreur, on deconnecte le module */
                 module->date_next_connexion = Partage->top + UPS_RETRY;
               }
            }
           else
-           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                      "%s: %s: Envoi des sorties ups", __func__, module->tech_id );
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: %s: Envoi des sorties ups", __func__, module->tech_id );
              if ( Envoyer_sortie_ups ( module ) == FALSE )
               { Deconnecter_UPS ( module );                                         /* Sur erreur, on deconnecte le module */
                 module->date_next_connexion = Partage->top + UPS_RETRY;                          /* On retente dans longtemps */
               }
              else
-              { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                         "%s: %s: Interrogation ups", __func__, module->tech_id );
+              { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: %s: Interrogation ups", __func__, module->tech_id );
                 if ( Interroger_ups ( module ) == FALSE )
                  { Deconnecter_UPS ( module );
                    module->date_next_connexion = Partage->top + UPS_RETRY;                       /* On retente dans longtemps */
@@ -667,6 +642,13 @@
     Decharger_tous_UPS();
 end:
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
+       goto reload;
+     }
+
     Cfg_ups.lib->Thread_run = FALSE;                                                            /* Le thread ne tourne plus ! */
     Cfg_ups.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
