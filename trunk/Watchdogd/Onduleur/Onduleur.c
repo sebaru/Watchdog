@@ -77,8 +77,8 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Ups_send_status_to_master ( struct MODULE_UPS *ups, gboolean status )
-  { if (Config.instance_is_master==TRUE)                                                        /* si l'instance est Maitre */
-     { Dls_data_set_DI ( ups->tech_id, "COMM", &ups->bit_comm, status ); }                              /* Communication OK */
+  { if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
+     { Dls_data_set_DI ( ups->tech_id, "COMM", &ups->bit_comm, status ); }                                /* Communication OK */
 /*    else
      {
      }*/
@@ -540,11 +540,11 @@
      { Dls_data_set_DI ( module->tech_id, "OUTLET_2_STATUS", &module->di_outlet_2_status, !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { Dls_data_set_DI ( module->tech_id, "UPS_ONLINE",       &module->di_ups_online,       (g_strrstr("OL", reponse)?TRUE:FALSE) );
-       Dls_data_set_DI ( module->tech_id, "UPS_CHARGING",     &module->di_ups_charging,     (g_strrstr("CHRG", reponse)?TRUE:FALSE) );
-       Dls_data_set_DI ( module->tech_id, "UPS_ON_BATT",      &module->di_ups_on_batt,      (g_strrstr("OB", reponse)?TRUE:FALSE) );
-       Dls_data_set_DI ( module->tech_id, "UPS_REPLACE_BATT", &module->di_ups_replace_batt, (g_strrstr("RB", reponse)?TRUE:FALSE) );
-       Dls_data_set_DI ( module->tech_id, "UPS_ALARM",        &module->di_ups_alarm,        (g_strrstr("ALARM", reponse)?TRUE:FALSE) );
+     { Dls_data_set_DI ( module->tech_id, "UPS_ONLINE",       &module->di_ups_online,       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
+       Dls_data_set_DI ( module->tech_id, "UPS_CHARGING",     &module->di_ups_charging,     (g_strrstr(reponse, "CHRG")?TRUE:FALSE) );
+       Dls_data_set_DI ( module->tech_id, "UPS_ON_BATT",      &module->di_ups_on_batt,      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
+       Dls_data_set_DI ( module->tech_id, "UPS_REPLACE_BATT", &module->di_ups_replace_batt, (g_strrstr(reponse, "RB")?TRUE:FALSE) );
+       Dls_data_set_DI ( module->tech_id, "UPS_ALARM",        &module->di_ups_alarm,        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
      }
     Ups_send_status_to_master ( module, TRUE );
 
