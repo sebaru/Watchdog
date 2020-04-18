@@ -384,10 +384,10 @@
 /* Entrée : l'ups, le nom de la commande                                                                                      */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
 /******************************************************************************************************************************/
- gboolean Onduleur_set_instcmd ( struct MODULE_UPS *module, gchar *nom_cmd )
+ static void Onduleur_set_instcmd ( struct MODULE_UPS *module, gchar *nom_cmd )
   { gchar buffer[80];
 
-    if (module->started != TRUE) return(FALSE);
+    if (module->started != TRUE) return;
 
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->name, nom_cmd );
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s'", __func__, module->tech_id, buffer );
@@ -396,7 +396,7 @@
                  "%s: %s: Sending INSTCMD failed with error '%s' for '%s'", __func__, module->tech_id,
                  (char *)upscli_strerror(&module->upsconn), buffer );
        Deconnecter_UPS ( module );
-       return(FALSE);
+       return;
      }
 
     if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
@@ -404,13 +404,12 @@
                 "%s: %s: Reading INSTCMD result failed (%s) error %s", __func__, module->tech_id,
                  nom_cmd, (char *)upscli_strerror(&module->upsconn) );
        Deconnecter_UPS ( module );
-       return(FALSE);
+       return;
      }
     else
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
                 "%s: %s: Sending '%s' OK", __func__, module->tech_id, nom_cmd );
      }
-    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Onduleur_get_var: Recupere une valeur de la variable en parametre                                                          */
@@ -507,7 +506,7 @@
           GSList *liste = Cfg_ups.Modules_UPS;
           while (liste)
            { struct MODULE_UPS *module = (struct MODULE_UPS *)liste->data;
-             if (strcasecmp(module->tech_id, tech_id))
+             if (!strcasecmp(module->tech_id, tech_id))
               { if (!strcasecmp(acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( module, "load.off" );
                 if (!strcasecmp(acronyme, "LOAD_ON"))         Onduleur_set_instcmd ( module, "load.on" );
                 if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    Onduleur_set_instcmd ( module, "outlet.1.load.off" );
