@@ -33,9 +33,9 @@
  #define NOM_THREAD      "ups"
  #define NOM_TABLE_UPS   "ups"
 
- #define UPS_PORT_TCP    3493                             /* Port de connexion TCP pour accès aux modules */
- #define UPS_RETRY       1800                          /* 3 minutes entre chaque retry si pb de connexion */
- #define UPS_POLLING      100                  /* Si tout va bien, on s'y connecte toutes les 10 secondes */
+ #define UPS_PORT_TCP    3493                                                 /* Port de connexion TCP pour accès aux modules */
+ #define UPS_RETRY       1800                                              /* 3 minutes entre chaque retry si pb de connexion */
+ #define UPS_POLLING      100                                      /* Si tout va bien, on s'y connecte toutes les 10 secondes */
 
  struct UPS_CONFIG                                                    /* Communication entre DLS et l'UPS */
   { struct LIBRAIRIE *lib;

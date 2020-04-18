@@ -407,8 +407,7 @@
        return;
      }
     else
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
-                "%s: %s: Sending '%s' OK", __func__, module->tech_id, nom_cmd );
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s' OK", __func__, module->tech_id, nom_cmd );
      }
   }
 /******************************************************************************************************************************/
@@ -501,7 +500,7 @@
              continue;
            }
 
-          Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: Recu SET_DO from bus: %s:%s", __func__, tech_id, acronyme );
+          Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s", __func__, tech_id, acronyme );
 
           GSList *liste = Cfg_ups.Modules_UPS;
           while (liste)
