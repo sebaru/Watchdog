@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/fr/abls_habitat/watchdog">
+    <file>gtk/menus.ui</file>
+    <file>icons/logo.png</file>
+  </gresource>
+</gresources>

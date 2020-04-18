@@ -39,6 +39,7 @@
  #include "Erreur.h"
  #include "Config_cli.h"
  #include "client.h"
+ #include "ClientResources.h"
 
  #define TITRE_FENETRE "Watchdog ver" VERSION " - GTK3"
 
@@ -371,10 +372,11 @@ static GActionEntry app_entries[] = {
     GtkWidget *button_box;
 
 
-
+    printf(" prefers_app_menu = %d\n", gtk_application_prefers_app_menu(app));
     window = gtk_application_window_new (app);
     gtk_window_set_title (GTK_WINDOW (window), TITRE_FENETRE );
     gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+    gtk_window_set_icon_name ( GTK_WINDOW(window), "fr.abls-habitat.watchdog" );
     g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app);
 
     GtkBuilder *builder = gtk_builder_new_from_string (
@@ -406,15 +408,16 @@ static GActionEntry app_entries[] = {
     -1);
 GMenuModel *menubar = G_MENU_MODEL (gtk_builder_get_object (builder,
                                                             "menubar"));
-gtk_application_set_menubar (GTK_APPLICATION (app), menubar);
+/*gtk_application_set_menubar (GTK_APPLICATION (app), menubar);*/
 g_object_unref (builder);
-    button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
+
+/*    button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
     gtk_container_add (GTK_CONTAINER (window), button_box);
 
     button = gtk_button_new_with_label ("Hello World");
     g_signal_connect (button, "clicked", G_CALLBACK (print_hello), NULL);
     g_signal_connect_swapped (button, "clicked", G_CALLBACK (gtk_widget_destroy), window);
-    gtk_container_add (GTK_CONTAINER (button_box), button);
+    gtk_container_add (GTK_CONTAINER (button_box), button);*/
 
     gtk_widget_show_all (window);
   }
@@ -449,11 +452,24 @@ g_object_unref (builder);
     GtkApplication *app;
     int status;
 
-    app = gtk_application_new ("fr.abls-habitat.watchdog", G_APPLICATION_FLAGS_NONE);
+    /*GtkBuilder *builder = gtk_builder_new_from_file ("test_glade.ui");
+    if (!builder) _exit(0);*/
+ /*   g_resources_register(ClientResources_get_resource());*/
+
+
+    app = gtk_application_new ("fr.abls_habitat.watchdog", G_APPLICATION_FLAGS_NONE);
     g_signal_connect (app, "activate", G_CALLBACK (ActivateCB), NULL);
+
+    printf("Ressource path = %s\n", g_application_get_resource_base_path( G_APPLICATION(app) ));
+    printf("Ressource menus.ui = %d\n", g_resources_get_info("/fr/abls_habitat/watchdog/gtk/menus.ui", G_RESOURCE_LOOKUP_FLAGS_NONE, NULL, NULL, NULL ) );
+GtkBuilder *builder = gtk_builder_new_from_resource ( "/fr/abls_habitat/watchdog/gtk/menus.ui" );
+    printf("builder=%p\n", builder );
+    printf(" Recherche app-menu: %p\n", gtk_builder_get_object (builder,"app-menu"));
+    g_object_unref(builder);
     status = g_application_run (G_APPLICATION (app), argc, argv);
     g_object_unref (app);
 
+/*    g_resources_unregister(ClientResources_get_resource());*/
     return status;
 #ifdef bouh
 

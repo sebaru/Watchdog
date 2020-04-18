@@ -28,6 +28,9 @@ AC_PROG_LIBTOOL
 
 AM_PATH_GLIB_2_0( 2.2.2 )
 
+AC_PATH_PROG([GLIB_COMPILE_RESOURCES], [glib-compile-resources])
+
+
 dnl Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC

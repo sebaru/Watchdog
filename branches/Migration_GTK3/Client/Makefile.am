@@ -5,8 +5,19 @@
 #**********************************************************************************************************/
 SUBDIRS = Include Config_cli
 
-bin_PROGRAMS = Watchdog-client
-Watchdog_client_SOURCES = Watchdog-client.c
+desktopdir = $(datadir)/applications
+desktop_DATA = fr.abls-habitat.watchdog.desktop
+
+appicondir=$(datadir)/icons/hicolor/scalable/apps
+appicon_DATA=fr.abls-habitat.watchdog.svg
+
+bin_PROGRAMS = Watchdog-client-gtk3
+
+ClientResources.c : ClientResources.xml $(shell glib-compile-resources --generate-dependencies ClientResources.xml)
+	glib-compile-resources --target=ClientResources.c --generate-source $<
+	glib-compile-resources --target=ClientResources.h --generate-header $<
+
+Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResources.h
 #connect.c ihm.c \
 #                          protocole.c protocole_gtk_message.c \
 #                          protocole_dls.c protocole_mnemonique.c \
@@ -34,12 +45,12 @@ Watchdog_client_SOURCES = Watchdog-client.c
 #			  trame.c \
 #			  print.c
 
-Watchdog_client_LDADD  = $(top_builddir)/Commun/libwatchdog.la \
+Watchdog_client_gtk3_LDADD  = $(top_builddir)/Commun/libwatchdog.la \
                          Config_cli/libconfig_cli.la
 
-Watchdog_client_LDFLAGS = `pkg-config --libs gtk+-3.0 openssl glib-2.0 libcurl json-glib-1.0` -lm
+Watchdog_client_gtk3_LDFLAGS = `pkg-config --libs gtk+-3.0 openssl glib-2.0 libcurl json-glib-1.0` -lm
 
-Watchdog_client_CFLAGS = `pkg-config --cflags gtk+-3.0 openssl glib-2.0 libcurl json-glib-1.0`
+Watchdog_client_gtk3_CFLAGS = `pkg-config --cflags gtk+-3.0 openssl glib-2.0 libcurl json-glib-1.0`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Client/Include
