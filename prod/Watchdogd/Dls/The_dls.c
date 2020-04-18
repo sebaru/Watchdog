@@ -788,7 +788,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_DI = g_slist_prepend ( Partage->Dls_data_DI, di );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding DLS_DI '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding DLS_DI '%s:%s'=%d", __func__, tech_id, acronyme, valeur );
         }
        if (di_p) *di_p = (gpointer)di;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -1026,7 +1026,7 @@
     else ai = (struct DLS_AI *)*ai_p;
 
     need_arch = FALSE;
-    if (ai->val_avant_ech != val_avant_ech)
+    if ( (ai->val_avant_ech != val_avant_ech) || (ai->inrange != in_range) )
      { ai->val_avant_ech = val_avant_ech;                                           /* Archive au mieux toutes les 5 secondes */
        if ( ai->last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top ) { need_arch = TRUE; }
 
