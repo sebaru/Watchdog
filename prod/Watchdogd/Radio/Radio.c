@@ -118,6 +118,7 @@
     gchar radio[128];
 
     prctl(PR_SET_NAME, "W-RADIO", 0, 0, 0 );
+reload:
     memset( &Cfg_radio, 0, sizeof(Cfg_radio) );                                     /* Mise a zero de la structure de travail */
     Cfg_radio.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_radio.lib->TID = pthread_self();                                                    /* Sauvegarde du TID pour le pere */
@@ -139,16 +140,10 @@
     zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     g_snprintf( radio, sizeof(radio), "%s",                                                               /* Radio par défaut */
                 "http://start-voltage.ice.infomaniak.ch/playlists/start-voltage-high.mp3.m3u" );
-    while ( Cfg_radio.lib->Thread_run == TRUE)                                               /* On tourne tant que necessaire */
+    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { struct ZMQ_TARGET *event;
        gchar buffer[256];
        void *payload;
-
-       if (Cfg_radio.lib->Thread_reload)                                                             /* On a recu reload ?? */
-        { Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
-          Radio_Lire_config();
-          Cfg_radio.lib->Thread_reload = FALSE;
-        }
 
        if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
         { if ( !strcmp( event->tag, "play_radio" ) )
@@ -167,6 +162,11 @@
     Stopper_radio();
 end:
     Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
+       goto reload;
+     }
     Cfg_radio.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */
     Cfg_radio.lib->TID = 0;                                                   /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

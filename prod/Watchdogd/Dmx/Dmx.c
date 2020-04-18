@@ -202,6 +202,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct ZMQUEUE *zmq_from_bus;
     prctl(PR_SET_NAME, "W-DMX", 0, 0, 0 );
+reload:
     memset( &Cfg_dmx, 0, sizeof(Cfg_dmx) );                                         /* Mise a zero de la structure de travail */
     Cfg_dmx.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_dmx.lib->TID = pthread_self();                                                      /* Sauvegarde du TID pour le pere */
@@ -212,7 +213,6 @@
     g_snprintf( Cfg_dmx.lib->admin_prompt, sizeof(Cfg_dmx.lib->admin_prompt), "dmx" );
     g_snprintf( Cfg_dmx.lib->admin_help,   sizeof(Cfg_dmx.lib->admin_help),   "Manage Dmx system" );
 
-reload:
     zmq_from_bus          = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     Cfg_dmx.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Dmx_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
@@ -302,14 +302,13 @@ reload:
     Close_zmq ( Cfg_dmx.zmq_to_master );
     Close_zmq ( zmq_from_bus );
 
-    if (lib->Thread_reload == TRUE && lib->Thread_run == TRUE)
+end:
+    Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    if (lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;
      }
-
-end:
-    Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_dmx.lib->Thread_run = FALSE;                                                            /* Le thread ne tourne plus ! */
     Cfg_dmx.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

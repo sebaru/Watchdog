@@ -902,7 +902,7 @@
 /* Dls_data_set_DO: Positionne une bit de sortie TOR                                                                          */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_DO ( gchar *tech_id, gchar *acronyme, gpointer *dout_p, gboolean valeur )
+ void Dls_data_set_DO ( gchar *tech_id, gchar *acronyme, gpointer *dout_p, gboolean etat )
   { struct DLS_DO *dout;
 
     if (!dout_p || !*dout_p)
@@ -932,15 +932,16 @@
       }
     else dout = (struct DLS_DO *)*dout_p;
 
-    if (dout->etat != valeur)
+    if (dout->etat != etat)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_DO '%s:%s'=%d ",
                  __func__, dout->tech_id, dout->acronyme );
-       pthread_mutex_lock( &Partage->com_msrv.synchro );
-       Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, dout );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
+       if (etat)
+        { pthread_mutex_lock( &Partage->com_msrv.synchro );
+          Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, dout );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+        }
      }
-    dout->etat = valeur;
+    dout->etat = etat;
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_bool_up: Remonte le front montant d'un boolean                                                                */

@@ -56,25 +56,26 @@ newline       [\n\r]+
 {newline}
 
  /******************************************** Methodes ***************************************************/
-"_EA"                      { DlsScanner_lval.val = EANA;        return EANA;        }
-"_AO"                      { DlsScanner_lval.val = T_SORTIEANA; return T_SORTIEANA; }
-"_E"                       { DlsScanner_lval.val = ENTREE;      return ENTREE;      }
-"_A"                       { DlsScanner_lval.val = SORTIE;      return SORTIE;      }
-"_I"                       { DlsScanner_lval.val = T_ICONE;     return T_ICONE;     }
-"_B"                       { DlsScanner_lval.val = T_BI;        return T_BI;        }
-"_M"                       { DlsScanner_lval.val = T_MONO;      return T_MONO;      }
-"_T"                       { DlsScanner_lval.val = T_TEMPO;     return T_TEMPO;     }
-"_R"                       { DlsScanner_lval.val = T_REGISTRE;  return T_REGISTRE;  }
-"_CH"                      { DlsScanner_lval.val = T_CPT_H;     return T_CPT_H;     }
-"_CI"                      { DlsScanner_lval.val = T_CPT_IMP;   return T_CPT_IMP;   }
-"_HORLOGE"                 { DlsScanner_lval.val = T_HORLOGE;   return T_HORLOGE;   }
-"_MSG"                     { DlsScanner_lval.val = T_MSG;       return T_MSG;       }
-"_START"                   { DlsScanner_lval.val = T_START;     return T_START;     }
-"_TRUE"                    { DlsScanner_lval.val = T_TRUE;      return T_TRUE;      }
-"_FALSE"                   { DlsScanner_lval.val = T_FALSE;     return T_FALSE;     }
-"_TOP_ALERTE"              { DlsScanner_lval.val = T_TOP_ALERTE;return T_TOP_ALERTE;}
+"_EA"                      { DlsScanner_lval.val = EANA;            return EANA;            }
+"_AO"                      { DlsScanner_lval.val = T_ANALOG_OUTPUT; return T_ANALOG_OUTPUT; }
+"_DO"                      { DlsScanner_lval.val = T_DIGITAL_OUTPUT;return T_DIGITAL_OUTPUT;  }
+"_E"                       { DlsScanner_lval.val = ENTREE;          return ENTREE;          }
+"_A"                       { DlsScanner_lval.val = SORTIE;          return SORTIE;          }
+"_I"                       { DlsScanner_lval.val = T_ICONE;         return T_ICONE;         }
+"_B"                       { DlsScanner_lval.val = T_BI;            return T_BI;            }
+"_M"                       { DlsScanner_lval.val = T_MONO;          return T_MONO;          }
+"_T"                       { DlsScanner_lval.val = T_TEMPO;         return T_TEMPO;         }
+"_R"                       { DlsScanner_lval.val = T_REGISTRE;      return T_REGISTRE;      }
+"_CH"                      { DlsScanner_lval.val = T_CPT_H;         return T_CPT_H;         }
+"_CI"                      { DlsScanner_lval.val = T_CPT_IMP;       return T_CPT_IMP;       }
+"_HORLOGE"                 { DlsScanner_lval.val = T_HORLOGE;       return T_HORLOGE;       }
+"_MSG"                     { DlsScanner_lval.val = T_MSG;           return T_MSG;           }
+"_START"                   { DlsScanner_lval.val = T_START;         return T_START;         }
+"_TRUE"                    { DlsScanner_lval.val = T_TRUE;          return T_TRUE;          }
+"_FALSE"                   { DlsScanner_lval.val = T_FALSE;         return T_FALSE;         }
+"_TOP_ALERTE"              { DlsScanner_lval.val = T_TOP_ALERTE;    return T_TOP_ALERTE;    }
 "_TOP_ALERTE_FUGITIVE"     { DlsScanner_lval.val = T_TOP_ALERTE_FUGITIVE;return T_TOP_ALERTE_FUGITIVE;}
-"_BUS"                     { DlsScanner_lval.val = T_BUS;       return T_BUS;       }
+"_BUS"                     { DlsScanner_lval.val = T_BUS;           return T_BUS;           }
 
  /***************************************** Methodes speciales ********************************************/
 "_HEURE"                   { DlsScanner_lval.val = HEURE;       return HEURE;       }

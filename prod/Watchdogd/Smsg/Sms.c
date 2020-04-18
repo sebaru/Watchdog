@@ -667,6 +667,7 @@
     struct ZMQUEUE *zmq_from_bus;
 
     prctl(PR_SET_NAME, "W-SMSG", 0, 0, 0 );
+reload:
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_smsg.lib->TID = pthread_self();                                                      /* Sauvegarde du TID pour le pere */
@@ -696,17 +697,10 @@
 
     Envoyer_smsg_gsm_text ( "SMS System is running" );
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
-    while(Cfg_smsg.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
+    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { struct ZMQ_TARGET *event;
        gchar buffer[256];
        void *payload;
-
-       if (Cfg_smsg.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
-        { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Thread Reload !", __func__ );
-          Smsg_Lire_config();
-          Cfg_smsg.lib->Thread_reload = FALSE;
-        }
-
 
 /****************************************************** Lecture de SMS ********************************************************/
        Lire_sms_gsm();
@@ -748,6 +742,11 @@
 
 end:
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
+       goto reload;
+     }
     Cfg_smsg.lib->Thread_run = FALSE;
     Cfg_smsg.lib->TID = 0;                                                    /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

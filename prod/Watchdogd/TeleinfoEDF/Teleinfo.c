@@ -201,6 +201,7 @@
     fd_set fdselect;
 
     prctl(PR_SET_NAME, "W-TINFOEDF", 0, 0, 0 );
+reload:
     memset( &Cfg_teleinfo, 0, sizeof(Cfg_teleinfo) );                               /* Mise a zero de la structure de travail */
     Cfg_teleinfo.lib = lib;                                        /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_teleinfo.lib->TID = pthread_self();                                                 /* Sauvegarde du TID pour le pere */
@@ -223,22 +224,9 @@
     nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
     Cfg_teleinfo.mode = TINFO_RETRING;
-    while( lib->Thread_run == TRUE )                                                         /* On tourne tant que necessaire */
+    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
-
-       if ( lib->Thread_reload == TRUE )
-        { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Reloading in progress", __func__ );
-          close(Cfg_teleinfo.fd);                                                             /* Fermeture de la connexion FD */
-          Teleinfo_send_status_to_master(FALSE);
-          Teleinfo_Lire_config ();                                          /* Lecture de la configuration logiciel du thread */
-          Cfg_teleinfo.fd = Init_teleinfo();
-          if (Cfg_teleinfo.fd<0)                                                               /* On valide l'acces aux ports */
-           { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_CRIT,
-                      "%s: Reloading with port %s failed", __func__, Cfg_teleinfo.port );
-           }
-          lib->Thread_reload = FALSE;
-        }
 
        if (Cfg_teleinfo.mode == TINFO_WAIT_BEFORE_RETRY)
         { if ( Cfg_teleinfo.date_next_retry <= Partage->top )
@@ -324,6 +312,12 @@
 
 end:
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
+       Teleinfo_send_status_to_master(FALSE);
+       goto reload;
+     }
     Cfg_teleinfo.lib->Thread_run = FALSE;                                                       /* Le thread ne tourne plus ! */
     Cfg_teleinfo.lib->TID = 0;                                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

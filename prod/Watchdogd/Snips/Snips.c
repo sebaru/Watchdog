@@ -264,6 +264,7 @@
    	struct mosquitto *mosq = NULL;
 
     prctl(PR_SET_NAME, "W-SNIPS", 0, 0, 0 );
+reload:
     memset( &Cfg_snips, 0, sizeof(Cfg_snips) );                                     /* Mise a zero de la structure de travail */
     Cfg_snips.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_snips.lib->TID = pthread_self();                                                    /* Sauvegarde du TID pour le pere */
@@ -303,16 +304,10 @@
        goto end;
      }
 
-    while(Cfg_snips.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
+    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { struct ZMQ_TARGET *event;
        gchar buffer[256];
        void *payload;
-
-       if (Cfg_snips.lib->Thread_reload)                                                             /* On a recu reload ?? */
-        { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
-          Snips_Lire_config();
-          Cfg_snips.lib->Thread_reload = FALSE;
-        }
 
        mosquitto_loop(mosq, 1000, 1);
 
@@ -335,6 +330,11 @@ end:
    	mosquitto_destroy(mosq);
    	mosquitto_lib_cleanup();
     Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
+       goto reload;
+     }
     Cfg_snips.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */
     Cfg_snips.lib->TID = 0;                                                   /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

@@ -64,8 +64,8 @@
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
 %type  <val>    modulateur jour_semaine
 
-%token <val>    T_BI T_MONO ENTREE SORTIE T_SORTIEANA T_TEMPO T_HORLOGE T_DYN_STRING
-%token <val>    T_MSG T_ICONE T_CPT_H T_CPT_IMP EANA T_START T_REGISTRE
+%token <val>    T_BI T_MONO ENTREE SORTIE T_ANALOG_OUTPUT T_TEMPO T_HORLOGE T_DYN_STRING
+%token <val>    T_MSG T_ICONE T_CPT_H T_CPT_IMP EANA T_START T_REGISTRE T_DIGITAL_OUTPUT
 %type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_IN_RANGE
@@ -144,7 +144,8 @@ alias_bit:        T_BI        {{ $$=MNEMO_BISTABLE;   }}
                 | T_CPT_H     {{ $$=MNEMO_CPTH;       }}
                 | T_CPT_IMP   {{ $$=MNEMO_CPT_IMP;    }}
                 | EANA        {{ $$=MNEMO_ENTREE_ANA; }}
-                | T_SORTIEANA {{ $$=MNEMO_SORTIE_ANA; }}
+                | T_ANALOG_OUTPUT {{ $$=MNEMO_SORTIE_ANA; }}
+                | T_DIGITAL_OUTPUT {{ $$=MNEMO_DIGITAL_OUTPUT; }}
                 | T_REGISTRE  {{ $$=MNEMO_REGISTRE;   }}
                 | T_HORLOGE   {{ $$=MNEMO_HORLOGE;    }}
                 | T_BUS       {{ $$=MNEMO_BUS;        }}
@@ -551,6 +552,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                    if (alias)
                     { if ($5 && (alias->type_bit==MNEMO_TEMPO ||                              /* Vérification des bits non comparables */
                                  alias->type_bit==MNEMO_ENTREE ||
+                                 alias->type_bit==MNEMO_SORTIE ||
                                  alias->type_bit==MNEMO_BISTABLE ||
                                  alias->type_bit==MNEMO_MONOSTABLE ||
                                  alias->type_bit==MNEMO_HORLOGE)
@@ -782,12 +784,15 @@ une_action:     T_ACT_COMOUT
                    int taille;
                    if ($3) { tech_id = $2; acro = $3; }
                       else { tech_id = NULL; acro = $2; }
+
                    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
-                   if (!alias && $3) { alias = Set_new_external_alias(tech_id,acro); }/* Si dependance externe, on va chercher */
-                   alias = Get_alias_par_acronyme(tech_id, acro);
                    if (!alias)
-                    { if ($3) Emettre_erreur_new( "Ligne %d: '%s:%s' is not defined", DlsScanner_get_lineno(), $2, $3 );
-                         else Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $2 );
+                    { if ($3) { alias = Set_new_external_alias(tech_id,acro); }      /* Si dependance externe, on va chercher */
+                         else { alias = Set_new_external_alias("THIS",acro); }/* Si dependance pseudo-externe, on va chercher */
+                    }
+                   if (!alias)
+                    { if ($3) Emettre_erreur_new( "'%s:%s' is not defined", $2, $3 );
+                         else Emettre_erreur_new( "'%s' is not defined", $2 );
 
                       $$=New_action();
                       taille = 2;
@@ -804,6 +809,7 @@ une_action:     T_ACT_COMOUT
                                  alias->type_bit==MNEMO_MSG ||
                                  alias->type_bit==MNEMO_BUS ||
                                  alias->type_bit==MNEMO_MOTIF ||
+                                 alias->type_bit==MNEMO_DIGITAL_OUTPUT ||
                                  alias->type_bit==MNEMO_MONOSTABLE)
                          )
                        { Emettre_erreur_new( "Ligne %d: '/%s' ne peut s'utiliser", DlsScanner_get_lineno(), alias->acronyme );
@@ -818,6 +824,7 @@ une_action:     T_ACT_COMOUT
                          case MNEMO_MSG   : $$=New_action_msg( alias );   break;
                          case MNEMO_BUS   : $$=New_action_bus( alias, options );   break;
                          case MNEMO_SORTIE: $$=New_action_sortie( alias, $1, options );  break;
+                         case MNEMO_DIGITAL_OUTPUT: $$=New_action_digital_output( alias, options );  break;
                          case MNEMO_BISTABLE:
                                     if (alias->num >= NBR_BIT_BISTABLE_RESERVED || alias->type==ALIAS_TYPE_DYNAMIC)
                                      { $$=New_action_bi( alias, $1 ); }

@@ -37,35 +37,38 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Gerer_arrive_Axxx_dls ( void )
-  { gsize taille_buf;
-    struct DLS_BOOL *bool;
+  { struct DLS_DO *dout;
     struct DLS_AO *ao;
+    gsize taille_buf;
     gchar *buffer;
     gint reste;
 
     if (!Partage->com_msrv.Liste_DO) goto suite_AO;                                               /* Si pas de a, on se barre */
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
-    bool = (struct DLS_BOOL *)Partage->com_msrv.Liste_DO->data;                                /* Recuperation du numero de a */
-    Partage->com_msrv.Liste_DO = g_slist_remove ( Partage->com_msrv.Liste_DO, bool );
+    dout = (struct DLS_DO *)Partage->com_msrv.Liste_DO->data;                                  /* Recuperation du numero de a */
+    Partage->com_msrv.Liste_DO = g_slist_remove ( Partage->com_msrv.Liste_DO, dout );
     reste = g_slist_length(Partage->com_msrv.Liste_DO);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-/*    mnemo = Rechercher_mnemo_baseDB_by_acronyme ( bool->tech_id, bool->acronyme );
-    if (!mnemo)
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Mnemo not found for %s:%s", __func__, bool->tech_id, bool->acronyme );
-       return;
-     }
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending SET_DO '%s':'%s' to Slave/Bus (reste %d)", __func__,
+              dout->tech_id, dout->acronyme, reste );
 
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Recu EVENT %s:%s -> %s:%s:%s. Reste a traiter %03d", __func__,
-              bool->tech_id, bool->acronyme, mnemo->ev_host, mnemo->ev_thread, mnemo->ev_text, reste );
-
-    if ( strlen ( mnemo->ev_text ) > 0 )                           /* Existe t'il un evenement associé ? (implique furtivité) */
-/*     { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv",
-                           mnemo->ev_host, mnemo->ev_thread, "dls_event", mnemo->ev_text, strlen(mnemo->ev_text)+1 );
+    JsonBuilder *builder = Json_create ();
+    if (builder)
+     { json_builder_begin_object (builder);                                                    /* Création du noeud principal */
+       Json_add_string ( builder, "tech_id",  dout->tech_id );
+       Json_add_string ( builder, "acronyme", dout->acronyme );
+       Json_add_bool   ( builder, "valeur", TRUE );
+       json_builder_end_object (builder);                                                                     /* End Document */
+       buffer = Json_get_buf ( builder, &taille_buf );
+       if (buffer)
+        { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "*", "SET_DO", buffer, taille_buf );
+          Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "SET_DO", buffer, taille_buf );
+          g_free(buffer);
+        }
      }
-    g_free(mnemo);
-*/
+    else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ ); }
 
 suite_AO:
     if (!Partage->com_msrv.Liste_AO) return;                                                      /* Si pas de a, on se barre */
