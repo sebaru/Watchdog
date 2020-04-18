@@ -465,29 +465,28 @@
 /* Entrée: identifiants des modules ups                                                                                       */
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
- static gboolean Envoyer_sortie_ups( struct MODULE_UPS *module )
+ static void Envoyer_sortie_aux_ups( void )
   { struct ZMQ_TARGET *event;
     gchar buffer[256];
     void *payload;
     gint byte;
                                                                                             /* Reception d'un paquet master ? */
-    if ( (byte=Recv_zmq_with_tag ( Cfg_ups.zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer)-1, &event, &payload )) > 0)
+    while( (byte=Recv_zmq_with_tag ( Cfg_ups.zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer)-1, &event, &payload )) > 0)
      { JsonObject *object;
        JsonNode *Query;
        buffer[byte] = 0;
 
        if ( !strcasecmp( event->tag, "SET_DO" ) )
         { gchar *tech_id, *acronyme;
-          Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s", __func__, payload );
           Query = json_from_string ( payload, NULL );
 
           if (!Query)
-           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ ); return(TRUE); }
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ ); continue; }
           object = json_node_get_object (Query);
           if (!object)
            { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
              json_node_unref (Query);
-             return(TRUE);
+             continue;
            }
 
           tech_id  = json_object_get_string_member ( object, "tech_id" );
@@ -495,31 +494,35 @@
           if (!tech_id)
            { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ );
              json_node_unref (Query);
-             return(TRUE);
+             continue;
            }
           else if (!acronyme)
            { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ );
              json_node_unref (Query);
-             return(TRUE);
+             continue;
            }
 
-          if (strcasecmp(module->tech_id, tech_id))
-           { json_node_unref (Query);
-             return(TRUE);
+          Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: Recu SET_DO from bus: %s:%s", __func__, tech_id, acronyme );
+
+          GSList *liste = Cfg_ups.Modules_UPS;
+          while (liste)
+           { struct MODULE_UPS *module = (struct MODULE_UPS *)liste->data;
+             if (strcasecmp(module->tech_id, tech_id))
+              { if (!strcasecmp(acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( module, "load.off" );
+                if (!strcasecmp(acronyme, "LOAD_ON"))         Onduleur_set_instcmd ( module, "load.on" );
+                if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    Onduleur_set_instcmd ( module, "outlet.1.load.off" );
+                if (!strcasecmp(acronyme, "OUTLET_1_ON"))     Onduleur_set_instcmd ( module, "outlet.1.load.on" );
+                if (!strcasecmp(acronyme, "OUTLET_2_OFF"))    Onduleur_set_instcmd ( module, "outlet.2.load.off" );
+                if (!strcasecmp(acronyme, "OUTLET_2_ON"))     Onduleur_set_instcmd ( module, "outlet.2.load.on" );
+                if (!strcasecmp(acronyme, "START_DEEP_BAT"))  Onduleur_set_instcmd ( module, "test.battery.start.deep" );
+                if (!strcasecmp(acronyme, "START_QUICK_BAT")) Onduleur_set_instcmd ( module, "test.battery.start.quick" );
+                if (!strcasecmp(acronyme, "STOP_TEST_BAT"))   Onduleur_set_instcmd ( module, "test.battery.stop" );
+              }
+             liste = g_slist_next(liste);
            }
           json_node_unref (Query);
-          if (!strcasecmp(acronyme, "LOAD_OFF"))        return(Onduleur_set_instcmd ( module, "load.off" ));
-          if (!strcasecmp(acronyme, "LOAD_ON"))         return(Onduleur_set_instcmd ( module, "load.on" ));
-          if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    return(Onduleur_set_instcmd ( module, "outlet.1.load.off" ));
-          if (!strcasecmp(acronyme, "OUTLET_1_ON"))     return(Onduleur_set_instcmd ( module, "outlet.1.load.on" ));
-          if (!strcasecmp(acronyme, "OUTLET_2_OFF"))    return(Onduleur_set_instcmd ( module, "outlet.2.load.off" ));
-          if (!strcasecmp(acronyme, "OUTLET_2_ON"))     return(Onduleur_set_instcmd ( module, "outlet.2.load.on" ));
-          if (!strcasecmp(acronyme, "START_DEEP_BAT"))  return(Onduleur_set_instcmd ( module, "test.battery.start.deep" ));
-          if (!strcasecmp(acronyme, "START_QUICK_BAT")) return(Onduleur_set_instcmd ( module, "test.battery.start.quick" ));
-          if (!strcasecmp(acronyme, "STOP_TEST_BAT"))   return(Onduleur_set_instcmd ( module, "test.battery.stop" ));
         }
      }
-    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Interroger_ups: Interrogation d'un ups                                                                                     */
@@ -621,13 +624,15 @@ reload:
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     while(lib->Thread_run == TRUE)                                                        /* On tourne tant que l'on a besoin */
-     { sleep(1);
+     { usleep(10000);
        sched_yield();
 
        if (lib->Thread_reload == TRUE)
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
           break;
         }
+
+       Envoyer_sortie_aux_ups();
 
        if (Cfg_ups.Modules_UPS == NULL)                                             /* Si pas de module référencés, on attend */
         { sleep(2); continue; }
@@ -650,19 +655,12 @@ reload:
               }
            }
           else
-           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: %s: Envoi des sorties ups", __func__, module->tech_id );
-             if ( Envoyer_sortie_ups ( module ) == FALSE )
-              { Deconnecter_UPS ( module );                                         /* Sur erreur, on deconnecte le module */
-                module->date_next_connexion = Partage->top + UPS_RETRY;                          /* On retente dans longtemps */
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: %s: Interrogation ups", __func__, module->tech_id );
+             if ( Interroger_ups ( module ) == FALSE )
+              { Deconnecter_UPS ( module );
+                module->date_next_connexion = Partage->top + UPS_RETRY;                       /* On retente dans longtemps */
               }
-             else
-              { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: %s: Interrogation ups", __func__, module->tech_id );
-                if ( Interroger_ups ( module ) == FALSE )
-                 { Deconnecter_UPS ( module );
-                   module->date_next_connexion = Partage->top + UPS_RETRY;                       /* On retente dans longtemps */
-                 }
-                else module->date_next_connexion = Partage->top + UPS_POLLING;               /* Update toutes les xx secondes */
-              }
+             else module->date_next_connexion = Partage->top + UPS_POLLING;               /* Update toutes les xx secondes */
            }
           liste = liste->next;                                            /* On prépare le prochain accès au prochain module */
         }
