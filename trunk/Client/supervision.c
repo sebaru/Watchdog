@@ -134,7 +134,7 @@
  static void Menu_get_horloge_synoptique( struct TYPE_INFO_SUPERVISION *infos )
   { gchar chaine[80];
     printf("Get Horloge from %s\n", infos->syn.page );
-    g_snprintf(chaine, sizeof(chaine), "horloges/%s", infos->syn.page );
+    g_snprintf(chaine, sizeof(chaine), "horloges/list/%s", infos->syn.page );
     Firefox_exec ( chaine );
   }
 /******************************************************************************************************************************/
