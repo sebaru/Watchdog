@@ -72,7 +72,7 @@
 
  struct TYPE_INFO_SUPERVISION
   { guint timer_id;                                    /* Id du timer pour l'animation des motifs sur la trame de supervision */
-    guint syn_id;                                                                        /* Id du synoptique en cours de visu */
+    struct CMD_TYPE_SYNOPTIQUE syn;                                                      /* Id du synoptique en cours de visu */
     GtkWidget *Dialog_horloge;                                                  /* Boite de dialogue d'affichage des horloges */
     GtkWidget *Liste_horloge;
     GtkWidget *Option_zoom;                                                               /* Choix du zoom sur la supervision */
@@ -338,7 +338,7 @@
  extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *camera_sup );
 
                                                                                                         /* Dans supervision.c */
- extern void Creer_page_supervision( gchar *libelle, guint syn_id );
+ extern void Creer_page_supervision ( struct CMD_TYPE_SYNOPTIQUE *syn );
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
  extern void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_changer_etat_motif( struct CMD_ETAT_BIT_CTRL *etat_motif );

@@ -61,7 +61,7 @@
      { page = (struct PAGE_NOTEBOOK *)liste->data;
        if ( page->type == TYPE_PAGE_SUPERVISION )                /* Est-ce bien une page d'supervision ?? */
         { infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
-          if (infos->syn_id == syn_id) break;                              /* Nous avons trouvé le syn !! */
+          if (infos->syn.id == syn_id) break;                              /* Nous avons trouvé le syn !! */
         }
        liste = liste->next;                                                        /* On passe au suivant */
      }
@@ -125,13 +125,24 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Menu_acquitter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
-  { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACQ_SYN, (gchar *)&infos->syn_id, sizeof(gint) ); }
+  { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACQ_SYN, (gchar *)&infos->syn.id, sizeof(gint) ); }
+/******************************************************************************************************************************/
+/* Menu_acquitter_synoptique: Envoi une commande d'acquit du synoptique en cours de visu                                      */
+/* Entrée: La page d'information synoptique                                                                                   */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Menu_get_horloge_synoptique( struct TYPE_INFO_SUPERVISION *infos )
+  { gchar chaine[80];
+    printf("Get Horloge from %s\n", infos->syn.page );
+    g_snprintf(chaine, sizeof(chaine), "horloges/%s", infos->syn.page );
+    Firefox_exec ( chaine );
+  }
 /******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
 /* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Creer_page_supervision ( gchar *libelle, guint syn_id )
+ void Creer_page_supervision ( struct CMD_TYPE_SYNOPTIQUE *syn )
   { GtkWidget *bouton, *boite, *hboite, *scroll, *frame, *label;
     GtkAdjustment *adj;
     struct TYPE_INFO_SUPERVISION *infos;
@@ -139,7 +150,7 @@
     static gint init_timer;
     GdkColor color;
 
-    printf("Creation page synoptique %d\n", syn_id );
+    printf("Creation page synoptique %d\n", syn->id );
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
 
@@ -149,7 +160,7 @@
 
     page->type   = TYPE_PAGE_SUPERVISION;
     Liste_pages  = g_list_append( Liste_pages, page );
-    infos->syn_id = syn_id;
+    memcpy(&infos->syn, syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
 
     if (!init_timer) { g_timeout_add( 500, Timer, NULL ); init_timer = 1; }
 
@@ -210,10 +221,16 @@
     g_signal_connect_swapped( G_OBJECT(infos->bouton_acq), "clicked",
                               G_CALLBACK(Menu_acquitter_synoptique), infos );
 
+/******************************************************* Horloges *************************************************************/
+    bouton = gtk_button_new_with_label( "Horloges" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_get_horloge_synoptique), infos );
+
     gtk_widget_show_all( page->child );
 
     label = gtk_event_box_new ();
-    gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( libelle ) );
+    gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( syn->libelle ) );
     gdk_color_parse ("cyan", &color);
     gtk_widget_modify_bg ( label, GTK_STATE_NORMAL, &color );
     gtk_widget_modify_bg ( label, GTK_STATE_ACTIVE, &color );
@@ -459,7 +476,7 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
 
        infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
 
-       if (infos->syn_id == syn_vars->syn_id)
+       if (infos->syn.id == syn_vars->syn_id)
         {                                                     /* Positionnement de la couleur du bouton d'acquit du synotique */
           if (syn_vars->bit_defaut || syn_vars->bit_alarme || syn_vars->bit_alerte ||
               syn_vars->bit_derangement || syn_vars->bit_danger)
