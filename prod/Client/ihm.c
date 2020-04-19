@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -29,7 +29,7 @@
 
  GtkWidget *Notebook;                                                /* Le Notebook de controle du client */
  GtkWidget *Entry_status;                                                 /* Status de la machine cliente */
- GList *Liste_pages = NULL;                                   /* Liste des pages ouvertes sur le notebook */  
+ GList *Liste_pages = NULL;                                   /* Liste des pages ouvertes sur le notebook */
 
  static gint nbr_enreg = 0, nbr_enreg_max = 0;
  static GtkWidget *Barre_pulse;                                                        /* Barre de pulse  */
@@ -210,7 +210,7 @@ printf("searching page %d %d\n", type, id );
                    { liste = liste->next; continue; }
                   break;
              case TYPE_PAGE_SUPERVISION:
-                  if ( ((struct TYPE_INFO_SUPERVISION *)page->infos)->syn_id != id )
+                  if ( ((struct TYPE_INFO_SUPERVISION *)page->infos)->syn.id != id )
                    { liste = liste->next; continue; }
                   break;
              case TYPE_PAGE_MNEMONIQUE:
@@ -266,7 +266,7 @@ printf("not found\n");
   { GtkWidget *vboite, *hboite, *texte;
 
     vboite = gtk_vbox_new( FALSE, 6 );
-    
+
     Notebook = gtk_notebook_new();
     gtk_box_pack_start( GTK_BOX(vboite), Notebook, TRUE, TRUE, 0 );
     gtk_container_set_border_width( GTK_CONTAINER(Notebook), 6 );
