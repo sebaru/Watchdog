@@ -103,7 +103,7 @@
      { gchar tech_id[80], acronyme[80];
        int val;
        if (sscanf ( ligne, "%s %[^:]:%s %d", commande, tech_id, acronyme, &val ) == 4)   /* Découpage de la ligne de commande */
-        { Dls_data_set_bool ( tech_id, acronyme, NULL, val );
+        { Dls_data_set_bool ( NULL, tech_id, acronyme, NULL, val );
           g_snprintf( chaine, sizeof(chaine), " | - %s:%s set to %d", tech_id, acronyme, val );
         }
        else { g_snprintf( chaine, sizeof(chaine), " | - Wrong number of parameters" ); }

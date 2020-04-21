@@ -82,22 +82,18 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Teleinfo_send_status_to_master ( gboolean status )
-  { if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
-     { Dls_data_set_DI ( Cfg_teleinfo.tech_id, "COMM", &Cfg_teleinfo.bit_comm, status ); }                /* Communication OK */
-    else /* Envoi au master via thread HTTP */
-     { JsonBuilder *builder;
-       gchar *result;
-       gsize taille;
-       builder = Json_create ();
-       json_builder_begin_object ( builder );
-       Json_add_string ( builder, "tech_id",  Cfg_teleinfo.tech_id );
-       Json_add_string ( builder, "acronyme", "COMM" );
-       Json_add_bool   ( builder, "etat", status );
-       json_builder_end_object ( builder );
-       result = Json_get_buf ( builder, &taille );
-       Send_zmq_with_tag ( Cfg_teleinfo.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_DI", result, taille );
-       g_free(result);
-     }
+  { JsonBuilder *builder;
+    gchar *result;
+    gsize taille;
+    builder = Json_create ();
+    json_builder_begin_object ( builder );
+    Json_add_string ( builder, "tech_id",  Cfg_teleinfo.tech_id );
+    Json_add_string ( builder, "acronyme", "COMM" );
+    Json_add_bool   ( builder, "etat", status );
+    json_builder_end_object ( builder );
+    result = Json_get_buf ( builder, &taille );
+    Send_zmq_with_tag ( Cfg_teleinfo.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_DI", result, taille );
+    g_free(result);
     Cfg_teleinfo.comm_status = status;
   }
 /******************************************************************************************************************************/
