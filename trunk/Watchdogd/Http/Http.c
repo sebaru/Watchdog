@@ -303,7 +303,7 @@
              }
 
             pss->zmq = Connect_zmq ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
-            pss->zmq_local_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",   "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+            /*pss->zmq_local_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",   "inproc", ZMQUEUE_LOCAL_BUS, 0 );*/
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: %s: WS callback established", __func__, pss->username );
             break;
        case LWS_CALLBACK_RECEIVE:
@@ -323,7 +323,7 @@
        case LWS_CALLBACK_CLOSED:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: %s: WS callback closed", __func__, pss->username );
             if (pss->zmq) Close_zmq(pss->zmq);
-            if (pss->zmq_local_bus) Close_zmq(pss->zmq_local_bus);
+            /*if (pss->zmq_local_bus) Close_zmq(pss->zmq_local_bus);*/
             break;
        case LWS_CALLBACK_SERVER_WRITEABLE:
              { struct DLS_VISUEL visu;
@@ -333,7 +333,7 @@
                 { JsonBuilder *builder;
                   gsize taille_buf;
                   gchar *buf, *result;
-                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
                             "%s: %s: Visuel %s:%s received", __func__, pss->username, visu.tech_id, visu.acronyme );
                   builder = Json_create ();
                   if (builder == NULL)
@@ -360,16 +360,18 @@
                   lws_write	(	wsi,	result+LWS_SEND_BUFFER_PRE_PADDING, taille_buf, LWS_WRITE_TEXT );
                   g_free(result);
                 }
-               if ( pss->zmq_local_bus && (taille_buf = Recv_zmq ( pss->zmq_local_bus, &json_buffer, sizeof(json_buffer) )) > 0 )
+               /*else if ( pss->zmq_local_bus && (taille_buf = Recv_zmq ( pss->zmq_local_bus, &json_buffer, sizeof(json_buffer) )) > 0 )
                 { gchar *result = (gchar *)g_malloc(LWS_SEND_BUFFER_PRE_PADDING + taille_buf);
                   if (result == NULL)
                    { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon Result creation failed", __func__ );
                      return(1);
                    }
                   memcpy ( result + LWS_SEND_BUFFER_PRE_PADDING , json_buffer, taille_buf );
+                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                            "%s: %s: bus %s received", __func__, pss->username, json_buffer );
                   lws_write	(	wsi,	result+LWS_SEND_BUFFER_PRE_PADDING, taille_buf, LWS_WRITE_TEXT );
                   g_free(result);
-                }
+                }*/
              }
             lws_callback_on_writable(wsi);
             break;
