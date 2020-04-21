@@ -39,7 +39,7 @@
 /******************************************************************************************************************************/
  void Lire_config_cli ( struct CONFIG_CLI *config_cli, char *fichier_config_cli )
   { gchar *chaine, *fichier;
-	gint num;
+	   gint num;
     GKeyFile *gkf;
     GError *error=NULL;
 

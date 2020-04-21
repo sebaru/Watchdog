@@ -29,7 +29,7 @@
 
  GtkWidget *Notebook=NULL;                                                               /* Le Notebook de controle du client */
  GtkWidget *Entry_status;                                                                     /* Status de la machine cliente */
- extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */  
+ GList *Liste_pages = NULL;                                                       /* Liste des pages ouvertes sur le notebook */  
 
  static gint nbr_enreg = 0, nbr_enreg_max = 0;
  static GtkWidget *Barre_pulse;                                                        /* Barre de pulse  */

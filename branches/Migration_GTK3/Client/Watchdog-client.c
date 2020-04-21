@@ -50,74 +50,9 @@
  struct CLIENT Client;                                                               /* Identifiant de l'utilisateur en cours */
  struct CONFIG_CLI Config_cli;                                                     /* Configuration generale cliente watchdog */
 
- static void Fermer_client ( void );
- static void A_propos ( GtkWidget *widget, gpointer data );
  static gboolean Arret = FALSE;
-
- GList *Liste_pages = NULL;
-
 /***************************************************** Définition du menu *****************************************************/
 #ifdef bouh
- GnomeUIInfo Menu_lowlevel[]=                                            /*!< Définition du menu lowlevel */
-  { GNOMEUIINFO_ITEM_STOCK( N_("_Camera"), N_("Edit Camera"),
-                            Menu_want_camera, GNOME_STOCK_PIXMAP_MIC ),
-    GNOMEUIINFO_END
-  };
-
- GnomeUIInfo Menu_client_leger[]=                                    /*!< Définition du menu d'administration du client leger */
-  { GNOMEUIINFO_ITEM_STOCK( N_("Lancer le client léger"), N_("Client léger"),
-                            Menu_want_client_leger, GNOME_STOCK_PIXMAP_MAIL ),
-    GNOMEUIINFO_END
-  };
-
- GnomeUIInfo Menu_admin[]=                                                           /*!< Définition du menu d'administration */
-  { GNOMEUIINFO_ITEM_STOCK( N_("Adminis_tration"), N_("Administration"),
-                            Menu_want_page_admin, GNOME_STOCK_PIXMAP_PROPERTIES ),
-    GNOMEUIINFO_ITEM_STOCK( N_("_D.L.S"), N_("Edit DLS plugins"),
-                            Menu_want_plugin_dls, GNOME_STOCK_PIXMAP_EXEC ),
-    GNOMEUIINFO_ITEM_STOCK( N_("_Atelier"), N_("Edit synoptiques"),
-                            Menu_want_synoptique, GNOME_STOCK_PIXMAP_INDEX ),
-    GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_SUBTREE(N_("_Low level"), Menu_lowlevel),
-    GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_SUBTREE(N_("_Client leger"), Menu_client_leger),
-    GNOMEUIINFO_ITEM_STOCK( N_("Compilation forcée"), N_("Compilation forcée"),
-                            Menu_want_compilation_forcee, GNOME_STOCK_PIXMAP_JUMP_TO ),
-    GNOMEUIINFO_END
-  };
- GnomeUIInfo Menu_serveur[]=                                                  /*!< Définition du menu de connexion au serveur */
-  { GNOMEUIINFO_ITEM_STOCK( N_("Connect"), N_("Connect to server"),
-                            Connecter, GNOME_STOCK_PIXMAP_EXEC ),
-    GNOMEUIINFO_ITEM_STOCK( N_("Stop"), N_("Stop the connexion"),
-                            Deconnecter, GNOME_STOCK_PIXMAP_CLOSE ),
-    GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_ITEM_STOCK( N_("_Quit"), N_("Disconnect and quit"), Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
-    GNOMEUIINFO_END
-  };
- GnomeUIInfo Menu_aide[]=                                                                        /*!< Définition du menu aide */
-  { GNOMEUIINFO_ITEM_STOCK( N_("A propos.."), N_("Signatures"), A_propos, GNOME_STOCK_PIXMAP_ABOUT ),
-    GNOMEUIINFO_END
-  };
- GnomeUIInfo Menu_principal[]=                                                 /*!< Définition de la barre de menu principale */
-  { GNOMEUIINFO_SUBTREE(N_("_Serveur"), Menu_serveur),
-    GNOMEUIINFO_SUBTREE(N_("_Admin"), Menu_admin),
-    GNOMEUIINFO_SUBTREE(N_("A_ide"), Menu_aide),
-    GNOMEUIINFO_END
-  };
-
- GnomeUIInfo Barre_outils[]=                                                             /*!< Définition de la barre d'outils */
-  { GNOMEUIINFO_ITEM_STOCK( N_("Connect"), N_("Connect to server"),
-                            Connecter, GNOME_STOCK_PIXMAP_EXEC ),
-    GNOMEUIINFO_ITEM_STOCK( N_("Stop"), N_("Stop the connexion"),
-                            Deconnecter, GNOME_STOCK_PIXMAP_CLOSE ),
-    GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_ITEM_STOCK( N_("Supervision"), N_("Graphical Supervision"),
-                            Menu_want_supervision, GNOME_STOCK_PIXMAP_SEARCH ),
-    GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_ITEM_STOCK( N_("Quit"), N_("Stop and quit"),
-                            Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
-    GNOMEUIINFO_END
-  };
 
 /******************************************************************************************************************************/
 /* Firefox_exec:Lance un navigateur avec l'URI en pj                                                                          */
@@ -158,7 +93,7 @@
  static void Fermer_client ( void )
   { printf("Fermer_client ! \n");
     Deconnecter();
-    Arret = TRUE;
+    gtk_widget_destroy(F_client);
   }
 #ifdef bouh
 /******************************************************************************************************************************/
@@ -291,6 +226,9 @@
  static void Menu_Connecter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
   { Connecter(); }
             
+ static void Menu_Quitter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
+  { Fermer_client(); }
+
  static void Menu_about (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
   { GtkWidget *about_dialog;
     about_dialog = gtk_about_dialog_new ();
@@ -319,8 +257,9 @@
 
 static GActionEntry app_entries[] = {
   { "about", Menu_about, NULL, NULL, NULL },
-  { "connecter", Menu_Connecter, NULL, NULL, NULL },
-  { "quit", Fermer_client, NULL, NULL, NULL },
+  { "Connecter", Menu_Connecter, NULL, NULL, NULL },
+  //{ "Donnecter", Menu_Connecter, NULL, NULL, NULL },
+  { "Quitter", Menu_Quitter, NULL, NULL, NULL },
 //  { "new", new_activated, NULL, NULL, NULL }
 };
 
@@ -328,16 +267,15 @@ static GActionEntry app_entries[] = {
 
  static void ActivateCB ( GtkApplication *app, gpointer user_data)
   { GtkToolItem *bouton, *separateur;
-    GtkWidget *window;
 
-    window = gtk_application_window_new (app);
-    gtk_window_set_title (GTK_WINDOW (window), TITRE_FENETRE );
-    gtk_window_set_default_size (GTK_WINDOW (window), 400, 400);
-    gtk_window_set_icon_name ( GTK_WINDOW(window), "fr.abls-habitat.watchdog" );
+    F_client = gtk_application_window_new (app);
+    gtk_window_set_title (GTK_WINDOW (F_client), TITRE_FENETRE );
+    gtk_window_set_default_size (GTK_WINDOW (F_client), 400, 400);
+    gtk_window_set_icon_name ( GTK_WINDOW(F_client), "fr.abls-habitat.watchdog" );
     g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app);
 
     GtkWidget *box = gtk_box_new( GTK_ORIENTATION_VERTICAL, 10 );
-    gtk_container_add (GTK_CONTAINER (window), box);
+    gtk_container_add (GTK_CONTAINER (F_client), box);
 
     GtkWidget *toolbar = gtk_toolbar_new();
     gtk_box_pack_start ( GTK_BOX(box), toolbar, FALSE, FALSE, 0 );
@@ -366,31 +304,13 @@ static GActionEntry app_entries[] = {
 
     bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("application-exit", GTK_ICON_SIZE_LARGE_TOOLBAR), "Quitter" );
     gtk_tool_item_set_tooltip_text ( bouton, "Sortir de l'application" );
-    g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(gtk_widget_destroy), window );
+    g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(Fermer_client), NULL );
     gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
 
-    GtkWidget *hbox = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 10 );
     gtk_box_pack_start ( GTK_BOX(box), Creer_boite_travail(), TRUE, TRUE, 0 );
 
-    GtkWidget *statusbar = gtk_statusbar_new();
-    gtk_box_pack_start ( GTK_BOX(hbox), statusbar, TRUE, TRUE, 0 );
-
-    GtkWidget *progressbar = gtk_progress_bar_new();
-    gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR(progressbar), 1.0 );
-    gtk_progress_bar_set_show_text ( GTK_PROGRESS_BAR(progressbar), TRUE );
-    gtk_box_pack_start ( GTK_BOX(hbox), progressbar, FALSE, FALSE, 0 );
-
-/*    button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
-    gtk_container_add (GTK_CONTAINER (window), button_box);
-
-    button = gtk_button_new_with_label ("Hello World");
-    g_signal_connect (button, "clicked", G_CALLBACK (print_hello), NULL);
-    g_signal_connect_swapped (button, "clicked", G_CALLBACK (gtk_widget_destroy), window);
-    gtk_container_add (GTK_CONTAINER (button_box), button);*/
-
-    gtk_widget_show_all (window);
+    gtk_widget_show_all(F_client);
   }
-
 /******************************************************************************************************************************/
 /*!Main: Fonction principale du programme du client Watchdog
  ******************************************************************************************************************************/
@@ -413,6 +333,7 @@ static GActionEntry app_entries[] = {
 
     Config_cli.log = Info_init( "Watchdog_client", LOG_DEBUG );                                        /* Init msgs d'erreurs */
     Info_change_log_level( Config_cli.log, Config_cli.log_level );
+    Lire_config_cli ( &Config_cli, "watchdog-client.conf" );
 
     Client.mode = DISCONNECTED;
     GtkApplication *app = gtk_application_new ("fr.abls_habitat.watchdog", G_APPLICATION_FLAGS_NONE);

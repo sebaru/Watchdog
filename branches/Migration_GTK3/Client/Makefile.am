@@ -3,7 +3,7 @@
 #* Projet WatchDog version 3.0       Gestion d'habitat                       sam 13 mar 2004 17:53:37 CET */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Config_cli
+SUBDIRS = Include
 
 desktopdir = $(datadir)/applications
 desktop_DATA = fr.abls-habitat.watchdog.desktop
@@ -18,7 +18,7 @@ ClientResources.c : ClientResources.xml $(shell glib-compile-resources --generat
 	glib-compile-resources --target=ClientResources.h --generate-header $<
 
 Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResources.h \
-                               ihm.c connect.c liste_histo.c
+                               Config_cli.c ihm.c connect.c liste_histo.c
 #connect.c ihm.c \
 #                          protocole.c protocole_gtk_message.c \
 #                          protocole_dls.c protocole_mnemonique.c \
@@ -45,8 +45,7 @@ Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResourc
 #			  trame.c \
 #			  print.c
 
-Watchdog_client_gtk3_LDADD  = $(top_builddir)/Commun/libwatchdog.la \
-                         Config_cli/libconfig_cli.la
+Watchdog_client_gtk3_LDADD  = $(top_builddir)/Commun/libwatchdog.la
 
 Watchdog_client_gtk3_LDFLAGS = `pkg-config --libs gtk+-3.0 openssl glib-2.0 libcurl json-glib-1.0` -lm
 
