@@ -117,22 +117,7 @@
        Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
                  src_text, tech_id, acro, libelle );
 
-       if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
-        { Envoyer_commande_dls_data ( tech_id, acro ); }
-       else /* Envoi au master via thread HTTP */
-        { JsonBuilder *builder;
-          gchar *result;
-          gsize taille;
-          builder = Json_create ();
-          json_builder_begin_object ( builder );
-          Json_add_string ( builder, "tech_id", tech_id );
-          Json_add_string ( builder, "acronyme", acro );
-          Json_add_bool   ( builder, "etat", TRUE );
-          json_builder_end_object ( builder );
-          result = Json_get_buf ( builder, &taille );
-          Send_zmq_with_tag ( Cfg_snips.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_CDE", result, taille );
-          g_free(result);
-        }
+       Send_zmq_CDE_to_master ( Cfg_snips.zmq_to_master, NOM_THREAD, tech_id, acro );
      }
   }
 /******************************************************************************************************************************/

@@ -66,7 +66,6 @@
  extern gboolean Zmq_instance_is_target ( struct ZMQ_TARGET *event );
  extern gboolean Zmq_other_is_target ( struct ZMQ_TARGET *event );
  extern void Send_zmq_DI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gboolean etat );
- extern void Send_zmq_AI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gfloat valeur );
  extern void Send_zmq_CDE_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

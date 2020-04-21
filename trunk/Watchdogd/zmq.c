@@ -306,27 +306,6 @@
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Send_zmq_AI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gfloat valeur )
-  { JsonBuilder *builder;
-    gchar *result;
-    gsize taille;
-
-    builder = Json_create ();
-    if(!builder) return;
-    json_builder_begin_object ( builder );
-    Json_add_string ( builder, "tech_id",  tech_id );
-    Json_add_string ( builder, "acronyme", acronyme );
-    Json_add_double ( builder, "valeur", valeur );
-    json_builder_end_object ( builder );
-    result = Json_get_buf ( builder, &taille );
-    Send_zmq_with_tag ( zmq, NULL, thread, "*", "msrv", "SET_AI", result, taille );
-    g_free(result);
-  }
-/******************************************************************************************************************************/
-/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
-/* Entrée: le status du GSM                                                                                                   */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
  void Send_zmq_CDE_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme )
   { JsonBuilder *builder;
     gchar *result;
