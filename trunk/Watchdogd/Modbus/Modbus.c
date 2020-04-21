@@ -691,7 +691,6 @@
         { if (num<module->nbr_entree_ana)
            { Dls_data_get_AI ( tech_id, acro, &module->AI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
              if(module->AI[num] == NULL) Dls_data_set_AI ( tech_id, acro, &module->AI[num], 0.0, FALSE );/* Sinon, on le crée */
-             Charger_conf_AI ( module->AI[num] );                                    /* Chargement de la conf AI depuis la DB */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
                          __func__, module->modbus.tech_id, map_text, num, module->nbr_entree_ana );
