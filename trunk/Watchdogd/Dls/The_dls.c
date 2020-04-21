@@ -1895,7 +1895,7 @@
 /* Main: Fonction principale du DLS                                                                                           */
 /******************************************************************************************************************************/
  void Run_dls ( void )
-  { gint last_top_1hz, last_top_2hz, last_top_5hz, last_top_1min;
+  { gint last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min;
     gint Update_heure=0;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
@@ -1912,7 +1912,7 @@
     Mnemo_auto_create_AI ( "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
     Mnemo_auto_create_AI ( "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1MIN", "Impulsion toutes les minutes" );
-    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1HZ", "Impulsion toutes les secondes" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1SEC", "Impulsion toutes les secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
 
@@ -1920,9 +1920,9 @@
 
     Partage->com_dls.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
-    last_top_1hz = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
+    last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
-     { gpointer dls_top_1hz=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
+     { gpointer dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
 
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
@@ -1936,9 +1936,9 @@
         { Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
           last_top_1min = Partage->top;
         }
-       if (Partage->top-last_top_1hz>=10)                                                              /* Toutes les secondes */
-        { Dls_data_set_bool ( NULL, "SYS", "TOP_1HZ", &dls_top_1hz, TRUE );
-          last_top_1hz = Partage->top;
+       if (Partage->top-last_top_1sec>=10)                                                              /* Toutes les secondes */
+        { Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
+          last_top_1sec = Partage->top;
         }
        if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
         { Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
@@ -1973,10 +1973,9 @@
        Dls_run_dls_tree( Partage->com_dls.Dls_tree );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
        SB_SYS(3, 1);                                                  /* B3 est toujours à un apres le premier tour programme */
-       Dls_data_set_bool ( NULL, "SYS", "TOP_1HZ", &dls_top_1hz, FALSE );
+       Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, FALSE );
-       Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, FALSE );
        Partage->com_dls.Top_check_horaire = FALSE;                         /* Cotrole horaire effectué un fois par minute max */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */

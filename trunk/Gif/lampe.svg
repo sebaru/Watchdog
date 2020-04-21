@@ -279,11 +279,11 @@
   </metadata>
   <script id="SetMode" type="text/javascript">
     { console.log("Appel au svg "+this.motif.libelle+" avec mode="+mode+" color="+color);
-      var chg_matrice =
+      /*var chg_matrice =
        { fill: [ this.currentColor, color ] };                                                       /* Matrice de changement */
-      var chg_timing  = { duration: 500, fill: 'forwards' };                                          /* Timing de changement */
-      this.getElementById("ampoule").animate ( chg_matrice, chg_timing );                                     /* Go Animate ! */
-      this.currentColor = color;
+      /*var chg_timing  = { duration: 500, fill: 'forwards' };                                          /* Timing de changement */
+      /*this.getElementById("ampoule").animate ( chg_matrice, chg_timing );                                     /* Go Animate ! */
+      /*this.currentColor = color;*/
     }
   </script>
 </svg>

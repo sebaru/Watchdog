@@ -440,8 +440,7 @@
     memcpy ( pss->post_data + pss->post_data_length, buffer, taille );
     pss->post_data_length += taille;
     pss->post_data[pss->post_data_length] = 0;
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s:  received %d bytes (total length=%d, max %d)", __func__,
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s:  received %d bytes (total length=%d, max %d)", __func__,
               taille, pss->post_data_length, Cfg_http.max_upload_bytes );
     return 0;
   }
@@ -467,7 +466,6 @@
   { gchar remote_name[80], remote_ip[80];
     struct HTTP_PER_SESSION_DATA *pss = (struct HTTP_PER_SESSION_DATA *)user;
 
- /*   Http_Log_request(connection, url, method, version, upload_data_size, con_cls);*/
     switch (tag)
      { case LWS_CALLBACK_ESTABLISHED:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: connexion established" );
