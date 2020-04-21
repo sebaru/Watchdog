@@ -164,34 +164,39 @@
  extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
  extern gchar *Type_vers_string ( guint type );
  extern gchar *Type_sms_vers_string ( guint type );
+#endif
+ extern void Log( gchar *chaine );                                                                              /* Dans ihm.c */
+ extern void Raz_progress_pulse( void );
+ extern GtkWidget *Creer_boite_travail ( void );
+
+#ifdef bouh
+ extern void Effacer_pages ( void );
+ extern void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer );
+ extern void Set_progress_plus( gint plus );
+ extern void Set_progress_text( gchar *cadran, gint max );
+ extern void Set_progress_ratio( gint nbr, gint max );
+ extern void Set_progress_pulse( void );
+ extern struct PAGE_NOTEBOOK *Chercher_page_notebook ( guint type, guint id, gboolean affiche );
+ extern gboolean Tester_page_notebook ( guint type );
+ extern gint Nbr_page_type ( gint type );
+ extern struct PAGE_NOTEBOOK *Page_actuelle ( void );
+#endif
+
+ extern void Connecter ( void );                                                                            /* Dans connect.c */
+ extern void Deconnecter ( void );
+
+#ifdef bouh
+ extern gboolean Connecter_ssl ( void );
+ extern gboolean Connecter_au_serveur ( void );
+ extern void Envoyer_authentification ( void );
+ extern void Deconnecter_sale ( void );
+ extern gboolean Envoi_serveur ( gint tag, gint ss_tag, gchar *buffer, gint taille );
+ extern gboolean Changer_password ( void );
 
 
  extern gboolean WTD_Curl_post_request ( gchar *uri, gint post, gchar *post_data, gint post_length );
  extern CURL *WTD_Curl_init ( gchar *erreur );
  extern void Firefox_exec ( gchar *uri );
-
- extern void Log( gchar *chaine );                                                                              /* Dans ihm.c */
- extern void Effacer_pages ( void );
- extern void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer );
- extern GtkWidget *Creer_boite_travail ( void );
- extern void Set_progress_plus( gint plus );
- extern void Set_progress_text( gchar *cadran, gint max );
- extern void Set_progress_ratio( gint nbr, gint max );
- extern void Set_progress_pulse( void );
- extern void Raz_progress_pulse( void );
- extern struct PAGE_NOTEBOOK *Chercher_page_notebook ( guint type, guint id, gboolean affiche );
- extern gboolean Tester_page_notebook ( guint type );
- extern gint Nbr_page_type ( gint type );
- extern struct PAGE_NOTEBOOK *Page_actuelle ( void );
-
- extern void Connecter ( void );                                                                            /* Dans connect.c */
- extern gboolean Connecter_ssl ( void );
- extern gboolean Connecter_au_serveur ( void );
- extern void Envoyer_authentification ( void );
- extern void Deconnecter_sale ( void );
- extern void Deconnecter ( void );
- extern gboolean Envoi_serveur ( gint tag, gint ss_tag, gchar *buffer, gint taille );
- extern gboolean Changer_password ( void );
 
  extern void Ecouter_serveur ( void );                                                                    /* Dans protocole.c */
  extern void Gerer_protocole_gtk_message ( struct CONNEXION *connexion );

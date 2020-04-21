@@ -25,11 +25,11 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
+ #include <gtk/gtk.h>
 
- GtkWidget *Notebook;                                                /* Le Notebook de controle du client */
- GtkWidget *Entry_status;                                                 /* Status de la machine cliente */
- GList *Liste_pages = NULL;                                   /* Liste des pages ouvertes sur le notebook */  
+ GtkWidget *Notebook=NULL;                                                               /* Le Notebook de controle du client */
+ GtkWidget *Entry_status;                                                                     /* Status de la machine cliente */
+ extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */  
 
  static gint nbr_enreg = 0, nbr_enreg_max = 0;
  static GtkWidget *Barre_pulse;                                                        /* Barre de pulse  */
@@ -37,6 +37,7 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
+#ifdef bouh
 /**********************************************************************************************************/
 /* Detruire_page_plugin_dls: Detruit la page du notebook consacrée aux plugin_dlss watchdog               */
 /* Entrée: rien                                                                                           */
@@ -114,6 +115,7 @@
      }
     return(cpt);
   }
+#endif
 /**********************************************************************************************************/
 /* Set_progress: Positionne la barre de progression de la fenetre                                         */
 /* Entrées: val, max                                                                                      */
@@ -265,14 +267,15 @@ printf("not found\n");
  GtkWidget *Creer_boite_travail ( void )
   { GtkWidget *vboite, *hboite, *texte;
 
-    vboite = gtk_vbox_new( FALSE, 6 );
+    vboite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
     
     Notebook = gtk_notebook_new();
     gtk_box_pack_start( GTK_BOX(vboite), Notebook, TRUE, TRUE, 0 );
     gtk_container_set_border_width( GTK_CONTAINER(Notebook), 6 );
     gtk_notebook_set_scrollable (GTK_NOTEBOOK(Notebook), TRUE );
+    gtk_notebook_append_page ( GTK_NOTEBOOK(Notebook), Creer_page_histo(), gtk_label_new("Fil de l'eau") );
 
-    hboite = gtk_hbox_new( FALSE, 6 );
+    hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_box_pack_start( GTK_BOX(vboite), hboite, FALSE, FALSE, 0 );
 
@@ -280,7 +283,8 @@ printf("not found\n");
     texte = gtk_label_new( "Status" );
     gtk_box_pack_start( GTK_BOX(hboite), texte, FALSE, FALSE, 0 );
     Entry_status = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_status), FALSE );
+    gtk_entry_set_icon_from_icon_name ( GTK_ENTRY(Entry_status), GTK_ENTRY_ICON_PRIMARY, "window-close");
+    g_object_set (Entry_status, "editable", FALSE, NULL );
     gtk_box_pack_start( GTK_BOX(hboite), Entry_status, TRUE, TRUE, 0 );
 
     Barre_progress = gtk_progress_bar_new ();

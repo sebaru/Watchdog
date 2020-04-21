@@ -25,7 +25,7 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
+ #include <gtk/gtk.h>
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <netinet/in.h>
@@ -56,7 +56,9 @@
     Client.ssl_ctx = NULL;
     Client.mode = DISCONNECTED;
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode DISCONNECTED" );
+#ifdef bouh
     Effacer_pages();                                                                          /* Efface les pages du notebook */
+#endif
   }
 /******************************************************************************************************************************/
 /* Deconnecter: libere la mémoire et deconnecte le client                                                                     */
@@ -66,8 +68,9 @@
   { if (!Client.connexion) return;
     Envoyer_reseau( Client.connexion, TAG_CONNEXION, SSTAG_CLIENT_OFF, NULL, 0 );
     Deconnecter_sale();
-    Log ( _("Disconnected") );
+    Log ( "Disconnected" );
   }
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Envoi_serveur: Envoi d'un paquet au serveur                                                                                */
 /* Entrée: des infos sur le paquet à envoyer                                                                                  */
@@ -111,6 +114,7 @@
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
              "Envoyer_identification: Client en mode ATTENTE_AUTORISATION" );
   }
+#endif
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
 /* Entrée: une nom et un password                                                                                             */
@@ -123,7 +127,7 @@
     gchar service[10];
     int connexion;
 
-    Log( _("Trying to connect") );
+    Log( "Trying to connect" );
     Raz_progress_pulse();
 
     memset(&hints, 0, sizeof(struct addrinfo));
@@ -135,9 +139,9 @@
     g_snprintf( service, sizeof(service), "%d", Config_cli.port_ihm );
     s = getaddrinfo( Client.host, service, &hints, &result);
     if (s != 0)
-     { Log( _("DNS failed") );
+     { Log( "DNS failed" );
        Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
-                 _("Connecter_au_serveur: DNS failed %s(%s)"), Client.host, gai_strerror(s) );
+                 "Connecter_au_serveur: DNS failed %s(%s)", Client.host, gai_strerror(s) );
        return(FALSE);
      }
 
@@ -151,13 +155,13 @@
         connexion = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (connexion == -1)
          { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
-                    "Connecter_au_serveur: Socket creation failed" );
+                     "Connecter_au_serveur: Socket creation failed" );
            continue;
          }
 
        if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
         { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
-                   "Connecter_au_serveur: Connect OK to %s (%s) family=%d",
+                    "Connecter_au_serveur: Connect OK to %s (%s) family=%d",
                     Client.host, service, rp->ai_family );
           break;                  /* Success */
         }
@@ -179,8 +183,7 @@
 
     Client.connexion = Nouvelle_connexion( Config_cli.log, connexion, -1 );                       /* Creation de la structure */
     if (!Client.connexion)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                 _("Connecter_au_serveur: cannot create new connexion") );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "Connecter_au_serveur: cannot create new connexion" );
        Deconnecter();
        return(FALSE);
      }
@@ -279,7 +282,7 @@
 /* Connecter_ssl: Tentative de connexion sécurisée au serveur                                                                 */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- gboolean Connecter_ssl ( void )
+ static gboolean Connecter_ssl ( void )
   { gint retour;
 
     Client.ssl_ctx = Init_ssl();                                                                  /* Creation du contexte SSL */
@@ -357,42 +360,45 @@ encore:
     gint retour;
 
     if (Client.connexion) return;
-    F_ident = gtk_message_dialog_new ( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT,
+    F_ident = gtk_message_dialog_new ( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
                                        GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
-                                       _("Identification required") );
+                                       "Identification required" );
     gtk_window_set_resizable (GTK_WINDOW (F_ident), FALSE);
 
-    frame = gtk_frame_new( _("Put your ID and password") );
+    frame = gtk_frame_new( "Put your ID and password" );
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_ident)->vbox ), frame, TRUE, TRUE, 0 );
+    gtk_container_set_border_width( GTK_CONTAINER(frame), 6 );
+    gtk_box_pack_start( GTK_BOX(gtk_dialog_get_content_area (GTK_DIALOG(F_ident))), frame, TRUE, TRUE, 0 );
 
-    boite = gtk_vbox_new( FALSE, 6 );
+    boite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(boite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), boite );
 
-    table = gtk_table_new( 3, 3, TRUE );                                                      /* Table des entrys identifiant */
+    table = gtk_grid_new();                                                                   /* Table des entrys identifiant */
     gtk_box_pack_start( GTK_BOX(boite), table, TRUE, TRUE, 0 );
-    gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
-    gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
+    //gtk_grid_set_row_homogeneous ( GTK_GRID(table), TRUE );
+    //gtk_grid_set_column_homogeneous ( GTK_GRID(table), TRUE );
+    gtk_grid_set_row_spacing( GTK_GRID(table), 5 );
+    gtk_grid_set_column_spacing( GTK_GRID(table), 5 );
 
-    texte = gtk_label_new( _("Serveur") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
+    texte = gtk_label_new( "Serveur" );
+    gtk_grid_attach( GTK_GRID(table), texte, 0, 0, 1, 1 );
     Entry_host = gtk_entry_new();
     gtk_entry_set_text( GTK_ENTRY(Entry_host), Config_cli.host );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_host, 1, 3, 0, 1 );
+    gtk_grid_attach( GTK_GRID(table), Entry_host, 1, 0, 1, 1 );
 
-    texte = gtk_label_new( _("Name") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
+    texte = gtk_label_new( "Name" );
+    gtk_grid_attach( GTK_GRID(table), texte, 0, 1, 1, 1 );
     Entry_nom = gtk_entry_new();
     gtk_entry_set_text( GTK_ENTRY(Entry_nom), Config_cli.user );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_nom, 1, 3, 1, 2 );
+    gtk_grid_attach( GTK_GRID(table), Entry_nom, 1, 1, 1, 1 );
 
-    texte = gtk_label_new( _("Password") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 2, 3 );
+    texte = gtk_label_new( "Password" );
+    gtk_grid_attach( GTK_GRID(table), texte, 0, 2, 1, 1 );
     Entry_code = gtk_entry_new();
     gtk_entry_set_visibility( GTK_ENTRY(Entry_code), FALSE );
     gtk_entry_set_text( GTK_ENTRY(Entry_code), Config_cli.passwd );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_code, 1, 3, 2, 3 );
+    gtk_grid_attach( GTK_GRID(table), Entry_code, 1, 2, 1, 1 );
 
     g_signal_connect_swapped( Entry_host, "activate", (GCallback)gtk_widget_grab_focus, Entry_nom );
     g_signal_connect_swapped( Entry_nom,  "activate", (GCallback)gtk_widget_grab_focus, Entry_code );
@@ -411,7 +417,7 @@ encore:
 
            gtk_widget_destroy( F_ident );                                                          /* Fermeture de la fenetre */
            if (Connecter_au_serveur())                                              /* Essai de connexion au serveur Watchdog */
-            { Log( _("Waiting for connexion....") ); }
+            { Log( "Waiting for connexion...." ); }
          }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

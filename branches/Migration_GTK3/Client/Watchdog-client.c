@@ -54,7 +54,6 @@
  static void A_propos ( GtkWidget *widget, gpointer data );
  static gboolean Arret = FALSE;
 
- GtkWidget *Notebook;
  GList *Liste_pages = NULL;
 
 /***************************************************** Définition du menu *****************************************************/
@@ -119,39 +118,6 @@
                             Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
     GNOMEUIINFO_END
   };
-#endif
-/**********************************************************************************************************/
-/*!A_propos: Presentation du programme et des authors
- **********************************************************************************************************/
- static void A_propos ( GtkWidget *widget,                              /*!< widget source de l'évènement */
-                        gpointer data                                               /*!< data du callback */
-                      )
-  { const gchar *auteurs[]=
-     { "Sebastien Lefevre <sebastien.lefevre@abls-habitat.fr>",
-       "Bruno Lefevre <bruno.lefevre@abls-habitat.fr>",
-       NULL
-     };
-
-    gtk_show_about_dialog( NULL, "program-name", "Watchdog-client",
-                           "version", VERSION, "copyright", "Copyright 2010-2017 © Sebastien Lefevre",
-                           "authors", auteurs,
-                           "license", "Watchdog is free software; you can redistribute it and/or modify\n"
-                                      "it under the terms of the GNU General Public License as published by\n"
-                                      "the Free Software Foundation; either version 2 of the License, or\n"
-                                      "(at your option) any later version.\n"
-                                      "\n"
-                                      "Watchdog is distributed in the hope that it will be useful,\n"
-                                      "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-                                      "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
-                                      "GNU General Public License for more details.\n"
-                                      "\n"
-                                      "You should have received a copy of the GNU General Public License\n"
-                                      "along with Watchdog; if not, write to the Free Software\n"
-                                      "Foundation, Inc., 51 Franklin St, Fifth Floor, \n"
-                                      "Boston, MA  02110-1301  USA\n",
-                           NULL );
-  }
-#ifdef bouh
 
 /******************************************************************************************************************************/
 /* Firefox_exec:Lance un navigateur avec l'URI en pj                                                                          */
@@ -185,6 +151,7 @@
      }
     printf("Fin traitement signaux\n");
   }
+#endif
 /******************************************************************************************************************************/
 /*!Fermer_client: Deconnexion du client avant sortir du programme
  ******************************************************************************************************************************/
@@ -193,6 +160,7 @@
     Deconnecter();
     Arret = TRUE;
   }
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Curl_progress_callback: Callbakc d'affichage de la progression du download ou upload                                       */
 /* Entrée:                                                                                                                    */
@@ -320,50 +288,39 @@
     return(TRUE);
   }
 #endif
+ static void Menu_Connecter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
+  { Connecter(); }
+            
+ static void Menu_about (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
+  { GtkWidget *about_dialog;
+    about_dialog = gtk_about_dialog_new ();
+    const gchar *authors[] = { "Sebastien Lefevre <sebastien.lefevre@abls-habitat.fr>",
+                               "Bruno Lefevre <bruno.lefevre@abls-habitat.fr>", NULL };
+    const gchar *documenters[] = {"A vot' bon coeur !", NULL};
 
-static void
-print_hello (GtkWidget *widget,
-             gpointer   data)
-{
-  g_print ("Hello World\n");
-}
-
-
-static void
-about (GSimpleAction *simple,
-            GVariant      *parameter,
-            gpointer       user_data)
-{
-   GtkWidget *about_dialog;
-
-   about_dialog = gtk_about_dialog_new ();
-
-   const gchar *authors[] = { "Sebastien Lefevre <sebastien.lefevre@abls-habitat.fr>",
-                              "Bruno Lefevre <bruno.lefevre@abls-habitat.fr>", NULL };
-   const gchar *documenters[] = {"A vot' bon coeur !", NULL};
-
-   /* Fill in the about_dialog with the desired information */
-   gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG (about_dialog), "About Watchdog");
-   gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG (about_dialog), "Gnu Public License");
-   gtk_about_dialog_set_authors (GTK_ABOUT_DIALOG (about_dialog), authors);
-   gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG (about_dialog), documenters);
-   gtk_about_dialog_set_website_label (GTK_ABOUT_DIALOG (about_dialog), "Wiki ABLS-Habitat.fr");
-   gtk_about_dialog_set_website (GTK_ABOUT_DIALOG (about_dialog), "https://abls-habitat.fr");
+    /* Fill in the about_dialog with the desired information */
+    gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG (about_dialog), "About Watchdog");
+    gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG (about_dialog), "Gnu Public License");
+    gtk_about_dialog_set_authors (GTK_ABOUT_DIALOG (about_dialog), authors);
+    gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG (about_dialog), documenters);
+    gtk_about_dialog_set_website_label (GTK_ABOUT_DIALOG (about_dialog), "Wiki ABLS-Habitat.fr");
+    gtk_about_dialog_set_website (GTK_ABOUT_DIALOG (about_dialog), "https://abls-habitat.fr");
 
    /* The "response" signal is emitted when the dialog receives a delete event,
     * therefore we connect that signal to the on_close callback function
     * created above.
     */
-   g_signal_connect (GTK_DIALOG (about_dialog), "response", G_CALLBACK(gtk_widget_destroy), NULL);
+    g_signal_connect (GTK_DIALOG (about_dialog), "response", G_CALLBACK(gtk_widget_destroy), NULL);
 
    /* Show the about dialog */
-   gtk_widget_show (about_dialog);
-}
+    gtk_widget_show (about_dialog);
+  }
 
 
 static GActionEntry app_entries[] = {
-  { "about", about, NULL, NULL, NULL }
-//  { "quit", quit_app, NULL, NULL, NULL },
+  { "about", Menu_about, NULL, NULL, NULL },
+  { "connecter", Menu_Connecter, NULL, NULL, NULL },
+  { "quit", Fermer_client, NULL, NULL, NULL },
 //  { "new", new_activated, NULL, NULL, NULL }
 };
 
@@ -373,7 +330,6 @@ static GActionEntry app_entries[] = {
   { GtkToolItem *bouton, *separateur;
     GtkWidget *window;
 
-    /*printf(" prefers_app_menu = %d\n", gtk_application_prefers_app_menu(app));*/
     window = gtk_application_window_new (app);
     gtk_window_set_title (GTK_WINDOW (window), TITRE_FENETRE );
     gtk_window_set_default_size (GTK_WINDOW (window), 400, 400);
@@ -388,6 +344,7 @@ static GActionEntry app_entries[] = {
 
     bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("system-run", GTK_ICON_SIZE_LARGE_TOOLBAR), "Se connecter" );
     gtk_tool_item_set_tooltip_text ( bouton, "Se connecter au serveur" );
+    g_signal_connect ( bouton, "clicked", G_CALLBACK(Connecter), NULL );
     gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
 
     bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_LARGE_TOOLBAR), "Se déconnecter" );
@@ -412,12 +369,8 @@ static GActionEntry app_entries[] = {
     g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(gtk_widget_destroy), window );
     gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
 
-    Notebook = gtk_notebook_new();
-    gtk_box_pack_start ( GTK_BOX(box), Notebook, TRUE, TRUE, 0 );
-    gtk_notebook_append_page ( GTK_NOTEBOOK(Notebook), Creer_page_histo(), gtk_label_new("Fil de l'eau") );
-
     GtkWidget *hbox = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 10 );
-    gtk_box_pack_start ( GTK_BOX(box), hbox, FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(box), Creer_boite_travail(), TRUE, TRUE, 0 );
 
     GtkWidget *statusbar = gtk_statusbar_new();
     gtk_box_pack_start ( GTK_BOX(hbox), statusbar, TRUE, TRUE, 0 );
@@ -444,8 +397,8 @@ static GActionEntry app_entries[] = {
  int main ( int argc,                                                       /*!< nombre d'argument dans la ligne de commande, */
             char *argv[]                                                               /*!< Arguments de la ligne de commande */
           )
-  { gint help = 0, port = -1, gui_tech = -1, debug_level = -1;
-    struct sigaction sig;
+  { struct sigaction sig;
+    int status;
 
     if (chdir( g_get_home_dir() ))                                                      /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", g_get_home_dir() ); exit(EXIT_ERREUR); }
@@ -459,45 +412,18 @@ static GActionEntry app_entries[] = {
      } else printf ("Chdir %s OK\n", REPERTOIR_CONF );
 
     Config_cli.log = Info_init( "Watchdog_client", LOG_DEBUG );                                        /* Init msgs d'erreurs */
-
     Info_change_log_level( Config_cli.log, Config_cli.log_level );
 
-    //Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, _("Main : Start v%s"), VERSION );
-    Print_config_cli( &Config_cli );
-
-    GtkApplication *app;
-    int status;
-
-    /*GtkBuilder *builder = gtk_builder_new_from_file ("test_glade.ui");
-    if (!builder) _exit(0);*/
- /*   g_resources_register(ClientResources_get_resource());*/
-
-
-    app = gtk_application_new ("fr.abls_habitat.watchdog", G_APPLICATION_FLAGS_NONE);
+    Client.mode = DISCONNECTED;
+    GtkApplication *app = gtk_application_new ("fr.abls_habitat.watchdog", G_APPLICATION_FLAGS_NONE);
     g_signal_connect (app, "activate", G_CALLBACK (ActivateCB), NULL);
 
-    printf("Ressource path = %s\n", g_application_get_resource_base_path( G_APPLICATION(app) ));
-    printf("Ressource menus.ui = %d\n", g_resources_get_info("/fr/abls_habitat/watchdog/gtk/menus.ui", G_RESOURCE_LOOKUP_FLAGS_NONE, NULL, NULL, NULL ) );
-GtkBuilder *builder = gtk_builder_new_from_resource ( "/fr/abls_habitat/watchdog/gtk/menus.ui" );
-    printf("builder=%p\n", builder );
-    printf(" Recherche app-menu: %p\n", gtk_builder_get_object (builder,"app-menu"));
-    g_object_unref(builder);
     status = g_application_run (G_APPLICATION (app), argc, argv);
     g_object_unref (app);
 
 /*    g_resources_unregister(ClientResources_get_resource());*/
     return status;
 #ifdef bouh
-
-    if (Config_cli.gui_tech == TRUE)
-     { gnome_app_create_menus( GNOME_APP(F_client), Menu_principal );
-       gnome_app_create_toolbar( GNOME_APP(F_client), Barre_outils );
-     }
-
-    gtk_widget_set_size_request (F_client, 800, 600);
-    gtk_widget_realize( F_client );                                                         /* Pour pouvoir creer les pixmaps */
-    if (Config_cli.gui_fullscreen) gtk_window_maximize ( GTK_WINDOW(F_client) );
-    gnome_app_set_contents( GNOME_APP(F_client), Creer_boite_travail() );
 
     sig.sa_handler = Traitement_signaux;
     sigemptyset(&sig.sa_mask);
@@ -507,7 +433,6 @@ GtkBuilder *builder = gtk_builder_new_from_resource ( "/fr/abls_habitat/watchdog
     sigaction( SIGPIPE,  &sig, NULL );                                                          /* Arret Prématuré (logiciel) */
 
     Client.gids = NULL;                                                  /* Initialisation de la structure de client en cours */
-    Client.mode = DISCONNECTED;
 
     gtk_widget_show_all( F_client );                                                   /* Affichage de le fenetre de controle */
     if (Config_cli.gui_tech == FALSE)
