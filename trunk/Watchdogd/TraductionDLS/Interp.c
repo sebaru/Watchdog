@@ -109,7 +109,7 @@
      { va_start( ap, format );
        g_vsnprintf( chaine, sizeof(chaine), format, ap );
        va_end ( ap );
-       g_snprintf( log, sizeof(log), "%s\n", chaine );
+       g_snprintf( log, sizeof(log), "Ligne %d: %s\n", DlsScanner_get_lineno(), chaine );
        write( Id_log, log, strlen(log) );
 
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );

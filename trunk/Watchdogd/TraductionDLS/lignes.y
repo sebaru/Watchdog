@@ -107,14 +107,14 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                 {{ switch($5)
                     { case MNEMO_ENTREE:
                                  if ( New_alias(ALIAS_TYPE_STATIC, NULL, $2, $5, $6, $4, NULL) == FALSE )    /* Deja defini ? */
-                                  { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
+                                  { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                                  break;
                       case MNEMO_CPTH:
                       case MNEMO_CPT_IMP:
                       case MNEMO_TEMPO:
                       case MNEMO_MSG:
                       case MNEMO_REGISTRE :
-                                 Emettre_erreur_new( "Ligne %d: Use of #static is obsolete. Migrate to #define.", DlsScanner_get_lineno() );
+                                 Emettre_erreur_new( "Use of #static is obsolete. Migrate to #define." );
                                  break;
                       case MNEMO_SORTIE:
                       case MNEMO_BISTABLE:
@@ -122,13 +122,13 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                       case MNEMO_MONOSTABLE  :
                       case MNEMO_MOTIF:
                                  if ($4==1)                                                                   /* Barre = 1 ?? */
-                                  { Emettre_erreur_new( "Ligne %d: Use of '/%s' is forbidden", DlsScanner_get_lineno(), $2 ); }
+                                  { Emettre_erreur_new( "Use of '/%s' is forbidden",  $2 ); }
                                  else
                                   { if (New_alias(ALIAS_TYPE_STATIC, NULL, $2, $5, $6, 0, NULL) == FALSE)
-                                     { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
+                                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                                   }
                                  break;
-                      default: Emettre_erreur_new( "Ligne %d: Syntaxe Error near '%s'", DlsScanner_get_lineno(), $2 );
+                      default: Emettre_erreur_new( "Syntax Error near '%s'", $2 );
                                break;
                     }
                    g_free($2);
@@ -557,7 +557,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                  alias->type_bit==MNEMO_MONOSTABLE ||
                                  alias->type_bit==MNEMO_HORLOGE)
                          )
-                       { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser dans une comparaison", DlsScanner_get_lineno(), $3 );
+                       { Emettre_erreur_new( "'%s' ne peut s'utiliser dans une comparaison", $3 );
                          $$=New_chaine(2);
                          g_snprintf( $$, 2, "0" );
                        } else
@@ -566,7 +566,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                   alias->type_bit==MNEMO_CPT_IMP ||
                                   alias->type_bit==MNEMO_CPTH)
                          )
-                       { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser qu'avec une comparaison", DlsScanner_get_lineno(), $3 );
+                       { Emettre_erreur_new( "'%s' ne peut s'utiliser qu'avec une comparaison", $3 );
                          $$=New_chaine(2);
                          g_snprintf( $$, 2, "0" );
                        }
@@ -708,13 +708,13 @@ unite:          modulateur ENTIER HEURE ENTIER
                             break;
                           }
                          default:
-                          { Emettre_erreur_new( "Ligne %d: '%s' n'est pas une condition valide", DlsScanner_get_lineno(), $3 );
+                          { Emettre_erreur_new( "'%s' n'est pas une condition valide", $3 );
                             $$=New_chaine(2);
                             g_snprintf( $$, 2, "0" );
                           }
                        }
                     }
-                   else { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), acro );/* si l'alias n'existe pas */
+                   else { Emettre_erreur_new( "'%s' is not defined", acro );/* si l'alias n'existe pas */
                           $$=New_chaine(2);
                           g_snprintf( $$, 2, "0" );
                         }
@@ -812,7 +812,7 @@ une_action:     T_ACT_COMOUT
                                  alias->type_bit==MNEMO_DIGITAL_OUTPUT ||
                                  alias->type_bit==MNEMO_MONOSTABLE)
                          )
-                       { Emettre_erreur_new( "Ligne %d: '/%s' ne peut s'utiliser", DlsScanner_get_lineno(), alias->acronyme );
+                       { Emettre_erreur_new( "'/%s' ne peut s'utiliser", alias->acronyme );
                          $$=New_action();
                          taille = 2;
                          $$->alors = New_chaine( taille );
@@ -829,7 +829,7 @@ une_action:     T_ACT_COMOUT
                                     if (alias->num >= NBR_BIT_BISTABLE_RESERVED || alias->type==ALIAS_TYPE_DYNAMIC)
                                      { $$=New_action_bi( alias, $1 ); }
                                     else
-                                     { Emettre_erreur_new( "Ligne %d: 'B%04d' could not be set (system bit)", DlsScanner_get_lineno(), alias->num );
+                                     { Emettre_erreur_new( "'B%04d' could not be set (system bit)", alias->num );
                                        $$=New_action();
                                        taille = 2;
                                        $$->alors = New_chaine( taille );
@@ -841,8 +841,7 @@ une_action:     T_ACT_COMOUT
                          case MNEMO_CPTH      : $$=New_action_cpt_h( alias, options );   break;
                          case MNEMO_CPT_IMP   : $$=New_action_cpt_imp( alias, options ); break;
                          case MNEMO_MOTIF     : $$=New_action_icone( alias, options );   break;
-                         default: { Emettre_erreur_new( "Ligne %d: '%s:%s' syntax error", DlsScanner_get_lineno(),
-                                                        alias->tech_id, alias->acronyme );
+                         default: { Emettre_erreur_new( "'%s:%s' syntax error", alias->tech_id, alias->acronyme );
                                     $$=New_action();
                                     taille = 2;
                                     $$->alors = New_chaine( taille );
@@ -1029,8 +1028,8 @@ dyn_string:     T_CHAINE
                    if (!alias && $6) { alias = Set_new_external_alias(tech_id,acro); }/* Si dependance externe, on va chercher */
                    alias = Get_alias_par_acronyme(tech_id, acro);
                    if (!alias)
-                    { if ($6) Emettre_erreur_new( "Ligne %d: '%s:%s' is not defined", DlsScanner_get_lineno(), tech_id, acro );
-                         else Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), acro );
+                    { if ($6) Emettre_erreur_new( "'%s:%s' is not defined", tech_id, acro );
+                         else Emettre_erreur_new( "'%s' is not defined", acro );
                       $$=New_option();
                       $$->type = T_DYN_STRING;
                       $$->chaine = strdup("error");
