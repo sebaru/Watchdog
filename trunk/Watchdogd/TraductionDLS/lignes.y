@@ -190,12 +190,12 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                       $$ = New_chaine( taille );
                       if ($8->type_bit==MNEMO_SORTIE_ANA)
                        { g_snprintf( $$, taille,
-                                     "if(%s) { Dls_data_set_AO ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
+                                     "if(%s) { Dls_data_set_AO ( vars, \"%s\", \"%s\", &_%s_%s, %s ); }\n",
                                      $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
                        }
                       else if ($8->type_bit==MNEMO_REGISTRE)
                        { g_snprintf( $$, taille,
-                                     "if(%s) { Dls_data_set_R ( \"%s\", \"%s\", &_%s_%s, %s ); }\n",
+                                     "if(%s) { Dls_data_set_R ( vars, \"%s\", \"%s\", &_%s_%s, %s ); }\n",
                                      $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
                        }
                       else
