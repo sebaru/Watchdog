@@ -54,6 +54,8 @@
  static void A_propos ( GtkWidget *widget, gpointer data );
  static gboolean Arret = FALSE;
 
+ GtkWidget *Notebook;
+
 /***************************************************** Définition du menu *****************************************************/
 #ifdef bouh
  GnomeUIInfo Menu_lowlevel[]=                                            /*!< Définition du menu lowlevel */
@@ -367,49 +369,62 @@ static GActionEntry app_entries[] = {
 
 
  static void ActivateCB ( GtkApplication *app, gpointer user_data)
-  { GtkWidget *window;
-    GtkWidget *button;
-    GtkWidget *button_box;
+  { GtkToolItem *bouton, *separateur;
+    GtkWidget *window;
 
-
-    printf(" prefers_app_menu = %d\n", gtk_application_prefers_app_menu(app));
+    /*printf(" prefers_app_menu = %d\n", gtk_application_prefers_app_menu(app));*/
     window = gtk_application_window_new (app);
     gtk_window_set_title (GTK_WINDOW (window), TITRE_FENETRE );
-    gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+    gtk_window_set_default_size (GTK_WINDOW (window), 400, 400);
     gtk_window_set_icon_name ( GTK_WINDOW(window), "fr.abls-habitat.watchdog" );
     g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app);
 
-    GtkBuilder *builder = gtk_builder_new_from_string (
-    "<interface>"
-    "<menu id='menubar'>"
-     "<submenu>"
-      "<attribute name='label'>File</attribute>"
-       "<section>"
-        "<item>"
-          "<attribute name='label' translatable='yes'>_Uber ! </attribute>"
-  "        <attribute name='action'>app.about</attribute>"
-  "      </item>"
-  "      <item>"
-  "        <attribute name='label' translatable='yes'>_Section ! </attribute>"
-  "      </item>"
-"</section>"
-    "</submenu>"
-    "<submenu>"
-      "<attribute name='label'>Edit</attribute>"
-    "</submenu>"
-    "<submenu>"
-      "<attribute name='label'>Choices</attribute>"
-    "</submenu>"
-    "<submenu>"
-      "<attribute name='label'>Help</attribute>"
-    "</submenu>"
-  "</menu>"
-    "</interface>",
-    -1);
-GMenuModel *menubar = G_MENU_MODEL (gtk_builder_get_object (builder,
-                                                            "menubar"));
-/*gtk_application_set_menubar (GTK_APPLICATION (app), menubar);*/
-g_object_unref (builder);
+    GtkWidget *box = gtk_box_new( GTK_ORIENTATION_VERTICAL, 10 );
+    gtk_container_add (GTK_CONTAINER (window), box);
+
+    GtkWidget *toolbar = gtk_toolbar_new();
+    gtk_box_pack_start ( GTK_BOX(box), toolbar, FALSE, FALSE, 0 );
+
+    bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("system-run", GTK_ICON_SIZE_LARGE_TOOLBAR), "Se connecter" );
+    gtk_tool_item_set_tooltip_text ( bouton, "Se connecter au serveur" );
+    gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
+
+    bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_LARGE_TOOLBAR), "Se déconnecter" );
+    gtk_tool_item_set_tooltip_text ( bouton, "Se déconnecter du serveur" );
+    gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
+
+    separateur = gtk_separator_tool_item_new ();
+    gtk_separator_tool_item_set_draw ( GTK_SEPARATOR_TOOL_ITEM(separateur), TRUE );
+    gtk_toolbar_insert (GTK_TOOLBAR(toolbar), separateur, -1 );
+
+    bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("edit-find", GTK_ICON_SIZE_LARGE_TOOLBAR), "Superviser" );
+    gtk_tool_item_set_tooltip_text ( bouton, "Ouvrir le synoptique d'accueil" );
+    gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
+
+    separateur = gtk_separator_tool_item_new ();
+    gtk_separator_tool_item_set_draw ( GTK_SEPARATOR_TOOL_ITEM(separateur), FALSE );
+    gtk_tool_item_set_expand ( separateur, TRUE );
+    gtk_toolbar_insert (GTK_TOOLBAR(toolbar), separateur, -1 );
+
+    bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("application-exit", GTK_ICON_SIZE_LARGE_TOOLBAR), "Quitter" );
+    gtk_tool_item_set_tooltip_text ( bouton, "Sortir de l'application" );
+    g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(gtk_widget_destroy), window );
+    gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
+
+    Notebook = gtk_notebook_new();
+    gtk_box_pack_start ( GTK_BOX(box), Notebook, TRUE, TRUE, 0 );
+    gtk_notebook_append_page ( GTK_NOTEBOOK(Notebook), Creer_page_histo(), gtk_label_new("Fil de l'eau") );
+
+    GtkWidget *hbox = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 10 );
+    gtk_box_pack_start ( GTK_BOX(box), hbox, FALSE, FALSE, 0 );
+
+    GtkWidget *statusbar = gtk_statusbar_new();
+    gtk_box_pack_start ( GTK_BOX(hbox), statusbar, TRUE, TRUE, 0 );
+
+    GtkWidget *progressbar = gtk_progress_bar_new();
+    gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR(progressbar), 1.0 );
+    gtk_progress_bar_set_show_text ( GTK_PROGRESS_BAR(progressbar), TRUE );
+    gtk_box_pack_start ( GTK_BOX(hbox), progressbar, FALSE, FALSE, 0 );
 
 /*    button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
     gtk_container_add (GTK_CONTAINER (window), button_box);

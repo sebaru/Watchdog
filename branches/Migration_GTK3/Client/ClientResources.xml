@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/fr/abls_habitat/watchdog">
     <file>gtk/menus.ui</file>
-    <file>icons/logo.png</file>
+    <file>gtk/toolbar.ui</file>
+    <file>icons/fr.abls-habitat.watchdog.png</file>
   </gresource>
 </gresources>

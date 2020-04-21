@@ -312,7 +312,7 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: un widget boite                                                                                */
 /**********************************************************************************************************/
- void Creer_page_histo( void )
+ GtkWidget *Creer_page_histo( void )
   { GtkWidget *boite, *scroll, *hboite;
     GtkTreeSelection *selection;
     GtkTreeViewColumn *colonne;
