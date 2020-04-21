@@ -156,7 +156,16 @@
   };
 
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
+ extern GtkWidget *Creer_page_histo( void );                                                            /* Dans liste_histo.c */
+
 #ifdef bouh
+ extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo ); 
+ extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
+ extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
+ extern gchar *Type_vers_string ( guint type );
+ extern gchar *Type_sms_vers_string ( guint type );
+
+
  extern gboolean WTD_Curl_post_request ( gchar *uri, gint post, gchar *post_data, gint post_length );
  extern CURL *WTD_Curl_init ( gchar *erreur );
  extern void Firefox_exec ( gchar *uri );
@@ -216,13 +225,6 @@
  extern void Proto_append_source_dls( struct CMD_TYPE_SOURCE_DLS *dls, gchar *buffer );
  extern void Proto_afficher_mnemo_dls ( struct CMD_TYPE_MNEMO_BASE *mnemo );
  extern void Dls_set_compil_status ( gchar *chaine );
-
- extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );                                   /* Dans liste_histo.c */
- extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
- extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
- extern void Creer_page_histo( void );
- extern gchar *Type_vers_string ( guint type );
- extern gchar *Type_sms_vers_string ( guint type );
 
  extern void Proto_cacher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );                  /* Dans liste_synoptique.c*/
  extern void Proto_afficher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );

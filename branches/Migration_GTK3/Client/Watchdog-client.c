@@ -55,6 +55,7 @@
  static gboolean Arret = FALSE;
 
  GtkWidget *Notebook;
+ GList *Liste_pages = NULL;
 
 /***************************************************** Définition du menu *****************************************************/
 #ifdef bouh

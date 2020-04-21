@@ -17,7 +17,8 @@ ClientResources.c : ClientResources.xml $(shell glib-compile-resources --generat
 	glib-compile-resources --target=ClientResources.c --generate-source $<
 	glib-compile-resources --target=ClientResources.h --generate-header $<
 
-Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResources.h
+Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResources.h \
+                               liste_histo.c
 #connect.c ihm.c \
 #                          protocole.c protocole_gtk_message.c \
 #                          protocole_dls.c protocole_mnemonique.c \
@@ -27,7 +28,6 @@ Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResourc
 #			  protocole_synoptique.c protocole_admin.c \
 #                          menu.c timer.c admin.c \
 #			  liste_plugin_dls.c ajout_plugin_dls.c edit_source_dls.c \
-#			  liste_histo.c \
 #			  liste_synoptique.c ajout_synoptique.c \
 #			  liste_mnemonique.c ajout_mnemonique.c option_entreeana.c option_cpt_imp.c \
 #			  option_registre.c \

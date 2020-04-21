@@ -25,7 +25,7 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
+ #include <gtk/gtk.h>
  #include <time.h>
 
  #include "Config_cli.h"
@@ -82,12 +82,13 @@
  static void Menu_acquitter_histo ( void );
  static void Menu_go_to_syn ( void );
 
+#ifdef bouh
  static GnomeUIInfo Menu_popup[]=
   { GNOMEUIINFO_ITEM_STOCK ( N_("Acknowledge"), NULL, Menu_acquitter_histo, GNOME_STOCK_PIXMAP_CLEAR ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Go to Syn"), NULL, Menu_go_to_syn, GNOME_STOCK_PIXMAP_SEARCH ),
     GNOMEUIINFO_END
   };
-
+#endif
 /******************************************************************************************************************************/
 /* Type_vers_string: renvoie le type string associé                                                                           */
 /* Entrée: le type numérique                                                                                                  */
@@ -95,17 +96,18 @@
 /******************************************************************************************************************************/
  gchar *Type_vers_string ( guint32 type )
   { switch (type)
-     { case MSG_ETAT        : return( _("Info        (I) ") );
-       case MSG_ALERTE      : return( _("Alerte      (AK)") );
-       case MSG_ALARME      : return( _("Alarme      (AL)") );
-       case MSG_DEFAUT      : return( _("Trouble     (T) ") );
-       case MSG_VEILLE      : return( _("Veille      (V) ") );
-       case MSG_ATTENTE     : return( _("Attente     (A) ") );
-       case MSG_DANGER      : return( _("Danger      (DA)") );
-       case MSG_DERANGEMENT : return( _("Derangement (DE)") );
+     { case MSG_ETAT        : return( "Info        (I) " );
+       case MSG_ALERTE      : return( "Alerte      (AK)" );
+       case MSG_ALARME      : return( "Alarme      (AL)" );
+       case MSG_DEFAUT      : return( "Trouble     (T) " );
+       case MSG_VEILLE      : return( "Veille      (V) " );
+       case MSG_ATTENTE     : return( "Attente     (A) " );
+       case MSG_DANGER      : return( "Danger      (DA)" );
+       case MSG_DERANGEMENT : return( "Derangement (DE)" );
      }
-    return( _("Unknown") );
+    return( "Unknown" );
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Menu_acquitter_histo: Acquittement d'un des messages histo                                             */
 /* Entrée: rien                                                                                           */
@@ -307,11 +309,12 @@
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
     gtk_list_store_clear( GTK_LIST_STORE(store) );
   }
-/**********************************************************************************************************/
-/* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: un widget boite                                                                                */
-/**********************************************************************************************************/
+#endif
+/******************************************************************************************************************************/
+/* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
+/* Entrée: rien                                                                                                               */
+/* Sortie: un widget boite                                                                                                    */
+/******************************************************************************************************************************/
  GtkWidget *Creer_page_histo( void )
   { GtkWidget *boite, *scroll, *hboite;
     GtkTreeSelection *selection;
@@ -321,15 +324,14 @@
     struct PAGE_NOTEBOOK *page;
 
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
-    if (!page) { printf("Creer_page_histo: page = NULL !\n"); return; }
+    if (!page) { printf("Creer_page_histo: page = NULL !\n"); return(NULL); }
 
     page->type  = TYPE_PAGE_HISTO;
     Liste_pages = g_list_append( Liste_pages, page );
 
-    hboite = gtk_hbox_new( FALSE, 6 );
+    hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
-
 /***************************************** La liste des groupes *******************************************/
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
@@ -344,8 +346,8 @@
                                               G_TYPE_STRING,                             /* DLS Shortname */
                                               G_TYPE_STRING,
                                               G_TYPE_STRING,
-                                              GDK_TYPE_COLOR,      /* Couleur de fond de l'enregistrement */
-                                              GDK_TYPE_COLOR      /* Couleur du texte de l'enregistrement */
+                                              gdk_rgba_get_type(),      /* Couleur de fond de l'enregistrement */
+                                              gdk_rgba_get_type() /* Couleur du texte de l'enregistrement */
                                );
     Liste_histo = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );           /* Creation de la vue */
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );
@@ -353,7 +355,7 @@
     gtk_container_add( GTK_CONTAINER(scroll), Liste_histo );
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( "Groupe/Page", renderer,
                                                          "text", COLONNE_GROUPE_PAGE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_GROUPE_PAGE);
@@ -361,7 +363,7 @@
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Type"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( "Type", renderer,
                                                          "text", COLONNE_TYPE,
                                                          "background-gdk", COLONNE_COULEUR_FOND,
                                                          "foreground-gdk", COLONNE_COULEUR_TEXTE,
@@ -371,7 +373,7 @@
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Timestamp"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( "Timestamp", renderer,
                                                          "text", COLONNE_DATE_CREATE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_DATE_CREATE);
@@ -379,7 +381,7 @@
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("DLS Shortname"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( "DLS Shortname", renderer,
                                                          "text", COLONNE_DLS_SHORTNAME,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_DLS_SHORTNAME);
@@ -387,25 +389,27 @@
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Ack"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( "Ack", renderer,
                                                          "text", COLONNE_ACK,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_ACK);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                        /* Colonne du libelle */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Message"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( "Message", renderer,
                                                          "text", COLONNE_LIBELLE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
 
+#ifdef bouh
     g_signal_connect( G_OBJECT(Liste_histo), "button_press_event",               /* Gestion du menu popup */
                       G_CALLBACK(Gerer_popup_histo), NULL );
+#endif
     g_object_unref (G_OBJECT (store));                        /* nous n'avons plus besoin de notre modele */
 
 /************************************ Les boutons de controles ********************************************/
-    boite = gtk_vbox_new( FALSE, 6 );
+/*    boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
 /*    bouton = Bobouton( Verte, Vmask, _("Acknowledge") );
@@ -414,6 +418,6 @@
                       G_CALLBACK(Menu_acquitter_histo), NULL );
 */
     gtk_widget_show_all( hboite );
-    gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Messages") ) );
+    return(hboite);
   }
 /*--------------------------------------------------------------------------------------------------------*/
