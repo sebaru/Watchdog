@@ -82,8 +82,8 @@
 /* - MODE_AUTO . CMD_STOP . xx -> /CMD_STOP, CMD_FERME; */
 
 /******************************************* Reviens en mode Stop après manoeuvre *********************************************/
- - CMD_OUVRE + CMD_FERME -> TC_MANOEUVRE, /VOLET_SUPPOSE_FERME;
- - CMD_OUVRE . TC_MANOEUVRE -> /CMD_OUVRE, CMD_STOP;
+ - CMD_OUVRE + CMD_FERME -> TC_MANOEUVRE;
+ - CMD_OUVRE . TC_MANOEUVRE -> /CMD_OUVRE, CMD_STOP,/VOLET_SUPPOSE_FERME;
  - CMD_FERME . TC_MANOEUVRE -> /CMD_FERME, CMD_STOP, VOLET_SUPPOSE_FERME;
 
  switch
