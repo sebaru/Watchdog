@@ -47,9 +47,9 @@ Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResourc
 
 Watchdog_client_gtk3_LDADD  = $(top_builddir)/Commun/libwatchdog.la
 
-Watchdog_client_gtk3_LDFLAGS = `pkg-config --libs gtk+-3.0 openssl glib-2.0 libcurl json-glib-1.0` -lm
+Watchdog_client_gtk3_LDFLAGS = `pkg-config --libs gtk+-3.0 libsoup-2.4 glib-2.0 json-glib-1.0` -lm
 
-Watchdog_client_gtk3_CFLAGS = `pkg-config --cflags gtk+-3.0 openssl glib-2.0 libcurl json-glib-1.0`
+Watchdog_client_gtk3_CFLAGS = `pkg-config --cflags gtk+-3.0 libsoup-2.4 glib-2.0 json-glib-1.0`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Client/Include

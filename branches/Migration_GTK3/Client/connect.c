@@ -26,12 +26,12 @@
  */
 
  #include <gtk/gtk.h>
+ #include <libsoup/soup.h>
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <netinet/in.h>
  #include <netdb.h>
  #include <fcntl.h>
- #include <openssl/err.h>
 
  #include "Reseaux.h"
  #include "client.h"
@@ -52,8 +52,6 @@
  void Deconnecter_sale ( void )
   { Fermer_connexion(Client.connexion);
     Client.connexion = NULL;
-    if (Client.ssl_ctx) SSL_CTX_free(Client.ssl_ctx);                                           /* Libération du contexte SSL */
-    Client.ssl_ctx = NULL;
     Client.mode = DISCONNECTED;
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode DISCONNECTED" );
 #ifdef bouh
@@ -115,6 +113,18 @@
              "Envoyer_identification: Client en mode ATTENTE_AUTORISATION" );
   }
 #endif
+
+
+ void soupCB (SoupSession *session, SoupMessage *msg, gpointer user_data)
+{
+  gint status_code;
+  printf("test\n");
+  g_object_get ( msg, "status-code",&status_code, NULL );
+  printf("test\n");
+  SoupBuffer *buf = soup_message_body_get_chunk ( msg->response_body, 0 );
+  printf("test\n");
+  printf("Recu Soup Message %d, %s\n", status_code, msg->response_body->data );
+}
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
 /* Entrée: une nom et un password                                                                                             */
@@ -128,6 +138,15 @@
     int connexion;
 
     Log( "Trying to connect" );
+
+    SoupSession *session=soup_session_new();
+    SoupMessage *msg= soup_message_new ( "GET", "http://wtd-ozoir.abls-habitat.fr/auth/login");
+
+// soup_session_send_message (session, msg);
+    soup_session_queue_message (session, msg, soupCB, NULL);              
+    //g_object_unref (msg);
+    return(TRUE);
+
     Raz_progress_pulse();
 
     memset(&hints, 0, sizeof(struct addrinfo));
@@ -191,162 +210,6 @@
     Client.mode = ATTENTE_INTERNAL;
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode ATTENTE_INTERNAL" );
 
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Init_SSL: Initialisation de l'environnement SSL                                                                            */
-/* Entrée: rien                                                                                                               */
-/* Sortie: un contexte SSL                                                                                                    */
-/******************************************************************************************************************************/
- static SSL_CTX *Init_ssl ( void )
-  { gchar nom_fichier[80];
-    SSL_CTX *ssl_ctx;
-    gint retour;
-    FILE *fd;
-
-    SSL_load_error_strings();                                                                        /* Initialisation de SSL */
-    SSL_library_init();                                                                 /* Init SSL et PRNG: number générator */
-
-    ssl_ctx = SSL_CTX_new ( TLS_client_method() );                                              /* Création d'un contexte SSL */
-    if (!ssl_ctx)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                 "Init_ssl : Error creation SSL_CTX_new %s", ERR_error_string( ERR_get_error(), NULL ) );
-       return( NULL );
-     }
-
-    SSL_CTX_set_mode( ssl_ctx, SSL_MODE_AUTO_RETRY );                                                    /* Mode non bloquant */
-    SSL_CTX_set_options( ssl_ctx, SSL_OP_SINGLE_DH_USE );                                        /* Options externe à OpenSSL */
-
-    retour = SSL_CTX_load_verify_locations( ssl_ctx, Config_cli.ssl_file_ca, NULL );
-    if (retour != 1)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                 "Init_ssl : load verify locations error (%s, file %s)",
-                 ERR_error_string( ERR_get_error(), NULL ), Config_cli.ssl_file_ca );
-       SSL_CTX_free(ssl_ctx);
-       return(NULL);
-     } else Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
-                     "Init_ssl : load verify locations OK (file %s)", Config_cli.ssl_file_ca );
-
-    SSL_CTX_set_verify( ssl_ctx, SSL_VERIFY_PEER, NULL );                             /* Type de verification des certificats */
-
-    g_snprintf( nom_fichier, sizeof(nom_fichier), "%s.crt", Client.ident.nom );
-    fd = fopen( nom_fichier, "r" );
-    if (!fd)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                 "Init_ssl : failed to open file certif %s. Falling back to login/password authentication",
-                 nom_fichier );
-     }
-    else                                                                                   /* Authentification par certificat */
-     { Client.cli_certif = PEM_read_X509( fd, NULL, NULL, NULL );                                    /* Lecture du certificat */
-       fclose(fd);
-       if (!Client.cli_certif)
-        { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                    "Init_ssl : Certif loading failed %s", nom_fichier );
-          SSL_CTX_free(ssl_ctx);
-          return(NULL);
-        }
-
-       retour = SSL_CTX_use_certificate( ssl_ctx, Client.cli_certif );
-       if (retour != 1)
-        { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                    "Init_ssl : Use certificate error (%s)", ERR_error_string( ERR_get_error(), NULL ) );
-          SSL_CTX_free(ssl_ctx);
-          return(NULL);
-        }
-       Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
-                 "Init_ssl : Use of certificate %s", Nom_certif(Client.cli_certif) );
-                                                                                                     /* Clef privée du client */
-       g_snprintf( nom_fichier, sizeof(nom_fichier), "%s.pem", Client.ident.nom );
-       retour = SSL_CTX_use_RSAPrivateKey_file( ssl_ctx, nom_fichier, SSL_FILETYPE_PEM );
-       if (retour != 1)
-        { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                    "Init_ssl : Error Use RSAPrivate key %s (%s)",
-                    nom_fichier, ERR_error_string( ERR_get_error(), NULL ) );
-          SSL_CTX_free(ssl_ctx);
-          return(NULL);
-        }
-
-       retour = SSL_CTX_check_private_key( ssl_ctx );                                          /* Verification du certif/clef */
-       if (retour != 1)
-        { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                    "Init_ssl : check private key failed %s (%s)",
-                    nom_fichier, ERR_error_string( ERR_get_error(), NULL ) );
-          SSL_CTX_free(ssl_ctx);
-          return(NULL);
-        }
-     }
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "SSL initialisation ok" );
-    return(ssl_ctx);
-  }
-/******************************************************************************************************************************/
-/* Connecter_ssl: Tentative de connexion sécurisée au serveur                                                                 */
-/* Entrée/Sortie: rien                                                                                                        */
-/******************************************************************************************************************************/
- static gboolean Connecter_ssl ( void )
-  { gint retour;
-
-    Client.ssl_ctx = Init_ssl();                                                                  /* Creation du contexte SSL */
-    if (!Client.ssl_ctx)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                 "Connecter_ssl : Can't initialise SSL" );
-       Log( "SSL init failed..." );
-       return(FALSE);
-     }
-
-    Client.connexion->ssl = SSL_new( Client.ssl_ctx );                                           /* Instanciation du contexte */
-    if (Client.connexion->ssl)                                                                    /* Si réussite d'allocation */
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "Connecter_ssl: SSL_new OK" );
-       SSL_set_fd( Client.connexion->ssl, Client.connexion->socket );
-       SSL_set_connect_state( Client.connexion->ssl );                                               /* Nous sommes un client */
-     }
-    else
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "Connecter_ssl: SSL_new failed" );
-       Log( "SSL context Init failed" );
-       Deconnecter();
-       return(FALSE);
-     }
-
-encore:
-    retour = SSL_connect( Client.connexion->ssl );
-    if (retour<=0)
-     { retour = SSL_get_error( Client.connexion->ssl, retour );
-       if (retour == SSL_ERROR_WANT_READ || retour == SSL_ERROR_WANT_WRITE)
-        { /*Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
-                   "Connecter_ssl: SSL_connect need more data" );
-          */
-          goto encore;
-        }
-
-       Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                 "Connecter_ssl: SSL_connect get error %d (%s)",
-                 retour, ERR_error_string( ERR_get_error(), NULL ) );
-       Log( "SSL_connect failed" );
-     }
-                                              /* Ici, la connexion a été effectuée, il faut maintenant tester les certificats */
-    Client.srv_certif = SSL_get_peer_certificate( Client.connexion->ssl );               /* On prend le certificat du serveur */
-    if (!Client.srv_certif)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
-                "Connecter_ssl: no certificate received" );
-       Log( "Aucun certificat serveur recu" );
-       Deconnecter();
-       return(FALSE);
-     }
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE,
-             "Connecter_ssl: certificate received. Algo=%s, keylength=%d",
-              (gchar *) SSL_get_cipher_name( Client.connexion->ssl ), SSL_get_cipher_bits( Client.connexion->ssl, NULL ) );
-
-    retour = SSL_get_verify_result( Client.connexion->ssl );                                    /* Verification du certificat */
-    if ( retour != X509_V_OK )                                                          /* Si erreur, on se deconnecte presto */
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE,
-                "Connecter_ssl: unauthorized certificate Error %02d", retour );
-       Log( "Certificat serveur non valide" );
-       Deconnecter();
-       return(FALSE);
-     }
-
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE,
-              "Connecter_ssl: partenaire %s, signataire %s",
-              Nom_certif ( Client.srv_certif ), Nom_certif_signataire ( Client.srv_certif ) );
     return(TRUE);
   }
 /******************************************************************************************************************************/
