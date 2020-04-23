@@ -21,46 +21,42 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
  #ifndef _CLIENT_H_
  #define _CLIENT_H_
  #include <glib.h>
+ #include <libsoup/soup.h>
 
  #include "Reseaux.h"
  #include "Config_cli.h"
 
- #define PROGRAMME          "Watchdog-client"
-
- #define EXIT_ERREUR       -1                                                                   /* Sortie sur erreur inconnue */
- #define EXIT_OK           0                                                                                /* Sortie normale */
- #define EXIT_INACTIF      1                                                                 /* Un fils est mort d'inactivité */
-
  #define REPERTOIR_CONF    ".watchdog"                             /* Repertoire ou sont stocké les fichiers de configuration */
- #define FICHIER_VERSION   "icone_version.dat"
- 
- enum
+
+/* enum
   { DISCONNECTED,
     ATTENTE_INTERNAL,
     ATTENTE_AUTORISATION,
     CONNECTE,
     VALIDE,
-  };
+  };*/
 
  struct CLIENT
   { guint32 mode;
-    GList *gids;
-    struct REZO_CLI_IDENT ident;
+    gint access_level;
+    SoupSession *connexion;
+    /*struct REZO_CLI_IDENT ident;
     struct CONNEXION *connexion;
     SSL_CTX *ssl_ctx;
     X509 *srv_certif;
     X509 *cli_certif;
     gboolean ssl_needed;
-    gboolean ssl_needed_with_cert;
-    gchar host[TAILLE_NOM_SERVEUR+1];                                               /* Nom du serveur sur lequel se connecter */
-    struct CMD_TYPE_UTILISATEUR util;
+    gboolean ssl_needed_with_cert;*/
+    gchar hostname[32];                                                             /* Nom du serveur sur lequel se connecter */
+    gchar username[32];
+    gchar password[32];
   };
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

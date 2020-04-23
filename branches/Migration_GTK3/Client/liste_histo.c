@@ -316,8 +316,8 @@
 /* Sortie: un widget boite                                                                                                    */
 /******************************************************************************************************************************/
  GtkWidget *Creer_page_histo( void )
-  { GtkWidget *boite, *scroll, *hboite;
-    GtkTreeSelection *selection;
+  { GtkTreeSelection *selection;
+    GtkWidget *scroll, *hboite;
     GtkTreeViewColumn *colonne;
     GtkCellRenderer *renderer;
     GtkListStore *store;

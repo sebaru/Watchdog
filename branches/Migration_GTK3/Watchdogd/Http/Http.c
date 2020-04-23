@@ -573,6 +573,45 @@
      }
     return(0);                                                      /* Poursuite du processus de prise en charge des requetes */
   }
+
+/******************************************************************************************************************************/
+/* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_traiter_log ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                SoupClientContext *client, gpointer user_data)
+  { if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: LogLevel request:'%s'", __func__, path );
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+         if ( ! strcasecmp ( path, "/log/debug"   ) ) { Info_change_log_level ( Config.log, LOG_DEBUG   ); }
+    else if ( ! strcasecmp ( path, "/log/notice"  ) ) { Info_change_log_level ( Config.log, LOG_NOTICE  ); }
+    else if ( ! strcasecmp ( path, "/log/info"    ) ) { Info_change_log_level ( Config.log, LOG_INFO    ); }
+    else if ( ! strcasecmp ( path, "/log/warning" ) ) { Info_change_log_level ( Config.log, LOG_WARNING ); }
+    else if ( ! strcasecmp ( path, "/log/error"   ) ) { Info_change_log_level ( Config.log, LOG_ERR     ); }
+	   else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+    /*soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, "LogLevel set", 18 );*/
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_traiter_connect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                    SoupClientContext *client, gpointer user_data)
+  {
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, "ceci est un test !!", 18 );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Gatcha !" );
+  }
 /******************************************************************************************************************************/
 /* Run_thread: Thread principal                                                                                               */
 /* Entrée: une structure LIBRAIRIE                                                                                            */
@@ -657,6 +696,28 @@
     /*Cfg_http.zmq_from_bus = New_zmq ( ZMQ_SUB, "listen-to-bus" );
     Connect_zmq ( Cfg_http.zmq_from_bus, "inproc", ZMQUEUE_LOCAL_BUS, 0 );*/
 
+    SoupServer *socket = soup_server_new("server-header", "Watchdogd HTTP Server", NULL);
+    soup_server_add_handler (socket, "/connect", Http_traiter_connect, NULL, NULL );
+    soup_server_add_handler (socket, "/log", Http_traiter_log, NULL, NULL );
+    if (!soup_server_listen_all (socket, 5570, 0, NULL))
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer init Failed !", __func__ ); }
+    else { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: SoupServer init OK !", __func__ ); }
+    GMainLoop *loop = g_main_loop_new (NULL, TRUE);
+    GMainContext *loop_context = g_main_loop_get_context ( loop );
+/*
+SoupAuthDomain *domain;
+
+domain = soup_auth_domain_basic_new (
+	SOUP_AUTH_DOMAIN_REALM, "My Realm",
+	SOUP_AUTH_DOMAIN_BASIC_AUTH_CALLBACK, auth_callback,
+	SOUP_AUTH_DOMAIN_BASIC_AUTH_DATA, auth_data,
+	SOUP_AUTH_DOMAIN_ADD_PATH, "/foo",
+	SOUP_AUTH_DOMAIN_ADD_PATH, "/bar/private",
+	NULL);
+soup_server_add_auth_domain (server, domain);
+g_object_unref (domain);
+*/
+
     Cfg_http.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
@@ -664,7 +725,7 @@
 
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(Cfg_http.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
-     { usleep(10000);
+     { usleep(1000);
        sched_yield();
 
        if (Cfg_http.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
@@ -677,8 +738,10 @@
         }
 
    	   lws_service( Cfg_http.ws_context, 1000);                                 /* On lance l'écoute des connexions websocket */
+       g_main_context_iteration ( loop_context, FALSE );
      }
 
+    soup_server_disconnect (socket);
     lws_context_destroy(Cfg_http.ws_context);                                                   /* Arret du serveur WebSocket */
     Cfg_http.ws_context = NULL;
 

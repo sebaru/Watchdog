@@ -27,6 +27,7 @@
 
 #ifndef _HTTP_H_
  #define _HTTP_H_
+ #include <libsoup/soup.h>
  #include <libwebsockets.h>
  #include <libxml/xmlwriter.h>
  #include <json-glib/json-glib.h>

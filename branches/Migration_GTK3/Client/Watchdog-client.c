@@ -225,7 +225,7 @@
 #endif
  static void Menu_Connecter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
   { Connecter(); }
-            
+
  static void Menu_Quitter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
   { Fermer_client(); }
 
@@ -321,7 +321,7 @@ static GActionEntry app_entries[] = {
     int status;
 
     if (chdir( g_get_home_dir() ))                                                      /* Positionnement à la racine du home */
-     { printf( "Chdir %s failed\n", g_get_home_dir() ); exit(EXIT_ERREUR); }
+     { printf( "Chdir %s failed\n", g_get_home_dir() ); exit(-1); }
     else
      { printf( "Chdir %s OK\n", g_get_home_dir() ); }
 
@@ -335,7 +335,6 @@ static GActionEntry app_entries[] = {
     Info_change_log_level( Config_cli.log, Config_cli.log_level );
     Lire_config_cli ( &Config_cli, "watchdog-client.conf" );
 
-    Client.mode = DISCONNECTED;
     GtkApplication *app = gtk_application_new ("fr.abls_habitat.watchdog", G_APPLICATION_FLAGS_NONE);
     g_signal_connect (app, "activate", G_CALLBACK (ActivateCB), NULL);
 

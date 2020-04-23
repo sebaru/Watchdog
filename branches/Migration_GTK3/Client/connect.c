@@ -37,7 +37,7 @@
  #include "client.h"
  #include "Config_cli.h"
 
- static GtkWidget *F_ident;                                                      /* Fenetre d'identification de l'utilisateur */
+ static GtkWidget *fenetre;                                                      /* Fenetre d'identification de l'utilisateur */
 /******************************************** Définitions des prototypes programme ********************************************/
  #include "config.h"
  #include "protocli.h"
@@ -50,10 +50,10 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Deconnecter_sale ( void )
-  { Fermer_connexion(Client.connexion);
+  { soup_session_abort (Client.connexion);
     Client.connexion = NULL;
-    Client.mode = DISCONNECTED;
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode DISCONNECTED" );
+    /*Client.mode = DISCONNECTED;*/
+    /*Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode DISCONNECTED" );*/
 #ifdef bouh
     Effacer_pages();                                                                          /* Efface les pages du notebook */
 #endif
@@ -64,7 +64,7 @@
 /******************************************************************************************************************************/
  void Deconnecter ( void )
   { if (!Client.connexion) return;
-    Envoyer_reseau( Client.connexion, TAG_CONNEXION, SSTAG_CLIENT_OFF, NULL, 0 );
+    /*Envoyer_reseau( Client.connexion, TAG_CONNEXION, SSTAG_CLIENT_OFF, NULL, 0 );*/
     Deconnecter_sale();
     Log ( "Disconnected" );
   }
@@ -115,102 +115,42 @@
 #endif
 
 
- void soupCB (SoupSession *session, SoupMessage *msg, gpointer user_data)
-{
-  gint status_code;
-  printf("test\n");
-  g_object_get ( msg, "status-code",&status_code, NULL );
-  printf("test\n");
-  SoupBuffer *buf = soup_message_body_get_chunk ( msg->response_body, 0 );
-  printf("test\n");
-  printf("Recu Soup Message %d, %s\n", status_code, msg->response_body->data );
-}
+/******************************************************************************************************************************/
+/* Connecter_au_serveur_CB: Traite la reponse du serveur a la demande de connexionen                                          */
+/* Entrée: les variables traditionnelles de libsous                                                                           */
+/* Sortie: l'ihm est mise a jour et les ws sont activées                                                                      */
+/******************************************************************************************************************************/
+ static void Connecter_au_serveur_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
+  { gchar *reason_phrase;
+    gint status_code;
+    GBytes *response;
+    gsize taille;
+    gchar *data;
+
+    g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
+    if (status_code != 200)
+     { gchar chaine[256];
+       g_snprintf(chaine, sizeof(chaine), "Error connecting to server : Code %d - %s", status_code, reason_phrase );
+       Log(chaine);
+       return;
+     }
+    g_object_get ( msg, "response-body-data", &response, NULL );
+    data = g_bytes_unref_to_data ( response, &taille );
+    printf("Recu Soup Message status %d, taille %d, %s\n", status_code, taille, data );
+    g_free(data);
+  }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
 /* Entrée: une nom et un password                                                                                             */
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                                              */
 /******************************************************************************************************************************/
- gboolean Connecter_au_serveur ( void )
-  { struct addrinfo *result, *rp;
-    struct addrinfo hints;
-    gint s;
-    gchar service[10];
-    int connexion;
-
+ static void Connecter_au_serveur ( void )
+  { gchar chaine[128];
     Log( "Trying to connect" );
-
-    SoupSession *session=soup_session_new();
-    SoupMessage *msg= soup_message_new ( "GET", "http://wtd-ozoir.abls-habitat.fr/auth/login");
-
-// soup_session_send_message (session, msg);
-    soup_session_queue_message (session, msg, soupCB, NULL);              
-    //g_object_unref (msg);
-    return(TRUE);
-
     Raz_progress_pulse();
-
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
-    hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
-    hints.ai_flags = 0;
-    hints.ai_protocol = 0;          /* Any protocol */
-
-    g_snprintf( service, sizeof(service), "%d", Config_cli.port_ihm );
-    s = getaddrinfo( Client.host, service, &hints, &result);
-    if (s != 0)
-     { Log( "DNS failed" );
-       Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
-                 "Connecter_au_serveur: DNS failed %s(%s)", Client.host, gai_strerror(s) );
-       return(FALSE);
-     }
-
-   /* getaddrinfo() returns a list of address structures.
-       Try each address until we successfully connect(2).
-       If socket(2) (or connect(2)) fails, we (close the socket
-       and) try the next address. */
-
-    for (rp = result; rp != NULL; rp = rp->ai_next)
-     {
-        connexion = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-        if (connexion == -1)
-         { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
-                     "Connecter_au_serveur: Socket creation failed" );
-           continue;
-         }
-
-       if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
-        { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
-                    "Connecter_au_serveur: Connect OK to %s (%s) family=%d",
-                    Client.host, service, rp->ai_family );
-          break;                  /* Success */
-        }
-       else
-        { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
-                    "Connecter_au_serveur: connexion refused by server %s (%s) family=%d",
-                    Client.host, service, rp->ai_family );
-        }
-       close(connexion);
-     }
-    freeaddrinfo(result);
-    if (rp == NULL)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
-                    "Connecter_au_serveur: all family connexion failed for server %s (%s)",
-                    Client.host, service );
-       Log( "Connexion refused by server" );
-       return(FALSE);                                                                                  /* Erreur de connexion */
-     }
-
-    Client.connexion = Nouvelle_connexion( Config_cli.log, connexion, -1 );                       /* Creation de la structure */
-    if (!Client.connexion)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "Connecter_au_serveur: cannot create new connexion" );
-       Deconnecter();
-       return(FALSE);
-     }
-
-    Client.mode = ATTENTE_INTERNAL;
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode ATTENTE_INTERNAL" );
-
-    return(TRUE);
+    Client.connexion = soup_session_new();
+    SoupMessage *msg= soup_message_new ( "GET", "http://localhost:5560/dls/list");
+    soup_session_queue_message (Client.connexion, msg, Connecter_au_serveur_CB, NULL);
   }
 /******************************************************************************************************************************/
 /* Identifier: Affiche la fenetre d'identification de l'utilisateur                                                           */
@@ -223,15 +163,15 @@
     gint retour;
 
     if (Client.connexion) return;
-    F_ident = gtk_message_dialog_new ( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+    fenetre = gtk_message_dialog_new ( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
                                        GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
                                        "Identification required" );
-    gtk_window_set_resizable (GTK_WINDOW (F_ident), FALSE);
+    gtk_window_set_resizable (GTK_WINDOW (fenetre), FALSE);
 
     frame = gtk_frame_new( "Put your ID and password" );
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
     gtk_container_set_border_width( GTK_CONTAINER(frame), 6 );
-    gtk_box_pack_start( GTK_BOX(gtk_dialog_get_content_area (GTK_DIALOG(F_ident))), frame, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX(gtk_dialog_get_content_area (GTK_DIALOG(fenetre))), frame, TRUE, TRUE, 0 );
 
     boite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(boite), 6 );
@@ -268,19 +208,14 @@
 
     gtk_widget_grab_focus( Entry_nom );
     gtk_widget_show_all( frame );
-    retour = gtk_dialog_run( GTK_DIALOG(F_ident) );                                    /* Attente de reponse de l'utilisateur */
+    retour = gtk_dialog_run( GTK_DIALOG(fenetre) );                                    /* Attente de reponse de l'utilisateur */
 
-    if (retour == GTK_RESPONSE_CANCEL || retour == GTK_RESPONSE_DELETE_EVENT)                                /* Si annulation */
-         { gtk_widget_destroy( F_ident );
-           return;
-         }
-    else { g_snprintf( Client.host, sizeof(Client.host), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
-           g_snprintf( Client.ident.nom, sizeof(Client.ident.nom), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
-           g_snprintf( Client.ident.passwd, sizeof(Client.ident.passwd), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_code) ) );
-
-           gtk_widget_destroy( F_ident );                                                          /* Fermeture de la fenetre */
-           if (Connecter_au_serveur())                                              /* Essai de connexion au serveur Watchdog */
-            { Log( "Waiting for connexion...." ); }
-         }
+    if (retour == GTK_RESPONSE_OK)
+     { g_snprintf( Client.hostname, sizeof(Client.hostname), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
+       g_snprintf( Client.username, sizeof(Client.username), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
+       g_snprintf( Client.password, sizeof(Client.password), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_code) ) );
+       Connecter_au_serveur();                                                      /* Essai de connexion au serveur Watchdog */
+     }
+    gtk_widget_destroy( fenetre );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
