@@ -133,21 +133,7 @@
     </rdf:RDF>
   </metadata>
   <script id="SetMode" type="text/javascript">
-    { console.log("Appel au svg "+this.motif.libelle+" avec mode="+mode+" color="+color);
-      targets = this.getElementsByClassName('WTD-ActiveFillColor');
-      for (target of targets)
-       { var chg_matrice = { fill: [ this.currentColor, color ] };                                   /* Matrice de changement */
-         var chg_timing  = { duration: 500, fill: 'forwards' };                                       /* Timing de changement */
-         target.animate ( chg_matrice, chg_timing );                                                          /* Go Animate ! */
-       }
-
-      targets = this.getElementsByClassName('WTD-ActiveStrokeColor');
-      for (target of targets)
-       { var chg_matrice = { stroke: [ this.currentColor, color ] };                                 /* Matrice de changement */
-         var chg_timing  = { duration: 500, fill: 'forwards' };                                       /* Timing de changement */
-         target.animate ( chg_matrice, chg_timing );                                                          /* Go Animate ! */
-       }
-      this.currentColor = color;
+    { console.log("Appel au svg "+this.motif.libelle+" avec mode="+mode);
     }
   </script>
 </svg>

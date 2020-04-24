@@ -79,30 +79,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
-/* Entrée: le status du GSM                                                                                                   */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Smsg_send_status_to_master ( gboolean status )
-  { if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
-     { Dls_data_set_DI ( Cfg_smsg.tech_id, "COMM", &Cfg_smsg.bit_comm, status ); }                      /* Communication OK */
-    else /* Envoi au master via thread HTTP */
-     { JsonBuilder *builder;
-       gchar *result;
-       gsize taille;
-       builder = Json_create ();
-       json_builder_begin_object ( builder );
-       Json_add_string ( builder, "tech_id",  Cfg_smsg.tech_id );
-       Json_add_string ( builder, "acronyme", "COMM" );
-       Json_add_bool   ( builder, "etat", status );
-       json_builder_end_object ( builder );
-       result = Json_get_buf ( builder, &taille );
-       Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_DI", result, taille );
-       g_free(result);
-     }
-    Cfg_smsg.comm_status = status;
-  }
-/******************************************************************************************************************************/
 /* Recuperer_smsDB: récupère la liste des utilisateurs et de leur numéro de téléphone                                         */
 /* Entrée: une structure DB                                                                                                   */
 /* Sortie: FALSE si pb                                                                                                        */
@@ -519,19 +495,7 @@
        if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
         { Envoyer_commande_dls_data ( tech_id, acro ); }
        else /* Envoi au master via thread HTTP */
-        { JsonBuilder *builder;
-          gchar *result;
-          gsize taille;
-          builder = Json_create ();
-          json_builder_begin_object ( builder );
-          Json_add_string ( builder, "tech_id", tech_id );
-          Json_add_string ( builder, "acronyme", acro );
-          Json_add_bool   ( builder, "etat", TRUE );
-          json_builder_end_object ( builder );
-          result = Json_get_buf ( builder, &taille );
-          Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_CDE", result, taille );
-          g_free(result);
-        }
+        { Send_zmq_CDE_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, tech_id, acro ); }
      }
 
     if (found)
@@ -653,8 +617,13 @@
     if (found) Traiter_commande_sms ( from, texte );
 
     if ( (error == ERR_NONE) || (error == ERR_EMPTY) )
-         { Smsg_send_status_to_master( TRUE  ); }
-    else { Smsg_send_status_to_master( FALSE ); }
+     { Send_zmq_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", TRUE );
+       Cfg_smsg.comm_status = TRUE;
+     }
+    else
+     { Send_zmq_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", FALSE );
+       Cfg_smsg.comm_status = FALSE;
+     }
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -667,6 +636,7 @@
     struct ZMQUEUE *zmq_from_bus;
 
     prctl(PR_SET_NAME, "W-SMSG", 0, 0, 0 );
+reload:
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_smsg.lib->TID = pthread_self();                                                      /* Sauvegarde du TID pour le pere */
@@ -696,17 +666,10 @@
 
     Envoyer_smsg_gsm_text ( "SMS System is running" );
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
-    while(Cfg_smsg.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
+    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { struct ZMQ_TARGET *event;
        gchar buffer[256];
        void *payload;
-
-       if (Cfg_smsg.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
-        { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Thread Reload !", __func__ );
-          Smsg_Lire_config();
-          Cfg_smsg.lib->Thread_reload = FALSE;
-        }
-
 
 /****************************************************** Lecture de SMS ********************************************************/
        Lire_sms_gsm();
@@ -741,13 +704,18 @@
            }
         }
      }
-    Smsg_send_status_to_master( FALSE );
+    Send_zmq_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", FALSE );
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_from_bus );
     Close_zmq ( Cfg_smsg.zmq_to_master );
 
 end:
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
+       goto reload;
+     }
     Cfg_smsg.lib->Thread_run = FALSE;
     Cfg_smsg.lib->TID = 0;                                                    /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

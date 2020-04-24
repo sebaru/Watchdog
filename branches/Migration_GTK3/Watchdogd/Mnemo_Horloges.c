@@ -95,7 +95,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT m.tech_id, m.acronyme"
-                " FROM mnemos_HORLOGE as m INNER JOIN mnemos_HORLOGE_ticks as t"
+                " FROM mnemos_HORLOGE as m INNER JOIN mnemos_HORLOGE_ticks as t ON m.id = t.horloge_id"
                 " WHERE CURTIME() LIKE CONCAT(LPAD(t.heure,2,'0'),':',LPAD(t.minute,2,'0'),':%%')" );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */

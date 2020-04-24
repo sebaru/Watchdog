@@ -303,7 +303,7 @@
              }
 
             pss->zmq = Connect_zmq ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
-            pss->zmq_local_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",   "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+            /*pss->zmq_local_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",   "inproc", ZMQUEUE_LOCAL_BUS, 0 );*/
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: %s: WS callback established", __func__, pss->username );
             break;
        case LWS_CALLBACK_RECEIVE:
@@ -323,7 +323,7 @@
        case LWS_CALLBACK_CLOSED:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: %s: WS callback closed", __func__, pss->username );
             if (pss->zmq) Close_zmq(pss->zmq);
-            if (pss->zmq_local_bus) Close_zmq(pss->zmq_local_bus);
+            /*if (pss->zmq_local_bus) Close_zmq(pss->zmq_local_bus);*/
             break;
        case LWS_CALLBACK_SERVER_WRITEABLE:
              { struct DLS_VISUEL visu;
@@ -333,7 +333,7 @@
                 { JsonBuilder *builder;
                   gsize taille_buf;
                   gchar *buf, *result;
-                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
                             "%s: %s: Visuel %s:%s received", __func__, pss->username, visu.tech_id, visu.acronyme );
                   builder = Json_create ();
                   if (builder == NULL)
@@ -360,16 +360,18 @@
                   lws_write	(	wsi,	result+LWS_SEND_BUFFER_PRE_PADDING, taille_buf, LWS_WRITE_TEXT );
                   g_free(result);
                 }
-               if ( pss->zmq_local_bus && (taille_buf = Recv_zmq ( pss->zmq_local_bus, &json_buffer, sizeof(json_buffer) )) > 0 )
+               /*else if ( pss->zmq_local_bus && (taille_buf = Recv_zmq ( pss->zmq_local_bus, &json_buffer, sizeof(json_buffer) )) > 0 )
                 { gchar *result = (gchar *)g_malloc(LWS_SEND_BUFFER_PRE_PADDING + taille_buf);
                   if (result == NULL)
                    { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon Result creation failed", __func__ );
                      return(1);
                    }
                   memcpy ( result + LWS_SEND_BUFFER_PRE_PADDING , json_buffer, taille_buf );
+                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                            "%s: %s: bus %s received", __func__, pss->username, json_buffer );
                   lws_write	(	wsi,	result+LWS_SEND_BUFFER_PRE_PADDING, taille_buf, LWS_WRITE_TEXT );
                   g_free(result);
-                }
+                }*/
              }
             lws_callback_on_writable(wsi);
             break;
@@ -440,8 +442,7 @@
     memcpy ( pss->post_data + pss->post_data_length, buffer, taille );
     pss->post_data_length += taille;
     pss->post_data[pss->post_data_length] = 0;
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s:  received %d bytes (total length=%d, max %d)", __func__,
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s:  received %d bytes (total length=%d, max %d)", __func__,
               taille, pss->post_data_length, Cfg_http.max_upload_bytes );
     return 0;
   }
@@ -467,7 +468,6 @@
   { gchar remote_name[80], remote_ip[80];
     struct HTTP_PER_SESSION_DATA *pss = (struct HTTP_PER_SESSION_DATA *)user;
 
- /*   Http_Log_request(connection, url, method, version, upload_data_size, con_cls);*/
     switch (tag)
      { case LWS_CALLBACK_ESTABLISHED:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: connexion established" );
@@ -627,6 +627,7 @@
     struct stat sbuf;
 
     prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
+reload:
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_http.lib->TID = pthread_self();                                                     /* Sauvegarde du TID pour le pere */
@@ -728,17 +729,13 @@ g_object_unref (domain);
              "%s: WebSocket Create OK. Listening on port %d with ssl=%d", __func__, Cfg_http.tcp_port, Cfg_http.ssl_enable );
 
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
-    while(Cfg_http.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
+    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { usleep(1000);
        sched_yield();
 
        if (Cfg_http.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
-        { pthread_mutex_lock( &Cfg_http.lib->synchro );                                      /* Ajout dans la liste a traiter */
-          pthread_mutex_unlock( &Cfg_http.lib->synchro );
-          Http_Lire_config();
-          /*Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                   "Run_thread: SIGUSR1. %03d sessions", nbr );*/
-          Cfg_http.lib->Thread_reload = FALSE;
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Thread Reload !", __func__ );
+          break;
         }
 
    	   lws_service( Cfg_http.ws_context, 1000);                                 /* On lance l'écoute des connexions websocket */
@@ -753,6 +750,11 @@ g_object_unref (domain);
     Close_zmq ( Cfg_http.zmq_to_master );
 end:
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
+       goto reload;
+     }
     Cfg_http.lib->Thread_run = FALSE;                                                           /* Le thread ne tourne plus ! */
     Cfg_http.lib->TID = 0;                                                    /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

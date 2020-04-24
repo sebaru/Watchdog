@@ -77,30 +77,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
-/* Entrée: le status du GSM                                                                                                   */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Teleinfo_send_status_to_master ( gboolean status )
-  { if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
-     { Dls_data_set_DI ( Cfg_teleinfo.tech_id, "COMM", &Cfg_teleinfo.bit_comm, status ); }                /* Communication OK */
-    else /* Envoi au master via thread HTTP */
-     { JsonBuilder *builder;
-       gchar *result;
-       gsize taille;
-       builder = Json_create ();
-       json_builder_begin_object ( builder );
-       Json_add_string ( builder, "tech_id",  Cfg_teleinfo.tech_id );
-       Json_add_string ( builder, "acronyme", "COMM" );
-       Json_add_bool   ( builder, "etat", status );
-       json_builder_end_object ( builder );
-       result = Json_get_buf ( builder, &taille );
-       Send_zmq_with_tag ( Cfg_teleinfo.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_DI", result, taille );
-       g_free(result);
-     }
-    Cfg_teleinfo.comm_status = status;
-  }
-/******************************************************************************************************************************/
 /* Init_teleinfo: Initialisation de la ligne TELEINFO                                                                         */
 /* Sortie: l'identifiant de la connexion                                                                                      */
 /******************************************************************************************************************************/
@@ -143,7 +119,8 @@
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IMAX",  "Intensité EDF maximale", "A" );
        Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "PAPP",  "Puissance apparente EDF consommée", "VA" );
      }
-    Teleinfo_send_status_to_master(TRUE);
+    Send_zmq_DI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", TRUE );
+    Cfg_teleinfo.comm_status = TRUE;
     Cfg_teleinfo.nbr_connexion++;
     return(fd);
   }
@@ -153,19 +130,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Send_AI_to_master ( gchar *name, gchar *chaine )                                      /* Envoi au master via ZMQ */
-  { JsonBuilder *builder;
-    gchar *result;
-    gsize taille;
-    builder = Json_create ();
-    json_builder_begin_object ( builder );
-    Json_add_string  ( builder, "tech_id",  Cfg_teleinfo.tech_id );
-    Json_add_string  ( builder, "acronyme", name );
-    Json_add_double  ( builder, "valeur",   atof( chaine ) );
-    Json_add_bool    ( builder, "in_range", TRUE );
-    json_builder_end_object ( builder );
-    result = Json_get_buf ( builder, &taille );
-    Send_zmq_with_tag ( Cfg_teleinfo.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_AI", result, taille );
-    g_free(result);
+  { Send_zmq_AI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, name, atof( chaine ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
@@ -201,6 +166,7 @@
     fd_set fdselect;
 
     prctl(PR_SET_NAME, "W-TINFOEDF", 0, 0, 0 );
+reload:
     memset( &Cfg_teleinfo, 0, sizeof(Cfg_teleinfo) );                               /* Mise a zero de la structure de travail */
     Cfg_teleinfo.lib = lib;                                        /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_teleinfo.lib->TID = pthread_self();                                                 /* Sauvegarde du TID pour le pere */
@@ -223,22 +189,9 @@
     nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
     Cfg_teleinfo.mode = TINFO_RETRING;
-    while( lib->Thread_run == TRUE )                                                         /* On tourne tant que necessaire */
+    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
-
-       if ( lib->Thread_reload == TRUE )
-        { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Reloading in progress", __func__ );
-          close(Cfg_teleinfo.fd);                                                             /* Fermeture de la connexion FD */
-          Teleinfo_send_status_to_master(FALSE);
-          Teleinfo_Lire_config ();                                          /* Lecture de la configuration logiciel du thread */
-          Cfg_teleinfo.fd = Init_teleinfo();
-          if (Cfg_teleinfo.fd<0)                                                               /* On valide l'acces aux ports */
-           { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_CRIT,
-                      "%s: Reloading with port %s failed", __func__, Cfg_teleinfo.port );
-           }
-          lib->Thread_reload = FALSE;
-        }
 
        if (Cfg_teleinfo.mode == TINFO_WAIT_BEFORE_RETRY)
         { if ( Cfg_teleinfo.date_next_retry <= Partage->top )
@@ -315,7 +268,8 @@
            { close(Cfg_teleinfo.fd);
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
-             Teleinfo_send_status_to_master(FALSE);
+             Send_zmq_DI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", FALSE );
+             Cfg_teleinfo.comm_status = FALSE;
            }
         }
      }
@@ -324,6 +278,13 @@
 
 end:
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
+       Send_zmq_DI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", FALSE );
+       Cfg_teleinfo.comm_status = FALSE;
+       goto reload;
+     }
     Cfg_teleinfo.lib->Thread_run = FALSE;                                                       /* Le thread ne tourne plus ! */
     Cfg_teleinfo.lib->TID = 0;                                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

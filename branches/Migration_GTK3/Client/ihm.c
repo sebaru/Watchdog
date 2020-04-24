@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -212,7 +212,7 @@ printf("searching page %d %d\n", type, id );
                    { liste = liste->next; continue; }
                   break;
              case TYPE_PAGE_SUPERVISION:
-                  if ( ((struct TYPE_INFO_SUPERVISION *)page->infos)->syn_id != id )
+                  if ( ((struct TYPE_INFO_SUPERVISION *)page->infos)->syn.id != id )
                    { liste = liste->next; continue; }
                   break;
              case TYPE_PAGE_MNEMONIQUE:
@@ -268,7 +268,7 @@ printf("not found\n");
   { GtkWidget *vboite, *hboite, *texte;
 
     vboite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
-    
+
     Notebook = gtk_notebook_new();
     gtk_box_pack_start( GTK_BOX(vboite), Notebook, TRUE, TRUE, 0 );
     gtk_container_set_border_width( GTK_CONTAINER(Notebook), 6 );

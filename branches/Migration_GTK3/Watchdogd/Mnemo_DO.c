@@ -97,7 +97,7 @@
                 "SELECT %d"
                 " FROM mnemos_DO as m"
                 " WHERE m.tech_id='%s' AND m.acronyme='%s' LIMIT 1",
-                MNEMO_SORTIE, tech_id, acronyme
+                MNEMO_DIGITAL_OUTPUT, tech_id, acronyme
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */

@@ -233,6 +233,7 @@
   { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
     Charger_analogInput();
     Charger_confDB_Registre();
+    Charger_confDB_AI();
     Charger_confDB_MSG();
     Charger_confDB_BOOL();
   }
@@ -340,7 +341,7 @@
                        "%s: receive SET_DI from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
                        event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
                        Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
-             Dls_data_set_DI ( Json_get_string ( query, "tech_id" ),
+             Dls_data_set_DI ( NULL, Json_get_string ( query, "tech_id" ),
                                Json_get_string ( query, "acronyme" ),
                                NULL, Json_get_bool ( query, "etat" ) );
            }

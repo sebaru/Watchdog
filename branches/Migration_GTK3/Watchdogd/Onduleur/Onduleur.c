@@ -72,18 +72,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Ups_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                          */
-/* Entrée: le status du GSM                                                                                                   */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Ups_send_status_to_master ( struct MODULE_UPS *ups, gboolean status )
-  { if (Config.instance_is_master==TRUE)                                                        /* si l'instance est Maitre */
-     { Dls_data_set_DI ( ups->tech_id, "COMM", &ups->bit_comm, status ); }                              /* Communication OK */
-/*    else
-     {
-     }*/
-  }
-/******************************************************************************************************************************/
 /* Recuperer_liste_id_MODULE_UPS: Recupération de la liste des ids des upss                                                   */
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
@@ -183,7 +171,7 @@
 
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
               "%s: %s disconnected (host='%s')", __func__, module->tech_id, module->host );
-    Ups_send_status_to_master ( module, FALSE );
+    Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "COMM", FALSE );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -280,71 +268,61 @@
        Mnemo_auto_create_DI ( module->tech_id, "UPS_ALARM",  "UPS en alarme !" );
 
        Mnemo_auto_create_AI ( module->tech_id, "LOAD", "Charge onduleur", "%" );
-       Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, 0.0, FALSE );
-       Charger_conf_AI ( module->ai_load );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "LOAD", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( module->tech_id, "REALPOWER", "Charge onduleur", "W" );
-       Dls_data_set_AI ( module->tech_id, "REALPOWER", &module->ai_realpower, 0.0, FALSE );
-       Charger_conf_AI ( module->ai_realpower );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "REALPOWER", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( module->tech_id, "BATTERY_CHARGE", "Charge batterie", "%" );
-       Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", &module->ai_battery_charge, 0.0, FALSE );
-       Charger_conf_AI ( module->ai_battery_charge );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_CHARGE", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( module->tech_id, "INPUT_VOLTAGE", "Tension d'entrée", "V" );
-       Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", &module->ai_input_voltage, 0.0, FALSE );
-       Charger_conf_AI ( module->ai_input_voltage );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "INPUT_VOLTAGE", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( module->tech_id, "BATTERY_RUNTIME", "Durée de batterie restante", "s" );
-       Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", &module->ai_battery_runtime, 0.0, FALSE );
-       Charger_conf_AI ( module->ai_battery_runtime );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_RUNTIME", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( module->tech_id, "BATTERY_VOLTAGE", "Tension batterie", "V" );
-       Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", &module->ai_battery_voltage, 0.0, FALSE );
-       Charger_conf_AI ( module->ai_battery_voltage );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_VOLTAGE", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( module->tech_id, "INPUT_HZ", "Fréquence d'entrée", "HZ" );
-       Dls_data_set_AI ( module->tech_id, "INPUT_HZ", &module->ai_input_frequency, 0.0, FALSE );
-       Charger_conf_AI ( module->ai_input_frequency );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "INPUT_HZ", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( module->tech_id, "OUTPUT_CURRENT", "Courant de sortie", "A" );
-       Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", &module->ai_output_current, 0.0, FALSE );
-       Charger_conf_AI ( module->ai_output_current );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_CURRENT", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( module->tech_id, "OUTPUT_HZ", "Fréquence de sortie", "HZ" );
-       Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", &module->ai_output_frequency, 0.0, FALSE );
-       Charger_conf_AI ( module->ai_output_frequency );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_HZ", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( module->tech_id, "OUTPUT_VOLTAGE", "Tension de sortie", "V" );
-       Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", &module->ai_output_voltage, 0.0, FALSE );
-       Charger_conf_AI ( module->ai_output_voltage );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_VOLTAGE", 0.0, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
-       Dls_data_set_DO ( module->tech_id, "LOAD_OFF", &module->do_load_off, FALSE );
+       Dls_data_set_DO ( NULL, module->tech_id, "LOAD_OFF", &module->do_load_off, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "LOAD_ON", "Active la sortie ondulée" );
-       Dls_data_set_DO ( module->tech_id, "LOAD_ON", &module->do_load_on, FALSE );
+       Dls_data_set_DO ( NULL, module->tech_id, "LOAD_ON", &module->do_load_on, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "OUTLET_1_OFF", "Désactive la prise n°1" );
-       Dls_data_set_DO ( module->tech_id, "OUTLET_1_OFF", &module->do_outlet_1_off, FALSE );
+       Dls_data_set_DO ( NULL, module->tech_id, "OUTLET_1_OFF", &module->do_outlet_1_off, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "OUTLET_1_ON", "Active la prise n°1" );
-       Dls_data_set_DO ( module->tech_id, "OUTLET_1_ON", &module->do_outlet_1_on, FALSE );
+       Dls_data_set_DO ( NULL, module->tech_id, "OUTLET_1_ON", &module->do_outlet_1_on, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "OUTLET_2_OFF", "Désactive la prise n°2" );
-       Dls_data_set_DO ( module->tech_id, "OUTLET_2_OFF", &module->do_outlet_2_off, FALSE );
+       Dls_data_set_DO ( NULL, module->tech_id, "OUTLET_2_OFF", &module->do_outlet_2_off, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "OUTLET_2_ON", "Active la prise n°2" );
-       Dls_data_set_DO ( module->tech_id, "OUTLET_2_ON", &module->do_outlet_2_on, FALSE );
+       Dls_data_set_DO ( NULL, module->tech_id, "OUTLET_2_ON", &module->do_outlet_2_on, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "START_DEEP_BAT", "Active un test de decharge profond" );
-       Dls_data_set_DO ( module->tech_id, "START_DEEP_BAT", &module->do_start_deep_bat, FALSE);
+       Dls_data_set_DO ( NULL, module->tech_id, "START_DEEP_BAT", &module->do_start_deep_bat, FALSE);
 
        Mnemo_auto_create_DO ( module->tech_id, "START_QUICK_BAT", "Active un test de decharge léger" );
-       Dls_data_set_DO ( module->tech_id, "START_QUICK_BAT", &module->do_start_quick_bat, FALSE );
+       Dls_data_set_DO ( NULL, module->tech_id, "START_QUICK_BAT", &module->do_start_quick_bat, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
-       Dls_data_set_DO ( module->tech_id, "STOP_TEST_BAT", &module->do_start_quick_bat, FALSE );
+       Dls_data_set_DO ( NULL, module->tech_id, "STOP_TEST_BAT", &module->do_stop_test_bat, FALSE );
      }
 
     module->date_next_connexion = 0;
@@ -384,19 +362,19 @@
 /* Entrée : l'ups, le nom de la commande                                                                                      */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
 /******************************************************************************************************************************/
- gboolean Onduleur_set_instcmd ( struct MODULE_UPS *module, gchar *nom_cmd )
+ static void Onduleur_set_instcmd ( struct MODULE_UPS *module, gchar *nom_cmd )
   { gchar buffer[80];
 
-    if (module->started != TRUE) return(FALSE);
+    if (module->started != TRUE) return;
 
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->name, nom_cmd );
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s'", __func__, module->tech_id, buffer );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                 "%s: %s: Sending INSTCMD failed (%s) error %s", __func__, module->tech_id,
-                 buffer, (char *)upscli_strerror(&module->upsconn) );
+                 "%s: %s: Sending INSTCMD failed with error '%s' for '%s'", __func__, module->tech_id,
+                 (char *)upscli_strerror(&module->upsconn), buffer );
        Deconnecter_UPS ( module );
-       return(FALSE);
+       return;
      }
 
     if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
@@ -404,13 +382,11 @@
                 "%s: %s: Reading INSTCMD result failed (%s) error %s", __func__, module->tech_id,
                  nom_cmd, (char *)upscli_strerror(&module->upsconn) );
        Deconnecter_UPS ( module );
-       return(FALSE);
+       return;
      }
     else
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
-                "%s: %s: Sending '%s' OK", __func__, module->tech_id, nom_cmd );
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s' OK", __func__, module->tech_id, nom_cmd );
      }
-    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Onduleur_get_var: Recupere une valeur de la variable en parametre                                                          */
@@ -465,34 +441,64 @@
 /* Entrée: identifiants des modules ups                                                                                       */
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
- static gboolean Envoyer_sortie_ups( struct MODULE_UPS *module )
-  { if (Dls_data_get_DO_up ( module->tech_id, "LOAD_OFF", &module->do_load_off))
-     { if (Onduleur_set_instcmd ( module, "load.off" ) == FALSE) return(FALSE); }
+ static void Envoyer_sortie_aux_ups( void )
+  { struct ZMQ_TARGET *event;
+    gchar buffer[256];
+    void *payload;
+    gint byte;
+                                                                                            /* Reception d'un paquet master ? */
+    while( (byte=Recv_zmq_with_tag ( Cfg_ups.zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer)-1, &event, &payload )) > 0)
+     { JsonObject *object;
+       JsonNode *Query;
+       buffer[byte] = 0;
 
-    if (Dls_data_get_DO_up ( module->tech_id, "LOAD_ON", &module->do_load_on))
-     { if (Onduleur_set_instcmd ( module, "load.on" ) == FALSE) return(FALSE); }
+       if ( !strcasecmp( event->tag, "SET_DO" ) )
+        { gchar *tech_id, *acronyme;
+          Query = json_from_string ( payload, NULL );
 
-    if (Dls_data_get_DO_up ( module->tech_id, "OUTLET_1_OFF", &module->do_outlet_1_off))
-     { if (Onduleur_set_instcmd ( module, "outlet.1.load.off" ) == FALSE) return(FALSE); }
+          if (!Query)
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ ); continue; }
+          object = json_node_get_object (Query);
+          if (!object)
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
+             json_node_unref (Query);
+             continue;
+           }
 
-    if (Dls_data_get_DO_up ( module->tech_id, "OUTLET_1_ON", &module->do_outlet_1_on))
-     { if (Onduleur_set_instcmd ( module, "outlet.1.load.on" ) == FALSE) return(FALSE); }
+          tech_id  = json_object_get_string_member ( object, "tech_id" );
+          acronyme = json_object_get_string_member ( object, "acronyme" );
+          if (!tech_id)
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ );
+             json_node_unref (Query);
+             continue;
+           }
+          else if (!acronyme)
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ );
+             json_node_unref (Query);
+             continue;
+           }
 
-    if (Dls_data_get_DO_up ( module->tech_id, "OUTLET_2_OFF", &module->do_outlet_2_off))
-     { if (Onduleur_set_instcmd ( module, "outlet.2.load.off" ) == FALSE) return(FALSE); }
+          Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s", __func__, tech_id, acronyme );
 
-    if (Dls_data_get_DO_up ( module->tech_id, "OUTLET_2_ON", &module->do_outlet_2_on))
-     { if (Onduleur_set_instcmd ( module, "outlet.2.load.on" ) == FALSE) return(FALSE); }
-
-    if (Dls_data_get_DO_up ( module->tech_id, "START_DEEP_BAT", &module->do_start_deep_bat))
-     { if (Onduleur_set_instcmd ( module, "test.battery.start.deep" ) == FALSE) return(FALSE); }
-
-    if (Dls_data_get_DO_up ( module->tech_id, "START_QUICK_BAT", &module->do_start_quick_bat))
-     { if (Onduleur_set_instcmd ( module, "test.battery.start.quick" ) == FALSE) return(FALSE); }
-
-    if (Dls_data_get_DO_up ( module->tech_id, "STOP_TEST_BAT", &module->do_stop_test_bat))
-     { if (Onduleur_set_instcmd ( module, "test.battery.stop" ) == FALSE) return(FALSE); }
-    return(TRUE);
+          GSList *liste = Cfg_ups.Modules_UPS;
+          while (liste)
+           { struct MODULE_UPS *module = (struct MODULE_UPS *)liste->data;
+             if (!strcasecmp(module->tech_id, tech_id))
+              { if (!strcasecmp(acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( module, "load.off" );
+                if (!strcasecmp(acronyme, "LOAD_ON"))         Onduleur_set_instcmd ( module, "load.on" );
+                if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    Onduleur_set_instcmd ( module, "outlet.1.load.off" );
+                if (!strcasecmp(acronyme, "OUTLET_1_ON"))     Onduleur_set_instcmd ( module, "outlet.1.load.on" );
+                if (!strcasecmp(acronyme, "OUTLET_2_OFF"))    Onduleur_set_instcmd ( module, "outlet.2.load.off" );
+                if (!strcasecmp(acronyme, "OUTLET_2_ON"))     Onduleur_set_instcmd ( module, "outlet.2.load.on" );
+                if (!strcasecmp(acronyme, "START_DEEP_BAT"))  Onduleur_set_instcmd ( module, "test.battery.start.deep" );
+                if (!strcasecmp(acronyme, "START_QUICK_BAT")) Onduleur_set_instcmd ( module, "test.battery.start.quick" );
+                if (!strcasecmp(acronyme, "STOP_TEST_BAT"))   Onduleur_set_instcmd ( module, "test.battery.stop" );
+              }
+             liste = g_slist_next(liste);
+           }
+          json_node_unref (Query);
+        }
+     }
   }
 /******************************************************************************************************************************/
 /* Interroger_ups: Interrogation d'un ups                                                                                     */
@@ -503,51 +509,50 @@
   { gchar *reponse;
 
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "LOAD", &module->ai_load, atof(reponse+1), TRUE ); }
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "LOAD", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "REALPOWER", &module->ai_realpower, atof(reponse+1), TRUE ); }
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "REALPOWER", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "BATTERY_CHARGE", &module->ai_battery_charge, atof(reponse+1), TRUE ); }
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_CHARGE", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "INPUT_VOLTAGE", &module->ai_input_voltage, atof(reponse+1), TRUE ); }
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "INPUT_VOLTAGE", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "BATTERY_RUNTIME", &module->ai_battery_runtime, atof(reponse+1), TRUE ); }
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_RUNTIME", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "BATTERY_VOLTAGE", &module->ai_battery_voltage, atof(reponse+1), TRUE ); }
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_VOLTAGE", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "INPUT_HZ", &module->ai_input_frequency, atof(reponse+1), TRUE ); }
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "INPUT_HZ", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "OUTPUT_CURRENT", &module->ai_output_current, atof(reponse+1), TRUE); }
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_CURRENT", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "OUTPUT_HZ", &module->ai_output_frequency, atof(reponse+1), TRUE ); }
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_HZ", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
-     { Dls_data_set_AI ( module->tech_id, "OUTPUT_VOLTAGE", &module->ai_output_voltage, atof(reponse+1), TRUE ); }
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_VOLTAGE", atof(reponse+1), TRUE ); }
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
-     { Dls_data_set_DI ( module->tech_id, "OUTLET_1_STATUS", &module->di_outlet_1_status, !strcmp(reponse, "\"on\"") ); }
+     { Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTLET_1_STATUS", !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
-     { Dls_data_set_DI ( module->tech_id, "OUTLET_2_STATUS", &module->di_outlet_2_status, !strcmp(reponse, "\"on\"") ); }
+     { Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTLET_2_STATUS", !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { Dls_data_set_DI ( module->tech_id, "UPS_ONLINE",       &module->di_ups_online,       (g_strrstr("OL", reponse)?TRUE:FALSE) );
-       Dls_data_set_DI ( module->tech_id, "UPS_CHARGING",     &module->di_ups_charging,     (g_strrstr("CHRG", reponse)?TRUE:FALSE) );
-       Dls_data_set_DI ( module->tech_id, "UPS_ON_BATT",      &module->di_ups_on_batt,      (g_strrstr("OB", reponse)?TRUE:FALSE) );
-       Dls_data_set_DI ( module->tech_id, "UPS_REPLACE_BATT", &module->di_ups_replace_batt, (g_strrstr("RB", reponse)?TRUE:FALSE) );
-       Dls_data_set_DI ( module->tech_id, "UPS_ALARM",        &module->di_ups_alarm,        (g_strrstr("ALARM", reponse)?TRUE:FALSE) );
+     { Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "UPS_ONLINE",       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
+       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "UPS_CHARGING",     (g_strrstr(reponse, "CHRG")?TRUE:FALSE) );
+       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "UPS_ON_BATT",      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
+       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "UPS_REPLACE_BATT", (g_strrstr(reponse, "RB")?TRUE:FALSE) );
+       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "UPS_ALARM",        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
      }
-    Ups_send_status_to_master ( module, TRUE );
-
+    Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "COMM", TRUE );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -558,17 +563,18 @@
     GSList *liste;
 
     prctl(PR_SET_NAME, "W-UPS", 0, 0, 0 );
+reload:
     memset( &Cfg_ups, 0, sizeof(Cfg_ups) );                                         /* Mise a zero de la structure de travail */
     Cfg_ups.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_ups.lib->TID = pthread_self();                                                      /* Sauvegarde du TID pour le pere */
     Ups_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-              "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Cfg_ups.lib->Thread_run = TRUE;                                                                     /* Le thread tourne ! */
 
     g_snprintf( Cfg_ups.lib->admin_prompt, sizeof(Cfg_ups.lib->admin_prompt), "ups" );
     g_snprintf( Cfg_ups.lib->admin_help,   sizeof(Cfg_ups.lib->admin_help),   "Manage UPS Modules" );
+
 
     if (!Cfg_ups.enable)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
@@ -582,6 +588,8 @@
        goto end;
      }
 
+    Cfg_ups.zmq_from_bus  = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    Cfg_ups.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Cfg_ups.Modules_UPS = NULL;                                                               /* Init des variables du thread */
 
     if ( Charger_tous_ups() == FALSE )                                                          /* Chargement des modules ups */
@@ -591,42 +599,22 @@
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     while(lib->Thread_run == TRUE)                                                        /* On tourne tant que l'on a besoin */
-     { sleep(1);
+     { usleep(10000);
        sched_yield();
 
        if (lib->Thread_reload == TRUE)
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
-          Ups_Lire_config();
-          Decharger_tous_UPS();
-          Charger_tous_ups();
-          lib->Thread_reload = FALSE;
+          break;
         }
 
-/*       if (Cfg_ups.admin_start)
-        { module = Chercher_module_ups_by_id ( Cfg_ups.admin_start );
-          if (module) { module->enable = TRUE;
-                        module->date_next_connexion = 0;
-                        Modifier_MODULE_UPS( &module->name );
-                      }
-          Cfg_ups.admin_start = 0;
-        }
-
-       if (Cfg_ups.admin_stop)
-        { module = Chercher_module_ups_by_id ( Cfg_ups.admin_stop );
-          if (module) { module->enable = FALSE;
-                        Deconnecter_UPS  ( module );
-                        module->date_next_connexion = 0;                                         /* RAZ de la date de retente */
-  /*                      Modifier_MODULE_UPS( &module->name );
-                      }
-          Cfg_ups.admin_stop = 0;
-        }*/
+       Envoyer_sortie_aux_ups();
 
        if (Cfg_ups.Modules_UPS == NULL)                                             /* Si pas de module référencés, on attend */
         { sleep(2); continue; }
 
        pthread_mutex_lock ( &Cfg_ups.lib->synchro );                                   /* Car utilisation de la liste chainée */
        liste = Cfg_ups.Modules_UPS;
-       while (liste && (lib->Thread_run == TRUE))
+       while (liste && lib->Thread_run == TRUE && lib->Thread_reload == FALSE)
         { module = (struct MODULE_UPS *)liste->data;
           if ( module->enable != TRUE ||                            /* si le module n'est pas enable, on ne le traite pas */
                Partage->top < module->date_next_connexion )                        /* Si attente retente, on change de module */
@@ -636,28 +624,18 @@
 /******************************************** Début de l'interrogation du module **********************************************/
           if ( ! module->started )                                                               /* Communication OK ou non ? */
            { if ( ! Connecter_ups( module ) )                                                 /* Demande de connexion a l'ups */
-              { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                         "%s: %s: Module DOWN", __func__, module->tech_id );
+              { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: %s: Module DOWN", __func__, module->tech_id );
                 Deconnecter_UPS ( module );                                         /* Sur erreur, on deconnecte le module */
                 module->date_next_connexion = Partage->top + UPS_RETRY;
               }
            }
           else
-           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                      "%s: %s: Envoi des sorties ups", __func__, module->tech_id );
-             if ( Envoyer_sortie_ups ( module ) == FALSE )
-              { Deconnecter_UPS ( module );                                         /* Sur erreur, on deconnecte le module */
-                module->date_next_connexion = Partage->top + UPS_RETRY;                          /* On retente dans longtemps */
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: %s: Interrogation ups", __func__, module->tech_id );
+             if ( Interroger_ups ( module ) == FALSE )
+              { Deconnecter_UPS ( module );
+                module->date_next_connexion = Partage->top + UPS_RETRY;                       /* On retente dans longtemps */
               }
-             else
-              { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                         "%s: %s: Interrogation ups", __func__, module->tech_id );
-                if ( Interroger_ups ( module ) == FALSE )
-                 { Deconnecter_UPS ( module );
-                   module->date_next_connexion = Partage->top + UPS_RETRY;                       /* On retente dans longtemps */
-                 }
-                else module->date_next_connexion = Partage->top + UPS_POLLING;               /* Update toutes les xx secondes */
-              }
+             else module->date_next_connexion = Partage->top + UPS_POLLING;               /* Update toutes les xx secondes */
            }
           liste = liste->next;                                            /* On prépare le prochain accès au prochain module */
         }
@@ -665,8 +643,18 @@
      }
 
     Decharger_tous_UPS();
+    Close_zmq ( Cfg_ups.zmq_to_master );
+    Close_zmq ( Cfg_ups.zmq_from_bus );
+
 end:
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
+       goto reload;
+     }
+
     Cfg_ups.lib->Thread_run = FALSE;                                                            /* Le thread ne tourne plus ! */
     Cfg_ups.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

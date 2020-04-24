@@ -109,7 +109,7 @@
      { va_start( ap, format );
        g_vsnprintf( chaine, sizeof(chaine), format, ap );
        va_end ( ap );
-       g_snprintf( log, sizeof(log), "%s\n", chaine );
+       g_snprintf( log, sizeof(log), "Ligne %d: %s\n", DlsScanner_get_lineno(), chaine );
        write( Id_log, log, strlen(log) );
 
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
@@ -436,10 +436,10 @@
     taille = 256;                                                                               /* Alias par nom uniquement ! */
     result = New_chaine( taille ); /* 10 caractères max */
     if ( !barre )
-         { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
+         { g_snprintf( result, taille, "Dls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
-    else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
+    else { g_snprintf( result, taille, "!Dls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
    return(result);
@@ -486,9 +486,9 @@
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-    g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( \"%s\", \"%s\", &_%s_%s, TRUE );\n",
+    g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-    g_snprintf( action->sinon, taille, "   Dls_data_set_MSG ( \"%s\", \"%s\", &_%s_%s, FALSE );\n",
+    g_snprintf( action->sinon, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
     return(action);
   }
@@ -530,7 +530,7 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_action_sortie: Prepare la structure ACTION associée à l'alias en paremetre                                             */
+/* New_action_sortie: Prepare la structure ACTION associée à l'alias en paramètre                                             */
 /* Entrées: l'alias, le complement si besoin, les options                                                                     */
 /* Sortie: la structure ACTION associée                                                                                       */
 /******************************************************************************************************************************/
@@ -542,12 +542,31 @@
     gint taille = 128;
     action->alors = New_chaine( taille );
     if ( (!barre && !alias->barre) || (barre && alias->barre) )
-         { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( \"%s\", \"%s\", &_%s_%s, 1 );\n",
+         { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( vars, \"%s\", \"%s\", &_%s_%s, 1 );\n",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
-    else { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( \"%s\", \"%s\", &_%s_%s, 0 );\n",
+    else { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( vars, \"%s\", \"%s\", &_%s_%s, 0 );\n",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
+    return(action);
+  }
+/******************************************************************************************************************************/
+/* New_action_digital_output: Prepare la structure ACTION associée à l'alias en paramètre                                     */
+/* Entrées: l'alias, le complement si besoin, les options                                                                     */
+/* Sortie: la structure ACTION associée                                                                                       */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_digital_output( struct ALIAS *alias, GList *options )
+  { struct ACTION *action;
+    gint taille = 128;
+
+    action = New_action();
+    action->alors = New_chaine( taille );
+    action->sinon = New_chaine( taille );
+
+    g_snprintf( action->alors, taille, "   Dls_data_set_DO ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+    g_snprintf( action->sinon, taille, "   Dls_data_set_DO ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
     return(action);
   }
 /******************************************************************************************************************************/
@@ -593,9 +612,9 @@
        action->alors = New_chaine( taille );
        action->sinon = New_chaine( taille );
 
-       g_snprintf( action->alors, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_%s_%s, TRUE );\n",
+       g_snprintf( action->alors, taille, "   Dls_data_set_bool ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-       g_snprintf( action->sinon, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_%s_%s, FALSE );\n",
+       g_snprintf( action->sinon, taille, "   Dls_data_set_bool ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     return(action);
@@ -615,9 +634,9 @@
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-    g_snprintf( action->alors, taille, "   Dls_data_set_CH ( \"%s\", \"%s\", &_%s_%s, TRUE, %d );\n",
+    g_snprintf( action->alors, taille, "   Dls_data_set_CH ( vars, \"%s\", \"%s\", &_%s_%s, TRUE, %d );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset );
-    g_snprintf( action->sinon, taille, "   Dls_data_set_CH ( \"%s\", \"%s\", &_%s_%s, FALSE, %d );\n",
+    g_snprintf( action->sinon, taille, "   Dls_data_set_CH ( vars, \"%s\", \"%s\", &_%s_%s, FALSE, %d );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset );
     return(action);
   }
@@ -638,9 +657,9 @@
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-    g_snprintf( action->alors, taille, "   Dls_data_set_CI ( \"%s\", \"%s\", &_%s_%s, TRUE, %d, %d );\n",
+    g_snprintf( action->alors, taille, "   Dls_data_set_CI ( vars, \"%s\", \"%s\", &_%s_%s, TRUE, %d, %d );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset, ratio );
-    g_snprintf( action->sinon, taille, "   Dls_data_set_CI ( \"%s\", \"%s\", &_%s_%s, FALSE, %d, %d );\n",
+    g_snprintf( action->sinon, taille, "   Dls_data_set_CI ( vars, \"%s\", \"%s\", &_%s_%s, FALSE, %d, %d );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset, ratio );
     return(action);
   }
@@ -678,8 +697,8 @@
      }
     else
      { g_snprintf( action->alors, taille,
-                   "  if (vars->bit_comm_out) Dls_data_set_VISUEL( \"%s\", \"%s\", &_%s_%s, 0, \"darkgreen\", 1 );"
-                   " else Dls_data_set_VISUEL( \"%s\", \"%s\", &_%s_%s, %d, \"%s\", %d );\n",
+                   "  if (vars->bit_comm_out) Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, 0, \"darkgreen\", 1 );"
+                   " else Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, %d, \"%s\", %d );\n",
                      alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
                      alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno );
      }
@@ -766,11 +785,11 @@
        action = New_action();
        action->alors = New_chaine( taille );
        if (barre)
-        { g_snprintf( action->alors, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_%s_%s, FALSE );\n",
+        { g_snprintf( action->alors, taille, "   Dls_data_set_bool ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
                                              alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
         }
        else
-        { g_snprintf( action->alors, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_%s_%s, TRUE );\n",
+        { g_snprintf( action->alors, taille, "   Dls_data_set_bool ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
                                              alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
         }
      }
@@ -841,7 +860,7 @@
     else if ( (db=Rechercher_DO ( tech_id, acronyme )) != NULL )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = MNEMO_SORTIE;
+       alias->type_bit = MNEMO_DIGITAL_OUTPUT;
        Libere_DB_SQL (&db);
      }
     else if ( (db=Rechercher_CI ( tech_id, acronyme )) != NULL )
