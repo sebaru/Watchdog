@@ -31,10 +31,7 @@
  #include <sys/stat.h>
  #include <fcntl.h>
  #include <string.h>
- #include <unistd.h>
- #include <sys/socket.h>
- #include <netinet/in.h>
- #include <netdb.h>
+ #include <crypt.h>
 
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
@@ -134,7 +131,7 @@
 
     sid = Normaliser_chaine ( sid_brut );                                                    /* Formatage correct des chaines */
     if (!sid)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Normalisation impossible", __func__ );
        return(NULL);
      }
 
@@ -145,7 +142,7 @@
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed for sid '%s'", __func__, sid_brut );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: DB connexion failed for sid '%s'", __func__, sid_brut );
        return(NULL);
      }
 
@@ -360,20 +357,86 @@
     /*soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, "LogLevel set", 18 );*/
   }
 /******************************************************************************************************************************/
+/* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */
+/* Entrées: une structure util, un code confidentiel                                                                          */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ static gboolean Http_check_utilisateur_password( gchar *hash, gchar *pwd )
+  { struct crypt_data *Data;
+    gboolean retour=FALSE;
+    gchar *result;
+
+    Data = (struct crypt_data *)g_try_malloc0(sizeof(struct crypt_data));
+    if( !Data)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Memory Error", __func__ );
+       return(FALSE);
+     }
+    result = crypt_r( pwd, hash, Data);
+    retour = memcmp( result, hash, strlen( hash ) );                                                  /* Comparaison des hash */
+    g_free(Data);
+    if (retour==0) return(TRUE);
+    return(FALSE);
+  }
+/******************************************************************************************************************************/
 /* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Http_traiter_connect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                    SoupClientContext *client, gpointer user_data)
-  {
-    if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
+ static gboolean Http_authenticate_CB ( SoupAuthDomain *domain, SoupMessage *msg, const char *username, const char *password,
+                                        gpointer user_data )
+  { gchar requete[256], *name;
+
+    name = Normaliser_chaine ( username );                                                   /* Formatage correct des chaines */
+    if (!name)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+       return(FALSE);
      }
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, "ceci est un test !!", 18 );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Gatcha !" );
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT username,comment,enable,access_level,hash "
+                "FROM users WHERE username='%s' LIMIT 1", name );
+    g_free(name);
+
+    struct DB *db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: DB connexion failed for user '%s'", __func__, username );
+       return(FALSE);
+     }
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: DB request failed for user '%s'", __func__, username );
+       return(FALSE);
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: User '%s' not found in DB", __func__, username );
+       return(FALSE);
+     }
+
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: User '%s' (%s) found in database.",
+              __func__, db->row[0], db->row[1] );
+
+/*********************************************************** Compte du client *************************************************/
+    if (atoi(db->row[2]) != 1)                                                 /* Est-ce que son compte est toujours actif ?? */
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: User '%s' not enabled", __func__, username );
+       return(FALSE);
+     }
+/*********************************************** Authentification du client par login mot de passe ****************************/
+    if ( Http_check_utilisateur_password( db->row[4], password ) == FALSE )                          /* Comparaison des codes */
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Password error for '%s'(id=%d)", __func__, username );
+       return(FALSE);
+     }
+
+    Liberer_resultat_SQL (db);
+    Libere_DB_SQL( &db );
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Http_print_request: affiche les données relatives à une requete                                                            */
@@ -383,6 +446,45 @@
  void Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client )
   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: %s from %s@%s", __func__,
               path, soup_client_context_get_auth_user (client), soup_client_context_get_host(client) );
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_traiter_connect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                    SoupClientContext *client, gpointer user_data)
+  { JsonBuilder *builder;
+    gsize taille_buf;
+    gchar *buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+    Http_print_request ( server, msg, path, client );
+
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+                                                                      /* Lancement de la requete de recuperation des messages */
+/*------------------------------------------------------- Dumping status -----------------------------------------------------*/
+    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+    Json_add_bool   ( builder, "connected", TRUE );
+    Json_add_string ( builder, "version",  VERSION );
+    Json_add_string ( builder, "instance", g_get_host_name() );
+    Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
+    Json_add_string ( builder, "message", "Welcome back Home !" );
+    json_builder_end_object (builder);                                                                        /* End Document */
+    buf = Json_get_buf (builder, &taille_buf);
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /******************************************************************************************************************************/
 /* Run_thread: Thread principal                                                                                               */
@@ -418,19 +520,16 @@ reload:
     soup_server_add_handler (socket, "/log",     Http_traiter_log, NULL, NULL );
     soup_server_add_handler (socket, "/bus",     Http_traiter_bus, NULL, NULL );
     soup_server_add_handler (socket, "/memory",  Http_traiter_memory, NULL, NULL );
-/*
-SoupAuthDomain *domain;
 
-domain = soup_auth_domain_basic_new (
-	SOUP_AUTH_DOMAIN_REALM, "My Realm",
-	SOUP_AUTH_DOMAIN_BASIC_AUTH_CALLBACK, auth_callback,
-	SOUP_AUTH_DOMAIN_BASIC_AUTH_DATA, auth_data,
-	SOUP_AUTH_DOMAIN_ADD_PATH, "/foo",
-	SOUP_AUTH_DOMAIN_ADD_PATH, "/bar/private",
-	NULL);
-soup_server_add_auth_domain (server, domain);
-g_object_unref (domain);
-*/
+    if (Cfg_http.authenticate)
+     { SoupAuthDomain *domain;
+       domain = soup_auth_domain_basic_new ( SOUP_AUTH_DOMAIN_REALM, "WatchdogServer",
+	                                            SOUP_AUTH_DOMAIN_BASIC_AUTH_CALLBACK, Http_authenticate_CB,
+                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/", NULL );
+       soup_server_add_auth_domain(socket, domain);
+       g_object_unref (domain);
+     }
+
     if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
      { if ( stat ( Cfg_http.ssl_cert_filepath, &sbuf ) == -1)                                     /* Test présence du fichier */
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
@@ -458,8 +557,10 @@ g_object_unref (domain);
      }
     else
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                 "%s: HTTP SoupServer Listen on port %d OK !", __func__, Cfg_http.tcp_port );
+                 "%s: HTTP SoupServer Listen OK on port %d, SSL=%d, authenticate=%d !", __func__,
+                 Cfg_http.tcp_port, Cfg_http.ssl_enable, Cfg_http.authenticate );
      }
+
     GMainLoop *loop = g_main_loop_new (NULL, TRUE);
     GMainContext *loop_context = g_main_loop_get_context ( loop );
 
