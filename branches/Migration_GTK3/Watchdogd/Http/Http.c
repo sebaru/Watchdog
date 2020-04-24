@@ -697,10 +697,14 @@
     Connect_zmq ( Cfg_http.zmq_from_bus, "inproc", ZMQUEUE_LOCAL_BUS, 0 );*/
 
     SoupServer *socket = soup_server_new("server-header", "Watchdogd HTTP Server", NULL);
+    if (!socket)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer new Failed !", __func__ );
+       goto end;
+     }
     soup_server_add_handler (socket, "/connect", Http_traiter_connect, NULL, NULL );
     soup_server_add_handler (socket, "/log", Http_traiter_log, NULL, NULL );
     if (!soup_server_listen_all (socket, 5570, 0, NULL))
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer init Failed !", __func__ ); }
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer Listen Failed !", __func__ ); }
     else { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: SoupServer init OK !", __func__ ); }
     GMainLoop *loop = g_main_loop_new (NULL, TRUE);
     GMainContext *loop_context = g_main_loop_get_context ( loop );
