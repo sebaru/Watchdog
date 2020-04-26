@@ -214,4 +214,32 @@
      }
     return(histo_msgs);
   }
+/******************************************************************************************************************************/
+/* Histo_msg_print_to_JSON: Convertir un histo au format JSON                                                                 */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
+ void Histo_msg_print_to_JSON ( JsonBuilder *builder, struct CMD_TYPE_HISTO *histo )
+  { Json_add_int    ( builder, "id", histo->id );
+    Json_add_bool   ( builder, "alive", histo->alive );                             /* Le message est-il encore d'actualité ? */
+    Json_add_bool   ( builder, "enable", histo->msg.enable );                       /* Le message est-il encore d'actualité ? */
+    Json_add_string ( builder, "nom_ack", histo->nom_ack );
+    Json_add_string ( builder, "date_create", histo->date_create );
+    Json_add_string ( builder, "date_fixe", histo->date_create );
+    Json_add_string ( builder, "date_fin", histo->date_fin );
+    Json_add_string ( builder, "tech_id", histo->msg.tech_id );
+    Json_add_string ( builder, "acronyme", histo->msg.acronyme );
+    Json_add_int    ( builder, "type", histo->msg.type );
+    Json_add_string ( builder, "dls_shortname", histo->msg.dls_shortname );
+    Json_add_string ( builder, "libelle", histo->msg.libelle );
+    Json_add_string ( builder, "libelle_sms", histo->msg.libelle_sms );
+    Json_add_int    ( builder, "syn_id", histo->msg.syn_id );
+    Json_add_string ( builder, "syn_parent_page", histo->msg.syn_parent_page );
+    Json_add_string ( builder, "syn_page", histo->msg.syn_page );
+    Json_add_string ( builder, "syn_libelle", histo->msg.syn_libelle );
+    Json_add_int    ( builder, "sms", histo->msg.sms );
+    Json_add_bool   ( builder, "audio", histo->msg.audio );
+    Json_add_string ( builder, "libelle_audio", histo->msg.libelle_audio );
+    Json_add_string ( builder, "profil_audio", histo->msg.profil_audio );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
