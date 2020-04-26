@@ -486,13 +486,44 @@
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
+
+ static void Http_ws_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
+  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Close Connexion received !", __func__ );
+    g_object_unref(connexion);
+    Cfg_http.liste_ws_clients = g_slist_remove ( Cfg_http.liste_ws_clients, connexion );
+  }
+
+ static void Http_ws_on_message ( SoupWebsocketConnection *connexion, gint type, GBytes *message, gpointer user_data )
+  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Message received !", __func__ );
+  }
+
+ static void Http_ws_on_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
+  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
+  }
+
+/******************************************************************************************************************************/
+/* Http_traiter_websocket: Traite une requete websocket                                                                       */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_traiter_websocket_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
+                                         SoupClientContext *client, gpointer user_data)
+  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Opened %p state %d!", __func__, connexion,
+              soup_websocket_connection_get_state (connexion) );
+    g_signal_connect ( connexion, "message", G_CALLBACK(Http_ws_on_message), NULL);
+    g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_on_closed), NULL);
+    g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_on_error), NULL);
+    /*soup_websocket_connection_send_text ( connexion, "Welcome on Watchdog WebSocket !" );*/
+    Cfg_http.liste_ws_clients = g_slist_prepend ( Cfg_http.liste_ws_clients, connexion );
+    g_object_ref(connexion);
+  }
 /******************************************************************************************************************************/
 /* Run_thread: Thread principal                                                                                               */
 /* Entrée: une structure LIBRAIRIE                                                                                            */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct stat sbuf;
+  { void *zmq_motifs, *zmq_msgs;
 
     prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
 reload:
@@ -505,33 +536,38 @@ reload:
     g_snprintf( Cfg_http.lib->admin_prompt, sizeof(Cfg_http.lib->admin_prompt), NOM_THREAD );
     g_snprintf( Cfg_http.lib->admin_help,   sizeof(Cfg_http.lib->admin_help),   "Manage Web Services with external Devices" );
 
-    /*Cfg_http.zmq_from_bus = New_zmq ( ZMQ_SUB, "listen-to-bus" );
-    Connect_zmq ( Cfg_http.zmq_from_bus, "inproc", ZMQUEUE_LOCAL_BUS, 0 );*/
-
     SoupServer *socket = soup_server_new("server-header", "Watchdogd HTTP Server", NULL);
     if (!socket)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer new Failed !", __func__ );
        goto end;
      }
-    soup_server_add_handler (socket, "/connect", Http_traiter_connect, NULL, NULL );
-    soup_server_add_handler (socket, "/dls",     Http_traiter_dls, NULL, NULL );
-    soup_server_add_handler (socket, "/process", Http_traiter_process, NULL, NULL );
-    soup_server_add_handler (socket, "/status",  Http_traiter_status, NULL, NULL );
-    soup_server_add_handler (socket, "/log",     Http_traiter_log, NULL, NULL );
-    soup_server_add_handler (socket, "/bus",     Http_traiter_bus, NULL, NULL );
-    soup_server_add_handler (socket, "/memory",  Http_traiter_memory, NULL, NULL );
+    soup_server_add_handler ( socket, "/connect", Http_traiter_connect, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls",     Http_traiter_dls, NULL, NULL );
+    soup_server_add_handler ( socket, "/process", Http_traiter_process, NULL, NULL );
+    soup_server_add_handler ( socket, "/status",  Http_traiter_status, NULL, NULL );
+    soup_server_add_handler ( socket, "/log",     Http_traiter_log, NULL, NULL );
+    soup_server_add_handler ( socket, "/bus",     Http_traiter_bus, NULL, NULL );
+    soup_server_add_handler ( socket, "/memory",  Http_traiter_memory, NULL, NULL );
+    soup_server_add_websocket_handler ( socket, "/ws", NULL, NULL, Http_traiter_websocket_CB, NULL, NULL );
 
     if (Cfg_http.authenticate)
      { SoupAuthDomain *domain;
        domain = soup_auth_domain_basic_new ( SOUP_AUTH_DOMAIN_REALM, "WatchdogServer",
 	                                            SOUP_AUTH_DOMAIN_BASIC_AUTH_CALLBACK, Http_authenticate_CB,
-                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/", NULL );
+                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/connect",
+                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/dls",
+                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/process",
+                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/log",
+                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/bus",
+                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/memory",
+                                             NULL );
        soup_server_add_auth_domain(socket, domain);
        g_object_unref (domain);
      }
 
     if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
-     { if ( stat ( Cfg_http.ssl_cert_filepath, &sbuf ) == -1)                                     /* Test présence du fichier */
+     { struct stat sbuf;
+       if ( stat ( Cfg_http.ssl_cert_filepath, &sbuf ) == -1)                                     /* Test présence du fichier */
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                    "%s: unable to load '%s' (error '%s'). Setting ssl=FALSE", __func__,
                     Cfg_http.ssl_cert_filepath, strerror(errno) );
@@ -555,24 +591,98 @@ reload:
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer Listen Failed !", __func__ );
        goto end;
      }
-    else
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                 "%s: HTTP SoupServer Listen OK on port %d, SSL=%d, authenticate=%d !", __func__,
-                 Cfg_http.tcp_port, Cfg_http.ssl_enable, Cfg_http.authenticate );
-     }
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+              "%s: HTTP SoupServer Listen OK on port %d, SSL=%d, authenticate=%d !", __func__,
+              Cfg_http.tcp_port, Cfg_http.ssl_enable, Cfg_http.authenticate );
 
     GMainLoop *loop = g_main_loop_new (NULL, TRUE);
     GMainContext *loop_context = g_main_loop_get_context ( loop );
 
+    zmq_msgs   = Connect_zmq ( ZMQ_SUB, "listen-to-msgs",   "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+    zmq_motifs = Connect_zmq ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
     Cfg_http.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { usleep(1000);
+     { struct CMD_TYPE_HISTO histo;
+       struct DLS_VISUEL visu;
+       usleep(1000);
        sched_yield();
 
        if (Cfg_http.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Thread Reload !", __func__ );
           break;
+        }
+
+       if ( Recv_zmq ( zmq_motifs, &visu, sizeof(struct DLS_VISUEL) ) == sizeof(struct DLS_VISUEL) )
+        { JsonBuilder *builder;
+          gsize taille_buf;
+          gchar *buf;
+          GSList *liste;
+
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Visuel %s:%s received",
+                    __func__, visu.tech_id, visu.acronyme );
+          builder = Json_create ();
+          if (builder == NULL)
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
+             continue;
+           }
+          json_builder_begin_object(builder);
+          Http_Memory_print_VISUEL_to_json ( builder, &visu );
+          json_builder_end_object(builder);
+          buf = Json_get_buf ( builder, &taille_buf );
+          liste = Cfg_http.liste_ws_clients;
+          while (liste)
+           { SoupWebsocketConnection *connexion = liste->data;
+             soup_websocket_connection_send_text ( connexion, buf );
+             liste = g_slist_next(liste);
+           }
+          g_free(buf);
+        }
+
+       if ( Recv_zmq ( zmq_msgs, &histo, sizeof(histo) ) == sizeof(struct CMD_TYPE_HISTO) )
+        { JsonBuilder *builder;
+          gsize taille_buf;
+          gchar *buf;
+          GSList *liste;
+
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: MSG %s:%s received",
+                    __func__, histo.msg.tech_id, histo.msg.acronyme );
+          builder = Json_create ();
+          if (builder == NULL)
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
+             continue;
+           }
+          json_builder_begin_object(builder);
+          Json_add_int    ( builder, "id", histo.id );
+          Json_add_bool   ( builder, "alive", histo.alive );                        /* Le message est-il encore d'actualité ? */
+          Json_add_bool   ( builder, "enable", histo.msg.enable );                        /* Le message est-il encore d'actualité ? */
+          Json_add_string ( builder, "nom_ack", histo.nom_ack );
+          Json_add_string ( builder, "date_create", histo.date_create );
+          Json_add_string ( builder, "date_fixe", histo.date_create );
+          Json_add_string ( builder, "date_fin", histo.date_fin );
+          Json_add_string ( builder, "tech_id", histo.msg.tech_id );
+          Json_add_string ( builder, "acronyme", histo.msg.acronyme );
+          Json_add_int    ( builder, "type", histo.msg.type );
+          Json_add_string ( builder, "dls_shortname", histo.msg.dls_shortname );
+          Json_add_string ( builder, "libelle", histo.msg.libelle );
+          Json_add_string ( builder, "libelle_sms", histo.msg.libelle_sms );
+          Json_add_int    ( builder, "syn_id", histo.msg.syn_id );
+          Json_add_string ( builder, "syn_parent_page", histo.msg.syn_parent_page );
+          Json_add_string ( builder, "syn_page", histo.msg.syn_page );
+          Json_add_string ( builder, "syn_libelle", histo.msg.syn_libelle );
+          Json_add_int    ( builder, "sms", histo.msg.sms );
+          Json_add_bool   ( builder, "audio", histo.msg.audio );
+          Json_add_string ( builder, "libelle_audio", histo.msg.libelle_audio );
+          Json_add_string ( builder, "profil_audio", histo.msg.profil_audio );
+          json_builder_end_object(builder);
+          buf = Json_get_buf ( builder, &taille_buf );
+          liste = Cfg_http.liste_ws_clients;
+          while (liste)
+           { SoupWebsocketConnection *connexion = liste->data;
+             soup_websocket_connection_send_text ( connexion, buf );
+             liste = g_slist_next(liste);
+           }
+          g_free(buf);
         }
 
        g_main_context_iteration ( loop_context, FALSE );
@@ -581,6 +691,10 @@ reload:
     soup_server_disconnect (socket);                                                            /* Arret du serveur WebSocket */
     /*Close_zmq ( Cfg_http.zmq_from_bus );*/
     Close_zmq ( Cfg_http.zmq_to_master );
+    Close_zmq ( zmq_motifs );
+    Close_zmq ( zmq_msgs );
+    g_main_loop_unref(loop);
+
 end:
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     if (lib->Thread_reload == TRUE)

@@ -68,6 +68,7 @@
     gchar ssl_cert_filepath[80];
     gchar ssl_private_key_filepath[80];
     gboolean authenticate;
+    GSList *liste_ws_clients;
  };
 
 /*************************************************** Définitions des prototypes ***********************************************/
@@ -84,6 +85,6 @@
                                     SoupClientContext *client, gpointer user_data );
  extern void Http_Memory_get_all ( SoupMessage *msg, gchar *tech_id );
  extern void Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
-
+ extern void Http_Memory_print_VISUEL_to_json ( JsonBuilder *builder, struct DLS_VISUEL *bit );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
