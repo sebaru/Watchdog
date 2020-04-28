@@ -68,7 +68,7 @@
     gchar ssl_cert_filepath[80];
     gchar ssl_private_key_filepath[80];
     gboolean authenticate;
-    GSList *liste_ws_clients;
+    GSList *liste_ws_motifs_clients;
     GSList *liste_ws_msgs_clients;
  };
 

@@ -159,7 +159,7 @@
  extern GtkWidget *Creer_page_histo( void );                                                            /* Dans liste_histo.c */
 
 #ifdef bouh
- extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo ); 
+ extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );
  extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
  extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
  extern gchar *Type_vers_string ( guint type );
@@ -434,6 +434,21 @@
 
  extern void Menu_ajouter_editer_horloge ( struct CMD_TYPE_MNEMO_FULL *edit_horloge, gint id_mnemo);  /* Dans ajout_horloge.c */
 #endif
+
+ extern JsonBuilder *Json_create ( void );                                                                     /* Dans Json.c */
+ extern void Json_add_string ( JsonBuilder *builder, gchar *name, gchar *chaine );
+ extern void Json_add_int ( JsonBuilder *builder, gchar *name, gint valeur );
+ extern void Json_add_double ( JsonBuilder *builder, gchar *name, gdouble valeur );
+ extern void Json_add_bool ( JsonBuilder *builder, gchar *name, gboolean bool );
+ extern void Json_add_object ( JsonBuilder *builder, gchar *name );
+ extern void Json_end_object ( JsonBuilder *builder );
+ extern void Json_add_array ( JsonBuilder *builder, gchar *name );
+ extern void Json_end_array ( JsonBuilder *builder );
+ extern gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p );
+ extern JsonNode *Json_get_from_string ( gchar *chaine );
+ extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );
+ extern gfloat Json_get_float ( JsonNode *query, gchar *chaine );
+ extern gboolean Json_get_bool ( JsonNode *query, gchar *chaine );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
 

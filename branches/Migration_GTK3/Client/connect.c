@@ -123,9 +123,9 @@
  static void Connecter_au_serveur_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
   { gchar *reason_phrase;
     gint status_code;
-    GBytes *response;
+    GBytes *response_brute;
+    gchar chaine[128];
     gsize taille;
-    gchar *data;
 
     g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
     if (status_code != 200)
@@ -134,10 +134,26 @@
        Log(chaine);
        return;
      }
-    g_object_get ( msg, "response-body-data", &response, NULL );
-    data = g_bytes_unref_to_data ( response, &taille );
-    printf("Recu Soup Message status %d, taille %d, %s\n", status_code, taille, data );
-    g_free(data);
+    g_object_get ( msg, "response-body-data", &response_brute, NULL );
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
+    g_snprintf( chaine, sizeof(chaine), "Connected with %s@%s to %s Instance '%s' with %s. Version %s - %s\n",
+                Client.username, Client.hostname,
+                (Json_get_bool(response, "instance_is_master") ? "Master" : "Slave"),
+                Json_get_string(response, "instance"),
+                (Json_get_bool(response, "ssl") ? "SSL" : "NO SSL"),
+                Json_get_string(response, "version"), Json_get_string(response, "message") );
+    Log(chaine);
+    json_node_unref(response);
+  }
+/******************************************************************************************************************************/
+/* Connecter: Tentative de connexion au serveur                                                                               */
+/* Entrée: une nom et un password                                                                                             */
+/* Sortie: les variables globales sont initialisées, FALSE si pb                                                              */
+/******************************************************************************************************************************/
+ static void Send_credentials_CB ( SoupSession *session, SoupMessage *msg, SoupAuth  *auth, gboolean retrying, gpointer user_data)
+  { if (retrying)
+     { Log( "Wrong Credentials - Unable to connect" ); Deconnecter_sale(); return; }
+    soup_auth_authenticate (auth, Client.username, Client.password);
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -145,12 +161,13 @@
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                                              */
 /******************************************************************************************************************************/
  static void Connecter_au_serveur ( void )
-  { gchar chaine[128];
-    Log( "Trying to connect" );
+  { Log( "Trying to connect" );
     Raz_progress_pulse();
     Client.connexion = soup_session_new();
-    SoupMessage *msg= soup_message_new ( "GET", "http://localhost:5560/dls/list");
+/*Client.hostname*/
+    SoupMessage *msg= soup_message_new ( "GET", "http://localhost:5560/connect");
     soup_session_queue_message (Client.connexion, msg, Connecter_au_serveur_CB, NULL);
+    g_signal_connect( Client.connexion, "authenticate", G_CALLBACK(Send_credentials_CB), NULL );
   }
 /******************************************************************************************************************************/
 /* Identifier: Affiche la fenetre d'identification de l'utilisateur                                                           */

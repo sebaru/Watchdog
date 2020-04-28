@@ -152,7 +152,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create,"
-                "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
+                "histo.date_fixe, histo.date_fin, dls.shortname, msg.id, msg.tech_id, msg.acronyme"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
                 " INNER JOIN %s as dls ON dls.tech_id = msg.tech_id"
@@ -203,13 +203,15 @@
        g_snprintf( histo_msgs->msg.syn_page,        sizeof(histo_msgs->msg.syn_page),        "%s", db->row[6]  );
        g_snprintf( histo_msgs->nom_ack,             sizeof(histo_msgs->nom_ack),             "%s", db->row[7]  );
        g_snprintf( histo_msgs->msg.dls_shortname,   sizeof(histo_msgs->msg.dls_shortname),   "%s", db->row[11] );
+       g_snprintf( histo_msgs->msg.tech_id,         sizeof(histo_msgs->msg.tech_id),         "%s", db->row[13] );
+       g_snprintf( histo_msgs->msg.acronyme,        sizeof(histo_msgs->msg.acronyme),        "%s", db->row[14] );
        histo_msgs->id               = atoi(db->row[0]);
        histo_msgs->alive            = atoi(db->row[1]);
        histo_msgs->msg.type         = atoi(db->row[3]);
        histo_msgs->msg.syn_id       = atoi(db->row[4]);
        g_snprintf ( histo_msgs->date_create, sizeof(histo_msgs->date_create), "%s", db->row[8] );
-       if (db->row[9]) g_snprintf ( histo_msgs->date_fixe,   sizeof(histo_msgs->date_fixe), "%s", db->row[9] );
-       if (db->row[10]) g_snprintf ( histo_msgs->date_fin,    sizeof(histo_msgs->date_fin), "%s", db->row[10] );
+       if (db->row[9])  g_snprintf ( histo_msgs->date_fixe,   sizeof(histo_msgs->date_fixe), "%s", db->row[9] );
+       if (db->row[10]) g_snprintf ( histo_msgs->date_fin,    sizeof(histo_msgs->date_fin),  "%s", db->row[10] );
        histo_msgs->msg.id           = atoi(db->row[12]);
      }
     return(histo_msgs);
