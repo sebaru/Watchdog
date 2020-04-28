@@ -310,6 +310,20 @@
     gtk_list_store_clear( GTK_LIST_STORE(store) );
   }
 #endif
+
+ void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
+  { gsize taille;
+    printf("Recu from websocket msgs : %s\n",g_bytes_get_data (message_brut, &taille) );
+    /*JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    g_snprintf( chaine, sizeof(chaine), "Connected with %s@%s to %s Instance '%s' with %s. Version %s - %s",
+                Client.username, Client.hostname,
+                (Json_get_bool(response, "instance_is_master") ? "Master" : "Slave"),
+                Json_get_string(response, "instance"),
+                (Json_get_bool(response, "ssl") ? "SSL" : "NO SSL"),
+                Json_get_string(response, "version"), Json_get_string(response, "message") );
+    json_node_unref(response);*/
+  }
+
 /******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
 /* Entrée: rien                                                                                                               */

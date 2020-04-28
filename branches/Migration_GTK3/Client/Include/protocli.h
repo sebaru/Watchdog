@@ -29,7 +29,7 @@
  #define _PROTOCLI_H_
 
  #include <gtk/gtk.h>
- #include <openssl/ssl.h>
+ #include <libsoup/soup.h>
  //#include <gtksourceview/gtksourceprintcompositor.h>
  #include <curl/curl.h>
  #include <json-glib/json-glib.h>
@@ -157,7 +157,7 @@
 
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
  extern GtkWidget *Creer_page_histo( void );                                                            /* Dans liste_histo.c */
-
+ extern void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data );
 #ifdef bouh
  extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );
  extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );

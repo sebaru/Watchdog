@@ -47,6 +47,7 @@
   { guint32 mode;
     gint access_level;
     SoupSession *connexion;
+    SoupWebsocketConnection *websocket;
     /*struct REZO_CLI_IDENT ident;
     struct CONNEXION *connexion;
     SSL_CTX *ssl_ctx;

@@ -25,23 +25,15 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <gtk/gtk.h>
- #include <libsoup/soup.h>
- #include <sys/types.h>
- #include <sys/socket.h>
- #include <netinet/in.h>
- #include <netdb.h>
- #include <fcntl.h>
-
  #include "Reseaux.h"
  #include "client.h"
  #include "Config_cli.h"
 
- static GtkWidget *fenetre;                                                      /* Fenetre d'identification de l'utilisateur */
 /******************************************** Définitions des prototypes programme ********************************************/
  #include "config.h"
  #include "protocli.h"
 
+ static GtkWidget *fenetre;                                                      /* Fenetre d'identification de l'utilisateur */
  extern struct CLIENT Client;                                                        /* Identifiant de l'utilisateur en cours */
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
  extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
@@ -114,6 +106,12 @@
   }
 #endif
 
+ static void Traiter_connect_ws_CB (GObject *source_object, GAsyncResult *res, gpointer user_data)
+  { Client.websocket = soup_session_websocket_connect_finish ( Client.connexion, res, NULL );
+    if (Client.websocket)
+     { g_signal_connect( Client.websocket, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), NULL );
+     }
+  }
 
 /******************************************************************************************************************************/
 /* Connecter_au_serveur_CB: Traite la reponse du serveur a la demande de connexionen                                          */
@@ -132,11 +130,12 @@
      { gchar chaine[256];
        g_snprintf(chaine, sizeof(chaine), "Error connecting to server : Code %d - %s", status_code, reason_phrase );
        Log(chaine);
+       Deconnecter_sale();
        return;
      }
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
-    g_snprintf( chaine, sizeof(chaine), "Connected with %s@%s to %s Instance '%s' with %s. Version %s - %s\n",
+    g_snprintf( chaine, sizeof(chaine), "Connected with %s@%s to %s Instance '%s' with %s. Version %s - %s",
                 Client.username, Client.hostname,
                 (Json_get_bool(response, "instance_is_master") ? "Master" : "Slave"),
                 Json_get_string(response, "instance"),
@@ -144,6 +143,8 @@
                 Json_get_string(response, "version"), Json_get_string(response, "message") );
     Log(chaine);
     json_node_unref(response);
+    soup_session_websocket_connect_async ( Client.connexion, soup_message_new ( "GET", "ws://localhost:5560/ws/live-msgs"),
+                                           NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, NULL );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */

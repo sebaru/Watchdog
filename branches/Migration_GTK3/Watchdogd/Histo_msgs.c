@@ -118,7 +118,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.libelle, msg.type, dls.syn_id,"
                 "parent_syn.page, syn.page, histo.nom_ack, histo.date_create,"
-                "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
+                "histo.date_fixe, histo.date_fin, dls.shortname, msg.id, msg.tech_id, msg.acronyme"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
                 " INNER JOIN %s as dls ON dls.tech_id = msg.tech_id"
