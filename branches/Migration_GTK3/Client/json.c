@@ -148,6 +148,24 @@
     return(json_object_get_string_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
+/* Json_get_int: Recupere l'entier dont le nom est en parametre                                                               */
+/* Entrée: la query, le nom du parametre                                                                                      */
+/* Sortie: la chaine de caractere                                                                                             */
+/******************************************************************************************************************************/
+ gboolean Json_has_member ( JsonNode *query, gchar *chaine )
+  { JsonObject *object = json_node_get_object (query);
+    return(json_object_has_member ( object, chaine ));
+  }
+/******************************************************************************************************************************/
+/* Json_get_int: Recupere l'entier dont le nom est en parametre                                                               */
+/* Entrée: la query, le nom du parametre                                                                                      */
+/* Sortie: la chaine de caractere                                                                                             */
+/******************************************************************************************************************************/
+ gint Json_get_int ( JsonNode *query, gchar *chaine )
+  { JsonObject *object = json_node_get_object (query);
+    return((gfloat)json_object_get_int_member ( object, chaine ));
+  }
+/******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
@@ -164,5 +182,14 @@
  gboolean Json_get_bool ( JsonNode *query, gchar *chaine )
   { JsonObject *object = json_node_get_object (query);
     return(json_object_get_boolean_member ( object, chaine ));
+  }
+/******************************************************************************************************************************/
+/* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
+/* Entrée: la query, le nom du parametre                                                                                      */
+/* Sortie: la chaine de caractere                                                                                             */
+/******************************************************************************************************************************/
+ JsonArray *Json_get_array ( JsonNode *query, gchar *chaine )
+  { JsonObject *object = json_node_get_object (query);
+    return(json_object_get_array_member ( object, chaine ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -39,7 +39,7 @@
  extern struct CLIENT Client;                                                        /* Identifiant de l'utilisateur en cours */
 
  enum
-  { COLONNE_ID,
+  { COLONNE_HISTO_ID,
     COLONNE_MSG_ID,
     COLONNE_GROUPE_PAGE,
     COLONNE_TYPE,
@@ -52,25 +52,25 @@
     COLONNE_COULEUR_TEXTE,
     NBR_COLONNE
   };
- GdkColor COULEUR_FOND[]=
-  { { 0x0, 0xAFFF, 0xAFFF, 0xAFFF }, /* Info */
-    { 0x0, 0x7FFF, 0x0,    0x0    }, /* Alerte */
-    { 0x0, 0xFFFF, 0xFFFF, 0x0    }, /* Trouble */
-    { 0x0, 0xFFFF, 0x0,    0x0    }, /* Alarme */
-    { 0x0, 0x0,    0xFFFF, 0x0    }, /* Veille */
-    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF }, /* Attente */
-    { 0x0, 0x0   , 0x0   , 0xFFFF }, /* Danger */
-    { 0x0, 0x0   , 0x0   , 0x0    }  /* Derangement */
+ GdkRGBA COULEUR_FOND[]=
+  { { 0.0, 0.0, 0.0, 0.2 }, /* Info */
+    { 1.0, 0.0, 0.0, 1.0 }, /* Alerte */
+    { 1.0, 1.0, 0.0, 0.5 }, /* Trouble */
+    { 1.0, 0.6, 1.0, 0.8 }, /* Alarme */
+    { 0.0, 1.0, 0.0, 0.8 }, /* Veille */
+    { 0.0, 0.0, 0.0, 0.5 }, /* Attente */
+    { 1.0, 0.0, 0.0, 0.8 }, /* Danger */
+    { 0.0, 1.0, 0.5, 0.5 }  /* Derangement */
   };
- GdkColor COULEUR_TEXTE[]=
-  { { 0x0, 0x0,    0x0,    0x0    }, /* Info */
-    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF }, /* Alerte */
-    { 0x0, 0x0,    0x0,    0x0    }, /* Trouble */
-    { 0x0, 0x0,    0x0,    0x0    }, /* Alarme */
-    { 0x0, 0x0,    0x0,    0x0    }, /* Veille */
-    { 0x0, 0x0,    0x0,    0x0    }, /* Attente */
-    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF }, /* Danger */
-    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF }  /* Derangement */
+ GdkRGBA COULEUR_TEXTE[]=
+  { { 0.0, 0.0, 0.0, 1.0 }, /* Info */
+    { 0.0, 0.0, 0.0, 1.0 }, /* Alerte */
+    { 0.0, 0.0, 0.0, 1.0 }, /* Trouble */
+    { 0.0, 0.0, 0.0, 1.0 }, /* Alarme */
+    { 0.0, 0.0, 0.0, 1.0 }, /* Veille */
+    { 0.0, 0.0, 0.0, 1.0 }, /* Attente */
+    { 0.0, 0.0, 0.0, 1.0 }, /* Danger */
+    { 0.0, 0.0, 0.0, 1.0 }  /* Derangement */
   };
 /**************************************** Définitions des prototypes programme ************************************************/
  #include "protocli.h"
@@ -126,7 +126,7 @@
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     while ( lignes )
      { gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_ID, &histo.id, -1 );                      /* Recup du id */
+       gtk_tree_model_get( store, &iter, COLONNE_HISTO_ID, &histo.id, -1 );                      /* Recup du id */
 
        Envoi_serveur( TAG_HISTO, SSTAG_CLIENT_ACK_HISTO, (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
        gtk_tree_selection_unselect_iter( selection, &iter );
@@ -218,7 +218,7 @@
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) );               /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_ID, histo->id,
+                         COLONNE_HISTO_ID, histo->id,
                          COLONNE_MSG_ID, histo->msg.id,
                          COLONNE_SYN_ID, histo->msg.syn_id,
                          COLONNE_GROUPE_PAGE, groupe_page,
@@ -247,7 +247,7 @@
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )                                                    /* A la recherche de l'iter perdu */
-     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
+     { gtk_tree_model_get( store, &iter, COLONNE_HISTO_ID, &id, -1 );
        if ( id == histo->id )
         { Rafraichir_visu_histo( &iter, histo );
           break;
@@ -310,20 +310,51 @@
     gtk_list_store_clear( GTK_LIST_STORE(store) );
   }
 #endif
+ static void Afficher_un_histo (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { gchar ack[128], groupe_page[512];
+    GtkTreeIter iter;
+    GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) ));
+    gtk_list_store_append ( store, &iter );
 
- void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
-  { gsize taille;
-    printf("Recu from websocket msgs : %s\n",g_bytes_get_data (message_brut, &taille) );
-    /*JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
-    g_snprintf( chaine, sizeof(chaine), "Connected with %s@%s to %s Instance '%s' with %s. Version %s - %s",
-                Client.username, Client.hostname,
-                (Json_get_bool(response, "instance_is_master") ? "Master" : "Slave"),
-                Json_get_string(response, "instance"),
-                (Json_get_bool(response, "ssl") ? "SSL" : "NO SSL"),
-                Json_get_string(response, "version"), Json_get_string(response, "message") );
-    json_node_unref(response);*/
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s",
+                Json_get_string(element, "syn_parent_page"), Json_get_string(element, "syn_page") );
+
+    if (strlen(Json_get_string(element, "date_fixe")))
+     { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") ); }
+    else
+     { g_snprintf( ack, sizeof(ack), "(%s)", Json_get_string(element, "nom_ack" ) ); }
+
+    gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
+                         COLONNE_HISTO_ID, Json_get_int(element, "id"),
+                         COLONNE_MSG_ID, Json_get_int(element, "msg_id"),
+                         COLONNE_SYN_ID, Json_get_int(element, "syn_id"),
+                         COLONNE_GROUPE_PAGE, groupe_page,
+                         COLONNE_TYPE, Type_vers_string(Json_get_int(element, "type")),
+                         COLONNE_DATE_CREATE, Json_get_string(element, "date_create"),
+                         COLONNE_DLS_SHORTNAME, Json_get_string(element, "dls_shortname"),
+                         COLONNE_ACK, ack,
+                         COLONNE_LIBELLE, Json_get_string(element, "libelle"),
+                         COLONNE_COULEUR_FOND, &COULEUR_FOND[Json_get_int(element, "type")],
+                         COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[Json_get_int(element, "type")],
+                         -1
+                       );
   }
+/******************************************************************************************************************************/
+/* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
+/* Entrée: rien                                                                                                               */
+/* Sortie: un widget boite                                                                                                    */
+/******************************************************************************************************************************/
+ void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
+  { GtkTreeIter iter;
+    gsize taille;
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    if (!response) return;
 
+    GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) ));
+    if (Json_has_member ( response, "nbr_enreg" ))
+     { json_array_foreach_element ( Json_get_array(response, "enregs"), Afficher_un_histo, NULL ); }
+    json_node_unref(response);
+  }
 /******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
 /* Entrée: rien                                                                                                               */
@@ -379,8 +410,8 @@
     g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( "Type", renderer,
                                                          "text", COLONNE_TYPE,
-                                                         "background-gdk", COLONNE_COULEUR_FOND,
-                                                         "foreground-gdk", COLONNE_COULEUR_TEXTE,
+                                                         "background-rgba", COLONNE_COULEUR_FOND,
+                                                         "foreground-rgba", COLONNE_COULEUR_TEXTE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_TYPE);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
