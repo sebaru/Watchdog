@@ -226,6 +226,9 @@
  static void Menu_Connecter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
   { Connecter(); }
 
+ static void Menu_Deconnecter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
+  { Deconnecter(); }
+
  static void Menu_Quitter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
   { Fermer_client(); }
 
@@ -255,18 +258,20 @@
   }
 
 
-static GActionEntry app_entries[] = {
-  { "about", Menu_about, NULL, NULL, NULL },
-  { "Connecter", Menu_Connecter, NULL, NULL, NULL },
-  //{ "Donnecter", Menu_Connecter, NULL, NULL, NULL },
-  { "Quitter", Menu_Quitter, NULL, NULL, NULL },
-//  { "new", new_activated, NULL, NULL, NULL }
-};
 
 
-
+/******************************************************************************************************************************/
+/* ActivateCB: Fonction d'activation de a fenetre applicative                                                                 */
+/******************************************************************************************************************************/
  static void ActivateCB ( GtkApplication *app, gpointer user_data)
   { GtkToolItem *bouton, *separateur;
+    static GActionEntry app_entries[] =
+     { { "about", Menu_about, NULL, NULL, NULL },
+       { "Connecter", Menu_Connecter, NULL, NULL, NULL },
+       { "Deconnecter", Menu_Deconnecter, NULL, NULL, NULL },
+       { "Quitter", Menu_Quitter, NULL, NULL, NULL },
+    //  { "new", new_activated, NULL, NULL, NULL }
+     };
 
     F_client = gtk_application_window_new (app);
     gtk_window_set_title (GTK_WINDOW (F_client), TITRE_FENETRE );
@@ -287,6 +292,7 @@ static GActionEntry app_entries[] = {
 
     bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_LARGE_TOOLBAR), "Se déconnecter" );
     gtk_tool_item_set_tooltip_text ( bouton, "Se déconnecter du serveur" );
+    g_signal_connect ( bouton, "clicked", G_CALLBACK(Deconnecter), NULL );
     gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
 
     separateur = gtk_separator_tool_item_new ();

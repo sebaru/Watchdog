@@ -44,11 +44,10 @@
  void Deconnecter_sale ( void )
   { soup_session_abort (Client.connexion);
     Client.connexion = NULL;
-    /*Client.mode = DISCONNECTED;*/
+    printf("%s\n", __func__ );
+   /*Client.mode = DISCONNECTED;*/
     /*Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode DISCONNECTED" );*/
-#ifdef bouh
     Effacer_pages();                                                                          /* Efface les pages du notebook */
-#endif
   }
 /******************************************************************************************************************************/
 /* Deconnecter: libere la mémoire et deconnecte le client                                                                     */
@@ -56,63 +55,36 @@
 /******************************************************************************************************************************/
  void Deconnecter ( void )
   { if (!Client.connexion) return;
-    /*Envoyer_reseau( Client.connexion, TAG_CONNEXION, SSTAG_CLIENT_OFF, NULL, 0 );*/
-    Deconnecter_sale();
+    Envoi_au_serveur ( "GET", NULL, "disconnect", (SoupSessionCallback) Deconnecter_sale );
+    if (Client.websocket)
+     { soup_websocket_connection_close ( Client.websocket, 0, "Thanks" );
+       Client.websocket = NULL;
+     }
     Log ( "Disconnected" );
   }
-#ifdef bouh
 /******************************************************************************************************************************/
-/* Envoi_serveur: Envoi d'un paquet au serveur                                                                                */
+/* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
 /* Entrée: des infos sur le paquet à envoyer                                                                                  */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- gboolean Envoi_serveur ( gint tag, gint ss_tag, gchar *buffer, gint taille )
-  { if ( Envoyer_reseau( Client.connexion, tag, ss_tag, buffer, taille ) )
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "Deconnexion sur erreur envoi au serveur" );
-       Deconnecter_sale();
-       Log ( _("Disconnected (server offline ?)") );
-       return(FALSE);
-     }
-    return(TRUE);
+ void Envoi_au_serveur ( gchar *methode, JsonNode *payload, gchar *URI, SoupSessionCallback callback )
+  { gchar target[128];
+    g_snprintf( target, sizeof(target), "http://%s:5560/%s", Client.hostname, URI );
+    SoupMessage *msg= soup_message_new ( methode, target );
+    if (!msg) { Log( "Erreur envoi au serveur"); Deconnecter_sale(); }
+    else soup_session_queue_message (Client.connexion, msg, callback, NULL);
   }
 /******************************************************************************************************************************/
-/* Envoyer_authentification: envoi de l'authentification cliente au serveur                                                   */
-/* Entrée/Sortie: rien                                                                                                        */
+/* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
+/* Entrée: les variables traditionnelles de libsous                                                                           */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Envoyer_authentification ( void )
-  { g_snprintf( Client.ident.version, sizeof(Client.ident.version), "%s", VERSION );
-    if (!Client.cli_certif)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
-                "Envoyer_identification: sending login(%s)/password(XX) and version number(%s)",
-                 Client.ident.nom, Client.ident.version
-               );
-     } else
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
-                "Envoyer_identification: sending login(%s) and version number(%s). Certificate already sent",
-                 Client.ident.nom, Client.ident.version
-               );
-     }
-
-    if ( !Envoi_serveur( TAG_CONNEXION, SSTAG_CLIENT_IDENT,
-                         (gchar *)&Client.ident, sizeof(struct REZO_CLI_IDENT) ) )
-     { Deconnecter();
-       return;
-     }
-
-    Log ( _("Waiting for authorization") );
-    Client.mode = ATTENTE_AUTORISATION;
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
-             "Envoyer_identification: Client en mode ATTENTE_AUTORISATION" );
-  }
-#endif
-
  static void Traiter_connect_ws_CB (GObject *source_object, GAsyncResult *res, gpointer user_data)
   { Client.websocket = soup_session_websocket_connect_finish ( Client.connexion, res, NULL );
     if (Client.websocket)
      { g_signal_connect( Client.websocket, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), NULL );
      }
   }
-
 /******************************************************************************************************************************/
 /* Connecter_au_serveur_CB: Traite la reponse du serveur a la demande de connexionen                                          */
 /* Entrée: les variables traditionnelles de libsous                                                                           */
@@ -124,11 +96,10 @@
     GBytes *response_brute;
     gchar chaine[128];
     gsize taille;
-
     g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
     if (status_code != 200)
      { gchar chaine[256];
-       g_snprintf(chaine, sizeof(chaine), "Error connecting to server : Code %d - %s", status_code, reason_phrase );
+       g_snprintf(chaine, sizeof(chaine), "Error connecting to server %s: Code %d - %s", Client.hostname, status_code, reason_phrase );
        Log(chaine);
        Deconnecter_sale();
        return;
@@ -165,10 +136,8 @@
   { Log( "Trying to connect" );
     Raz_progress_pulse();
     Client.connexion = soup_session_new();
-/*Client.hostname*/
-    SoupMessage *msg= soup_message_new ( "GET", "http://localhost:5560/connect");
-    soup_session_queue_message (Client.connexion, msg, Connecter_au_serveur_CB, NULL);
     g_signal_connect( Client.connexion, "authenticate", G_CALLBACK(Send_credentials_CB), NULL );
+    Envoi_au_serveur ( "GET", NULL, "connect", Connecter_au_serveur_CB );
   }
 /******************************************************************************************************************************/
 /* Identifier: Affiche la fenetre d'identification de l'utilisateur                                                           */

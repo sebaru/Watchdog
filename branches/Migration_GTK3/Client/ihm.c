@@ -29,7 +29,7 @@
 
  GtkWidget *Notebook=NULL;                                                               /* Le Notebook de controle du client */
  GtkWidget *Entry_status;                                                                     /* Status de la machine cliente */
- GList *Liste_pages = NULL;                                                       /* Liste des pages ouvertes sur le notebook */  
+ GList *Liste_pages = NULL;                                                       /* Liste des pages ouvertes sur le notebook */
 
  static gint nbr_enreg = 0, nbr_enreg_max = 0;
  static GtkWidget *Barre_pulse;                                                        /* Barre de pulse  */
@@ -37,22 +37,23 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
-#ifdef bouh
-/**********************************************************************************************************/
-/* Detruire_page_plugin_dls: Detruit la page du notebook consacrée aux plugin_dlss watchdog               */
-/* Entrée: rien                                                                                           */
-/* Sortie: un widget boite                                                                                */
-/**********************************************************************************************************/
- void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer )
+/******************************************************************************************************************************/
+/* Detruire_page: Detruit la page du notebook en parametre                                                                    */
+/* Entrée: rien                                                                                                               */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer )
   { gint num;
     num = gtk_notebook_page_num( GTK_NOTEBOOK(Notebook), GTK_WIDGET(page_a_virer->child) );
+    if (page_a_virer->type == TYPE_PAGE_HISTO) { Reset_page_histo(); return; }
+
     if (num>=0)
      { switch(page_a_virer->type)
         { case TYPE_PAGE_ATELIER:
-               Detruire_page_atelier( page_a_virer );
+               /*Detruire_page_atelier( page_a_virer );*/
                break;
           case TYPE_PAGE_SUPERVISION:
-               Detruire_page_supervision( page_a_virer );
+               /*Detruire_page_supervision( page_a_virer );*/
                break;
         }
        gtk_notebook_remove_page( GTK_NOTEBOOK(Notebook), num );
@@ -97,6 +98,7 @@
        Liste_pages = g_list_remove( Liste_pages, page );
      }
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Nbr_page_type: Renvoie le nombre de page notebook de type type                                         */
 /* Entrée: Le type de page à compter                                                                      */
@@ -283,7 +285,7 @@ printf("not found\n");
     texte = gtk_label_new( "Status" );
     gtk_box_pack_start( GTK_BOX(hboite), texte, FALSE, FALSE, 0 );
     Entry_status = gtk_entry_new();
-    gtk_entry_set_icon_from_icon_name ( GTK_ENTRY(Entry_status), GTK_ENTRY_ICON_PRIMARY, "window-close");
+    gtk_entry_set_icon_from_icon_name ( GTK_ENTRY(Entry_status), GTK_ENTRY_ICON_PRIMARY, "user-info");
     g_object_set (Entry_status, "editable", FALSE, NULL );
     gtk_box_pack_start( GTK_BOX(hboite), Entry_status, TRUE, TRUE, 0 );
 

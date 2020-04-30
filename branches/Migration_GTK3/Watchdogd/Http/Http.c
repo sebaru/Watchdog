@@ -448,6 +448,24 @@
               path, soup_client_context_get_auth_user (client), soup_client_context_get_host(client) );
   }
 /******************************************************************************************************************************/
+/* Http_traiter_disconnect: Répond aux requetes sur l'URI disconnect                                                          */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_traiter_disconnect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                       SoupClientContext *client, gpointer user_data)
+  { JsonBuilder *builder;
+    gsize taille_buf;
+    gchar *buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+    Http_print_request ( server, msg, path, client );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+/******************************************************************************************************************************/
 /* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
@@ -605,13 +623,14 @@ reload:
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer new Failed !", __func__ );
        goto end;
      }
-    soup_server_add_handler ( socket, "/connect", Http_traiter_connect, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls",     Http_traiter_dls, NULL, NULL );
-    soup_server_add_handler ( socket, "/process", Http_traiter_process, NULL, NULL );
-    soup_server_add_handler ( socket, "/status",  Http_traiter_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/log",     Http_traiter_log, NULL, NULL );
-    soup_server_add_handler ( socket, "/bus",     Http_traiter_bus, NULL, NULL );
-    soup_server_add_handler ( socket, "/memory",  Http_traiter_memory, NULL, NULL );
+    soup_server_add_handler ( socket, "/connect",    Http_traiter_connect, NULL, NULL );
+    soup_server_add_handler ( socket, "/disconnect", Http_traiter_disconnect, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls",        Http_traiter_dls, NULL, NULL );
+    soup_server_add_handler ( socket, "/process",    Http_traiter_process, NULL, NULL );
+    soup_server_add_handler ( socket, "/status",     Http_traiter_status, NULL, NULL );
+    soup_server_add_handler ( socket, "/log",        Http_traiter_log, NULL, NULL );
+    soup_server_add_handler ( socket, "/bus",        Http_traiter_bus, NULL, NULL );
+    soup_server_add_handler ( socket, "/memory",     Http_traiter_memory, NULL, NULL );
     soup_server_add_websocket_handler ( socket, "/ws/live-motifs", NULL, NULL, Http_traiter_websocket_motifs_CB, NULL, NULL );
     soup_server_add_websocket_handler ( socket, "/ws/live-msgs",   NULL, NULL, Http_traiter_websocket_msgs_CB, NULL, NULL );
 
@@ -620,6 +639,7 @@ reload:
        domain = soup_auth_domain_basic_new ( SOUP_AUTH_DOMAIN_REALM, "WatchdogServer",
 	                                            SOUP_AUTH_DOMAIN_BASIC_AUTH_CALLBACK, Http_authenticate_CB,
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/connect",
+                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/disconnect",
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/dls",
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/process",
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/log",

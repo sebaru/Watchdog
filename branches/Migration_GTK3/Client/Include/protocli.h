@@ -158,6 +158,8 @@
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
  extern GtkWidget *Creer_page_histo( void );                                                            /* Dans liste_histo.c */
  extern void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data );
+ extern void Reset_page_histo( void );
+
 #ifdef bouh
  extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );
  extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
@@ -165,12 +167,13 @@
  extern gchar *Type_vers_string ( guint type );
  extern gchar *Type_sms_vers_string ( guint type );
 #endif
+
  extern void Log( gchar *chaine );                                                                              /* Dans ihm.c */
  extern void Raz_progress_pulse( void );
  extern GtkWidget *Creer_boite_travail ( void );
+ extern void Effacer_pages ( void );
 
 #ifdef bouh
- extern void Effacer_pages ( void );
  extern void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer );
  extern void Set_progress_plus( gint plus );
  extern void Set_progress_text( gchar *cadran, gint max );
@@ -184,6 +187,7 @@
 
  extern void Connecter ( void );                                                                            /* Dans connect.c */
  extern void Deconnecter ( void );
+ extern void Envoi_au_serveur ( gchar *methode, JsonNode *payload, gchar *URI, SoupSessionCallback callback );
 
 #ifdef bouh
  extern gboolean Connecter_ssl ( void );

@@ -39,10 +39,11 @@
  extern struct CLIENT Client;                                                        /* Identifiant de l'utilisateur en cours */
 
  enum
-  { COLONNE_HISTO_ID,
-    COLONNE_MSG_ID,
+  { COLONNE_TECH_ID,
+    COLONNE_ACRONYME,
     COLONNE_GROUPE_PAGE,
     COLONNE_TYPE,
+    COLONNE_TYPE_PIXBUF,
     COLONNE_SYN_ID,
     COLONNE_DATE_CREATE,
     COLONNE_DLS_SHORTNAME,
@@ -200,38 +201,7 @@
      }
     return(FALSE);
   }
-/**********************************************************************************************************/
-/* Rafraichir_visu_message: Rafraichissement du message à la position iter de la liste                    */
-/* Entrée: une reference sur l'utilisateur                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Rafraichir_visu_histo( GtkTreeIter *iter, struct CMD_TYPE_HISTO *histo )
-  { GtkTreeModel *store;
-    gchar ack[128], groupe_page[512];
 
-    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", histo->msg.syn_parent_page, histo->msg.syn_page );
-
-    if (strlen(histo->date_fixe))
-     { g_snprintf( ack, sizeof(ack), "%s (%s)", histo->date_fixe, histo->nom_ack ); }
-    else
-     { g_snprintf( ack, sizeof(ack), "(%s)", histo->nom_ack ); }
-
-    store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) );               /* Acquisition du modele */
-    gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_HISTO_ID, histo->id,
-                         COLONNE_MSG_ID, histo->msg.id,
-                         COLONNE_SYN_ID, histo->msg.syn_id,
-                         COLONNE_GROUPE_PAGE, groupe_page,
-                         COLONNE_TYPE, Type_vers_string(histo->msg.type),
-                         COLONNE_DATE_CREATE, histo->date_create,
-                         COLONNE_DLS_SHORTNAME, histo->msg.dls_shortname,
-                         COLONNE_ACK, ack,
-                         COLONNE_LIBELLE, histo->msg.libelle,
-                         COLONNE_COULEUR_FOND, &COULEUR_FOND[histo->msg.type],
-                         COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[histo->msg.type],
-                         -1
-                       );
-  }
 /**********************************************************************************************************/
 /* Proto_rafrachir_un_histo: Rafraichissement de l'histo en parametre                                     */
 /* Entrée: une reference sur le groupe                                                                    */
@@ -255,63 +225,48 @@
        valide = gtk_tree_model_iter_next( store, &iter );
      }
   }
-/**********************************************************************************************************/
-/* Afficher_un_message: Ajout d'un message dans la liste des messages à l'écran                           */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo )
-  { GtkListStore *store;
-    GtkTreePath *path;
-    GtkTreeIter iter;
 
-    if (!Tester_page_notebook(TYPE_PAGE_HISTO))
-     { printf("Creation page histo\n");
-       Creer_page_histo();
-       printf("Fin Creation page histo\n");
-     }
-
-    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) ));
-    gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
-    Rafraichir_visu_histo ( &iter, histo );
-    path = gtk_tree_model_get_path ( GTK_TREE_MODEL(store), &iter );
-    gtk_tree_view_scroll_to_cell ( GTK_TREE_VIEW(Liste_histo), path, NULL, FALSE, 0.0, 0.0 );
-    gtk_tree_path_free( path );
-  }
-/**********************************************************************************************************/
-/* Cacher_un_utilisateur: Enleve un groupe de la liste des utilisateurs                                   */
-/* Entrée: une reference sur l'utilisateur                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo )
-  { GtkTreeModel *store;
-    GtkTreeIter iter;
-    gboolean valide;
-    guint id;
-
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
-    valide = gtk_tree_model_get_iter_first( store, &iter );
-
-    while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_MSG_ID, &id, -1 );
-       if ( id == histo->msg.id )
-        { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
-       valide = gtk_tree_model_iter_next( store, &iter );
-     }
-  }
-/**********************************************************************************************************/
-/* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: un widget boite                                                                                */
-/**********************************************************************************************************/
+#endif
+/******************************************************************************************************************************/
+/* Reset_page_histo: Efface les enregistrements de la page histo                                                              */
+/* Entrée: rien                                                                                                               */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Reset_page_histo( void )
   { GtkTreeModel *store;
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
     gtk_list_store_clear( GTK_LIST_STORE(store) );
   }
-#endif
+/******************************************************************************************************************************/
+/* Cacher_un_histo: Enleve un histo de la liste fil de l'eau                                                                  */
+/* Entrée: l'element a cacher                                                                                                 */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Cacher_un_histo( JsonNode *element )
+  { gchar *tech_id, *acronyme;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    gboolean valide;
+
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
+    valide = gtk_tree_model_get_iter_first( store, &iter );
+
+    while ( valide )
+     { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
+       if ( !strcmp(tech_id, Json_get_string(element, "tech_id")) && !strcmp(acronyme,Json_get_string(element, "acronyme")) )
+        { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); break; }
+       valide = gtk_tree_model_iter_next( store, &iter );
+     }
+  }
+/******************************************************************************************************************************/
+/* Afficher_un_histo: Ajoute un histo sur la page fil de l'eau                                                                */
+/* Entrée: un jsonnode representant l'histo                                                                                   */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Afficher_un_histo (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { gchar ack[128], groupe_page[512];
+    GtkTreePath *path;
+    GdkPixbuf *pixbuf;
     GtkTreeIter iter;
     GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) ));
     gtk_list_store_append ( store, &iter );
@@ -319,17 +274,29 @@
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s",
                 Json_get_string(element, "syn_parent_page"), Json_get_string(element, "syn_page") );
 
-    if (strlen(Json_get_string(element, "date_fixe")))
+    if (strcmp(Json_get_string(element, "nom_ack"),"None"))
      { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") ); }
     else
      { g_snprintf( ack, sizeof(ack), "(%s)", Json_get_string(element, "nom_ack" ) ); }
 
+    switch (Json_get_int(element, "type"))
+     { case MSG_ALARME: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Pignon_orange.svg", 30, 30, TRUE, NULL ); break;
+       case MSG_ALERTE: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Bouclier2_rouge.svg", 30, 30, TRUE, NULL ); break;
+       case MSG_DANGER: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Croix_rouge_rouge.svg", 30, 30, TRUE, NULL ); break;
+       case MSG_DEFAUT: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Pignon_jaune.svg", 30, 30, TRUE, NULL ); break;
+       case MSG_DERANGEMENT: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Croix_route_orange.svg", 30, 30, TRUE, NULL ); break;
+       default:
+       case MSG_ATTENTE:
+       case MSG_ETAT:  pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Info.svg", 30, 30, TRUE, NULL ); break;
+     }
+
     gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
-                         COLONNE_HISTO_ID, Json_get_int(element, "id"),
-                         COLONNE_MSG_ID, Json_get_int(element, "msg_id"),
+                         COLONNE_TECH_ID, Json_get_string(element, "tech_id"),
+                         COLONNE_ACRONYME, Json_get_string(element, "acronyme"),
+                         COLONNE_TYPE, Type_vers_string(Json_get_int(element, "type")),
+                         COLONNE_TYPE_PIXBUF, pixbuf,
                          COLONNE_SYN_ID, Json_get_int(element, "syn_id"),
                          COLONNE_GROUPE_PAGE, groupe_page,
-                         COLONNE_TYPE, Type_vers_string(Json_get_int(element, "type")),
                          COLONNE_DATE_CREATE, Json_get_string(element, "date_create"),
                          COLONNE_DLS_SHORTNAME, Json_get_string(element, "dls_shortname"),
                          COLONNE_ACK, ack,
@@ -338,6 +305,9 @@
                          COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[Json_get_int(element, "type")],
                          -1
                        );
+    path = gtk_tree_model_get_path ( GTK_TREE_MODEL(store), &iter );
+    gtk_tree_view_scroll_to_cell ( GTK_TREE_VIEW(Liste_histo), path, NULL, FALSE, 0.0, 0.0 );
+    gtk_tree_path_free( path );
   }
 /******************************************************************************************************************************/
 /* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
@@ -345,14 +315,18 @@
 /* Sortie: un widget boite                                                                                                    */
 /******************************************************************************************************************************/
  void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
-  { GtkTreeIter iter;
-    gsize taille;
+  { gsize taille;
+    printf("Recu MSGS: %s\n", g_bytes_get_data ( message_brut, &taille ) );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
 
-    GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) ));
     if (Json_has_member ( response, "nbr_enreg" ))
      { json_array_foreach_element ( Json_get_array(response, "enregs"), Afficher_un_histo, NULL ); }
+    else
+     { if (Json_get_bool(response, "alive"))
+        { Afficher_un_histo( NULL, 0, response, NULL ); }
+       else { Cacher_un_histo ( response ); }
+     }
     json_node_unref(response);
   }
 /******************************************************************************************************************************/
@@ -382,36 +356,46 @@
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* ID */
-                                              G_TYPE_UINT,                                         /* MSG_ID */
-                                              G_TYPE_STRING,
-                                              G_TYPE_STRING,                               /* Groupe page */
-                                              G_TYPE_UINT,                                     /* Num_syn */
-                                              G_TYPE_STRING,
-                                              G_TYPE_STRING,                             /* DLS Shortname */
-                                              G_TYPE_STRING,
-                                              G_TYPE_STRING,
-                                              gdk_rgba_get_type(),      /* Couleur de fond de l'enregistrement */
-                                              gdk_rgba_get_type() /* Couleur du texte de l'enregistrement */
+    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_STRING,                                                       /* tech_ID */
+                                              G_TYPE_STRING,                                                      /* Acronyme */
+                                              G_TYPE_STRING,                                                   /* Groupe page */
+                                              G_TYPE_STRING,                                                   /* Type String */
+                                              GDK_TYPE_PIXBUF,
+                                              G_TYPE_UINT,                                                         /* Num_syn */
+                                              G_TYPE_STRING,                                                   /* date create */
+                                              G_TYPE_STRING,                                                 /* DLS Shortname */
+                                              G_TYPE_STRING,                                                           /* ACK */
+                                              G_TYPE_STRING,                                                       /* Libelle */
+                                              gdk_rgba_get_type(),                     /* Couleur de fond de l'enregistrement */
+                                              gdk_rgba_get_type()                     /* Couleur du texte de l'enregistrement */
                                );
-    Liste_histo = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );           /* Creation de la vue */
+
+    Liste_histo = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                               /* Creation de la vue */
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
     gtk_container_add( GTK_CONTAINER(scroll), Liste_histo );
 
-    renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
+    renderer = gtk_cell_renderer_text_new();                                                         /* Colonne du synoptique */
     colonne = gtk_tree_view_column_new_with_attributes ( "Groupe/Page", renderer,
                                                          "text", COLONNE_GROUPE_PAGE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_GROUPE_PAGE);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
+    renderer = gtk_cell_renderer_text_new();                                                         /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( "Type", renderer,
                                                          "text", COLONNE_TYPE,
                                                          "background-rgba", COLONNE_COULEUR_FOND,
                                                          "foreground-rgba", COLONNE_COULEUR_TEXTE,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_TYPE);
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
+
+    renderer = gtk_cell_renderer_pixbuf_new();                                                       /* Colonne du synoptique */
+    g_object_set( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( "Type", renderer,
+                                                         "pixbuf", COLONNE_TYPE_PIXBUF,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_TYPE);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
