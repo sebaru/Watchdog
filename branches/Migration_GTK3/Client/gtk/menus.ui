@@ -40,6 +40,12 @@
           <attribute name='action'>app.go_to_wiki</attribute>
         </item>
         <item>
+          <attribute name='label'>Inspector</attribute>
+          <attribute name='action'>app.Inspector</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
           <attribute name='label'>A propos</attribute>
           <attribute name='action'>app.about</attribute>
         </item>

@@ -80,16 +80,6 @@
  extern struct CLIENT Client;                                                        /* Identifiant de l'utilisateur en cours */
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 
- static void Menu_acquitter_histo ( void );
- static void Menu_go_to_syn ( void );
-
-#ifdef bouh
- static GnomeUIInfo Menu_popup[]=
-  { GNOMEUIINFO_ITEM_STOCK ( N_("Acknowledge"), NULL, Menu_acquitter_histo, GNOME_STOCK_PIXMAP_CLEAR ),
-    GNOMEUIINFO_ITEM_STOCK ( N_("Go to Syn"), NULL, Menu_go_to_syn, GNOME_STOCK_PIXMAP_SEARCH ),
-    GNOMEUIINFO_END
-  };
-#endif
 /******************************************************************************************************************************/
 /* Type_vers_string: renvoie le type string associé                                                                           */
 /* Entrée: le type numérique                                                                                                  */
@@ -108,34 +98,90 @@
      }
     return( "Unknown" );
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Menu_acquitter_histo: Acquittement d'un des messages histo                                             */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Menu_acquitter_histo ( void )
+/******************************************************************************************************************************/
+/* Gerer_popup_message: Gestion du menu popup quand on clique droite sur la liste des messages                                */
+/* Entrée: la liste(widget), l'evenement bouton, et les data                                                                  */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static gboolean Gerer_popup_histo ( GtkWidget *widget, GdkEventButton *event, gpointer data )
+  { static GtkWidget *Popup=NULL;
+    static GMenu *Model=NULL;
+    GtkTreeSelection *selection;
+    gboolean ya_selection;
+    GtkTreePath *path;
+    gint cellx, celly;
+    if (!event) return(FALSE);
+
+    if (!Model)
+     { GtkWidget *item;
+       Popup = gtk_menu_new();                                                                            /* Creation si besoin */
+       item = gtk_menu_item_new_with_label ( "Acquitter le message" );
+       g_signal_connect ( item, "activate", G_CALLBACK (Acquitter_histo), NULL );
+       gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+
+       item = gtk_menu_item_new_with_label ( "Voir le synoptique" );
+/*       g_signal_connect ( item, "activate", G_CALLBACK (Go_to_syn), NULL );*/
+       gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+       gtk_widget_show_all(Popup);
+     }
+
+    ya_selection = FALSE;
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );                        /* On recupere la selection */
+    if (gtk_tree_selection_count_selected_rows(selection) == 0)
+     { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(Liste_histo), event->x, event->y, &path, NULL, &cellx, &celly );
+       if (path)
+        { gtk_tree_selection_select_path( selection, path );
+          gtk_tree_path_free( path );
+          ya_selection = TRUE;
+        }
+     } else ya_selection = TRUE;                                                     /* ya bel et bien qqchose de selectionné */
+
+    if ( event->button == 3 && ya_selection )                                                             /* Gestion du popup */
+     { gtk_menu_popup_at_pointer ( GTK_MENU(Popup), (GdkEvent *)event );
+       return(TRUE);
+     }
+    else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                                       /* Double clic ?? */
+     { /*Menu_go_to_syn();*/
+       return(TRUE);
+     }
+    return(FALSE);
+  }
+/******************************************************************************************************************************/
+/* Menu_acquitter_histo: Acquittement d'un des messages histo                                                                 */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Acquitter_histo ( void )
   { GtkTreeSelection *selection;
-    struct CMD_TYPE_HISTO histo;
+    gchar *tech_id, *acronyme;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
-
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_histo) );
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     while ( lignes )
-     { gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_HISTO_ID, &histo.id, -1 );                      /* Recup du id */
+     { gsize taille_buf;
+       gchar *buf;
+       gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
+       gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
 
-       Envoi_serveur( TAG_HISTO, SSTAG_CLIENT_ACK_HISTO, (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
+       JsonBuilder *builder = Json_create ();
+       if (builder == NULL) break;
+       json_builder_begin_object ( builder );
+       Json_add_string( builder, "tech_id", tech_id );
+       Json_add_string( builder, "acronyme", acronyme );
+       json_builder_end_object (builder);                                                                        /* End Document */
+       buf = Json_get_buf (builder, &taille_buf);
+       Envoi_au_serveur( "POST", buf, taille_buf, "histo/ack", NULL );
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
      }
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Menu_go_to_syn: Affiche les synoptiques associés aux messages histo                                    */
 /* Entrée: rien                                                                                           */
@@ -163,43 +209,6 @@
      }
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
-  }
-/**********************************************************************************************************/
-/* Gerer_popup_message: Gestion du menu popup quand on clique droite sur la liste des messages            */
-/* Entrée: la liste(widget), l'evenement bouton, et les data                                              */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static gboolean Gerer_popup_histo ( GtkWidget *widget, GdkEventButton *event, gpointer data )
-  { static GtkWidget *Popup=NULL;
-    GtkTreeSelection *selection;
-    gboolean ya_selection;
-    GtkTreePath *path;
-    gint cellx, celly;
-    if (!event) return(FALSE);
-
-    if (!Popup)    Popup = gnome_popup_menu_new( Menu_popup );                        /*Creation si besoin*/
-    ya_selection = FALSE;
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );    /* On recupere la selection */
-    if (gtk_tree_selection_count_selected_rows(selection) == 0)
-     { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(Liste_histo), event->x, event->y,
-                                       &path, NULL, &cellx, &celly );
-
-       if (path)
-        { gtk_tree_selection_select_path( selection, path );
-          gtk_tree_path_free( path );
-          ya_selection = TRUE;
-        }
-     } else ya_selection = TRUE;                                 /* ya bel et bien qqchose de selectionné */
-
-    if ( event->button == 3 && ya_selection )                                         /* Gestion du popup */
-     { gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, event, NULL, F_client );
-       return(TRUE);
-     }
-    else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                   /* Double clic ?? */
-     { Menu_go_to_syn();
-       return(TRUE);
-     }
-    return(FALSE);
   }
 
 /**********************************************************************************************************/
@@ -431,10 +440,8 @@
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
 
-#ifdef bouh
     g_signal_connect( G_OBJECT(Liste_histo), "button_press_event",               /* Gestion du menu popup */
                       G_CALLBACK(Gerer_popup_histo), NULL );
-#endif
     g_object_unref (G_OBJECT (store));                        /* nous n'avons plus besoin de notre modele */
 
 /************************************ Les boutons de controles ********************************************/

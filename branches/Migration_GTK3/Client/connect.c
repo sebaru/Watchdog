@@ -45,8 +45,6 @@
   { soup_session_abort (Client.connexion);
     Client.connexion = NULL;
     printf("%s\n", __func__ );
-   /*Client.mode = DISCONNECTED;*/
-    /*Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode DISCONNECTED" );*/
     Effacer_pages();                                                                          /* Efface les pages du notebook */
   }
 /******************************************************************************************************************************/
@@ -55,7 +53,7 @@
 /******************************************************************************************************************************/
  void Deconnecter ( void )
   { if (!Client.connexion) return;
-    Envoi_au_serveur ( "GET", NULL, "disconnect", (SoupSessionCallback) Deconnecter_sale );
+    Envoi_au_serveur ( "GET", NULL, 0, "disconnect", (SoupSessionCallback) Deconnecter_sale );
     if (Client.websocket)
      { soup_websocket_connection_close ( Client.websocket, 0, "Thanks" );
        Client.websocket = NULL;
@@ -67,10 +65,14 @@
 /* Entrée: des infos sur le paquet à envoyer                                                                                  */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Envoi_au_serveur ( gchar *methode, JsonNode *payload, gchar *URI, SoupSessionCallback callback )
+ void Envoi_au_serveur ( gchar *methode, gchar *payload, gsize taille_buf, gchar *URI, SoupSessionCallback callback )
   { gchar target[128];
     g_snprintf( target, sizeof(target), "http://%s:5560/%s", Client.hostname, URI );
-    SoupMessage *msg= soup_message_new ( methode, target );
+    SoupMessage *msg = soup_message_new ( methode, target );
+    if (payload)
+     { soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
+       printf("Sending %s : %s\n", URI, payload );
+     }
     if (!msg) { Log( "Erreur envoi au serveur"); Deconnecter_sale(); }
     else soup_session_queue_message (Client.connexion, msg, callback, NULL);
   }
@@ -137,7 +139,7 @@
     Raz_progress_pulse();
     Client.connexion = soup_session_new();
     g_signal_connect( Client.connexion, "authenticate", G_CALLBACK(Send_credentials_CB), NULL );
-    Envoi_au_serveur ( "GET", NULL, "connect", Connecter_au_serveur_CB );
+    Envoi_au_serveur ( "GET", NULL, 0, "connect", Connecter_au_serveur_CB );
   }
 /******************************************************************************************************************************/
 /* Identifier: Affiche la fenetre d'identification de l'utilisateur                                                           */

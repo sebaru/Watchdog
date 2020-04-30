@@ -159,6 +159,7 @@
  extern GtkWidget *Creer_page_histo( void );                                                            /* Dans liste_histo.c */
  extern void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data );
  extern void Reset_page_histo( void );
+ extern void Acquitter_histo ( void );
 
 #ifdef bouh
  extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );
@@ -187,7 +188,7 @@
 
  extern void Connecter ( void );                                                                            /* Dans connect.c */
  extern void Deconnecter ( void );
- extern void Envoi_au_serveur ( gchar *methode, JsonNode *payload, gchar *URI, SoupSessionCallback callback );
+ extern void Envoi_au_serveur ( gchar *methode, gchar *payload, gsize taille_buf, gchar *URI, SoupSessionCallback callback );
 
 #ifdef bouh
  extern gboolean Connecter_ssl ( void );
