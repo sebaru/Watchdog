@@ -35,6 +35,7 @@
  #define NOM_TABLE_HISTO_MSGS  "histo_msgs"
 
 /*********************************************** Définitions des prototypes ***************************************************/
+ extern gboolean Acquitter_histo_msgsDB ( gchar *tech_id, gchar *acronyme, gchar *username, gchar *date_fixe );
  extern gboolean Ajouter_histo_msgsDB ( struct CMD_TYPE_HISTO *histo );
  extern gboolean Modifier_histo_msgsDB ( struct CMD_TYPE_HISTO *histo );
  extern struct CMD_TYPE_HISTO *Rechercher_histo_msgsDB_by_id ( guint id );

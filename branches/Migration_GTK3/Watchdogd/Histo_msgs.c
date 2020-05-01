@@ -35,6 +35,41 @@
 
  #include "watchdogd.h"
 
+
+/******************************************************************************************************************************/
+/* Modifier_Ajouter_histo_msgsDB: Ajout ou modifier un enregistrement MSGS de la base de données                              */
+/* Entrée: un flag d'ajout et un enregistrement à modifier                                                                    */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gboolean Acquitter_histo_msgsDB ( gchar *tech_id, gchar *acronyme, gchar *username, gchar *date_fixe )
+  { gchar *nom_ack;
+    gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+    nom_ack = Normaliser_chaine ( username );                                                /* Formatage correct des chaines */
+    if (!nom_ack)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+       return(FALSE);
+     }
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "UPDATE %s as histo INNER JOIN msgs as msg ON msg.id = histo.id_msg"
+                " SET nom_ack='%s',date_fixe='%s'"
+                " WHERE histo.alive=1 and msg.tech_id='%s' AND msg.acronyme='%s'",
+                NOM_TABLE_HISTO_MSGS, nom_ack, date_fixe, tech_id, acronyme );
+    g_free(nom_ack);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
+  }
+
 /******************************************************************************************************************************/
 /* Modifier_Ajouter_histo_msgsDB: Ajout ou modifier un enregistrement MSGS de la base de données                              */
 /* Entrée: un flag d'ajout et un enregistrement à modifier                                                                    */

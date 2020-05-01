@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Client/ihm.c        L'interface du client Watchdog v2.0                                                */
+/* client/ihm.c        L'interface du client Watchdog v2.0                                                */
 /* Projet WatchDog version 3.0       Gestion d'habitat                      jeu 21 aoû 2003 18:47:38 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -27,9 +27,7 @@
 
  #include <gtk/gtk.h>
 
- GtkWidget *Notebook=NULL;                                                               /* Le Notebook de controle du client */
  GtkWidget *Entry_status;                                                                     /* Status de la machine cliente */
- GList *Liste_pages = NULL;                                                       /* Liste des pages ouvertes sur le notebook */
 
  static gint nbr_enreg = 0, nbr_enreg_max = 0;
  static GtkWidget *Barre_pulse;                                                        /* Barre de pulse  */
@@ -42,10 +40,10 @@
 /* Entrée: rien                                                                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer )
+ static void Detruire_page ( struct CLIENT *client, struct PAGE_NOTEBOOK *page_a_virer )
   { gint num;
-    num = gtk_notebook_page_num( GTK_NOTEBOOK(Notebook), GTK_WIDGET(page_a_virer->child) );
-    if (page_a_virer->type == TYPE_PAGE_HISTO) { Reset_page_histo(); return; }
+    num = gtk_notebook_page_num( GTK_NOTEBOOK(client->Notebook), GTK_WIDGET(page_a_virer->child) );
+    if (page_a_virer->type == TYPE_PAGE_HISTO) { Reset_page_histo(client); return; }
 
     if (num>=0)
      { switch(page_a_virer->type)
@@ -56,8 +54,8 @@
                /*Detruire_page_supervision( page_a_virer );*/
                break;
         }
-       gtk_notebook_remove_page( GTK_NOTEBOOK(Notebook), num );
-       Liste_pages = g_list_remove( Liste_pages, page_a_virer );
+       gtk_notebook_remove_page( GTK_NOTEBOOK(client->Notebook), num );
+       client->Liste_pages = g_slist_remove( client->Liste_pages, page_a_virer );
        if (page_a_virer->infos) g_free(page_a_virer->infos);       /* Libération des infos le cas échéant */
        g_free(page_a_virer);
      }
@@ -68,16 +66,16 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: un widget boite                                                                                */
 /**********************************************************************************************************/
- struct PAGE_NOTEBOOK *Page_actuelle ( void )
+ struct PAGE_NOTEBOOK *Page_actuelle ( struct CLIENT *client )
   { struct PAGE_NOTEBOOK *page;
     GtkWidget *child;
-    GList * liste;
+    GSList * liste;
     gint num;
 
-    num = gtk_notebook_get_current_page( GTK_NOTEBOOK(Notebook) );
-    child = gtk_notebook_get_nth_page( GTK_NOTEBOOK(Notebook), num );
+    num = gtk_notebook_get_current_page( GTK_NOTEBOOK(client->Notebook) );
+    child = gtk_notebook_get_nth_page( GTK_NOTEBOOK(client->Notebook), num );
 
-    liste = Liste_pages;
+    liste = client->Liste_pages;
     while(liste)
      { page = (struct PAGE_NOTEBOOK *)liste->data;
        if ( page->child == child ) return(page);                                /* Nous l'avons trouvé !! */
@@ -90,12 +88,12 @@
 /* Entrée: niet                                                                                           */
 /* Sortie: void                                                                                           */
 /**********************************************************************************************************/
- void Effacer_pages ( void )
-  { while(Liste_pages)
+ void Effacer_pages ( struct CLIENT *client )
+  { while(client->Liste_pages)
      { struct PAGE_NOTEBOOK *page;
-       page = (struct PAGE_NOTEBOOK *)Liste_pages->data;
-       Detruire_page( page );
-       Liste_pages = g_list_remove( Liste_pages, page );
+       page = (struct PAGE_NOTEBOOK *)client->Liste_pages->data;
+       Detruire_page( client, page );
+       client->Liste_pages = g_slist_remove( client->Liste_pages, page );
      }
   }
 #ifdef bouh
@@ -108,7 +106,7 @@
   { struct PAGE_NOTEBOOK *page;
     gint cpt;
     GList *liste;
-    liste = Liste_pages;
+    liste = client->Liste_pages;
     cpt = 0;
     while( liste )
      { page = (struct PAGE_NOTEBOOK *)liste->data;
@@ -190,17 +188,18 @@
 /**********************************************************************************************************/
  void Log( gchar *chaine )
   { gtk_entry_set_text( GTK_ENTRY(Entry_status), chaine ); }
+#ifdef bouh
 /**********************************************************************************************************/
-/* Changer_page_Notebook: Affiche la page du Notebook dont le numero est en parametre                     */
+/* Changer_page_client->Notebook: Affiche la page du client->Notebook dont le numero est en parametre                     */
 /* Entrées: widget, data                                                                                  */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- struct PAGE_NOTEBOOK *Chercher_page_notebook ( guint type, guint id, gboolean affiche )
+ struct PAGE_NOTEBOOK *Chercher_page_notebook ( struct CLIENT *client, guint type, guint id, gboolean affiche )
   { struct PAGE_NOTEBOOK *page;
-    GList *liste;
+    GSList *liste;
 
 printf("searching page %d %d\n", type, id );
-    liste = Liste_pages;
+    liste = client->Liste_pages;
     while(liste)
      { page = (struct PAGE_NOTEBOOK *)liste->data;
        if (page->type == type)                                    /* Si la page existe deja, on l'affiche */
@@ -232,8 +231,8 @@ printf("searching page %d %d\n", type, id );
              default: break;
            }
           if (affiche)
-           { gtk_notebook_set_current_page( GTK_NOTEBOOK(Notebook),
-                                            gtk_notebook_page_num( GTK_NOTEBOOK(Notebook), page->child )
+           { gtk_notebook_set_current_page( GTK_NOTEBOOK(client->Notebook),
+                                            gtk_notebook_page_num( GTK_NOTEBOOK(client->Notebook), page->child )
                                           );
            }
           return(page);
@@ -243,16 +242,16 @@ printf("searching page %d %d\n", type, id );
 printf("not found\n");
     return(NULL);
   }
-/**********************************************************************************************************/
-/* Changer_page_Notebook: Affiche la page du Notebook dont le numero est en parametre                     */
-/* Entrées: widget, data                                                                                  */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Changer_page_client->Notebook: Affiche la page du client->Notebook dont le numero est en parametre                         */
+/* Entrées: widget, data                                                                                                      */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  gboolean Tester_page_notebook ( guint type )
   { struct PAGE_NOTEBOOK *page;
     GList *liste;
 
-    liste = Liste_pages;
+    liste = client->Liste_pages;
     while(liste)
      { page = (struct PAGE_NOTEBOOK *)liste->data;
        if (page->type == type)                                    /* Si la page existe deja, on l'affiche */
@@ -261,21 +260,22 @@ printf("not found\n");
      }
     return(FALSE);
   }
-/**********************************************************************************************************/
-/* Creer_boite_travail: Creation de la zone de choix/edition... des mots de passe                         */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Widget *boite, référençant la boite                                                            */
-/**********************************************************************************************************/
- GtkWidget *Creer_boite_travail ( void )
+#endif
+/******************************************************************************************************************************/
+/* Creer_boite_travail: Creation de la zone de choix/edition... des mots de passe                                             */
+/* Entrée: Néant                                                                                                              */
+/* Sortie: Widget *boite, référençant la boite                                                                                */
+/******************************************************************************************************************************/
+ GtkWidget *Creer_boite_travail ( struct CLIENT *client )
   { GtkWidget *vboite, *hboite, *texte;
 
     vboite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
 
-    Notebook = gtk_notebook_new();
-    gtk_box_pack_start( GTK_BOX(vboite), Notebook, TRUE, TRUE, 0 );
-    gtk_container_set_border_width( GTK_CONTAINER(Notebook), 6 );
-    gtk_notebook_set_scrollable (GTK_NOTEBOOK(Notebook), TRUE );
-    gtk_notebook_append_page ( GTK_NOTEBOOK(Notebook), Creer_page_histo(), gtk_label_new("Fil de l'eau") );
+    client->Notebook = gtk_notebook_new();
+    gtk_box_pack_start( GTK_BOX(vboite), client->Notebook, TRUE, TRUE, 0 );
+    gtk_container_set_border_width( GTK_CONTAINER(client->Notebook), 6 );
+    gtk_notebook_set_scrollable (GTK_NOTEBOOK(client->Notebook), TRUE );
+    gtk_notebook_append_page ( GTK_NOTEBOOK(client->Notebook), Creer_page_histo(client), gtk_label_new("Fil de l'eau") );
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );

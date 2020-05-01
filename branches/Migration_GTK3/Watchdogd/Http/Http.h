@@ -84,6 +84,11 @@
                                     SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_memory  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
+ extern void Http_msgs_send_histo_to_all ( struct CMD_TYPE_HISTO *histo );
+ extern void Http_traiter_open_websocket_msgs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
+                                                   SoupClientContext *client, gpointer user_data);
+ extern void Http_traiter_histo_ack ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                      SoupClientContext *client, gpointer user_data);
  extern void Http_Memory_get_all ( SoupMessage *msg, gchar *tech_id );
  extern void Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern void Http_Memory_print_VISUEL_to_json ( JsonBuilder *builder, struct DLS_VISUEL *bit );

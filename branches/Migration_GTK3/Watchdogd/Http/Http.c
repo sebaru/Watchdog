@@ -454,11 +454,7 @@
 /******************************************************************************************************************************/
  static void Http_traiter_disconnect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                        SoupClientContext *client, gpointer user_data)
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -540,65 +536,7 @@
 
 
 
-/******************************************************************************************************************************/
- static void Http_ws_msgs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Close Connexion received !", __func__ );
-    g_object_unref(connexion);
-    Cfg_http.liste_ws_msgs_clients = g_slist_remove ( Cfg_http.liste_ws_msgs_clients, connexion );
-  }
-/******************************************************************************************************************************/
-/* Recuperer_histo_msgsDB_alive: Recupération de l'ensemble des messages encore Alive dans le BDD                             */
-/* Entrée: La base de données de travail                                                                                      */
-/* Sortie: False si probleme                                                                                                  */
-/******************************************************************************************************************************/
- static void Http_ws_msgs_send_histo_alive ( SoupWebsocketConnection *connexion )
-  { struct CMD_TYPE_HISTO *histo;
-    gsize taille_buf;
-    struct DB *db;
-    gchar *buf;
 
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonBuilder *builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-       return;
-     }
-
-    json_builder_begin_object ( builder );
-
-    if ( ! Recuperer_histo_msgsDB_alive( &db ) )                                                     /* Si pas de histos (??) */
-     { goto end; }
-
-    Json_add_int( builder, "nbr_enreg", db->nbr_result );
-    Json_add_array ( builder, "enregs" );
-    while ( (histo = Recuperer_histo_msgsDB_suite( &db )) != NULL)
-     { json_builder_begin_object ( builder );
-       Histo_msg_print_to_JSON ( builder, histo );
-       json_builder_end_object (builder);
-     }
-    Json_end_array( builder );
-    Json_end_object (builder);                                                                          /* Fin dump du status */
-end:
-    json_builder_end_object (builder);                                                                        /* End Document */
-    buf = Json_get_buf (builder, &taille_buf);
-    soup_websocket_connection_send_text ( connexion, buf );
-    g_free(buf);
-  }
-/******************************************************************************************************************************/
-/* Http_traiter_websocket: Traite une requete websocket                                                                       */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Http_traiter_websocket_msgs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
-                                              SoupClientContext *client, gpointer user_data)
-  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: MSGS WebSocket Opened %p state %d!", __func__, connexion,
-              soup_websocket_connection_get_state (connexion) );
-    g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_msgs_on_closed), NULL);
-    /*soup_websocket_connection_send_text ( connexion, "Welcome on Watchdog WebSocket !" );*/
-    Cfg_http.liste_ws_msgs_clients = g_slist_prepend ( Cfg_http.liste_ws_msgs_clients, connexion );
-    Http_ws_msgs_send_histo_alive ( connexion );
-    g_object_ref(connexion);
-  }
 /******************************************************************************************************************************/
 /* Run_thread: Thread principal                                                                                               */
 /* Entrée: une structure LIBRAIRIE                                                                                            */
@@ -631,8 +569,9 @@ reload:
     soup_server_add_handler ( socket, "/log",        Http_traiter_log, NULL, NULL );
     soup_server_add_handler ( socket, "/bus",        Http_traiter_bus, NULL, NULL );
     soup_server_add_handler ( socket, "/memory",     Http_traiter_memory, NULL, NULL );
+    soup_server_add_handler ( socket, "/histo/ack",  Http_traiter_histo_ack, NULL, NULL );
     soup_server_add_websocket_handler ( socket, "/ws/live-motifs", NULL, NULL, Http_traiter_websocket_motifs_CB, NULL, NULL );
-    soup_server_add_websocket_handler ( socket, "/ws/live-msgs",   NULL, NULL, Http_traiter_websocket_msgs_CB, NULL, NULL );
+    soup_server_add_websocket_handler ( socket, "/ws/live-msgs",   NULL, NULL, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
 
     if (Cfg_http.authenticate)
      { SoupAuthDomain *domain;
@@ -643,6 +582,7 @@ reload:
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/dls",
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/process",
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/log",
+                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/histo",
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/bus",
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/memory",
                                              NULL );
@@ -725,29 +665,9 @@ reload:
         }
 
        if ( Recv_zmq ( zmq_msgs, &histo, sizeof(histo) ) == sizeof(struct CMD_TYPE_HISTO) && Cfg_http.liste_ws_msgs_clients )
-        { JsonBuilder *builder;
-          gsize taille_buf;
-          gchar *buf;
-          GSList *liste;
-
-          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: MSG %s:%s=%d received",
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: MSG %s:%s=%d received",
                     __func__, histo.msg.tech_id, histo.msg.acronyme, histo.alive );
-          builder = Json_create ();
-          if (builder == NULL)
-           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
-             continue;
-           }
-          json_builder_begin_object(builder);
-          Histo_msg_print_to_JSON ( builder, &histo );
-          json_builder_end_object(builder);
-          buf = Json_get_buf ( builder, &taille_buf );
-          liste = Cfg_http.liste_ws_msgs_clients;
-          while (liste)
-           { SoupWebsocketConnection *connexion = liste->data;
-             soup_websocket_connection_send_text ( connexion, buf );
-             liste = g_slist_next(liste);
-           }
-          g_free(buf);
+          Http_msgs_send_histo_to_all(&histo);
         }
 
        g_main_context_iteration ( loop_context, FALSE );

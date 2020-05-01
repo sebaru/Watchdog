@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Client/Watchdog-client.c        Le client Watchdog v2.0                                                                    */
+/* client/Watchdog-client.c        Le client Watchdog v2.0                                                                    */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                           ven 15 fév 2008 18:05:42 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -43,14 +43,7 @@
 
  #define TITRE_FENETRE "Watchdog ver" VERSION " - GTK3"
 
- GtkWidget *F_client;                                                                                /* Widget Fenetre Client */
-
- extern struct CMD_TYPE_UTILISATEUR *Edit_util;                                           /* L'utilisateur en cours d'edition */
-
- struct CLIENT Client;                                                               /* Identifiant de l'utilisateur en cours */
  struct CONFIG_CLI Config_cli;                                                     /* Configuration generale cliente watchdog */
-
- static gboolean Arret = FALSE;
 /***************************************************** Définition du menu *****************************************************/
 #ifdef bouh
 
@@ -60,7 +53,7 @@
  void Firefox_exec ( gchar *uri )
   { gchar chaine[256];
     gint pid;
-    g_snprintf(chaine, sizeof(chaine), "https://%s.abls-habitat.fr/%s", Client.host, uri );
+    g_snprintf(chaine, sizeof(chaine), "https://%s.abls-habitat.fr/%s", client.host, uri );
     printf( "Lancement d'un firefox sur %s\n", chaine );
     pid = fork();
     if (pid<0) return;
@@ -90,26 +83,24 @@
 /******************************************************************************************************************************/
 /*!Fermer_client: Deconnexion du client avant sortir du programme
  ******************************************************************************************************************************/
- static void Fermer_client ( void )
-  { printf("Fermer_client ! \n");
-    Deconnecter();
-    gtk_widget_destroy(F_client);
+ static void Fermer_client ( struct CLIENT *client )
+  { printf("%s : %p\n", __func__, client);
+    Deconnecter(client);
+    gtk_widget_destroy(client->window);
+    g_free(client);
   }
 
  static void Menu_inspector (GSimpleAction *action, GVariant *parameter, gpointer user_data)
   { gtk_window_set_interactive_debugging (TRUE); }
 
  static void Menu_Connecter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
-  { Connecter(); }
+  { Connecter(user_data); }
 
  static void Menu_Deconnecter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
-  { Deconnecter(); }
+  { Deconnecter(user_data); }
 
  static void Menu_Quitter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
-  { Fermer_client(); }
-
- static void Menu_Acquitter_histo (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
-  { Acquitter_histo(); }
+  { Fermer_client(user_data); }
 
  static void Menu_about (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
   { GtkWidget *about_dialog;
@@ -138,27 +129,28 @@
 /******************************************************************************************************************************/
 /* ActivateCB: Fonction d'activation de a fenetre applicative                                                                 */
 /******************************************************************************************************************************/
- static void ActivateCB ( GtkApplication *app, gpointer user_data)
+ static void ActivateCB ( GtkApplication *app, gpointer data )
   { GtkToolItem *bouton, *separateur;
-    F_client = gtk_application_window_new (app);
-    gtk_window_set_title (GTK_WINDOW (F_client), TITRE_FENETRE );
-    gtk_window_set_default_size (GTK_WINDOW (F_client), 400, 400);
-    gtk_window_set_icon_name ( GTK_WINDOW(F_client), "fr.abls-habitat.watchdog" );
 
+    struct CLIENT *client = g_malloc0 ( sizeof(struct CLIENT) );
+    client->window = gtk_application_window_new (app);
+    gtk_window_set_title (GTK_WINDOW (client->window), TITRE_FENETRE );
+    gtk_window_set_default_size (GTK_WINDOW (client->window), 400, 400);
+    gtk_window_set_icon_name ( GTK_WINDOW(client->window), "fr.abls-habitat.watchdog" );
     GtkWidget *box = gtk_box_new( GTK_ORIENTATION_VERTICAL, 10 );
-    gtk_container_add (GTK_CONTAINER (F_client), box);
+    gtk_container_add (GTK_CONTAINER (client->window), box);
 
     GtkWidget *toolbar = gtk_toolbar_new();
     gtk_box_pack_start ( GTK_BOX(box), toolbar, FALSE, FALSE, 0 );
 
     bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("system-run", GTK_ICON_SIZE_LARGE_TOOLBAR), "Se connecter" );
     gtk_tool_item_set_tooltip_text ( bouton, "Se connecter au serveur" );
-    g_signal_connect ( bouton, "clicked", G_CALLBACK(Connecter), NULL );
+    g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(Connecter), client );
     gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
 
     bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_LARGE_TOOLBAR), "Se déconnecter" );
     gtk_tool_item_set_tooltip_text ( bouton, "Se déconnecter du serveur" );
-    g_signal_connect ( bouton, "clicked", G_CALLBACK(Deconnecter), NULL );
+    g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(Deconnecter), client );
     gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
 
     separateur = gtk_separator_tool_item_new ();
@@ -176,12 +168,12 @@
 
     bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("application-exit", GTK_ICON_SIZE_LARGE_TOOLBAR), "Quitter" );
     gtk_tool_item_set_tooltip_text ( bouton, "Sortir de l'application" );
-    g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(Fermer_client), NULL );
+    g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(Fermer_client), client );
     gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
 
-    gtk_box_pack_start ( GTK_BOX(box), Creer_boite_travail(), TRUE, TRUE, 0 );
+    gtk_box_pack_start ( GTK_BOX(box), Creer_boite_travail(client), TRUE, TRUE, 0 );
 
-    gtk_widget_show_all(F_client);
+    gtk_widget_show_all(client->window);
   }
 /******************************************************************************************************************************/
 /*!Main: Fonction principale du programme du client Watchdog
@@ -211,18 +203,18 @@
        chdir ( REPERTOIR_CONF );
      } else printf ("Chdir %s OK\n", REPERTOIR_CONF );
 
+
     Config_cli.log = Info_init( "Watchdog_client", LOG_DEBUG );                                        /* Init msgs d'erreurs */
     Info_change_log_level( Config_cli.log, Config_cli.log_level );
     Lire_config_cli ( &Config_cli, "watchdog-client.conf" );
 
     GtkApplication *app = gtk_application_new ("fr.abls_habitat.watchdog", G_APPLICATION_FLAGS_NONE);
-    g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app);
+    g_action_map_add_action_entries ( G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app );
     g_signal_connect (app, "activate", G_CALLBACK (ActivateCB), NULL);
 
     status = g_application_run (G_APPLICATION (app), argc, argv);
     g_object_unref (app);
-
-/*    g_resources_unregister(ClientResources_get_resource());*/
+/*    g_resources_unregister(clientResources_get_resource());*/
     return status;
 #ifdef bouh
 
@@ -233,23 +225,23 @@
     sigaction( SIGINT,  &sig, NULL );                                                           /* Arret Prématuré (logiciel) */
     sigaction( SIGPIPE,  &sig, NULL );                                                          /* Arret Prématuré (logiciel) */
 
-    Client.gids = NULL;                                                  /* Initialisation de la structure de client en cours */
+    client.gids = NULL;                                                  /* Initialisation de la structure de client en cours */
 
-    gtk_widget_show_all( F_client );                                                   /* Affichage de le fenetre de controle */
+    gtk_widget_show_all( client->window );                                                   /* Affichage de le fenetre de controle */
     if (Config_cli.gui_tech == FALSE)
-     { memcpy( Client.ident.nom,    Config_cli.user,   sizeof(Client.ident.nom) );
-       memcpy( Client.ident.passwd, Config_cli.passwd, sizeof(Client.ident.passwd) );
-       memcpy( Client.host,         Config_cli.host,   sizeof(Client.host) );
+     { memcpy( client.ident.nom,    Config_cli.user,   sizeof(client.ident.nom) );
+       memcpy( client.ident.passwd, Config_cli.passwd, sizeof(client.ident.passwd) );
+       memcpy( client.host,         Config_cli.host,   sizeof(client.host) );
        Connecter_au_serveur();
      }
 
     while ( Arret != TRUE )
      { gtk_main_iteration_do ( FALSE );
-       if (Client.connexion) Ecouter_serveur();
+       if (client.connexion) Ecouter_serveur();
        usleep(1000);
      }
 
-    if (Client.gids) g_list_free(Client.gids);
+    if (client.gids) g_list_free(client.gids);
     Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE, _("Main : Stopped") );
     exit(0);
 #endif

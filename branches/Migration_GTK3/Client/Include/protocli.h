@@ -35,7 +35,7 @@
  #include <json-glib/json-glib.h>
 
  #include "Reseaux.h"
- //#include "trame.h"
+ #include "client.h"
 
 
  #define TEMPS_MAX_PULSE   10                                            /* 10 secondes de battements maximum pour le serveur */
@@ -156,10 +156,10 @@
   };
 
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
- extern GtkWidget *Creer_page_histo( void );                                                            /* Dans liste_histo.c */
+ extern GtkWidget *Creer_page_histo( struct CLIENT *Client );                                           /* Dans liste_histo.c */
  extern void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data );
- extern void Reset_page_histo( void );
- extern void Acquitter_histo ( void );
+ extern void Reset_page_histo( struct CLIENT *client );
+ extern void Acquitter_histo ( struct CLIENT *Client );
 
 #ifdef bouh
  extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );
@@ -171,8 +171,8 @@
 
  extern void Log( gchar *chaine );                                                                              /* Dans ihm.c */
  extern void Raz_progress_pulse( void );
- extern GtkWidget *Creer_boite_travail ( void );
- extern void Effacer_pages ( void );
+ extern GtkWidget *Creer_boite_travail ( struct CLIENT *Client );
+ extern void Effacer_pages ( struct CLIENT *client );
 
 #ifdef bouh
  extern void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer );
@@ -186,9 +186,9 @@
  extern struct PAGE_NOTEBOOK *Page_actuelle ( void );
 #endif
 
- extern void Connecter ( void );                                                                            /* Dans connect.c */
- extern void Deconnecter ( void );
- extern void Envoi_au_serveur ( gchar *methode, gchar *payload, gsize taille_buf, gchar *URI, SoupSessionCallback callback );
+ extern void Connecter ( struct CLIENT *Client );                                                           /* Dans connect.c */
+ extern void Deconnecter ( struct CLIENT *Client );
+ extern void Envoi_au_serveur ( struct CLIENT *Client, gchar *methode, gchar *payload, gsize taille_buf, gchar *URI, SoupSessionCallback callback );
 
 #ifdef bouh
  extern gboolean Connecter_ssl ( void );

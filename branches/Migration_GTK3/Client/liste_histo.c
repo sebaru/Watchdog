@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Client/liste_message.c        Gestion de la page d'affichage des messages au fil de l'eau                                  */
+/* client/liste_message.c        Gestion de la page d'affichage des messages au fil de l'eau                                  */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                          mer 20 aoû 2003 18:19:00 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -31,12 +31,7 @@
  #include "Config_cli.h"
  #include "Reseaux.h"
 
- GtkWidget *Liste_histo;                                                 /* GtkTreeView pour la gestion des messages Watchdog */
- extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */
- extern GtkWidget *Notebook;                                                             /* Le Notebook de controle du client */
- extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
  extern struct CONFIG Config;                                                              /* Configuration generale watchdog */
- extern struct CLIENT Client;                                                        /* Identifiant de l'utilisateur en cours */
 
  enum
   { COLONNE_TECH_ID,
@@ -77,7 +72,6 @@
  #include "protocli.h"
  #include "client.h"
 
- extern struct CLIENT Client;                                                        /* Identifiant de l'utilisateur en cours */
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 
 /******************************************************************************************************************************/
@@ -106,6 +100,7 @@
  static gboolean Gerer_popup_histo ( GtkWidget *widget, GdkEventButton *event, gpointer data )
   { static GtkWidget *Popup=NULL;
     static GMenu *Model=NULL;
+    struct CLIENT *client = data;
     GtkTreeSelection *selection;
     gboolean ya_selection;
     GtkTreePath *path;
@@ -116,7 +111,7 @@
      { GtkWidget *item;
        Popup = gtk_menu_new();                                                                            /* Creation si besoin */
        item = gtk_menu_item_new_with_label ( "Acquitter le message" );
-       g_signal_connect ( item, "activate", G_CALLBACK (Acquitter_histo), NULL );
+       g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), data );
        gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
 
        item = gtk_menu_item_new_with_label ( "Voir le synoptique" );
@@ -126,9 +121,9 @@
      }
 
     ya_selection = FALSE;
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );                        /* On recupere la selection */
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );                        /* On recupere la selection */
     if (gtk_tree_selection_count_selected_rows(selection) == 0)
-     { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(Liste_histo), event->x, event->y, &path, NULL, &cellx, &celly );
+     { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(client->Liste_histo), event->x, event->y, &path, NULL, &cellx, &celly );
        if (path)
         { gtk_tree_selection_select_path( selection, path );
           gtk_tree_path_free( path );
@@ -147,18 +142,45 @@
     return(FALSE);
   }
 /******************************************************************************************************************************/
+/* Updater_histo_CB: Appeler suite a une requete d'acquit auprès du serveur                                                   */
+/* Entrée: les parametres libsoup                                                                                             */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Updater_histo ( struct CLIENT *client, JsonNode *element )
+  { gchar *tech_id, *acronyme;
+    GtkTreeIter iter;
+
+    gchar *acronyme_recu = Json_get_string ( element, "acronyme" );
+    gchar *tech_id_recu  = Json_get_string ( element, "tech_id" );
+    if (!acronyme || !tech_id) return;
+
+    GtkTreeModel *store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
+    gboolean valide      = gtk_tree_model_get_iter_first( store, &iter );
+
+    while ( valide )                                                    /* A la recherche de l'iter perdu */
+     { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
+       if ( !strcmp(tech_id, tech_id_recu) && !strcmp(acronyme,acronyme_recu) )
+        { gchar ack[80];
+          g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") );
+          gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, ack, -1 );
+          break;
+        }
+       valide = gtk_tree_model_iter_next( store, &iter );
+     }
+  }
+/******************************************************************************************************************************/
 /* Menu_acquitter_histo: Acquittement d'un des messages histo                                                                 */
 /* Entrée: rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Acquitter_histo ( void )
+ void Acquitter_histo ( struct CLIENT *client )
   { GtkTreeSelection *selection;
     gchar *tech_id, *acronyme;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );
-    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_histo) );
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(client->Liste_histo) );
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     while ( lignes )
@@ -174,7 +196,7 @@
        Json_add_string( builder, "acronyme", acronyme );
        json_builder_end_object (builder);                                                                        /* End Document */
        buf = Json_get_buf (builder, &taille_buf);
-       Envoi_au_serveur( "POST", buf, taille_buf, "histo/ack", NULL );
+       Envoi_au_serveur( client, "POST", buf, taille_buf, "histo/ack", NULL );
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
      }
@@ -193,8 +215,8 @@
     GtkTreeIter iter;
     GList *lignes;
 
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );
-    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_histo) );
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(client->Liste_histo) );
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     while ( lignes )
@@ -210,40 +232,15 @@
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
-
-/**********************************************************************************************************/
-/* Proto_rafrachir_un_histo: Rafraichissement de l'histo en parametre                                     */
-/* Entrée: une reference sur le groupe                                                                    */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo )
-  { GtkTreeModel *store;
-    GtkTreeIter iter;
-    gboolean valide;
-    guint id;
-
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
-    valide = gtk_tree_model_get_iter_first( store, &iter );
-
-    while ( valide )                                                    /* A la recherche de l'iter perdu */
-     { gtk_tree_model_get( store, &iter, COLONNE_HISTO_ID, &id, -1 );
-       if ( id == histo->id )
-        { Rafraichir_visu_histo( &iter, histo );
-          break;
-        }
-       valide = gtk_tree_model_iter_next( store, &iter );
-     }
-  }
-
 #endif
 /******************************************************************************************************************************/
 /* Reset_page_histo: Efface les enregistrements de la page histo                                                              */
 /* Entrée: rien                                                                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Reset_page_histo( void )
+ void Reset_page_histo( struct CLIENT *client )
   { GtkTreeModel *store;
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
     gtk_list_store_clear( GTK_LIST_STORE(store) );
   }
 /******************************************************************************************************************************/
@@ -251,13 +248,13 @@
 /* Entrée: l'element a cacher                                                                                                 */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Cacher_un_histo( JsonNode *element )
+ static void Cacher_un_histo( struct CLIENT *client, JsonNode *element )
   { gchar *tech_id, *acronyme;
     GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
 
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
@@ -277,7 +274,8 @@
     GtkTreePath *path;
     GdkPixbuf *pixbuf;
     GtkTreeIter iter;
-    GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) ));
+    struct CLIENT *client = user_data;
+    GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(client->Liste_histo) ));
     gtk_list_store_append ( store, &iter );
 
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s",
@@ -315,7 +313,7 @@
                          -1
                        );
     path = gtk_tree_model_get_path ( GTK_TREE_MODEL(store), &iter );
-    gtk_tree_view_scroll_to_cell ( GTK_TREE_VIEW(Liste_histo), path, NULL, FALSE, 0.0, 0.0 );
+    gtk_tree_view_scroll_to_cell ( GTK_TREE_VIEW(client->Liste_histo), path, NULL, FALSE, 0.0, 0.0 );
     gtk_tree_path_free( path );
   }
 /******************************************************************************************************************************/
@@ -325,16 +323,22 @@
 /******************************************************************************************************************************/
  void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
   { gsize taille;
-    printf("Recu MSGS: %s\n", g_bytes_get_data ( message_brut, &taille ) );
+    struct CLIENT *client = user_data;
+    printf("Recu MSGS: %s %p\n", g_bytes_get_data ( message_brut, &taille ), client );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
 
-    if (Json_has_member ( response, "nbr_enreg" ))
-     { json_array_foreach_element ( Json_get_array(response, "enregs"), Afficher_un_histo, NULL ); }
-    else
-     { if (Json_get_bool(response, "alive"))
-        { Afficher_un_histo( NULL, 0, response, NULL ); }
-       else { Cacher_un_histo ( response ); }
+    gchar *zmq_type = Json_get_string( response, "zmq_type" );
+    if (zmq_type)
+     { if (!strcmp(zmq_type,"load_histo_alive"))
+        { json_array_foreach_element ( Json_get_array(response, "enregs"), Afficher_un_histo, client ); }
+       else if(!strcmp(zmq_type,"insert_or_delete_histo"))
+        { if (Json_get_bool(response,"alive"))
+           { Afficher_un_histo( NULL, 0, response, client ); }
+          else { Cacher_un_histo ( client, response ); }
+        }
+       else if(!strcmp(zmq_type,"update_histo"))
+        { Updater_histo( client, response ); }
      }
     json_node_unref(response);
   }
@@ -343,7 +347,7 @@
 /* Entrée: rien                                                                                                               */
 /* Sortie: un widget boite                                                                                                    */
 /******************************************************************************************************************************/
- GtkWidget *Creer_page_histo( void )
+ GtkWidget *Creer_page_histo( struct CLIENT *client )
   { GtkTreeSelection *selection;
     GtkWidget *scroll, *hboite;
     GtkTreeViewColumn *colonne;
@@ -355,7 +359,7 @@
     if (!page) { printf("Creer_page_histo: page = NULL !\n"); return(NULL); }
 
     page->type  = TYPE_PAGE_HISTO;
-    Liste_pages = g_list_append( Liste_pages, page );
+    client->Liste_pages = g_slist_append( client->Liste_pages, page );
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     page->child = hboite;
@@ -379,17 +383,17 @@
                                               gdk_rgba_get_type()                     /* Couleur du texte de l'enregistrement */
                                );
 
-    Liste_histo = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                               /* Creation de la vue */
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );
+    client->Liste_histo = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                               /* Creation de la vue */
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
-    gtk_container_add( GTK_CONTAINER(scroll), Liste_histo );
+    gtk_container_add( GTK_CONTAINER(scroll), client->Liste_histo );
 
     renderer = gtk_cell_renderer_text_new();                                                         /* Colonne du synoptique */
     colonne = gtk_tree_view_column_new_with_attributes ( "Groupe/Page", renderer,
                                                          "text", COLONNE_GROUPE_PAGE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_GROUPE_PAGE);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                                         /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
@@ -399,7 +403,7 @@
                                                          "foreground-rgba", COLONNE_COULEUR_TEXTE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_TYPE);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
     renderer = gtk_cell_renderer_pixbuf_new();                                                       /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
@@ -407,7 +411,7 @@
                                                          "pixbuf", COLONNE_TYPE_PIXBUF,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_TYPE);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
@@ -415,7 +419,7 @@
                                                          "text", COLONNE_DATE_CREATE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_DATE_CREATE);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
@@ -423,7 +427,7 @@
                                                          "text", COLONNE_DLS_SHORTNAME,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_DLS_SHORTNAME);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
@@ -431,17 +435,17 @@
                                                          "text", COLONNE_ACK,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_ACK);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                        /* Colonne du libelle */
     colonne = gtk_tree_view_column_new_with_attributes ( "Message", renderer,
                                                          "text", COLONNE_LIBELLE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
-    g_signal_connect( G_OBJECT(Liste_histo), "button_press_event",               /* Gestion du menu popup */
-                      G_CALLBACK(Gerer_popup_histo), NULL );
+    g_signal_connect( G_OBJECT(client->Liste_histo), "button_press_event",               /* Gestion du menu popup */
+                      G_CALLBACK(Gerer_popup_histo), client );
     g_object_unref (G_OBJECT (store));                        /* nous n'avons plus besoin de notre modele */
 
 /************************************ Les boutons de controles ********************************************/

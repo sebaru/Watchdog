@@ -28,6 +28,7 @@
  #ifndef _CLIENT_H_
  #define _CLIENT_H_
  #include <glib.h>
+ #include <gtk/gtk.h>
  #include <libsoup/soup.h>
 
  #include "Reseaux.h"
@@ -44,7 +45,10 @@
   };*/
 
  struct CLIENT
-  { guint32 mode;
+  { GtkWidget *window;
+    GtkWidget *Notebook;
+    GSList *Liste_pages;
+    GtkWidget *Liste_histo;
     gint access_level;
     SoupSession *connexion;
     SoupWebsocketConnection *websocket;

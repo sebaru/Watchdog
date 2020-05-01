@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Client/connect.c        Gestion du logon user sur module Client Watchdog                                                   */
+/* client/connect.c        Gestion du logon user sur module client Watchdog                                                   */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                           sam 16 fév 2008 19:19:02 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -33,30 +33,34 @@
  #include "config.h"
  #include "protocli.h"
 
- static GtkWidget *fenetre;                                                      /* Fenetre d'identification de l'utilisateur */
- extern struct CLIENT Client;                                                        /* Identifiant de l'utilisateur en cours */
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
- extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
 /******************************************************************************************************************************/
 /* Deconnecter: libere la mémoire et deconnecte le client                                                                     */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- void Deconnecter_sale ( void )
-  { soup_session_abort (Client.connexion);
-    Client.connexion = NULL;
-    printf("%s\n", __func__ );
-    Effacer_pages();                                                                          /* Efface les pages du notebook */
+ void Deconnecter_sale ( struct CLIENT *client )
+  { printf("%s : %p\n", __func__, client );
+    soup_session_abort (client->connexion);
+    client->connexion = NULL;
+    Effacer_pages(client);                                                                    /* Efface les pages du notebook */
   }
 /******************************************************************************************************************************/
+/* Deconnecter_CB: Appeler une fois que la reponse à la requet /connect est recue                                             */
+/* Entrée/Sortie: les parametres libsoup                                                                                      */
+/******************************************************************************************************************************/
+ static void Deconnecter_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
+  { Deconnecter_sale ( user_data ); }
+/******************************************************************************************************************************/
 /* Deconnecter: libere la mémoire et deconnecte le client                                                                     */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- void Deconnecter ( void )
-  { if (!Client.connexion) return;
-    Envoi_au_serveur ( "GET", NULL, 0, "disconnect", (SoupSessionCallback) Deconnecter_sale );
-    if (Client.websocket)
-     { soup_websocket_connection_close ( Client.websocket, 0, "Thanks" );
-       Client.websocket = NULL;
+ void Deconnecter ( struct CLIENT *client )
+  { printf("%s : %p\n", __func__, client );
+    if (!client->connexion) return;
+    Envoi_au_serveur ( client, "GET", NULL, 0, "disconnect", Deconnecter_CB );
+    if (client->websocket)
+     { soup_websocket_connection_close ( client->websocket, 0, "Thanks" );
+       client->websocket = NULL;
      }
     Log ( "Disconnected" );
   }
@@ -65,26 +69,29 @@
 /* Entrée: des infos sur le paquet à envoyer                                                                                  */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Envoi_au_serveur ( gchar *methode, gchar *payload, gsize taille_buf, gchar *URI, SoupSessionCallback callback )
+ void Envoi_au_serveur ( struct CLIENT *client, gchar *methode, gchar *payload, gsize taille_buf, gchar *URI, SoupSessionCallback callback )
   { gchar target[128];
-    g_snprintf( target, sizeof(target), "http://%s:5560/%s", Client.hostname, URI );
+    printf("%s : %p\n", __func__, client );
+    g_snprintf( target, sizeof(target), "http://%s:5560/%s", client->hostname, URI );
     SoupMessage *msg = soup_message_new ( methode, target );
     if (payload)
      { soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
        printf("Sending %s : %s\n", URI, payload );
      }
-    if (!msg) { Log( "Erreur envoi au serveur"); Deconnecter_sale(); }
-    else soup_session_queue_message (Client.connexion, msg, callback, NULL);
+    if (!msg) { Log( "Erreur envoi au serveur"); Deconnecter_sale(client); }
+    else soup_session_queue_message (client->connexion, msg, callback, client);
   }
 /******************************************************************************************************************************/
 /* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
 /* Entrée: les variables traditionnelles de libsous                                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Traiter_connect_ws_CB (GObject *source_object, GAsyncResult *res, gpointer user_data)
-  { Client.websocket = soup_session_websocket_connect_finish ( Client.connexion, res, NULL );
-    if (Client.websocket)
-     { g_signal_connect( Client.websocket, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), NULL );
+ static void Traiter_connect_ws_CB (GObject *source_object, GAsyncResult *res, gpointer user_data )
+  { struct CLIENT *client = user_data;
+    printf("%s\n", __func__ );
+    client->websocket = soup_session_websocket_connect_finish ( client->connexion, res, NULL );
+    if (client->websocket)
+     { g_signal_connect( client->websocket, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), client );
      }
   }
 /******************************************************************************************************************************/
@@ -93,68 +100,72 @@
 /* Sortie: l'ihm est mise a jour et les ws sont activées                                                                      */
 /******************************************************************************************************************************/
  static void Connecter_au_serveur_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
-  { gchar *reason_phrase;
-    gint status_code;
+  { struct CLIENT *client = user_data;
     GBytes *response_brute;
+    gchar *reason_phrase;
+    gint status_code;
     gchar chaine[128];
     gsize taille;
+    printf("%s\n", __func__ );
     g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
     if (status_code != 200)
      { gchar chaine[256];
-       g_snprintf(chaine, sizeof(chaine), "Error connecting to server %s: Code %d - %s", Client.hostname, status_code, reason_phrase );
+       g_snprintf(chaine, sizeof(chaine), "Error connecting to server %s: Code %d - %s", client->hostname, status_code, reason_phrase );
        Log(chaine);
-       Deconnecter_sale();
+       Deconnecter_sale(client);
        return;
      }
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
     g_snprintf( chaine, sizeof(chaine), "Connected with %s@%s to %s Instance '%s' with %s. Version %s - %s",
-                Client.username, Client.hostname,
+                client->username, client->hostname,
                 (Json_get_bool(response, "instance_is_master") ? "Master" : "Slave"),
                 Json_get_string(response, "instance"),
                 (Json_get_bool(response, "ssl") ? "SSL" : "NO SSL"),
                 Json_get_string(response, "version"), Json_get_string(response, "message") );
     Log(chaine);
     json_node_unref(response);
-    soup_session_websocket_connect_async ( Client.connexion, soup_message_new ( "GET", "ws://localhost:5560/ws/live-msgs"),
-                                           NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, NULL );
+    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", "ws://localhost:5560/ws/live-msgs"),
+                                           NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
 /* Entrée: une nom et un password                                                                                             */
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                                              */
 /******************************************************************************************************************************/
- static void Send_credentials_CB ( SoupSession *session, SoupMessage *msg, SoupAuth  *auth, gboolean retrying, gpointer user_data)
-  { if (retrying)
-     { Log( "Wrong Credentials - Unable to connect" ); Deconnecter_sale(); return; }
-    soup_auth_authenticate (auth, Client.username, Client.password);
+ static void Send_credentials_CB ( SoupSession *session, SoupMessage *msg, SoupAuth  *auth, gboolean retrying, struct CLIENT *client)
+  { printf("%s\n", __func__ );
+    if (retrying)
+     { Log( "Wrong Credentials - Unable to connect" ); Deconnecter_sale(client); return; }
+    soup_auth_authenticate (auth, client->username, client->password);
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
 /* Entrée: une nom et un password                                                                                             */
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                                              */
 /******************************************************************************************************************************/
- static void Connecter_au_serveur ( void )
-  { Log( "Trying to connect" );
+ static void Connecter_au_serveur ( struct CLIENT *client )
+  { printf("%s\n", __func__ );
+    Log( "Trying to connect" );
     Raz_progress_pulse();
-    Client.connexion = soup_session_new();
-    g_signal_connect( Client.connexion, "authenticate", G_CALLBACK(Send_credentials_CB), NULL );
-    Envoi_au_serveur ( "GET", NULL, 0, "connect", Connecter_au_serveur_CB );
+    client->connexion = soup_session_new();
+    g_signal_connect( client->connexion, "authenticate", G_CALLBACK(Send_credentials_CB), client );
+    Envoi_au_serveur ( client, "GET", NULL, 0, "connect", Connecter_au_serveur_CB );
   }
 /******************************************************************************************************************************/
 /* Identifier: Affiche la fenetre d'identification de l'utilisateur                                                           */
 /* Entrée: rien                                                                                                               */
 /* Sortie: kedal                                                                                                              */
 /******************************************************************************************************************************/
- void Connecter ( void )
+ void Connecter ( struct CLIENT *client )
   { GtkWidget *table, *texte, *boite, *frame;
     GtkWidget *Entry_host, *Entry_nom, *Entry_code;
     gint retour;
 
-    if (Client.connexion) return;
-    fenetre = gtk_message_dialog_new ( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
-                                       GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
-                                       "Identification required" );
+    if (client->connexion) return;
+    GtkWidget *fenetre = gtk_message_dialog_new ( GTK_WINDOW(client->window), GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+                                                  GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
+                                                  "Identification required" );
     gtk_window_set_resizable (GTK_WINDOW (fenetre), FALSE);
 
     frame = gtk_frame_new( "Put your ID and password" );
@@ -200,10 +211,10 @@
     retour = gtk_dialog_run( GTK_DIALOG(fenetre) );                                    /* Attente de reponse de l'utilisateur */
 
     if (retour == GTK_RESPONSE_OK)
-     { g_snprintf( Client.hostname, sizeof(Client.hostname), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
-       g_snprintf( Client.username, sizeof(Client.username), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
-       g_snprintf( Client.password, sizeof(Client.password), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_code) ) );
-       Connecter_au_serveur();                                                      /* Essai de connexion au serveur Watchdog */
+     { g_snprintf( client->hostname, sizeof(client->hostname), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
+       g_snprintf( client->username, sizeof(client->username), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
+       g_snprintf( client->password, sizeof(client->password), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_code) ) );
+       Connecter_au_serveur(client);                                                /* Essai de connexion au serveur Watchdog */
      }
     gtk_widget_destroy( fenetre );
   }
