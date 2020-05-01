@@ -49,6 +49,11 @@
     GtkWidget *Notebook;
     GSList *Liste_pages;
     GtkWidget *Liste_histo;
+    GtkWidget *Barre_pulse;
+    GtkWidget *Barre_progress;
+    GtkWidget *Entry_status;
+    gint network_size_sent;
+    gint network_size_to_send;
     gint access_level;
     SoupSession *connexion;
     SoupWebsocketConnection *websocket;

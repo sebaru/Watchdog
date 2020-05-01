@@ -544,6 +544,7 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { void *zmq_motifs, *zmq_msgs;
+    gint last_pulse = 0;
 
     prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
 reload:
@@ -669,6 +670,12 @@ reload:
                     __func__, histo.msg.tech_id, histo.msg.acronyme, histo.alive );
           Http_msgs_send_histo_to_all(&histo);
         }
+
+       if ( Partage->top > last_pulse + 50 )
+        { Http_msgs_send_pulse_to_all();
+          last_pulse = Partage->top;
+        }
+
 
        g_main_context_iteration ( loop_context, FALSE );
      }

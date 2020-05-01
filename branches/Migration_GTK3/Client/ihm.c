@@ -27,11 +27,6 @@
 
  #include <gtk/gtk.h>
 
- GtkWidget *Entry_status;                                                                     /* Status de la machine cliente */
-
- static gint nbr_enreg = 0, nbr_enreg_max = 0;
- static GtkWidget *Barre_pulse;                                                        /* Barre de pulse  */
- static GtkWidget *Barre_progress;                                                 /* Barre de chargement */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
@@ -116,78 +111,41 @@
     return(cpt);
   }
 #endif
-/**********************************************************************************************************/
-/* Set_progress: Positionne la barre de progression de la fenetre                                         */
-/* Entrées: val, max                                                                                      */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
- void Set_progress_pulse( void )
-  { gtk_progress_bar_pulse ( GTK_PROGRESS_BAR(Barre_pulse) );
-  }
-/**********************************************************************************************************/
-/* Set_progress: Positionne la barre de progression de la fenetre                                         */
-/* Entrées: val, max                                                                                      */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
- void Raz_progress_pulse( void )
-  { gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (Barre_progress), 1.0 );
-    gtk_progress_bar_set_text( GTK_PROGRESS_BAR (Barre_progress), "100%" );
-    nbr_enreg = 0;
-    nbr_enreg_max = 0;
-  }
-/**********************************************************************************************************/
-/* Set_progress: Positionne la barre de progression de la fenetre                                         */
-/* Entrées: val, max                                                                                      */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
- void Set_progress_plus( gint plus )
-  { gdouble fraction;
-    gchar chaine[20];
-
-    nbr_enreg += plus;
-    printf("Set_progress_plus : plus=%d, nbr=%d, max=%d\n", plus, nbr_enreg, nbr_enreg_max);
-    if (nbr_enreg >= nbr_enreg_max)
-     { Raz_progress_pulse(); }
-    else
-     { fraction = 1.0*nbr_enreg/nbr_enreg_max;
-       gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (Barre_progress), fraction );
-       g_snprintf( chaine, sizeof(chaine), "%3.1f%%", 100.0*fraction );
-       gtk_progress_bar_set_text( GTK_PROGRESS_BAR (Barre_progress), chaine );
-     }
+/******************************************************************************************************************************/
+/* Set_progress: Positionne la barre de progression de la fenetre                                                             */
+/* Entrées: val, max                                                                                                          */
+/* Sortie: Kedal                                                                                                              */
+/******************************************************************************************************************************/
+ void Set_progress_pulse( struct CLIENT *client )
+  { gtk_progress_bar_pulse ( GTK_PROGRESS_BAR(client->Barre_pulse) );
   }
 /******************************************************************************************************************************/
 /* Set_progress: Positionne la barre de progression de la fenetre                                                             */
 /* Entrées: val, max                                                                                                          */
 /* Sortie: Kedal                                                                                                              */
 /******************************************************************************************************************************/
- void Set_progress_ratio( gint nbr, gint max )
-  { gdouble fraction;
+ void Update_progress_bar( SoupMessage *msg, SoupBuffer *chunk, gpointer data )
+  { struct CLIENT *client = data;
+    gdouble fraction;
     gchar chaine[20];
 
-    if (nbr >= max)
-     { Raz_progress_pulse(); }
-    else
-     { fraction = 1.0*nbr/max;
-       gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (Barre_progress), fraction );
-       g_snprintf( chaine, sizeof(chaine), "%3.1f%%", 100.0*fraction );
-       gtk_progress_bar_set_text( GTK_PROGRESS_BAR (Barre_progress), chaine );
-     }
-  }
-/**********************************************************************************************************/
-/* Set_progress_text: Positionne le texte de la barre de progression de la fenetre                        */
-/* Entrées: un gchar *                                                                                    */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
- void Set_progress_text( gchar *texte, gint max )
-  { nbr_enreg_max += max;
+    client->network_size_sent += chunk->length;
+    if (client->network_size_sent >= client->network_size_to_send)
+     { client->network_size_sent =client->network_size_to_send; }
+
+    fraction = 1.0*client->network_size_sent/client->network_size_to_send;
+    gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (client->Barre_progress), fraction );
+    g_snprintf( chaine, sizeof(chaine), "%3.1f%%", 100.0*fraction );
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR (client->Barre_progress), chaine );
+    printf("Progress bar set to %s\n", chaine );
   }
 /**********************************************************************************************************/
 /* Log: Afficher un texte dans l'entry status                                                             */
 /* Entrée: la chaine de caracteres                                                                        */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Log( gchar *chaine )
-  { gtk_entry_set_text( GTK_ENTRY(Entry_status), chaine ); }
+ void Log( struct CLIENT *client, gchar *chaine )
+  { gtk_entry_set_text( GTK_ENTRY(client->Entry_status), chaine ); }
 #ifdef bouh
 /**********************************************************************************************************/
 /* Changer_page_client->Notebook: Affiche la page du client->Notebook dont le numero est en parametre                     */
@@ -284,18 +242,20 @@ printf("not found\n");
 /********************* Status de la machine cliente:connectée/erreur/loguée... ****************************/
     texte = gtk_label_new( "Status" );
     gtk_box_pack_start( GTK_BOX(hboite), texte, FALSE, FALSE, 0 );
-    Entry_status = gtk_entry_new();
-    gtk_entry_set_icon_from_icon_name ( GTK_ENTRY(Entry_status), GTK_ENTRY_ICON_PRIMARY, "user-info");
-    g_object_set (Entry_status, "editable", FALSE, NULL );
-    gtk_box_pack_start( GTK_BOX(hboite), Entry_status, TRUE, TRUE, 0 );
+    client->Entry_status = gtk_entry_new();
+    gtk_entry_set_icon_from_icon_name ( GTK_ENTRY(client->Entry_status), GTK_ENTRY_ICON_PRIMARY, "user-info");
+    g_object_set (client->Entry_status, "editable", FALSE, NULL );
+    gtk_box_pack_start( GTK_BOX(hboite), client->Entry_status, TRUE, TRUE, 0 );
 
-    Barre_progress = gtk_progress_bar_new ();
-    gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (Barre_progress), 1.0 );
-    gtk_progress_bar_set_text( GTK_PROGRESS_BAR (Barre_progress), "100%" );
-    gtk_box_pack_start( GTK_BOX(hboite), Barre_progress, FALSE, FALSE, 0 );
+    client->Barre_progress = gtk_progress_bar_new ();
+    gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (client->Barre_progress), 1.0 );
+    gtk_progress_bar_set_show_text( GTK_PROGRESS_BAR (client->Barre_progress), TRUE );
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR (client->Barre_progress), "100%" );
+    gtk_box_pack_start( GTK_BOX(hboite), client->Barre_progress, FALSE, FALSE, 0 );
 
-    Barre_pulse = gtk_progress_bar_new ();
-    gtk_box_pack_start( GTK_BOX(hboite), Barre_pulse, FALSE, FALSE, 0 );
+    client->Barre_pulse = gtk_progress_bar_new ();
+    gtk_progress_bar_set_pulse_step( GTK_PROGRESS_BAR (client->Barre_pulse), 1.0 );
+    gtk_box_pack_start( GTK_BOX(hboite), client->Barre_pulse, FALSE, FALSE, 0 );
 
     return(vboite);
  }

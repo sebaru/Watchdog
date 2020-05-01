@@ -169,10 +169,11 @@
  extern gchar *Type_sms_vers_string ( guint type );
 #endif
 
- extern void Log( gchar *chaine );                                                                              /* Dans ihm.c */
- extern void Raz_progress_pulse( void );
+ extern void Log( struct CLIENT *client, gchar *chaine );                                                       /* Dans ihm.c */
  extern GtkWidget *Creer_boite_travail ( struct CLIENT *Client );
  extern void Effacer_pages ( struct CLIENT *client );
+ extern void Update_progress_bar( SoupMessage *msg, SoupBuffer *chunk, gpointer data );
+ extern void Set_progress_pulse( struct CLIENT *client );
 
 #ifdef bouh
  extern void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer );

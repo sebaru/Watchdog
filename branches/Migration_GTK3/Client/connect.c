@@ -62,7 +62,7 @@
      { soup_websocket_connection_close ( client->websocket, 0, "Thanks" );
        client->websocket = NULL;
      }
-    Log ( "Disconnected" );
+    Log ( client, "Disconnected" );
   }
 /******************************************************************************************************************************/
 /* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
@@ -75,10 +75,13 @@
     g_snprintf( target, sizeof(target), "http://%s:5560/%s", client->hostname, URI );
     SoupMessage *msg = soup_message_new ( methode, target );
     if (payload)
-     { soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
-       printf("Sending %s : %s\n", URI, payload );
+     { g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
+       soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
+       client->network_size_sent = 0;
+       client->network_size_to_send = taille_buf;
+       printf("Sending %s : %d %s\n", URI, taille_buf, payload );
      }
-    if (!msg) { Log( "Erreur envoi au serveur"); Deconnecter_sale(client); }
+    if (!msg) { Log( client, "Erreur envoi au serveur"); Deconnecter_sale(client); }
     else soup_session_queue_message (client->connexion, msg, callback, client);
   }
 /******************************************************************************************************************************/
@@ -111,7 +114,7 @@
     if (status_code != 200)
      { gchar chaine[256];
        g_snprintf(chaine, sizeof(chaine), "Error connecting to server %s: Code %d - %s", client->hostname, status_code, reason_phrase );
-       Log(chaine);
+       Log(client, chaine);
        Deconnecter_sale(client);
        return;
      }
@@ -123,7 +126,7 @@
                 Json_get_string(response, "instance"),
                 (Json_get_bool(response, "ssl") ? "SSL" : "NO SSL"),
                 Json_get_string(response, "version"), Json_get_string(response, "message") );
-    Log(chaine);
+    Log(client, chaine);
     json_node_unref(response);
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", "ws://localhost:5560/ws/live-msgs"),
                                            NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
@@ -136,7 +139,7 @@
  static void Send_credentials_CB ( SoupSession *session, SoupMessage *msg, SoupAuth  *auth, gboolean retrying, struct CLIENT *client)
   { printf("%s\n", __func__ );
     if (retrying)
-     { Log( "Wrong Credentials - Unable to connect" ); Deconnecter_sale(client); return; }
+     { Log( client, "Wrong Credentials - Unable to connect" ); Deconnecter_sale(client); return; }
     soup_auth_authenticate (auth, client->username, client->password);
   }
 /******************************************************************************************************************************/
@@ -146,8 +149,7 @@
 /******************************************************************************************************************************/
  static void Connecter_au_serveur ( struct CLIENT *client )
   { printf("%s\n", __func__ );
-    Log( "Trying to connect" );
-    Raz_progress_pulse();
+    Log( client, "Trying to connect" );
     client->connexion = soup_session_new();
     g_signal_connect( client->connexion, "authenticate", G_CALLBACK(Send_credentials_CB), client );
     Envoi_au_serveur ( client, "GET", NULL, 0, "connect", Connecter_au_serveur_CB );

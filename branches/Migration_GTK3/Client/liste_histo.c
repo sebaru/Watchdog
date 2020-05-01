@@ -339,6 +339,8 @@
         }
        else if(!strcmp(zmq_type,"update_histo"))
         { Updater_histo( client, response ); }
+       else if(!strcmp(zmq_type,"pulse"))
+        { Set_progress_pulse( client ); }
      }
     json_node_unref(response);
   }
