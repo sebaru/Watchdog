@@ -90,6 +90,8 @@ ClientGTK2/Include/Makefile \
 Commun/Reseaux/Makefile \
 ClientGTK2/Config_cli/Makefile \
 ClientGTK2/Makefile \
+ClientGTK3/Makefile \
+ClientGTK3/Include/Makefile \
 Watchdogd/Makefile \
 Watchdogd/Include/Makefile \
 Watchdogd/Onduleur/Makefile \

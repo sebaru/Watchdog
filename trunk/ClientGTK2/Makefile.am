@@ -5,8 +5,8 @@
 #**********************************************************************************************************/
 SUBDIRS = Include Config_cli
 
-bin_PROGRAMS = Watchdog-client
-Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
+bin_PROGRAMS = Watchdog-client-gtk2
+Watchdog_client_gtk2_SOURCES = Watchdog-client.c connect.c ihm.c \
                           protocole.c protocole_gtk_message.c \
                           protocole_dls.c protocole_mnemonique.c \
                           protocole_connexion.c \
@@ -33,12 +33,12 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  trame.c \
 			  print.c
 
-Watchdog_client_LDADD  = $(top_builddir)/Commun/libwatchdog.la \
-                         Config_cli/libconfig_cli.la
+Watchdog_client_gtk2_LDADD  = $(top_builddir)/Commun/libwatchdog.la \
+                              Config_cli/libconfig_cli.la
 
-Watchdog_client_LDFLAGS = `pkg-config --libs libgnomeui-2.0 libgnome-2.0 openssl glib-2.0 goocanvas gtksourceview-2.0 libcurl json-glib-1.0` -lm
+Watchdog_client_gtk2_LDFLAGS = `pkg-config --libs libgnomeui-2.0 libgnome-2.0 openssl glib-2.0 goocanvas gtksourceview-2.0 libcurl json-glib-1.0` -lm
 
-Watchdog_client_CFLAGS = `pkg-config --cflags libgnomeui-2.0 libgnome-2.0 openssl glib-2.0 goocanvas gtksourceview-2.0 libcurl json-glib-1.0`
+Watchdog_client_gtk2_CFLAGS = `pkg-config --cflags libgnomeui-2.0 libgnome-2.0 openssl glib-2.0 goocanvas gtksourceview-2.0 libcurl json-glib-1.0`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/ClientGTK2/Include

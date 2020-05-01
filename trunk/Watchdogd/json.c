@@ -125,6 +125,11 @@
     result = json_generator_to_data (gen, taille_buf_p);
     g_object_unref(builder);
     g_object_unref(gen);
+    if (result)
+     { (*taille_buf_p)++;
+       result = g_try_realloc (result, *taille_buf_p);
+       result[(*taille_buf_p)-1]=0;
+     }
     return(result);
   }
 /******************************************************************************************************************************/

@@ -38,25 +38,32 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- gboolean Http_Traiter_request_getstatus ( struct lws *wsi )
+ void Http_traiter_status ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                            SoupClientContext *client, gpointer user_data )
   { gchar date[64], *buf;
     JsonBuilder *builder;
     gsize taille_buf;
     struct tm *temps;
     gint num;
 
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    Http_print_request ( server, msg, path, client );
+
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
-       return(1);
+	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-    json_builder_set_member_name  ( builder, "Status" );
-    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
+    Json_add_object ( builder, "Status" );
 
     Json_add_string ( builder, "version",  VERSION );
     Json_add_string ( builder, "instance", g_get_host_name() );
@@ -88,12 +95,12 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
     Json_add_int  ( builder, "length_msg_repeat", num );
 
-    json_builder_end_object (builder);                                                                  /* Fin dump du status */
+    Json_end_object (builder);                                                                          /* Fin dump du status */
 
     json_builder_end_object (builder);                                                                        /* End Document */
-
-    buf = Json_get_buf ( builder, &taille_buf);
+    buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
-    return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

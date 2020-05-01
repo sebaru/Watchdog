@@ -36,16 +36,12 @@
 /******************************************************************************************************************************/
  static gchar *Admin_http_status ( gchar *response )
   { gchar chaine[128];
-    g_snprintf( chaine, sizeof(chaine), " | HTTP Server : port %d %s with SSL=%d",
-                Cfg_http.tcp_port, (Cfg_http.ws_context ? "Running" : "Stopped" ), Cfg_http.ssl_enable );
+    g_snprintf( chaine, sizeof(chaine), " | HTTP Server : port %d with SSL=%d",
+                Cfg_http.tcp_port, Cfg_http.ssl_enable );
     response = Admin_write ( response, chaine );
     g_snprintf( chaine, sizeof(chaine), " | ssl_cert_filepath = %s", Cfg_http.ssl_cert_filepath );
     response = Admin_write ( response, chaine );
     g_snprintf( chaine, sizeof(chaine), " | ssl_file_key      = %s", Cfg_http.ssl_private_key_filepath );
-    response = Admin_write ( response, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | ssl_file_ca       = %s", Cfg_http.ssl_ca_filepath );
-    response = Admin_write ( response, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | ssl_cipher        = %s", Cfg_http.ssl_cipher_list );
     response = Admin_write ( response, chaine );
     return(response);
   }
