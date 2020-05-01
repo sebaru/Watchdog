@@ -41,6 +41,6 @@ Watchdog_client_LDFLAGS = `pkg-config --libs libgnomeui-2.0 libgnome-2.0 openssl
 Watchdog_client_CFLAGS = `pkg-config --cflags libgnomeui-2.0 libgnome-2.0 openssl glib-2.0 goocanvas gtksourceview-2.0 libcurl json-glib-1.0`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
-            -I$(top_srcdir)/Client/Include
+            -I$(top_srcdir)/ClientGTK2/Include
 
 MAINTAINERCLEANFILES = Makefile.in

@@ -86,10 +86,10 @@ AC_OUTPUT( \
 Makefile \
 Include/Makefile \
 Commun/Makefile \
-Client/Include/Makefile \
+ClientGTK2/Include/Makefile \
 Commun/Reseaux/Makefile \
-Client/Config_cli/Makefile \
-Client/Makefile \
+ClientGTK2/Config_cli/Makefile \
+ClientGTK2/Makefile \
 Watchdogd/Makefile \
 Watchdogd/Include/Makefile \
 Watchdogd/Onduleur/Makefile \

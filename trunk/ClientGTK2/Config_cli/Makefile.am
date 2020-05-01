@@ -10,7 +10,7 @@ libconfig_cli_la_SOURCES = Config_cli.c
 AM_CPPFLAGS= -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \
-          -I$(top_srcdir)/Client/Include \
+          -I$(top_srcdir)/ClientGTK2/Include \
           $(GLIB_CFLAGS)
 
 CLEANFILES = 
