@@ -29,6 +29,7 @@
  #define _TRAME_H_
 
  #include <gtk/gtk.h>
+ #include <goocanvas.h>
  #include <gdk-pixbuf/gdk-pixbuf.h>                                                              /* Gestion des images/motifs */
 // #include <goocanvas.h>                                                                                /* Interface GooCanvas */
  #include "Reseaux.h"

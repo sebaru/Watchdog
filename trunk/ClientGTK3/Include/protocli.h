@@ -174,7 +174,7 @@
  extern void Effacer_pages ( struct CLIENT *client );
  extern void Update_progress_bar( SoupMessage *msg, SoupBuffer *chunk, gpointer data );
  extern void Set_progress_pulse( struct CLIENT *client );
-
+ extern struct PAGE_NOTEBOOK *Chercher_page_notebook ( struct CLIENT *client, guint type, guint id, gboolean affiche );
 #ifdef bouh
  extern void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer );
  extern void Set_progress_plus( gint plus );
@@ -263,7 +263,6 @@
  extern void Menu_want_synoptique ( void );
  extern void Menu_want_camera ( void );
  extern void Menu_want_histo_msgs ( void );
- extern void Menu_want_supervision( void );
  extern void Menu_want_page_admin ( void );
  extern void Menu_want_compilation_forcee ( void );
 
@@ -350,15 +349,17 @@
  extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
  extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *camera_sup );
 
+#endif
                                                                                                         /* Dans supervision.c */
- extern void Creer_page_supervision ( struct CMD_TYPE_SYNOPTIQUE *syn );
+ extern void Menu_want_supervision_accueil( struct CLIENT *client );
+ extern void Demander_synoptique_supervision ( struct CLIENT *client, gint id );
+#ifdef bouh
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
  extern void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_changer_etat_motif( struct CMD_ETAT_BIT_CTRL *etat_motif );
  extern void Proto_set_syn_vars( struct CMD_TYPE_SYN_VARS *syn_vars );
  extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( gint syn_id );
  extern void Proto_afficher_une_horloge( struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_MNEMO_BASE *mnemo );
-
                                                                                                    /* Dans supervision_clic.c */
  extern void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
@@ -441,7 +442,8 @@
  extern void Menu_ajouter_editer_horloge ( struct CMD_TYPE_MNEMO_FULL *edit_horloge, gint id_mnemo);  /* Dans ajout_horloge.c */
 #endif
 
- extern JsonBuilder *Json_create ( void );                                                                     /* Dans Json.c */
+/************************************************ Définitions des prototypes **************************************************/
+ extern JsonBuilder *Json_create ( void );
  extern void Json_add_string ( JsonBuilder *builder, gchar *name, gchar *chaine );
  extern void Json_add_int ( JsonBuilder *builder, gchar *name, gint valeur );
  extern void Json_add_double ( JsonBuilder *builder, gchar *name, gdouble valeur );
@@ -455,8 +457,6 @@
  extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );
  extern gfloat Json_get_float ( JsonNode *query, gchar *chaine );
  extern gboolean Json_get_bool ( JsonNode *query, gchar *chaine );
- extern gboolean Json_has_member ( JsonNode *query, gchar *chaine );
- extern gint Json_get_int ( JsonNode *query, gchar *chaine );
  extern JsonArray *Json_get_array ( JsonNode *query, gchar *chaine );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

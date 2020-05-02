@@ -23,7 +23,8 @@ ClientResources.c : ClientResources.xml $(shell glib-compile-resources --generat
 	glib-compile-resources --target=ClientResources.h --generate-header $<
 
 Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResources.h \
-                               ihm.c connect.c liste_histo.c json.c
+                               ihm.c connect.c liste_histo.c json.c \
+                               supervision.c
 #                          protocole.c protocole_gtk_message.c \
 #                          protocole_dls.c protocole_mnemonique.c \
 #                          protocole_connexion.c \
@@ -51,9 +52,9 @@ Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResourc
 
 Watchdog_client_gtk3_LDADD  = $(top_builddir)/Commun/libwatchdog.la
 
-Watchdog_client_gtk3_LDFLAGS = `pkg-config --libs gtk+-3.0 libsoup-2.4 glib-2.0 json-glib-1.0` -lm
+Watchdog_client_gtk3_LDFLAGS = `pkg-config --libs gtk+-3.0 goocanvas-2.0 libsoup-2.4 glib-2.0 json-glib-1.0` -lm
 
-Watchdog_client_gtk3_CFLAGS = `pkg-config --cflags gtk+-3.0 libsoup-2.4 glib-2.0 json-glib-1.0`
+Watchdog_client_gtk3_CFLAGS = `pkg-config --cflags gtk+-3.0 goocanvas-2.0 libsoup-2.4 glib-2.0 json-glib-1.0`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/ClientGTK3/Include

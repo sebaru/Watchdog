@@ -77,7 +77,10 @@
        soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
        client->network_size_sent = 0;
        client->network_size_to_send = taille_buf;
-       printf("Sending %s : %d %s\n", URI, taille_buf, payload );
+       gchar chaine[128];
+       g_snprintf ( chaine, (taille_buf>sizeof(chaine) ? taille_buf : sizeof(chaine)) - 1,
+                    "Sending %s : %s\n", URI, payload );
+       printf(chaine);
      }
     if (!msg) { Log( client, "Erreur envoi au serveur"); Deconnecter_sale(client); }
     else soup_session_queue_message (client->connexion, msg, callback, client);
@@ -126,7 +129,8 @@
                 Json_get_string(response, "version"), Json_get_string(response, "message") );
     Log(client, chaine);
     json_node_unref(response);
-    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", "ws://localhost:5560/ws/live-msgs"),
+    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/ws/live-msgs", client->hostname );
+    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
                                            NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
   }
 /******************************************************************************************************************************/

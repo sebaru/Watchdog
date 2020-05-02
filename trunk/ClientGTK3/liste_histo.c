@@ -188,10 +188,8 @@
 
        JsonBuilder *builder = Json_create ();
        if (builder == NULL) break;
-       json_builder_begin_object ( builder );
        Json_add_string( builder, "tech_id", tech_id );
        Json_add_string( builder, "acronyme", acronyme );
-       json_builder_end_object (builder);                                                                        /* End Document */
        buf = Json_get_buf (builder, &taille_buf);
        Envoi_au_serveur( client, "POST", buf, taille_buf, "histo/ack", NULL );
        gtk_tree_selection_unselect_iter( selection, &iter );

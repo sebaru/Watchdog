@@ -152,12 +152,11 @@
 /**********************************************************************************************************/
  void Log( struct CLIENT *client, gchar *chaine )
   { gtk_entry_set_text( GTK_ENTRY(client->Entry_status), chaine ); }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Changer_page_client->Notebook: Affiche la page du client->Notebook dont le numero est en parametre                     */
-/* Entrées: widget, data                                                                                  */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Changer_page_Notebook: Affiche la page du Notebook dont le numero est en parametre                                         */
+/* Entrées: widget, data                                                                                                      */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  struct PAGE_NOTEBOOK *Chercher_page_notebook ( struct CLIENT *client, guint type, guint id, gboolean affiche )
   { struct PAGE_NOTEBOOK *page;
     GSList *liste;
@@ -206,6 +205,7 @@ printf("searching page %d %d\n", type, id );
 printf("not found\n");
     return(NULL);
   }
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Changer_page_client->Notebook: Affiche la page du client->Notebook dont le numero est en parametre                         */
 /* Entrées: widget, data                                                                                                      */

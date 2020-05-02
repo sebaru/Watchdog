@@ -158,6 +158,7 @@
 
     bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("edit-find", GTK_ICON_SIZE_LARGE_TOOLBAR), "Superviser" );
     gtk_tool_item_set_tooltip_text ( bouton, "Ouvrir le synoptique d'accueil" );
+    g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(Menu_want_supervision_accueil), client );
     gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
 
     separateur = gtk_separator_tool_item_new ();

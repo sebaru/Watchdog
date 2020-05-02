@@ -35,6 +35,7 @@
  JsonBuilder *Json_create ( void )
   { JsonBuilder *builder;
     builder = json_builder_new();
+    json_builder_begin_object( builder );
     return(builder);
   }
 /******************************************************************************************************************************/
@@ -116,6 +117,7 @@
   { JsonGenerator *gen;
     JsonNode *RootNode;
     gchar *result;
+    json_builder_end_object ( builder );
     gen = json_generator_new ();
     RootNode = json_builder_get_root(builder);
     json_generator_set_root ( gen, RootNode );
@@ -124,11 +126,6 @@
     result = json_generator_to_data (gen, taille_buf_p);
     g_object_unref(builder);
     g_object_unref(gen);
-    if (result)
-     { (*taille_buf_p)++;
-       result = g_try_realloc (result, *taille_buf_p);
-       result[(*taille_buf_p)-1]=0;
-     }
     return(result);
   }
 /******************************************************************************************************************************/

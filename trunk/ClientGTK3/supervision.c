@@ -25,17 +25,10 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
  #include <sys/time.h>
 
  #include "Reseaux.h"
- #include "Config_cli.h"
  #include "trame.h"
-
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */
- extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 
 /********************************************* Définitions des prototypes programme *******************************************/
  #include "protocli.h"
@@ -51,11 +44,11 @@
 /* Entrée: Un numéro de synoptique                                                                                            */
 /* Sortie: Une référence sur les champs d'information de la page en question                                                  */
 /******************************************************************************************************************************/
- struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( gint syn_id )
+ struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( struct CLIENT *client, gint syn_id )
   { struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
-    GList *liste;
-    liste = Liste_pages;
+    GSList *liste;
+    liste = client->Liste_pages;
     infos = NULL;
     while( liste )
      { page = (struct PAGE_NOTEBOOK *)liste->data;
@@ -76,7 +69,7 @@
   { struct TYPE_INFO_SUPERVISION *infos;
     infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
     /*g_timeout_remove( infos->timer_id );*/
-    Trame_detruire_trame( infos->Trame );
+    //Trame_detruire_trame( infos->Trame );
   }
 /******************************************************************************************************************************/
 /* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                                                */
@@ -107,17 +100,17 @@
 /* Entrée: néant                                                                                                              */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Menu_exporter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
+ static void Menu_exporter_synoptique( struct CLIENT *client, struct TYPE_INFO_SUPERVISION *infos )
   { GtkPrintOperation *print;
     GError *error;
 
-    print = New_print_job ( "Print Synoptique" );
+//    print = New_print_job ( "Print Synoptique" );
 
     g_signal_connect (G_OBJECT(print), "draw-page", G_CALLBACK (draw_page), infos );
     gtk_print_operation_set_n_pages ( print, 1 );
 
     gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
-                             GTK_WINDOW(F_client), &error);
+                             GTK_WINDOW(client->window), &error);
   }
 /******************************************************************************************************************************/
 /* Menu_acquitter_synoptique: Envoi une commande d'acquit du synoptique en cours de visu                                      */
@@ -125,7 +118,8 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Menu_acquitter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
-  { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACQ_SYN, (gchar *)&infos->syn.id, sizeof(gint) ); }
+  { //Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACQ_SYN, (gchar *)&infos->syn.id, sizeof(gint) );
+  }
 /******************************************************************************************************************************/
 /* Menu_acquitter_synoptique: Envoi une commande d'acquit du synoptique en cours de visu                                      */
 /* Entrée: La page d'information synoptique                                                                                   */
@@ -135,22 +129,36 @@
   { gchar chaine[80];
     printf("Get Horloge from %s\n", infos->syn.page );
     g_snprintf(chaine, sizeof(chaine), "horloges/list/%s", infos->syn.page );
-    Firefox_exec ( chaine );
+//    Firefox_exec ( chaine );
   }
 /******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
 /* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Creer_page_supervision ( struct CMD_TYPE_SYNOPTIQUE *syn )
+ static void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
   { GtkWidget *bouton, *boite, *hboite, *scroll, *frame, *label;
+    struct CLIENT *client = user_data;
     GtkAdjustment *adj;
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
     static gint init_timer;
     GdkColor color;
+    GBytes *response_brute;
+    gchar *reason_phrase;
+    gint status_code;
+    gchar chaine[128];
+    gsize taille;
 
-    printf("Creation page synoptique %d\n", syn->id );
+    printf("%s\n", __func__ );
+    g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
+    if (status_code != 200)
+     { gchar chaine[256];
+       g_snprintf(chaine, sizeof(chaine), "Error loading synoptique: Code %d - %s", status_code, reason_phrase );
+       Log(client, chaine);
+       return;
+     }
+
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
 
@@ -159,47 +167,47 @@
     if (!page->infos) { g_free(page); return; }
 
     page->type   = TYPE_PAGE_SUPERVISION;
-    Liste_pages  = g_list_append( Liste_pages, page );
-    memcpy(&infos->syn, syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
+    client->Liste_pages  = g_slist_append( client->Liste_pages, page );
+//    memcpy(&infos->syn, syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
 
-    if (!init_timer) { g_timeout_add( 500, Timer, NULL ); init_timer = 1; }
+    g_object_get ( msg, "response-body-data", &response_brute, NULL );
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
 
-    hboite = gtk_hbox_new( FALSE, 6 );
+    //if (!init_timer) { g_timeout_add( 500, Timer, NULL ); init_timer = 1; }
+
+    hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
 /**************************************************** Trame proprement dite ***************************************************/
-
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_ALWAYS, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-    infos->Trame = Trame_creer_trame( TAILLE_SYNOPTIQUE_X, TAILLE_SYNOPTIQUE_Y, "darkgray", 0 );
-    gtk_container_add( GTK_CONTAINER(scroll), infos->Trame->trame_widget );
+    //infos->Trame = Trame_creer_trame( TAILLE_SYNOPTIQUE_X, TAILLE_SYNOPTIQUE_Y, "darkgray", 0 );
+    //gtk_container_add( GTK_CONTAINER(scroll), infos->Trame->trame_widget );
 
 /************************************************** Boutons de controle *******************************************************/
-    boite = gtk_vbox_new( FALSE, 6 );
+    boite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
-    bouton = gtk_button_new_from_stock( GTK_STOCK_CLOSE );
+    bouton = gtk_button_new_with_label( "Fermer" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Detruire_page), page );
+    //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Detruire_page), page );
 
-    bouton = gtk_button_new_from_stock( GTK_STOCK_PRINT );
+    bouton = gtk_button_new_with_label( "Imprimer" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_exporter_synoptique), infos );
+    //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_exporter_synoptique), infos );
 
 /********************************************************** Zoom **************************************************************/
-    frame = gtk_frame_new ( _("Zoom") );
+    frame = gtk_frame_new ( "Zoom" );
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
     gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
 
-    hboite = gtk_vbox_new( FALSE, 6 );
+    hboite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
 
-    infos->Option_zoom = gtk_hscale_new_with_range ( 0.2, 5.0, 0.1 );
+    infos->Option_zoom = gtk_scale_new_with_range ( GTK_ORIENTATION_HORIZONTAL, 0.2, 5.0, 0.1 );
     gtk_box_pack_start( GTK_BOX(hboite), infos->Option_zoom, FALSE, FALSE, 0 );
     g_object_get( infos->Option_zoom, "adjustment", &adj, NULL );
     gtk_adjustment_set_value( adj, 1.0 );
@@ -207,11 +215,11 @@
                       G_CALLBACK( Changer_option_zoom ), infos );
 
 /************************************************************* Palettes *******************************************************/
-    frame = gtk_frame_new( _("Palette") );
+    frame = gtk_frame_new( "Palette" );
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
     gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
 
-    infos->Box_palette = gtk_vbox_new( FALSE, 6 );
+    infos->Box_palette = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(infos->Box_palette), 6 );
     gtk_container_add( GTK_CONTAINER(frame), infos->Box_palette );
 
@@ -230,13 +238,17 @@
     gtk_widget_show_all( page->child );
 
     label = gtk_event_box_new ();
-    gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( syn->libelle ) );
-    gdk_color_parse ("cyan", &color);
-    gtk_widget_modify_bg ( label, GTK_STATE_NORMAL, &color );
-    gtk_widget_modify_bg ( label, GTK_STATE_ACTIVE, &color );
+    gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( Json_get_string( response, "libelle" ) ) );
+//    gdk_color_parse ("cyan", &color);
+//    gtk_widget_modify_bg ( label, GTK_STATE_NORMAL, &color );
+//    gtk_widget_modify_bg ( label, GTK_STATE_ACTIVE, &color );
     gtk_widget_show_all( label );
-    gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), page->child, label );
+    gtk_notebook_append_page( GTK_NOTEBOOK(client->Notebook), page->child, label );
+    json_node_unref(response);
+//    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", "ws://localhost:5560/ws/live-msgs"),
+  //                                         NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Proto_afficher_un_motif_supervision: Ajoute un motif sur la trame de supervision                       */
 /* Entrée: une reference sur le motif                                                                     */
@@ -469,7 +481,7 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
                    syn_vars->bit_veille_partielle, syn_vars->bit_veille_totale, syn_vars->bit_alerte,
                    syn_vars->bit_derangement, syn_vars->bit_danger );
     cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */
-    liste = Liste_pages;
+    liste = client->Liste_pages;
     while(liste)                                                                  /* On parcours toutes les pages SUPERVISION */
      { page = (struct PAGE_NOTEBOOK *)liste->data;
        if (page->type != TYPE_PAGE_SUPERVISION) { liste = liste->next; continue; }
@@ -480,10 +492,11 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
         {                                                     /* Positionnement de la couleur du bouton d'acquit du synotique */
           if (syn_vars->bit_defaut || syn_vars->bit_alarme || syn_vars->bit_alerte ||
               syn_vars->bit_derangement || syn_vars->bit_danger)
-           { gdk_color_parse ("blue", &color);
-             gtk_widget_modify_bg ( infos->bouton_acq, GTK_STATE_NORMAL, &color );
+           { //gdk_color_parse ("blue", &color);
+             //gtk_widget_override_background_color ( infos->bouton_acq, GTK_STATE_NORMAL, &color );
            } else
-           { gtk_widget_modify_bg ( infos->bouton_acq, GTK_STATE_NORMAL, NULL ); }
+           { //gtk_widget_override_background_color ( infos->bouton_acq, GTK_STATE_NORMAL, NULL );
+           }
 
            Changer_etat_etiquette( infos, syn_vars );                          /* Positionnement des vignettes du synoptiques */
         }
@@ -510,4 +523,26 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
      { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_SYN_VARS_UNKNOWN, (gchar *)syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
      }
   }
+#endif
+/******************************************************************************************************************************/
+/* Demander_synoptique_supervision: Envoie une demande d'affichage synoptique au serveur                                      */
+/* Entrée/Sortie: l'instance cliente, l'id du synoptique a demander                                                           */
+/******************************************************************************************************************************/
+ void Demander_synoptique_supervision ( struct CLIENT *client, gint id )
+  { gsize taille_buf;
+    JsonBuilder *builder = Json_create ();
+    if (builder == NULL) return;
+    Json_add_int( builder, "syn_id", id );
+    gchar *buf = Json_get_buf (builder, &taille_buf);
+    Envoi_au_serveur( client, "POST", buf, taille_buf, "syns/get", Creer_page_supervision_CB );
+  }
+/**********************************************************************************************************/
+/* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                             */
+/* Entrée/Sortie: rien                                                                                    */
+/**********************************************************************************************************/
+ void Menu_want_supervision_accueil ( struct CLIENT *client )
+  { if (Chercher_page_notebook( client, TYPE_PAGE_SUPERVISION, 1, TRUE )) return;
+    Demander_synoptique_supervision ( client, 1 );
+  }
+
 /*----------------------------------------------------------------------------------------------------------------------------*/
