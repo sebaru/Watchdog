@@ -23,8 +23,7 @@ ClientResources.c : ClientResources.xml $(shell glib-compile-resources --generat
 	glib-compile-resources --target=ClientResources.h --generate-header $<
 
 Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResources.h \
-                               Config_cli.c ihm.c connect.c liste_histo.c json.c
-#connect.c ihm.c \
+                               ihm.c connect.c liste_histo.c json.c
 #                          protocole.c protocole_gtk_message.c \
 #                          protocole_dls.c protocole_mnemonique.c \
 #                          protocole_connexion.c \

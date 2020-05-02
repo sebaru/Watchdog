@@ -28,10 +28,7 @@
  #include <gtk/gtk.h>
  #include <time.h>
 
- #include "Config_cli.h"
  #include "Reseaux.h"
-
- extern struct CONFIG Config;                                                              /* Configuration generale watchdog */
 
  enum
   { COLONNE_TECH_ID,

@@ -27,13 +27,11 @@
 
  #include "Reseaux.h"
  #include "client.h"
- #include "Config_cli.h"
 
 /******************************************** Définitions des prototypes programme ********************************************/
  #include "config.h"
  #include "protocli.h"
 
- extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 /******************************************************************************************************************************/
 /* Deconnecter: libere la mémoire et deconnecte le client                                                                     */
 /* Entrée/Sortie: rien                                                                                                        */

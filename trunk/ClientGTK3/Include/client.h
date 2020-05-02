@@ -32,7 +32,6 @@
  #include <libsoup/soup.h>
 
  #include "Reseaux.h"
- #include "Config_cli.h"
 
  #define REPERTOIR_CONF    ".watchdog"                             /* Repertoire ou sont stocké les fichiers de configuration */
 

@@ -37,13 +37,11 @@
  #include "protocli.h"
  #include "config.h"
  #include "Erreur.h"
- #include "Config_cli.h"
  #include "client.h"
  #include "ClientResources.h"
 
  #define TITRE_FENETRE "Watchdog ver" VERSION " - GTK3"
 
- struct CONFIG_CLI Config_cli;                                                     /* Configuration generale cliente watchdog */
 /***************************************************** Définition du menu *****************************************************/
 #ifdef bouh
 
@@ -204,10 +202,6 @@
        chdir ( REPERTOIR_CONF );
      } else printf ("Chdir %s OK\n", REPERTOIR_CONF );
 
-
-    Config_cli.log = Info_init( "Watchdog_client", LOG_DEBUG );                                        /* Init msgs d'erreurs */
-    Info_change_log_level( Config_cli.log, Config_cli.log_level );
-    Lire_config_cli ( &Config_cli, "watchdog-client.conf" );
 
     GtkApplication *app = gtk_application_new ("fr.abls_habitat.watchdog", G_APPLICATION_FLAGS_NONE);
     g_action_map_add_action_entries ( G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app );
