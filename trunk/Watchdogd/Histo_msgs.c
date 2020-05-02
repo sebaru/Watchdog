@@ -47,6 +47,7 @@
     gboolean retour;
     struct DB *db;
 
+    if (!username) username = "unknown";
     nom_ack = Normaliser_chaine ( username );                                                /* Formatage correct des chaines */
     if (!nom_ack)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );

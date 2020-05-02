@@ -62,7 +62,6 @@
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
     Json_add_object ( builder, "Status" );
 
     Json_add_string ( builder, "version",  VERSION );
@@ -94,10 +93,8 @@
     num = g_slist_length( Partage->com_msrv.liste_msg_repeat );                                           /* liste des repeat */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
     Json_add_int  ( builder, "length_msg_repeat", num );
-
-    Json_end_object (builder);                                                                          /* Fin dump du status */
-
     json_builder_end_object (builder);                                                                        /* End Document */
+
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);

@@ -189,20 +189,20 @@
     texte = gtk_label_new( "Serveur" );
     gtk_grid_attach( GTK_GRID(table), texte, 0, 0, 1, 1 );
     Entry_host = gtk_entry_new();
-    gtk_entry_set_text( GTK_ENTRY(Entry_host), Config_cli.host );
+    gtk_entry_set_text( GTK_ENTRY(Entry_host), g_settings_get_string ( client->settings, "hostname" ) );
     gtk_grid_attach( GTK_GRID(table), Entry_host, 1, 0, 1, 1 );
 
     texte = gtk_label_new( "Name" );
     gtk_grid_attach( GTK_GRID(table), texte, 0, 1, 1, 1 );
     Entry_nom = gtk_entry_new();
-    gtk_entry_set_text( GTK_ENTRY(Entry_nom), Config_cli.user );
+    gtk_entry_set_text( GTK_ENTRY(Entry_nom), g_settings_get_string ( client->settings, "username" ) );
     gtk_grid_attach( GTK_GRID(table), Entry_nom, 1, 1, 1, 1 );
 
     texte = gtk_label_new( "Password" );
     gtk_grid_attach( GTK_GRID(table), texte, 0, 2, 1, 1 );
     Entry_code = gtk_entry_new();
     gtk_entry_set_visibility( GTK_ENTRY(Entry_code), FALSE );
-    gtk_entry_set_text( GTK_ENTRY(Entry_code), Config_cli.passwd );
+    gtk_entry_set_text( GTK_ENTRY(Entry_code), g_settings_get_string ( client->settings, "password" ) );
     gtk_grid_attach( GTK_GRID(table), Entry_code, 1, 2, 1, 1 );
 
     g_signal_connect_swapped( Entry_host, "activate", (GCallback)gtk_widget_grab_focus, Entry_nom );
@@ -216,6 +216,9 @@
      { g_snprintf( client->hostname, sizeof(client->hostname), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
        g_snprintf( client->username, sizeof(client->username), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
        g_snprintf( client->password, sizeof(client->password), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_code) ) );
+       g_settings_set_string ( client->settings, "hostname", client->hostname );
+       g_settings_set_string ( client->settings, "username", client->username );
+       g_settings_set_string ( client->settings, "password", client->password );
        Connecter_au_serveur(client);                                                /* Essai de connexion au serveur Watchdog */
      }
     gtk_widget_destroy( fenetre );

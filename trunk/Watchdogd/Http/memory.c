@@ -350,7 +350,7 @@
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
+
     Json_add_string ( builder, "tech_id", tech_id );
     Json_add_string ( builder, "acronyme", acronyme );
     Json_add_int    ( builder, "top", Partage->top );
@@ -516,8 +516,6 @@
      }
 /*------------------------------------------------------- sinon --------------------------------------------------------------*/
     else { Json_add_bool ( builder, "found", FALSE ); }
-
-    json_builder_end_object (builder);                                                                        /* End Document */
 
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/

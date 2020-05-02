@@ -45,7 +45,8 @@
   };*/
 
  struct CLIENT
-  { GtkWidget *window;
+  { GSettings *settings;
+    GtkWidget *window;
     GtkWidget *Notebook;
     GSList *Liste_pages;
     GtkWidget *Liste_histo;

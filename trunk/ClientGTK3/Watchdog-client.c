@@ -133,6 +133,7 @@
   { GtkToolItem *bouton, *separateur;
 
     struct CLIENT *client = g_malloc0 ( sizeof(struct CLIENT) );
+    client->settings = g_settings_new ( "fr.abls-habitat.watchdog" );
     client->window = gtk_application_window_new (app);
     gtk_window_set_title (GTK_WINDOW (client->window), TITRE_FENETRE );
     gtk_window_set_default_size (GTK_WINDOW (client->window), 400, 400);

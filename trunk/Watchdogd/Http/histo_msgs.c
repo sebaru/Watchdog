@@ -168,7 +168,6 @@
        json_builder_end_object (builder);
      }
     Json_end_array( builder );
-    Json_end_object (builder);                                                                          /* Fin dump du status */
 end:
     buf = Json_get_buf (builder, &taille_buf);
     soup_websocket_connection_send_text ( connexion, buf );

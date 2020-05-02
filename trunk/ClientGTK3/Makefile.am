@@ -5,6 +5,11 @@
 #**********************************************************************************************************/
 SUBDIRS = Include
 
+gsettings_SCHEMAS = fr.abls-habitat.watchdog.gschema.xml
+EXTRA_DIST = $(gsettings_SCHEMAS)
+
+@GSETTINGS_RULES@
+
 desktopdir = $(datadir)/applications
 desktop_DATA = fr.abls-habitat.watchdog.desktop
 

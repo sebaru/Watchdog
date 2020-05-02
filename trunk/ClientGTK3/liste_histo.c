@@ -255,12 +255,12 @@
     gboolean valide;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
+again:
     valide = gtk_tree_model_get_iter_first( store, &iter );
-
     while ( valide )
      { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
        if ( !strcmp(tech_id, Json_get_string(element, "tech_id")) && !strcmp(acronyme,Json_get_string(element, "acronyme")) )
-        { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); break; }
+        { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); goto again; }
        valide = gtk_tree_model_iter_next( store, &iter );
      }
   }

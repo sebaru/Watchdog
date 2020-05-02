@@ -601,9 +601,7 @@ reload:
            { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
              continue;
            }
-          json_builder_begin_object(builder);
           Http_Memory_print_VISUEL_to_json ( builder, &visu );
-          json_builder_end_object(builder);
           buf = Json_get_buf ( builder, &taille_buf );
           liste = Cfg_http.liste_ws_motifs_clients;
           while (liste)

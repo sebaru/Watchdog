@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* client/ihm.c        L'interface du client Watchdog v2.0                                                */
-/* Projet WatchDog version 3.0       Gestion d'habitat                      jeu 21 aoû 2003 18:47:38 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                      jeu 21 aoÃ» 2003 18:47:38 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * ihm.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sébastien Lefevre
+ * Copyright (C) 2010-2020 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,18 +27,17 @@
 
  #include <gtk/gtk.h>
 
-/********************************* Définitions des prototypes programme ***********************************/
+/********************************* DÃ©finitions des prototypes programme ***********************************/
  #include "protocli.h"
 
 /******************************************************************************************************************************/
 /* Detruire_page: Detruit la page du notebook en parametre                                                                    */
-/* Entrée: rien                                                                                                               */
-/* Sortie: néant                                                                                                              */
+/* EntrÃ©e: rien                                                                                                               */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static void Detruire_page ( struct CLIENT *client, struct PAGE_NOTEBOOK *page_a_virer )
   { gint num;
     num = gtk_notebook_page_num( GTK_NOTEBOOK(client->Notebook), GTK_WIDGET(page_a_virer->child) );
-    if (page_a_virer->type == TYPE_PAGE_HISTO) { Reset_page_histo(client); return; }
 
     if (num>=0)
      { switch(page_a_virer->type)
@@ -51,14 +50,14 @@
         }
        gtk_notebook_remove_page( GTK_NOTEBOOK(client->Notebook), num );
        client->Liste_pages = g_slist_remove( client->Liste_pages, page_a_virer );
-       if (page_a_virer->infos) g_free(page_a_virer->infos);       /* Libération des infos le cas échéant */
+       if (page_a_virer->infos) g_free(page_a_virer->infos);       /* LibÃ©ration des infos le cas Ã©chÃ©ant */
        g_free(page_a_virer);
      }
-    else printf("Detruire_page: Page non trouvée\n");
+    else printf("Detruire_page: Page non trouvÃ©e\n");
   }
 /**********************************************************************************************************/
-/* Detruire_page_plugin_dls: Detruit la page du notebook consacrée aux plugin_dlss watchdog               */
-/* Entrée: rien                                                                                           */
+/* Detruire_page_plugin_dls: Detruit la page du notebook consacrÃ©e aux plugin_dlss watchdog               */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: un widget boite                                                                                */
 /**********************************************************************************************************/
  struct PAGE_NOTEBOOK *Page_actuelle ( struct CLIENT *client )
@@ -73,28 +72,35 @@
     liste = client->Liste_pages;
     while(liste)
      { page = (struct PAGE_NOTEBOOK *)liste->data;
-       if ( page->child == child ) return(page);                                /* Nous l'avons trouvé !! */
+       if ( page->child == child ) return(page);                                /* Nous l'avons trouvÃ© !! */
        liste = liste->next;
      }
     return(NULL);
   }
-/**********************************************************************************************************/
-/* Effacer_pages: On efface toutes les pages restantes du notebook                                        */
-/* Entrée: niet                                                                                           */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Effacer_pages: On efface toutes les pages restantes du notebook                                                            */
+/* EntrÃ©e: niet                                                                                                               */
+/* Sortie: void                                                                                                               */
+/******************************************************************************************************************************/
  void Effacer_pages ( struct CLIENT *client )
-  { while(client->Liste_pages)
+  { GSList *liste;
+    liste = client->Liste_pages;
+    while(liste)
      { struct PAGE_NOTEBOOK *page;
-       page = (struct PAGE_NOTEBOOK *)client->Liste_pages->data;
-       Detruire_page( client, page );
-       client->Liste_pages = g_slist_remove( client->Liste_pages, page );
+       page = (struct PAGE_NOTEBOOK *)liste->data;
+       if (page->type == TYPE_PAGE_HISTO)
+        { Reset_page_histo(client); }
+       else
+        { Detruire_page( client, page );
+          client->Liste_pages = g_slist_remove( client->Liste_pages, page );
+        }
+       liste = g_slist_next(liste);
      }
   }
 #ifdef bouh
 /**********************************************************************************************************/
 /* Nbr_page_type: Renvoie le nombre de page notebook de type type                                         */
-/* Entrée: Le type de page à compter                                                                      */
+/* EntrÃ©e: Le type de page Ã  compter                                                                      */
 /* Sortie: Un entier                                                                                      */
 /**********************************************************************************************************/
  gint Nbr_page_type ( gint type )
@@ -113,7 +119,7 @@
 #endif
 /******************************************************************************************************************************/
 /* Set_progress: Positionne la barre de progression de la fenetre                                                             */
-/* Entrées: val, max                                                                                                          */
+/* EntrÃ©es: val, max                                                                                                          */
 /* Sortie: Kedal                                                                                                              */
 /******************************************************************************************************************************/
  void Set_progress_pulse( struct CLIENT *client )
@@ -121,7 +127,7 @@
   }
 /******************************************************************************************************************************/
 /* Set_progress: Positionne la barre de progression de la fenetre                                                             */
-/* Entrées: val, max                                                                                                          */
+/* EntrÃ©es: val, max                                                                                                          */
 /* Sortie: Kedal                                                                                                              */
 /******************************************************************************************************************************/
  void Update_progress_bar( SoupMessage *msg, SoupBuffer *chunk, gpointer data )
@@ -141,15 +147,15 @@
   }
 /**********************************************************************************************************/
 /* Log: Afficher un texte dans l'entry status                                                             */
-/* Entrée: la chaine de caracteres                                                                        */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: la chaine de caracteres                                                                        */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Log( struct CLIENT *client, gchar *chaine )
   { gtk_entry_set_text( GTK_ENTRY(client->Entry_status), chaine ); }
 #ifdef bouh
 /**********************************************************************************************************/
 /* Changer_page_client->Notebook: Affiche la page du client->Notebook dont le numero est en parametre                     */
-/* Entrées: widget, data                                                                                  */
+/* EntrÃ©es: widget, data                                                                                  */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  struct PAGE_NOTEBOOK *Chercher_page_notebook ( struct CLIENT *client, guint type, guint id, gboolean affiche )
@@ -202,7 +208,7 @@ printf("not found\n");
   }
 /******************************************************************************************************************************/
 /* Changer_page_client->Notebook: Affiche la page du client->Notebook dont le numero est en parametre                         */
-/* Entrées: widget, data                                                                                                      */
+/* EntrÃ©es: widget, data                                                                                                      */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  gboolean Tester_page_notebook ( guint type )
@@ -221,8 +227,8 @@ printf("not found\n");
 #endif
 /******************************************************************************************************************************/
 /* Creer_boite_travail: Creation de la zone de choix/edition... des mots de passe                                             */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Widget *boite, référençant la boite                                                                                */
+/* EntrÃ©e: NÃ©ant                                                                                                              */
+/* Sortie: Widget *boite, rÃ©fÃ©renÃ§ant la boite                                                                                */
 /******************************************************************************************************************************/
  GtkWidget *Creer_boite_travail ( struct CLIENT *client )
   { GtkWidget *vboite, *hboite, *texte;
@@ -239,7 +245,7 @@ printf("not found\n");
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_box_pack_start( GTK_BOX(vboite), hboite, FALSE, FALSE, 0 );
 
-/********************* Status de la machine cliente:connectée/erreur/loguée... ****************************/
+/********************* Status de la machine cliente:connectÃ©e/erreur/loguÃ©e... ****************************/
     texte = gtk_label_new( "Status" );
     gtk_box_pack_start( GTK_BOX(hboite), texte, FALSE, FALSE, 0 );
     client->Entry_status = gtk_entry_new();
