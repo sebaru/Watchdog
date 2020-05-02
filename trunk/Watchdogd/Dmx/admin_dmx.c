@@ -35,7 +35,6 @@
 /******************************************************************************************************************************/
  static void Admin_json_status ( JsonBuilder *builder )
   { gint cpt;
-    json_builder_begin_object (builder);                                                    /* Contenu du Noeud Passerelle */
     Json_add_string ( builder, "tech_id", Cfg_dmx.tech_id );
     Json_add_string ( builder, "device", Cfg_dmx.device );
     Json_add_bool   ( builder, "enable", Cfg_dmx.enable );
@@ -50,7 +49,6 @@
           Json_add_int ( builder, canal, Cfg_dmx.Trame_dmx.channel[cpt] ); /*Canal[cpt].val_avant_ech );*/
         }
      }
-    json_builder_end_object (builder);                                                                    /* End Module Array */
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */

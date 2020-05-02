@@ -292,11 +292,9 @@
 
     builder = Json_create ();
     if(!builder) return;
-    json_builder_begin_object ( builder );
     Json_add_string ( builder, "tech_id",  tech_id );
     Json_add_string ( builder, "acronyme", acronyme );
     Json_add_bool   ( builder, "etat", etat );
-    json_builder_end_object ( builder );
     result = Json_get_buf ( builder, &taille );
     Send_zmq_with_tag ( zmq, NULL, thread, "*", "msrv", "SET_DI", result, taille );
     g_free(result);
@@ -313,12 +311,10 @@
 
     builder = Json_create ();
     if(!builder) return;
-    json_builder_begin_object ( builder );
     Json_add_string ( builder, "tech_id",  tech_id );
     Json_add_string ( builder, "acronyme", acronyme );
     Json_add_double ( builder, "valeur", valeur );
     Json_add_bool   ( builder, "in_range", in_range );
-    json_builder_end_object ( builder );
     result = Json_get_buf ( builder, &taille );
     Send_zmq_with_tag ( zmq, NULL, thread, "*", "msrv", "SET_AI", result, taille );
     g_free(result);
@@ -335,10 +331,8 @@
 
     builder = Json_create ();
     if(!builder) return;
-    json_builder_begin_object ( builder );
     Json_add_string ( builder, "tech_id",  tech_id );
     Json_add_string ( builder, "acronyme", acronyme );
-    json_builder_end_object ( builder );
     result = Json_get_buf ( builder, &taille );
     Send_zmq_with_tag ( zmq, NULL, thread, "*", "msrv", "SET_CDE", result, taille );
     g_free(result);

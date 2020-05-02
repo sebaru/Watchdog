@@ -92,14 +92,11 @@
         }
        else
         { gsize taille_buf;
-          json_builder_begin_object(builder);
           Json_add_string ( builder, "zmq_type", "update_histo" );
           Json_add_string ( builder, "tech_id", tech_id );
           Json_add_string ( builder, "acronyme", acronyme );
           Json_add_string ( builder, "nom_ack", soup_client_context_get_auth_user (client) );
           Json_add_string ( builder, "date_fixe", date_fixe );
-
-          json_builder_end_object(builder);
           gchar *buf = Json_get_buf ( builder, &taille_buf );
           Http_msgs_send_to_all ( buf );
           soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -120,10 +117,8 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
        return;
      }
-    json_builder_begin_object(builder);
     Json_add_string( builder, "zmq_type", "insert_or_delete_histo" );
     Histo_msg_print_to_JSON ( builder, histo );
-    json_builder_end_object(builder);
     gchar *buf = Json_get_buf ( builder, &taille_buf );
     Http_msgs_send_to_all ( buf );
   }
@@ -139,9 +134,7 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
        return;
      }
-    json_builder_begin_object(builder);
     Json_add_string( builder, "zmq_type", "pulse" );
-    json_builder_end_object(builder);
     gchar *buf = Json_get_buf ( builder, &taille_buf );
     Http_msgs_send_to_all ( buf );
   }
@@ -163,8 +156,6 @@
        return;
      }
 
-    json_builder_begin_object ( builder );
-
     if ( ! Recuperer_histo_msgsDB_alive( &db ) )                                                     /* Si pas de histos (??) */
      { goto end; }
 
@@ -179,7 +170,6 @@
     Json_end_array( builder );
     Json_end_object (builder);                                                                          /* Fin dump du status */
 end:
-    json_builder_end_object (builder);                                                                        /* End Document */
     buf = Json_get_buf (builder, &taille_buf);
     soup_websocket_connection_send_text ( connexion, buf );
     g_free(buf);

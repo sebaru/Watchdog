@@ -34,9 +34,7 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_ups_print ( JsonBuilder *builder, struct MODULE_UPS *module )
-  { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-
-    Json_add_string ( builder, "tech_id", module->tech_id );
+  { Json_add_object ( builder, module->tech_id );
     Json_add_string ( builder, "host", module->host );
     Json_add_string ( builder, "name", module->name );
     Json_add_string ( builder, "libelle", module->libelle );
@@ -48,7 +46,6 @@
 
     Json_add_string ( builder, "admin_username", module->username );
     Json_add_string ( builder, "admin_password", module->password );
-
 
     Json_add_double ( builder, "ups_load", Dls_data_get_AI( NULL, NULL, &module->ai_load ) );
     Json_add_double ( builder, "ups_realpower", Dls_data_get_AI( NULL, NULL, &module->ai_realpower ) );
@@ -68,8 +65,7 @@
     Json_add_bool ( builder, "ups_on_batt",         Dls_data_get_DI( NULL, NULL, &module->di_ups_on_batt ) );
     Json_add_bool ( builder, "ups_replace_batt",    Dls_data_get_DI( NULL, NULL, &module->di_ups_replace_batt ) );
     Json_add_bool ( builder, "ups_alarm",           Dls_data_get_DI( NULL, NULL, &module->di_ups_alarm ) );
-
-    json_builder_end_object (builder);                                                                        /* End Document */
+    Json_end_object ( builder );
   }
 /******************************************************************************************************************************/
 /* Admin_ups_list : Affichage de toutes les infos opérationnelles de tous les onduleurs                                       */
@@ -79,7 +75,6 @@
  static void Admin_json_ups_list ( JsonBuilder *builder )
   { GSList *liste_modules;
 
-    json_builder_begin_array (builder);
     pthread_mutex_lock ( &Cfg_ups.lib->synchro );
     liste_modules = Cfg_ups.Modules_UPS;
     while ( liste_modules )
@@ -89,7 +84,6 @@
        liste_modules = liste_modules->next;
      }
     pthread_mutex_unlock ( &Cfg_ups.lib->synchro );
-    json_builder_end_array (builder);
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */

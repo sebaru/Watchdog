@@ -179,7 +179,6 @@
        return;
      }
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
     Json_add_string ( builder, "tech_id", tech_id );
     Json_add_int    ( builder, "top", Partage->top );
 /*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
@@ -327,8 +326,6 @@
      }
     Json_end_array( builder );
 /*------------------------------------------------------- fin ----------------------------------------------------------------*/
-    json_builder_end_object (builder);                                                                        /* End Document */
-
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);

@@ -34,11 +34,8 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_status ( JsonBuilder *builder )
-  {
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-    Json_add_int ( builder, "nbr_diffusion_radio", Cfg_radio.nbr_diffusion );
+  { Json_add_int ( builder, "nbr_diffusion_radio", Cfg_radio.nbr_diffusion );
     Json_add_int ( builder, "radio_en_cours", Cfg_radio.radio_en_cours );
-    json_builder_end_object (builder);                                                                        /* End Document */
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */

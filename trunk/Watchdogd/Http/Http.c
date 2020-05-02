@@ -80,47 +80,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Http_send_histo : envoie un histo au client                                                                                */
-/* Entrée : la connexion client WebSocket et l'histo a envoyer                                                                */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
-#ifdef bouh
- static void WS_send_histo ( struct lws *wsi, struct CMD_TYPE_HISTO *histo )
-  { struct WS_PER_SESSION_DATA *pss;
-    gchar *buf;
-    JsonBuilder *builder;
-    gsize taille_buf;
-
-    pss = lws_wsi_user ( wsi );
-    builder = Json_create ();
-    if (!builder) return;
-
-    json_builder_begin_object (builder);                                                                  /* Contenu du Histo */
-    Json_add_bool ( builder, "alive", histo->alive );
-    Json_add_string ( builder, "date_create",   histo->date_create );
-    Json_add_string ( builder, "nom_ack",       histo->nom_ack );
-    Json_add_string ( builder, "libelle",       histo->msg.libelle );
-    Json_add_string ( builder, "syn_groupe",    histo->msg.syn_parent_page );
-    Json_add_string ( builder, "syn_page",      histo->msg.syn_page );
-    Json_add_string ( builder, "syn_libelle",   histo->msg.syn_libelle );
-    Json_add_string ( builder, "dls_shortname", histo->msg.dls_shortname );
-    json_builder_end_object (builder);                                                                           /* End Histo */
-
-    buf = Json_get_buf ( builder, &taille_buf );
-#ifdef bouh
-    buf_to_send = g_try_malloc0( taille_buf + LWS_PRE );
-    if (buf_to_send)
-     { memcpy( buf_to_send + LWS_PRE, buf, taille_buf );
-       lws_write(wsi, &buf_to_send[LWS_PRE], taille_buf, LWS_WRITE_TEXT );
-       g_free(buf_to_send);                                           /* Libération du buffer dont nous n'avons plus besoin ! */
-     }
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-              "%s: send %d byte to '%s' ('%s')", __func__, taille_buf, pss->sid, pss->util );
-#endif
-    g_free(buf);
-  }
-#endif
-/******************************************************************************************************************************/
 /* Rechercher_utilisateurDB_by_sid: Recuperation de tous les champs de l'utilisateur dont le sid est en parametre             */
 /* Entrées: le Session ID                                                                                                     */
 /* Sortie: une structure utilisateur, ou null si erreur                                                                       */
@@ -251,13 +210,11 @@
                    { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
                      return(1);
                    }
-                  json_builder_begin_object (builder);                                         /* Création du noeud principal */
                   Json_add_string ( builder, "tech_id",  visu.tech_id );
                   Json_add_string ( builder, "acronyme", visu.acronyme );
                   Json_add_int    ( builder, "mode",     visu.mode );
                   Json_add_string ( builder, "color",    visu.color );
                   Json_add_bool   ( builder, "cligno",   visu.cligno );
-                  json_builder_end_object (builder);                                                          /* End Document */
                   buf = Json_get_buf ( builder, &taille_buf );
                   result = (gchar *)g_malloc(LWS_SEND_BUFFER_PRE_PADDING + taille_buf);
                   if (result == NULL)
@@ -477,8 +434,6 @@
 		     return;
      }
     Http_print_request ( server, msg, path, client );
-
-
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
     if (builder == NULL)
@@ -488,14 +443,12 @@
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
     Json_add_bool   ( builder, "connected", TRUE );
     Json_add_string ( builder, "version",  VERSION );
     Json_add_string ( builder, "instance", g_get_host_name() );
     Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
     Json_add_bool   ( builder, "ssl", soup_server_is_https (server) );
     Json_add_string ( builder, "message", "Welcome back Home !" );
-    json_builder_end_object (builder);                                                                        /* End Document */
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -533,10 +486,6 @@
     Cfg_http.liste_ws_motifs_clients = g_slist_prepend ( Cfg_http.liste_ws_motifs_clients, connexion );
     g_object_ref(connexion);
   }
-
-
-
-
 /******************************************************************************************************************************/
 /* Run_thread: Thread principal                                                                                               */
 /* Entrée: une structure LIBRAIRIE                                                                                            */

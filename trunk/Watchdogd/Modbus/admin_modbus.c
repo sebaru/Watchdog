@@ -70,15 +70,13 @@
 /******************************************************************************************************************************/
  static void Admin_json_list ( JsonBuilder *builder )
   { GSList *liste_modules;
-    json_builder_begin_array (builder);                                                                  /* Contenu du Status */
 
     pthread_mutex_lock( &Cfg_modbus.lib->synchro );
     liste_modules = Cfg_modbus.Modules_MODBUS;
     while ( liste_modules )
      { struct MODULE_MODBUS *module = liste_modules->data;
 
-       json_builder_begin_object (builder);                                                    /* Contenu du Noeud Passerelle */
-       Json_add_string ( builder, "tech_id", module->modbus.tech_id );
+       Json_add_object ( builder, module->modbus.tech_id );
        Json_add_string ( builder, "mode", Modbus_mode_to_string(module) );
        Json_add_bool   ( builder, "started", module->started );
        Json_add_int    ( builder, "nbr_entree_tor", module->nbr_entree_tor );
@@ -93,14 +91,12 @@
        Json_add_int    ( builder, "last_reponse", (Partage->top - module->date_last_reponse)/10 );
        Json_add_int    ( builder, "date_next_eana", (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1) );
        Json_add_int    ( builder, "date_retente", (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1) );
-
-       json_builder_end_object (builder);                                                                 /* End Module Array */
+       Json_end_object ( builder );                                                                       /* End Module Array */
 
        liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
      }
     pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
-
-    json_builder_end_array (builder);                                                                         /* End Document */
+    Json_end_array (builder);                                                                                 /* End Document */
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */

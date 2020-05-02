@@ -56,11 +56,9 @@
 
     JsonBuilder *builder = Json_create ();
     if (builder)
-     { json_builder_begin_object (builder);                                                    /* Création du noeud principal */
-       Json_add_string ( builder, "tech_id",  dout->tech_id );
+     { Json_add_string ( builder, "tech_id",  dout->tech_id );
        Json_add_string ( builder, "acronyme", dout->acronyme );
        Json_add_bool   ( builder, "valeur", TRUE );
-       json_builder_end_object (builder);                                                                     /* End Document */
        buffer = Json_get_buf ( builder, &taille_buf );
        if (buffer)
         { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "*", "SET_DO", buffer, taille_buf );

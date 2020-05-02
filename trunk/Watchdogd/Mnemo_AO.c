@@ -201,11 +201,9 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return(NULL);
      }
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
     Json_add_string ( builder, "tech_id",  ao->tech_id );
     Json_add_string ( builder, "acronyme", ao->acronyme );
     Json_add_double ( builder, "valeur",   ao->val_ech );
-    json_builder_end_object (builder);                                                                        /* End Document */
     return(Json_get_buf ( builder, taille_buf_p ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

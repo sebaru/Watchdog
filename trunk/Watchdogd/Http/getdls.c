@@ -47,9 +47,8 @@
     if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
           else { g_snprintf(date, sizeof(date), "Erreur"); }
 
-    json_builder_begin_object (builder);
+    Json_add_object ( builder, dls->plugindb.tech_id );
     Json_add_int    ( builder, "id",        dls->plugindb.id );
-    Json_add_string ( builder, "tech_id",   dls->plugindb.tech_id );
     Json_add_string ( builder, "shortname", dls->plugindb.shortname );
     Json_add_string ( builder, "name" ,     dls->plugindb.nom );
     if (dls->version) Json_add_string ( builder, "version", dls->version() );
@@ -78,7 +77,7 @@
     Json_add_bool   ( builder, "bit_secu_pers_ok",     dls->vars.bit_secupers_ok );
 
     Json_add_bool   ( builder, "bit_acquit",           dls->vars.bit_acquit );
-    json_builder_end_object (builder);
+    Json_end_object ( builder );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
@@ -99,9 +98,7 @@
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping dlslist ----------------------------------------------------*/
-    json_builder_begin_array (builder);                                                        /* Création du noeud principal */
     Dls_foreach ( builder, Http_dls_do_plugin, NULL );
-    json_builder_end_array (builder);                                                                         /* End Document */
 
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
