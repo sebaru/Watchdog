@@ -46,13 +46,13 @@
      { case SSTAG_SERVEUR_SHOW_HISTO:
              { struct CMD_TYPE_HISTO *histo;
                histo = (struct CMD_TYPE_HISTO *)connexion->donnees;
-               Proto_afficher_un_histo( histo );
+               Proto_insert_or_update_histo( histo );
              }
             break;
        case SSTAG_SERVEUR_ACK_HISTO:
              { struct CMD_TYPE_HISTO *histo;
                histo = (struct CMD_TYPE_HISTO *)connexion->donnees;
-               Proto_rafraichir_un_histo( histo );
+               Proto_insert_or_update_histo( histo );
              }
             break;
        case SSTAG_SERVEUR_DEL_HISTO:

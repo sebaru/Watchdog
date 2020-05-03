@@ -217,9 +217,8 @@
  extern void Proto_afficher_mnemo_dls ( struct CMD_TYPE_MNEMO_BASE *mnemo );
  extern void Dls_set_compil_status ( gchar *chaine );
 
- extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );                                   /* Dans liste_histo.c */
- extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
- extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
+ extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );                                     /* Dans liste_histo.c */
+ extern void Proto_insert_or_update_histo( struct CMD_TYPE_HISTO *histo );
  extern void Creer_page_histo( void );
  extern gchar *Type_vers_string ( guint type );
  extern gchar *Type_sms_vers_string ( guint type );

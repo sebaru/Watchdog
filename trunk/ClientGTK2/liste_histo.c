@@ -230,16 +230,22 @@
                          -1
                        );
   }
-/**********************************************************************************************************/
-/* Proto_rafrachir_un_histo: Rafraichissement de l'histo en parametre                                     */
-/* Entrée: une reference sur le groupe                                                                    */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo )
+/******************************************************************************************************************************/
+/* Proto_insert_or_update_histo: Meta jour une ligne historique ou l'ajoute le cas échéant                                    */
+/* Entrée: Une référence sur l'histo                                                                                          */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Proto_insert_or_update_histo( struct CMD_TYPE_HISTO *histo )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
     guint id;
+
+    if (!Tester_page_notebook(TYPE_PAGE_HISTO))
+     { printf("Creation page histo\n");
+       Creer_page_histo();
+       printf("Fin Creation page histo\n");
+     }
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
@@ -252,24 +258,6 @@
         }
        valide = gtk_tree_model_iter_next( store, &iter );
      }
-  }
-/**********************************************************************************************************/
-/* Afficher_un_message: Ajout d'un message dans la liste des messages à l'écran                           */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo )
-  { GtkListStore *store;
-    GtkTreePath *path;
-    GtkTreeIter iter;
-
-    if (!Tester_page_notebook(TYPE_PAGE_HISTO))
-     { printf("Creation page histo\n");
-       Creer_page_histo();
-       printf("Fin Creation page histo\n");
-     }
-
-    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) ));
     gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
     Rafraichir_visu_histo ( &iter, histo );
     path = gtk_tree_model_get_path ( GTK_TREE_MODEL(store), &iter );
