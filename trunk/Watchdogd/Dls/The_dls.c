@@ -53,7 +53,8 @@
 
     Partage->com_dls.Compil_at_boot = FALSE;                                                   /* Settings default parameters */
     Partage->com_dls.Thread_debug   = FALSE;                                                   /* Settings default parameters */
-
+    g_snprintf( Partage->com.dls.Library_version, sizeof(Partage->com.dls.Library_version), "unknown" );
+     
     if ( ! Recuperer_configDB( &db, "dls" ) )                                               /* Connexion a la base de données */
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                 "%s: Database connexion failed. Using Default Parameters", __func__ );
