@@ -80,10 +80,13 @@
        struct tm *temps = localtime( (time_t *)&tv.tv_sec );
        strftime( chaine, sizeof(chaine), "%F %T", temps );
        gchar *temp_date_fixe = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-       g_snprintf( date_fixe, sizeof(date_fixe), "%s.%02d", temp_date_fixe, (gint)tv.tv_usec/10000 );
+       g_snprintf( date_fixe, sizeof(date_fixe), "%s", temp_date_fixe );
        g_free( temp_date_fixe );
 
-       Acquitter_histo_msgsDB ( tech_id, acronyme, soup_client_context_get_auth_user (client), date_fixe );
+       gchar *username = soup_client_context_get_auth_user (client);
+       if (!username) username = "unknown";
+
+       Acquitter_histo_msgsDB ( tech_id, acronyme, username, date_fixe );
 
        JsonBuilder *builder = Json_create ();
        if (builder == NULL)
@@ -95,7 +98,7 @@
           Json_add_string ( builder, "zmq_type", "update_histo" );
           Json_add_string ( builder, "tech_id", tech_id );
           Json_add_string ( builder, "acronyme", acronyme );
-          Json_add_string ( builder, "nom_ack", soup_client_context_get_auth_user (client) );
+          Json_add_string ( builder, "nom_ack", username );
           Json_add_string ( builder, "date_fixe", date_fixe );
           gchar *buf = Json_get_buf ( builder, &taille_buf );
           Http_msgs_send_to_all ( buf );

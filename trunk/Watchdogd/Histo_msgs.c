@@ -263,7 +263,7 @@
     Json_add_bool   ( builder, "enable", histo->msg.enable );                       /* Le message est-il encore d'actualité ? */
     Json_add_string ( builder, "nom_ack", histo->nom_ack );
     Json_add_string ( builder, "date_create", histo->date_create );
-    Json_add_string ( builder, "date_fixe", histo->date_create );
+    Json_add_string ( builder, "date_fixe", histo->date_fixe );
     Json_add_string ( builder, "date_fin", histo->date_fin );
     Json_add_string ( builder, "tech_id", histo->msg.tech_id );
     Json_add_string ( builder, "acronyme", histo->msg.acronyme );
