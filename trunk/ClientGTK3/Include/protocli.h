@@ -159,7 +159,7 @@
  extern GtkWidget *Creer_page_histo( struct CLIENT *Client );                                           /* Dans liste_histo.c */
  extern void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data );
  extern void Reset_page_histo( struct CLIENT *client );
- extern void Acquitter_histo ( struct CLIENT *Client );
+// extern void Acquitter_histo ( struct CLIENT *Client );
 
 #ifdef bouh
  extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );
@@ -456,6 +456,7 @@
  extern JsonNode *Json_get_from_string ( gchar *chaine );
  extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );
  extern gfloat Json_get_float ( JsonNode *query, gchar *chaine );
+ extern gint Json_get_int ( JsonNode *query, gchar *chaine );
  extern gboolean Json_get_bool ( JsonNode *query, gchar *chaine );
  extern JsonArray *Json_get_array ( JsonNode *query, gchar *chaine );
  #endif

@@ -90,6 +90,39 @@
     return( "Unknown" );
   }
 /******************************************************************************************************************************/
+/* Menu_acquitter_histo: Acquittement d'un des messages histo                                                                 */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Acquitter_histo ( struct CLIENT *client )
+  { GtkTreeSelection *selection;
+    gchar *tech_id, *acronyme;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    GList *lignes;
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(client->Liste_histo) );
+
+    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+    while ( lignes )
+     { gsize taille_buf;
+       gchar *buf;
+       gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
+       gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
+
+       JsonBuilder *builder = Json_create ();
+       if (builder == NULL) break;
+       Json_add_string( builder, "tech_id", tech_id );
+       Json_add_string( builder, "acronyme", acronyme );
+       buf = Json_get_buf (builder, &taille_buf);
+       Envoi_au_serveur( client, "POST", buf, taille_buf, "histo/ack", NULL );
+       gtk_tree_selection_unselect_iter( selection, &iter );
+       lignes = lignes->next;
+     }
+    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (lignes);                                                           /* Liberation mémoire */
+  }
+/******************************************************************************************************************************/
 /* Gerer_popup_message: Gestion du menu popup quand on clique droite sur la liste des messages                                */
 /* Entrée: la liste(widget), l'evenement bouton, et les data                                                                  */
 /* Sortie: Niet                                                                                                               */
@@ -137,66 +170,6 @@
        return(TRUE);
      }
     return(FALSE);
-  }
-/******************************************************************************************************************************/
-/* Updater_histo_CB: Appeler suite a une requete d'acquit auprès du serveur                                                   */
-/* Entrée: les parametres libsoup                                                                                             */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Updater_histo ( struct CLIENT *client, JsonNode *element )
-  { gchar *tech_id, *acronyme;
-    GtkTreeIter iter;
-
-    gchar *acronyme_recu = Json_get_string ( element, "acronyme" );
-    gchar *tech_id_recu  = Json_get_string ( element, "tech_id" );
-    if (!acronyme || !tech_id) return;
-
-    GtkTreeModel *store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
-    gboolean valide      = gtk_tree_model_get_iter_first( store, &iter );
-
-    while ( valide )                                                    /* A la recherche de l'iter perdu */
-     { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
-       if ( !strcmp(tech_id, tech_id_recu) && !strcmp(acronyme,acronyme_recu) )
-        { gchar ack[80];
-          g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") );
-          gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, ack, -1 );
-          break;
-        }
-       valide = gtk_tree_model_iter_next( store, &iter );
-     }
-  }
-/******************************************************************************************************************************/
-/* Menu_acquitter_histo: Acquittement d'un des messages histo                                                                 */
-/* Entrée: rien                                                                                                               */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Acquitter_histo ( struct CLIENT *client )
-  { GtkTreeSelection *selection;
-    gchar *tech_id, *acronyme;
-    GtkTreeModel *store;
-    GtkTreeIter iter;
-    GList *lignes;
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );
-    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(client->Liste_histo) );
-
-    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    while ( lignes )
-     { gsize taille_buf;
-       gchar *buf;
-       gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
-
-       JsonBuilder *builder = Json_create ();
-       if (builder == NULL) break;
-       Json_add_string( builder, "tech_id", tech_id );
-       Json_add_string( builder, "acronyme", acronyme );
-       buf = Json_get_buf (builder, &taille_buf);
-       Envoi_au_serveur( client, "POST", buf, taille_buf, "histo/ack", NULL );
-       gtk_tree_selection_unselect_iter( selection, &iter );
-       lignes = lignes->next;
-     }
-    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
   }
 #ifdef bouh
 /**********************************************************************************************************/
@@ -312,6 +285,46 @@ again:
     gtk_tree_path_free( path );
   }
 /******************************************************************************************************************************/
+/* Updater_histo_CB: Appeler suite a une requete d'acquit auprès du serveur                                                   */
+/* Entrée: les parametres libsoup                                                                                             */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Updater_histo ( struct CLIENT *client, JsonNode *element )
+  { gchar *tech_id, *acronyme;
+    GtkTreeIter iter;
+
+    gchar *acronyme_recu = Json_get_string ( element, "acronyme" );
+    gchar *tech_id_recu  = Json_get_string ( element, "tech_id" );
+    gboolean alive = Json_get_bool(element,"alive");
+
+    if (!acronyme || !tech_id) return;
+
+    if (alive == FALSE) { Cacher_un_histo ( client, element ); return; }
+
+    GtkTreeModel *store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
+    gboolean valide      = gtk_tree_model_get_iter_first( store, &iter );
+
+    while ( valide )                                              /* A la recherche de l'iter perdu. Si trouvé, on met a jour */
+     { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
+       if ( !strcmp(tech_id, tech_id_recu) && !strcmp(acronyme,acronyme_recu) )
+        { gchar ack[80], *chaine;
+
+          if (strcmp(Json_get_string(element, "nom_ack"),"None"))
+           { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") ); }
+          else
+           { g_snprintf( ack, sizeof(ack), "(%s)", Json_get_string(element, "nom_ack" ) ); }
+          gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, ack, -1 );
+          chaine = Json_get_string(element, "date_create");
+          if (chaine)
+           { gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_DATE_CREATE, chaine, -1 ); }
+           
+          return;
+        }
+       valide = gtk_tree_model_iter_next( store, &iter );
+     }
+    Afficher_un_histo( NULL, 0, element, client );                                /* Sinon on en affiche un nouveau complet ! */
+  }
+/******************************************************************************************************************************/
 /* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
 /* Entrée: rien                                                                                                               */
 /* Sortie: un widget boite                                                                                                    */
@@ -327,15 +340,8 @@ again:
     if (zmq_type)
      { if (!strcmp(zmq_type,"load_histo_alive"))
         { json_array_foreach_element ( Json_get_array(response, "enregs"), Afficher_un_histo, client ); }
-       else if(!strcmp(zmq_type,"insert_or_delete_histo"))
-        { if (Json_get_bool(response,"alive"))
-           { Afficher_un_histo( NULL, 0, response, client ); }
-          else { Cacher_un_histo ( client, response ); }
-        }
-       else if(!strcmp(zmq_type,"update_histo"))
-        { Updater_histo( client, response ); }
-       else if(!strcmp(zmq_type,"pulse"))
-        { Set_progress_pulse( client ); }
+       else if(!strcmp(zmq_type,"update_histo")) { Updater_histo( client, response ); }
+       else if(!strcmp(zmq_type,"pulse"))        { Set_progress_pulse( client ); }
      }
     json_node_unref(response);
   }

@@ -117,7 +117,7 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
        return;
      }
-    Json_add_string( builder, "zmq_type", "insert_or_delete_histo" );
+    Json_add_string( builder, "zmq_type", "update_histo" );
     Histo_msg_print_to_JSON ( builder, histo );
     gchar *buf = Json_get_buf ( builder, &taille_buf );
     Http_msgs_send_to_all ( buf );
