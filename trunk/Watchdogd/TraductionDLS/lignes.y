@@ -53,7 +53,7 @@
 %token <val>    T_BUS T_HOST T_THREAD T_TAG T_PARAM1
 
 %token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
-%token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM
+%token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM T_UPDATE
 
 %token <val>    T_TYPE T_INFO T_ATTENTE T_DEFAUT T_ALARME T_VEILLE T_ALERTE T_DERANGEMENT T_DANGER
 %type  <val>    type_msg
@@ -942,6 +942,11 @@ une_option:     MODE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = RESET;
                    $$->entier = $3;
+                }}
+                | T_UPDATE
+                {{ $$=New_option();
+                   $$->type = T_UPDATE;
+                   $$->entier = 1;
                 }}
                 | RATIO T_EGAL ENTIER
                 {{ $$=New_option();

@@ -486,10 +486,13 @@
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-    g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
-                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-    g_snprintf( action->sinon, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
-                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+    gint update = Get_option_entier ( alias->options, T_UPDATE );
+    if (update==-1) update=0;
+
+    g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, TRUE );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
+    g_snprintf( action->sinon, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, FALSE );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
     return(action);
   }
 /******************************************************************************************************************************/

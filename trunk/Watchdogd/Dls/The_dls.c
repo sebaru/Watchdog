@@ -40,6 +40,7 @@
 
  #include "watchdogd.h"
 
+ #define DLS_LIBRARY_VERSION  "20200503"
 
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
@@ -64,6 +65,8 @@
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Partage->com_dls.Thread_debug = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "compil_at_boot" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Partage->com_dls.Compil_at_boot = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "library_version" ) )
+        { g_snprintf( Partage->com_dls.Library_version, sizeof(Partage->com_dls.Library_version), "%s", valeur ); }
        else
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE,
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
@@ -1448,7 +1451,7 @@
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MSG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean etat )
+ void Dls_data_set_MSG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
   { struct DLS_MESSAGES *msg;
 
     if (!msg_p || !*msg_p)
@@ -1478,7 +1481,26 @@
       }
     else msg = (struct DLS_MESSAGES *)*msg_p;
 
-    if ( msg->etat != etat )
+    if ( update )
+     { if (etat == FALSE) { msg->etat_update = FALSE; }
+       else if (etat == TRUE && msg->etat_update == FALSE)
+        { struct DLS_MESSAGES_EVENT *event;
+          msg->etat_update = TRUE;
+          event = (struct DLS_MESSAGES_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGES_EVENT) );
+          if (!event)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
+                      "%s: malloc Event failed. Memory error for Updating MSG'%s:%s'", __func__, msg->tech_id, msg->acronyme );
+           }
+          else
+           { event->etat = TRUE;                                                        /* Recopie de l'état dans l'evenement */
+             event->msg  = msg;
+             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
+        }
+     }
+    else if ( msg->etat != etat )
      { msg->etat = etat;
 
        if ( msg->last_change + 10 <= Partage->top ) { msg->changes = 0; }            /* Si pas de change depuis plus de 1 sec */
@@ -1904,6 +1926,14 @@
     Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */
     Dls_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
+
+    if (strcmp ( Partage->com_dls.Library_version, DLS_LIBRARY_VERSION ) )
+     { Partage->com_dls.Compil_at_boot = TRUE;
+       if (Modifier_configDB ( "dls", "library_version", DLS_LIBRARY_VERSION ))
+        { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating library version OK", __func__ ); }
+       else
+        { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: update library error" ); }
+     }
     Charger_plugins();                                                                          /* Chargement des modules dls */
     SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
     SB_SYS(2, 1);                                                                                      /* B2 est toujours à 1 */

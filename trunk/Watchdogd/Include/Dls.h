@@ -173,6 +173,7 @@
   { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gboolean etat;
+    gboolean etat_update;
     gint last_change;
     gint changes;
   };
@@ -223,6 +224,7 @@
     gboolean Thread_debug;                                                             /* TRUE si le thread doit tout logguer */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     gboolean Compil_at_boot;                                            /* True si DLS doit compiler les plugins au démarrage */
+    gchar Library_version[12];                       /* Version de librairie. Si différent, impose une recompilation complete */
     guint admin_start;                                                                              /* Demande de deconnexion */
     guint admin_stop;                                                                               /* Demande de deconnexion */
     guint temps_sched;                                          /* Delai d'attente DLS pour assurer 100 tours max par seconde */

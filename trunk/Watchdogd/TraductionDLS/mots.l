@@ -129,6 +129,7 @@ newline       [\n\r]+
 "libelle"                  { DlsScanner_lval.val = T_LIBELLE;   return T_LIBELLE;   }
 "unite"                    { DlsScanner_lval.val = T_UNITE;     return T_UNITE;     }
 "random"                   { DlsScanner_lval.val = T_RANDOM;    return T_RANDOM;    }
+"update"                   { DlsScanner_lval.val = T_UPDATE;    return T_UPDATE;    }
 "etiquette"                { DlsScanner_lval.val = T_ETIQUETTE; return T_ETIQUETTE; }
 "daa"                      { DlsScanner_lval.val = T_DAA;       return T_DAA;       }
 "dma"                      { DlsScanner_lval.val = T_DMINA;     return T_DMINA;     }
