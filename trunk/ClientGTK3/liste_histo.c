@@ -295,11 +295,10 @@ again:
 
     gchar *acronyme_recu = Json_get_string ( element, "acronyme" );
     gchar *tech_id_recu  = Json_get_string ( element, "tech_id" );
-    gboolean alive = Json_get_bool(element,"alive");
 
     if (!acronyme || !tech_id) return;
 
-    if (alive == FALSE) { Cacher_un_histo ( client, element ); return; }
+    if (Json_has_element(element,"alive") && Json_get_bool(element,"alive") == FALSE) { Cacher_un_histo ( client, element ); return; }
 
     GtkTreeModel *store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
     gboolean valide      = gtk_tree_model_get_iter_first( store, &iter );
@@ -309,15 +308,14 @@ again:
        if ( !strcmp(tech_id, tech_id_recu) && !strcmp(acronyme,acronyme_recu) )
         { gchar ack[80], *chaine;
 
-          if (strcmp(Json_get_string(element, "nom_ack"),"None"))
-           { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") ); }
-          else
-           { g_snprintf( ack, sizeof(ack), "(%s)", Json_get_string(element, "nom_ack" ) ); }
-          gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, ack, -1 );
+          if(Json_has_element(element, "nom_ack"))
+           { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") );
+             gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, ack, -1 );
+           }
           chaine = Json_get_string(element, "date_create");
           if (chaine)
            { gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_DATE_CREATE, chaine, -1 ); }
-           
+
           return;
         }
        valide = gtk_tree_model_iter_next( store, &iter );

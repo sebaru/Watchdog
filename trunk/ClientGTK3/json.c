@@ -189,4 +189,13 @@
   { JsonObject *object = json_node_get_object (query);
     return(json_object_get_array_member ( object, chaine ));
   }
+/******************************************************************************************************************************/
+/* Json_get_int: Recupere l'entier dont le nom est en parametre                                                               */
+/* Entrée: la query, le nom du parametre                                                                                      */
+/* Sortie: la chaine de caractere                                                                                             */
+/******************************************************************************************************************************/
+ gboolean Json_has_element ( JsonNode *query, gchar *chaine )
+  { JsonObject *object = json_node_get_object (query);
+    return(json_object_has_member ( object, chaine ));
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

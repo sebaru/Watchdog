@@ -250,7 +250,7 @@
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
-    while ( valide )                                                    /* A la recherche de l'iter perdu */
+    while ( valide )                                                                        /* A la recherche de l'iter perdu */
      { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
        if ( id == histo->id )
         { Rafraichir_visu_histo( &iter, histo );
@@ -258,17 +258,17 @@
         }
        valide = gtk_tree_model_iter_next( store, &iter );
      }
-    gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
+    gtk_list_store_append ( GTK_LIST_STORE(store), &iter );                                          /* Acquisition iterateur */
     Rafraichir_visu_histo ( &iter, histo );
-    path = gtk_tree_model_get_path ( GTK_TREE_MODEL(store), &iter );
+    GtkTreePath *path = gtk_tree_model_get_path ( GTK_TREE_MODEL(store), &iter );
     gtk_tree_view_scroll_to_cell ( GTK_TREE_VIEW(Liste_histo), path, NULL, FALSE, 0.0, 0.0 );
     gtk_tree_path_free( path );
   }
-/**********************************************************************************************************/
-/* Cacher_un_utilisateur: Enleve un groupe de la liste des utilisateurs                                   */
-/* Entrée: une reference sur l'utilisateur                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Cacher_un_utilisateur: Enleve un groupe de la liste des utilisateurs                                                       */
+/* Entrée: une reference sur l'utilisateur                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo )
   { GtkTreeModel *store;
     GtkTreeIter iter;
@@ -276,12 +276,13 @@
     guint id;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
+again:
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
      { gtk_tree_model_get( store, &iter, COLONNE_MSG_ID, &id, -1 );
        if ( id == histo->msg.id )
-        { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
+        { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); goto again; }
        valide = gtk_tree_model_iter_next( store, &iter );
      }
   }

@@ -71,7 +71,7 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN:
-             { g_list_foreach( Arrivee_histo, (GFunc)Proto_afficher_un_histo, NULL );
+             { g_list_foreach( Arrivee_histo, (GFunc)Proto_insert_or_update_histo, NULL );
                g_list_foreach( Arrivee_histo, (GFunc)g_free, NULL );
                g_list_free( Arrivee_histo );
                Arrivee_histo = NULL;
