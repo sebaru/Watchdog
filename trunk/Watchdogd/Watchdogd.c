@@ -264,8 +264,13 @@
        query = Json_get_from_string ( payload );
        if (!query)
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); return; }
-       Dls_data_set_AI ( Json_get_string ( query, "tech_id" ),
-       Json_get_string ( query, "acronyme" ), NULL, Json_get_float ( query, "valeur" ), Json_get_bool ( query, "in_range" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                 "%s: receive SET_AI from %s/%s to %s/%s : '%s:%s'=%f (range=%d)", __func__,
+                 event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
+                 Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ),
+                 Json_get_float ( query, "valeur" ), Json_get_bool ( query, "in_range" ) );
+       Dls_data_set_AI ( Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ), NULL,
+                         Json_get_float ( query, "valeur" ), Json_get_bool ( query, "in_range" ) );
        json_node_unref (query);
      }
     else if ( !strcmp(event->tag,"SET_CDE") )
@@ -371,6 +376,10 @@
            __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
        g_snprintf( chaine, sizeof(chaine), "sudo -n %s", (gchar *)payload );
        system(chaine);
+     }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s/%s to %s/%s/%s",
+           __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
      }
   }
 /******************************************************************************************************************************/

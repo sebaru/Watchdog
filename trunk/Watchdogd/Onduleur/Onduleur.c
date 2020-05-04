@@ -298,31 +298,14 @@
        Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_VOLTAGE", 0.0, FALSE );
 
        Mnemo_auto_create_DO ( module->tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
-       Dls_data_set_DO ( NULL, module->tech_id, "LOAD_OFF", &module->do_load_off, FALSE );
-
        Mnemo_auto_create_DO ( module->tech_id, "LOAD_ON", "Active la sortie ondulée" );
-       Dls_data_set_DO ( NULL, module->tech_id, "LOAD_ON", &module->do_load_on, FALSE );
-
        Mnemo_auto_create_DO ( module->tech_id, "OUTLET_1_OFF", "Désactive la prise n°1" );
-       Dls_data_set_DO ( NULL, module->tech_id, "OUTLET_1_OFF", &module->do_outlet_1_off, FALSE );
-
        Mnemo_auto_create_DO ( module->tech_id, "OUTLET_1_ON", "Active la prise n°1" );
-       Dls_data_set_DO ( NULL, module->tech_id, "OUTLET_1_ON", &module->do_outlet_1_on, FALSE );
-
        Mnemo_auto_create_DO ( module->tech_id, "OUTLET_2_OFF", "Désactive la prise n°2" );
-       Dls_data_set_DO ( NULL, module->tech_id, "OUTLET_2_OFF", &module->do_outlet_2_off, FALSE );
-
        Mnemo_auto_create_DO ( module->tech_id, "OUTLET_2_ON", "Active la prise n°2" );
-       Dls_data_set_DO ( NULL, module->tech_id, "OUTLET_2_ON", &module->do_outlet_2_on, FALSE );
-
        Mnemo_auto_create_DO ( module->tech_id, "START_DEEP_BAT", "Active un test de decharge profond" );
-       Dls_data_set_DO ( NULL, module->tech_id, "START_DEEP_BAT", &module->do_start_deep_bat, FALSE);
-
        Mnemo_auto_create_DO ( module->tech_id, "START_QUICK_BAT", "Active un test de decharge léger" );
-       Dls_data_set_DO ( NULL, module->tech_id, "START_QUICK_BAT", &module->do_start_quick_bat, FALSE );
-
        Mnemo_auto_create_DO ( module->tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
-       Dls_data_set_DO ( NULL, module->tech_id, "STOP_TEST_BAT", &module->do_stop_test_bat, FALSE );
      }
 
     module->date_next_connexion = 0;

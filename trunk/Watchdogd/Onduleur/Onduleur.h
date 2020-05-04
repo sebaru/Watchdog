@@ -75,32 +75,6 @@
     UPSCONN_t upsconn;                                                                               /* Connexion UPS à l'ups */
     gboolean started;                                                                                      /* Est-il actif ?? */
     time_t date_next_connexion;
-    gpointer ai_load;
-    gpointer ai_realpower;
-    gpointer ai_battery_charge;
-    gpointer ai_battery_runtime;
-    gpointer ai_battery_voltage;
-    gpointer ai_input_voltage;
-    gpointer ai_input_frequency;
-    gpointer ai_output_current;
-    gpointer ai_output_voltage;
-    gpointer ai_output_frequency;
-    gpointer di_outlet_1_status;
-    gpointer di_outlet_2_status;
-    gpointer di_ups_online;
-    gpointer di_ups_charging;
-    gpointer di_ups_on_batt;
-    gpointer di_ups_replace_batt;
-    gpointer di_ups_alarm;
-    gpointer do_load_off;
-    gpointer do_load_on;
-    gpointer do_outlet_1_off;
-    gpointer do_outlet_1_on;
-    gpointer do_outlet_2_off;
-    gpointer do_outlet_2_on;
-    gpointer do_start_deep_bat;
-    gpointer do_start_quick_bat;
-    gpointer do_stop_test_bat;
   };
 
 /************************************************* Déclaration des prototypes *************************************************/
