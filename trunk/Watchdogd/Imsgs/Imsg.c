@@ -468,7 +468,7 @@ reconnect:
     Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG, "%s: XMPPshutdown OK", __func__ );
 
     if (Cfg_imsgs.lib->Thread_run == TRUE && Cfg_imsgs.signed_off == TRUE)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Account signed off. Why ?? Reconnect in 5s!", __func__ );
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Account signed off. Why ?? Reconnect in 5s!", __func__ );
        Cfg_imsgs.signed_off = FALSE;
        sleep(5);
        goto reconnect;

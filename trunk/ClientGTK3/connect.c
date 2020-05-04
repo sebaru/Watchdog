@@ -86,17 +86,35 @@
     else soup_session_queue_message (client->connexion, msg, callback, client);
   }
 /******************************************************************************************************************************/
+/* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
+/* Entrée: rien                                                                                                               */
+/* Sortie: un widget boite                                                                                                    */
+/******************************************************************************************************************************/
+ static void Http_ws_msgs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
+  { printf("%s\n", __func__ );
+  }
+ static void Http_ws_msgs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
+  { printf("%s: WebSocket Error '%s' received !", __func__, error->message );
+  }
+/******************************************************************************************************************************/
 /* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
 /* Entrée: les variables traditionnelles de libsous                                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Traiter_connect_ws_CB (GObject *source_object, GAsyncResult *res, gpointer user_data )
   { struct CLIENT *client = user_data;
+    GError *error = NULL;
     printf("%s\n", __func__ );
-    client->websocket = soup_session_websocket_connect_finish ( client->connexion, res, NULL );
+    client->websocket = soup_session_websocket_connect_finish ( client->connexion, res, &error );
     if (client->websocket)
-     { g_signal_connect( client->websocket, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), client );
+     { g_object_set ( G_OBJECT(client->websocket), "max-incoming-payload-size", 0, NULL );   /* No limit on incoming packet ! */
+       g_signal_connect ( client->websocket, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), client );
+       g_signal_connect ( client->websocket, "closed",  G_CALLBACK(Http_ws_msgs_on_closed), client );
+       g_signal_connect ( client->websocket, "error",   G_CALLBACK(Http_ws_msgs_on_error), client );
      }
+    else { printf("Error opening Websocket '%s' !", error->message);
+           g_error_free (error);
+         }
   }
 /******************************************************************************************************************************/
 /* Connecter_au_serveur_CB: Traite la reponse du serveur a la demande de connexionen                                          */
