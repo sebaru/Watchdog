@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/fr/abls_habitat/watchdog">
+    <file>gtk/menus.ui</file>
+    <file>icons/fr.abls-habitat.watchdog.png</file>
+    <file>icons/Bouclier2_rouge.svg</file>
+    <file>icons/Bouclier2_vert.svg</file>
+    <file>icons/Croix_rouge_rouge.svg</file>
+    <file>icons/Croix_rouge_vert.svg</file>
+    <file>icons/Pignon_orange.svg</file>
+    <file>icons/Pignon_jaune.svg</file>
+    <file>icons/Pignon_vert.svg</file>
+    <file>icons/Info.svg</file>
+  </gresource>
+</gresources>

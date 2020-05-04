@@ -212,7 +212,7 @@
     struct DLS_REGISTRE *reg;
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
      { reg = NULL;
-       Dls_data_set_R ( db->row[0], db->row[1], (gpointer)&reg, atof(db->row[2]) );
+       Dls_data_set_R ( NULL, db->row[0], db->row[1], (gpointer)&reg, atof(db->row[2]) );
        g_snprintf( reg->unite, sizeof(reg->unite), "%s", db->row[3] );
        reg->archivage = atoi(db->row[4]);
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: REGISTRE '%s:%s'=%f %s loaded (archivage=%d)", __func__,
@@ -253,5 +253,18 @@
 
     Libere_DB_SQL( &db );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d REGISTRE updated", __func__, cpt );
+  }
+/******************************************************************************************************************************/
+/* Dls_REGISTRE_to_json : Formate un bit au format JSON                                                                       */
+/* Entrées: le builder et le bit                                                                                              */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_REGISTRE_to_json ( JsonBuilder *builder, struct DLS_REGISTRE *bit )
+  { Json_add_string ( builder, "tech_id",  bit->tech_id );
+    Json_add_string ( builder, "acronyme", bit->acronyme );
+    Json_add_double ( builder, "valeur", bit->valeur );
+    Json_add_string ( builder, "unite", bit->unite );
+    Json_add_bool   ( builder, "archivage", bit->archivage );
+    Json_add_int    ( builder, "last_arch", bit->last_arch );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

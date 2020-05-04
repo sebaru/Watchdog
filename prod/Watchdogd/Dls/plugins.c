@@ -104,14 +104,14 @@
      { struct DLS_MESSAGES *msg = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(msg->tech_id, plugin->plugindb.tech_id))
-        { Dls_data_set_MSG ( msg->tech_id, msg->acronyme, (gpointer *)&msg, FALSE ); }
+        { Dls_data_set_MSG ( &plugin->vars, msg->tech_id, msg->acronyme, (gpointer *)&msg, FALSE, FALSE ); }
      }
     liste_bit = Partage->Dls_data_BOOL;                                               /* Decharge tous les booleens du module */
     while(liste_bit)
      { struct DLS_BOOL *bool = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(bool->tech_id, plugin->plugindb.tech_id))
-        { Dls_data_set_bool ( bool->tech_id, bool->acronyme, (gpointer *)&bool, FALSE ); }
+        { Dls_data_set_bool ( &plugin->vars, bool->tech_id, bool->acronyme, (gpointer *)&bool, FALSE ); }
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }

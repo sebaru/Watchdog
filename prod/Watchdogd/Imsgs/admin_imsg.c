@@ -50,20 +50,16 @@
      }
 
     while ( (imsgs = Recuperer_imsgsDB_suite( db )) != NULL)
-     { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-
+     { Json_add_object ( builder, imsgs->user_name );
        Json_add_int    ( builder, "user_id", imsgs->user_id );
-       Json_add_string ( builder, "user_name", imsgs->user_name );
        Json_add_bool   ( builder, "user_enable", imsgs->user_enable );
        Json_add_bool   ( builder, "user_imsg_enable", imsgs->user_imsg_enable );
        Json_add_string ( builder, "user_jabber_id", imsgs->user_jabberid );
        Json_add_bool   ( builder, "user_allow_command", imsgs->user_allow_cde );
        Json_add_bool   ( builder, "user_available", imsgs->user_available );
        Json_add_string ( builder, "user_comment", imsgs->user_comment );
-
-       json_builder_end_object (builder);                                                                     /* End Document */
+       Json_end_object ( builder );                                                                           /* End Document */
      }
-
     Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
@@ -86,16 +82,8 @@
 /************************************************ Préparation du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/list")) { Admin_json_list ( builder ); }
-    else if ( ! strcmp ( commande, "/add_buddy/" ) )
-				 { json_builder_begin_object (builder);                                                    /* Création du noeud principal */
-       Json_add_string ( builder, "buddy_name", commande+11 );
-       json_builder_end_object (builder);                                                                     /* End Document */
-       /*purple_account_add_buddy( Cfg_imsgs.account, purple_buddy_new	( Cfg_imsgs.account, commande + 11, commande + 11 ) );*/
-     }
     else if ( ! strcmp ( commande, "/send/" ) )
-				 { json_builder_begin_object (builder);                                                    /* Création du noeud principal */
-       Json_add_string ( builder, "message_sent", commande+6 );
-       json_builder_end_object (builder);                                                                     /* End Document */
+				 { Json_add_string ( builder, "message_sent", commande+6 );
        Imsgs_Envoi_message_to_all_available ( commande+6 );
      }
 

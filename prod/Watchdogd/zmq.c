@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -29,8 +29,8 @@
 
  #include "watchdogd.h"
 /******************************************************************************************************************************/
-/* Zmq_instance_is_target: Renvoie TRUE si l'instance actuelle est visÈe par l'evenement en parametre                         */
-/* EntrÈe: l'evenement                                                                                                        */
+/* Zmq_instance_is_target: Renvoie TRUE si l'instance actuelle est vis√©e par l'evenement en parametre                         */
+/* Entr√©e: l'evenement                                                                                                        */
 /* Sortie: TRUE ou FALSE                                                                                                      */
 /******************************************************************************************************************************/
  gboolean Zmq_instance_is_target ( struct ZMQ_TARGET *event )
@@ -47,8 +47,8 @@
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Zmq_instance_is_target: Renvoie TRUE si l'instance actuelle est visÈe par l'evenement en parametre                         */
-/* EntrÈe: l'evenement                                                                                                        */
+/* Zmq_instance_is_target: Renvoie TRUE si l'instance actuelle est vis√©e par l'evenement en parametre                         */
+/* Entr√©e: l'evenement                                                                                                        */
 /* Sortie: TRUE ou FALSE                                                                                                      */
 /******************************************************************************************************************************/
  static gboolean Zmq_thread_is_target ( struct ZMQ_TARGET *event, const gchar *thread )
@@ -58,8 +58,8 @@
     return(FALSE);
   }
 /******************************************************************************************************************************/
-/* Zmq_instance_is_target: Renvoie TRUE si l'instance actuelle est visÈe par l'evenement en parametre                         */
-/* EntrÈe: l'evenement                                                                                                        */
+/* Zmq_instance_is_target: Renvoie TRUE si l'instance actuelle est vis√©e par l'evenement en parametre                         */
+/* Entr√©e: l'evenement                                                                                                        */
 /* Sortie: TRUE ou FALSE                                                                                                      */
 /******************************************************************************************************************************/
  gboolean Zmq_other_is_target ( struct ZMQ_TARGET *event )
@@ -67,8 +67,8 @@
     return(!Zmq_instance_is_target(event));
   }
 /******************************************************************************************************************************/
-/* New_zmq: Initialise une socket dont le pattern et le endpoint sont en parametre                                                 */
-/* EntrÈe: le pattern                                                                                                         */
+/* New_zmq: Initialise une socket dont le pattern et le endpoint sont en parametre                                            */
+/* Entr√©e: le pattern                                                                                                         */
 /* Sortie: une socket ZMQ ou NUL si erreur                                                                                    */
 /******************************************************************************************************************************/
  struct ZMQUEUE *New_zmq ( gint pattern, gchar *name )
@@ -79,7 +79,7 @@
                  __func__, name, zmq_strerror(errno) );
        return(NULL);
      }
-    
+
     zmq->pattern = pattern;
     g_snprintf( zmq->name, sizeof(zmq->name), "%s", name );
     if ( (zmq->socket = zmq_socket ( Partage->zmq_ctx, pattern )) == NULL)
@@ -91,7 +91,7 @@
   }
 /******************************************************************************************************************************/
 /* Subscribe_zmq: Souscris au topic en parametre                                                                              */
-/* EntrÈe: la queue, le topic                                                                                                 */
+/* Entr√©e: la queue, le topic                                                                                                 */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  static gboolean Subscribe_zmq ( struct ZMQUEUE *zmq )
@@ -105,7 +105,7 @@
   }
 /******************************************************************************************************************************/
 /* Bind_zmq: Bind la socket en parametre                                                                                      */
-/* EntrÈe: le type, le endpoint et le port                                                                                    */
+/* Entr√©e: le type, le endpoint et le port                                                                                    */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  struct ZMQUEUE *Bind_zmq ( gint pattern, gchar *name, gchar *type, gchar *endpoint, gint port )
@@ -116,7 +116,7 @@
                  __func__, name, zmq_strerror(errno) );
        return(NULL);
      }
-    
+
     zmq->pattern = pattern;
     g_snprintf( zmq->name, sizeof(zmq->name), "%s", name );
     if ( (zmq->socket = zmq_socket ( Partage->zmq_ctx, pattern )) == NULL)
@@ -128,7 +128,7 @@
 
     if (port) g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s:%d", type, endpoint, port );
          else g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s", type, endpoint );
-    if ( zmq_bind (zmq->socket, zmq->endpoint) == -1 ) 
+    if ( zmq_bind (zmq->socket, zmq->endpoint) == -1 )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "%s: ZMQ Bind '%s' to '%s' Failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
        g_free(zmq);
@@ -140,7 +140,7 @@
   }
 /******************************************************************************************************************************/
 /* Bind_zmq: Bind la socket en parametre                                                                                      */
-/* EntrÈe: le type, le endpoint et le port                                                                                    */
+/* Entr√©e: le type, le endpoint et le port                                                                                    */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  struct ZMQUEUE *Connect_zmq ( gint pattern, gchar *name, gchar *type, gchar *endpoint, gint port )
@@ -151,7 +151,7 @@
                  __func__, name, zmq_strerror(errno) );
        return(NULL);
      }
-    
+
     zmq->pattern = pattern;
     g_snprintf( zmq->name, sizeof(zmq->name), "%s", name );
     if ( (zmq->socket = zmq_socket ( Partage->zmq_ctx, pattern )) == NULL)
@@ -163,7 +163,7 @@
 
     if (port) g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s:%d", type, endpoint, port );
          else g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s", type, endpoint );
-    if ( zmq_connect (zmq->socket, zmq->endpoint) == -1 ) 
+    if ( zmq_connect (zmq->socket, zmq->endpoint) == -1 )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "%s: ZMQ Connect '%s' to '%s' Failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
        g_free(zmq);
@@ -175,7 +175,7 @@
   }
 /******************************************************************************************************************************/
 /* Close_zmq: Ferme une socket ZMQ                                                                                            */
-/* EntrÈe: la queue                                                                                                           */
+/* Entr√©e: la queue                                                                                                           */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Close_zmq ( struct ZMQUEUE *zmq )
@@ -186,7 +186,7 @@
   }
 /******************************************************************************************************************************/
 /* Send_zmq: Envoie un message dans la socket                                                                                 */
-/* EntrÈe: la socket, le message, sa longueur                                                                                 */
+/* Entr√©e: la socket, le message, sa longueur                                                                                 */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Send_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille )
@@ -201,10 +201,10 @@
   }
 /******************************************************************************************************************************/
 /* Send_zmq_with_tag: Envoie un message dans la socket avec le tag en prefixe                                                 */
-/* EntrÈe: la socket, le tag, le message, sa longueur                                                                         */
+/* Entr√©e: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, 
+ gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq,
                               const gchar *source_instance, const gchar *source_thread,
                               const gchar *target_instance, const gchar *target_thread,
                               const gchar *target_tag, void *source, gint taille )
@@ -218,7 +218,7 @@
                 "%s: Send to ZMQ '%s' ('%s') failed (Memory Error)", __func__, zmq->name, zmq->endpoint );
        return(FALSE);
      }
-    
+
     g_snprintf( event.src_instance, sizeof(event.src_instance), g_get_host_name() );
     if (source_instance) g_snprintf( event.src_instance, sizeof(event.src_instance), source_instance);
                     else g_snprintf( event.src_instance, sizeof(event.src_instance), g_get_host_name() );
@@ -235,7 +235,7 @@
     memcpy ( buffer + sizeof(struct ZMQ_TARGET), source, taille );                                  /* Recopie buffer payload */
     retour = Send_zmq( zmq, buffer, taille + sizeof(struct ZMQ_TARGET) );
     g_free(buffer);
-    if (retour==FALSE)    
+    if (retour==FALSE)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "%s: '%s' ('%s') : ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
                  event.src_instance, event.src_thread, event.dst_instance, event.dst_thread, event.tag );
@@ -250,7 +250,7 @@
   }
 /******************************************************************************************************************************/
 /* Recv_zmq: Receptionne un message sur le file en paremetre (sans attendre)                                                  */
-/* EntrÈe: la file, le buffer d'accueil, la taille du buffer                                                                  */
+/* Entr√©e: la file, le buffer d'accueil, la taille du buffer                                                                  */
 /* Sortie: Nombre de caractere lu, -1 si erreur                                                                               */
 /******************************************************************************************************************************/
  gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf )
@@ -260,27 +260,13 @@
   }
 /******************************************************************************************************************************/
 /* Recv_zmq: Receptionne un message sur le file en paremetre (sans attendre)                                                  */
-/* EntrÈe: la file, le buffer d'accueil, la taille du buffer                                                                  */
-/* Sortie: Nombre de caractere lu, -1 si erreur                                                                               */
-/******************************************************************************************************************************/
- gint Recv_zmq_block ( struct ZMQUEUE *zmq, void *buf, gint taille_buf )
-  { gint byte;
-    byte = zmq_recv ( zmq->socket, buf, taille_buf, 0 );
-    if (byte<=0)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "%s: Error for ZMQ '%s' ('%s'): %s", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
-     }
-    return(byte);
-  }
-/******************************************************************************************************************************/
-/* Recv_zmq: Receptionne un message sur le file en paremetre (sans attendre)                                                  */
-/* EntrÈe: la file, le buffer d'accueil, la taille du buffer                                                                  */
+/* Entr√©e: la file, le buffer d'accueil, la taille du buffer                                                                  */
 /* Sortie: Nombre de caractere lu, -1 si erreur                                                                               */
 /******************************************************************************************************************************/
  gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, const gchar *thread, void *buf, gint taille_buf,
                           struct ZMQ_TARGET **event, void **payload )
   { gint byte;
-    byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
+    byte = zmq_recv ( zmq->socket, buf, taille_buf-1, ZMQ_DONTWAIT );
     if (byte>=0)
      { *event = buf;
        if (Zmq_instance_is_target ( *event ) && Zmq_thread_is_target ( *event, thread ) )
@@ -288,10 +274,68 @@
           Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                    "%s: '%s' ('%s') : %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
                    (*event)->src_instance, (*event)->src_thread, (*event)->dst_instance, (*event)->dst_thread, (*event)->tag );
+          ((gchar *)buf)[byte] = 0;                                                                       /* Caractere nul d'arret forc√© */
           return(byte);
         }
        else return(0);                                                                        /* Si pas destinataire, on drop */
      }
     return(byte);
+  }
+/******************************************************************************************************************************/
+/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
+/* Entr√©e: le status du GSM                                                                                                   */
+/* Sortie: n√©ant                                                                                                              */
+/******************************************************************************************************************************/
+ void Send_zmq_DI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gboolean etat )
+  { JsonBuilder *builder;
+    gchar *result;
+    gsize taille;
+
+    builder = Json_create ();
+    if(!builder) return;
+    Json_add_string ( builder, "tech_id",  tech_id );
+    Json_add_string ( builder, "acronyme", acronyme );
+    Json_add_bool   ( builder, "etat", etat );
+    result = Json_get_buf ( builder, &taille );
+    Send_zmq_with_tag ( zmq, NULL, thread, "*", "msrv", "SET_DI", result, taille );
+    g_free(result);
+  }
+/******************************************************************************************************************************/
+/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
+/* Entr√©e: le status du GSM                                                                                                   */
+/* Sortie: n√©ant                                                                                                              */
+/******************************************************************************************************************************/
+ void Send_zmq_AI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range)
+  { JsonBuilder *builder;
+    gchar *result;
+    gsize taille;
+
+    builder = Json_create ();
+    if(!builder) return;
+    Json_add_string ( builder, "tech_id",  tech_id );
+    Json_add_string ( builder, "acronyme", acronyme );
+    Json_add_double ( builder, "valeur", valeur );
+    Json_add_bool   ( builder, "in_range", in_range );
+    result = Json_get_buf ( builder, &taille );
+    Send_zmq_with_tag ( zmq, NULL, thread, "*", "msrv", "SET_AI", result, taille );
+    g_free(result);
+  }
+/******************************************************************************************************************************/
+/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
+/* Entr√©e: le status du GSM                                                                                                   */
+/* Sortie: n√©ant                                                                                                              */
+/******************************************************************************************************************************/
+ void Send_zmq_CDE_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme )
+  { JsonBuilder *builder;
+    gchar *result;
+    gsize taille;
+
+    builder = Json_create ();
+    if(!builder) return;
+    Json_add_string ( builder, "tech_id",  tech_id );
+    Json_add_string ( builder, "acronyme", acronyme );
+    result = Json_get_buf ( builder, &taille );
+    Send_zmq_with_tag ( zmq, NULL, thread, "*", "msrv", "SET_CDE", result, taille );
+    g_free(result);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

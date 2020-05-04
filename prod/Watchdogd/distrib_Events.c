@@ -37,7 +37,8 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Gerer_arrive_Axxx_dls ( void )
-  { struct DLS_DO *dout;
+  { JsonBuilder *builder;
+    struct DLS_DO *dout;
     struct DLS_AO *ao;
     gsize taille_buf;
     gchar *buffer;
@@ -54,13 +55,9 @@
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending SET_DO '%s':'%s' to Slave/Bus (reste %d)", __func__,
               dout->tech_id, dout->acronyme, reste );
 
-    JsonBuilder *builder = Json_create ();
+    builder = Json_create ();
     if (builder)
-     { json_builder_begin_object (builder);                                                    /* Création du noeud principal */
-       Json_add_string ( builder, "tech_id",  dout->tech_id );
-       Json_add_string ( builder, "acronyme", dout->acronyme );
-       Json_add_bool   ( builder, "valeur", TRUE );
-       json_builder_end_object (builder);                                                                     /* End Document */
+     { Dls_DO_to_json ( builder, dout );
        buffer = Json_get_buf ( builder, &taille_buf );
        if (buffer)
         { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "*", "SET_DO", buffer, taille_buf );
@@ -81,11 +78,16 @@ suite_AO:
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending SET_AO '%s':'%s' = %f to Slave/Bus (reste %d)", __func__,
               ao->tech_id, ao->acronyme, ao->val_ech, reste );
 
-    buffer = Dls_AO_to_Json( ao, &taille_buf );
-    if (buffer)
-     { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "*", "SET_AO", buffer, taille_buf );
-       Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "SET_AO", buffer, taille_buf );
-       g_free(buffer);
+    builder = Json_create ();
+    if (builder)
+     { Dls_AO_to_json ( builder, ao );
+       buffer = Json_get_buf ( builder, &taille_buf );
+       if (buffer)
+        { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "*", "SET_AO", buffer, taille_buf );
+          Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "SET_AO", buffer, taille_buf );
+          g_free(buffer);
+        }
      }
+    else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

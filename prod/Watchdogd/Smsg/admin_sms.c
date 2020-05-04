@@ -35,13 +35,9 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_status ( JsonBuilder *builder )
-  { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-
-    Json_add_string ( builder, "tech_id", Cfg_smsg.tech_id );
+  { Json_add_string ( builder, "tech_id", Cfg_smsg.tech_id );
     Json_add_bool ( builder, "comm_status", Cfg_smsg.comm_status );
     Json_add_int ( builder, "nbr_sms", Cfg_smsg.nbr_sms );
-
-    json_builder_end_object (builder);                                                                        /* End Document */
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */

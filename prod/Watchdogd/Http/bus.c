@@ -38,57 +38,80 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
 /******************************************************************************************************************************/
- gint Http_Traiter_request_body_completion_bus ( struct lws *wsi )
+ void Http_traiter_bus ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                         SoupClientContext *client, gpointer user_data )
   { const gchar *host, *thread, *tag, *text;
-    struct HTTP_PER_SESSION_DATA *pss;
+    GBytes *request;
     JsonObject *object;
     JsonNode *Query;
+    gchar * data;
+    gsize taille;
 
-    pss = lws_wsi_user ( wsi );
-    pss->post_data [ pss->post_data_length ] = 0;
-    Query = json_from_string ( pss->post_data, NULL );
-    pss->post_data_length = 0;
-    g_free(pss->post_data);
+    if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
 
+    Http_print_request ( server, msg, path, client );
+
+    g_object_get ( msg, "request-body-data", &request, NULL );
+    if (!request)
+     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
+     }
+
+    data = g_bytes_unref_to_data ( request, &taille );
+    Query = json_from_string ( data, NULL );
+    g_free(data);
     if (!Query)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ );
-       return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
      }
 
     object = json_node_get_object (Query);
     if (!object)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
-       return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+       json_node_unref (Query);
+       soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
      }
 
     host = json_object_get_string_member ( object, "host" );
     if (!host)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: host non trouvé", __func__ );
-       return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+       json_node_unref (Query);
+       soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
      }
 
     thread = json_object_get_string_member ( object, "thread" );
     if (!thread)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: thread non trouvé", __func__ );
-       return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+       json_node_unref (Query);
+       soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
      }
 
     tag = json_object_get_string_member ( object, "tag" );
     if (!tag)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: text non trouvé", __func__ );
-       return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+       json_node_unref (Query);
+       soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
      }
 
     text = json_object_get_string_member ( object, "text" );
     if (!text)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: tag non trouvé", __func__ );
-       return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+       json_node_unref (Query);
+       soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
      }
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
              "%s: HTTP/CLI request for %s:%s:%s:%s", __func__, host, thread, tag, text );
 
     Send_zmq_with_tag ( Cfg_http.zmq_to_master, NULL, NOM_THREAD, host, thread, tag, (void *)text, strlen(text)+1 );
-    return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+    soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

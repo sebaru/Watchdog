@@ -34,10 +34,7 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_status ( JsonBuilder *builder )
-  {
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-    Json_add_int ( builder, "nbr_message_recu", Cfg_snips.nbr_msg_recu );
-    json_builder_end_object (builder);                                                                        /* End Document */
+  { Json_add_int ( builder, "nbr_message_recu", Cfg_snips.nbr_msg_recu );
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */

@@ -47,9 +47,8 @@
     if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
           else { g_snprintf(date, sizeof(date), "Erreur"); }
 
-    json_builder_begin_object (builder);
+    Json_add_object ( builder, dls->plugindb.tech_id );
     Json_add_int    ( builder, "id",        dls->plugindb.id );
-    Json_add_string ( builder, "tech_id",   dls->plugindb.tech_id );
     Json_add_string ( builder, "shortname", dls->plugindb.shortname );
     Json_add_string ( builder, "name" ,     dls->plugindb.nom );
     if (dls->version) Json_add_string ( builder, "version", dls->version() );
@@ -78,14 +77,14 @@
     Json_add_bool   ( builder, "bit_secu_pers_ok",     dls->vars.bit_secupers_ok );
 
     Json_add_bool   ( builder, "bit_acquit",           dls->vars.bit_acquit );
-    json_builder_end_object (builder);
+    Json_end_object ( builder );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static gint Http_dls_getlist ( struct lws *wsi )
+ static void Http_dls_getlist ( SoupMessage *msg )
   { JsonBuilder *builder;
     gchar *buf;
     gsize taille_buf;
@@ -94,17 +93,17 @@
     builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-       return(Http_Send_response_code ( wsi, HTTP_SERVER_ERROR ));
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping dlslist ----------------------------------------------------*/
-    json_builder_begin_array (builder);                                                        /* Création du noeud principal */
     Dls_foreach ( builder, Http_dls_do_plugin, NULL );
-    json_builder_end_array (builder);                                                                         /* End Document */
 
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
-    return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /******************************************************************************************************************************/
 /* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
@@ -150,57 +149,56 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- gint Http_Traiter_request_getdls ( struct lws *wsi, gchar *url )
-  {
-    if ( ! strcasecmp( url, "debug_trad_on" ) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug ON", __func__ );
-       Trad_dls_set_debug ( TRUE );
+ void Http_traiter_dls ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                         SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
      }
-    else if ( ! strcasecmp( url, "debug_trad_off" ) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug OFF", __func__ );
-       Trad_dls_set_debug ( FALSE );
+
+    Http_print_request ( server, msg, path, client );
+
+         if ( ! strcasecmp( path, "/dls/debug_trad_on" ) )  { Trad_dls_set_debug ( TRUE ); }
+    else if ( ! strcasecmp( path, "/dls/debug_trad_off" ) ) { Trad_dls_set_debug ( FALSE ); }
+    else if ( ! strcasecmp( path, "/dls/list" ) )           { Http_dls_getlist ( msg ); }
+    else if ( ! strcasecmp( path, "/dls/compil" ) )
+     { gpointer id_string = g_hash_table_lookup ( query, "id" );
+       if (id_string) { Compiler_source_dls( TRUE, atoi(id_string), NULL, 0 ); }
      }
-    else if ( ! strcasecmp( url, "list" ) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: /dls/list received", __func__ );
-       return(Http_dls_getlist ( wsi ));
+    else if ( ! strcasecmp( path, "/dls/acquit" ) )
+     { gpointer id_string = g_hash_table_lookup ( query, "id" );
+       if (id_string) { gint id = atoi(id_string); Dls_foreach ( &id, Http_dls_acquitter_plugin, NULL ); }
      }
-    else if ( ! strcasecmp( url, "compil" ) )
-     { gint id = Http_get_arg_int ( wsi, "id" );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Compiling DLS %d", __func__, id );
-       Compiler_source_dls( TRUE, id, NULL, 0 );
+    else if ( ! strcasecmp( path, "/dls/debug" ) )
+     { gpointer id_string = g_hash_table_lookup ( query, "id" );
+       if (id_string) { gint id = atoi(id_string); Dls_foreach ( &id, Http_dls_debug_plugin, NULL ); }
      }
-    else if ( ! strcasecmp( url, "acquit" ) )
-     { gint id = Http_get_arg_int ( wsi, "id" );
-       Dls_foreach ( &id, Http_dls_acquitter_plugin, NULL );
+    else if ( ! strcasecmp( path, "/dls/undebug" ) )
+     { gpointer id_string = g_hash_table_lookup ( query, "id" );
+       if (id_string) { gint id = atoi(id_string); Dls_foreach ( &id, Http_dls_undebug_plugin, NULL ); }
      }
-    else if ( ! strcasecmp( url, "debug" ) )
-     { gint id = Http_get_arg_int ( wsi, "id" );
-       Dls_foreach ( &id, Http_dls_debug_plugin, NULL );
+    else if ( ! strcasecmp( path, "/dls/delete" ) )
+     { gpointer id_string = g_hash_table_lookup ( query, "id" );
+       if (id_string) { gint id = atoi(id_string); Decharger_plugin_by_id( id ); }
      }
-    else if ( ! strcasecmp( url, "undebug" ) )
-     { gint id = Http_get_arg_int ( wsi, "id" );
-       Dls_foreach ( &id, Http_dls_undebug_plugin, NULL );
+    else if ( ! strcasecmp( path, "/dls/start" ) )
+     { gpointer id_string = g_hash_table_lookup ( query, "id" );
+       if (id_string)
+        { gint id = atoi(id_string);
+          while (Partage->com_dls.admin_start) sched_yield();
+          Partage->com_dls.admin_start = id;
+        }
      }
-    else if ( ! strcasecmp( url, "delete" ) )
-     { gint id = Http_get_arg_int ( wsi, "id" );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Delete DLS %d", __func__, id );
-       Decharger_plugin_by_id( id );
+    else if ( ! strcasecmp( path, "/dls/stop" ) )
+     { gpointer id_string = g_hash_table_lookup ( query, "id" );
+       if (id_string)
+        { gint id = atoi(id_string);
+          while (Partage->com_dls.admin_stop) sched_yield();
+          Partage->com_dls.admin_stop = id;
+        }
      }
-    else if ( ! strcasecmp( url, "start" ) )
-     { gint id = Http_get_arg_int ( wsi, "id" );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Activating DLS %d", __func__, id );
-       while (Partage->com_dls.admin_start) sched_yield();
-       Partage->com_dls.admin_start = id;
-     }
-    else if ( ! strcasecmp( url, "stop" ) )
-     { gint id = Http_get_arg_int ( wsi, "id" );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: DesActivating DLS %d", __func__, id );
-       while (Partage->com_dls.admin_stop) sched_yield();
-       Partage->com_dls.admin_stop = id;
-     }
-    else if ( ! strncasecmp( url, "run/", 4 ) )
-     { return(Http_Memory_get_all ( wsi, url+4 )); }
-    else return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
-    return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+    else if ( ! strncasecmp( path, "/dls/run/", 9 ) )
+     { return(Http_Memory_get_all ( msg, path+9 )); }
+    else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

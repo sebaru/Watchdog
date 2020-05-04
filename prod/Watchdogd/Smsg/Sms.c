@@ -79,30 +79,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
-/* Entrée: le status du GSM                                                                                                   */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Smsg_send_status_to_master ( gboolean status )
-  { if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
-     { Dls_data_set_DI ( Cfg_smsg.tech_id, "COMM", &Cfg_smsg.bit_comm, status ); }                      /* Communication OK */
-    else /* Envoi au master via thread HTTP */
-     { JsonBuilder *builder;
-       gchar *result;
-       gsize taille;
-       builder = Json_create ();
-       json_builder_begin_object ( builder );
-       Json_add_string ( builder, "tech_id",  Cfg_smsg.tech_id );
-       Json_add_string ( builder, "acronyme", "COMM" );
-       Json_add_bool   ( builder, "etat", status );
-       json_builder_end_object ( builder );
-       result = Json_get_buf ( builder, &taille );
-       Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_DI", result, taille );
-       g_free(result);
-     }
-    Cfg_smsg.comm_status = status;
-  }
-/******************************************************************************************************************************/
 /* Recuperer_smsDB: récupère la liste des utilisateurs et de leur numéro de téléphone                                         */
 /* Entrée: une structure DB                                                                                                   */
 /* Sortie: FALSE si pb                                                                                                        */
@@ -519,19 +495,7 @@
        if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
         { Envoyer_commande_dls_data ( tech_id, acro ); }
        else /* Envoi au master via thread HTTP */
-        { JsonBuilder *builder;
-          gchar *result;
-          gsize taille;
-          builder = Json_create ();
-          json_builder_begin_object ( builder );
-          Json_add_string ( builder, "tech_id", tech_id );
-          Json_add_string ( builder, "acronyme", acro );
-          Json_add_bool   ( builder, "etat", TRUE );
-          json_builder_end_object ( builder );
-          result = Json_get_buf ( builder, &taille );
-          Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_CDE", result, taille );
-          g_free(result);
-        }
+        { Send_zmq_CDE_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, tech_id, acro ); }
      }
 
     if (found)
@@ -653,8 +617,13 @@
     if (found) Traiter_commande_sms ( from, texte );
 
     if ( (error == ERR_NONE) || (error == ERR_EMPTY) )
-         { Smsg_send_status_to_master( TRUE  ); }
-    else { Smsg_send_status_to_master( FALSE ); }
+     { Send_zmq_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", TRUE );
+       Cfg_smsg.comm_status = TRUE;
+     }
+    else
+     { Send_zmq_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", FALSE );
+       Cfg_smsg.comm_status = FALSE;
+     }
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -735,7 +704,7 @@ reload:
            }
         }
      }
-    Smsg_send_status_to_master( FALSE );
+    Send_zmq_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", FALSE );
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_from_bus );
     Close_zmq ( Cfg_smsg.zmq_to_master );

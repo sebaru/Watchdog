@@ -147,7 +147,7 @@
     if (module->DI) g_free(module->DI);
     if (module->AI) g_free(module->AI);
     if (module->DO) g_free(module->DO);
-    Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
+    Dls_data_set_bool ( NULL, module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s : '%s': Module disconnected", __func__, module->modbus.tech_id );
   }
 /******************************************************************************************************************************/
@@ -691,7 +691,6 @@
         { if (num<module->nbr_entree_ana)
            { Dls_data_get_AI ( tech_id, acro, &module->AI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
              if(module->AI[num] == NULL) Dls_data_set_AI ( tech_id, acro, &module->AI[num], 0.0, FALSE );/* Sinon, on le crée */
-             Charger_conf_AI ( module->AI[num] );                                    /* Chargement de la conf AI depuis la DB */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
                          __func__, module->modbus.tech_id, map_text, num, module->nbr_entree_ana );
@@ -714,7 +713,7 @@
        if ( sscanf ( src_text, "%[^:]:DI%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_tor)
            { Dls_data_get_DI ( tech_id, acro, &module->DI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
-             if(module->DI[num] == NULL) Dls_data_set_DI ( tech_id, acro, &module->DI[num], FALSE );     /* Sinon, on le crée */
+             if(module->DI[num] == NULL) Dls_data_set_DI ( NULL, tech_id, acro, &module->DI[num], FALSE );     /* Sinon, on le crée */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
                          __func__, module->modbus.tech_id, src_text, num, module->nbr_entree_tor );
@@ -737,7 +736,7 @@
        if ( sscanf ( dst_tag, "%[^:]:DO%d", debut, &num ) == 2 )                             /* Découpage de la ligne ev_text */
         { if (num<module->nbr_sortie_tor)
            { Dls_data_get_DO ( tech_id, acro, &module->DO[num] );        /* bit déjà existant deja dans la structure DLS DATA */
-             if(module->DO[num] == NULL) Dls_data_set_DO ( tech_id, acro, &module->DO[num], FALSE );     /* Sinon, on le crée */
+             if(module->DO[num] == NULL) Dls_data_set_DO ( NULL, tech_id, acro, &module->DO[num], FALSE );     /* Sinon, on le crée */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
                          __func__, module->modbus.tech_id, dst_tag, num, module->nbr_entree_tor );
@@ -746,7 +745,7 @@
                       __func__, module->modbus.tech_id, dst_tag );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
+    Dls_data_set_bool ( NULL, module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
 
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: '%s': Module '%s' : mapping done",
               __func__, module->modbus.tech_id, module->modbus.description );
@@ -767,7 +766,7 @@
     else
      { int cpt_e, cpt_byte, cpt_poid, cpt;
        module->date_last_reponse = Partage->top;                                                   /* Estampillage de la date */
-       Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, TRUE );
+       Dls_data_set_bool ( NULL, module->modbus.tech_id, "COMM", &module->bit_comm, TRUE );
        if (ntohs(module->response.transaction_id) != module->transaction_id)                              /* Mauvaise reponse */
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                    "%s: '%s': wrong transaction_id for module %d  attendu %d, recu %d", __func__, module->modbus.tech_id,
@@ -784,7 +783,7 @@
                cpt_e = module->modbus.map_E;
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
                 { if(!module->DI[cpt]) SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
-                  else Dls_data_set_DI ( NULL, NULL, (gpointer)&module->DI[cpt], (module->response.data[ cpt_byte ] & cpt_poid) );
+                  else Dls_data_set_DI ( NULL, NULL, NULL, (gpointer)&module->DI[cpt], (module->response.data[ cpt_byte ] & cpt_poid) );
                   cpt_e++;
                   cpt_poid = cpt_poid << 1;
                   if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }

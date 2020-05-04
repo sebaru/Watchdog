@@ -260,7 +260,7 @@
      }
 
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { Dls_data_set_MSG ( db->row[0], db->row[1], NULL, atoi(db->row[2]) );
+     { Dls_data_set_MSG ( NULL, db->row[0], db->row[1], NULL, FALSE, atoi(db->row[2]) );
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: MSG '%s:%s'=%d loaded", __func__,
                  db->row[0], db->row[1], atoi(db->row[2]) );
      }
@@ -294,8 +294,15 @@
        liste = g_slist_next(liste);
        cpt++;
      }
-
-    Libere_DB_SQL( &db );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d MSG updated", __func__, cpt );
+  }
+/******************************************************************************************************************************/
+/* Dls_MESSAGE_to_json : Formate un bit au format JSON                                                                        */
+/* Entrées: le builder et le bit                                                                                              */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_MESSAGE_to_json ( JsonBuilder *builder, struct DLS_MESSAGES *bit )
+  { Json_add_string ( builder, "tech_id",  bit->tech_id );
+    Json_add_string ( builder, "acronyme", bit->acronyme );
+    Json_add_bool ( builder, "etat", bit->etat );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

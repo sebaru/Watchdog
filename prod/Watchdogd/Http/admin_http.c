@@ -31,45 +31,39 @@
  extern struct HTTP_CONFIG Cfg_http;
 /******************************************************************************************************************************/
 /* Admin_http_status: Print le statut du thread HTTP                                                                          */
-/* Entrée: la response pour sortiee client et la ligne de commande                                                           */
-/* Sortie: Néant                                                                                                              */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static gchar *Admin_http_status ( gchar *response )
-  { gchar chaine[128];
-    g_snprintf( chaine, sizeof(chaine), " | HTTP Server : port %d %s with SSL=%d",
-                Cfg_http.tcp_port, (Cfg_http.ws_context ? "Running" : "Stopped" ), Cfg_http.ssl_enable );
-    response = Admin_write ( response, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | ssl_cert_filepath = %s", Cfg_http.ssl_cert_filepath );
-    response = Admin_write ( response, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | ssl_file_key      = %s", Cfg_http.ssl_private_key_filepath );
-    response = Admin_write ( response, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | ssl_file_ca       = %s", Cfg_http.ssl_ca_filepath );
-    response = Admin_write ( response, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | ssl_cipher        = %s", Cfg_http.ssl_cipher_list );
-    response = Admin_write ( response, chaine );
-    return(response);
+ static void Admin_Http_status ( JsonBuilder *builder )
+  { Json_add_int    ( builder, "tcp_port", Cfg_http.tcp_port );
+    Json_add_bool   ( builder, "tcp_authenticate", Cfg_http.authenticate );
+    Json_add_int    ( builder, "ssl_enable", Cfg_http.ssl_enable );
+    Json_add_string ( builder, "ssl_cert_filepath", Cfg_http.ssl_cert_filepath );
+    Json_add_string ( builder, "ssl_private_key_filepath", Cfg_http.ssl_private_key_filepath );
+    Json_add_int    ( builder, "nbr_of_motifs_client", g_slist_length (Cfg_http.liste_ws_motifs_clients) );
+    Json_add_int    ( builder, "nbr_of_msgs_client", g_slist_length (Cfg_http.liste_ws_msgs_clients) );
   }
 /******************************************************************************************************************************/
-/* Admin_command: Gere une commande liée au thread HTTP depuis une response admin                                            */
-/* Entrée: le client et la ligne de commande                                                                                  */
-/* Sortie: Néant                                                                                                              */
+/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- gchar *Admin_command ( gchar *response, gchar *ligne )
-  { gchar commande[128], chaine[128];
+ void Admin_json ( gchar *commande, gchar **buffer_p, gsize *taille_p )
+{ JsonBuilder *builder;
+    *buffer_p = NULL;
+    *taille_p = 0;
 
-    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
-    if ( ! strcmp ( commande, "status" ) )
-     { response = Admin_http_status ( response ); }
-    else if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'UPS'" );
-       response = Admin_write ( response, "  status                                 - Get Status of HTTP Thread");
-       response = Admin_write ( response, "  list                                   - Get Sessions list");
-       response = Admin_write ( response, "  kill $id                               - Kill session(s) with id $id (name or sid)");
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       return;
      }
-    else
-     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s", ligne );
-       response = Admin_write ( response, chaine );
-     }
-    return(response);
+/************************************************ Préparation du buffer JSON **************************************************/
+                                                                      /* Lancement de la requete de recuperation des messages */
+    if (!strcmp(commande, "/status")) { Admin_Http_status ( builder ); }
+
+/************************************************ Génération du JSON **********************************************************/
+    *buffer_p = Json_get_buf (builder, taille_p);
+    return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

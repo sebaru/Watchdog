@@ -91,7 +91,7 @@
  extern gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_vars( int barre, gchar *nom );
  extern struct ACTION *New_action( void );
- extern struct ACTION *New_action_msg( struct ALIAS *alias );
+ extern struct ACTION *New_action_msg( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options );
  extern struct ACTION *New_action_digital_output( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_vars_mono( gchar *nom );

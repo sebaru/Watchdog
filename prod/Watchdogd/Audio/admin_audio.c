@@ -34,14 +34,12 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_status ( JsonBuilder *builder )
-  { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-    Json_add_string ( builder, "langage", Cfg_audio.language );
+  { Json_add_string ( builder, "langage", Cfg_audio.language );
     Json_add_string ( builder, "device", Cfg_audio.device );
     Json_add_bool ( builder, "diffusion_enabled",    Cfg_audio.diffusion_enabled );
     Json_add_int  ( builder, "last_audio",           Cfg_audio.last_audio );
     Json_add_int  ( builder, "nbr_diffusion_wav",    Cfg_audio.nbr_diffusion_wav );
     Json_add_int  ( builder, "nbr_diffusion_google", Cfg_audio.nbr_diffusion_google );
-    json_builder_end_object (builder);                                                                        /* End Document */
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */

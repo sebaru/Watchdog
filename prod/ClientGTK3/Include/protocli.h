@@ -28,14 +28,14 @@
  #ifndef _PROTOCLI_H_
  #define _PROTOCLI_H_
 
- #include <gnome.h>
- #include <openssl/ssl.h>
- #include <gtksourceview/gtksourceprintcompositor.h>
+ #include <gtk/gtk.h>
+ #include <libsoup/soup.h>
+ //#include <gtksourceview/gtksourceprintcompositor.h>
  #include <curl/curl.h>
  #include <json-glib/json-glib.h>
 
  #include "Reseaux.h"
- #include "trame.h"
+ #include "client.h"
 
 
  #define TEMPS_MAX_PULSE   10                                            /* 10 secondes de battements maximum pour le serveur */
@@ -156,33 +156,53 @@
   };
 
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
- extern gboolean WTD_Curl_post_request ( gchar *uri, gint post, gchar *post_data, gint post_length );
- extern CURL *WTD_Curl_init ( gchar *erreur );
- extern void Firefox_exec ( gchar *uri );
+ extern GtkWidget *Creer_page_histo( struct CLIENT *Client );                                           /* Dans liste_histo.c */
+ extern void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data );
+ extern void Reset_page_histo( struct CLIENT *client );
+// extern void Acquitter_histo ( struct CLIENT *Client );
 
- extern void Log( gchar *chaine );                                                                              /* Dans ihm.c */
- extern void Effacer_pages ( void );
+#ifdef bouh
+ extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );
+ extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
+ extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
+ extern gchar *Type_vers_string ( guint type );
+ extern gchar *Type_sms_vers_string ( guint type );
+#endif
+
+ extern void Log( struct CLIENT *client, gchar *chaine );                                                       /* Dans ihm.c */
+ extern GtkWidget *Creer_boite_travail ( struct CLIENT *Client );
+ extern void Effacer_pages ( struct CLIENT *client );
+ extern void Update_progress_bar( SoupMessage *msg, SoupBuffer *chunk, gpointer data );
+ extern void Set_progress_pulse( struct CLIENT *client );
+ extern struct PAGE_NOTEBOOK *Chercher_page_notebook ( struct CLIENT *client, guint type, guint id, gboolean affiche );
+#ifdef bouh
  extern void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer );
- extern GtkWidget *Creer_boite_travail ( void );
  extern void Set_progress_plus( gint plus );
  extern void Set_progress_text( gchar *cadran, gint max );
  extern void Set_progress_ratio( gint nbr, gint max );
  extern void Set_progress_pulse( void );
- extern void Raz_progress_pulse( void );
  extern struct PAGE_NOTEBOOK *Chercher_page_notebook ( guint type, guint id, gboolean affiche );
  extern gboolean Tester_page_notebook ( guint type );
- extern GtkWidget *Bobouton ( GdkPixmap *pix, GdkBitmap *bitmap, gchar *cadran );
  extern gint Nbr_page_type ( gint type );
  extern struct PAGE_NOTEBOOK *Page_actuelle ( void );
+#endif
 
- extern void Connecter ( void );                                                                            /* Dans connect.c */
+ extern void Connecter ( struct CLIENT *Client );                                                           /* Dans connect.c */
+ extern void Deconnecter ( struct CLIENT *Client );
+ extern void Envoi_au_serveur ( struct CLIENT *Client, gchar *methode, gchar *payload, gsize taille_buf, gchar *URI, SoupSessionCallback callback );
+
+#ifdef bouh
  extern gboolean Connecter_ssl ( void );
  extern gboolean Connecter_au_serveur ( void );
  extern void Envoyer_authentification ( void );
  extern void Deconnecter_sale ( void );
- extern void Deconnecter ( void );
  extern gboolean Envoi_serveur ( gint tag, gint ss_tag, gchar *buffer, gint taille );
  extern gboolean Changer_password ( void );
+
+
+ extern gboolean WTD_Curl_post_request ( gchar *uri, gint post, gchar *post_data, gint post_length );
+ extern CURL *WTD_Curl_init ( gchar *erreur );
+ extern void Firefox_exec ( gchar *uri );
 
  extern void Ecouter_serveur ( void );                                                                    /* Dans protocole.c */
  extern void Gerer_protocole_gtk_message ( struct CONNEXION *connexion );
@@ -217,13 +237,6 @@
  extern void Proto_afficher_mnemo_dls ( struct CMD_TYPE_MNEMO_BASE *mnemo );
  extern void Dls_set_compil_status ( gchar *chaine );
 
- extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );                                   /* Dans liste_histo.c */
- extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
- extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
- extern void Creer_page_histo( void );
- extern gchar *Type_vers_string ( guint type );
- extern gchar *Type_sms_vers_string ( guint type );
-
  extern void Proto_cacher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );                  /* Dans liste_synoptique.c*/
  extern void Proto_afficher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );
  extern void Proto_rafraichir_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );
@@ -250,7 +263,6 @@
  extern void Menu_want_synoptique ( void );
  extern void Menu_want_camera ( void );
  extern void Menu_want_histo_msgs ( void );
- extern void Menu_want_supervision( void );
  extern void Menu_want_page_admin ( void );
  extern void Menu_want_compilation_forcee ( void );
 
@@ -337,15 +349,17 @@
  extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
  extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *camera_sup );
 
+#endif
                                                                                                         /* Dans supervision.c */
- extern void Creer_page_supervision ( struct CMD_TYPE_SYNOPTIQUE *syn );
+ extern void Menu_want_supervision_accueil( struct CLIENT *client );
+ extern void Demander_synoptique_supervision ( struct CLIENT *client, gint id );
+#ifdef bouh
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
  extern void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_changer_etat_motif( struct CMD_ETAT_BIT_CTRL *etat_motif );
  extern void Proto_set_syn_vars( struct CMD_TYPE_SYN_VARS *syn_vars );
  extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( gint syn_id );
  extern void Proto_afficher_une_horloge( struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_MNEMO_BASE *mnemo );
-
                                                                                                    /* Dans supervision_clic.c */
  extern void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
@@ -426,7 +440,26 @@
  extern void Proto_rafraichir_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo );
 
  extern void Menu_ajouter_editer_horloge ( struct CMD_TYPE_MNEMO_FULL *edit_horloge, gint id_mnemo);  /* Dans ajout_horloge.c */
+#endif
 
+/************************************************ Définitions des prototypes **************************************************/
+ extern JsonBuilder *Json_create ( void );
+ extern void Json_add_string ( JsonBuilder *builder, gchar *name, gchar *chaine );
+ extern void Json_add_int ( JsonBuilder *builder, gchar *name, gint valeur );
+ extern void Json_add_double ( JsonBuilder *builder, gchar *name, gdouble valeur );
+ extern void Json_add_bool ( JsonBuilder *builder, gchar *name, gboolean bool );
+ extern void Json_add_object ( JsonBuilder *builder, gchar *name );
+ extern void Json_end_object ( JsonBuilder *builder );
+ extern void Json_add_array ( JsonBuilder *builder, gchar *name );
+ extern void Json_end_array ( JsonBuilder *builder );
+ extern gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p );
+ extern JsonNode *Json_get_from_string ( gchar *chaine );
+ extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );
+ extern gfloat Json_get_float ( JsonNode *query, gchar *chaine );
+ extern gint Json_get_int ( JsonNode *query, gchar *chaine );
+ extern gboolean Json_get_bool ( JsonNode *query, gchar *chaine );
+ extern JsonArray *Json_get_array ( JsonNode *query, gchar *chaine );
+ extern gboolean Json_has_element ( JsonNode *query, gchar *chaine );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
 

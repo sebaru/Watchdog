@@ -276,8 +276,9 @@
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
- void Charger_conf_AI ( struct DLS_AI *ai )
-  { gchar requete[512];
+ void Charger_confDB_AI ( void )
+  { struct DLS_AI *ai;
+    gchar requete[512];
     struct DB *db;
 
     db = Init_DB_SQL();
@@ -287,10 +288,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT a.min,a.max,a.type,a.unite,a.valeur"
+                "SELECT a.tech_id, a.acronyme, a.valeur, a.min, a.max, a.type, a.unite"
                 " FROM mnemos_AI as a"
-                " WHERE a.tech_id='%s' AND a.acronyme='%s' LIMIT 1",
-                ai->tech_id, ai->acronyme
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -298,19 +297,16 @@
        return;
      }
 
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Libere_DB_SQL( &db );
-       return;
+    while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
+     { ai = NULL;
+       Dls_data_set_AI ( db->row[0], db->row[1], (void *)&ai, atoi(db->row[2]), FALSE );
+       ai->min      = atof(db->row[3]);
+       ai->max      = atof(db->row[4]);
+       ai->type     = atoi(db->row[5]);
+       g_snprintf( ai->unite, sizeof(ai->unite), "%s", db->row[6] );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s'=%f %s loaded", __func__,
+                 ai->tech_id, ai->acronyme, ai->val_avant_ech, ai->unite );
      }
-
-    ai->min      = atof(db->row[0]);
-    ai->max      = atof(db->row[1]);
-    ai->type     = atoi(db->row[2]);
-    g_snprintf( ai->unite, sizeof(ai->unite), "%s", db->row[3] );
-    ai->val_avant_ech = atof(db->row[4]);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s'=%f %s loaded", __func__,
-              ai->tech_id, ai->acronyme, ai->val_avant_ech, ai->unite );
     Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
@@ -394,5 +390,21 @@
 
     Libere_DB_SQL( &db );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d AI updated", __func__, cpt );
+  }
+/******************************************************************************************************************************/
+/* Dls_AI_to_json : Formate un bit au format JSON                                                                             */
+/* Entrées: le builder et le bit                                                                                              */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_AI_to_json ( JsonBuilder *builder, struct DLS_AI *bit )
+  { Json_add_string ( builder, "tech_id",      bit->tech_id );
+    Json_add_string ( builder, "acronyme",     bit->acronyme );
+    Json_add_double ( builder, "valeur_brute", bit->val_avant_ech );
+    Json_add_double ( builder, "valeur_min",   bit->min );
+    Json_add_double ( builder, "valeur_max",   bit->max );
+    Json_add_double ( builder, "valeur",       bit->val_ech );
+    Json_add_int    ( builder, "type",         bit->type );
+    Json_add_int    ( builder, "in_range",     bit->inrange );
+    Json_add_int    ( builder, "last_arch",    bit->last_arch );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

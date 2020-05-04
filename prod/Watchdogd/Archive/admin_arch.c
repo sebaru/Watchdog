@@ -40,9 +40,7 @@
     db = Init_ArchDB_SQL();
     g_snprintf( chaine, sizeof(chaine), " Response to DB %s (Host='%s':%d, User='%s' DB='%s')", (db ? "OK" : "Failed"),
                 Partage->com_arch.archdb_host, Partage->com_arch.archdb_port, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
     Json_add_string ( builder, "result", chaine );
-    json_builder_end_object (builder);                                                         /* Création du noeud principal */
     Libere_DB_SQL ( &db );
   }
 /******************************************************************************************************************************/
@@ -54,9 +52,7 @@
   { gint nbr;
 
     nbr = Arch_Clear_list();
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
     Json_add_int ( builder, "nbr_archive_deleted", nbr );
-    json_builder_end_object (builder);                                                         /* Création du noeud principal */
   }
 /******************************************************************************************************************************/
 /* Admin_arch_json_purge: Lance le thread de purge des archives                                                               */
@@ -65,7 +61,6 @@
 /******************************************************************************************************************************/
  static void Admin_arch_json_purge ( JsonBuilder *builder )
   { pthread_t tid;
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
     if (pthread_create( &tid, NULL, (void *)Arch_Update_SQL_Partitions_thread, NULL ))
      { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: pthread_create failed for Update SQL Partitions", __func__ );
        Json_add_string ( builder, "exec_purge_thread", "success" );
@@ -74,7 +69,6 @@
      { pthread_detach( tid );                                        /* On le detache pour qu'il puisse se terminer tout seul */
        Json_add_string ( builder, "exec_purge_thread", "failed" );
      }
-    json_builder_end_object (builder);                                                         /* Création du noeud principal */
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */

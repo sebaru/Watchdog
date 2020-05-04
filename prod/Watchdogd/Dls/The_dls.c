@@ -40,6 +40,7 @@
 
  #include "watchdogd.h"
 
+ #define DLS_LIBRARY_VERSION  "20200503"
 
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
@@ -52,6 +53,7 @@
 
     Partage->com_dls.Compil_at_boot = FALSE;                                                   /* Settings default parameters */
     Partage->com_dls.Thread_debug   = FALSE;                                                   /* Settings default parameters */
+    g_snprintf( Partage->com_dls.Library_version, sizeof(Partage->com_dls.Library_version), "unknown" );
 
     if ( ! Recuperer_configDB( &db, "dls" ) )                                               /* Connexion a la base de données */
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
@@ -64,6 +66,8 @@
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Partage->com_dls.Thread_debug = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "compil_at_boot" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Partage->com_dls.Compil_at_boot = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "library_version" ) )
+        { g_snprintf( Partage->com_dls.Library_version, sizeof(Partage->com_dls.Library_version), "%s", valeur ); }
        else
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE,
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
@@ -71,70 +75,6 @@
      }
     return(TRUE);
   }
-/******************************************************************************************************************************/
-/* Dls_print_debug: Affiche les valeurs des bits utilisés dans le plugin.                                                     */
-/* Entrée: Appelé directement par le plugin, avec ne parametre les tableaux de bit et de valeur                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- void Dls_print_debug ( gint id, gint *Tableau_bit, gint *Tableau_num, gfloat *Tableau_val )
-  { gchar chaine[32], result[1024];
-    gboolean change=FALSE;
-    gint cpt, type;
-    cpt=0;
-    result[0]=0;
-    while( (type=Tableau_bit[cpt]) != -1)
-     { switch (type)
-        { case MNEMO_SORTIE:
-           { if (A(Tableau_num[cpt])!=Tableau_val[cpt])
-              { g_snprintf( chaine, sizeof(chaine), "A[%04d]=%d, ", Tableau_num[cpt], A(Tableau_num[cpt]) );
-                g_strlcat(result, chaine, sizeof(result));
-                Tableau_val[cpt] = (float)A(Tableau_num[cpt]);
-                change=TRUE;
-              }
-             break;
-           }
-          case MNEMO_MONOSTABLE:
-           { if (M(Tableau_num[cpt])!=Tableau_val[cpt])
-              { g_snprintf( chaine, sizeof(chaine), "M[%04d]=%d, ", Tableau_num[cpt], M(Tableau_num[cpt]) );
-                g_strlcat(result, chaine, sizeof(result));
-                Tableau_val[cpt] = (float)M(Tableau_num[cpt]);
-                change=TRUE;
-              }
-             break;
-           }
-          case MNEMO_BISTABLE:
-           { if (B(Tableau_num[cpt])!=Tableau_val[cpt])
-              { g_snprintf( chaine, sizeof(chaine), "B[%04d]=%d, ", Tableau_num[cpt], B(Tableau_num[cpt]) );
-                g_strlcat(result, chaine, sizeof(result));
-                Tableau_val[cpt] = (float)B(Tableau_num[cpt]);
-                change=TRUE;
-              }
-             break;
-           }
-/*          case MNEMO_CPTH:
-           { if (CH(Tableau_num[cpt])!=Tableau_val[cpt])
-              { g_snprintf( chaine, sizeof(chaine), "CH[%04d]=%d, ", Tableau_num[cpt], CH(Tableau_num[cpt]) );
-                g_strlcat(result, chaine, sizeof(result));
-                Tableau_val[cpt] = (float)CH(Tableau_num[cpt]);
-                change=TRUE;
-              }
-             break;
-           }
-          case MNEMO_CPT_IMP:
-           { if (CI(Tableau_num[cpt])!=Tableau_val[cpt])
-              { g_snprintf( chaine, sizeof(chaine), "CI[%04d]=%f, ", Tableau_num[cpt], CI(Tableau_num[cpt]) );
-                g_strlcat(result, chaine, sizeof(result));
-                Tableau_val[cpt] = (float)CI(Tableau_num[cpt]);
-                change=TRUE;
-              }
-             break;
-           }*/
-        }
-       cpt++;
-     }
-   if (change)
-    { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : DLS[%06d]->%s", __func__, id, result ); }
- }
 /******************************************************************************************************************************/
 /* Dls_get_top_alerte: Remonte la valeur du plus haut bit d'alerte dans l'arbre DLS                                           */
 /* Entrée: Rien                                                                                                               */
@@ -590,7 +530,7 @@
  void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme )
   { gpointer di=NULL;
     Dls_data_get_DI ( tech_id, acronyme, &di );
-    if (!di) { Dls_data_set_DI ( tech_id, acronyme, &di, TRUE ); }
+    if (!di) { Dls_data_set_DI ( NULL, tech_id, acronyme, &di, TRUE ); }
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, di );
@@ -618,7 +558,7 @@
                  __func__, di->tech_id, di->acronyme );
        Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, di );
        Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, di );
-       Dls_data_set_DI ( NULL, NULL, (gpointer *)&di, TRUE );                                    /* Mise a un du bit d'entrée */
+       Dls_data_set_DI ( NULL, NULL, NULL, (gpointer *)&di, TRUE );                              /* Mise a un du bit d'entrée */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
@@ -641,7 +581,7 @@
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a 0 du bit DI %s:%s",
                  __func__, di->tech_id, di->acronyme );
        Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, di );
-       Dls_data_set_DI ( NULL, NULL, (gpointer *)&di, FALSE );                                   /* Mise a un du bit d'entrée */
+       Dls_data_set_DI ( NULL, NULL, NULL, (gpointer *)&di, FALSE );                             /* Mise a un du bit d'entrée */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
@@ -650,7 +590,7 @@
 /* Dls_data_set_bool: Positionne un boolean                                                                                   */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- void Dls_data_set_bool ( gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur )
+ void Dls_data_set_bool ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur )
   { struct DLS_BOOL *bool;
 
     if (!bool_p || !*bool_p)
@@ -683,7 +623,7 @@
     if (valeur == TRUE && bool->etat==FALSE) { bool->edge_up = TRUE; } else { bool->edge_up = FALSE; }
     if (valeur == FALSE && bool->etat==TRUE) { bool->edge_down = TRUE; } else { bool->edge_down = FALSE; }
     if (bool->etat != valeur)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
+     { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
                  __func__, bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
      }
     bool->etat = valeur;
@@ -764,7 +704,7 @@
 /* Dls_data_set_bool: Positionne un boolean                                                                                   */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- void Dls_data_set_DI ( gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur )
+ void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur )
   { struct DLS_DI *di;
 
     if (!di_p || !*di_p)
@@ -797,7 +737,7 @@
     if (valeur == TRUE && di->etat==FALSE) { di->edge_up = TRUE; } else { di->edge_up = FALSE; }
     if (valeur == FALSE && di->etat==TRUE) { di->edge_down = TRUE; } else { di->edge_down = FALSE; }
     if (di->etat != valeur)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_DI '%s:%s'=%d up %d down %d",
+     { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_DI '%s:%s'=%d up %d down %d",
                  __func__, di->tech_id, di->acronyme, valeur, di->edge_up, di->edge_down );
      }
     di->etat = valeur;
@@ -902,7 +842,7 @@
 /* Dls_data_set_DO: Positionne une bit de sortie TOR                                                                          */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_DO ( gchar *tech_id, gchar *acronyme, gpointer *dout_p, gboolean etat )
+ void Dls_data_set_DO ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *dout_p, gboolean etat )
   { struct DLS_DO *dout;
 
     if (!dout_p || !*dout_p)
@@ -933,7 +873,7 @@
     else dout = (struct DLS_DO *)*dout_p;
 
     if (dout->etat != etat)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_DO '%s:%s'=%d ",
+     { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_DO '%s:%s'=%d ",
                  __func__, dout->tech_id, dout->acronyme );
        if (etat)
         { pthread_mutex_lock( &Partage->com_msrv.synchro );
@@ -1087,7 +1027,7 @@
 /* Met à jour la sortie analogique à partir de sa valeur avant mise a l'echelle                                               */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AO ( gchar *tech_id, gchar *acronyme, gpointer *ao_p, float val_avant_ech )
+ void Dls_data_set_AO ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *ao_p, float val_avant_ech )
   { struct DLS_AO *ao;
     gboolean need_arch;
 
@@ -1168,7 +1108,7 @@
        pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
        Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_AO '%s:%s'=%f/%f",
+       Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_AO '%s:%s'=%f/%f",
                  __func__, ao->tech_id, ao->acronyme, ao->val_avant_ech, ao->val_ech );
      }
     else if ( ao->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
@@ -1184,7 +1124,7 @@
 /* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio )
+ void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio )
   { struct DLS_CI *cpt_imp;
 
     if (!cpt_imp_p || !*cpt_imp_p)
@@ -1231,6 +1171,8 @@
            { cpt_imp->valeur++;
              cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
              need_arch = TRUE;
+             Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_CI '%s:%s'=%d",
+                       __func__, cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
            }
         }
      }
@@ -1275,7 +1217,7 @@
 /* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p, gboolean etat, gint reset )
+ void Dls_data_set_CH ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p, gboolean etat, gint reset )
   { struct DLS_CH *cpt_h;
 
     if (!cpt_h_p || !*cpt_h_p)
@@ -1324,6 +1266,8 @@
           if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
            { cpt_h->valeur++;
              cpt_h->old_top = new_top;
+             Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_CH '%s:%s'=%d",
+                       __func__, cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
            }
           if (cpt_h->last_arch + 600 < Partage->top)
            { Ajouter_arch_by_nom( cpt_h->acronyme, cpt_h->tech_id, 1.0*cpt_h->valeur );
@@ -1495,7 +1439,7 @@
 /******************************************************************************************************************************/
  void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
                          gchar *host, gchar *thread, gchar *tag, gchar *param1)
-  { Dls_data_set_bool ( tech_id, acronyme, bus_p, etat );                                         /* Utilisation d'un boolean */
+  { Dls_data_set_bool ( NULL, tech_id, acronyme, bus_p, etat );                                   /* Utilisation d'un boolean */
     if (Dls_data_get_bool_up(tech_id, acronyme, bus_p))
      { if (param1)
         { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
@@ -1508,7 +1452,7 @@
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean etat )
+ void Dls_data_set_MSG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
   { struct DLS_MESSAGES *msg;
 
     if (!msg_p || !*msg_p)
@@ -1538,7 +1482,26 @@
       }
     else msg = (struct DLS_MESSAGES *)*msg_p;
 
-    if ( msg->etat != etat )
+    if ( update )
+     { if (etat == FALSE) { msg->etat_update = FALSE; }
+       else if (etat == TRUE && msg->etat_update == FALSE)
+        { struct DLS_MESSAGES_EVENT *event;
+          msg->etat_update = TRUE;
+          event = (struct DLS_MESSAGES_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGES_EVENT) );
+          if (!event)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
+                      "%s: malloc Event failed. Memory error for Updating MSG'%s:%s'", __func__, msg->tech_id, msg->acronyme );
+           }
+          else
+           { event->etat = TRUE;                                                        /* Recopie de l'état dans l'evenement */
+             event->msg  = msg;
+             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
+        }
+     }
+    else if ( msg->etat != etat )
      { msg->etat = etat;
 
        if ( msg->last_change + 10 <= Partage->top ) { msg->changes = 0; }            /* Si pas de change depuis plus de 1 sec */
@@ -1562,7 +1525,7 @@
              pthread_mutex_unlock( &Partage->com_msrv.synchro );
            }
 
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Changing DLS_MSG '%s:%s'=%d",
+          Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_MSG '%s:%s'=%d",
                     __func__, msg->tech_id, msg->acronyme, msg->etat );
           msg->changes++;
           msg->last_change = Partage->top;
@@ -1598,7 +1561,7 @@
 /* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
- void Dls_data_set_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p, gint mode,
+ void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *visu_p, gint mode,
                             gchar *color, gboolean cligno )
   { struct DLS_VISUEL *visu;
 
@@ -1648,6 +1611,8 @@
           pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
           Partage->com_msrv.liste_new_i = g_slist_append( Partage->com_msrv.liste_new_i, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d",
+                    __func__, visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno );
         }
        visu->changes++;                                                                                /* Un change de plus ! */
        Partage->audit_bit_interne_per_sec++;
@@ -1681,7 +1646,7 @@
 /* Dls_data_set_R: Positionne un registre                                                                                     */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_R ( gchar *tech_id, gchar *acronyme, gpointer *r_p, gfloat valeur )
+ void Dls_data_set_R ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *r_p, gfloat valeur )
   { struct DLS_REGISTRE *reg;
 
     if (!r_p || !*r_p)
@@ -1719,6 +1684,8 @@
         { Ajouter_arch_by_nom( reg->acronyme, reg->tech_id, reg->valeur );                             /* Archivage si besoin */
           reg->last_arch = Partage->top;
         }
+       Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_REGISTRE '%s:%s'=%f",
+                 __func__, reg->tech_id, reg->acronyme, reg->valeur );
      }
   }
 /******************************************************************************************************************************/
@@ -1864,7 +1831,7 @@
        if (plugin_actuel->plugindb.on && plugin_actuel->go)
         { gettimeofday( &tv_avant, NULL );
           Partage->top_cdg_plugin_dls = 0;                                                      /* On reset le cdg plugin DLS */
-          plugin_actuel->go( &plugin_actuel->vars );     /* On appel le plugin */
+          plugin_actuel->go( &plugin_actuel->vars );                                                    /* On appel le plugin */
           gettimeofday( &tv_apres, NULL );
           plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
           plugin_actuel->vars.starting = 0;
@@ -1951,7 +1918,7 @@
 /* Main: Fonction principale du DLS                                                                                           */
 /******************************************************************************************************************************/
  void Run_dls ( void )
-  { gint last_top_1hz, last_top_2hz, last_top_5hz, last_top_1min;
+  { gint last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min;
     gint Update_heure=0;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
@@ -1960,6 +1927,14 @@
     Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */
     Dls_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
+
+    if (strcmp ( Partage->com_dls.Library_version, DLS_LIBRARY_VERSION ) )
+     { Partage->com_dls.Compil_at_boot = TRUE;
+       if (Modifier_configDB ( "dls", "library_version", DLS_LIBRARY_VERSION ))
+        { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating library version OK", __func__ ); }
+       else
+        { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: update library error" ); }
+     }
     Charger_plugins();                                                                          /* Chargement des modules dls */
     SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
     SB_SYS(2, 1);                                                                                      /* B2 est toujours à 1 */
@@ -1968,7 +1943,7 @@
     Mnemo_auto_create_AI ( "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
     Mnemo_auto_create_AI ( "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1MIN", "Impulsion toutes les minutes" );
-    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1HZ", "Impulsion toutes les secondes" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1SEC", "Impulsion toutes les secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
 
@@ -1976,9 +1951,9 @@
 
     Partage->com_dls.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
-    last_top_1hz = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
+    last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
-     { gpointer dls_top_1hz=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
+     { gpointer dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
 
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
@@ -1989,19 +1964,19 @@
         }
 
        if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
-        { Dls_data_set_bool ( "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
+        { Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
           last_top_1min = Partage->top;
         }
-       if (Partage->top-last_top_1hz>=10)                                                              /* Toutes les secondes */
-        { Dls_data_set_bool ( "SYS", "TOP_1HZ", &dls_top_1hz, TRUE );
-          last_top_1hz = Partage->top;
+       if (Partage->top-last_top_1sec>=10)                                                              /* Toutes les secondes */
+        { Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
+          last_top_1sec = Partage->top;
         }
        if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
-        { Dls_data_set_bool ( "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
+        { Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
           last_top_2hz = Partage->top;
         }
        if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
-        { Dls_data_set_bool ( "SYS", "TOP_5HZ", &dls_top_5hz, TRUE );
+        { Dls_data_set_bool ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, TRUE );
           last_top_5hz = Partage->top;
         }
 
@@ -2029,10 +2004,10 @@
        Dls_run_dls_tree( Partage->com_dls.Dls_tree );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
        SB_SYS(3, 1);                                                  /* B3 est toujours à un apres le premier tour programme */
-       Dls_data_set_bool ( "SYS", "TOP_1HZ", &dls_top_1hz, FALSE );
-       Dls_data_set_bool ( "SYS", "TOP_2HZ", &dls_top_2hz, FALSE );
-       Dls_data_set_bool ( "SYS", "TOP_5HZ", &dls_top_5hz, FALSE );
-       Dls_data_set_bool ( "SYS", "TOP_1MIN", &dls_top_1min, FALSE );
+       Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, FALSE );
+       Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, FALSE );
+       Dls_data_set_bool ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, FALSE );
+       Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, FALSE );
        Partage->com_dls.Top_check_horaire = FALSE;                         /* Cotrole horaire effectué un fois par minute max */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
        Partage->audit_tour_dls_per_sec++;                                   /* Gestion de l'audit nbr de tour DLS par seconde */

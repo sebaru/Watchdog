@@ -37,7 +37,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static gint Http_Traiter_request_getprocess_list ( struct lws *wsi )
+ static void Http_traiter_process_list ( SoupMessage *msg )
   { JsonBuilder *builder;
     gsize taille_buf;
     GSList *liste;
@@ -47,69 +47,62 @@
     builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
-       return(1);
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
      }
 
-    json_builder_begin_array (builder);                                                                  /* Contenu du Status */
-
-    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
-    Json_add_string ( builder, "thread",  "msrv" );
+    Json_add_object ( builder, "msrv");                                                                  /* Contenu du Status */
     Json_add_bool   ( builder, "debug",   Config.log_msrv );
     Json_add_bool   ( builder, "started", Partage->com_msrv.Thread_run );
     Json_add_string ( builder, "objet",   "Local Master Server" );
     Json_add_string ( builder, "fichier", "built-in" );
-    json_builder_end_object (builder);                                                                        /* End Document */
+    Json_end_object ( builder );                                                                              /* End Document */
 
-    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
-    Json_add_string ( builder, "thread",  "dls" );
+    Json_add_object ( builder, "dls" );                                                                  /* Contenu du Status */
     Json_add_bool   ( builder, "debug",   Partage->com_dls.Thread_debug );
     Json_add_bool   ( builder, "started", Partage->com_dls.Thread_run );
     Json_add_string ( builder, "objet",   "D.L.S" );
     Json_add_string ( builder, "fichier", "built-in" );
-    json_builder_end_object (builder);                                                                        /* End Document */
+    Json_end_object ( builder );                                                                              /* End Document */
 
-    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
-    Json_add_string ( builder, "thread",  "arch" );
+    Json_add_object ( builder, "arch" );                                                                 /* Contenu du Status */
     Json_add_bool   ( builder, "debug",   Config.log_arch );
     Json_add_bool   ( builder, "started", Partage->com_arch.Thread_run );
     Json_add_string ( builder, "objet",   "Archivage" );
     Json_add_string ( builder, "fichier", "built-in" );
-    json_builder_end_object (builder);                                                                        /* End Document */
+    Json_end_object ( builder );                                                                              /* End Document */
 
-    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
-    Json_add_string ( builder, "thread",  "db" );
+    Json_add_object ( builder, "db" );                                                                   /* Contenu du Status */
     Json_add_bool   ( builder, "debug",   Config.log_db );
     Json_add_bool   ( builder, "started", TRUE );
     Json_add_string ( builder, "objet",   "Database Access" );
     Json_add_string ( builder, "fichier", "built-in" );
-    json_builder_end_object (builder);                                                                        /* End Document */
+    Json_end_object ( builder );                                                                              /* End Document */
 
     liste = Partage->com_msrv.Librairies;                                                /* Parcours de toutes les librairies */
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
-       json_builder_begin_object (builder);                                                                 /* Contenu du Status */
-       Json_add_string ( builder, "thread",  lib->admin_prompt );
+       Json_add_object ( builder, lib->admin_prompt );                                                   /* Contenu du Status */
        Json_add_bool   ( builder, "debug",   lib->Thread_debug );
        Json_add_bool   ( builder, "started", lib->Thread_run );
        Json_add_string ( builder, "objet",   lib->admin_help );
        Json_add_string ( builder, "fichier", lib->nom_fichier );
-       json_builder_end_object (builder);                                                                        /* End Document */
+       Json_end_object ( builder );                                                                           /* End Document */
 
        liste = liste->next;
      }
-    json_builder_end_array (builder);                                                                         /* End Document */
 
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
-    return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess_debug: Active ou non le debug d'un process                                                 */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- static gint Http_Traiter_request_getprocess_debug ( struct lws *wsi, gchar *thread, gboolean status )
+ static void Http_traiter_process_debug ( SoupMessage *msg,  gchar *thread, gboolean status )
   {      if ( ! strcasecmp ( thread, "arch" ) ) { Config.log_arch = status; }
     else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
     else if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
@@ -124,14 +117,15 @@
           liste = liste->next;
         }
      }
-    return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' debug to %d", __func__, thread, status );
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess_start_stop: Traite une requete sur l'URI process/stop|start                                */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- static gint Http_Traiter_request_getprocess_start_stop ( struct lws *wsi, gchar *thread, gboolean status )
+ static void Http_traiter_process_start_stop ( SoupMessage *msg, gchar *thread, gboolean status )
   { if ( ! strcasecmp ( thread, "arch" ) )
      { if (status==FALSE) { Partage->com_arch.Thread_run = FALSE; }
        else Demarrer_arch();                                                                   /* Demarrage gestion Archivage */
@@ -151,37 +145,43 @@
           liste = liste->next;
         }
      }
-    return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' to '%s'",
+                          __func__, thread, (status ? "start" : "stop") );
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess: Traite une requete sur l'URI process                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- gint Http_Traiter_request_getprocess ( struct lws *wsi, gchar *url )
-  {
-    if (!strcasecmp(url, "list"))
-     { return(Http_Traiter_request_getprocess_list(wsi)); }
-    else if (!strncmp(url, "stop/", 5))
-     { return(Http_Traiter_request_getprocess_start_stop(wsi, url+5, FALSE));}
-    else if (!strncmp(url, "start/", 6))
-     { return(Http_Traiter_request_getprocess_start_stop(wsi, url+6, TRUE));}
-    else if (!strncmp(url, "undebug/", 8))
-     { return(Http_Traiter_request_getprocess_debug(wsi, url+8, FALSE));}
-    else if (!strncmp(url, "debug/", 6))
-     { return(Http_Traiter_request_getprocess_debug(wsi, url+6, TRUE));}
+ void Http_traiter_process ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                             SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    Http_print_request ( server, msg, path, client );
+
+         if (!strcasecmp(path, "/process/list"))          { Http_traiter_process_list(msg); }
+    else if (g_str_has_prefix(path, "/process/stop/"))    { Http_traiter_process_start_stop( msg, path+14, FALSE ); }
+    else if (g_str_has_prefix(path, "/process/start/"))   { Http_traiter_process_start_stop( msg, path+15, TRUE );  }
+    else if (g_str_has_prefix(path, "/process/undebug/")) { Http_traiter_process_debug( msg, path+17, FALSE );      }
+    else if (g_str_has_prefix(path, "/process/debug/"))   { Http_traiter_process_debug( msg, path+15, TRUE );       }
 /*************************************************** WS Reload library ********************************************************/
-    else if ( ! strncasecmp( url, "reload/", 7 ) )
-     { gchar *target = url+7;
+    else if (g_str_has_prefix(path, "/process/reload/"))
+     { gchar *target = path+16;
        GSList *liste;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading start for %s", __func__, target );
        if ( ! strcasecmp( target, "dls" ) )
         { Partage->com_dls.Thread_reload = TRUE;
-          return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+          soup_message_set_status (msg, SOUP_STATUS_OK);
+          return;
         }
        else if ( ! strcasecmp( target, "arch" ) )
         { Partage->com_arch.Thread_reload = TRUE;
-          return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+          soup_message_set_status (msg, SOUP_STATUS_OK);
+          return;
         }
 
        liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
@@ -201,16 +201,18 @@
            }
           liste = g_slist_next(liste);
         }
-       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+       soup_message_set_status (msg, SOUP_STATUS_OK);
+       return;
      }
 /****************************************** WS get Running config library *****************************************************/
     else
      { GSList *liste;
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Searching for CLI commande %s", __func__, url );
-       liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Searching for CLI commande %s", __func__, path );
+       path=path+9;
+       liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
        while(liste)
         { struct LIBRAIRIE *lib = liste->data;
-          if ( ! strncmp( url, lib->admin_prompt, strlen(lib->admin_prompt) ) )
+          if ( ! strncasecmp( path, lib->admin_prompt, strlen(lib->admin_prompt) ) )
            { if (!lib->Admin_json)
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                           "%s: library %s do not have Admin_json.", __func__, lib->admin_prompt );
@@ -218,17 +220,18 @@
              else
               { gint taille_buf;
                 gchar *buffer;
-                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                         "%s: Admin_json call for %s%s.", __func__,
-                          lib->admin_prompt, url+strlen(lib->admin_prompt) );
-                lib->Admin_json ( url+strlen(lib->admin_prompt), &buffer, &taille_buf );
-                return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buffer, taille_buf ));
+                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Admin_json call for %s%s.", __func__,
+                          lib->admin_prompt, path+strlen(lib->admin_prompt) );
+                lib->Admin_json ( path+strlen(lib->admin_prompt), &buffer, &taille_buf );
+                soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buffer, taille_buf );
+                soup_message_set_status ( msg, SOUP_STATUS_OK) ;
+                return;
               }
             }
            liste = g_slist_next(liste);
         }
-       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+       soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
      }
-    return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

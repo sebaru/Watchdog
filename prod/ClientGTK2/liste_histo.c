@@ -40,7 +40,8 @@
 
  enum
   { COLONNE_ID,
-    COLONNE_MSG_ID,
+    COLONNE_TECH_ID,
+    COLONNE_ACRONYME,
     COLONNE_GROUPE_PAGE,
     COLONNE_TYPE,
     COLONNE_SYN_ID,
@@ -217,7 +218,8 @@
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) );               /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, histo->id,
-                         COLONNE_MSG_ID, histo->msg.id,
+                         COLONNE_TECH_ID, histo->msg.tech_id,
+                         COLONNE_ACRONYME, histo->msg.acronyme,
                          COLONNE_SYN_ID, histo->msg.syn_id,
                          COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_TYPE, Type_vers_string(histo->msg.type),
@@ -230,38 +232,16 @@
                          -1
                        );
   }
-/**********************************************************************************************************/
-/* Proto_rafrachir_un_histo: Rafraichissement de l'histo en parametre                                     */
-/* Entrée: une reference sur le groupe                                                                    */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo )
-  { GtkTreeModel *store;
+/******************************************************************************************************************************/
+/* Proto_insert_or_update_histo: Meta jour une ligne historique ou l'ajoute le cas échéant                                    */
+/* Entrée: Une référence sur l'histo                                                                                          */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Proto_insert_or_update_histo( struct CMD_TYPE_HISTO *histo )
+  { gchar *tech_id, *acronyme;
+    GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
-    guint id;
-
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
-    valide = gtk_tree_model_get_iter_first( store, &iter );
-
-    while ( valide )                                                    /* A la recherche de l'iter perdu */
-     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
-       if ( id == histo->id )
-        { Rafraichir_visu_histo( &iter, histo );
-          break;
-        }
-       valide = gtk_tree_model_iter_next( store, &iter );
-     }
-  }
-/**********************************************************************************************************/
-/* Afficher_un_message: Ajout d'un message dans la liste des messages à l'écran                           */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo )
-  { GtkListStore *store;
-    GtkTreePath *path;
-    GtkTreeIter iter;
 
     if (!Tester_page_notebook(TYPE_PAGE_HISTO))
      { printf("Creation page histo\n");
@@ -269,31 +249,41 @@
        printf("Fin Creation page histo\n");
      }
 
-    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) ));
-    gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
-    Rafraichir_visu_histo ( &iter, histo );
-    path = gtk_tree_model_get_path ( GTK_TREE_MODEL(store), &iter );
-    gtk_tree_view_scroll_to_cell ( GTK_TREE_VIEW(Liste_histo), path, NULL, FALSE, 0.0, 0.0 );
-    gtk_tree_path_free( path );
-  }
-/**********************************************************************************************************/
-/* Cacher_un_utilisateur: Enleve un groupe de la liste des utilisateurs                                   */
-/* Entrée: une reference sur l'utilisateur                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo )
-  { GtkTreeModel *store;
-    GtkTreeIter iter;
-    gboolean valide;
-    guint id;
-
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
+    while ( valide )                                                                        /* A la recherche de l'iter perdu */
+     { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
+       if ( !strcmp(tech_id,histo->msg.tech_id) && !strcmp(acronyme,histo->msg.acronyme) )
+        { Rafraichir_visu_histo( &iter, histo );
+          return;
+        }
+       valide = gtk_tree_model_iter_next( store, &iter );
+     }
+    gtk_list_store_append ( GTK_LIST_STORE(store), &iter );                                          /* Acquisition iterateur */
+    Rafraichir_visu_histo ( &iter, histo );
+    GtkTreePath *path = gtk_tree_model_get_path ( GTK_TREE_MODEL(store), &iter );
+    gtk_tree_view_scroll_to_cell ( GTK_TREE_VIEW(Liste_histo), path, NULL, FALSE, 0.0, 0.0 );
+    gtk_tree_path_free( path );
+  }
+/******************************************************************************************************************************/
+/* Cacher_un_utilisateur: Enleve un groupe de la liste des utilisateurs                                                       */
+/* Entrée: une reference sur l'utilisateur                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo )
+  { gchar *tech_id, *acronyme;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    gboolean valide;
+
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
+again:
+    valide = gtk_tree_model_get_iter_first( store, &iter );
     while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_MSG_ID, &id, -1 );
-       if ( id == histo->msg.id )
-        { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
+     { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
+       if ( !strcmp(tech_id,histo->msg.tech_id) && !strcmp(acronyme,histo->msg.acronyme) )
+        { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); goto again; }
        valide = gtk_tree_model_iter_next( store, &iter );
      }
   }
@@ -330,23 +320,25 @@
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
 
-/***************************************** La liste des groupes *******************************************/
+/************************************************ La liste des groupes ********************************************************/
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* ID */
-                                              G_TYPE_UINT,                                         /* MSG_ID */
+    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                                              /* ID */
+                                              G_TYPE_STRING,                                                       /* tech_id */
+                                              G_TYPE_STRING,                                                      /* acronyme */
+                                              G_TYPE_STRING,                                                   /* Groupe page */
+                                              G_TYPE_STRING,                                                   /* type string */
+                                              G_TYPE_UINT,                                                         /* Num_syn */
+                                              G_TYPE_STRING,                                                   /* Date create */
+                                              G_TYPE_STRING,                                                 /* DLS Shortname */
                                               G_TYPE_STRING,
-                                              G_TYPE_STRING,                               /* Groupe page */
-                                              G_TYPE_UINT,                                     /* Num_syn */
                                               G_TYPE_STRING,
-                                              G_TYPE_STRING,                             /* DLS Shortname */
-                                              G_TYPE_STRING,
-                                              G_TYPE_STRING,
-                                              GDK_TYPE_COLOR,      /* Couleur de fond de l'enregistrement */
-                                              GDK_TYPE_COLOR      /* Couleur du texte de l'enregistrement */
+                                              GDK_TYPE_COLOR,                          /* Couleur de fond de l'enregistrement */
+                                              GDK_TYPE_COLOR                          /* Couleur du texte de l'enregistrement */
                                );
+
     Liste_histo = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );           /* Creation de la vue */
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );

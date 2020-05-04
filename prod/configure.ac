@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl define([gittag], esyscmd([sh -c "git describe --always  | tr -d '\n'"]))
 define([SVNVERSION], esyscmd([sh -c "svnversion -n | sed s/M//g"]))
-AC_INIT([Watchdog], [3.2.SVNVERSION], [sebastien.lefevre@abls-habitat.fr], [Watchdog], [https://wiki.abls-habitat.fr] )
+AC_INIT([Watchdog], [3.3.SVNVERSION], [sebastien.lefevre@abls-habitat.fr], [Watchdog], [https://wiki.abls-habitat.fr] )
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
 AM_INIT_AUTOMAKE
@@ -27,6 +27,7 @@ AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
 AM_PATH_GLIB_2_0( 2.2.2 )
+GLIB_GSETTINGS
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
@@ -86,10 +87,12 @@ AC_OUTPUT( \
 Makefile \
 Include/Makefile \
 Commun/Makefile \
-Client/Include/Makefile \
+ClientGTK2/Include/Makefile \
 Commun/Reseaux/Makefile \
-Client/Config_cli/Makefile \
-Client/Makefile \
+ClientGTK2/Config_cli/Makefile \
+ClientGTK2/Makefile \
+ClientGTK3/Makefile \
+ClientGTK3/Include/Makefile \
 Watchdogd/Makefile \
 Watchdogd/Include/Makefile \
 Watchdogd/Onduleur/Makefile \

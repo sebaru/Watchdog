@@ -34,6 +34,7 @@
  #include <errno.h>
 
  #include "Reseaux.h"
+ #include "Dls.h"
  #include "Zmq.h"
  #include "Json.h"
  #include "config.h"
@@ -43,7 +44,6 @@
  #include "Admin.h"
  #include "Message_DB.h"
  #include "Camera_DB.h"
- #include "Dls.h"
  #include "Histo_DB.h"
  #include "Synoptiques_DB.h"
  #include "Mnemonique_DB.h"

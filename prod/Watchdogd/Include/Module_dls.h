@@ -51,35 +51,34 @@
     gboolean bit_alerte_fugitive;
   };
 
- extern void     Dls_print_debug ( gint id, gint *Tableau_bit, gint *Tableau_num, gfloat *Tableau_val );
  extern gboolean Dls_get_top_alerte ( void );
  extern gboolean Dls_get_top_alerte_fugitive ( void );
  extern gboolean Dls_data_get_bool      ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_bool_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_bool_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern void     Dls_data_set_bool      ( gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur );
+ extern void     Dls_data_set_bool      ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur );
  extern gboolean Dls_data_get_DI        ( gchar *tech_id, gchar *acronyme, gpointer *di_p );
  extern gboolean Dls_data_get_DI_up     ( gchar *tech_id, gchar *acronyme, gpointer *di_p );
  extern gboolean Dls_data_get_DI_down   ( gchar *tech_id, gchar *acronyme, gpointer *di_p );
- extern void     Dls_data_set_DO        ( gchar *tech_id, gchar *acronyme, gpointer *dout_p, gboolean valeur );
- extern void     Dls_data_set_MSG       ( gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean etat );
+ extern void     Dls_data_set_DO        ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *dout_p, gboolean valeur );
+ extern void     Dls_data_set_MSG       ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat );
  extern void     Dls_data_set_tempo     ( gchar *tech_id, gchar *acronyme, gpointer *tempo_p, gboolean etat,
                                           gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
  extern gfloat   Dls_data_get_AO        ( gchar *tech_id, gchar *acronyme, gpointer *ao_p );
- extern void     Dls_data_set_AO        ( gchar *tech_id, gchar *acronyme, gpointer *ao_p, gfloat val_avant_ech );
+ extern void     Dls_data_set_AO        ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *ao_p, gfloat val_avant_ech );
  extern gboolean Dls_data_get_tempo     ( gchar *tech_id, gchar *acronyme, gpointer *tempo_p );
  extern void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
                                 gchar *host, gchar *thread, gchar *tag, gchar *param1);
  extern gfloat   Dls_data_get_AI        ( gchar *tech_id, gchar *acronyme, gpointer *ai_p );
  extern gboolean Dls_data_get_AI_inrange ( gchar *tech_id, gchar *acronyme, gpointer *ai_p );
- extern void Dls_data_set_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio );
+ extern void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio );
  extern gint Dls_data_get_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p );
- extern void Dls_data_set_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p, gboolean etat, gint reset );
+ extern void Dls_data_set_CH ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p, gboolean etat, gint reset );
  extern gint Dls_data_get_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p );
- extern void Dls_data_set_R ( gchar *tech_id, gchar *acronyme, gpointer *r_p, gfloat valeur );
+ extern void Dls_data_set_R ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *r_p, gfloat valeur );
  extern gfloat Dls_data_get_R ( gchar *tech_id, gchar *acronyme, gpointer *r_p );
  extern gchar *Dls_dyn_string ( gchar *format, gint type_bit, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p );
- extern void Dls_data_set_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visuel_p, gint mode,
+ extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *visuel_p, gint mode,
                                    gchar *color, gboolean cligno );
  extern int E( int num );
  extern int B( int num );

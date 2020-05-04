@@ -61,10 +61,12 @@
                                      const gchar *target_instance, const gchar *target_thread,
                                      const gchar *target_tag, void *source, gint taille );
  extern gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
- extern gint Recv_zmq_block ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
  extern gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, const gchar *thread, void *buf, gint taille_buf,
                                  struct ZMQ_TARGET **event, void **payload );
  extern gboolean Zmq_instance_is_target ( struct ZMQ_TARGET *event );
  extern gboolean Zmq_other_is_target ( struct ZMQ_TARGET *event );
+ extern void Send_zmq_DI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gboolean etat );
+ extern void Send_zmq_AI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range);
+ extern void Send_zmq_CDE_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
