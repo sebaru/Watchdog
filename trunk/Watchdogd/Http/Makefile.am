@@ -10,7 +10,7 @@ libwatchdog_server_http_la_SOURCES    = Http.c Http.h admin_http.c getstatus.c b
                                         histo_msgs.c memory.c getprocess.c getdls.c
 
 libwatchdog_server_http_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 libwebsockets libxml-2.0 json-glib-1.0 libsoup-2.4` \
-                                       `mysql_config --libs` \
+                                       `mysql_config --libs` -lcrypt \
                                        -rdynamic \
                                        -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
 
