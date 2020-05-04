@@ -95,7 +95,7 @@
   }
  static void Http_ws_msgs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
   { struct CLIENT *client = user_data;
-    printf("%s: WebSocket Error '%s' received !", __func__, error->message );
+    printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
     Log( client, error->message );
   }
 /******************************************************************************************************************************/
@@ -114,7 +114,7 @@
        g_signal_connect ( client->websocket, "closed",  G_CALLBACK(Http_ws_msgs_on_closed), client );
        g_signal_connect ( client->websocket, "error",   G_CALLBACK(Http_ws_msgs_on_error), client );
      }
-    else { printf("Error opening Websocket '%s' !", error->message);
+    else { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
            g_error_free (error);
          }
   }
