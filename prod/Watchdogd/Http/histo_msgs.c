@@ -37,6 +37,11 @@
     g_object_unref(connexion);
     Cfg_http.liste_ws_msgs_clients = g_slist_remove ( Cfg_http.liste_ws_msgs_clients, connexion );
   }
+ static void Http_ws_msgs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
+  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Error '%s' Connexion received !",
+              __func__, error->message );
+    g_error_free (error);
+  }
 /******************************************************************************************************************************/
 /* Http_msgs_send_to_all: Envoi d'un buffer a tous les clients connectés à la websocket                                       */
 /* Entrée: Le buffer                                                                                                          */
@@ -185,7 +190,8 @@ end:
                                             SoupClientContext *client, gpointer user_data)
   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: MSGS WebSocket Opened %p state %d!", __func__, connexion,
               soup_websocket_connection_get_state (connexion) );
-    g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_msgs_on_closed), NULL);
+    g_signal_connect ( connexion, "closed", G_CALLBACK(Http_ws_msgs_on_closed), NULL );
+    g_signal_connect ( connexion, "error",  G_CALLBACK(Http_ws_msgs_on_error),  NULL );
     Cfg_http.liste_ws_msgs_clients = g_slist_prepend ( Cfg_http.liste_ws_msgs_clients, connexion );
     Http_ws_msgs_send_histo_alive ( connexion );
     g_object_ref(connexion);
