@@ -164,4 +164,14 @@
 
     return(TRUE);                                                                                    /* Résultat dans db->row */
   }
+/******************************************************************************************************************************/
+/* Dls_DI_to_json : Formate un bit au format JSON                                                                             */
+/* Entrées: le builder et le bit                                                                                              */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_DI_to_json ( JsonBuilder *builder, struct DLS_DI *bit )
+  { Json_add_string ( builder, "tech_id",  bit->tech_id );
+    Json_add_string ( builder, "acronyme", bit->acronyme );
+    Json_add_bool   ( builder, "etat", bit->etat );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

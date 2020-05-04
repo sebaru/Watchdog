@@ -32,134 +32,6 @@
  #include "Http.h"
  extern struct HTTP_CONFIG Cfg_http;
 
-
-/******************************************************************************************************************************/
-/* Http_Memory_print_CI_to_json : Formate un CI au format JSON                                                                */
-/* Entrées: le builder et le bit                                                                                              */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Http_Memory_print_CI_to_json ( JsonBuilder *builder, struct DLS_CI *bit )
-  { Json_add_string ( builder, "acronyme",  bit->acronyme );
-    Json_add_int    ( builder, "valeur", bit->valeur );
-    Json_add_int    ( builder, "imp_par_minute", bit->imp_par_minute );
-    Json_add_double ( builder, "multi",  bit->multi );
-    Json_add_string ( builder, "unite",  bit->unite );
-  };
-/******************************************************************************************************************************/
-/* Http_Memory_print_CH_to_json : Formate un CH au format JSON                                                                */
-/* Entrées: le builder et le bit                                                                                              */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Http_Memory_print_CH_to_json ( JsonBuilder *builder, struct DLS_CH *bit )
-  { Json_add_string ( builder, "acronyme",  bit->acronyme );
-    Json_add_int  ( builder, "valeur", bit->valeur );
-    Json_add_bool ( builder, "etat",   bit->etat );
-    Json_add_int  ( builder, "last_arch", bit->last_arch );
-  };
-/******************************************************************************************************************************/
-/* Http_Memory_print_BOOL_to_json : Formate un bit au format JSON                                                             */
-/* Entrées: le builder et le bit                                                                                              */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Http_Memory_print_BOOL_to_json ( JsonBuilder *builder, struct DLS_BOOL *bit )
-  { Json_add_string ( builder, "acronyme",  bit->acronyme );
-    Json_add_bool ( builder, "etat", bit->etat );
-  }
-/******************************************************************************************************************************/
-/* Http_Memory_print_DI_to_json : Formate un bit au format JSON                                                               */
-/* Entrées: le builder et le bit                                                                                              */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Http_Memory_print_DI_to_json ( JsonBuilder *builder, struct DLS_DI *bit )
-  { Json_add_string ( builder, "acronyme",  bit->acronyme );
-    Json_add_bool ( builder, "etat", bit->etat );
-  }
-/******************************************************************************************************************************/
-/* Http_Memory_print_DO_to_json : Formate un bit au format JSON                                                               */
-/* Entrées: le builder et le bit                                                                                              */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Http_Memory_print_DO_to_json ( JsonBuilder *builder, struct DLS_DO *bit )
-  { Json_add_string ( builder, "acronyme",  bit->acronyme );
-    Json_add_bool ( builder, "etat", bit->etat );
-  }
-/******************************************************************************************************************************/
-/* Http_Memory_print_AI_to_json : Formate un bit au format JSON                                                               */
-/* Entrées: le builder et le bit                                                                                              */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Http_Memory_print_AI_to_json ( JsonBuilder *builder, struct DLS_AI *bit )
-  { Json_add_string ( builder, "acronyme",     bit->acronyme );
-    Json_add_double ( builder, "valeur_brute", bit->val_avant_ech );
-    Json_add_double ( builder, "valeur_min",   bit->min );
-    Json_add_double ( builder, "valeur_max",   bit->max );
-    Json_add_double ( builder, "valeur",       bit->val_ech );
-    Json_add_int    ( builder, "type",         bit->type );
-    Json_add_int    ( builder, "in_range",     bit->inrange );
-    Json_add_int    ( builder, "last_arch",    bit->last_arch );
-  }
-/******************************************************************************************************************************/
-/* Http_Memory_print_AO_to_json : Formate un bit au format JSON                                                               */
-/* Entrées: le builder et le bit                                                                                              */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Http_Memory_print_AO_to_json ( JsonBuilder *builder, struct DLS_AO *bit )
-  { Json_add_string ( builder, "acronyme",     bit->acronyme );
-    Json_add_double ( builder, "valeur_brute", bit->val_avant_ech );
-    Json_add_double ( builder, "valeur_min",   bit->min );
-    Json_add_double ( builder, "valeur_max",   bit->max );
-    Json_add_double ( builder, "valeur",       bit->val_ech );
-    Json_add_int    ( builder, "type",         bit->type );
-  }
-/******************************************************************************************************************************/
-/* Http_Memory_print_TEMPO_to_json : Formate un bit au format JSON                                                            */
-/* Entrées: le builder et le bit                                                                                              */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Http_Memory_print_TEMPO_to_json ( JsonBuilder *builder, struct DLS_TEMPO *bit )
-  { Json_add_string ( builder, "acronyme",  bit->acronyme );
-    Json_add_bool ( builder, "etat", bit->state );
-    Json_add_int  ( builder, "status", bit->status );
-    Json_add_int  ( builder, "daa", bit->delai_on );
-    Json_add_int  ( builder, "dma", bit->min_on );
-    Json_add_int  ( builder, "dMa", bit->max_on );
-    Json_add_int  ( builder, "dad", bit->delai_off );
-    Json_add_int  ( builder, "date_on", bit->date_on );
-    Json_add_int  ( builder, "date_off", bit->date_off );
-  }
-/******************************************************************************************************************************/
-/* Http_Memory_print_VISUEL_to_json : Formate un bit au format JSON                                                           */
-/* Entrées: le builder et le bit                                                                                              */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Http_Memory_print_VISUEL_to_json ( JsonBuilder *builder, struct DLS_VISUEL *bit )
-  { Json_add_string ( builder, "tech_id",   bit->tech_id );
-    Json_add_string ( builder, "acronyme",  bit->acronyme );
-    Json_add_int    ( builder, "mode",   bit->mode  );
-    Json_add_string ( builder, "color",  bit->color );
-    Json_add_bool   ( builder, "cligno", bit->cligno );
-  }
-/******************************************************************************************************************************/
-/* Http_Memory_print_MESSAGE_to_json : Formate un bit au format JSON                                                          */
-/* Entrées: le builder et le bit                                                                                              */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Http_Memory_print_MESSAGE_to_json ( JsonBuilder *builder, struct DLS_MESSAGES *bit )
-  { Json_add_string ( builder, "acronyme",  bit->acronyme );
-    Json_add_bool ( builder, "etat", bit->etat );
-  }
-/******************************************************************************************************************************/
-/* Http_Memory_print_REGISTRE_to_json : Formate un bit au format JSON                                                         */
-/* Entrées: le builder et le bit                                                                                              */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Http_Memory_print_REGISTRE_to_json ( JsonBuilder *builder, struct DLS_REGISTRE *bit )
-  { Json_add_string ( builder, "acronyme",  bit->acronyme );
-    Json_add_double ( builder, "valeur", bit->valeur );
-    Json_add_string ( builder, "unite", bit->unite );
-    Json_add_bool   ( builder, "archivage", bit->archivage );
-    Json_add_int    ( builder, "last_arch", bit->last_arch );
-  }
 /******************************************************************************************************************************/
 /* Http_Memory_get : Renvoi, au format json, la valeur d'un bit interne                                                       */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -188,7 +60,7 @@
      { struct DLS_CI *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
         { Json_add_object ( builder, bit->acronyme );
-          Http_Memory_print_CI_to_json ( builder, bit );
+          Dls_CI_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);
@@ -201,7 +73,7 @@
      { struct DLS_BOOL *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
         { Json_add_object ( builder, bit->acronyme );
-          Http_Memory_print_BOOL_to_json ( builder, bit );
+          Dls_BOOL_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);
@@ -214,7 +86,7 @@
      { struct DLS_CH *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
         { Json_add_object ( builder, bit->acronyme );
-          Http_Memory_print_CH_to_json ( builder, bit );
+          Dls_CH_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);
@@ -227,7 +99,7 @@
      { struct DLS_AI *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
         { Json_add_object ( builder, bit->acronyme );
-          Http_Memory_print_AI_to_json ( builder, bit );
+          Dls_AI_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);
@@ -240,7 +112,7 @@
      { struct DLS_AO *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
         { Json_add_object ( builder, bit->acronyme );
-          Http_Memory_print_AO_to_json ( builder, bit );
+          Dls_AO_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);
@@ -253,7 +125,7 @@
      { struct DLS_TEMPO *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
         { Json_add_object ( builder, bit->acronyme );
-          Http_Memory_print_TEMPO_to_json ( builder, bit );
+          Dls_TEMPO_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);
@@ -266,7 +138,7 @@
      { struct DLS_DI *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
         { Json_add_object ( builder, bit->acronyme );
-          Http_Memory_print_DI_to_json ( builder, bit );
+          Dls_DI_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);
@@ -279,7 +151,7 @@
      { struct DLS_DO *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
         { Json_add_object ( builder, bit->acronyme );
-          Http_Memory_print_DO_to_json ( builder, bit );
+          Dls_DO_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);
@@ -292,7 +164,7 @@
      { struct DLS_VISUEL *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
         { Json_add_object ( builder, bit->acronyme );
-          Http_Memory_print_VISUEL_to_json ( builder, bit );
+          Dls_VISUEL_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);
@@ -306,7 +178,7 @@
      { struct DLS_MESSAGES *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
         { Json_add_object ( builder, bit->acronyme );
-          Http_Memory_print_MESSAGE_to_json ( builder, bit );
+          Dls_MESSAGE_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);
@@ -319,7 +191,7 @@
      { struct DLS_REGISTRE *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
         { Json_add_object ( builder, bit->acronyme );
-          Http_Memory_print_REGISTRE_to_json ( builder, bit );
+          Dls_REGISTRE_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);
@@ -367,7 +239,7 @@
    	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
           return;
         }
-       Http_Memory_print_CI_to_json ( builder, cpt_imp );
+       Dls_CI_to_json ( builder, cpt_imp );
      }
 /*------------------------------------------------ Compteur horaire ----------------------------------------------------------*/
     else if (!strcasecmp(type,"CH"))
@@ -381,7 +253,7 @@
    	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
           return;
         }
-       Http_Memory_print_CH_to_json ( builder, cpt_h );
+       Dls_CH_to_json ( builder, cpt_h );
      }
 /*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
     else if (!strcasecmp(type,"EA"))
@@ -395,7 +267,7 @@
    	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
           return;
         }
-       Http_Memory_print_AI_to_json ( builder, ai );
+       Dls_AI_to_json ( builder, ai );
      }
 /*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
     else if (!strcasecmp(type,"AO"))
@@ -409,7 +281,7 @@
    	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
           return;
         }
-       Http_Memory_print_AO_to_json ( builder, ao );
+       Dls_AO_to_json ( builder, ao );
      }
 /*----------------------------------------------- Bistable et Monostables ----------------------------------------------------*/
     else if (!strcasecmp(type,"B") || !strcasecmp(type,"M"))
@@ -423,7 +295,7 @@
    	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
           return;
         }
-       Http_Memory_print_BOOL_to_json ( builder, bool );
+       Dls_BOOL_to_json ( builder, bool );
      }
 /*---------------------------------------------------------- Tempo -----------------------------------------------------------*/
     else if (!strcasecmp(type,"T"))
@@ -437,7 +309,7 @@
    	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
           return;
         }
-       Http_Memory_print_TEMPO_to_json ( builder, tempo );
+       Dls_TEMPO_to_json ( builder, tempo );
      }
 /*---------------------------------------------------------- Tempo -----------------------------------------------------------*/
     else if (!strcasecmp(type,"E"))
@@ -451,7 +323,7 @@
    	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
           return;
         }
-       Http_Memory_print_DI_to_json ( builder, di );
+       Dls_DI_to_json ( builder, di );
      }
 /*---------------------------------------------------- Visuels ---------------------------------------------------------------*/
     else if (!strcasecmp(type,"I"))
@@ -483,7 +355,7 @@
       	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
              return;
            }
-          Http_Memory_print_VISUEL_to_json ( builder, visu );
+          Dls_VISUEL_to_json ( builder, visu );
         }
      }
 /*---------------------------------------------------- Messages --------------------------------------------------------------*/
@@ -498,7 +370,7 @@
    	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
           return;
         }
-       Http_Memory_print_MESSAGE_to_json ( builder, dls_msg );
+       Dls_MESSAGE_to_json ( builder, dls_msg );
      }
 /*--------------------------------------------------- Registres --------------------------------------------------------------*/
     else if (!strcasecmp(type,"R"))
@@ -512,7 +384,7 @@
    	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
           return;
         }
-       Http_Memory_print_REGISTRE_to_json ( builder, r );
+       Dls_REGISTRE_to_json ( builder, r );
      }
 /*------------------------------------------------------- sinon --------------------------------------------------------------*/
     else { Json_add_bool ( builder, "found", FALSE ); }

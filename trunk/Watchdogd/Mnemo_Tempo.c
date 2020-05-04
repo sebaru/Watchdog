@@ -111,4 +111,21 @@
      }
     return(db);
   }
+/******************************************************************************************************************************/
+/* Dls_TEMPO_to_json : Formate un bit au format JSON                                                                          */
+/* Entrées: le builder et le bit                                                                                              */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_TEMPO_to_json ( JsonBuilder *builder, struct DLS_TEMPO *bit )
+  { Json_add_string ( builder, "tech_id",  bit->tech_id );
+    Json_add_string ( builder, "acronyme", bit->acronyme );
+    Json_add_bool ( builder, "etat", bit->state );
+    Json_add_int  ( builder, "status", bit->status );
+    Json_add_int  ( builder, "daa", bit->delai_on );
+    Json_add_int  ( builder, "dma", bit->min_on );
+    Json_add_int  ( builder, "dMa", bit->max_on );
+    Json_add_int  ( builder, "dad", bit->delai_off );
+    Json_add_int  ( builder, "date_on", bit->date_on );
+    Json_add_int  ( builder, "date_off", bit->date_off );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

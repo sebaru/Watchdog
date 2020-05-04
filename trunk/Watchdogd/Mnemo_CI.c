@@ -184,4 +184,17 @@
     Libere_DB_SQL( &db );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d CptIMP updated", __func__, cpt );
   }
+/******************************************************************************************************************************/
+/* Dls_CI_to_json : Formate un CI au format JSON                                                                              */
+/* Entrées: le builder et le bit                                                                                              */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_CI_to_json ( JsonBuilder *builder, struct DLS_CI *bit )
+  { Json_add_string ( builder, "tech_id",  bit->tech_id );
+    Json_add_string ( builder, "acronyme", bit->acronyme );
+    Json_add_int    ( builder, "valeur", bit->valeur );
+    Json_add_int    ( builder, "imp_par_minute", bit->imp_par_minute );
+    Json_add_double ( builder, "multi",  bit->multi );
+    Json_add_string ( builder, "unite",  bit->unite );
+  };
 /*----------------------------------------------------------------------------------------------------------------------------*/

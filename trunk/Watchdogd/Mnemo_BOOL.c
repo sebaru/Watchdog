@@ -174,4 +174,14 @@
     Libere_DB_SQL( &db );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d BOOL updated", __func__, cpt );
   }
+/******************************************************************************************************************************/
+/* Dls_BOOL_to_json : Formate un bit au format JSON                                                                           */
+/* Entrées: le builder et le bit                                                                                              */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_BOOL_to_json ( JsonBuilder *builder, struct DLS_BOOL *bit )
+  { Json_add_string ( builder, "tech_id",  bit->tech_id );
+    Json_add_string ( builder, "acronyme", bit->acronyme );
+    Json_add_bool ( builder, "etat", bit->etat );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

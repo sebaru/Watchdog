@@ -190,20 +190,17 @@
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d AO updated", __func__, cpt );
   }
 /******************************************************************************************************************************/
-/* Dls_AO_to_Json: Convertir un AO en JSON                                                                                    */
-/* Entrée: l'AO en question et un pointeur recevant la taille du buffer créé                                                  */
-/* Sortie: le buffer et sa taille                                                                                             */
+/* Dls_AO_to_json: Convertir un AO en JSON                                                                                    */
+/* Entrées: le builder et le bit                                                                                              */
+/* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- gchar *Dls_AO_to_Json ( struct DLS_AO *ao, gsize *taille_buf_p )
-  { JsonBuilder *builder;
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-       return(NULL);
-     }
-    Json_add_string ( builder, "tech_id",  ao->tech_id );
-    Json_add_string ( builder, "acronyme", ao->acronyme );
-    Json_add_double ( builder, "valeur",   ao->val_ech );
-    return(Json_get_buf ( builder, taille_buf_p ));
+ void Dls_AO_to_json ( JsonBuilder *builder, struct DLS_AO *bit )
+  { Json_add_string ( builder, "tech_id",      bit->tech_id );
+    Json_add_string ( builder, "acronyme",     bit->acronyme );
+    Json_add_double ( builder, "valeur_brute", bit->val_avant_ech );
+    Json_add_double ( builder, "valeur_min",   bit->min );
+    Json_add_double ( builder, "valeur_max",   bit->max );
+    Json_add_double ( builder, "valeur",       bit->val_ech );
+    Json_add_int    ( builder, "type",         bit->type );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -303,18 +303,21 @@
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' stopped !", __func__, event->src_instance); }
     else if ( !strcmp(event->tag, "SLAVE_START") )
      { struct DLS_AO *ao;
-       gsize taille_buf;
        GSList *liste;
-       gchar *result;
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' started. Sending AO !", __func__, event->src_instance);
        liste = Partage->Dls_data_AO;
        while (liste)
         { ao = (struct DLS_AO *)Partage->com_msrv.Liste_AO->data;            /* Recuperation du numero de a */
-          result = Dls_AO_to_Json( ao, &taille_buf );
-          if (result)
-           { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", event->src_instance, "*", "SET_AO", result, taille_buf );
-             Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance, "*", "SET_AO", result, taille_buf );
-             g_free(result);
+          JsonBuilder *builder = Json_create ();
+          if (builder)
+           { gsize taille_buf;
+             Dls_AO_to_json( builder, ao );
+             gchar *buf = Json_get_buf ( builder, &taille_buf );
+              if(buf)
+               { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", event->src_instance, "*", "SET_AO", buf, taille_buf );
+                 Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance, "*", "SET_AO", buf, taille_buf );
+                 g_free(buf);
+               }
            }
           liste = g_slist_next(liste);
         }

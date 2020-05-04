@@ -384,4 +384,16 @@
     Libere_DB_SQL(&db);
     return(retour);
   }
+/******************************************************************************************************************************/
+/* Dls_VISUEL_to_json : Formate un bit au format JSON                                                                         */
+/* Entrées: le builder et le bit                                                                                              */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_VISUEL_to_json ( JsonBuilder *builder, struct DLS_VISUEL *bit )
+  { Json_add_string ( builder, "tech_id",   bit->tech_id );
+    Json_add_string ( builder, "acronyme",  bit->acronyme );
+    Json_add_int    ( builder, "mode",   bit->mode  );
+    Json_add_string ( builder, "color",  bit->color );
+    Json_add_bool   ( builder, "cligno", bit->cligno );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
