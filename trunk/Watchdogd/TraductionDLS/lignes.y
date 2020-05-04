@@ -821,7 +821,7 @@ une_action:     T_ACT_COMOUT
                        }
                       else switch(alias->type_bit)
                        { case MNEMO_TEMPO : $$=New_action_tempo( alias, options ); break;
-                         case MNEMO_MSG   : $$=New_action_msg( alias );   break;
+                         case MNEMO_MSG   : $$=New_action_msg( alias, options );   break;
                          case MNEMO_BUS   : $$=New_action_bus( alias, options );   break;
                          case MNEMO_SORTIE: $$=New_action_sortie( alias, $1, options );  break;
                          case MNEMO_DIGITAL_OUTPUT: $$=New_action_digital_output( alias, options );  break;

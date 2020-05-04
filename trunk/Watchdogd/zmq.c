@@ -67,7 +67,7 @@
     return(!Zmq_instance_is_target(event));
   }
 /******************************************************************************************************************************/
-/* New_zmq: Initialise une socket dont le pattern et le endpoint sont en parametre                                                 */
+/* New_zmq: Initialise une socket dont le pattern et le endpoint sont en parametre                                            */
 /* Entrée: le pattern                                                                                                         */
 /* Sortie: une socket ZMQ ou NUL si erreur                                                                                    */
 /******************************************************************************************************************************/
@@ -266,7 +266,7 @@
  gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, const gchar *thread, void *buf, gint taille_buf,
                           struct ZMQ_TARGET **event, void **payload )
   { gint byte;
-    byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
+    byte = zmq_recv ( zmq->socket, buf, taille_buf-1, ZMQ_DONTWAIT );
     if (byte>=0)
      { *event = buf;
        if (Zmq_instance_is_target ( *event ) && Zmq_thread_is_target ( *event, thread ) )
@@ -274,6 +274,7 @@
           Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                    "%s: '%s' ('%s') : %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
                    (*event)->src_instance, (*event)->src_thread, (*event)->dst_instance, (*event)->dst_thread, (*event)->tag );
+          ((gchar *)buf)[byte] = 0;                                                                       /* Caractere nul d'arret forcé */
           return(byte);
         }
        else return(0);                                                                        /* Si pas destinataire, on drop */

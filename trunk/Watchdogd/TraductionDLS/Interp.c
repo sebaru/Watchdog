@@ -477,7 +477,7 @@
 /* Entrées: L'alias decouvert                                                                                                 */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_msg( struct ALIAS *alias )
+ struct ACTION *New_action_msg( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
     int taille;
 
@@ -486,7 +486,7 @@
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-    gint update = Get_option_entier ( alias->options, T_UPDATE );
+    gint update = Get_option_entier ( options, T_UPDATE );
     if (update==-1) update=0;
 
     g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, TRUE );\n",

@@ -254,6 +254,123 @@
     Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
+/* Handle_zmq_message_for_master: Analyse et reagi à un message ZMQ a destination du MSRV                   */
+/* Entrée: le message                                       */
+/* Sortie: rien                                             */
+/******************************************************************************************************************************/
+ static void Handle_zmq_message_for_master ( struct ZMQ_TARGET *event, gchar *payload )
+  { if ( !strcmp(event->tag,"SET_AI") )
+     { JsonNode *query;
+       query = Json_get_from_string ( payload );
+       if (!query)
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); return; }
+       Dls_data_set_AI ( Json_get_string ( query, "tech_id" ),
+       Json_get_string ( query, "acronyme" ), NULL, Json_get_float ( query, "valeur" ), Json_get_bool ( query, "in_range" ) );
+       json_node_unref (query);
+     }
+    else if ( !strcmp(event->tag,"SET_CDE") )
+     { JsonNode *query;
+       query = Json_get_from_string ( payload );
+       if (!query)
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); return; }
+
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                 "%s: receive SET_CDE=1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
+                 event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
+                 Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
+       Envoyer_commande_dls_data ( Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
+       json_node_unref (query);
+     }
+    else if ( !strcmp(event->tag,"SET_DI") )
+     { JsonNode *query;
+       query = Json_get_from_string ( payload );
+       if (!query)
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); return; }
+
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                 "%s: receive SET_DI from %s/%s to %s/%s : '%s:%s'=%d", __func__,
+                 event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
+                 Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ), Json_get_bool ( query, "etat" ) );
+       Dls_data_set_DI ( NULL, Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ),
+                         NULL, Json_get_bool ( query, "etat" ) );
+       json_node_unref (query);
+     }
+    else if ( !strcmp(event->tag, "ping") )
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s/%s to %s/%s",
+                 __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
+     }
+    else if ( !strcmp(event->tag, "SLAVE_STOP") )
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' stopped !", __func__, event->src_instance); }
+    else if ( !strcmp(event->tag, "SLAVE_START") )
+     { struct DLS_AO *ao;
+       gsize taille_buf;
+       GSList *liste;
+       gchar *result;
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' started. Sending AO !", __func__, event->src_instance);
+       liste = Partage->Dls_data_AO;
+       while (liste)
+        { ao = (struct DLS_AO *)Partage->com_msrv.Liste_AO->data;            /* Recuperation du numero de a */
+          result = Dls_AO_to_Json( ao, &taille_buf );
+          if (result)
+           { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", event->src_instance, "*", "SET_AO", result, taille_buf );
+             Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance, "*", "SET_AO", result, taille_buf );
+             g_free(result);
+           }
+          liste = g_slist_next(liste);
+        }
+     }
+    else if ( !strcmp(event->tag, "SNIPS_QUESTION") )
+     { struct DB *db;
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SNIPS_QUESTION from %s/%s to %s/%s : '%s'",
+                 __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
+
+       if ( ! Recuperer_mnemos_AI_by_map_question_vocale ( &db, (gchar *)payload ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Error searching Database for '%s'", __func__, payload ); }
+       else while ( Recuperer_mnemos_AI_suite( &db ) )
+        { gchar *tech_id = db->row[0], *acronyme = db->row[1], *libelle = db->row[2];
+          gchar *map_question_vocale = db->row[3], *map_reponse_vocale = db->row[4];
+          gchar *result_string;
+          gpointer ai_p=NULL;
+          Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s - %s", __func__,
+                    map_question_vocale, tech_id, acronyme, libelle, map_reponse_vocale );
+          result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_ENTREE_ANA, tech_id, acronyme, &ai_p );
+          Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
+                    event->src_instance, result_string );
+          Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
+                              "audio", "play_google", result_string, strlen(result_string)+1 );
+          Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
+                              "audio", "play_google", result_string, strlen(result_string)+1 );
+          g_free(result_string);
+        }
+
+       if ( ! Recuperer_mnemos_R_by_map_question_vocale ( &db, (gchar *)payload ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Error searching Database for '%s'", __func__, payload ); }
+       else while ( Recuperer_mnemos_R_suite( &db ) )
+        { gchar *tech_id = db->row[0], *acronyme = db->row[1], *libelle = db->row[2];
+          gchar *map_question_vocale = db->row[3], *map_reponse_vocale = db->row[4];
+          gchar *result_string;
+          gpointer reg_p=NULL;
+          Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s - %s", __func__,
+                    map_question_vocale, tech_id, acronyme, libelle, map_reponse_vocale );
+          result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_REGISTRE, tech_id, acronyme, &reg_p );
+          Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
+                    event->src_instance, result_string );
+          Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
+                              "audio", "play_google", result_string, strlen(result_string)+1 );
+          Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
+                              "audio", "play_google", result_string, strlen(result_string)+1 );
+          g_free(result_string);
+        }
+     }
+    else if ( !strcmp(event->tag, "sudo") )
+     { gchar chaine[80];
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s/%s",
+           __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
+       g_snprintf( chaine, sizeof(chaine), "sudo -n %s", (gchar *)payload );
+       system(chaine);
+     }
+  }
+/******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
@@ -306,125 +423,15 @@
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
 
        if ( (byte=Recv_zmq_with_tag( zmq_from_slave, "msrv", &buffer, sizeof(buffer)-1, &event, &payload )) > 0 )
-        { if ( !strcmp(event->tag,"SET_AI") )
-           { JsonNode *query;
-             buffer[byte] = 0;                                                                       /* Caractère nul d'arret */
-             query = Json_get_from_string ( payload );
-             if (!query)
-              { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); continue; }
-             Dls_data_set_AI ( Json_get_string ( query, "tech_id" ),
-                               Json_get_string ( query, "acronyme" ),
-                               NULL, Json_get_float ( query, "valeur" ), Json_get_bool ( query, "in_range" ) );
-             json_node_unref (query);
-           }
-          else if ( !strcmp(event->tag,"SET_CDE") )
-           { JsonNode *query;
-             buffer[byte] = 0;                                                                       /* Caractère nul d'arret */
-             query = Json_get_from_string ( payload );
-             if (!query)
-              { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); continue; }
+        { Handle_zmq_message_for_master( event, payload ); }
 
-             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                       "%s: receive SET_CDE=1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
-                       event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
-                       Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
-             Envoyer_commande_dls_data ( Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
+       if ( (byte=Recv_zmq_with_tag( zmq_from_bus, NULL, &buffer, sizeof(buffer)-1, &event, &payload )) > 0 )
+        { if (!strcmp(event->dst_thread, "msrv"))
+           { Handle_zmq_message_for_master( event, payload ); }
+          else
+           { Send_zmq ( Partage->com_msrv.zmq_to_bus, buffer, byte );                           /* Sinon on envoi aux threads */
+             Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte );                           /* Sinon on envoi aux slave */
            }
-          else if ( !strcmp(event->tag,"SET_DI") )
-           { JsonNode *query;
-             buffer[byte] = 0;                                                                       /* Caractère nul d'arret */
-             query = Json_get_from_string ( payload );
-             if (!query)
-              { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); continue; }
-
-             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                       "%s: receive SET_DI from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
-                       event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
-                       Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
-             Dls_data_set_DI ( NULL, Json_get_string ( query, "tech_id" ),
-                               Json_get_string ( query, "acronyme" ),
-                               NULL, Json_get_bool ( query, "etat" ) );
-           }
-          else if ( !strcmp(event->tag, "ping") )
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s/%s to %s/%s",
-                       __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
-           }
-          else if ( !strcmp(event->tag, "SLAVE_STOP") )
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' stopped !", __func__, event->src_instance);
-           }
-          else if ( !strcmp(event->tag, "SLAVE_START") )
-           { struct DLS_AO *ao;
-             gsize taille_buf;
-             GSList *liste;
-             gchar *result;
-             Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' started. Sending AO !", __func__, event->src_instance);
-             liste = Partage->Dls_data_AO;
-             while (liste)
-              { ao = (struct DLS_AO *)Partage->com_msrv.Liste_AO->data;                        /* Recuperation du numero de a */
-                result = Dls_AO_to_Json( ao, &taille_buf );
-                if (result)
-                 { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", event->src_instance, "*", "SET_AO", result, taille_buf );
-                   Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance, "*", "SET_AO", result, taille_buf );
-                   g_free(result);
-                 }
-                liste = g_slist_next(liste);
-              }
-           }
-          else if ( !strcmp(event->tag, "SNIPS_QUESTION") )
-           { struct DB *db;
-             Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SNIPS_QUESTION from %s/%s to %s/%s : '%s'",
-                       __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
-
-             if ( ! Recuperer_mnemos_AI_by_map_question_vocale ( &db, (gchar *)payload ) )
-              { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Error searching Database for '%s'", __func__, payload ); }
-             else while ( Recuperer_mnemos_AI_suite( &db ) )
-              { gchar *tech_id = db->row[0], *acronyme = db->row[1], *libelle = db->row[2];
-                gchar *map_question_vocale = db->row[3], *map_reponse_vocale = db->row[4];
-                gchar *result_string;
-                gpointer ai_p=NULL;
-                Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s - %s", __func__,
-                          map_question_vocale, tech_id, acronyme, libelle, map_reponse_vocale );
-                result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_ENTREE_ANA, tech_id, acronyme, &ai_p );
-                Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
-                          event->src_instance, result_string );
-                Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
-                                    "audio", "play_google", result_string, strlen(result_string)+1 );
-                Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
-                                    "audio", "play_google", result_string, strlen(result_string)+1 );
-                g_free(result_string);
-              }
-
-             if ( ! Recuperer_mnemos_R_by_map_question_vocale ( &db, (gchar *)payload ) )
-              { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Error searching Database for '%s'", __func__, payload ); }
-             else while ( Recuperer_mnemos_R_suite( &db ) )
-              { gchar *tech_id = db->row[0], *acronyme = db->row[1], *libelle = db->row[2];
-                gchar *map_question_vocale = db->row[3], *map_reponse_vocale = db->row[4];
-                gchar *result_string;
-                gpointer reg_p=NULL;
-                Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s - %s", __func__,
-                          map_question_vocale, tech_id, acronyme, libelle, map_reponse_vocale );
-                result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_REGISTRE, tech_id, acronyme, &reg_p );
-                Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
-                          event->src_instance, result_string );
-                Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
-                                    "audio", "play_google", result_string, strlen(result_string)+1 );
-                Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
-                                    "audio", "play_google", result_string, strlen(result_string)+1 );
-                g_free(result_string);
-              }
-           }
-          else if ( !strcmp(event->tag, "sudo") )
-           { gchar chaine[80];
-             Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s/%s",
-                       __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
-             g_snprintf( chaine, sizeof(chaine), "sudo -n %s", (gchar *)payload );
-             system(chaine);
-           }
-        }
-
-       if ( (byte=Recv_zmq( zmq_from_bus, &buffer, sizeof(buffer) )) > 0 )
-        { Send_zmq ( Partage->com_msrv.zmq_to_bus, buffer, byte );                              /* Sinon on envoi aux threads */
-          Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte );                              /* Sinon on envoi aux slave */
         }
 
        if (Partage->com_msrv.Thread_reload)                                                               /* On a recu RELOAD */
