@@ -117,6 +117,7 @@
           liste = liste->next;
         }
      }
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' debug to %d", __func__, thread, status );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
@@ -144,6 +145,8 @@
           liste = liste->next;
         }
      }
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' to '%s'",
+                          __func__, thread, (status ? "start" : "stop") );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
@@ -160,13 +163,13 @@
 
     Http_print_request ( server, msg, path, client );
 
-         if (!strcasecmp(path, "/process/list"))     { Http_traiter_process_list(msg); }
-    else if (!strcasecmp(path, "/process/stop/"))    { Http_traiter_process_start_stop( msg, path+15, FALSE ); }
-    else if (!strcasecmp(path, "/process/start/"))   { Http_traiter_process_start_stop( msg, path+15, TRUE );  }
-    else if (!strcasecmp(path, "/process/undebug/")) { Http_traiter_process_debug( msg, path+17, FALSE );      }
-    else if (!strcasecmp(path, "/process/debug/"))   { Http_traiter_process_debug( msg, path+16, TRUE );       }
+         if (!strcasecmp(path, "/process/list"))          { Http_traiter_process_list(msg); }
+    else if (g_str_has_prefix(path, "/process/stop/"))    { Http_traiter_process_start_stop( msg, path+14, FALSE ); }
+    else if (g_str_has_prefix(path, "/process/start/"))   { Http_traiter_process_start_stop( msg, path+15, TRUE );  }
+    else if (g_str_has_prefix(path, "/process/undebug/")) { Http_traiter_process_debug( msg, path+17, FALSE );      }
+    else if (g_str_has_prefix(path, "/process/debug/"))   { Http_traiter_process_debug( msg, path+15, TRUE );       }
 /*************************************************** WS Reload library ********************************************************/
-    else if (!strcasecmp( path, "/process/reload/"))
+    else if (g_str_has_prefix(path, "/process/reload/"))
      { gchar *target = path+16;
        GSList *liste;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading start for %s", __func__, target );
