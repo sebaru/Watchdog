@@ -95,6 +95,7 @@
   }
  static void Http_ws_msgs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
   { printf("%s: WebSocket Error '%s' received !", __func__, error->message );
+    Log( client, error->message );
   }
 /******************************************************************************************************************************/
 /* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
@@ -106,8 +107,8 @@
     GError *error = NULL;
     printf("%s\n", __func__ );
     client->websocket = soup_session_websocket_connect_finish ( client->connexion, res, &error );
-    if (client->websocket)
-     { g_object_set ( G_OBJECT(client->websocket), "max-incoming-payload-size", 0, NULL );   /* No limit on incoming packet ! */
+    if (client->websocket)                                                                   /* No limit on incoming packet ! */
+     { g_object_set ( G_OBJECT(client->websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
        g_signal_connect ( client->websocket, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), client );
        g_signal_connect ( client->websocket, "closed",  G_CALLBACK(Http_ws_msgs_on_closed), client );
        g_signal_connect ( client->websocket, "error",   G_CALLBACK(Http_ws_msgs_on_error), client );
