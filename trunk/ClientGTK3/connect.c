@@ -94,7 +94,8 @@
   { printf("%s\n", __func__ );
   }
  static void Http_ws_msgs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
-  { printf("%s: WebSocket Error '%s' received !", __func__, error->message );
+  { struct CLIENT *client = user_data;
+    printf("%s: WebSocket Error '%s' received !", __func__, error->message );
     Log( client, error->message );
   }
 /******************************************************************************************************************************/
