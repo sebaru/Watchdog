@@ -176,7 +176,7 @@ printf("searching page %d %d\n", type, id );
                    { liste = liste->next; continue; }
                   break;
              case TYPE_PAGE_SUPERVISION:
-                  if ( ((struct TYPE_INFO_SUPERVISION *)page->infos)->syn.id != id )
+                  if ( Json_get_int ( ((struct TYPE_INFO_SUPERVISION *)page->infos)->syn , "id" ) != id )
                    { liste = liste->next; continue; }
                   break;
              case TYPE_PAGE_MNEMONIQUE:

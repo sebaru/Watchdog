@@ -218,6 +218,33 @@
     return ( retour );
   }
 /******************************************************************************************************************************/
+/* Recuperer_motifDB: Recupération de la liste des motifs d'un synoptique                                                     */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
+ gboolean Recuperer_motifDB_new ( struct DB **db_retour, gint id_syn )
+  { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT tech_id,acronyme,forme,libelle,access_level,posx,posy,angle,"
+                "def_color, clic_tech_id, clic_acronyme"
+                " FROM syns_motifs"
+                " WHERE syn_id='%d' ORDER BY layer", id_syn );
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
+  }
+/******************************************************************************************************************************/
 /* Recuperer_motifDB_suite : Contination de la recupération de la liste des motifs d'un synoptique                            */
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
