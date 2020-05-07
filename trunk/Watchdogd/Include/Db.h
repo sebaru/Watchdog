@@ -21,15 +21,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #ifndef _DB_H_
   #define _DB_H_
-
  #include <mysql.h>
-
  #include "Erreur.h"
 
  #define TAILLE_DB_HOST           30
@@ -59,5 +57,6 @@
  extern guint Recuperer_last_ID_SQL ( struct DB *db );
  extern void Print_SQL_status ( void );
  extern void Update_database_schema ( void );
+ extern gboolean Select_SQL_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete );
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

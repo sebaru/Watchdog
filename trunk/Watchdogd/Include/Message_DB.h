@@ -29,7 +29,6 @@
  #define _MESSAGE_DB_H_
 
  #include "Reseaux.h"
- #include "Db.h"
 
  #define NOM_TABLE_MSG       "msgs"
 

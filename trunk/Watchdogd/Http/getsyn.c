@@ -40,10 +40,9 @@
 /******************************************************************************************************************************/
  void Http_traiter_syn_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { gsize taille_buf;
-    struct DB *db;
+  { gchar *buf, chaine[256];
+    gsize taille_buf;
     gint syn_id;
-    gchar *buf;
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -68,41 +67,40 @@
        return;
      }
 
-    if ( Recuperer_motifDB_new ( &db, syn_id ) == FALSE )
+    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns WHERE id=%d", syn_id );
+    if (Select_SQL_to_JSON ( builder, NULL, chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
        return;
      }
 
-    Json_add_array ( builder, "motifs" );
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    while ( db->row )
-     { Json_add_object ( builder, NULL );
-       Json_add_string ( builder, "tech_id", db->row[0] );
-       Json_add_string ( builder, "acronyme", db->row[1] );
-       Json_add_string ( builder, "forme", db->row[2] );
-       Json_add_string ( builder, "libelle", db->row[3] );
-       Json_add_int    ( builder, "access_level", atoi(db->row[4]) );
-       Json_add_int    ( builder, "posx", atoi(db->row[5]) );
-       Json_add_int    ( builder, "posy", atoi(db->row[6]) );
-       Json_add_int    ( builder, "angle", atoi(db->row[7]) );
-       Json_add_string ( builder, "def_color", db->row[8] );
-       Json_add_string ( builder, "clic_tech_id", db->row[9] );
-       Json_add_string ( builder, "clic_acronyme", db->row[10] );
-       Json_end_object ( builder );
-       Recuperer_ligne_SQL(db);                                                            /* Chargement d'une ligne resultat */
+    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_motifs WHERE syn_id=%d", syn_id );
+    if (Select_SQL_to_JSON ( builder, "motifs", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
      }
-    Liberer_resultat_SQL (db);
-    Libere_DB_SQL( &db );
-    Json_end_array ( builder );
 
-    Json_add_array ( builder, "passerelles" );
-    Json_end_array ( builder );
+    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_pass WHERE syn_id=%d", syn_id );
+    if (Select_SQL_to_JSON ( builder, "passerelles", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
 
-    Json_add_array ( builder, "liens" );
-    Json_end_array ( builder );
+    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_liens WHERE syn_id=%d", syn_id );
+    if (Select_SQL_to_JSON ( builder, "liens", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
 
-    Json_add_array ( builder, "rectangles" );
-    Json_end_array ( builder );
+    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_rectangles WHERE syn_id=%d", syn_id );
+    if (Select_SQL_to_JSON ( builder, "rectangles", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
 
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/

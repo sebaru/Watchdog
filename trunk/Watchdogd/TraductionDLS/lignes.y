@@ -29,8 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
-#include "Proto_traductionDLS.h"
-#include "Dls.h"
+#include "watchdogd.h"
 %}
 
 %union { int val;
