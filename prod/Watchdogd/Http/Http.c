@@ -282,37 +282,6 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 
-
- static void Http_ws_motifs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Close Connexion received !", __func__ );
-    g_object_unref(connexion);
-    Cfg_http.liste_ws_motifs_clients = g_slist_remove ( Cfg_http.liste_ws_motifs_clients, connexion );
-  }
-
- static void Http_ws_motifs_on_message ( SoupWebsocketConnection *connexion, gint type, GBytes *message, gpointer user_data )
-  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Message received !", __func__ );
-  }
-
- static void Http_ws_motifs_on_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
-  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
-  }
-
-/******************************************************************************************************************************/
-/* Http_traiter_websocket: Traite une requete websocket                                                                       */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Http_traiter_websocket_motifs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
-                                                SoupClientContext *client, gpointer user_data)
-  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Opened %p state %d!", __func__, connexion,
-              soup_websocket_connection_get_state (connexion) );
-    g_signal_connect ( connexion, "message", G_CALLBACK(Http_ws_motifs_on_message), NULL);
-    g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_motifs_on_closed), NULL);
-    g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_motifs_on_error), NULL);
-    /*soup_websocket_connection_send_text ( connexion, "Welcome on Watchdog WebSocket !" );*/
-    Cfg_http.liste_ws_motifs_clients = g_slist_prepend ( Cfg_http.liste_ws_motifs_clients, connexion );
-    g_object_ref(connexion);
-  }
 /******************************************************************************************************************************/
 /* Run_thread: Thread principal                                                                                               */
 /* Entrée: une structure LIBRAIRIE                                                                                            */
@@ -341,14 +310,16 @@ reload:
     soup_server_add_handler ( socket, "/connect",    Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/disconnect", Http_traiter_disconnect, NULL, NULL );
     soup_server_add_handler ( socket, "/dls",        Http_traiter_dls, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/get/",   Http_traiter_syn_get, NULL, NULL );
     soup_server_add_handler ( socket, "/process",    Http_traiter_process, NULL, NULL );
     soup_server_add_handler ( socket, "/status",     Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/log",        Http_traiter_log, NULL, NULL );
     soup_server_add_handler ( socket, "/bus",        Http_traiter_bus, NULL, NULL );
     soup_server_add_handler ( socket, "/memory",     Http_traiter_memory, NULL, NULL );
     soup_server_add_handler ( socket, "/histo/ack",  Http_traiter_histo_ack, NULL, NULL );
-    soup_server_add_websocket_handler ( socket, "/ws/live-motifs", NULL, NULL, Http_traiter_websocket_motifs_CB, NULL, NULL );
-    soup_server_add_websocket_handler ( socket, "/ws/live-msgs",   NULL, NULL, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
+    gchar *protocols[] = { "live-motifs", "live-msgs" };
+    soup_server_add_websocket_handler ( socket, "/ws/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
+    soup_server_add_websocket_handler ( socket, "/ws/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
 
     if (Cfg_http.authenticate)
      { SoupAuthDomain *domain;
@@ -357,6 +328,7 @@ reload:
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/connect",
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/disconnect",
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/dls",
+                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/syn",
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/process",
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/log",
                                              SOUP_AUTH_DOMAIN_ADD_PATH, "/histo",

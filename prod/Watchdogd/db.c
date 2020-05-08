@@ -131,6 +131,43 @@
                                Partage->com_arch.archdb_password, Partage->com_arch.archdb_database, Partage->com_arch.archdb_port ) );
   }
 /******************************************************************************************************************************/
+/* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                                         */
+/* Entrée: La DB, la requete                                                                                                  */
+/* Sortie: TRUE si pas de souci                                                                                               */
+/******************************************************************************************************************************/
+ gboolean Select_SQL_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete )
+  { struct DB *db = Init_DB_SQL ();
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
+       return(FALSE);
+     }
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
+       Libere_DB_SQL ( &db );
+       return(FALSE);
+     }
+
+    db->result = mysql_store_result ( db->mysql );
+    if ( ! db->result )
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: store_result failed (%s)", __func__, (char *) mysql_error(db->mysql) );
+       db->nbr_result = 0;
+     }
+    else
+     { if (array_name) Json_add_array( builder, array_name );
+       while ( (db->row = mysql_fetch_row(db->result)) != NULL )
+        { if (array_name) Json_add_object ( builder, NULL );
+          for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
+           { Json_add_string( builder, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
+          if (array_name) Json_end_object ( builder );
+        }
+       if (array_name) Json_end_array ( builder );
+       mysql_free_result( db->result );
+     }
+    mysql_close( db->mysql );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                                           */
 /* Entrée: La DB                                                                                                              */
 /******************************************************************************************************************************/

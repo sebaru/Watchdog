@@ -294,6 +294,7 @@
        liste = g_slist_next(liste);
        cpt++;
      }
+    Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
 /* Dls_MESSAGE_to_json : Formate un bit au format JSON                                                                        */

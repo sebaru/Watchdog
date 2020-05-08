@@ -28,7 +28,6 @@
   #define _DLS_H_
 
  #include "Reseaux.h"
- #include "Db.h"
  #include "Module_dls.h"
 
  #define NOM_TABLE_DLS         "dls"

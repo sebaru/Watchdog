@@ -54,7 +54,7 @@
      { page = (struct PAGE_NOTEBOOK *)liste->data;
        if ( page->type == TYPE_PAGE_SUPERVISION )                /* Est-ce bien une page d'supervision ?? */
         { infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
-          if (infos->syn.id == syn_id) break;                              /* Nous avons trouvé le syn !! */
+          if (Json_get_int(infos->syn, "id") == syn_id) break;                              /* Nous avons trouvé le syn !! */
         }
        liste = liste->next;                                                        /* On passe au suivant */
      }
@@ -68,6 +68,7 @@
  void Detruire_page_supervision( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_SUPERVISION *infos;
     infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
+    json_node_unref( infos->syn );
     /*g_timeout_remove( infos->timer_id );*/
     //Trame_detruire_trame( infos->Trame );
   }
@@ -127,8 +128,8 @@
 /******************************************************************************************************************************/
  static void Menu_get_horloge_synoptique( struct TYPE_INFO_SUPERVISION *infos )
   { gchar chaine[80];
-    printf("Get Horloge from %s\n", infos->syn.page );
-    g_snprintf(chaine, sizeof(chaine), "horloges/list/%s", infos->syn.page );
+    printf("Get Horloge from %s\n", Json_get_string(infos->syn, "page") );
+    g_snprintf(chaine, sizeof(chaine), "horloges/list/%s", Json_get_string(infos->syn, "page") );
 //    Firefox_exec ( chaine );
   }
 /******************************************************************************************************************************/
@@ -171,7 +172,7 @@
 //    memcpy(&infos->syn, syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
 
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
-    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
+    infos->syn = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
 
     //if (!init_timer) { g_timeout_add( 500, Timer, NULL ); init_timer = 1; }
 
@@ -238,13 +239,12 @@
     gtk_widget_show_all( page->child );
 
     label = gtk_event_box_new ();
-    gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( Json_get_string( response, "libelle" ) ) );
+    gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( Json_get_string( infos->syn, "libelle" ) ) );
 //    gdk_color_parse ("cyan", &color);
 //    gtk_widget_modify_bg ( label, GTK_STATE_NORMAL, &color );
 //    gtk_widget_modify_bg ( label, GTK_STATE_ACTIVE, &color );
     gtk_widget_show_all( label );
     gtk_notebook_append_page( GTK_NOTEBOOK(client->Notebook), page->child, label );
-    json_node_unref(response);
 //    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", "ws://localhost:5560/ws/live-msgs"),
   //                                         NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
   }
@@ -529,12 +529,14 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
 /* Entrée/Sortie: l'instance cliente, l'id du synoptique a demander                                                           */
 /******************************************************************************************************************************/
  void Demander_synoptique_supervision ( struct CLIENT *client, gint id )
-  { gsize taille_buf;
+  { gchar chaine[80];
+    /*gsize taille_buf;
     JsonBuilder *builder = Json_create ();
     if (builder == NULL) return;
     Json_add_int( builder, "syn_id", id );
-    gchar *buf = Json_get_buf (builder, &taille_buf);
-    Envoi_au_serveur( client, "POST", buf, taille_buf, "syns/get", Creer_page_supervision_CB );
+    gchar *buf = Json_get_buf (builder, &taille_buf);*/
+    g_snprintf( chaine, sizeof(chaine), "syn/get/%d", id );
+    Envoi_au_serveur( client, "GET", NULL, 0, chaine, Creer_page_supervision_CB );
   }
 /**********************************************************************************************************/
 /* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                             */

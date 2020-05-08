@@ -1,11 +1,10 @@
-
 /******************************************************************************************************************************/
-/* Watchdogd/Http/histo_msgs.c        Gestion des echanges des elements d'historiques/messages de watchdog                    */
+/* Watchdogd/Http/ws_histo_msgs.c        Gestion des echanges des élements d'historiques/messages via webconnect de watchdog  */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    01.05.2020 09:53:41 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * histo_msgs.c
+ * ws_histo_msgs.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre
