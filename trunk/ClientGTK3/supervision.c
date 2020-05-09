@@ -138,12 +138,10 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Afficher_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TYPE_INFO_SUPERVISION *infos;
+  { struct TYPE_INFO_SUPERVISION *infos=user_data;
+    struct TRAME_ITEM_MOTIF *trame_motif;
     struct CMD_TYPE_MOTIF *motif;
-    struct CLIENT *client = user_data;
 
-    infos = Rechercher_infos_supervision_par_id_syn ( client, Json_get_int ( element, "syn_id" ) );
     if (!(infos && infos->Trame)) return;
 
     motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
@@ -170,7 +168,7 @@
     motif->bit_controle = atoi(Json_get_string ( element, "bitctrl" ));
     motif->bit_clic     = atoi(Json_get_string ( element, "bitclic" ));
     motif->rafraich     = atoi(Json_get_string ( element, "rafraich" ));
-
+printf("%s, add motif %s\n", __func__, motif->libelle );
     trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
     if (!trame_motif)
      { printf("Erreur creation d'un nouveau motif\n");
@@ -303,8 +301,10 @@
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(client->Notebook), page_num );
 //    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", "ws://localhost:5560/ws/live-msgs"),
   //                                         NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ), Afficher_un_motif, client );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, client );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ), Afficher_un_motif, infos );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, infos );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ), Afficher_un_commentaire, infos );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ), Afficher_une_camera, infos );
   }
 
 #ifdef bouh

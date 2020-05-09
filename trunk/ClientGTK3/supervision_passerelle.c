@@ -67,12 +67,9 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct TRAME_ITEM_PASS *trame_pass;
-    struct TYPE_INFO_SUPERVISION *infos;
+  { struct TYPE_INFO_SUPERVISION *infos=user_data;
+    struct TRAME_ITEM_PASS *trame_pass;
     struct CMD_TYPE_PASSERELLE *pass;
-    struct CLIENT *client = user_data;
-
-    infos = Rechercher_infos_supervision_par_id_syn ( client, Json_get_int ( element, "syn_id" ) );
 
     if (!(infos && infos->Trame)) return;
     pass = (struct CMD_TYPE_PASSERELLE *)g_try_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
@@ -86,8 +83,8 @@
     pass->id           = atoi(Json_get_string ( element, "id" ));
     pass->syn_id       = atoi(Json_get_string ( element, "syn_id" ));
     pass->syn_cible_id = atoi(Json_get_string ( element, "syn_cible_id" ));
-    g_snprintf( pass->libelle, sizeof(pass->libelle), "%s", Json_get_string ( element, "libelle" ));
-    g_snprintf( pass->page,    sizeof(pass->page),    "%s", Json_get_string ( element, "page" ));
+    g_snprintf( pass->libelle, sizeof(pass->libelle), "%s", Json_get_string ( element, "page" ));
+    //g_snprintf( pass->page,    sizeof(pass->page),    "%s", Json_get_string ( element, "page" ));
 
     trame_pass = Trame_ajout_passerelle ( FALSE, infos->Trame, pass );
 //    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-press-event",

@@ -358,6 +358,12 @@
  extern void Menu_want_supervision_accueil( struct CLIENT *client );
  extern void Demander_synoptique_supervision ( struct CLIENT *client, gint id );
  extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( struct CLIENT *client, gint syn_id );
+
+                                                                                                /* Dans supervision_comment.c */
+ extern void Afficher_un_commentaire (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+
+                                                                                                 /* Dans supervision_camera.c */
+ extern void Afficher_une_camera (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
 #ifdef bouh
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
  extern void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif );
@@ -373,8 +379,6 @@
  extern void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                             GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran );
 
-                                                                                                /* Dans supervision_comment.c */
- extern void Proto_afficher_un_comment_supervision( struct CMD_TYPE_COMMENT *rezo_comment );
 
                                                                                              /* Dans supervision_passerelle.c */
  extern void Proto_afficher_une_passerelle_supervision( struct CMD_TYPE_PASSERELLE *rezo_pass );
@@ -387,8 +391,6 @@
  extern void Proto_afficher_un_cadran_supervision( struct CMD_TYPE_CADRAN *rezo_cadran );
  extern void Proto_changer_etat_cadran( struct CMD_ETAT_BIT_CADRAN *etat_cadran );
 
-                                                                                                 /* Dans supervision_camera.c */
- extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
 
                                                                                                /* Dans supervision_horloges.c */
  extern void Proto_afficher_une_horloge_supervision( struct CMD_TYPE_MNEMO_BASE *mnemo );

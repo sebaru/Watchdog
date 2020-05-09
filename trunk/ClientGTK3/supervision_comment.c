@@ -21,42 +21,44 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
- #include <sys/time.h>
- 
  #include "Reseaux.h"
- #include "Config_cli.h"
  #include "trame.h"
-
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
- extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
-/**********************************************************************************************************/
-/* Afficher_un_message: Ajoute un message dans la liste des messages                                      */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_afficher_un_comment_supervision( struct CMD_TYPE_COMMENT *rezo_comment )
-  { struct TYPE_INFO_SUPERVISION *infos;
+/******************************************************************************************************************************/
+/* Afficher_un_commentaire: Ajoute un commentaire sur un synoptique                                                           */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Afficher_un_commentaire (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct TYPE_INFO_SUPERVISION *infos=user_data;
+    struct TRAME_ITEM_COMMENT *trame_comment;
     struct CMD_TYPE_COMMENT *comment;
 
-    infos = Rechercher_infos_supervision_par_id_syn ( rezo_comment->syn_id );
-    if (!(infos && infos->Trame)) { printf("test\n"); return; }
     comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment)
      { return;
      }
 
-    memcpy( comment, rezo_comment, sizeof(struct CMD_TYPE_COMMENT) );
+    comment->id           = atoi(Json_get_string ( element, "id" ));
+    comment->syn_id       = atoi(Json_get_string ( element, "syn_id" ));
+    comment->position_x   = atoi(Json_get_string ( element, "posx" ));
+    comment->position_y   = atoi(Json_get_string ( element, "posy" ));
+    comment->angle        = atoi(Json_get_string ( element, "angle" ));
+    comment->rouge        = atoi(Json_get_string ( element, "rouge" ));
+    comment->vert         = atoi(Json_get_string ( element, "vert" ));
+    comment->bleu         = atoi(Json_get_string ( element, "bleu" ));
+    //comment->font_size    = atoi(Json_get_string ( element, "bleu" ));
+    g_snprintf( comment->libelle, sizeof(comment->libelle), "%s", Json_get_string ( element, "libelle" ));
+    g_snprintf( comment->font,    sizeof(comment->font),    "%s", Json_get_string ( element, "font" ));
+    //g_snprintf( comment->def_color,    sizeof(comment->def_color),    "%s", Json_get_string ( element, "def_color" ));
+
     Trame_ajout_commentaire ( TRUE, infos->Trame, comment );
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -598,6 +598,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     trame_item->gif_hauteur = 0;
 
     local_found = Add_single_icone_to_item(trame_item, icone_id, 0);                       /* Tentatives de chargement locale */
+    printf("%s: local_found=%d\n", __func__, local_found );
 #ifdef bouh
     if ( local_found == FALSE )                                        /* Si non, tentative de récupération auprès du serveur */
      { while ( Download_gif ( icone_id, trame_item->nbr_images ) == TRUE )                              /* Trying to download */
@@ -702,7 +703,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
     trame->trame_items = g_list_append( trame->trame_items, trame_motif );
     if (trame_motif->motif->type_gestion == TYPE_FOND)
-     { goo_canvas_item_lower( trame_motif->item, NULL );
+     { goo_canvas_item_lower( trame_motif->item_groupe, NULL );
        goo_canvas_item_lower( trame->fond, NULL );
      }
     return(trame_motif);
@@ -874,7 +875,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame_pass->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );     /* Groupe PASSERELLE */
 
     tailley = 15;
-    taillex = strlen(pass->page) * 11;
+    taillex = strlen(pass->libelle) * 11;
     trame_pass->item_fond = goo_canvas_rect_new( trame_pass->item_groupe,
                                                  (double)-60.0,
                                                  (double)-(tailley/2+10.0),
@@ -885,7 +886,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                  NULL);
 
     trame_pass->item_texte = goo_canvas_text_new( trame_pass->item_groupe,
-                                                  pass->page, 10.0, 0.0,
+                                                  pass->libelle, 10.0, 0.0,
                                                   -1, GOO_CANVAS_ANCHOR_WEST,
                                                   "font", "courier bold 14",
                                                   "fill-color", "white",
