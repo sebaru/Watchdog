@@ -21,26 +21,17 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
- #include <sys/time.h>
- 
  #include "Reseaux.h"
- #include "Config_cli.h"
  #include "trame.h"
-
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
- extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
-
+#ifdef bouh
 /**********************************************************************************************************/
 /* Changer_vue_directe: Demande au serveur une nouvelle vue                                               */
 /* Entrée: une reference sur le message                                                                   */
@@ -69,29 +60,39 @@
     Changer_vue_directe ( pass->syn_cible_id );
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Afficher_un_message: Ajoute un message dans la liste des messages                                      */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_afficher_une_passerelle_supervision( struct CMD_TYPE_PASSERELLE *rezo_pass )
+#endif
+/******************************************************************************************************************************/
+/* Afficher_un_message: Ajoute un message dans la liste des messages                                                          */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct TRAME_ITEM_PASS *trame_pass;
     struct TYPE_INFO_SUPERVISION *infos;
     struct CMD_TYPE_PASSERELLE *pass;
-        
-    infos = Rechercher_infos_supervision_par_id_syn ( rezo_pass->syn_id );
+    struct CLIENT *client = user_data;
+
+    infos = Rechercher_infos_supervision_par_id_syn ( client, Json_get_int ( element, "syn_id" ) );
+
     if (!(infos && infos->Trame)) return;
     pass = (struct CMD_TYPE_PASSERELLE *)g_try_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
     if (!pass)
      { return;
      }
 
-    memcpy( pass, rezo_pass, sizeof(struct CMD_TYPE_PASSERELLE) );
+    pass->position_x   = atoi(Json_get_string ( element, "posx" ));
+    pass->position_y   = atoi(Json_get_string ( element, "posy" ));
+    pass->angle        = atoi(Json_get_string ( element, "angle" ));
+    pass->id           = atoi(Json_get_string ( element, "id" ));
+    pass->syn_id       = atoi(Json_get_string ( element, "syn_id" ));
+    pass->syn_cible_id = atoi(Json_get_string ( element, "syn_cible_id" ));
+    g_snprintf( pass->libelle, sizeof(pass->libelle), "%s", Json_get_string ( element, "libelle" ));
+    g_snprintf( pass->page,    sizeof(pass->page),    "%s", Json_get_string ( element, "page" ));
 
     trame_pass = Trame_ajout_passerelle ( FALSE, infos->Trame, pass );
-    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-press-event",
-                      G_CALLBACK(Changer_vue), pass );
-    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-release-event",
-                      G_CALLBACK(Changer_vue), pass );
+//    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-press-event",
+//                      G_CALLBACK(Changer_vue), pass );
+//    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-release-event",
+//                      G_CALLBACK(Changer_vue), pass );
   }
 /*--------------------------------------------------------------------------------------------------------*/

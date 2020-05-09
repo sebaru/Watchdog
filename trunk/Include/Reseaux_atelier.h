@@ -81,6 +81,7 @@
     gint    syn_id;                                                                    /* Numéro du synoptique ou est l'icone */
     gint    syn_cible_id;                                                                       /* Numéro du synoptique cible */
     gchar   libelle[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];                                         /* Libelle du synoptique cible */
+    gchar   page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];                                            /* Libelle du synoptique cible */
     guint   position_x;                                                                          /* en abscisses et ordonnées */
     guint   position_y;
     gfloat  angle;

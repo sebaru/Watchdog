@@ -312,9 +312,8 @@ again:
            { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") );
              gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, ack, -1 );
            }
-          chaine = Json_get_string(element, "date_create");
-          if (chaine)
-           { gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_DATE_CREATE, chaine, -1 ); }
+          if(Json_has_element(element, "date_create"))
+           { gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_DATE_CREATE, Json_get_string(element, "date_create"), -1 ); }
 
           return;
         }

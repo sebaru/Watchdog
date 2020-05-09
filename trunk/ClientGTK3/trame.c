@@ -27,7 +27,7 @@
 
  #define FACTEUR_PI 3.141592654/180.0
 
- #include <gnome.h>                                                             /* Bibliothèque graphique */
+ #include <gtk/gtk.h>                                                                               /* Bibliothèque graphique */
  #include <gdk-pixbuf/gdk-pixbuf.h>                                          /* Gestion des images/motifs */
  #include <gdk-pixbuf/gdk-pixdata.h>                                         /* Gestion des images/motifs */
  #include <goocanvas.h>                                                            /* Interface GooCanvas */
@@ -41,19 +41,11 @@
  #include "trame.h"
 /* #define DEBUG_TRAME*/
 /********************************* Définitions des prototypes programme ***********************************/
- #include "Config_cli.h"
  #include "protocli.h"
  #include "client.h"
 
- extern struct CLIENT Client;                           /* Identifiant de l'utilisateur en cours */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
-
  static gchar *Gif_received_buffer;
  static gint   Gif_received_size;
-
-/****************************** Inclusion des images XPM pour les menus ***********************************/
- extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;
- extern GdkPixmap *Rouge, *Bleue, *Verte, *Orange, *Jaune;
 
 /**********************************************************************************************************/
 /* Reduire_en_vignette: Met un motif aux dimensions de vignette                                           */
@@ -399,16 +391,17 @@ printf("Charger_pixbuf_file: %s\n", fichier );
             }
      }
   }
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Satellite_Receive_response : Recupere la reponse du serveur (master)                                                       */
 /* Entrée : Les informations à sauvegarder                                                                                    */
 /******************************************************************************************************************************/
  static size_t CB_Receive_gif_data( char *ptr, size_t size, size_t nmemb, void *userdata )
   { gchar *new_buffer;
-    Info_new( Config_cli.log, FALSE, LOG_DEBUG, "%s: %d*%d octets received", __func__, size, nmemb );
+    printf("%s: %d*%d octets received", __func__, size, nmemb );
     new_buffer = g_try_realloc ( Gif_received_buffer, Gif_received_size +  size*nmemb );
     if (!new_buffer)                                                 /* Si erreur, on arrete le transfert */
-     { Info_new( Config_cli.log, FALSE, LOG_ERR, "%s: Memory Error realloc (%s).", __func__, strerror(errno) );
+     { printf( "%s: Memory Error realloc", __func__ );
        g_free(Gif_received_buffer);
        Gif_received_buffer = NULL;
        return(-1);
@@ -436,13 +429,13 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
     curl = curl_easy_init();                                            /* Preparation de la requete CURL */
     if (!curl)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "Download_gif: cURL init failed" );
+     { printf( "Download_gif: cURL init failed" );
        return(FALSE);
      }
 
     if (mode) g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/assets/gif/%d.gif.%02d", id, mode );
          else g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/assets/gif/%d.gif", id );
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
+    printf( "%s: Trying to get %s", __func__, url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
        /*curl_easy_setopt(curl, CURLOPT_POST, 1 );
        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)buf->content);
@@ -452,7 +445,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
        curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE );
     curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
 /*       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );*/
 /*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                    Warning ! */
@@ -463,7 +456,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
     res = curl_easy_perform(curl);
     if (res)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "%s: Error : Could not connect", __func__ );
+     { printf( "%s: Error : Could not connect", __func__ );
        curl_easy_cleanup(curl);
        if (Gif_received_buffer) { g_free(Gif_received_buffer); }
        return(FALSE);
@@ -473,7 +466,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     curl_slist_free_all(slist);
 
     if (http_response != 200)                                                                /* HTTP 200 OK ? */
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+     { printf(
                 "%s: Gif %s not received (HTTP_CODE = %d)!", __func__, url, http_response );
        if (Gif_received_buffer) { g_free(Gif_received_buffer); }
        return(FALSE);
@@ -483,7 +476,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
        gint fd;
        if (mode) g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", id, mode );
             else g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", id );
-       Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+       printf(
                 "%s: Saving GIF id %d, mode %d, size %d -> %s", __func__, id, mode, Gif_received_size, nom_fichier );
        unlink(nom_fichier);
        fd = open( nom_fichier, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR );
@@ -492,7 +485,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
           close (fd);
         }
        else
-        { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+        { printf(
                    "Download_gif : Unable to save file %s", nom_fichier );
         }
        g_free(Gif_received_buffer);
@@ -520,22 +513,22 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
     curl = curl_easy_init();                                                                /* Preparation de la requete CURL */
     if (!curl)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed for %s", __func__, file );
+     { printf( "%s: cURL init failed for %s", __func__, file );
        return(FALSE);
      }
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to download %s", __func__, file );
+    printf( "%s: Trying to download %s", __func__, file );
 
     g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/assets/gif/%s", file );
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
+    printf( "%s: Trying to get %s", __func__, url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE );
     curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
 
     res = curl_easy_perform(curl);
     if (res)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "%s: Error : Could not connect", __func__ );
+     { printf( "%s: Error : Could not connect", __func__ );
        curl_easy_cleanup(curl);
        if (Gif_received_buffer) { g_free(Gif_received_buffer); }
        return(FALSE);
@@ -545,14 +538,14 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     curl_slist_free_all(slist);
 
     if (http_response != 200)                                                                                /* HTTP 200 OK ? */
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+     { printf(
                 "%s: URL %s not received (HTTP_CODE = %d)!", __func__, url, http_response );
        if (Gif_received_buffer) { g_free(Gif_received_buffer); }
        return(FALSE);
      }
     else
      { gint fd;
-       Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Saving FILE %s", __func__, file );
+       printf( "%s: Saving FILE %s", __func__, file );
        unlink(file);
        fd = open( file, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR );
        if (fd>0)
@@ -560,14 +553,15 @@ printf("Charger_pixbuf_file: %s\n", fichier );
           close (fd);
         }
        else
-        { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Unable to save file %s", __func__, file ); }
+        { printf( "%s: Unable to save file %s", __func__, file ); }
        g_free(Gif_received_buffer);
        Gif_received_buffer = NULL;
        if (fd<=0) return(FALSE);
      }
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "%s: %s downloaded", __func__, file );
+    printf( "%s: %s downloaded", __func__, file );
     return(TRUE);
   }
+#endif
 /******************************************************************************************************************************/
 /* Add_single_icone_to_item : Chargement d'un icone (ID+Mode) dans l'item en parametre                                        */
 /* Entrée: L'item, l'icone_id et le mode attendu                                                                              */
@@ -604,10 +598,12 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     trame_item->gif_hauteur = 0;
 
     local_found = Add_single_icone_to_item(trame_item, icone_id, 0);                       /* Tentatives de chargement locale */
+#ifdef bouh
     if ( local_found == FALSE )                                        /* Si non, tentative de récupération auprès du serveur */
      { while ( Download_gif ( icone_id, trame_item->nbr_images ) == TRUE )                              /* Trying to download */
         { Add_single_icone_to_item(trame_item, icone_id, trame_item->nbr_images); }
      }
+#endif
                                                                   /* Chargement des frames restantes (downloadées ou locales) */
     while ( Add_single_icone_to_item(trame_item, icone_id, trame_item->nbr_images) == TRUE );
   }
@@ -627,10 +623,12 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
     if (pixbuf) return(pixbuf);                                                       /* Si trouvé en local, on charge direct */
                                                                           /* Sinon on telecharge depuis le repository d'icone */
+#ifdef bouh
     if (Download_icon ( file ))
      { if (taille_x>0 && taille_y>0) pixbuf = gdk_pixbuf_new_from_file_at_size( file, taille_x, taille_y, NULL );
                                 else pixbuf = gdk_pixbuf_new_from_file( file, NULL );
      }
+#endif
     return(pixbuf);
   }
 /******************************************************************************************************************************/
@@ -726,7 +724,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     trame_camera_sup->camera_sup = camera_sup;
     pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                      /* Chargement du fichier Camera */
     if (!pixbuf)
-     { Download_gif ( 1, 0 );
+     { //Download_gif ( 1, 0 );
        pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                   /* Chargement du fichier Camera */
        if (!pixbuf) { g_free(trame_camera_sup); return(NULL); }
      }
@@ -740,7 +738,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
 /*       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );
        goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
-                                                         -1, GTK_ANCHOR_CENTER,
+                                                         -1, GOO_CANVAS_ANCHOR_CENTER,
                                                          "fill-color", "yellow",
                                                          "font", "arial bold 14",
                                                          NULL);*/
@@ -799,7 +797,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame_comm->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );        /* Groupe COMMENT */
 
     trame_comm->item = goo_canvas_text_new ( trame_comm->item_groupe,
-                                             comm->libelle, 0.0, 0.0, -1, GTK_ANCHOR_CENTER,
+                                             comm->libelle, 0.0, 0.0, -1, GOO_CANVAS_ANCHOR_CENTER,
                                                "font", comm->font,
                                                "fill_color_rgba", couleur,
                                                NULL );
@@ -876,7 +874,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame_pass->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );     /* Groupe PASSERELLE */
 
     tailley = 15;
-    taillex = strlen(pass->libelle) * 11;
+    taillex = strlen(pass->page) * 11;
     trame_pass->item_fond = goo_canvas_rect_new( trame_pass->item_groupe,
                                                  (double)-60.0,
                                                  (double)-(tailley/2+10.0),
@@ -887,8 +885,8 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                  NULL);
 
     trame_pass->item_texte = goo_canvas_text_new( trame_pass->item_groupe,
-                                                  pass->libelle, 10.0, 0.0,
-                                                  -1, GTK_ANCHOR_WEST,
+                                                  pass->page, 10.0, 0.0,
+                                                  -1, GOO_CANVAS_ANCHOR_WEST,
                                                   "font", "courier bold 14",
                                                   "fill-color", "white",
                                                   NULL);
@@ -941,7 +939,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
     trame_cadran->item_entry = goo_canvas_text_new ( trame_cadran->item_groupe,
                                                      "- cadran -", 0.0, 0.0,
-                                                     -1, GTK_ANCHOR_CENTER,
+                                                     -1, GOO_CANVAS_ANCHOR_CENTER,
                                                      "font", "arial italic 12",
                                                      NULL);
 
@@ -973,7 +971,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     if (!trame) return(NULL);
 
     trame->trame_widget = goo_canvas_new();
-    g_object_set( trame->trame_widget, "background-color", coul, "anchor", GTK_ANCHOR_CENTER, NULL );
+    g_object_set( trame->trame_widget, "background-color", coul, "anchor", GOO_CANVAS_ANCHOR_CENTER, NULL );
     goo_canvas_set_bounds (GOO_CANVAS (trame->trame_widget), 0, 0, taille_x+80, taille_y);
     trame->canvas_root = goo_canvas_get_root_item (GOO_CANVAS (trame->trame_widget));
     trame->fond = goo_canvas_rect_new ( trame->canvas_root, 0.0, 0.0, (double) taille_x, (double) taille_y,

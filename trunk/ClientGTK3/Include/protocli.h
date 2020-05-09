@@ -325,7 +325,11 @@
  extern void Proto_afficher_un_comment_atelier( struct CMD_TYPE_COMMENT *rezo_comment );
  extern void Proto_cacher_un_comment_atelier( struct CMD_TYPE_COMMENT *comment );
 
- extern void Creer_fenetre_ajout_passerelle ( void );                                      /* Dans atelier_ajout_passerelle.c */
+#endif
+                                                                                           /* Dans atelier_ajout_passerelle.c */
+ extern void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+#ifdef bouh
+ extern void Creer_fenetre_ajout_passerelle ( void );
  extern void Proto_afficher_un_syn_for_passerelle_atelier( struct CMD_TYPE_SYNOPTIQUE *syn );
  extern void Proto_afficher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *rezo_pass );
  extern void Proto_cacher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *pass );
@@ -353,6 +357,7 @@
                                                                                                         /* Dans supervision.c */
  extern void Menu_want_supervision_accueil( struct CLIENT *client );
  extern void Demander_synoptique_supervision ( struct CLIENT *client, gint id );
+ extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( struct CLIENT *client, gint syn_id );
 #ifdef bouh
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
  extern void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif );
@@ -447,7 +452,7 @@
  extern void Json_add_string ( JsonBuilder *builder, gchar *name, gchar *chaine );
  extern void Json_add_int ( JsonBuilder *builder, gchar *name, gint valeur );
  extern void Json_add_double ( JsonBuilder *builder, gchar *name, gdouble valeur );
- extern void Json_add_bool ( JsonBuilder *builder, gchar *name, gboolean bool );
+ extern void Json_add_bool ( JsonBuilder *builder, gchar *name, gboolean valeur );
  extern void Json_add_object ( JsonBuilder *builder, gchar *name );
  extern void Json_end_object ( JsonBuilder *builder );
  extern void Json_add_array ( JsonBuilder *builder, gchar *name );
