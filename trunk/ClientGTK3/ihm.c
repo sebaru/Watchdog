@@ -132,16 +132,22 @@
 /******************************************************************************************************************************/
  void Update_progress_bar( SoupMessage *msg, SoupBuffer *chunk, gpointer data )
   { struct CLIENT *client = data;
+    SoupMessageHeaders *headers;
     gdouble fraction;
     gchar chaine[20];
 
+    g_object_get ( msg, "response-headers", &headers, NULL );
+    client->network_size_to_send = soup_message_headers_get_content_length ( headers );
+    printf("Progress bar prepare to %d \n", client->network_size_to_send );
+
     client->network_size_sent += chunk->length;
     if (client->network_size_sent >= client->network_size_to_send)
-     { client->network_size_sent =client->network_size_to_send; }
+     { client->network_size_sent = client->network_size_to_send; }
 
     fraction = 1.0*client->network_size_sent/client->network_size_to_send;
     gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (client->Barre_progress), fraction );
-    g_snprintf( chaine, sizeof(chaine), "%3.1f%%", 100.0*fraction );
+    if (fraction==1.0) g_snprintf( chaine, sizeof(chaine), "Ready" );
+                  else g_snprintf( chaine, sizeof(chaine), "%3.1f%% downloaded", 100.0*fraction );
     gtk_progress_bar_set_text( GTK_PROGRESS_BAR (client->Barre_progress), chaine );
     printf("Progress bar set to %s\n", chaine );
   }
@@ -243,6 +249,7 @@ printf("not found\n");
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
+    gtk_box_set_spacing ( GTK_BOX(hboite), 6 );
     gtk_box_pack_start( GTK_BOX(vboite), hboite, FALSE, FALSE, 0 );
 
 /********************* Status de la machine cliente:connectée/erreur/loguée... ****************************/
@@ -253,15 +260,15 @@ printf("not found\n");
     g_object_set (client->Entry_status, "editable", FALSE, NULL );
     gtk_box_pack_start( GTK_BOX(hboite), client->Entry_status, TRUE, TRUE, 0 );
 
-    client->Barre_progress = gtk_progress_bar_new ();
-    gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (client->Barre_progress), 1.0 );
-    gtk_progress_bar_set_show_text( GTK_PROGRESS_BAR (client->Barre_progress), TRUE );
-    gtk_progress_bar_set_text( GTK_PROGRESS_BAR (client->Barre_progress), "100%" );
-    gtk_box_pack_start( GTK_BOX(hboite), client->Barre_progress, FALSE, FALSE, 0 );
-
     client->Barre_pulse = gtk_progress_bar_new ();
     gtk_progress_bar_set_pulse_step( GTK_PROGRESS_BAR (client->Barre_pulse), 1.0 );
     gtk_box_pack_start( GTK_BOX(hboite), client->Barre_pulse, FALSE, FALSE, 0 );
+
+    client->Barre_progress = gtk_progress_bar_new ();
+    gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (client->Barre_progress), 0.75 );
+    gtk_progress_bar_set_show_text( GTK_PROGRESS_BAR (client->Barre_progress), TRUE );
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR (client->Barre_progress), "Ready" );
+    gtk_box_pack_start( GTK_BOX(hboite), client->Barre_progress, FALSE, FALSE, 0 );
 
     return(vboite);
  }

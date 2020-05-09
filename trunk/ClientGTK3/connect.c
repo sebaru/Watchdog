@@ -72,14 +72,13 @@
     printf("%s : %p\n", __func__, client );
     g_snprintf( target, sizeof(target), "http://%s:5560/%s", client->hostname, URI );
     SoupMessage *msg = soup_message_new ( methode, target );
+    g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
+    client->network_size_sent = 0;
     if (payload)
-     { g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
-       soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
-       client->network_size_sent = 0;
+     { soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
        client->network_size_to_send = taille_buf;
        gchar chaine[128];
-       g_snprintf ( chaine, (taille_buf>sizeof(chaine) ? taille_buf : sizeof(chaine)) - 1,
-                    "Sending %s : %s\n", URI, payload );
+       g_snprintf ( chaine, (taille_buf>sizeof(chaine) ? taille_buf : sizeof(chaine)) - 1, "Sending %s : %s\n", URI, payload );
        printf(chaine);
      }
     if (!msg) { Log( client, "Erreur envoi au serveur"); Deconnecter_sale(client); }
@@ -149,6 +148,8 @@
                 Json_get_string(response, "version"), Json_get_string(response, "message") );
     Log(client, chaine);
     json_node_unref(response);
+    g_snprintf( chaine, sizeof(chaine), "histo/alive" );
+    Envoi_au_serveur( client, "GET", NULL, 0, chaine, Afficher_histo_alive_CB );
     g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/ws/live-msgs", client->hostname );
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
                                            NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );

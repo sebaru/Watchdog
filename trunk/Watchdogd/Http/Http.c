@@ -316,6 +316,7 @@ reload:
     soup_server_add_handler ( socket, "/log",        Http_traiter_log, NULL, NULL );
     soup_server_add_handler ( socket, "/bus",        Http_traiter_bus, NULL, NULL );
     soup_server_add_handler ( socket, "/memory",     Http_traiter_memory, NULL, NULL );
+    soup_server_add_handler ( socket, "/histo/alive",Http_traiter_histo_alive, NULL, NULL );
     soup_server_add_handler ( socket, "/histo/ack",  Http_traiter_histo_ack, NULL, NULL );
     gchar *protocols[] = { "live-motifs", "live-msgs" };
     soup_server_add_websocket_handler ( socket, "/ws/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );

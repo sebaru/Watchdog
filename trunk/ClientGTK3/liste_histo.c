@@ -336,12 +336,37 @@ again:
 
     gchar *zmq_type = Json_get_string( response, "zmq_type" );
     if (zmq_type)
-     { if (!strcmp(zmq_type,"load_histo_alive"))
-        { json_array_foreach_element ( Json_get_array(response, "enregs"), Afficher_un_histo, client ); }
-       else if(!strcmp(zmq_type,"update_histo")) { Updater_histo( client, response ); }
+     {      if(!strcmp(zmq_type,"update_histo")) { Updater_histo( client, response ); }
        else if(!strcmp(zmq_type,"pulse"))        { Set_progress_pulse( client ); }
      }
     json_node_unref(response);
+  }
+/******************************************************************************************************************************/
+/* Afficher_histo_alive_CB: appeler par libsoup lorsque la requete de recuperation des histo alive a terminé                  */
+/* Entrée: les parametres libsoup                                                                                             */
+/* Sortie: un widget boite                                                                                                    */
+/******************************************************************************************************************************/
+ void Afficher_histo_alive_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
+  { GBytes *response_brute;
+    gchar *reason_phrase;
+    gint status_code;
+    gsize taille;
+    struct CLIENT *client = user_data;
+    printf("%s\n", __func__ );
+
+    g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
+    if (status_code != 200)
+     { gchar chaine[256];
+       g_snprintf(chaine, sizeof(chaine), "Error with get histo alive %s: Code %d - %s", client->hostname, status_code, reason_phrase );
+       printf(chaine);
+       return;
+     }
+    g_object_get ( msg, "response-body-data", &response_brute, NULL );
+
+    printf("Recu MSGS: %s %p\n", g_bytes_get_data ( response_brute, &taille ), client );
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
+    if (!response || Json_has_element ( response, "enregs" ) == FALSE ) return;
+    json_array_foreach_element ( Json_get_array(response, "enregs"), Afficher_un_histo, client );
   }
 /******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */

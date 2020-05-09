@@ -94,6 +94,8 @@
                                                      SoupClientContext *client, gpointer user_data);
  extern void Http_traiter_histo_ack ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                       SoupClientContext *client, gpointer user_data);
+ extern void Http_traiter_histo_alive ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                        SoupClientContext *client, gpointer user_data);
  extern void Http_Memory_get_all ( SoupMessage *msg, gchar *tech_id );
  extern void Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  #endif
