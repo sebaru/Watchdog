@@ -706,6 +706,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
      { goo_canvas_item_lower( trame_motif->item_groupe, NULL );
        goo_canvas_item_lower( trame->fond, NULL );
      }
+    else if (!flag) g_object_set ( G_OBJECT(trame_motif->item_groupe), "tooltip", motif->libelle, NULL );
     return(trame_motif);
   }
 /******************************************************************************************************************************/
@@ -732,6 +733,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
      }
 
     trame_camera_sup->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );    /* Groupe MOTIF */
+    if (!flag) g_object_set ( G_OBJECT(trame_camera_sup->item_groupe), "tooltip", camera_sup->libelle, NULL );
 
     trame_camera_sup->item = goo_canvas_image_new ( trame_camera_sup->item_groupe,
                                                     pixbuf,
@@ -875,7 +877,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame_pass->pass   = pass;
     trame_pass->type   = TYPE_PASSERELLE;
     trame_pass->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );     /* Groupe PASSERELLE */
-
     tailley = 15;
     taillex = strlen(pass->libelle) * 11;
     trame_pass->item_fond = goo_canvas_rect_new( trame_pass->item_groupe,
@@ -906,6 +907,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                     "stroke_color", "black", NULL);
        g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
      }
+    else g_object_set ( G_OBJECT(trame_pass->item_groupe), "tooltip", pass->libelle, NULL );
 
 
     Trame_rafraichir_passerelle ( trame_pass );
@@ -975,6 +977,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
     trame->trame_widget = goo_canvas_new();
     g_object_set( trame->trame_widget, "background-color", coul, "anchor", GOO_CANVAS_ANCHOR_CENTER, NULL );
+    g_object_set( trame->trame_widget, "has-tooltip", TRUE, NULL );
     goo_canvas_set_bounds (GOO_CANVAS (trame->trame_widget), 0, 0, taille_x+80, taille_y);
     trame->canvas_root = goo_canvas_get_root_item (GOO_CANVAS (trame->trame_widget));
     trame->fond = goo_canvas_rect_new ( trame->canvas_root, 0.0, 0.0, (double) taille_x, (double) taille_y,

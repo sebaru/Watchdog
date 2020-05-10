@@ -38,7 +38,7 @@
      COLONNE_HORLOGE_LIBELLE,
      NBR_COLONNE_HORLOGE
   };
-
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numéro                                      */
 /* Entrée: Un numéro de synoptique                                                                                            */
@@ -60,17 +60,24 @@
      }
     return(infos);
   }
+#endif
 /******************************************************************************************************************************/
 /* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                                                */
 /* Entrée: la page en question                                                                                                */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Detruire_page_supervision( struct PAGE_NOTEBOOK *page )
-  { struct TYPE_INFO_SUPERVISION *infos;
-    infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
+  { struct TYPE_INFO_SUPERVISION *infos = page->infos;
+
     json_node_unref( infos->syn );
     /*g_timeout_remove( infos->timer_id );*/
-    //Trame_detruire_trame( infos->Trame );
+    Trame_detruire_trame( infos->Trame );
+
+    gint num = gtk_notebook_page_num( GTK_NOTEBOOK(infos->client->Notebook), GTK_WIDGET(page->child) );
+    gtk_notebook_remove_page( GTK_NOTEBOOK(infos->client->Notebook), num );
+    infos->client->Liste_pages = g_slist_remove( infos->client->Liste_pages, page );
+    g_free(infos);                                                                     /* Libération des infos le cas échéant */
+    g_free(page);
   }
 /******************************************************************************************************************************/
 /* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                                                */
@@ -247,7 +254,7 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
 
     bouton = gtk_button_new_with_label( "Fermer" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Detruire_page), page );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Detruire_page_supervision), page );
 
     bouton = gtk_button_new_with_label( "Imprimer" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );

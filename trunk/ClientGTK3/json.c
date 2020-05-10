@@ -167,7 +167,8 @@
     json_node_get_value ( node, &valeur );
          if ( G_VALUE_HOLDS_STRING (&valeur) ) { retour = atoi(g_value_get_string (&valeur)); }
     else if ( G_VALUE_HOLDS_INT    (&valeur) ) { retour = g_value_get_int (&valeur); }
-    else retour = -1;
+    else if ( G_VALUE_HOLDS_INT64  (&valeur) ) { retour = g_value_get_int64 (&valeur); }
+    else { printf("%s: Erreur getting '%s'\n", __func__, chaine ); retour = -1; }
     g_value_unset ( &valeur );
     return(retour);
   }
