@@ -122,6 +122,36 @@
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
 /******************************************************************************************************************************/
+/* Menu_go_to_syn: Affiche les synoptiques associés aux messages histo                                                        */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Go_to_syn ( struct CLIENT *client )
+  { GtkTreeSelection *selection;
+    gchar *tech_id, *acronyme;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    GList *lignes;
+    gint syn_id;
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(client->Liste_histo) );
+
+    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+    while ( lignes )
+     { gsize taille_buf;
+       gchar *buf;
+       gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
+       gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &syn_id, -1 );                                        /* Recup du id */
+
+       Changer_vue_directe ( client, syn_id );
+
+       gtk_tree_selection_unselect_iter( selection, &iter );
+       lignes = lignes->next;
+     }
+    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (lignes);                                                           /* Liberation mémoire */
+  }
+/******************************************************************************************************************************/
 /* Gerer_popup_message: Gestion du menu popup quand on clique droite sur la liste des messages                                */
 /* Entrée: la liste(widget), l'evenement bouton, et les data                                                                  */
 /* Sortie: Niet                                                                                                               */
@@ -140,11 +170,11 @@
      { GtkWidget *item;
        Popup = gtk_menu_new();                                                                            /* Creation si besoin */
        item = gtk_menu_item_new_with_label ( "Acquitter le message" );
-       g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), data );
+       g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
        gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
 
        item = gtk_menu_item_new_with_label ( "Voir le synoptique" );
-/*       g_signal_connect ( item, "activate", G_CALLBACK (Go_to_syn), NULL );*/
+       g_signal_connect_swapped ( item, "activate", G_CALLBACK (Go_to_syn), client );
        gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
        gtk_widget_show_all(Popup);
      }
@@ -170,36 +200,6 @@
      }
     return(FALSE);
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Menu_go_to_syn: Affiche les synoptiques associés aux messages histo                                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Menu_go_to_syn ( void )
-  { GtkTreeSelection *selection;
-    GtkTreeModel *store;
-    GtkTreeIter iter;
-    GList *lignes;
-
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );
-    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(client->Liste_histo) );
-
-    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    while ( lignes )
-     { guint id_syn;
-       gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &id_syn, -1 );                  /* Recup du id */
-
-       Changer_vue_directe ( id_syn );
-
-       gtk_tree_selection_unselect_iter( selection, &iter );
-       lignes = lignes->next;
-     }
-    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
-  }
-#endif
 /******************************************************************************************************************************/
 /* Reset_page_histo: Efface les enregistrements de la page histo                                                              */
 /* Entrée: rien                                                                                                               */

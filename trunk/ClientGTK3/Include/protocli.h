@@ -330,7 +330,6 @@
 
 #endif
                                                                                            /* Dans atelier_ajout_passerelle.c */
- extern void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
 #ifdef bouh
  extern void Creer_fenetre_ajout_passerelle ( void );
  extern void Proto_afficher_un_syn_for_passerelle_atelier( struct CMD_TYPE_SYNOPTIQUE *syn );
@@ -384,10 +383,11 @@
                                             GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran );
 
 
+#endif
                                                                                              /* Dans supervision_passerelle.c */
- extern void Proto_afficher_une_passerelle_supervision( struct CMD_TYPE_PASSERELLE *rezo_pass );
- extern void Changer_vue_directe ( guint num_syn );
-
+ extern void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+ extern void Changer_vue_directe ( struct CLIENT *client, guint num_syn );
+#ifdef bouh
                                                                                                 /* Dans supervision_palette.c */
  extern void Proto_afficher_une_palette_supervision( struct CMD_TYPE_PALETTE *rezo_palette );
 
