@@ -31,36 +31,33 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
-#ifdef bouh
-/**********************************************************************************************************/
-/* Changer_vue_directe: Demande au serveur une nouvelle vue                                               */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Changer_vue_directe ( guint num_syn )
-  { struct CMD_TYPE_SYNOPTIQUE cmd;
-    if (Chercher_page_notebook( TYPE_PAGE_SUPERVISION, num_syn, TRUE )) return;
+/******************************************************************************************************************************/
+/* Changer_vue_directe: Demande au serveur une nouvelle vue                                                                   */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Changer_vue_directe ( struct CLIENT *client, guint num_syn )
+  { gchar chaine[80];
+    if (Chercher_page_notebook( client, TYPE_PAGE_SUPERVISION, num_syn, TRUE )) return;
 
-    cmd.id = num_syn;
-    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_PAGE_SUPERVISION,
-                   (gchar *)&cmd, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
+    g_snprintf( chaine, sizeof(chaine), "syn/get/%d", num_syn );
+    Envoi_au_serveur( client, "GET", NULL, 0, chaine, Creer_page_supervision_CB );
   }
-/**********************************************************************************************************/
-/* Changer_vue: Demande au serveur une nouvelle vue                                                       */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Changer_vue: Demande au serveur une nouvelle vue                                                                           */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static gboolean Changer_vue (GooCanvasItem *canvasitem, GooCanvasItem *target,
-                              GdkEvent          *event, struct CMD_TYPE_PASSERELLE *pass )
+                              GdkEvent *event, struct TRAME_ITEM_PASS *trame_pass )
   { if ( !(event->button.button == 1 &&                                                 /* clic gauche ?? */
            event->type == GDK_BUTTON_PRESS)
        )
     return(FALSE);
 
-    Changer_vue_directe ( pass->syn_cible_id );
+    Changer_vue_directe ( trame_pass->client, trame_pass->pass->syn_cible_id );
     return(TRUE);
   }
-#endif
 /******************************************************************************************************************************/
 /* Afficher_un_message: Ajoute un message dans la liste des messages                                                          */
 /* Entrée: une reference sur le message                                                                                       */
@@ -77,19 +74,17 @@
      { return;
      }
 
-    pass->position_x   = atoi(Json_get_string ( element, "posx" ));
-    pass->position_y   = atoi(Json_get_string ( element, "posy" ));
-    pass->angle        = atoi(Json_get_string ( element, "angle" ));
-    pass->id           = atoi(Json_get_string ( element, "id" ));
-    pass->syn_id       = atoi(Json_get_string ( element, "syn_id" ));
-    pass->syn_cible_id = atoi(Json_get_string ( element, "syn_cible_id" ));
+    pass->position_x   = Json_get_int ( element, "posx" );
+    pass->position_y   = Json_get_int ( element, "posy" );
+    pass->angle        = Json_get_int ( element, "angle" );
+    pass->id           = Json_get_int ( element, "id" );
+    pass->syn_id       = Json_get_int ( element, "syn_id" );
+    pass->syn_cible_id = Json_get_int ( element, "syn_cible_id" );
     g_snprintf( pass->libelle, sizeof(pass->libelle), "%s", Json_get_string ( element, "page" ));
     //g_snprintf( pass->page,    sizeof(pass->page),    "%s", Json_get_string ( element, "page" ));
-
-    trame_pass = Trame_ajout_passerelle ( FALSE, infos->Trame, pass );
-//    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-press-event",
-//                      G_CALLBACK(Changer_vue), pass );
-//    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-release-event",
-//                      G_CALLBACK(Changer_vue), pass );
+printf("%s: %d\n", __func__, pass->syn_cible_id );
+    trame_pass = Trame_ajout_passerelle ( infos->client, FALSE, infos->Trame, pass );
+    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-press-event",   G_CALLBACK(Changer_vue), trame_pass );
+    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-release-event", G_CALLBACK(Changer_vue), trame_pass );
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -122,6 +122,7 @@
 
  struct TRAME_ITEM_PASS
   { gint type;                                                                                              /* Type de l'item */
+    struct CLIENT *client;
     struct TRAME *trame;
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_texte;
@@ -212,7 +213,7 @@
                                                      struct CMD_TYPE_MOTIF *motif );
  extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame,
                                                             struct CMD_TYPE_COMMENT *comm );
- extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,
+ extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( struct CLIENT *client, gint flag, struct TRAME *trame,
                                                          struct CMD_TYPE_PASSERELLE *pass );
  extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
                                                      struct CMD_TYPE_CADRAN *cadran );

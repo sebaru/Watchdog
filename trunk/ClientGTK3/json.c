@@ -159,8 +159,17 @@
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
  gint Json_get_int ( JsonNode *query, gchar *chaine )
-  { JsonObject *object = json_node_get_object (query);
-    return((gfloat)json_object_get_int_member ( object, chaine ));
+  { GValue valeur = G_VALUE_INIT;
+    gint retour;
+    JsonObject *object = json_node_get_object (query);
+    JsonNode *node = json_object_get_member ( object, chaine );
+    if (!node) { return(-1); }
+    json_node_get_value ( node, &valeur );
+         if ( G_VALUE_HOLDS_STRING (&valeur) ) { retour = atoi(g_value_get_string (&valeur)); }
+    else if ( G_VALUE_HOLDS_INT    (&valeur) ) { retour = g_value_get_int (&valeur); }
+    else retour = -1;
+    g_value_unset ( &valeur );
+    return(retour);
   }
 /******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */

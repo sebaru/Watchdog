@@ -71,7 +71,8 @@
   };
 
  struct TYPE_INFO_SUPERVISION
-  { guint timer_id;                                    /* Id du timer pour l'animation des motifs sur la trame de supervision */
+  { struct CLIENT *client;
+    guint timer_id;                                    /* Id du timer pour l'animation des motifs sur la trame de supervision */
     JsonNode *syn;                                                                       /* Id du synoptique en cours de visu */
     GtkWidget *Dialog_horloge;                                                  /* Boite de dialogue d'affichage des horloges */
     GtkWidget *Liste_horloge;
@@ -358,6 +359,7 @@
                                                                                                         /* Dans supervision.c */
  extern void Menu_want_supervision_accueil( struct CLIENT *client );
  extern void Demander_synoptique_supervision ( struct CLIENT *client, gint id );
+ extern void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data);
  extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( struct CLIENT *client, gint syn_id );
 
                                                                                                 /* Dans supervision_comment.c */

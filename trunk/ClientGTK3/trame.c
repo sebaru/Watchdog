@@ -861,7 +861,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 /* Entrée: une structure passerelle, la trame de reference                                                                    */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame, struct CMD_TYPE_PASSERELLE *pass )
+ struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( struct CLIENT *client, gint flag, struct TRAME *trame, struct CMD_TYPE_PASSERELLE *pass )
   { struct TRAME_ITEM_PASS *trame_pass;
     gint taillex, tailley;
 
@@ -869,9 +869,10 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame_pass = g_try_malloc0( sizeof(struct TRAME_ITEM_PASS) );
     if (!trame_pass) return(NULL);
 
-    trame_pass->trame = trame;
-    trame_pass->pass  = pass;
-    trame_pass->type  = TYPE_PASSERELLE;
+    trame_pass->trame  = trame;
+    trame_pass->client = client;
+    trame_pass->pass   = pass;
+    trame_pass->type   = TYPE_PASSERELLE;
     trame_pass->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );     /* Groupe PASSERELLE */
 
     tailley = 15;

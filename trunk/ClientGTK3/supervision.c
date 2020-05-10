@@ -190,7 +190,7 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
 /* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
+ void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
   { GtkWidget *bouton, *boite, *hboite, *scroll, *frame, *label;
     struct CLIENT *client = user_data;
     GtkAdjustment *adj;
@@ -221,6 +221,7 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
     page->infos = (struct TYPE_INFO_SUPERVISION *)g_try_malloc0( sizeof(struct TYPE_INFO_SUPERVISION) );
     infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
     if (!page->infos) { g_free(page); return; }
+    infos->client = client;
 
     page->type   = TYPE_PAGE_SUPERVISION;
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
