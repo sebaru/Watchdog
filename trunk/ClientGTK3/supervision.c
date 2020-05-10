@@ -204,17 +204,45 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
  static void Traiter_connect_ws_motifs_CB (GObject *source_object, GAsyncResult *res, gpointer user_data )
   { struct TYPE_INFO_SUPERVISION *infos = user_data;
     GError *error = NULL;
+    gsize taille_buf;
     printf("%s\n", __func__ );
     infos->ws_motifs = soup_session_websocket_connect_finish ( infos->client->connexion, res, &error );
-    if (infos->ws_motifs)                                                                    /* No limit on incoming packet ! */
-     { g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
-       g_signal_connect ( infos->ws_motifs, "message", G_CALLBACK(Traiter_reception_ws_motifs_CB), infos );
-       g_signal_connect ( infos->ws_motifs, "closed",  G_CALLBACK(Traiter_reception_ws_motifs_on_closed), infos );
-       g_signal_connect ( infos->ws_motifs, "error",   G_CALLBACK(Traiter_reception_ws_motifs_on_error), infos );
+    if (!infos->ws_motifs)                                                                    /* No limit on incoming packet ! */
+     { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
+       g_error_free (error);
+       return;
      }
-    else { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
-           g_error_free (error);
-         }
+    g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
+    g_signal_connect ( infos->ws_motifs, "message", G_CALLBACK(Traiter_reception_ws_motifs_CB), infos );
+    g_signal_connect ( infos->ws_motifs, "closed",  G_CALLBACK(Traiter_reception_ws_motifs_on_closed), infos );
+    g_signal_connect ( infos->ws_motifs, "error",   G_CALLBACK(Traiter_reception_ws_motifs_on_error), infos );
+    JsonBuilder *builder = Json_create ();
+    if (builder == NULL) return;
+    Json_add_array ( builder, "cadrans" );
+    GList *liste = infos->Trame->trame_items;
+    while (liste)
+     { struct TRAME_ITEM *item = liste->data;
+       switch( *(gint *)item )
+        { case TYPE_CADRAN:
+           { struct TRAME_ITEM_CADRAN *trame_cadran = liste->data;
+             printf("%s: abonnement cadran to %d %s:%s\n", __func__,
+                    trame_cadran->cadran->type, trame_cadran->cadran->tech_id, trame_cadran->cadran->acronyme );
+             Json_add_object ( builder, NULL );
+             Json_add_string ( builder, "type_abonnement", "cadran" );
+             Json_add_int    ( builder, "type", trame_cadran->cadran->type );
+             Json_add_string ( builder, "tech_id", trame_cadran->cadran->tech_id );
+             Json_add_string ( builder, "acronyme", trame_cadran->cadran->acronyme );
+             Json_end_object ( builder );
+             break;
+           }
+        }
+       liste = g_list_next ( liste );
+     }
+    Json_end_array ( builder );
+    gchar *buf = Json_get_buf (builder, &taille_buf);
+    GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
+    soup_websocket_connection_send_message (infos->ws_motifs, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
+    g_bytes_unref( gbytes );
   }
 /******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
@@ -331,8 +359,6 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
     gtk_widget_show_all( label );
     gint page_num = gtk_notebook_append_page( GTK_NOTEBOOK(client->Notebook), page->child, label );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(client->Notebook), page_num );
-//    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", "ws://localhost:5560/ws/live-msgs"),
-  //                                         NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
     json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ),      Afficher_un_motif, infos );
     json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, infos );
     json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Afficher_un_commentaire, infos );

@@ -97,7 +97,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Json_add_object ( JsonBuilder *builder, gchar *name )
-  { json_builder_set_member_name  ( builder, name );
+  { if (name) json_builder_set_member_name  ( builder, name );
     json_builder_begin_object (builder);                                                                 /* Contenu du Status */
   }
 /******************************************************************************************************************************/

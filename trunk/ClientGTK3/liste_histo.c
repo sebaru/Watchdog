@@ -333,7 +333,7 @@ again:
   { gsize taille;
     struct CLIENT *client = user_data;
     printf("%s\n", __func__ );
-    printf("Recu MSGS: %s %p\n", g_bytes_get_data ( message_brut, &taille ), client );
+    /*printf("Recu MSGS: %s %p\n", g_bytes_get_data ( message_brut, &taille ), client );*/
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
 

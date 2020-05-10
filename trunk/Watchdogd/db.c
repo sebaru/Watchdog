@@ -164,7 +164,7 @@
        if (array_name) Json_end_array ( builder );
        mysql_free_result( db->result );
      }
-    mysql_close( db->mysql );
+    Libere_DB_SQL( &db );
     return(TRUE);
   }
 /******************************************************************************************************************************/

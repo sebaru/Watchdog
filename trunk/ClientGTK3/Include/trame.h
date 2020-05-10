@@ -149,8 +149,8 @@
   };
 
  struct TRAME_ITEM_CADRAN
-  { struct CLIENT *client;
-    gint type;                                                                                              /* Type de l'item */
+  { gint type;                                                                                              /* Type de l'item */
+    struct CLIENT *client;
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_carre;
     GooCanvasItem *item_entry;
@@ -166,8 +166,8 @@
   };
 
  struct TRAME_ITEM_CAMERA_SUP
-  { struct CLIENT *client;
-    gint type;                                                                                              /* Type de l'item */
+  { gint type;                                                                                              /* Type de l'item */
+    struct CLIENT *client;
     GooCanvasItem *item;
     cairo_matrix_t transform;
     GooCanvasItem *item_groupe;
