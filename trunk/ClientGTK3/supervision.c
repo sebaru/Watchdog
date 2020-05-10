@@ -46,6 +46,7 @@
  void Detruire_page_supervision( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_SUPERVISION *infos = page->infos;
 
+    soup_websocket_connection_close ( infos->ws_motifs, 0, "Thanks, Bye !" );
     json_node_unref( infos->syn );
     /*g_timeout_remove( infos->timer_id );*/
     Trame_detruire_trame( infos->Trame );
@@ -170,6 +171,52 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
    //                   G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
   }
 /******************************************************************************************************************************/
+/* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MOTIF                                 */
+/* Entrée: les parametres libsoup                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Traiter_reception_ws_motifs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
+  { struct TYPE_INFO_SUPERVISION *infos = user_data;
+    gsize taille;
+    printf("%s\n", __func__ );
+    printf("Recu MOTIFS: %s :\n", g_bytes_get_data ( message_brut, &taille ) );
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    if (!response) return;
+
+
+  }
+/******************************************************************************************************************************/
+/* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
+/* Entrée: rien                                                                                                               */
+/* Sortie: un widget boite                                                                                                    */
+/******************************************************************************************************************************/
+ static void Traiter_reception_ws_motifs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
+  { printf("%s\n", __func__ );
+  }
+ static void Traiter_reception_ws_motifs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
+  { printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
+  }
+/******************************************************************************************************************************/
+/* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
+/* Entrée: les variables traditionnelles de libsous                                                                           */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Traiter_connect_ws_motifs_CB (GObject *source_object, GAsyncResult *res, gpointer user_data )
+  { struct TYPE_INFO_SUPERVISION *infos = user_data;
+    GError *error = NULL;
+    printf("%s\n", __func__ );
+    infos->ws_motifs = soup_session_websocket_connect_finish ( infos->client->connexion, res, &error );
+    if (infos->ws_motifs)                                                                    /* No limit on incoming packet ! */
+     { g_object_set ( G_OBJECT(infos->client->websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
+       g_signal_connect ( infos->ws_motifs, "message", G_CALLBACK(Traiter_reception_ws_motifs_CB), infos );
+       g_signal_connect ( infos->ws_motifs, "closed",  G_CALLBACK(Traiter_reception_ws_motifs_on_closed), infos );
+       g_signal_connect ( infos->ws_motifs, "error",   G_CALLBACK(Traiter_reception_ws_motifs_on_error), infos );
+     }
+    else { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
+           g_error_free (error);
+         }
+  }
+/******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
 /* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
 /* Sortie: rien                                                                                                               */
@@ -291,6 +338,10 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
     json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Afficher_un_commentaire, infos );
     json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, infos );
     json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, infos );
+
+    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/ws/live-motifs", client->hostname );
+    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
+                                           NULL, NULL, g_cancellable_new(), Traiter_connect_ws_motifs_CB, infos );
   }
 
 #ifdef bouh

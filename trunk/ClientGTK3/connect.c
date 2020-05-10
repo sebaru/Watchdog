@@ -89,10 +89,10 @@
 /* Entrée: rien                                                                                                               */
 /* Sortie: un widget boite                                                                                                    */
 /******************************************************************************************************************************/
- static void Http_ws_msgs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
+ static void Traiter_reception_ws_msgs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
   { printf("%s\n", __func__ );
   }
- static void Http_ws_msgs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
+ static void Traiter_reception_ws_msgs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
   { struct CLIENT *client = user_data;
     printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
     Log( client, error->message );
@@ -110,8 +110,8 @@
     if (client->websocket)                                                                   /* No limit on incoming packet ! */
      { g_object_set ( G_OBJECT(client->websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
        g_signal_connect ( client->websocket, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), client );
-       g_signal_connect ( client->websocket, "closed",  G_CALLBACK(Http_ws_msgs_on_closed), client );
-       g_signal_connect ( client->websocket, "error",   G_CALLBACK(Http_ws_msgs_on_error), client );
+       g_signal_connect ( client->websocket, "closed",  G_CALLBACK(Traiter_reception_ws_msgs_on_closed), client );
+       g_signal_connect ( client->websocket, "error",   G_CALLBACK(Traiter_reception_ws_msgs_on_error), client );
      }
     else { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
            g_error_free (error);

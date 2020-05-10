@@ -72,6 +72,7 @@
 
  struct TYPE_INFO_SUPERVISION
   { struct CLIENT *client;
+    SoupWebsocketConnection *ws_motifs;
     guint timer_id;                                    /* Id du timer pour l'animation des motifs sur la trame de supervision */
     JsonNode *syn;                                                                       /* Id du synoptique en cours de visu */
     GtkWidget *Dialog_horloge;                                                  /* Boite de dialogue d'affichage des horloges */
