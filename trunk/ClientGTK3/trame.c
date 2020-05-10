@@ -713,7 +713,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: la structure referencant la camera de supervision, ou NULL si erreur                                               */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
+ struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( struct CLIENT *client, gint flag, struct TRAME *trame,
                                                         struct CMD_TYPE_CAMERASUP *camera_sup )
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GdkPixbuf *pixbuf;
@@ -723,6 +723,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     trame_camera_sup = g_try_malloc0( sizeof(struct TRAME_ITEM_CAMERA_SUP) );
     if (!trame_camera_sup) return(NULL);
     trame_camera_sup->camera_sup = camera_sup;
+    trame_camera_sup->client = client;
     pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                      /* Chargement du fichier Camera */
     if (!pixbuf)
      { //Download_gif ( 1, 0 );

@@ -50,10 +50,9 @@
 /******************************************************************************************************************************/
  static gboolean Changer_vue (GooCanvasItem *canvasitem, GooCanvasItem *target,
                               GdkEvent *event, struct TRAME_ITEM_PASS *trame_pass )
-  { if ( !(event->button.button == 1 &&                                                 /* clic gauche ?? */
+  { if ( !(event->button.button == 1 &&                                                                     /* clic gauche ?? */
            event->type == GDK_BUTTON_PRESS)
-       )
-    return(FALSE);
+       ) return(FALSE);
 
     Changer_vue_directe ( trame_pass->client, trame_pass->pass->syn_cible_id );
     return(TRUE);

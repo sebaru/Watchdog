@@ -160,32 +160,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision                       */
-/* Entrée: une structure Event                                                                                                */
-/* Sortie :rien                                                                                                               */
-/******************************************************************************************************************************/
- void Clic_sur_camera_sup_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
-                                        GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
-  { if (!(trame_camera_sup && event)) return;
-
-    if (event->type == GDK_BUTTON_PRESS)
-     { appui_camera_sup = trame_camera_sup; }
-    else if (event->type == GDK_BUTTON_RELEASE && appui_camera_sup)
-     { if ( ((GdkEventButton *)event)->button == 1)                               /* Release sur le motif qui a été appuyé ?? */
-        { gint pid;
-
-          pid = fork();
-          if (pid<0) return;
-          else if (!pid)                                                                 /* Lancement de la ligne de commande */
-           {
-             execlp( "vlc", "vlc", trame_camera_sup->camera_sup->location, NULL );
-             _exit(0);
-           }
-        }
-       appui_camera_sup = NULL;                                   /* L'action est faite, on ne selectionne donc plus le motif */
-     }
-  }
-/******************************************************************************************************************************/
 /* Clic_sur_cadran_supervision_action: Appelé pour lancer un firefox sur la periode en parametre                              */
 /* Entrée: période d'affichage                                                                                                */
 /* Sortie :rien                                                                                                               */

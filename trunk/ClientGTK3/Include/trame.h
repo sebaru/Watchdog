@@ -165,7 +165,8 @@
   };
 
  struct TRAME_ITEM_CAMERA_SUP
-  { gint type;                                                                                              /* Type de l'item */
+  { struct CLIENT *client;
+    gint type;                                                                                              /* Type de l'item */
     GooCanvasItem *item;
     cairo_matrix_t transform;
     GooCanvasItem *item_groupe;
@@ -220,7 +221,7 @@
  extern void Trame_ajout_motif_par_item ( struct TRAME *trame,
                                           struct TRAME_ITEM_MOTIF *trame_motif );
  extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );
- extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
+ extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( struct CLIENT *client, gint flag, struct TRAME *trame,
                                                                struct CMD_TYPE_CAMERASUP *camera_sup );
  extern void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
