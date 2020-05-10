@@ -921,7 +921,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 /* Entrée: une structure cadran, la trame de reference                                                                        */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
+ struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( struct CLIENT *client, gint flag, struct TRAME *trame,
                                                 struct CMD_TYPE_CADRAN *cadran )
   { struct TRAME_ITEM_CADRAN *trame_cadran;
     gchar *couleur_bordure;
@@ -931,7 +931,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     if (!trame_cadran) return(NULL);
 
     trame_cadran->cadran = cadran;
-
+    trame_cadran->client = client;
     trame_cadran->item_groupe = goo_canvas_group_new ( trame->canvas_root,                                   /* Groupe cadran */
                                                         NULL);
 

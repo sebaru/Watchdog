@@ -390,8 +390,10 @@
                                                                                                 /* Dans supervision_palette.c */
  extern void Proto_afficher_une_palette_supervision( struct CMD_TYPE_PALETTE *rezo_palette );
 
+#endif
                                                                                                  /* Dans supervision_cadran.c */
- extern void Proto_afficher_un_cadran_supervision( struct CMD_TYPE_CADRAN *rezo_cadran );
+ extern void Afficher_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+#ifdef bouh
  extern void Proto_changer_etat_cadran( struct CMD_ETAT_BIT_CADRAN *etat_cadran );
 
 

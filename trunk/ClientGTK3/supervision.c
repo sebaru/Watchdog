@@ -38,29 +38,6 @@
      COLONNE_HORLOGE_LIBELLE,
      NBR_COLONNE_HORLOGE
   };
-#ifdef bouh
-/******************************************************************************************************************************/
-/* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numéro                                      */
-/* Entrée: Un numéro de synoptique                                                                                            */
-/* Sortie: Une référence sur les champs d'information de la page en question                                                  */
-/******************************************************************************************************************************/
- struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( struct CLIENT *client, gint syn_id )
-  { struct TYPE_INFO_SUPERVISION *infos;
-    struct PAGE_NOTEBOOK *page;
-    GSList *liste;
-    liste = client->Liste_pages;
-    infos = NULL;
-    while( liste )
-     { page = (struct PAGE_NOTEBOOK *)liste->data;
-       if ( page->type == TYPE_PAGE_SUPERVISION )                /* Est-ce bien une page d'supervision ?? */
-        { infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
-          if (Json_get_int(infos->syn, "id") == syn_id) break;                              /* Nous avons trouvé le syn !! */
-        }
-       liste = liste->next;                                                        /* On passe au suivant */
-     }
-    return(infos);
-  }
-#endif
 /******************************************************************************************************************************/
 /* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                                                */
 /* Entrée: la page en question                                                                                                */
@@ -309,10 +286,11 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(client->Notebook), page_num );
 //    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", "ws://localhost:5560/ws/live-msgs"),
   //                                         NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ), Afficher_un_motif, infos );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ),      Afficher_un_motif, infos );
     json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, infos );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ), Afficher_un_commentaire, infos );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ), Afficher_une_camera, infos );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Afficher_un_commentaire, infos );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, infos );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, infos );
   }
 
 #ifdef bouh

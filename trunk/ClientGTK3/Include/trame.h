@@ -149,7 +149,8 @@
   };
 
  struct TRAME_ITEM_CADRAN
-  { gint type;                                                                                              /* Type de l'item */
+  { struct CLIENT *client;
+    gint type;                                                                                              /* Type de l'item */
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_carre;
     GooCanvasItem *item_entry;
@@ -216,8 +217,8 @@
                                                             struct CMD_TYPE_COMMENT *comm );
  extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( struct CLIENT *client, gint flag, struct TRAME *trame,
                                                          struct CMD_TYPE_PASSERELLE *pass );
- extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
-                                                     struct CMD_TYPE_CADRAN *cadran );
+ extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( struct CLIENT *client, gint flag, struct TRAME *trame,
+                                                       struct CMD_TYPE_CADRAN *cadran );
  extern void Trame_ajout_motif_par_item ( struct TRAME *trame,
                                           struct TRAME_ITEM_MOTIF *trame_motif );
  extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );
