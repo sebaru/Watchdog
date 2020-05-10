@@ -30,31 +30,6 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
-/******************************************************************************************************************************/
-/* Detruire_page: Detruit la page du notebook en parametre                                                                    */
-/* Entrée: rien                                                                                                               */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Detruire_page ( struct CLIENT *client, struct PAGE_NOTEBOOK *page_a_virer )
-  { gint num;
-    num = gtk_notebook_page_num( GTK_NOTEBOOK(client->Notebook), GTK_WIDGET(page_a_virer->child) );
-
-    if (num>=0)
-     { switch(page_a_virer->type)
-        { case TYPE_PAGE_ATELIER:
-               /*Detruire_page_atelier( page_a_virer );*/
-               break;
-          case TYPE_PAGE_SUPERVISION:
-               /*Detruire_page_supervision( page_a_virer );*/
-               break;
-        }
-       gtk_notebook_remove_page( GTK_NOTEBOOK(client->Notebook), num );
-       client->Liste_pages = g_slist_remove( client->Liste_pages, page_a_virer );
-       if (page_a_virer->infos) g_free(page_a_virer->infos);       /* Libération des infos le cas échéant */
-       g_free(page_a_virer);
-     }
-    else printf("Detruire_page: Page non trouvée\n");
-  }
 /**********************************************************************************************************/
 /* Detruire_page_plugin_dls: Detruit la page du notebook consacrée aux plugin_dlss watchdog               */
 /* Entrée: rien                                                                                           */
@@ -84,17 +59,12 @@
 /******************************************************************************************************************************/
  void Effacer_pages ( struct CLIENT *client )
   { GSList *liste;
-    liste = client->Liste_pages;
-    while(liste)
-     { struct PAGE_NOTEBOOK *page;
-       page = (struct PAGE_NOTEBOOK *)liste->data;
-       if (page->type == TYPE_PAGE_HISTO)
-        { Reset_page_histo(client); }
-       else
-        { Detruire_page( client, page );
-          client->Liste_pages = g_slist_remove( client->Liste_pages, page );
+    while( client->Liste_pages )
+     { struct PAGE_NOTEBOOK *page = client->Liste_pages->data;
+       switch(page->type)
+        { case TYPE_PAGE_SUPERVISION : Detruire_page_supervision ( page ); break;
         }
-       liste = g_slist_next(liste);
+       client->Liste_pages = g_slist_remove ( client->Liste_pages, page );
      }
   }
 #ifdef bouh

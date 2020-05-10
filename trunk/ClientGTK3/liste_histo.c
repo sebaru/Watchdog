@@ -70,7 +70,6 @@
  #include "client.h"
 
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
-
 /******************************************************************************************************************************/
 /* Type_vers_string: renvoie le type string associé                                                                           */
 /* Entrée: le type numérique                                                                                                  */
@@ -210,6 +209,10 @@
   { GtkTreeModel *store;
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
     gtk_list_store_clear( GTK_LIST_STORE(store) );
+    if (client->ws_msgs)
+     { soup_websocket_connection_close ( client->ws_msgs, 0, "Thanks" );
+       client->ws_msgs = NULL;
+     }
   }
 /******************************************************************************************************************************/
 /* Cacher_un_histo: Enleve un histo de la liste fil de l'eau                                                                  */
@@ -379,16 +382,8 @@ again:
     GtkTreeViewColumn *colonne;
     GtkCellRenderer *renderer;
     GtkListStore *store;
-    struct PAGE_NOTEBOOK *page;
-
-    page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
-    if (!page) { printf("Creer_page_histo: page = NULL !\n"); return(NULL); }
-
-    page->type  = TYPE_PAGE_HISTO;
-    client->Liste_pages = g_slist_append( client->Liste_pages, page );
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
-    page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
 /***************************************** La liste des groupes *******************************************/
     scroll = gtk_scrolled_window_new( NULL, NULL );

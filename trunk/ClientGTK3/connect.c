@@ -56,10 +56,7 @@
   { printf("%s : %p\n", __func__, client );
     if (!client->connexion) return;
     Envoi_au_serveur ( client, "GET", NULL, 0, "disconnect", Deconnecter_CB );
-    if (client->websocket)
-     { soup_websocket_connection_close ( client->websocket, 0, "Thanks" );
-       client->websocket = NULL;
-     }
+    Reset_page_histo( client );
     Log ( client, "Disconnected" );
   }
 /******************************************************************************************************************************/
@@ -106,12 +103,12 @@
   { struct CLIENT *client = user_data;
     GError *error = NULL;
     printf("%s\n", __func__ );
-    client->websocket = soup_session_websocket_connect_finish ( client->connexion, res, &error );
-    if (client->websocket)                                                                   /* No limit on incoming packet ! */
-     { g_object_set ( G_OBJECT(client->websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
-       g_signal_connect ( client->websocket, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), client );
-       g_signal_connect ( client->websocket, "closed",  G_CALLBACK(Traiter_reception_ws_msgs_on_closed), client );
-       g_signal_connect ( client->websocket, "error",   G_CALLBACK(Traiter_reception_ws_msgs_on_error), client );
+    client->ws_msgs = soup_session_websocket_connect_finish ( client->connexion, res, &error );
+    if (client->ws_msgs)                                                                   /* No limit on incoming packet ! */
+     { g_object_set ( G_OBJECT(client->ws_msgs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
+       g_signal_connect ( client->ws_msgs, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), client );
+       g_signal_connect ( client->ws_msgs, "closed",  G_CALLBACK(Traiter_reception_ws_msgs_on_closed), client );
+       g_signal_connect ( client->ws_msgs, "error",   G_CALLBACK(Traiter_reception_ws_msgs_on_error), client );
      }
     else { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
            g_error_free (error);

@@ -207,7 +207,7 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
     printf("%s\n", __func__ );
     infos->ws_motifs = soup_session_websocket_connect_finish ( infos->client->connexion, res, &error );
     if (infos->ws_motifs)                                                                    /* No limit on incoming packet ! */
-     { g_object_set ( G_OBJECT(infos->client->websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
+     { g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
        g_signal_connect ( infos->ws_motifs, "message", G_CALLBACK(Traiter_reception_ws_motifs_CB), infos );
        g_signal_connect ( infos->ws_motifs, "closed",  G_CALLBACK(Traiter_reception_ws_motifs_on_closed), infos );
        g_signal_connect ( infos->ws_motifs, "error",   G_CALLBACK(Traiter_reception_ws_motifs_on_error), infos );

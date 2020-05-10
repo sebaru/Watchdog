@@ -50,7 +50,6 @@
 
  enum
   { TYPE_PAGE_PLUGIN_DLS,                                                                         /* Listes des plugins D.L.S */
-    TYPE_PAGE_HISTO,                                                               /* Page de garde: messages au fil de l'eau */
     TYPE_PAGE_SYNOPTIQUE,                                                     /* Edition des noms/mnémoniques des synoptiques */
     TYPE_PAGE_ALL_MNEMONIQUE,                                                /* Page de visualisation de tous les mnemoniques */
     TYPE_PAGE_MNEMONIQUE,                                                            /* Page de visualisation des mnemoniques */
@@ -102,7 +101,8 @@
   };
 
  struct TYPE_INFO_HISTO_MSGS
-  { GtkListStore *Liste_histo_msgs;                                      /* GtkTreeView pour la gestion des messages Watchdog */
+  { SoupWebsocketConnection *websocket;
+    GtkListStore *Liste_histo_msgs;                                      /* GtkTreeView pour la gestion des messages Watchdog */
     GtkWidget *F_histo_msgs;
     GtkWidget *Check_num;
     GtkWidget *Spin_num;
