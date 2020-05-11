@@ -35,13 +35,14 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_Http_status ( JsonBuilder *builder )
-  { Json_add_int    ( builder, "tcp_port", Cfg_http.tcp_port );
-    Json_add_bool   ( builder, "tcp_authenticate", Cfg_http.authenticate );
-    Json_add_int    ( builder, "ssl_enable", Cfg_http.ssl_enable );
-    Json_add_string ( builder, "ssl_cert_filepath", Cfg_http.ssl_cert_filepath );
+  { Json_add_int    ( builder, "tcp_port",                 Cfg_http.tcp_port );
+    Json_add_bool   ( builder, "tcp_authenticate",         Cfg_http.authenticate );
+    Json_add_int    ( builder, "ssl_enable",               Cfg_http.ssl_enable );
+    Json_add_string ( builder, "ssl_cert_filepath",        Cfg_http.ssl_cert_filepath );
     Json_add_string ( builder, "ssl_private_key_filepath", Cfg_http.ssl_private_key_filepath );
-    Json_add_int    ( builder, "nbr_of_motifs_client", g_slist_length (Cfg_http.liste_ws_motifs_clients) );
-    Json_add_int    ( builder, "nbr_of_msgs_client", g_slist_length (Cfg_http.liste_ws_msgs_clients) );
+    Json_add_int    ( builder, "nbr_of_motifs_client",     g_slist_length (Cfg_http.liste_ws_motifs_clients) );
+    Json_add_int    ( builder, "nbr_of_msgs_client",       g_slist_length (Cfg_http.liste_ws_msgs_clients) );
+    Json_add_object ( builder, "abonnements_graphiques" );
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */

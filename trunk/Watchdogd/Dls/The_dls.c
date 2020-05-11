@@ -1642,7 +1642,7 @@
      { visu = (struct DLS_VISUEL *)*visu_p;
        return( visu->mode );
      }
-    if (!tech_id || !acronyme) return(FALSE);
+    if (!tech_id || !acronyme) return(0);
 
     liste = Partage->Dls_data_VISUEL;
     while (liste)
@@ -1651,7 +1651,7 @@
        liste = g_slist_next(liste);
      }
 
-    if (!liste) return(FALSE);
+    if (!liste) return(0);
     if (visu_p) *visu_p = (gpointer)visu;                                           /* Sauvegarde pour acceleration si besoin */
     return( visu->mode );
   }

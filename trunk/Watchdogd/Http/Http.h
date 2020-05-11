@@ -54,6 +54,7 @@
   { SoupWebsocketConnection *connexion;
     SoupClientContext *context;
     GSList *Liste_bit_cadrans;
+    GSList *Liste_bit_motifs;
   };
 
  struct HTTP_CONFIG

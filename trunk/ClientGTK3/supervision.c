@@ -128,7 +128,7 @@ static void Updater_un_motif( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *mo
     trame_motif->vert   = Json_get_int(motif,"vert");                                                /* Sauvegarde etat motif */
     trame_motif->bleu   = Json_get_int(motif,"bleu");                                                /* Sauvegarde etat motif */
     trame_motif->mode   = Json_get_int(motif,"mode");                                                /* Sauvegarde etat motif */
-    trame_motif->cligno = Json_get_int(motif,"cligno");                                              /* Sauvegarde etat motif */
+    trame_motif->cligno = Json_get_bool(motif,"cligno");                                             /* Sauvegarde etat motif */
 printf("%s\n", __func__);
     switch( trame_motif->motif->type_gestion )
      { case TYPE_INERTE: break;                          /* Si le motif est inerte, nous n'y touchons pas */
@@ -179,11 +179,12 @@ printf("%s\n", __func__);
               { if ( (!strcmp( Json_get_string(motif,"tech_id"), trame_motif->motif->tech_id) &&
                       !strcmp( Json_get_string(motif,"acronyme"), trame_motif->motif->acronyme)) )
                  { Updater_un_motif ( trame_motif, motif );
-                   printf("%s: change motif type %s:%s\n", __func__, trame_motif->motif->tech_id, trame_motif->motif->acronyme );
+                   printf("%s: change motif %s:%s\n", __func__, trame_motif->motif->tech_id, trame_motif->motif->acronyme );
                  }
               }
              else if ( trame_motif->motif->bit_controle == Json_get_int ( motif, "num" ) )
-              {
+              { Updater_un_motif ( trame_motif, motif );
+                printf("%s: change motif %d\n", __func__, trame_motif->motif->bit_controle );
               }
              break;
            }
@@ -286,6 +287,7 @@ printf("%s\n", __func__);
   { struct TYPE_INFO_SUPERVISION *infos = user_data;
     GError *error = NULL;
     gsize taille_buf;
+    GList *liste;
     printf("%s\n", __func__ );
     infos->ws_motifs = soup_session_websocket_connect_finish ( infos->client->connexion, res, &error );
     if (!infos->ws_motifs)                                                                    /* No limit on incoming packet ! */
@@ -301,7 +303,7 @@ printf("%s\n", __func__);
     if (builder == NULL) return;
     Json_add_string ( builder, "msg_type", "abonnements" );
     Json_add_array  ( builder, "cadrans" );
-    GList *liste = infos->Trame->trame_items;
+    liste = infos->Trame->trame_items;
     while (liste)
      { struct TRAME_ITEM *item = liste->data;
        switch( *(gint *)item )
@@ -310,10 +312,29 @@ printf("%s\n", __func__);
              printf("%s: abonnement cadran to %d %s:%s\n", __func__,
                     trame_cadran->cadran->type, trame_cadran->cadran->tech_id, trame_cadran->cadran->acronyme );
              Json_add_object ( builder, NULL );
-             Json_add_string ( builder, "type_abonnement", "cadran" );
              Json_add_int    ( builder, "type", trame_cadran->cadran->type );
              Json_add_string ( builder, "tech_id", trame_cadran->cadran->tech_id );
              Json_add_string ( builder, "acronyme", trame_cadran->cadran->acronyme );
+             Json_end_object ( builder );
+             break;
+           }
+        }
+       liste = g_list_next ( liste );
+     }
+    Json_end_array ( builder );
+    Json_add_array  ( builder, "motifs" );
+    liste = infos->Trame->trame_items;
+    while (liste)
+     { struct TRAME_ITEM *item = liste->data;
+       switch( *(gint *)item )
+        { case TYPE_MOTIF:
+           { struct TRAME_ITEM_MOTIF *trame_motif = liste->data;
+             printf("%s: abonnement motif to %d %s:%s\n", __func__,
+                    trame_motif->motif->bit_controle, trame_motif->motif->tech_id, trame_motif->motif->acronyme );
+             Json_add_object ( builder, NULL );
+             Json_add_int    ( builder, "bit_controle", trame_motif->motif->bit_controle );
+             Json_add_string ( builder, "tech_id", trame_motif->motif->tech_id );
+             Json_add_string ( builder, "acronyme", trame_motif->motif->acronyme );
              Json_end_object ( builder );
              break;
            }
