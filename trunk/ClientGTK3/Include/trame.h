@@ -158,11 +158,9 @@
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     struct CMD_TYPE_CADRAN *cadran;
-    GooCanvasItem *item_groupe_fleche;
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
     gint selection;
     gfloat valeur;
-    gfloat old_valeur[20];
   };
 
  struct TRAME_ITEM_CAMERA_SUP

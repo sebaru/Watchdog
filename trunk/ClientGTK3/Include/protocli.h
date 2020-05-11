@@ -394,6 +394,7 @@
 #endif
                                                                                                  /* Dans supervision_cadran.c */
  extern void Afficher_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+ extern void Updater_les_cadrans( struct TYPE_INFO_SUPERVISION *infos, JsonNode *cadran );
 #ifdef bouh
  extern void Proto_changer_etat_cadran( struct CMD_ETAT_BIT_CADRAN *etat_cadran );
 

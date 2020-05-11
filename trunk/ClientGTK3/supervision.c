@@ -179,11 +179,13 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
   { struct TYPE_INFO_SUPERVISION *infos = user_data;
     gsize taille;
     printf("%s\n", __func__ );
-    printf("Recu MOTIFS: %s :\n", g_bytes_get_data ( message_brut, &taille ) );
+    printf("Recu via WS-MOTIFS: %s :\n", g_bytes_get_data ( message_brut, &taille ) );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
+    if ( !strcmp ( Json_get_string(response,"msg_type"), "update_cadran" ) )
+     { Updater_les_cadrans ( infos, response ); }
 
-
+    json_node_unref(response);
   }
 /******************************************************************************************************************************/
 /* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
@@ -218,7 +220,8 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
     g_signal_connect ( infos->ws_motifs, "error",   G_CALLBACK(Traiter_reception_ws_motifs_on_error), infos );
     JsonBuilder *builder = Json_create ();
     if (builder == NULL) return;
-    Json_add_array ( builder, "cadrans" );
+    Json_add_string ( builder, "msg_type", "abonnements" );
+    Json_add_array  ( builder, "cadrans" );
     GList *liste = infos->Trame->trame_items;
     while (liste)
      { struct TRAME_ITEM *item = liste->data;

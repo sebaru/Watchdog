@@ -401,12 +401,13 @@ reload:
            { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
              continue;
            }
+          Json_add_string ( builder, "msg_type", "update_motif" );
           Dls_VISUEL_to_json ( builder, &visu );
           buf = Json_get_buf ( builder, &taille_buf );
           liste = Cfg_http.liste_ws_motifs_clients;
           while (liste)
-           { SoupWebsocketConnection *connexion = liste->data;
-             soup_websocket_connection_send_text ( connexion, buf );
+           { struct WS_CLIENT_SESSION *client = liste->data;
+             soup_websocket_connection_send_text ( client->connexion, buf );
              liste = g_slist_next(liste);
            }
           g_free(buf);

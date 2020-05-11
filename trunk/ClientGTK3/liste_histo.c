@@ -128,7 +128,6 @@
 /******************************************************************************************************************************/
  static void Go_to_syn ( struct CLIENT *client )
   { GtkTreeSelection *selection;
-    gchar *tech_id, *acronyme;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -138,9 +137,7 @@
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     while ( lignes )
-     { gsize taille_buf;
-       gchar *buf;
-       gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
+     { gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &syn_id, -1 );                                        /* Recup du id */
 
        Changer_vue_directe ( client, syn_id );
@@ -309,7 +306,7 @@ again:
     while ( valide )                                              /* A la recherche de l'iter perdu. Si trouvé, on met a jour */
      { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
        if ( !strcmp(tech_id, tech_id_recu) && !strcmp(acronyme,acronyme_recu) )
-        { gchar ack[80], *chaine;
+        { gchar ack[80];
 
           if(Json_has_element(element, "nom_ack"))
            { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") );

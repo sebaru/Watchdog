@@ -50,12 +50,10 @@
  #define HTTP_CONTENT_JSON             "application/json"
  #define HTTP_CONTENT_XML              "application/xml"
 
- enum WS_PROTO
-  {	/* always first */
-    WS_PROTO_HTTP = 0,
-    WS_PROTO_STATUS,
-    /* always last */
-    WS_NBR_PROTO
+ struct WS_CLIENT_SESSION
+  { SoupWebsocketConnection *connexion;
+    SoupClientContext *context;
+    GSList *Liste_bit_cadrans;
   };
 
  struct HTTP_CONFIG
