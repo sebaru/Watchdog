@@ -21,77 +21,69 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
- #include <sys/time.h>
- 
  #include "Reseaux.h"
- #include "Config_cli.h"
  #include "trame.h"
-
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
- extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
+/******************************************************************************************************************************/
+/* Changer_vue_directe: Demande au serveur une nouvelle vue                                                                   */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Changer_vue_directe ( struct CLIENT *client, guint num_syn )
+  { gchar chaine[80];
+    if (Chercher_page_notebook( client, TYPE_PAGE_SUPERVISION, num_syn, TRUE )) return;
 
-/**********************************************************************************************************/
-/* Changer_vue_directe: Demande au serveur une nouvelle vue                                               */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Changer_vue_directe ( guint num_syn )
-  { struct CMD_TYPE_SYNOPTIQUE cmd;
-    if (Chercher_page_notebook( TYPE_PAGE_SUPERVISION, num_syn, TRUE )) return;
-
-    cmd.id = num_syn;
-    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_PAGE_SUPERVISION,
-                   (gchar *)&cmd, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
+    g_snprintf( chaine, sizeof(chaine), "syn/get/%d", num_syn );
+    Envoi_au_serveur( client, "GET", NULL, 0, chaine, Creer_page_supervision_CB );
   }
-/**********************************************************************************************************/
-/* Changer_vue: Demande au serveur une nouvelle vue                                                       */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Changer_vue: Demande au serveur une nouvelle vue                                                                           */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static gboolean Changer_vue (GooCanvasItem *canvasitem, GooCanvasItem *target,
-                              GdkEvent          *event, struct CMD_TYPE_PASSERELLE *pass )
-  { if ( !(event->button.button == 1 &&                                                 /* clic gauche ?? */
+                              GdkEvent *event, struct TRAME_ITEM_PASS *trame_pass )
+  { if ( !(event->button.button == 1 &&                                                                     /* clic gauche ?? */
            event->type == GDK_BUTTON_PRESS)
-       )
-    return(FALSE);
+       ) return(FALSE);
 
-    Changer_vue_directe ( pass->syn_cible_id );
+    Changer_vue_directe ( trame_pass->client, trame_pass->pass->syn_cible_id );
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Afficher_un_message: Ajoute un message dans la liste des messages                                      */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_afficher_une_passerelle_supervision( struct CMD_TYPE_PASSERELLE *rezo_pass )
-  { struct TRAME_ITEM_PASS *trame_pass;
-    struct TYPE_INFO_SUPERVISION *infos;
+/******************************************************************************************************************************/
+/* Afficher_un_message: Ajoute un message dans la liste des messages                                                          */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct TYPE_INFO_SUPERVISION *infos=user_data;
+    struct TRAME_ITEM_PASS *trame_pass;
     struct CMD_TYPE_PASSERELLE *pass;
-        
-    infos = Rechercher_infos_supervision_par_id_syn ( rezo_pass->syn_id );
+
     if (!(infos && infos->Trame)) return;
     pass = (struct CMD_TYPE_PASSERELLE *)g_try_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
     if (!pass)
      { return;
      }
 
-    memcpy( pass, rezo_pass, sizeof(struct CMD_TYPE_PASSERELLE) );
-
-    trame_pass = Trame_ajout_passerelle ( FALSE, infos->Trame, pass );
-    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-press-event",
-                      G_CALLBACK(Changer_vue), pass );
-    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-release-event",
-                      G_CALLBACK(Changer_vue), pass );
+    pass->position_x   = Json_get_int ( element, "posx" );
+    pass->position_y   = Json_get_int ( element, "posy" );
+    pass->angle        = Json_get_int ( element, "angle" );
+    pass->id           = Json_get_int ( element, "id" );
+    pass->syn_id       = Json_get_int ( element, "syn_id" );
+    pass->syn_cible_id = Json_get_int ( element, "syn_cible_id" );
+    g_snprintf( pass->libelle, sizeof(pass->libelle), "%s", Json_get_string ( element, "page" ));
+    //g_snprintf( pass->page,    sizeof(pass->page),    "%s", Json_get_string ( element, "page" ));
+printf("%s: %d\n", __func__, pass->syn_cible_id );
+    trame_pass = Trame_ajout_passerelle ( infos->client, FALSE, infos->Trame, pass );
+    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-press-event",   G_CALLBACK(Changer_vue), trame_pass );
+    g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-release-event", G_CALLBACK(Changer_vue), trame_pass );
   }
 /*--------------------------------------------------------------------------------------------------------*/

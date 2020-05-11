@@ -60,6 +60,49 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
+ void Http_traiter_histo_alive ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                 SoupClientContext *client, gpointer user_data)
+  { gchar chaine[512];
+    gsize taille_buf;
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    Http_print_request ( server, msg, path, client );
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonBuilder *builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       return;
+     }
+
+    g_snprintf( chaine, sizeof(chaine),
+                "SELECT histo.*, histo.alive, msg.libelle, msg.type, dls.syn_id,"
+                "parent_syn.page as syn_parent_page, syn.page as syn_page,"
+                "dls.shortname as dls_shortname, msg.tech_id, msg.acronyme"
+                " FROM histo_msgs as histo"
+                " INNER JOIN msgs as msg ON msg.id = histo.id_msg"
+                " INNER JOIN dls as dls ON dls.tech_id = msg.tech_id"
+                " INNER JOIN syns as syn ON syn.id = dls.syn_id"
+                " INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id"
+                " WHERE alive = 1 ORDER BY histo.date_create" );
+    if (Select_SQL_to_JSON ( builder, "enregs", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
+
+    gchar *buf = Json_get_buf (builder, &taille_buf);
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Http_traiter_histo_ack ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                SoupClientContext *client, gpointer user_data)
   { GBytes *request_brute;
@@ -146,41 +189,6 @@
     Http_msgs_send_to_all ( buf );
   }
 /******************************************************************************************************************************/
-/* Recuperer_histo_msgsDB_alive: Recupération de l'ensemble des messages encore Alive dans le BDD                             */
-/* Entrée: La base de données de travail                                                                                      */
-/* Sortie: False si probleme                                                                                                  */
-/******************************************************************************************************************************/
- static void Http_ws_msgs_send_histo_alive ( SoupWebsocketConnection *connexion )
-  { struct CMD_TYPE_HISTO *histo;
-    gsize taille_buf;
-    struct DB *db;
-    gchar *buf;
-
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonBuilder *builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-       return;
-     }
-
-    if ( ! Recuperer_histo_msgsDB_alive( &db ) )                                                     /* Si pas de histos (??) */
-     { goto end; }
-
-    Json_add_string( builder, "zmq_type", "load_histo_alive" );
-    Json_add_int   ( builder, "nbr_enreg", db->nbr_result );
-    Json_add_array ( builder, "enregs" );
-    while ( (histo = Recuperer_histo_msgsDB_suite( &db )) != NULL)
-     { json_builder_begin_object ( builder );
-       Histo_msg_print_to_JSON ( builder, histo );
-       json_builder_end_object (builder);
-     }
-    Json_end_array( builder );
-end:
-    buf = Json_get_buf (builder, &taille_buf);
-    soup_websocket_connection_send_text ( connexion, buf );
-    g_free(buf);
-  }
-/******************************************************************************************************************************/
 /* Http_traiter_websocket: Traite une requete websocket                                                                       */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
@@ -192,7 +200,6 @@ end:
     g_signal_connect ( connexion, "closed", G_CALLBACK(Http_ws_msgs_on_closed), NULL );
     g_signal_connect ( connexion, "error",  G_CALLBACK(Http_ws_msgs_on_error),  NULL );
     Cfg_http.liste_ws_msgs_clients = g_slist_prepend ( Cfg_http.liste_ws_msgs_clients, connexion );
-    Http_ws_msgs_send_histo_alive ( connexion );
     g_object_ref(connexion);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

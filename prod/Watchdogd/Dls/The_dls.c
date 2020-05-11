@@ -1484,7 +1484,7 @@
 
     if ( update )
      { if (etat == FALSE) { msg->etat_update = FALSE; }
-       else if (etat == TRUE && msg->etat_update == FALSE)
+       else if (msg->etat == TRUE && msg->etat_update == FALSE)
         { struct DLS_MESSAGES_EVENT *event;
           msg->etat_update = TRUE;
           event = (struct DLS_MESSAGES_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGES_EVENT) );
@@ -1515,6 +1515,7 @@
      }
     else if ( msg->etat != etat )
      { msg->etat = etat;
+       if (etat) msg->etat_update = TRUE;
 
        if ( msg->last_change + 10 <= Partage->top ) { msg->changes = 0; }            /* Si pas de change depuis plus de 1 sec */
 

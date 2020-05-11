@@ -56,7 +56,7 @@
     gint network_size_to_send;
     gint access_level;
     SoupSession *connexion;
-    SoupWebsocketConnection *websocket;
+    SoupWebsocketConnection *ws_msgs;
     /*struct REZO_CLI_IDENT ident;
     struct CONNEXION *connexion;
     SSL_CTX *ssl_ctx;

@@ -56,6 +56,8 @@
     guchar  bleu0;
     gchar   type_gestion;                                                                      /* Statique/dynamique/cyclique */
     gint    layer;
+    gchar   tech_id[32];                                                                         /* Visuel Acronyme du cadran */
+    gchar   acronyme[64];                                                                        /* Visuel Acronyme du cadran */
   };
  struct CMD_TYPE_MOTIFS
   { guint nbr_motifs;                                                         /* Nombre de structure CMD_TYPE_MOTIF suivantes */

@@ -56,10 +56,7 @@
   { printf("%s : %p\n", __func__, client );
     if (!client->connexion) return;
     Envoi_au_serveur ( client, "GET", NULL, 0, "disconnect", Deconnecter_CB );
-    if (client->websocket)
-     { soup_websocket_connection_close ( client->websocket, 0, "Thanks" );
-       client->websocket = NULL;
-     }
+    Reset_page_histo( client );
     Log ( client, "Disconnected" );
   }
 /******************************************************************************************************************************/
@@ -72,14 +69,13 @@
     printf("%s : %p\n", __func__, client );
     g_snprintf( target, sizeof(target), "http://%s:5560/%s", client->hostname, URI );
     SoupMessage *msg = soup_message_new ( methode, target );
+    g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
+    client->network_size_sent = 0;
     if (payload)
-     { g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
-       soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
-       client->network_size_sent = 0;
+     { soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
        client->network_size_to_send = taille_buf;
        gchar chaine[128];
-       g_snprintf ( chaine, (taille_buf>sizeof(chaine) ? taille_buf : sizeof(chaine)) - 1,
-                    "Sending %s : %s\n", URI, payload );
+       g_snprintf ( chaine, (taille_buf>sizeof(chaine) ? taille_buf : sizeof(chaine)) - 1, "Sending %s : %s\n", URI, payload );
        printf(chaine);
      }
     if (!msg) { Log( client, "Erreur envoi au serveur"); Deconnecter_sale(client); }
@@ -90,10 +86,10 @@
 /* Entrée: rien                                                                                                               */
 /* Sortie: un widget boite                                                                                                    */
 /******************************************************************************************************************************/
- static void Http_ws_msgs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
+ static void Traiter_reception_ws_msgs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
   { printf("%s\n", __func__ );
   }
- static void Http_ws_msgs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
+ static void Traiter_reception_ws_msgs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
   { struct CLIENT *client = user_data;
     printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
     Log( client, error->message );
@@ -107,12 +103,12 @@
   { struct CLIENT *client = user_data;
     GError *error = NULL;
     printf("%s\n", __func__ );
-    client->websocket = soup_session_websocket_connect_finish ( client->connexion, res, &error );
-    if (client->websocket)                                                                   /* No limit on incoming packet ! */
-     { g_object_set ( G_OBJECT(client->websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
-       g_signal_connect ( client->websocket, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), client );
-       g_signal_connect ( client->websocket, "closed",  G_CALLBACK(Http_ws_msgs_on_closed), client );
-       g_signal_connect ( client->websocket, "error",   G_CALLBACK(Http_ws_msgs_on_error), client );
+    client->ws_msgs = soup_session_websocket_connect_finish ( client->connexion, res, &error );
+    if (client->ws_msgs)                                                                   /* No limit on incoming packet ! */
+     { g_object_set ( G_OBJECT(client->ws_msgs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
+       g_signal_connect ( client->ws_msgs, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), client );
+       g_signal_connect ( client->ws_msgs, "closed",  G_CALLBACK(Traiter_reception_ws_msgs_on_closed), client );
+       g_signal_connect ( client->ws_msgs, "error",   G_CALLBACK(Traiter_reception_ws_msgs_on_error), client );
      }
     else { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
            g_error_free (error);
@@ -149,6 +145,8 @@
                 Json_get_string(response, "version"), Json_get_string(response, "message") );
     Log(client, chaine);
     json_node_unref(response);
+    g_snprintf( chaine, sizeof(chaine), "histo/alive" );
+    Envoi_au_serveur( client, "GET", NULL, 0, chaine, Afficher_histo_alive_CB );
     g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/ws/live-msgs", client->hostname );
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
                                            NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );

@@ -111,7 +111,7 @@
     guint gif_largeur;
     guint gif_hauteur;
 
-    guchar etat;                                                                                     /* Etat attendu du motif */
+    guchar mode;                                                                                     /* Etat attendu du motif */
     gint   cligno;                                                                                    /* Etat cligno du motif */
     time_t last_clic;
 
@@ -122,6 +122,7 @@
 
  struct TRAME_ITEM_PASS
   { gint type;                                                                                              /* Type de l'item */
+    struct CLIENT *client;
     struct TRAME *trame;
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_texte;
@@ -144,11 +145,12 @@
     cairo_matrix_t transform;
     struct CMD_TYPE_COMMENT *comment;
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
-    gint selection;
+    gint   selection;
   };
 
  struct TRAME_ITEM_CADRAN
   { gint type;                                                                                              /* Type de l'item */
+    struct CLIENT *client;
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_carre;
     GooCanvasItem *item_entry;
@@ -156,15 +158,14 @@
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     struct CMD_TYPE_CADRAN *cadran;
-    GooCanvasItem *item_groupe_fleche;
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
-    gint selection;
+    gint   selection;
     gfloat valeur;
-    gfloat old_valeur[20];
   };
 
  struct TRAME_ITEM_CAMERA_SUP
   { gint type;                                                                                              /* Type de l'item */
+    struct CLIENT *client;
     GooCanvasItem *item;
     cairo_matrix_t transform;
     GooCanvasItem *item_groupe;
@@ -212,14 +213,14 @@
                                                      struct CMD_TYPE_MOTIF *motif );
  extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame,
                                                             struct CMD_TYPE_COMMENT *comm );
- extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,
+ extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( struct CLIENT *client, gint flag, struct TRAME *trame,
                                                          struct CMD_TYPE_PASSERELLE *pass );
- extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
-                                                     struct CMD_TYPE_CADRAN *cadran );
+ extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( struct CLIENT *client, gint flag, struct TRAME *trame,
+                                                       struct CMD_TYPE_CADRAN *cadran );
  extern void Trame_ajout_motif_par_item ( struct TRAME *trame,
                                           struct TRAME_ITEM_MOTIF *trame_motif );
  extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );
- extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
+ extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( struct CLIENT *client, gint flag, struct TRAME *trame,
                                                                struct CMD_TYPE_CAMERASUP *camera_sup );
  extern void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass );

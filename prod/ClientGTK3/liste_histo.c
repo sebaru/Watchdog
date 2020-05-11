@@ -70,7 +70,6 @@
  #include "client.h"
 
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
-
 /******************************************************************************************************************************/
 /* Type_vers_string: renvoie le type string associé                                                                           */
 /* Entrée: le type numérique                                                                                                  */
@@ -123,6 +122,33 @@
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
 /******************************************************************************************************************************/
+/* Menu_go_to_syn: Affiche les synoptiques associés aux messages histo                                                        */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Go_to_syn ( struct CLIENT *client )
+  { GtkTreeSelection *selection;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    GList *lignes;
+    gint syn_id;
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(client->Liste_histo) );
+
+    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+    while ( lignes )
+     { gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
+       gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &syn_id, -1 );                                        /* Recup du id */
+
+       Changer_vue_directe ( client, syn_id );
+
+       gtk_tree_selection_unselect_iter( selection, &iter );
+       lignes = lignes->next;
+     }
+    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (lignes);                                                           /* Liberation mémoire */
+  }
+/******************************************************************************************************************************/
 /* Gerer_popup_message: Gestion du menu popup quand on clique droite sur la liste des messages                                */
 /* Entrée: la liste(widget), l'evenement bouton, et les data                                                                  */
 /* Sortie: Niet                                                                                                               */
@@ -141,11 +167,11 @@
      { GtkWidget *item;
        Popup = gtk_menu_new();                                                                            /* Creation si besoin */
        item = gtk_menu_item_new_with_label ( "Acquitter le message" );
-       g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), data );
+       g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
        gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
 
        item = gtk_menu_item_new_with_label ( "Voir le synoptique" );
-/*       g_signal_connect ( item, "activate", G_CALLBACK (Go_to_syn), NULL );*/
+       g_signal_connect_swapped ( item, "activate", G_CALLBACK (Go_to_syn), client );
        gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
        gtk_widget_show_all(Popup);
      }
@@ -171,36 +197,6 @@
      }
     return(FALSE);
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Menu_go_to_syn: Affiche les synoptiques associés aux messages histo                                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Menu_go_to_syn ( void )
-  { GtkTreeSelection *selection;
-    GtkTreeModel *store;
-    GtkTreeIter iter;
-    GList *lignes;
-
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );
-    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(client->Liste_histo) );
-
-    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    while ( lignes )
-     { guint id_syn;
-       gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &id_syn, -1 );                  /* Recup du id */
-
-       Changer_vue_directe ( id_syn );
-
-       gtk_tree_selection_unselect_iter( selection, &iter );
-       lignes = lignes->next;
-     }
-    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
-  }
-#endif
 /******************************************************************************************************************************/
 /* Reset_page_histo: Efface les enregistrements de la page histo                                                              */
 /* Entrée: rien                                                                                                               */
@@ -210,6 +206,10 @@
   { GtkTreeModel *store;
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
     gtk_list_store_clear( GTK_LIST_STORE(store) );
+    if (client->ws_msgs)
+     { soup_websocket_connection_close ( client->ws_msgs, 0, "Thanks" );
+       client->ws_msgs = NULL;
+     }
   }
 /******************************************************************************************************************************/
 /* Cacher_un_histo: Enleve un histo de la liste fil de l'eau                                                                  */
@@ -298,7 +298,7 @@ again:
 
     if (!acronyme || !tech_id) return;
 
-    if (Json_has_element(element,"alive") && Json_get_bool(element,"alive") == FALSE) { Cacher_un_histo ( client, element ); return; }
+    if (Json_has_member(element,"alive") && Json_get_bool(element,"alive") == FALSE) { Cacher_un_histo ( client, element ); return; }
 
     GtkTreeModel *store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
     gboolean valide      = gtk_tree_model_get_iter_first( store, &iter );
@@ -306,15 +306,14 @@ again:
     while ( valide )                                              /* A la recherche de l'iter perdu. Si trouvé, on met a jour */
      { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
        if ( !strcmp(tech_id, tech_id_recu) && !strcmp(acronyme,acronyme_recu) )
-        { gchar ack[80], *chaine;
+        { gchar ack[80];
 
-          if(Json_has_element(element, "nom_ack"))
+          if(Json_has_member(element, "nom_ack"))
            { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") );
              gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, ack, -1 );
            }
-          chaine = Json_get_string(element, "date_create");
-          if (chaine)
-           { gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_DATE_CREATE, chaine, -1 ); }
+          if(Json_has_member(element, "date_create"))
+           { gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_DATE_CREATE, Json_get_string(element, "date_create"), -1 ); }
 
           return;
         }
@@ -331,18 +330,43 @@ again:
   { gsize taille;
     struct CLIENT *client = user_data;
     printf("%s\n", __func__ );
-    printf("Recu MSGS: %s %p\n", g_bytes_get_data ( message_brut, &taille ), client );
+    /*printf("Recu MSGS: %s %p\n", g_bytes_get_data ( message_brut, &taille ), client );*/
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
 
     gchar *zmq_type = Json_get_string( response, "zmq_type" );
     if (zmq_type)
-     { if (!strcmp(zmq_type,"load_histo_alive"))
-        { json_array_foreach_element ( Json_get_array(response, "enregs"), Afficher_un_histo, client ); }
-       else if(!strcmp(zmq_type,"update_histo")) { Updater_histo( client, response ); }
+     {      if(!strcmp(zmq_type,"update_histo")) { Updater_histo( client, response ); }
        else if(!strcmp(zmq_type,"pulse"))        { Set_progress_pulse( client ); }
      }
     json_node_unref(response);
+  }
+/******************************************************************************************************************************/
+/* Afficher_histo_alive_CB: appeler par libsoup lorsque la requete de recuperation des histo alive a terminé                  */
+/* Entrée: les parametres libsoup                                                                                             */
+/* Sortie: un widget boite                                                                                                    */
+/******************************************************************************************************************************/
+ void Afficher_histo_alive_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
+  { GBytes *response_brute;
+    gchar *reason_phrase;
+    gint status_code;
+    gsize taille;
+    struct CLIENT *client = user_data;
+    printf("%s\n", __func__ );
+
+    g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
+    if (status_code != 200)
+     { gchar chaine[256];
+       g_snprintf(chaine, sizeof(chaine), "Error with get histo alive %s: Code %d - %s", client->hostname, status_code, reason_phrase );
+       printf(chaine);
+       return;
+     }
+    g_object_get ( msg, "response-body-data", &response_brute, NULL );
+
+    printf("Recu MSGS: %s %p\n", g_bytes_get_data ( response_brute, &taille ), client );
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
+    if (!response || Json_has_member ( response, "enregs" ) == FALSE ) return;
+    json_array_foreach_element ( Json_get_array(response, "enregs"), Afficher_un_histo, client );
   }
 /******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
@@ -355,16 +379,8 @@ again:
     GtkTreeViewColumn *colonne;
     GtkCellRenderer *renderer;
     GtkListStore *store;
-    struct PAGE_NOTEBOOK *page;
-
-    page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
-    if (!page) { printf("Creer_page_histo: page = NULL !\n"); return(NULL); }
-
-    page->type  = TYPE_PAGE_HISTO;
-    client->Liste_pages = g_slist_append( client->Liste_pages, page );
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
-    page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
 /***************************************** La liste des groupes *******************************************/
     scroll = gtk_scrolled_window_new( NULL, NULL );

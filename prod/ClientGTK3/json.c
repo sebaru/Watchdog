@@ -97,7 +97,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Json_add_object ( JsonBuilder *builder, gchar *name )
-  { json_builder_set_member_name  ( builder, name );
+  { if (name) json_builder_set_member_name  ( builder, name );
     json_builder_begin_object (builder);                                                                 /* Contenu du Status */
   }
 /******************************************************************************************************************************/
@@ -159,8 +159,18 @@
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
  gint Json_get_int ( JsonNode *query, gchar *chaine )
-  { JsonObject *object = json_node_get_object (query);
-    return((gfloat)json_object_get_int_member ( object, chaine ));
+  { GValue valeur = G_VALUE_INIT;
+    gint retour;
+    JsonObject *object = json_node_get_object (query);
+    JsonNode *node = json_object_get_member ( object, chaine );
+    if (!node) { return(-1); }
+    json_node_get_value ( node, &valeur );
+         if ( G_VALUE_HOLDS_STRING (&valeur) ) { retour = atoi(g_value_get_string (&valeur)); }
+    else if ( G_VALUE_HOLDS_INT    (&valeur) ) { retour = g_value_get_int (&valeur); }
+    else if ( G_VALUE_HOLDS_INT64  (&valeur) ) { retour = g_value_get_int64 (&valeur); }
+    else { printf("%s: Erreur getting '%s'\n", __func__, chaine ); retour = -1; }
+    g_value_unset ( &valeur );
+    return(retour);
   }
 /******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
@@ -188,14 +198,5 @@
  JsonArray *Json_get_array ( JsonNode *query, gchar *chaine )
   { JsonObject *object = json_node_get_object (query);
     return(json_object_get_array_member ( object, chaine ));
-  }
-/******************************************************************************************************************************/
-/* Json_get_int: Recupere l'entier dont le nom est en parametre                                                               */
-/* Entrée: la query, le nom du parametre                                                                                      */
-/* Sortie: la chaine de caractere                                                                                             */
-/******************************************************************************************************************************/
- gboolean Json_has_element ( JsonNode *query, gchar *chaine )
-  { JsonObject *object = json_node_get_object (query);
-    return(json_object_has_member ( object, chaine ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

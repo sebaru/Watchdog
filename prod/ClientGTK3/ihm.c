@@ -30,31 +30,6 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
-/******************************************************************************************************************************/
-/* Detruire_page: Detruit la page du notebook en parametre                                                                    */
-/* Entrée: rien                                                                                                               */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Detruire_page ( struct CLIENT *client, struct PAGE_NOTEBOOK *page_a_virer )
-  { gint num;
-    num = gtk_notebook_page_num( GTK_NOTEBOOK(client->Notebook), GTK_WIDGET(page_a_virer->child) );
-
-    if (num>=0)
-     { switch(page_a_virer->type)
-        { case TYPE_PAGE_ATELIER:
-               /*Detruire_page_atelier( page_a_virer );*/
-               break;
-          case TYPE_PAGE_SUPERVISION:
-               /*Detruire_page_supervision( page_a_virer );*/
-               break;
-        }
-       gtk_notebook_remove_page( GTK_NOTEBOOK(client->Notebook), num );
-       client->Liste_pages = g_slist_remove( client->Liste_pages, page_a_virer );
-       if (page_a_virer->infos) g_free(page_a_virer->infos);       /* Libération des infos le cas échéant */
-       g_free(page_a_virer);
-     }
-    else printf("Detruire_page: Page non trouvée\n");
-  }
 /**********************************************************************************************************/
 /* Detruire_page_plugin_dls: Detruit la page du notebook consacrée aux plugin_dlss watchdog               */
 /* Entrée: rien                                                                                           */
@@ -84,17 +59,12 @@
 /******************************************************************************************************************************/
  void Effacer_pages ( struct CLIENT *client )
   { GSList *liste;
-    liste = client->Liste_pages;
-    while(liste)
-     { struct PAGE_NOTEBOOK *page;
-       page = (struct PAGE_NOTEBOOK *)liste->data;
-       if (page->type == TYPE_PAGE_HISTO)
-        { Reset_page_histo(client); }
-       else
-        { Detruire_page( client, page );
-          client->Liste_pages = g_slist_remove( client->Liste_pages, page );
+    while( client->Liste_pages )
+     { struct PAGE_NOTEBOOK *page = client->Liste_pages->data;
+       switch(page->type)
+        { case TYPE_PAGE_SUPERVISION : Detruire_page_supervision ( page ); break;
         }
-       liste = g_slist_next(liste);
+       client->Liste_pages = g_slist_remove ( client->Liste_pages, page );
      }
   }
 #ifdef bouh
@@ -132,16 +102,22 @@
 /******************************************************************************************************************************/
  void Update_progress_bar( SoupMessage *msg, SoupBuffer *chunk, gpointer data )
   { struct CLIENT *client = data;
+    SoupMessageHeaders *headers;
     gdouble fraction;
     gchar chaine[20];
 
+    g_object_get ( msg, "response-headers", &headers, NULL );
+    client->network_size_to_send = soup_message_headers_get_content_length ( headers );
+    printf("Progress bar prepare to %d \n", client->network_size_to_send );
+
     client->network_size_sent += chunk->length;
     if (client->network_size_sent >= client->network_size_to_send)
-     { client->network_size_sent =client->network_size_to_send; }
+     { client->network_size_sent = client->network_size_to_send; }
 
     fraction = 1.0*client->network_size_sent/client->network_size_to_send;
     gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (client->Barre_progress), fraction );
-    g_snprintf( chaine, sizeof(chaine), "%3.1f%%", 100.0*fraction );
+    if (fraction==1.0) g_snprintf( chaine, sizeof(chaine), "Ready" );
+                  else g_snprintf( chaine, sizeof(chaine), "%3.1f%% downloaded", 100.0*fraction );
     gtk_progress_bar_set_text( GTK_PROGRESS_BAR (client->Barre_progress), chaine );
     printf("Progress bar set to %s\n", chaine );
   }
@@ -243,6 +219,7 @@ printf("not found\n");
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
+    gtk_box_set_spacing ( GTK_BOX(hboite), 6 );
     gtk_box_pack_start( GTK_BOX(vboite), hboite, FALSE, FALSE, 0 );
 
 /********************* Status de la machine cliente:connectée/erreur/loguée... ****************************/
@@ -253,15 +230,15 @@ printf("not found\n");
     g_object_set (client->Entry_status, "editable", FALSE, NULL );
     gtk_box_pack_start( GTK_BOX(hboite), client->Entry_status, TRUE, TRUE, 0 );
 
-    client->Barre_progress = gtk_progress_bar_new ();
-    gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (client->Barre_progress), 1.0 );
-    gtk_progress_bar_set_show_text( GTK_PROGRESS_BAR (client->Barre_progress), TRUE );
-    gtk_progress_bar_set_text( GTK_PROGRESS_BAR (client->Barre_progress), "100%" );
-    gtk_box_pack_start( GTK_BOX(hboite), client->Barre_progress, FALSE, FALSE, 0 );
-
     client->Barre_pulse = gtk_progress_bar_new ();
     gtk_progress_bar_set_pulse_step( GTK_PROGRESS_BAR (client->Barre_pulse), 1.0 );
     gtk_box_pack_start( GTK_BOX(hboite), client->Barre_pulse, FALSE, FALSE, 0 );
+
+    client->Barre_progress = gtk_progress_bar_new ();
+    gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (client->Barre_progress), 0.75 );
+    gtk_progress_bar_set_show_text( GTK_PROGRESS_BAR (client->Barre_progress), TRUE );
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR (client->Barre_progress), "Ready" );
+    gtk_box_pack_start( GTK_BOX(hboite), client->Barre_progress, FALSE, FALSE, 0 );
 
     return(vboite);
  }

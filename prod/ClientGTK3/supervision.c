@@ -38,39 +38,24 @@
      COLONNE_HORLOGE_LIBELLE,
      NBR_COLONNE_HORLOGE
   };
-
-/******************************************************************************************************************************/
-/* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numéro                                      */
-/* Entrée: Un numéro de synoptique                                                                                            */
-/* Sortie: Une référence sur les champs d'information de la page en question                                                  */
-/******************************************************************************************************************************/
- struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( struct CLIENT *client, gint syn_id )
-  { struct TYPE_INFO_SUPERVISION *infos;
-    struct PAGE_NOTEBOOK *page;
-    GSList *liste;
-    liste = client->Liste_pages;
-    infos = NULL;
-    while( liste )
-     { page = (struct PAGE_NOTEBOOK *)liste->data;
-       if ( page->type == TYPE_PAGE_SUPERVISION )                /* Est-ce bien une page d'supervision ?? */
-        { infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
-          if (Json_get_int(infos->syn, "id") == syn_id) break;                              /* Nous avons trouvé le syn !! */
-        }
-       liste = liste->next;                                                        /* On passe au suivant */
-     }
-    return(infos);
-  }
 /******************************************************************************************************************************/
 /* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                                                */
 /* Entrée: la page en question                                                                                                */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Detruire_page_supervision( struct PAGE_NOTEBOOK *page )
-  { struct TYPE_INFO_SUPERVISION *infos;
-    infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
+  { struct TYPE_INFO_SUPERVISION *infos = page->infos;
+
+    soup_websocket_connection_close ( infos->ws_motifs, 0, "Thanks, Bye !" );
     json_node_unref( infos->syn );
     /*g_timeout_remove( infos->timer_id );*/
-    //Trame_detruire_trame( infos->Trame );
+    Trame_detruire_trame( infos->Trame );
+
+    gint num = gtk_notebook_page_num( GTK_NOTEBOOK(infos->client->Notebook), GTK_WIDGET(page->child) );
+    gtk_notebook_remove_page( GTK_NOTEBOOK(infos->client->Notebook), num );
+    infos->client->Liste_pages = g_slist_remove( infos->client->Liste_pages, page );
+    g_free(infos);                                                                     /* Libération des infos le cas échéant */
+    g_free(page);
   }
 /******************************************************************************************************************************/
 /* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                                                */
@@ -132,19 +117,227 @@
     g_snprintf(chaine, sizeof(chaine), "horloges/list/%s", Json_get_string(infos->syn, "page") );
 //    Firefox_exec ( chaine );
   }
+
+/******************************************************************************************************************************/
+/* Changer_etat_motif: Changement d'etat d'un motif                                                                           */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+static void Updater_un_motif( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *motif )
+  { trame_motif->rouge  = Json_get_int(motif,"rouge");                                               /* Sauvegarde etat motif */
+    trame_motif->vert   = Json_get_int(motif,"vert");                                                /* Sauvegarde etat motif */
+    trame_motif->bleu   = Json_get_int(motif,"bleu");                                                /* Sauvegarde etat motif */
+    trame_motif->mode   = Json_get_int(motif,"mode");                                                /* Sauvegarde etat motif */
+    trame_motif->cligno = Json_get_int(motif,"cligno");                                              /* Sauvegarde etat motif */
+printf("%s\n", __func__);
+    switch( trame_motif->motif->type_gestion )
+     { case TYPE_INERTE: break;                          /* Si le motif est inerte, nous n'y touchons pas */
+       case TYPE_STATIQUE:
+            Trame_choisir_frame( trame_motif, 0, trame_motif->rouge,
+                                                 trame_motif->vert,
+                                                 trame_motif->bleu );                           /* frame 1 */
+            break;
+       case TYPE_BOUTON:
+            if ( ! (trame_motif->mode % 2) )
+             { Trame_choisir_frame( trame_motif, 3*(trame_motif->mode/2),
+                                    trame_motif->rouge, trame_motif->vert, trame_motif->bleu );
+             } else
+             { Trame_choisir_frame( trame_motif, 3*(trame_motif->mode/2) + 1,
+                                    trame_motif->rouge, trame_motif->vert, trame_motif->bleu );
+             }
+            break;
+       case TYPE_DYNAMIQUE:
+            Trame_choisir_frame( trame_motif, trame_motif->mode, trame_motif->rouge,
+                                                                 trame_motif->vert,
+                                                                 trame_motif->bleu );            /* frame 1 */
+       case TYPE_PROGRESSIF:
+            Trame_peindre_motif ( trame_motif, trame_motif->rouge,
+                                               trame_motif->vert,
+                                               trame_motif->bleu );
+            break;
+       default: printf("Changer_etat_motif: type gestion non géré %d\n",
+                        trame_motif->motif->type_gestion );
+     }
+  }
+/******************************************************************************************************************************/
+/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Updater_les_motifs( struct TYPE_INFO_SUPERVISION *infos, JsonNode *motif )
+  { GList *liste_motifs;
+    gint cpt;
+printf("%s\n", __func__);
+
+    liste_motifs = infos->Trame->trame_items;                                     /* On parcours tous les motifs de la page */
+    while (liste_motifs)
+     { switch( *((gint *)liste_motifs->data) )
+        { case TYPE_MOTIF:
+           { cpt++;
+             struct TRAME_ITEM_MOTIF *trame_motif = liste_motifs->data;
+             if ( Json_has_member ( motif, "old_motif" ) == FALSE )
+              { if ( (!strcmp( Json_get_string(motif,"tech_id"), trame_motif->motif->tech_id) &&
+                      !strcmp( Json_get_string(motif,"acronyme"), trame_motif->motif->acronyme)) )
+                 { Updater_un_motif ( trame_motif, motif );
+                   printf("%s: change motif type %s:%s\n", __func__, trame_motif->motif->tech_id, trame_motif->motif->acronyme );
+                 }
+              }
+             else if ( trame_motif->motif->bit_controle == Json_get_int ( motif, "num" ) )
+              {
+              }
+             break;
+           }
+          default: break;
+        }
+       liste_motifs=liste_motifs->next;
+     }
+    if (!cpt)                                       /* Si nous n'avons rien mis à jour, alors nous demandons le desabonnement */
+     { /*Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_CADRAN_UNKNOWN,*/
+
+     }
+  }
+/******************************************************************************************************************************/
+/* Afficher_un_motif: Ajoute un motif sur la trame de supervision                                                             */
+/* Entrée: les parametres iteratif JSon                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Afficher_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct TYPE_INFO_SUPERVISION *infos=user_data;
+    struct TRAME_ITEM_MOTIF *trame_motif;
+    struct CMD_TYPE_MOTIF *motif;
+
+    if (!(infos && infos->Trame)) return;
+
+    motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
+    if (!motif) return;
+
+    motif->position_x   = atoi(Json_get_string ( element, "posx" ));
+    motif->position_y   = atoi(Json_get_string ( element, "posy" ));
+    motif->largeur      = atoi(Json_get_string ( element, "larg" ));
+    motif->hauteur      = atoi(Json_get_string ( element, "haut" ));
+    motif->angle        = atoi(Json_get_string ( element, "angle" ));
+    motif->icone_id     = atoi(Json_get_string ( element, "icone" ));
+    motif->type_dialog  = atoi(Json_get_string ( element, "dialog" ));
+    motif->type_gestion = atoi(Json_get_string ( element, "gestion" ));
+    motif->rouge0       = atoi(Json_get_string ( element, "rouge" ));
+    motif->vert0        = atoi(Json_get_string ( element, "vert" ));
+    motif->bleu0        = atoi(Json_get_string ( element, "bleu" ));
+    motif->layer        = atoi(Json_get_string ( element, "layer" ));
+    g_snprintf( motif->tech_id,       sizeof(motif->tech_id),       "%s", Json_get_string( element, "tech_id" ) );
+    g_snprintf( motif->acronyme,      sizeof(motif->acronyme),      "%s", Json_get_string( element, "acronyme" ) );
+    g_snprintf( motif->clic_tech_id,  sizeof(motif->clic_tech_id),  "%s", Json_get_string( element, "clic_tech_id" ) );
+    g_snprintf( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", Json_get_string( element, "clic_acronyme" ) );
+    g_snprintf( motif->libelle,       sizeof(motif->libelle),       "%s", Json_get_string( element, "libelle" ) );
+    motif->access_level = atoi(Json_get_string ( element, "access_level" ));
+    motif->bit_controle = atoi(Json_get_string ( element, "bitctrl" ));
+    motif->bit_clic     = atoi(Json_get_string ( element, "bitclic" ));
+    motif->rafraich     = atoi(Json_get_string ( element, "rafraich" ));
+    printf("%s, add motif %s\n", __func__, motif->libelle );
+    trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
+    if (!trame_motif)
+     { printf("Erreur creation d'un nouveau motif\n");
+       return;                                                          /* Ajout d'un test anti seg-fault */
+     }
+  //  trame_motif->groupe_dpl = Nouveau_groupe();                   /* Numéro de groupe pour le deplacement */
+    trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */
+    trame_motif->vert   = motif->vert0;                                          /* Sauvegarde etat motif */
+    trame_motif->bleu   = motif->bleu0;                                          /* Sauvegarde etat motif */
+    trame_motif->mode   = 0;                                                     /* Sauvegarde etat motif */
+    trame_motif->cligno = 0;                                                     /* Sauvegarde etat motif */
+   // g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
+   //                   G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
+   // g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
+   //                   G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
+  }
+/******************************************************************************************************************************/
+/* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MOTIF                                 */
+/* Entrée: les parametres libsoup                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Traiter_reception_ws_motifs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
+  { struct TYPE_INFO_SUPERVISION *infos = user_data;
+    gsize taille;
+    printf("%s\n", __func__ );
+    printf("Recu via WS-MOTIFS: %s :\n", g_bytes_get_data ( message_brut, &taille ) );
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    if (!response) return;
+    if ( !strcmp ( Json_get_string(response,"msg_type"), "update_cadran" ) ) { Updater_les_cadrans ( infos, response ); }
+    if ( !strcmp ( Json_get_string(response,"msg_type"), "update_motif" ) )  { Updater_les_motifs  ( infos, response ); }
+
+    json_node_unref(response);
+  }
+/******************************************************************************************************************************/
+/* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
+/* Entrée: rien                                                                                                               */
+/* Sortie: un widget boite                                                                                                    */
+/******************************************************************************************************************************/
+ static void Traiter_reception_ws_motifs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
+  { printf("%s\n", __func__ );
+  }
+ static void Traiter_reception_ws_motifs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
+  { printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
+  }
+/******************************************************************************************************************************/
+/* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
+/* Entrée: les variables traditionnelles de libsous                                                                           */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Traiter_connect_ws_motifs_CB (GObject *source_object, GAsyncResult *res, gpointer user_data )
+  { struct TYPE_INFO_SUPERVISION *infos = user_data;
+    GError *error = NULL;
+    gsize taille_buf;
+    printf("%s\n", __func__ );
+    infos->ws_motifs = soup_session_websocket_connect_finish ( infos->client->connexion, res, &error );
+    if (!infos->ws_motifs)                                                                    /* No limit on incoming packet ! */
+     { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
+       g_error_free (error);
+       return;
+     }
+    g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
+    g_signal_connect ( infos->ws_motifs, "message", G_CALLBACK(Traiter_reception_ws_motifs_CB), infos );
+    g_signal_connect ( infos->ws_motifs, "closed",  G_CALLBACK(Traiter_reception_ws_motifs_on_closed), infos );
+    g_signal_connect ( infos->ws_motifs, "error",   G_CALLBACK(Traiter_reception_ws_motifs_on_error), infos );
+    JsonBuilder *builder = Json_create ();
+    if (builder == NULL) return;
+    Json_add_string ( builder, "msg_type", "abonnements" );
+    Json_add_array  ( builder, "cadrans" );
+    GList *liste = infos->Trame->trame_items;
+    while (liste)
+     { struct TRAME_ITEM *item = liste->data;
+       switch( *(gint *)item )
+        { case TYPE_CADRAN:
+           { struct TRAME_ITEM_CADRAN *trame_cadran = liste->data;
+             printf("%s: abonnement cadran to %d %s:%s\n", __func__,
+                    trame_cadran->cadran->type, trame_cadran->cadran->tech_id, trame_cadran->cadran->acronyme );
+             Json_add_object ( builder, NULL );
+             Json_add_string ( builder, "type_abonnement", "cadran" );
+             Json_add_int    ( builder, "type", trame_cadran->cadran->type );
+             Json_add_string ( builder, "tech_id", trame_cadran->cadran->tech_id );
+             Json_add_string ( builder, "acronyme", trame_cadran->cadran->acronyme );
+             Json_end_object ( builder );
+             break;
+           }
+        }
+       liste = g_list_next ( liste );
+     }
+    Json_end_array ( builder );
+    gchar *buf = Json_get_buf (builder, &taille_buf);
+    GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
+    soup_websocket_connection_send_message (infos->ws_motifs, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
+    g_bytes_unref( gbytes );
+  }
 /******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
 /* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
+ void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
   { GtkWidget *bouton, *boite, *hboite, *scroll, *frame, *label;
     struct CLIENT *client = user_data;
     GtkAdjustment *adj;
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
     static gint init_timer;
-    GdkColor color;
     GBytes *response_brute;
     gchar *reason_phrase;
     gint status_code;
@@ -152,6 +345,9 @@
     gsize taille;
 
     printf("%s\n", __func__ );
+    g_object_get ( msg, "response-body-data", &response_brute, NULL );
+    printf("Recu SYNS: %s %p\n", g_bytes_get_data ( response_brute, &taille ), client );
+
     g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
     if (status_code != 200)
      { gchar chaine[256];
@@ -166,11 +362,10 @@
     page->infos = (struct TYPE_INFO_SUPERVISION *)g_try_malloc0( sizeof(struct TYPE_INFO_SUPERVISION) );
     infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
     if (!page->infos) { g_free(page); return; }
+    infos->client = client;
 
     page->type   = TYPE_PAGE_SUPERVISION;
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
-//    memcpy(&infos->syn, syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     infos->syn = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
 
@@ -184,8 +379,8 @@
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_ALWAYS, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-    //infos->Trame = Trame_creer_trame( TAILLE_SYNOPTIQUE_X, TAILLE_SYNOPTIQUE_Y, "darkgray", 0 );
-    //gtk_container_add( GTK_CONTAINER(scroll), infos->Trame->trame_widget );
+    infos->Trame = Trame_creer_trame( TAILLE_SYNOPTIQUE_X, TAILLE_SYNOPTIQUE_Y, "darkgray", 0 );
+    gtk_container_add( GTK_CONTAINER(scroll), infos->Trame->trame_widget );
 
 /************************************************** Boutons de controle *******************************************************/
     boite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
@@ -193,7 +388,7 @@
 
     bouton = gtk_button_new_with_label( "Fermer" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Detruire_page), page );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Detruire_page_supervision), page );
 
     bouton = gtk_button_new_with_label( "Imprimer" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
@@ -244,88 +439,19 @@
 //    gtk_widget_modify_bg ( label, GTK_STATE_NORMAL, &color );
 //    gtk_widget_modify_bg ( label, GTK_STATE_ACTIVE, &color );
     gtk_widget_show_all( label );
-    gtk_notebook_append_page( GTK_NOTEBOOK(client->Notebook), page->child, label );
-//    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", "ws://localhost:5560/ws/live-msgs"),
-  //                                         NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
+    gint page_num = gtk_notebook_append_page( GTK_NOTEBOOK(client->Notebook), page->child, label );
+    gtk_notebook_set_current_page ( GTK_NOTEBOOK(client->Notebook), page_num );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ),      Afficher_un_motif, infos );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, infos );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Afficher_un_commentaire, infos );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, infos );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, infos );
+
+    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/ws/live-motifs", client->hostname );
+    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
+                                           NULL, NULL, g_cancellable_new(), Traiter_connect_ws_motifs_CB, infos );
   }
 #ifdef bouh
-/**********************************************************************************************************/
-/* Proto_afficher_un_motif_supervision: Ajoute un motif sur la trame de supervision                       */
-/* Entrée: une reference sur le motif                                                                     */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif )
-  { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TYPE_INFO_SUPERVISION *infos;
-    struct CMD_TYPE_MOTIF *motif;
-
-    infos = Rechercher_infos_supervision_par_id_syn ( rezo_motif->syn_id );
-    if (!(infos && infos->Trame)) return;
-    motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
-    if (!motif) return;
-
-    memcpy( motif, rezo_motif, sizeof(struct CMD_TYPE_MOTIF) );
-    trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
-    if (!trame_motif)
-     { printf("Erreur creation d'un nouveau motif\n");
-       return;                                                          /* Ajout d'un test anti seg-fault */
-     }
-    trame_motif->groupe_dpl = Nouveau_groupe();                   /* Numéro de groupe pour le deplacement */
-    trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */
-    trame_motif->vert   = motif->vert0;                                          /* Sauvegarde etat motif */
-    trame_motif->bleu   = motif->bleu0;                                          /* Sauvegarde etat motif */
-    trame_motif->etat   = 0;                                                     /* Sauvegarde etat motif */
-    trame_motif->cligno = 0;                                                     /* Sauvegarde etat motif */
-    g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
-                      G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
-                      G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
-  }
-/******************************************************************************************************************************/
-/* Changer_etat_motif: Changement d'etat d'un motif                                                                           */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Changer_etat_motif( struct TRAME_ITEM_MOTIF *trame_motif, struct CMD_ETAT_BIT_CTRL *etat_motif )
-  { printf("Changer_etat_motif: %d = %d %d %d etat %d (type %d) cligno=%d %s\n",
-            trame_motif->motif->bit_controle,
-            etat_motif->rouge,
-            etat_motif->vert,
-            etat_motif->bleu, etat_motif->etat, trame_motif->motif->type_gestion, etat_motif->cligno, trame_motif->motif->libelle );
-    trame_motif->rouge  = etat_motif->rouge;                                     /* Sauvegarde etat motif */
-    trame_motif->vert   = etat_motif->vert;                                      /* Sauvegarde etat motif */
-    trame_motif->bleu   = etat_motif->bleu;                                      /* Sauvegarde etat motif */
-    trame_motif->etat   = etat_motif->etat;                                      /* Sauvegarde etat motif */
-    trame_motif->cligno = etat_motif->cligno;                                    /* Sauvegarde etat motif */
-    switch( trame_motif->motif->type_gestion )
-     { case TYPE_INERTE: break;                          /* Si le motif est inerte, nous n'y touchons pas */
-       case TYPE_STATIQUE:
-            Trame_choisir_frame( trame_motif, 0, etat_motif->rouge,
-                                                 etat_motif->vert,
-                                                 etat_motif->bleu );                           /* frame 1 */
-            break;
-       case TYPE_BOUTON:
-            if ( ! (etat_motif->etat % 2) )
-             { Trame_choisir_frame( trame_motif, 3*(etat_motif->etat/2),
-                                    etat_motif->rouge, etat_motif->vert, etat_motif->bleu );
-             } else
-             { Trame_choisir_frame( trame_motif, 3*(etat_motif->etat/2) + 1,
-                                    etat_motif->rouge, etat_motif->vert, etat_motif->bleu );
-             }
-            break;
-       case TYPE_DYNAMIQUE:
-            Trame_choisir_frame( trame_motif, etat_motif->etat, etat_motif->rouge,
-                                                                etat_motif->vert,
-                                                                etat_motif->bleu );            /* frame 1 */
-       case TYPE_PROGRESSIF:
-            Trame_peindre_motif ( trame_motif, etat_motif->rouge,
-                                               etat_motif->vert,
-                                               etat_motif->bleu );
-            break;
-       default: printf("Changer_etat_motif: type gestion non géré %d bit_ctrl=%d\n",
-                        trame_motif->motif->type_gestion, trame_motif->motif->bit_controle );
-     }
-  }
 /******************************************************************************************************************************/
 /* Changer_etat_passerelle: Changement d'etat d'une passerelle (toutes les vignettes)                                         */
 /* Entrée: une reference sur la passerelle, l'etat attendu                                                                    */
@@ -420,49 +546,7 @@
     else
      { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "vert", 0, FALSE ); }
  }
-/******************************************************************************************************************************/
-/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Proto_changer_etat_motif( struct CMD_ETAT_BIT_CTRL *etat_motif )
-  { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TYPE_INFO_SUPERVISION *infos;
-    struct PAGE_NOTEBOOK *page;
-    GList *liste_motifs;
-    GList *liste;
-    gint cpt;
 
-printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, etat_motif->etat, etat_motif->rouge,
-                                                         etat_motif->vert, etat_motif->bleu );
-    cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */
-    liste = Liste_pages;
-    while(liste)                                                                  /* On parcours toutes les pages SUPERVISION */
-     { page = (struct PAGE_NOTEBOOK *)liste->data;
-       if (page->type != TYPE_PAGE_SUPERVISION) { liste = liste->next; continue; }
-
-       infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
-
-       liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de chaque page */
-       while (liste_motifs)
-        { switch( *((gint *)liste_motifs->data) )
-           { case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)liste_motifs->data;
-                                    if (trame_motif->motif->bit_controle == etat_motif->num)
-                                     { Changer_etat_motif( trame_motif, etat_motif );
-                                       cpt++;                                             /* Nous updatons un motif de plus ! */
-                                     }
-                                    break;
-             case TYPE_COMMENTAIRE: break;
-             default: break;
-           }
-          liste_motifs=liste_motifs->next;
-        }
-       liste = liste->next;
-     }
-    if (!cpt)                                 /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
-     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN, (gchar *)etat_motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
-     }
-  }
 /******************************************************************************************************************************/
 /* Proto_set_syn_vars: Mets a jour les variables de run d'un synoptique                                                       */
 /* Entrée: une reference sur le message                                                                                       */
@@ -530,11 +614,6 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
 /******************************************************************************************************************************/
  void Demander_synoptique_supervision ( struct CLIENT *client, gint id )
   { gchar chaine[80];
-    /*gsize taille_buf;
-    JsonBuilder *builder = Json_create ();
-    if (builder == NULL) return;
-    Json_add_int( builder, "syn_id", id );
-    gchar *buf = Json_get_buf (builder, &taille_buf);*/
     g_snprintf( chaine, sizeof(chaine), "syn/get/%d", id );
     Envoi_au_serveur( client, "GET", NULL, 0, chaine, Creer_page_supervision_CB );
   }

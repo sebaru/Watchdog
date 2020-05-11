@@ -50,7 +50,6 @@
 
  enum
   { TYPE_PAGE_PLUGIN_DLS,                                                                         /* Listes des plugins D.L.S */
-    TYPE_PAGE_HISTO,                                                               /* Page de garde: messages au fil de l'eau */
     TYPE_PAGE_SYNOPTIQUE,                                                     /* Edition des noms/mnémoniques des synoptiques */
     TYPE_PAGE_ALL_MNEMONIQUE,                                                /* Page de visualisation de tous les mnemoniques */
     TYPE_PAGE_MNEMONIQUE,                                                            /* Page de visualisation des mnemoniques */
@@ -71,7 +70,9 @@
   };
 
  struct TYPE_INFO_SUPERVISION
-  { guint timer_id;                                    /* Id du timer pour l'animation des motifs sur la trame de supervision */
+  { struct CLIENT *client;
+    SoupWebsocketConnection *ws_motifs;
+    guint timer_id;                                    /* Id du timer pour l'animation des motifs sur la trame de supervision */
     JsonNode *syn;                                                                       /* Id du synoptique en cours de visu */
     GtkWidget *Dialog_horloge;                                                  /* Boite de dialogue d'affichage des horloges */
     GtkWidget *Liste_horloge;
@@ -100,7 +101,8 @@
   };
 
  struct TYPE_INFO_HISTO_MSGS
-  { GtkListStore *Liste_histo_msgs;                                      /* GtkTreeView pour la gestion des messages Watchdog */
+  { SoupWebsocketConnection *websocket;
+    GtkListStore *Liste_histo_msgs;                                      /* GtkTreeView pour la gestion des messages Watchdog */
     GtkWidget *F_histo_msgs;
     GtkWidget *Check_num;
     GtkWidget *Spin_num;
@@ -159,6 +161,7 @@
  extern GtkWidget *Creer_page_histo( struct CLIENT *Client );                                           /* Dans liste_histo.c */
  extern void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data );
  extern void Reset_page_histo( struct CLIENT *client );
+ extern void Afficher_histo_alive_CB (SoupSession *session, SoupMessage *msg, gpointer user_data);
 // extern void Acquitter_histo ( struct CLIENT *Client );
 
 #ifdef bouh
@@ -325,7 +328,10 @@
  extern void Proto_afficher_un_comment_atelier( struct CMD_TYPE_COMMENT *rezo_comment );
  extern void Proto_cacher_un_comment_atelier( struct CMD_TYPE_COMMENT *comment );
 
- extern void Creer_fenetre_ajout_passerelle ( void );                                      /* Dans atelier_ajout_passerelle.c */
+#endif
+                                                                                           /* Dans atelier_ajout_passerelle.c */
+#ifdef bouh
+ extern void Creer_fenetre_ajout_passerelle ( void );
  extern void Proto_afficher_un_syn_for_passerelle_atelier( struct CMD_TYPE_SYNOPTIQUE *syn );
  extern void Proto_afficher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *rezo_pass );
  extern void Proto_cacher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *pass );
@@ -353,6 +359,15 @@
                                                                                                         /* Dans supervision.c */
  extern void Menu_want_supervision_accueil( struct CLIENT *client );
  extern void Demander_synoptique_supervision ( struct CLIENT *client, gint id );
+ extern void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data);
+ extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
+ extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( struct CLIENT *client, gint syn_id );
+
+                                                                                                /* Dans supervision_comment.c */
+ extern void Afficher_un_commentaire (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+
+                                                                                                 /* Dans supervision_camera.c */
+ extern void Afficher_une_camera (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
 #ifdef bouh
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
  extern void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif );
@@ -368,22 +383,22 @@
  extern void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                             GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran );
 
-                                                                                                /* Dans supervision_comment.c */
- extern void Proto_afficher_un_comment_supervision( struct CMD_TYPE_COMMENT *rezo_comment );
 
+#endif
                                                                                              /* Dans supervision_passerelle.c */
- extern void Proto_afficher_une_passerelle_supervision( struct CMD_TYPE_PASSERELLE *rezo_pass );
- extern void Changer_vue_directe ( guint num_syn );
-
+ extern void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+ extern void Changer_vue_directe ( struct CLIENT *client, guint num_syn );
+#ifdef bouh
                                                                                                 /* Dans supervision_palette.c */
  extern void Proto_afficher_une_palette_supervision( struct CMD_TYPE_PALETTE *rezo_palette );
 
+#endif
                                                                                                  /* Dans supervision_cadran.c */
- extern void Proto_afficher_un_cadran_supervision( struct CMD_TYPE_CADRAN *rezo_cadran );
+ extern void Afficher_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+ extern void Updater_les_cadrans( struct TYPE_INFO_SUPERVISION *infos, JsonNode *cadran );
+#ifdef bouh
  extern void Proto_changer_etat_cadran( struct CMD_ETAT_BIT_CADRAN *etat_cadran );
 
-                                                                                                 /* Dans supervision_camera.c */
- extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
 
                                                                                                /* Dans supervision_horloges.c */
  extern void Proto_afficher_une_horloge_supervision( struct CMD_TYPE_MNEMO_BASE *mnemo );
@@ -447,7 +462,7 @@
  extern void Json_add_string ( JsonBuilder *builder, gchar *name, gchar *chaine );
  extern void Json_add_int ( JsonBuilder *builder, gchar *name, gint valeur );
  extern void Json_add_double ( JsonBuilder *builder, gchar *name, gdouble valeur );
- extern void Json_add_bool ( JsonBuilder *builder, gchar *name, gboolean bool );
+ extern void Json_add_bool ( JsonBuilder *builder, gchar *name, gboolean valeur );
  extern void Json_add_object ( JsonBuilder *builder, gchar *name );
  extern void Json_end_object ( JsonBuilder *builder );
  extern void Json_add_array ( JsonBuilder *builder, gchar *name );
@@ -459,7 +474,8 @@
  extern gint Json_get_int ( JsonNode *query, gchar *chaine );
  extern gboolean Json_get_bool ( JsonNode *query, gchar *chaine );
  extern JsonArray *Json_get_array ( JsonNode *query, gchar *chaine );
- extern gboolean Json_has_element ( JsonNode *query, gchar *chaine );
+ extern gboolean Json_has_member ( JsonNode *query, gchar *chaine );
+
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
 
