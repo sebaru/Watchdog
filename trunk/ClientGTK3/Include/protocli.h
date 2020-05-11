@@ -360,6 +360,7 @@
  extern void Menu_want_supervision_accueil( struct CLIENT *client );
  extern void Demander_synoptique_supervision ( struct CLIENT *client, gint id );
  extern void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data);
+ extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
  extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( struct CLIENT *client, gint syn_id );
 
                                                                                                 /* Dans supervision_comment.c */
@@ -473,7 +474,8 @@
  extern gint Json_get_int ( JsonNode *query, gchar *chaine );
  extern gboolean Json_get_bool ( JsonNode *query, gchar *chaine );
  extern JsonArray *Json_get_array ( JsonNode *query, gchar *chaine );
- extern gboolean Json_has_element ( JsonNode *query, gchar *chaine );
+ extern gboolean Json_has_member ( JsonNode *query, gchar *chaine );
+
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
 

@@ -298,7 +298,7 @@ again:
 
     if (!acronyme || !tech_id) return;
 
-    if (Json_has_element(element,"alive") && Json_get_bool(element,"alive") == FALSE) { Cacher_un_histo ( client, element ); return; }
+    if (Json_has_member(element,"alive") && Json_get_bool(element,"alive") == FALSE) { Cacher_un_histo ( client, element ); return; }
 
     GtkTreeModel *store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
     gboolean valide      = gtk_tree_model_get_iter_first( store, &iter );
@@ -308,11 +308,11 @@ again:
        if ( !strcmp(tech_id, tech_id_recu) && !strcmp(acronyme,acronyme_recu) )
         { gchar ack[80];
 
-          if(Json_has_element(element, "nom_ack"))
+          if(Json_has_member(element, "nom_ack"))
            { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") );
              gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, ack, -1 );
            }
-          if(Json_has_element(element, "date_create"))
+          if(Json_has_member(element, "date_create"))
            { gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_DATE_CREATE, Json_get_string(element, "date_create"), -1 ); }
 
           return;
@@ -365,7 +365,7 @@ again:
 
     printf("Recu MSGS: %s %p\n", g_bytes_get_data ( response_brute, &taille ), client );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
-    if (!response || Json_has_element ( response, "enregs" ) == FALSE ) return;
+    if (!response || Json_has_member ( response, "enregs" ) == FALSE ) return;
     json_array_foreach_element ( Json_get_array(response, "enregs"), Afficher_un_histo, client );
   }
 /******************************************************************************************************************************/

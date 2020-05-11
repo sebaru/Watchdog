@@ -38,7 +38,6 @@
 /******************************************************************************************************************************/
  void Afficher_un_commentaire (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct TYPE_INFO_SUPERVISION *infos=user_data;
-    struct TRAME_ITEM_COMMENT *trame_comment;
     struct CMD_TYPE_COMMENT *comment;
 
     comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof(struct CMD_TYPE_COMMENT) );

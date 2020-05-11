@@ -117,6 +117,85 @@
     g_snprintf(chaine, sizeof(chaine), "horloges/list/%s", Json_get_string(infos->syn, "page") );
 //    Firefox_exec ( chaine );
   }
+
+/******************************************************************************************************************************/
+/* Changer_etat_motif: Changement d'etat d'un motif                                                                           */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+static void Updater_un_motif( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *motif )
+  { trame_motif->rouge  = Json_get_int(motif,"rouge");                                               /* Sauvegarde etat motif */
+    trame_motif->vert   = Json_get_int(motif,"vert");                                                /* Sauvegarde etat motif */
+    trame_motif->bleu   = Json_get_int(motif,"bleu");                                                /* Sauvegarde etat motif */
+    trame_motif->mode   = Json_get_int(motif,"mode");                                                /* Sauvegarde etat motif */
+    trame_motif->cligno = Json_get_int(motif,"cligno");                                              /* Sauvegarde etat motif */
+printf("%s\n", __func__);
+    switch( trame_motif->motif->type_gestion )
+     { case TYPE_INERTE: break;                          /* Si le motif est inerte, nous n'y touchons pas */
+       case TYPE_STATIQUE:
+            Trame_choisir_frame( trame_motif, 0, trame_motif->rouge,
+                                                 trame_motif->vert,
+                                                 trame_motif->bleu );                           /* frame 1 */
+            break;
+       case TYPE_BOUTON:
+            if ( ! (trame_motif->mode % 2) )
+             { Trame_choisir_frame( trame_motif, 3*(trame_motif->mode/2),
+                                    trame_motif->rouge, trame_motif->vert, trame_motif->bleu );
+             } else
+             { Trame_choisir_frame( trame_motif, 3*(trame_motif->mode/2) + 1,
+                                    trame_motif->rouge, trame_motif->vert, trame_motif->bleu );
+             }
+            break;
+       case TYPE_DYNAMIQUE:
+            Trame_choisir_frame( trame_motif, trame_motif->mode, trame_motif->rouge,
+                                                                 trame_motif->vert,
+                                                                 trame_motif->bleu );            /* frame 1 */
+       case TYPE_PROGRESSIF:
+            Trame_peindre_motif ( trame_motif, trame_motif->rouge,
+                                               trame_motif->vert,
+                                               trame_motif->bleu );
+            break;
+       default: printf("Changer_etat_motif: type gestion non géré %d\n",
+                        trame_motif->motif->type_gestion );
+     }
+  }
+/******************************************************************************************************************************/
+/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Updater_les_motifs( struct TYPE_INFO_SUPERVISION *infos, JsonNode *motif )
+  { GList *liste_motifs;
+    gint cpt;
+printf("%s\n", __func__);
+
+    liste_motifs = infos->Trame->trame_items;                                     /* On parcours tous les motifs de la page */
+    while (liste_motifs)
+     { switch( *((gint *)liste_motifs->data) )
+        { case TYPE_MOTIF:
+           { cpt++;
+             struct TRAME_ITEM_MOTIF *trame_motif = liste_motifs->data;
+             if ( Json_has_member ( motif, "old_motif" ) == FALSE )
+              { if ( (!strcmp( Json_get_string(motif,"tech_id"), trame_motif->motif->tech_id) &&
+                      !strcmp( Json_get_string(motif,"acronyme"), trame_motif->motif->acronyme)) )
+                 { Updater_un_motif ( trame_motif, motif );
+                   printf("%s: change motif type %s:%s\n", __func__, trame_motif->motif->tech_id, trame_motif->motif->acronyme );
+                 }
+              }
+             else if ( trame_motif->motif->bit_controle == Json_get_int ( motif, "num" ) )
+              {
+              }
+             break;
+           }
+          default: break;
+        }
+       liste_motifs=liste_motifs->next;
+     }
+    if (!cpt)                                       /* Si nous n'avons rien mis à jour, alors nous demandons le desabonnement */
+     { /*Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_CADRAN_UNKNOWN,*/
+
+     }
+  }
 /******************************************************************************************************************************/
 /* Afficher_un_motif: Ajoute un motif sur la trame de supervision                                                             */
 /* Entrée: les parametres iteratif JSon                                                                                       */
@@ -144,8 +223,8 @@
     motif->vert0        = atoi(Json_get_string ( element, "vert" ));
     motif->bleu0        = atoi(Json_get_string ( element, "bleu" ));
     motif->layer        = atoi(Json_get_string ( element, "layer" ));
-    //g_snprintf( motif->tech_id,       sizeof(motif->tech_id),       "%s", Json_get_string( element, "tech_id" ) );
-    //g_snprintf( motif->acronyme,      sizeof(motif->acronyme),      "%s", Json_get_string( element, "acronyme" ) );
+    g_snprintf( motif->tech_id,       sizeof(motif->tech_id),       "%s", Json_get_string( element, "tech_id" ) );
+    g_snprintf( motif->acronyme,      sizeof(motif->acronyme),      "%s", Json_get_string( element, "acronyme" ) );
     g_snprintf( motif->clic_tech_id,  sizeof(motif->clic_tech_id),  "%s", Json_get_string( element, "clic_tech_id" ) );
     g_snprintf( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", Json_get_string( element, "clic_acronyme" ) );
     g_snprintf( motif->libelle,       sizeof(motif->libelle),       "%s", Json_get_string( element, "libelle" ) );
@@ -153,7 +232,7 @@
     motif->bit_controle = atoi(Json_get_string ( element, "bitctrl" ));
     motif->bit_clic     = atoi(Json_get_string ( element, "bitclic" ));
     motif->rafraich     = atoi(Json_get_string ( element, "rafraich" ));
-printf("%s, add motif %s\n", __func__, motif->libelle );
+    printf("%s, add motif %s\n", __func__, motif->libelle );
     trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
     if (!trame_motif)
      { printf("Erreur creation d'un nouveau motif\n");
@@ -163,7 +242,7 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
     trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */
     trame_motif->vert   = motif->vert0;                                          /* Sauvegarde etat motif */
     trame_motif->bleu   = motif->bleu0;                                          /* Sauvegarde etat motif */
-    trame_motif->etat   = 0;                                                     /* Sauvegarde etat motif */
+    trame_motif->mode   = 0;                                                     /* Sauvegarde etat motif */
     trame_motif->cligno = 0;                                                     /* Sauvegarde etat motif */
    // g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
    //                   G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
@@ -182,8 +261,8 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
     printf("Recu via WS-MOTIFS: %s :\n", g_bytes_get_data ( message_brut, &taille ) );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
-    if ( !strcmp ( Json_get_string(response,"msg_type"), "update_cadran" ) )
-     { Updater_les_cadrans ( infos, response ); }
+    if ( !strcmp ( Json_get_string(response,"msg_type"), "update_cadran" ) ) { Updater_les_cadrans ( infos, response ); }
+    if ( !strcmp ( Json_get_string(response,"msg_type"), "update_motif" ) )  { Updater_les_motifs  ( infos, response ); }
 
     json_node_unref(response);
   }
@@ -372,53 +451,7 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
                                            NULL, NULL, g_cancellable_new(), Traiter_connect_ws_motifs_CB, infos );
   }
-
 #ifdef bouh
-/******************************************************************************************************************************/
-/* Changer_etat_motif: Changement d'etat d'un motif                                                                           */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Changer_etat_motif( struct TRAME_ITEM_MOTIF *trame_motif, struct CMD_ETAT_BIT_CTRL *etat_motif )
-  { printf("Changer_etat_motif: %d = %d %d %d etat %d (type %d) cligno=%d %s\n",
-            trame_motif->motif->bit_controle,
-            etat_motif->rouge,
-            etat_motif->vert,
-            etat_motif->bleu, etat_motif->etat, trame_motif->motif->type_gestion, etat_motif->cligno, trame_motif->motif->libelle );
-    trame_motif->rouge  = etat_motif->rouge;                                     /* Sauvegarde etat motif */
-    trame_motif->vert   = etat_motif->vert;                                      /* Sauvegarde etat motif */
-    trame_motif->bleu   = etat_motif->bleu;                                      /* Sauvegarde etat motif */
-    trame_motif->etat   = etat_motif->etat;                                      /* Sauvegarde etat motif */
-    trame_motif->cligno = etat_motif->cligno;                                    /* Sauvegarde etat motif */
-    switch( trame_motif->motif->type_gestion )
-     { case TYPE_INERTE: break;                          /* Si le motif est inerte, nous n'y touchons pas */
-       case TYPE_STATIQUE:
-            Trame_choisir_frame( trame_motif, 0, etat_motif->rouge,
-                                                 etat_motif->vert,
-                                                 etat_motif->bleu );                           /* frame 1 */
-            break;
-       case TYPE_BOUTON:
-            if ( ! (etat_motif->etat % 2) )
-             { Trame_choisir_frame( trame_motif, 3*(etat_motif->etat/2),
-                                    etat_motif->rouge, etat_motif->vert, etat_motif->bleu );
-             } else
-             { Trame_choisir_frame( trame_motif, 3*(etat_motif->etat/2) + 1,
-                                    etat_motif->rouge, etat_motif->vert, etat_motif->bleu );
-             }
-            break;
-       case TYPE_DYNAMIQUE:
-            Trame_choisir_frame( trame_motif, etat_motif->etat, etat_motif->rouge,
-                                                                etat_motif->vert,
-                                                                etat_motif->bleu );            /* frame 1 */
-       case TYPE_PROGRESSIF:
-            Trame_peindre_motif ( trame_motif, etat_motif->rouge,
-                                               etat_motif->vert,
-                                               etat_motif->bleu );
-            break;
-       default: printf("Changer_etat_motif: type gestion non géré %d bit_ctrl=%d\n",
-                        trame_motif->motif->type_gestion, trame_motif->motif->bit_controle );
-     }
-  }
 /******************************************************************************************************************************/
 /* Changer_etat_passerelle: Changement d'etat d'une passerelle (toutes les vignettes)                                         */
 /* Entrée: une reference sur la passerelle, l'etat attendu                                                                    */
@@ -513,49 +546,7 @@ printf("%s, add motif %s\n", __func__, motif->libelle );
     else
      { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "vert", 0, FALSE ); }
  }
-/******************************************************************************************************************************/
-/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Proto_changer_etat_motif( struct CMD_ETAT_BIT_CTRL *etat_motif )
-  { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TYPE_INFO_SUPERVISION *infos;
-    struct PAGE_NOTEBOOK *page;
-    GList *liste_motifs;
-    GList *liste;
-    gint cpt;
 
-printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, etat_motif->etat, etat_motif->rouge,
-                                                         etat_motif->vert, etat_motif->bleu );
-    cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */
-    liste = Liste_pages;
-    while(liste)                                                                  /* On parcours toutes les pages SUPERVISION */
-     { page = (struct PAGE_NOTEBOOK *)liste->data;
-       if (page->type != TYPE_PAGE_SUPERVISION) { liste = liste->next; continue; }
-
-       infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
-
-       liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de chaque page */
-       while (liste_motifs)
-        { switch( *((gint *)liste_motifs->data) )
-           { case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)liste_motifs->data;
-                                    if (trame_motif->motif->bit_controle == etat_motif->num)
-                                     { Changer_etat_motif( trame_motif, etat_motif );
-                                       cpt++;                                             /* Nous updatons un motif de plus ! */
-                                     }
-                                    break;
-             case TYPE_COMMENTAIRE: break;
-             default: break;
-           }
-          liste_motifs=liste_motifs->next;
-        }
-       liste = liste->next;
-     }
-    if (!cpt)                                 /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
-     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN, (gchar *)etat_motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
-     }
-  }
 /******************************************************************************************************************************/
 /* Proto_set_syn_vars: Mets a jour les variables de run d'un synoptique                                                       */
 /* Entrée: une reference sur le message                                                                                       */

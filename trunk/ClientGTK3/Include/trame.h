@@ -111,7 +111,7 @@
     guint gif_largeur;
     guint gif_hauteur;
 
-    guchar etat;                                                                                     /* Etat attendu du motif */
+    guchar mode;                                                                                     /* Etat attendu du motif */
     gint   cligno;                                                                                    /* Etat cligno du motif */
     time_t last_clic;
 
@@ -145,7 +145,7 @@
     cairo_matrix_t transform;
     struct CMD_TYPE_COMMENT *comment;
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
-    gint selection;
+    gint   selection;
   };
 
  struct TRAME_ITEM_CADRAN
@@ -159,7 +159,7 @@
     cairo_matrix_t transform;
     struct CMD_TYPE_CADRAN *cadran;
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
-    gint selection;
+    gint   selection;
     gfloat valeur;
   };
 
