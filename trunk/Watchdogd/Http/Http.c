@@ -389,6 +389,8 @@ reload:
           break;
         }
 
+       Http_Envoyer_les_cadrans ();
+
        if ( (bytes = Recv_zmq ( zmq_motifs, &visu, sizeof(struct DLS_VISUEL) )) )
         { if (bytes == sizeof(struct DLS_VISUEL) && Cfg_http.liste_ws_motifs_clients )
            { JsonBuilder *builder;

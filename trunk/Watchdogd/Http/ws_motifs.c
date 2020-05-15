@@ -40,6 +40,7 @@
     gfloat old_valeur;
     gfloat valeur;
     gboolean in_range;
+    gint last_update;
   };
 
  struct WS_MOTIF
@@ -264,6 +265,28 @@
        if (array) { json_array_foreach_element ( array, Abonner_un_motif, client ); }
      }
     json_node_unref(response);
+  }
+/******************************************************************************************************************************/
+/* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Http_Envoyer_les_cadrans ( void )
+  { GSList *clients = Cfg_http.liste_ws_motifs_clients;
+    while (clients)
+     { struct WS_CLIENT_SESSION *client = clients->data;
+       GSList *cadrans = client->Liste_bit_cadrans;
+       while (cadrans)
+        { struct WS_CADRAN *cadran = cadrans->data;
+          if (cadran->last_update +10 <= Partage->top)
+           { Formater_cadran ( cadran );
+             Envoyer_un_cadran ( client, cadran );
+             cadran->last_update = Partage->top;
+           }
+          cadrans = g_slist_next(cadrans);
+        }
+       clients = g_slist_next(clients);
+     }
   }
 /******************************************************************************************************************************/
 /* Http_ws_motifs_on_closed: Traite une deconnexion                                                                           */

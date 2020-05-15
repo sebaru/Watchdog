@@ -328,35 +328,17 @@
 /*---------------------------------------------------- Visuels ---------------------------------------------------------------*/
     else if (!strcasecmp(type,"I"))
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: HTTP/ request for GET I. cheking num", __func__ );
-       gchar *num_s = json_object_get_string_member ( request, "num" );
-       gint num;
-       if (!num_s)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: num non trouvée", __func__ );
+       struct DLS_VISUEL *visu=NULL;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                 "%s: HTTP/ request for GET I %s:%s", __func__, tech_id, acronyme );
+       Dls_data_get_VISUEL ( tech_id, acronyme, (gpointer *)&visu );
+       if (!visu)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: visu '%s:%s' non trouvé", __func__, tech_id, acronyme );
           g_object_unref(builder);
-   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
+          soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
           return;
         }
-       num = atoi(num_s);
-       if (num!=-1)
-        { Json_add_int ( builder, "etat",   Partage->i[num].etat );
-          Json_add_int ( builder, "rouge",  Partage->i[num].rouge);
-          Json_add_int ( builder, "vert",   Partage->i[num].vert );
-          Json_add_int ( builder, "bleu",   Partage->i[num].bleu );
-          Json_add_int ( builder, "cligno", Partage->i[num].cligno );
-        }
-       else
-        { struct DLS_VISUEL *visu=NULL;
-          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                    "%s: HTTP/ request for GET I %s:%s", __func__, tech_id, acronyme );
-          Dls_data_get_VISUEL ( tech_id, acronyme, (gpointer *)&visu );
-          if (!visu)
-           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: visu '%s:%s' non trouvé", __func__, tech_id, acronyme );
-             g_object_unref(builder);
-      	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
-             return;
-           }
-          Dls_VISUEL_to_json ( builder, visu );
-        }
+       Dls_VISUEL_to_json ( builder, visu );
      }
 /*---------------------------------------------------- Messages --------------------------------------------------------------*/
     else if (!strcasecmp(type,"MSG"))
