@@ -404,6 +404,18 @@
                  Partage->i[num].bleu   = bleu;
                  Partage->i[num].cligno = cligno;
                }
+          gchar chaine[20], *color;
+          g_snprintf( chaine, sizeof(chaine), "%d", num );
+               if (rouge == 255 && vert ==   0 && bleu ==   0) color="red";
+          else if (rouge ==   0 && vert == 255 && bleu ==   0) color="lime";
+          else if (rouge ==   0 && vert ==   0 && bleu == 255) color="blue";
+          else if (rouge == 255 && vert == 255 && bleu ==   0) color="yellow";
+          else if (rouge == 255 && vert == 190 && bleu ==   0) color="orange";
+          else if (rouge == 255 && vert == 255 && bleu == 255) color="white";
+          else if (rouge == 127 && vert == 127 && bleu == 127) color="lightgray";
+          else if (rouge ==   0 && vert == 100 && bleu ==   0) color="brown";
+          else color = "black";
+          Dls_data_set_VISUEL ( NULL, "OLD_I", chaine, NULL, etat, color, cligno );
 
           Partage->i[num].last_change = Partage->top;                               /* Date de la photo ! */
           pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de i a traiter */

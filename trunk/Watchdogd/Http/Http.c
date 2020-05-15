@@ -380,7 +380,6 @@ reload:
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { struct CMD_TYPE_HISTO histo;
        struct DLS_VISUEL visu;
-       gint bytes;
        usleep(1000);
        sched_yield();
 
@@ -391,61 +390,29 @@ reload:
 
        Http_Envoyer_les_cadrans ();
 
-       if ( (bytes = Recv_zmq ( zmq_motifs, &visu, sizeof(struct DLS_VISUEL) )) )
-        { if (bytes == sizeof(struct DLS_VISUEL) && Cfg_http.liste_ws_motifs_clients )
-           { JsonBuilder *builder;
-             gsize taille_buf;
-             gchar *buf;
-             GSList *liste;
+       if ( Recv_zmq ( zmq_motifs, &visu, sizeof(struct DLS_VISUEL) ) == sizeof(struct DLS_VISUEL) && Cfg_http.liste_ws_motifs_clients )
+        { JsonBuilder *builder;
+          gsize taille_buf;
+          gchar *buf;
+          GSList *liste;
 
-             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Visuel %s:%s received",
-                       __func__, visu.tech_id, visu.acronyme );
-             builder = Json_create ();
-             if (builder == NULL)
-              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
-                continue;
-              }
-             Json_add_string ( builder, "msg_type", "update_motif" );
-             Dls_VISUEL_to_json ( builder, &visu );
-             buf = Json_get_buf ( builder, &taille_buf );
-             liste = Cfg_http.liste_ws_motifs_clients;
-             while (liste)
-              { struct WS_CLIENT_SESSION *client = liste->data;
-                soup_websocket_connection_send_text ( client->connexion, buf );
-                liste = g_slist_next(liste);
-              }
-             g_free(buf);
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Visuel %s:%s received",
+                    __func__, visu.tech_id, visu.acronyme );
+          builder = Json_create ();
+          if (builder == NULL)
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
+             continue;
            }
-          else if (bytes == sizeof(gint) && Cfg_http.liste_ws_motifs_clients )
-           { JsonBuilder *builder;
-             gsize taille_buf;
-             gchar *buf;
-             GSList *liste;
-             gint num;
-             memcpy ( &num, &visu, sizeof(gint) );
-             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Visuel %d received", __func__, num );
-             builder = Json_create ();
-             if (builder == NULL)
-              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
-                continue;
-              }
-             Json_add_string ( builder, "msg_type", "update_motif" );
-             Json_add_bool   ( builder, "old_motif", TRUE );
-             Json_add_int    ( builder, "num",    num );
-             Json_add_int    ( builder, "mode",   Partage->i[num].etat );
-             Json_add_int    ( builder, "rouge",  Partage->i[num].rouge );
-             Json_add_int    ( builder, "vert",   Partage->i[num].vert );
-             Json_add_int    ( builder, "bleu",   Partage->i[num].bleu );
-             Json_add_bool   ( builder, "cligno", Partage->i[num].cligno );
-             buf = Json_get_buf ( builder, &taille_buf );
-             liste = Cfg_http.liste_ws_motifs_clients;
-             while (liste)
-              { struct WS_CLIENT_SESSION *client = liste->data;
-                soup_websocket_connection_send_text ( client->connexion, buf );
-                liste = g_slist_next(liste);
-              }
-             g_free(buf);
+          Json_add_string ( builder, "msg_type", "update_motif" );
+          Dls_VISUEL_to_json ( builder, &visu );
+          buf = Json_get_buf ( builder, &taille_buf );
+          liste = Cfg_http.liste_ws_motifs_clients;
+          while (liste)
+           { struct WS_CLIENT_SESSION *client = liste->data;
+             soup_websocket_connection_send_text ( client->connexion, buf );
+             liste = g_slist_next(liste);
            }
+          g_free(buf);
         }
 
        if ( Recv_zmq ( zmq_msgs, &histo, sizeof(histo) ) == sizeof(struct CMD_TYPE_HISTO) && Cfg_http.liste_ws_msgs_clients )
