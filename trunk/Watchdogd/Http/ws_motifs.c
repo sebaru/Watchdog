@@ -46,7 +46,6 @@
  struct WS_MOTIF
   { gchar tech_id[32];
     gchar acronyme[64];
-    gint  bit_controle;
     gpointer dls_data;
   };
 
@@ -60,16 +59,7 @@
     JsonBuilder *builder = Json_create ();
     if (!builder) { return; }
     Json_add_string ( builder, "msg_type", "update_motif" );
-    if (ws_motif->bit_controle)
-     { Json_add_bool   ( builder, "old_motif", TRUE );
-       Json_add_int    ( builder, "num",    ws_motif->bit_controle );
-       Json_add_int    ( builder, "mode",   Partage->i[ws_motif->bit_controle].etat );
-       Json_add_int    ( builder, "rouge",  Partage->i[ws_motif->bit_controle].rouge );
-       Json_add_int    ( builder, "vert",   Partage->i[ws_motif->bit_controle].vert );
-       Json_add_int    ( builder, "bleu",   Partage->i[ws_motif->bit_controle].bleu );
-       Json_add_bool   ( builder, "cligno", Partage->i[ws_motif->bit_controle].cligno );
-     }
-    else Dls_VISUEL_to_json ( builder, ws_motif->dls_data );
+    Dls_VISUEL_to_json ( builder, ws_motif->dls_data );
     gchar *buf = Json_get_buf ( builder, &taille_buf );
     GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
     soup_websocket_connection_send_message ( client->connexion, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
@@ -97,7 +87,6 @@
 
     g_snprintf( ws_motif->tech_id,  sizeof(ws_motif->tech_id), "%s", Json_get_string(element, "tech_id") );
     g_snprintf( ws_motif->acronyme, sizeof(ws_motif->acronyme), "%s", Json_get_string(element, "acronyme") );
-    ws_motif->bit_controle = Json_get_int(element,"bit_controle");
 
     if ( g_slist_find_custom(client->Liste_bit_motifs, ws_motif, (GCompareFunc) Chercher_bit_motif) ) /* Si pas dans la liste */
      { Dls_data_get_VISUEL ( ws_motif->tech_id, ws_motif->acronyme, &ws_motif->dls_data);
