@@ -310,8 +310,9 @@ reload:
     soup_server_add_handler ( socket, "/connect",    Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/disconnect", Http_traiter_disconnect, NULL, NULL );
     soup_server_add_handler ( socket, "/dls",        Http_traiter_dls, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/get/",   Http_traiter_syn_get, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/list",   Http_traiter_syn_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/get/",   Http_traiter_syn_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/del/",   Http_traiter_syn_del, NULL, NULL );
     soup_server_add_handler ( socket, "/process",    Http_traiter_process, NULL, NULL );
     soup_server_add_handler ( socket, "/status",     Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/log",        Http_traiter_log, NULL, NULL );

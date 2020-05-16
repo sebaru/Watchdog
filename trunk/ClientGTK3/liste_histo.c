@@ -113,6 +113,8 @@
        if (builder == NULL) break;
        Json_add_string( builder, "tech_id", tech_id );
        Json_add_string( builder, "acronyme", acronyme );
+       g_free(tech_id);
+       g_free(acronyme);
        buf = Json_get_buf (builder, &taille_buf);
        Envoi_au_serveur( client, "POST", buf, taille_buf, "histo/ack", NULL );
        gtk_tree_selection_unselect_iter( selection, &iter );
@@ -229,6 +231,8 @@ again:
      { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
        if ( !strcmp(tech_id, Json_get_string(element, "tech_id")) && !strcmp(acronyme,Json_get_string(element, "acronyme")) )
         { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); goto again; }
+       g_free(tech_id);
+       g_free(acronyme);
        valide = gtk_tree_model_iter_next( store, &iter );
      }
   }
@@ -314,9 +318,9 @@ again:
            }
           if(Json_has_member(element, "date_create"))
            { gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_DATE_CREATE, Json_get_string(element, "date_create"), -1 ); }
-
-          return;
         }
+       g_free(tech_id);
+       g_free(acronyme);
        valide = gtk_tree_model_iter_next( store, &iter );
      }
     Afficher_un_histo( NULL, 0, element, client );                                /* Sinon on en affiche un nouveau complet ! */

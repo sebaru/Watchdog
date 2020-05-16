@@ -131,7 +131,7 @@
                                Partage->com_arch.archdb_password, Partage->com_arch.archdb_database, Partage->com_arch.archdb_port ) );
   }
 /******************************************************************************************************************************/
-/* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                                         */
+/* Select_SQL_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
@@ -170,6 +170,27 @@
        mysql_free_result( db->result );
      }
     Libere_DB_SQL( &db );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Select_SQL_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
+/* Entrée: La DB, la requete                                                                                                  */
+/* Sortie: TRUE si pas de souci                                                                                               */
+/******************************************************************************************************************************/
+ gboolean Update_Delete_SQL ( gchar *requete )
+  { struct DB *db = Init_DB_SQL ();
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
+       return(FALSE);
+     }
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
+       Libere_DB_SQL ( &db );
+       return(FALSE);
+     }
+
+    Libere_DB_SQL ( &db );
     return(TRUE);
   }
 /******************************************************************************************************************************/

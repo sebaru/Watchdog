@@ -180,39 +180,36 @@
 /* Sortie: kedal                                                                                                              */
 /******************************************************************************************************************************/
  void Connecter ( struct CLIENT *client )
-  { GtkWidget *table, *texte, *boite, *frame;
+  { GtkWidget *table, *texte, *boite, *frame, *content_area, *hbox, *image;
     GtkWidget *Entry_host, *Entry_nom, *Entry_code;
     gint retour;
 
     if (client->connexion) return;
-    GtkWidget *fenetre = gtk_message_dialog_new ( GTK_WINDOW(client->window), GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
-                                                  GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
-                                                  "Identification required" );
-    gtk_window_set_resizable (GTK_WINDOW (fenetre), FALSE);
+    GtkWidget *fenetre = gtk_dialog_new_with_buttons ( "Identification Required", GTK_WINDOW(client->window),
+                                                       GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+                                                       "Annuler", GTK_RESPONSE_CANCEL, "Connecter", GTK_RESPONSE_OK, NULL );
 
-    frame = gtk_frame_new( "Put your ID and password" );
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_container_set_border_width( GTK_CONTAINER(frame), 6 );
-    gtk_box_pack_start( GTK_BOX(gtk_dialog_get_content_area (GTK_DIALOG(fenetre))), frame, TRUE, TRUE, 0 );
+    content_area = gtk_dialog_get_content_area (GTK_DIALOG (fenetre));
 
-    boite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
-    gtk_container_set_border_width( GTK_CONTAINER(boite), 6 );
-    gtk_container_add( GTK_CONTAINER(frame), boite );
+    hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
+    gtk_container_set_border_width (GTK_CONTAINER (hbox), 8);
+    gtk_box_pack_start (GTK_BOX (content_area), hbox, FALSE, FALSE, 0);
+
+    image = gtk_image_new_from_icon_name ("dialog-question", GTK_ICON_SIZE_DIALOG);
+    gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
 
     table = gtk_grid_new();                                                                   /* Table des entrys identifiant */
-    gtk_box_pack_start( GTK_BOX(boite), table, TRUE, TRUE, 0 );
-    //gtk_grid_set_row_homogeneous ( GTK_GRID(table), TRUE );
-    //gtk_grid_set_column_homogeneous ( GTK_GRID(table), TRUE );
+    gtk_box_pack_start( GTK_BOX(hbox), table, TRUE, TRUE, 0 );
     gtk_grid_set_row_spacing( GTK_GRID(table), 5 );
     gtk_grid_set_column_spacing( GTK_GRID(table), 5 );
 
-    texte = gtk_label_new( "Serveur" );
+    texte = gtk_label_new( "Hostname" );
     gtk_grid_attach( GTK_GRID(table), texte, 0, 0, 1, 1 );
     Entry_host = gtk_entry_new();
     gtk_entry_set_text( GTK_ENTRY(Entry_host), g_settings_get_string ( client->settings, "hostname" ) );
     gtk_grid_attach( GTK_GRID(table), Entry_host, 1, 0, 1, 1 );
 
-    texte = gtk_label_new( "Name" );
+    texte = gtk_label_new( "Username" );
     gtk_grid_attach( GTK_GRID(table), texte, 0, 1, 1, 1 );
     Entry_nom = gtk_entry_new();
     gtk_entry_set_text( GTK_ENTRY(Entry_nom), g_settings_get_string ( client->settings, "username" ) );
@@ -229,7 +226,7 @@
     g_signal_connect_swapped( Entry_nom,  "activate", (GCallback)gtk_widget_grab_focus, Entry_code );
 
     gtk_widget_grab_focus( Entry_nom );
-    gtk_widget_show_all( frame );
+    gtk_widget_show_all( hbox );
     retour = gtk_dialog_run( GTK_DIALOG(fenetre) );                                    /* Attente de reponse de l'utilisateur */
 
     if (retour == GTK_RESPONSE_OK)
