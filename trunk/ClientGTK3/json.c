@@ -187,8 +187,17 @@
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
  gboolean Json_get_bool ( JsonNode *query, gchar *chaine )
-  { JsonObject *object = json_node_get_object (query);
-    return(json_object_get_boolean_member ( object, chaine ));
+  { GValue valeur = G_VALUE_INIT;
+    gint retour;
+    JsonObject *object = json_node_get_object (query);
+    JsonNode *node = json_object_get_member ( object, chaine );
+    if (!node) { return(-1); }
+    json_node_get_value ( node, &valeur );
+         if ( G_VALUE_HOLDS_STRING (&valeur) ) { retour = atoi(g_value_get_string (&valeur)); }
+    else if ( G_VALUE_HOLDS_BOOLEAN(&valeur) ) { retour = g_value_get_boolean (&valeur); }
+    else { printf("%s: Erreur getting '%s'\n", __func__, chaine ); retour = FALSE; }
+    g_value_unset ( &valeur );
+    return(retour);
   }
 /******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */

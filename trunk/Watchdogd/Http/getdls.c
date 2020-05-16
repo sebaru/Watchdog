@@ -84,7 +84,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Http_dls_getlist ( SoupMessage *msg )
+ static void Http_dls_getrunlist ( SoupMessage *msg )
   { JsonBuilder *builder;
     gchar *buf;
     gsize taille_buf;
@@ -100,6 +100,38 @@
 /*------------------------------------------------------- Dumping dlslist ----------------------------------------------------*/
     Dls_foreach ( builder, Http_dls_do_plugin, NULL );
 
+    buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ static void Http_dls_getlist ( SoupMessage *msg )
+  { JsonBuilder *builder;
+    gchar *buf, chaine[512];
+    gsize taille_buf;
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+    g_snprintf(chaine, sizeof(chaine), "SELECT d.id, d.tech_id, d.package, d.syn_id, d.name, d.shortname, d.actif, d.compil_status, "
+                                       "d.nbr_compil, d.nbr_ligne, d.compil_date, ps.page as ppage, s.page as page "
+                                       "FROM dls AS d "
+                                       "INNER JOIN syns as s ON d.syn_id=s.id "
+                                       "INNER JOIN syns as ps ON s.parent_id = ps.id" );
+    if (Select_SQL_to_JSON ( builder, "plugins", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -161,6 +193,7 @@
          if ( ! strcasecmp( path, "/dls/debug_trad_on" ) )  { Trad_dls_set_debug ( TRUE ); }
     else if ( ! strcasecmp( path, "/dls/debug_trad_off" ) ) { Trad_dls_set_debug ( FALSE ); }
     else if ( ! strcasecmp( path, "/dls/list" ) )           { Http_dls_getlist ( msg ); }
+    else if ( ! strcasecmp( path, "/dls/run/list" ) )       { Http_dls_getrunlist ( msg ); }
     else if ( ! strcasecmp( path, "/dls/compil" ) )
      { gpointer id_string = g_hash_table_lookup ( query, "id" );
        if (id_string) { Compiler_source_dls( TRUE, atoi(id_string), NULL, 0 ); }

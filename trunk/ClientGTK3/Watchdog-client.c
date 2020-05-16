@@ -88,19 +88,24 @@
     g_free(client);
   }
 
- static void Menu_inspector (GSimpleAction *action, GVariant *parameter, gpointer user_data)
+ static void Menu_Inspector (GSimpleAction *action, GVariant *parameter, gpointer user_data)
   { gtk_window_set_interactive_debugging (TRUE); }
-
- static void Menu_Connecter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
-  { Connecter(user_data); }
-
- static void Menu_Deconnecter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
-  { Deconnecter(user_data); }
 
  static void Menu_Quitter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
   { Fermer_client(user_data); }
 
- static void Menu_about (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
+ static void Menu_Go_to_wiki (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
+  { gint pid;
+    pid = fork();
+    if (pid<0) return;
+    else if (!pid)                                                                       /* Lancement de la ligne de commande */
+     { execlp( "firefox", "firefox", "https://wiki.abls-habitat.fr", NULL );
+       printf("Lancement de firefox failed\n");
+       _exit(0);
+     }
+  }
+
+ static void Menu_About (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
   { GtkWidget *about_dialog;
     about_dialog = gtk_about_dialog_new ();
     const gchar *authors[] = { "Sebastien Lefevre <sebastien.lefevre@abls-habitat.fr>",
@@ -141,6 +146,7 @@
 
     GtkWidget *toolbar = gtk_toolbar_new();
     gtk_box_pack_start ( GTK_BOX(box), toolbar, FALSE, FALSE, 0 );
+    gtk_toolbar_set_style ( GTK_TOOLBAR(toolbar), GTK_TOOLBAR_BOTH );
 
     bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("system-run", GTK_ICON_SIZE_LARGE_TOOLBAR), "Se connecter" );
     gtk_tool_item_set_tooltip_text ( bouton, "Se connecter au serveur" );
@@ -166,6 +172,11 @@
     gtk_tool_item_set_expand ( separateur, TRUE );
     gtk_toolbar_insert (GTK_TOOLBAR(toolbar), separateur, -1 );
 
+    bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("preferences-other", GTK_ICON_SIZE_LARGE_TOOLBAR), "Edition D.L.S" );
+    gtk_tool_item_set_tooltip_text ( bouton, "Editer les modules D.L.S" );
+    g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(Menu_want_edition_DLS), client );
+    gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
+
     bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("application-exit", GTK_ICON_SIZE_LARGE_TOOLBAR), "Quitter" );
     gtk_tool_item_set_tooltip_text ( bouton, "Sortir de l'application" );
     g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(Fermer_client), client );
@@ -182,14 +193,12 @@
             char *argv[]                                                               /*!< Arguments de la ligne de commande */
           )
   { static GActionEntry app_entries[] =
-     { { "about", Menu_about, NULL, NULL, NULL },
-       { "Connecter", Menu_Connecter, NULL, NULL, NULL },
-       { "Deconnecter", Menu_Deconnecter, NULL, NULL, NULL },
-       { "Inspector", Menu_inspector, NULL, NULL, NULL },
+     { { "About", Menu_About, NULL, NULL, NULL },
+       { "Inspector", Menu_Inspector, NULL, NULL, NULL },
+       { "Go_to_wiki", Menu_Go_to_wiki, NULL, NULL, NULL },
        { "Quitter", Menu_Quitter, NULL, NULL, NULL },
     //  { "new", new_activated, NULL, NULL, NULL }
      };
-    struct sigaction sig;
     int status;
 
     if (chdir( g_get_home_dir() ))                                                      /* Positionnement à la racine du home */
@@ -212,34 +221,5 @@
     g_object_unref (app);
 /*    g_resources_unregister(clientResources_get_resource());*/
     return status;
-#ifdef bouh
-
-    sig.sa_handler = Traitement_signaux;
-    sigemptyset(&sig.sa_mask);
-    sig.sa_flags = 0;
-    sigaction( SIGTERM, &sig, NULL );                                                           /* Arret Prématuré (logiciel) */
-    sigaction( SIGINT,  &sig, NULL );                                                           /* Arret Prématuré (logiciel) */
-    sigaction( SIGPIPE,  &sig, NULL );                                                          /* Arret Prématuré (logiciel) */
-
-    client.gids = NULL;                                                  /* Initialisation de la structure de client en cours */
-
-    gtk_widget_show_all( client->window );                                                   /* Affichage de le fenetre de controle */
-    if (Config_cli.gui_tech == FALSE)
-     { memcpy( client.ident.nom,    Config_cli.user,   sizeof(client.ident.nom) );
-       memcpy( client.ident.passwd, Config_cli.passwd, sizeof(client.ident.passwd) );
-       memcpy( client.host,         Config_cli.host,   sizeof(client.host) );
-       Connecter_au_serveur();
-     }
-
-    while ( Arret != TRUE )
-     { gtk_main_iteration_do ( FALSE );
-       if (client.connexion) Ecouter_serveur();
-       usleep(1000);
-     }
-
-    if (client.gids) g_list_free(client.gids);
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE, _("Main : Stopped") );
-    exit(0);
-#endif
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

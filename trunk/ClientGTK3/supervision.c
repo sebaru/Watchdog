@@ -475,7 +475,6 @@ printf("%s\n", __func__);
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     infos->syn = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
-
     infos->timer_id = g_timeout_add( 500, Timer, page );
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
@@ -493,7 +492,7 @@ printf("%s\n", __func__);
     boite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
-    bouton = gtk_button_new_with_label( "Fermer" );
+    bouton = gtk_button_new_from_icon_name( "Fermer", GTK_ICON_SIZE_BUTTON );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Detruire_page_supervision), page );
 
@@ -721,13 +720,12 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
     g_snprintf( chaine, sizeof(chaine), "syn/get/%d", id );
     Envoi_au_serveur( client, "GET", NULL, 0, chaine, Creer_page_supervision_CB );
   }
-/**********************************************************************************************************/
-/* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                             */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                                                 */
+/* Entrée/Sortie: rien                                                                                                        */
+/******************************************************************************************************************************/
  void Menu_want_supervision_accueil ( struct CLIENT *client )
   { if (Chercher_page_notebook( client, TYPE_PAGE_SUPERVISION, 1, TRUE )) return;
     Demander_synoptique_supervision ( client, 1 );
   }
-
 /*----------------------------------------------------------------------------------------------------------------------------*/

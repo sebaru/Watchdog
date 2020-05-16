@@ -347,11 +347,11 @@ again:
 /* Sortie: un widget boite                                                                                                    */
 /******************************************************************************************************************************/
  void Afficher_histo_alive_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
-  { GBytes *response_brute;
+  { struct CLIENT *client = user_data;
+    GBytes *response_brute;
     gchar *reason_phrase;
     gint status_code;
     gsize taille;
-    struct CLIENT *client = user_data;
     printf("%s\n", __func__ );
 
     g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );

@@ -25,7 +25,8 @@ ClientResources.c : ClientResources.xml $(shell glib-compile-resources --generat
 Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResources.h \
                                ihm.c connect.c liste_histo.c json.c \
                                trame.c supervision.c supervision_passerelle.c supervision_comment.c supervision_camera.c \
-                               supervision_cadran.c timer.c
+                               supervision_cadran.c timer.c \
+                               liste_plugin_dls.c
 #                          protocole.c protocole_gtk_message.c \
 #                          protocole_dls.c protocole_mnemonique.c \
 #                          protocole_connexion.c \

@@ -62,6 +62,7 @@
      { struct PAGE_NOTEBOOK *page = client->Liste_pages->data;
        switch(page->type)
         { case TYPE_PAGE_SUPERVISION : Detruire_page_supervision ( page ); break;
+          case TYPE_PAGE_PLUGIN_DLS  : Detruire_page_plugin_dls  ( page ); break;
         }
        client->Liste_pages = g_slist_remove ( client->Liste_pages, page );
      }

@@ -64,6 +64,7 @@
 
  struct PAGE_NOTEBOOK
   { gint type;
+    struct CLIENT *client;
     GtkWidget *child;                                                   /* Le widget toplevel, placé dans la page du notebook */
     void *infos;                                                                  /* Pointeur sur une structure TYPE_INFO_xxx */
   };
@@ -219,7 +220,11 @@
  extern void Proto_afficher_un_admin( struct CMD_TYPE_ADMIN *admin );                                         /* Dans admin.c */
  extern void Creer_page_admin( void );
 
- extern void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );                      /* Dans liste_plugin_dls.c */
+#endif
+ extern void Menu_want_edition_DLS ( struct CLIENT *client );                                      /* Dans liste_plugin_dls.c */
+ extern void Detruire_page_plugin_dls( struct PAGE_NOTEBOOK *page );
+#ifdef bouh
+ extern void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern void Proto_cacher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern void Proto_rafraichir_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern void Creer_page_plugin_dls( void );

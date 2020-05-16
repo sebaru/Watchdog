@@ -154,7 +154,12 @@
        db->nbr_result = 0;
      }
     else
-     { if (array_name) Json_add_array( builder, array_name );
+     { if (array_name)
+        { gchar chaine[80];
+          g_snprintf(chaine, sizeof(chaine), "nbr_%s", array_name );
+          Json_add_int ( builder, chaine, mysql_num_rows ( db->result ));
+          Json_add_array( builder, array_name );
+        }
        while ( (db->row = mysql_fetch_row(db->result)) != NULL )
         { if (array_name) Json_add_object ( builder, NULL );
           for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
