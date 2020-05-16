@@ -50,6 +50,7 @@
     GSList *Liste_pages;
     GtkWidget *Liste_histo;
     GtkWidget *Liste_plugin_dls;
+    GtkWidget *Liste_synoptique;
     GtkWidget *Barre_pulse;
     GtkWidget *Barre_progress;
     GtkWidget *Entry_status;

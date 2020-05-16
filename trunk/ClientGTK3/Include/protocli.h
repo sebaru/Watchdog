@@ -241,6 +241,11 @@
  extern void Proto_afficher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );
  extern void Proto_rafraichir_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );
  extern void Creer_page_synoptique( void );
+#endif
+                                                                                                    /* Dans liste_synoptique.c*/
+ extern void Menu_want_atelier_synoptique ( struct CLIENT *client );
+ extern void Detruire_page_atelier( struct PAGE_NOTEBOOK *page );
+#ifdef bouh
 
  extern void Menu_ajouter_editer_synoptique ( struct CMD_TYPE_SYNOPTIQUE *edit_syn );                    /* ajout_synoptique.c*/
  extern void Proto_afficher_un_dls_for_mnemonique ( struct CMD_TYPE_PLUGIN_DLS *dls );

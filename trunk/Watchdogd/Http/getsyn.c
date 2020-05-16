@@ -38,6 +38,45 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
+ void Http_traiter_syn_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                              SoupClientContext *client, gpointer user_data )
+  { gchar *buf, chaine[256];
+    gsize taille_buf;
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    Http_print_request ( server, msg, path, client );
+
+    if ( strcmp ( path, "/syn/list" ) )
+     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
+     }
+
+    JsonBuilder *builder = Json_create ();
+    if (!builder)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT syn.*,psyn.page as ppage FROM syns AS syn INNER JOIN syns as psyn ON psyn.id=syn.parent_id" );
+    if (Select_SQL_to_JSON ( builder, "synoptiques", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
+
+    buf = Json_get_buf (builder, &taille_buf);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
  void Http_traiter_syn_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];

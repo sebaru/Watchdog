@@ -168,14 +168,23 @@
     gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
 
     separateur = gtk_separator_tool_item_new ();
-    gtk_separator_tool_item_set_draw ( GTK_SEPARATOR_TOOL_ITEM(separateur), FALSE );
-    gtk_tool_item_set_expand ( separateur, TRUE );
+    gtk_separator_tool_item_set_draw ( GTK_SEPARATOR_TOOL_ITEM(separateur), TRUE );
     gtk_toolbar_insert (GTK_TOOLBAR(toolbar), separateur, -1 );
+
+    bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("preferences-desktop-display", GTK_ICON_SIZE_LARGE_TOOLBAR), "Atelier" );
+    gtk_tool_item_set_tooltip_text ( bouton, "Editer les synoptiques" );
+    g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(Menu_want_atelier_synoptique), client );
+    gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
 
     bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("preferences-other", GTK_ICON_SIZE_LARGE_TOOLBAR), "Edition D.L.S" );
     gtk_tool_item_set_tooltip_text ( bouton, "Editer les modules D.L.S" );
     g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK(Menu_want_edition_DLS), client );
     gtk_toolbar_insert (GTK_TOOLBAR(toolbar), bouton, -1 );
+
+    separateur = gtk_separator_tool_item_new ();
+    gtk_separator_tool_item_set_draw ( GTK_SEPARATOR_TOOL_ITEM(separateur), FALSE );
+    gtk_tool_item_set_expand ( separateur, TRUE );
+    gtk_toolbar_insert (GTK_TOOLBAR(toolbar), separateur, -1 );
 
     bouton = gtk_tool_button_new ( gtk_image_new_from_icon_name("application-exit", GTK_ICON_SIZE_LARGE_TOOLBAR), "Quitter" );
     gtk_tool_item_set_tooltip_text ( bouton, "Sortir de l'application" );

@@ -578,8 +578,8 @@
     GtkCellRenderer *renderer;
     GtkListStore *store;
     GBytes *response_brute;
-    JsonNode *response;
     gchar *reason_phrase;
+    JsonNode *response;
     gint status_code;
     gsize taille;
 

@@ -85,6 +85,8 @@
                                     SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_syn_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_syn_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                     SoupClientContext *client, gpointer user_data );
  extern void Http_msgs_send_histo_to_all ( struct CMD_TYPE_HISTO *histo );
  extern void Http_msgs_send_pulse_to_all ( void );
  extern void Http_traiter_open_websocket_msgs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
