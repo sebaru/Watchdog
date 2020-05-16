@@ -90,7 +90,13 @@
 
     if ( g_slist_find_custom(client->Liste_bit_motifs, ws_motif, (GCompareFunc) Chercher_bit_motif) ) /* Si pas dans la liste */
      { Dls_data_get_VISUEL ( ws_motif->tech_id, ws_motif->acronyme, &ws_motif->dls_data);
-       if (!ws_motif->dls_data) { g_free(ws_motif); return; }                                                /* Si pas trouvé */
+       if (!ws_motif->dls_data)                                                                              /* Si pas trouvé */
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: user '%s': bit %s:%s not found", __func__,
+                    soup_client_context_get_auth_user (client->context), ws_motif->tech_id, ws_motif->acronyme );
+          g_free(ws_motif); return;
+        }
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné à %s:%s", __func__,
+                 soup_client_context_get_auth_user (client->context), ws_motif->tech_id, ws_motif->acronyme );
        Envoyer_un_motif ( client, ws_motif );                                                        /* Envoi de l'init motif */
        client->Liste_bit_motifs = g_slist_prepend( client->Liste_bit_motifs, ws_motif );
      }

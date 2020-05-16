@@ -270,7 +270,7 @@ printf("%s\n", __func__);
   { struct TYPE_INFO_SUPERVISION *infos = user_data;
     gsize taille;
     printf("%s\n", __func__ );
-    printf("Recu via WS-MOTIFS: %s :\n", g_bytes_get_data ( message_brut, &taille ) );
+    /*printf("Recu via WS-MOTIFS: %s :\n", g_bytes_get_data ( message_brut, &taille ) );*/
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
     if ( !strcmp ( Json_get_string(response,"msg_type"), "update_cadran" ) ) { Updater_les_cadrans ( infos, response ); }
@@ -347,7 +347,7 @@ printf("%s\n", __func__);
                 gchar num[20];
                 g_snprintf(num, sizeof(num), "%d", trame_motif->motif->bit_controle );
                 Json_add_string ( builder, "acronyme", num );
-                printf("%s: abonnement motif to %d\n", __func__, trame_motif->motif->bit_controle );
+                printf("%s: abonnement motif to OLD_I:%d\n", __func__, trame_motif->motif->bit_controle );
               }
              else { Json_add_string ( builder, "tech_id", trame_motif->motif->tech_id );
                     Json_add_string ( builder, "acronyme", trame_motif->motif->acronyme );
