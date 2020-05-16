@@ -31,7 +31,7 @@
  #include <gtk/gtk.h>
  #include <goocanvas.h>
  #include <gdk-pixbuf/gdk-pixbuf.h>                                                              /* Gestion des images/motifs */
-// #include <goocanvas.h>                                                                                /* Interface GooCanvas */
+ #include "protocli.h"                                                                                 /* Interface GooCanvas */
  #include "Reseaux.h"
 
  #define TAILLE_SYNOPTIQUE_X        1024                                  /* Généralités sur la taille de la Trame synoptique */
@@ -82,6 +82,7 @@
 
  struct TRAME_ITEM_MOTIF
   { gint type;                                                                                              /* Type de l'item */
+    struct TYPE_INFO_SUPERVISION *infos;
     GooCanvasItem *item;
     cairo_matrix_t transform;
     cairo_matrix_t transform_hg;
@@ -209,7 +210,7 @@
  extern void Trame_set_svg ( struct TRAME_ITEM_SVG *trame_svg, gchar *couleur, gint mode, gboolean cligno );
  extern void Charger_gif ( struct TRAME_ITEM_MOTIF *trame_item, gchar *nom_fichier );
  extern void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier );
- extern struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame,
+ extern struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TYPE_INFO_SUPERVISION *infos,
                                                      struct CMD_TYPE_MOTIF *motif );
  extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame,
                                                             struct CMD_TYPE_COMMENT *comm );

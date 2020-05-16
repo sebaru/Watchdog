@@ -47,5 +47,6 @@
  extern gboolean Json_get_bool ( JsonNode *query, gchar *chaine );
  extern gint Json_get_int ( JsonNode *query, gchar *chaine );
  extern JsonArray *Json_get_array ( JsonNode *query, gchar *chaine );
- #endif
+ extern gboolean Json_has_member ( JsonNode *query, gchar *chaine );
+#endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

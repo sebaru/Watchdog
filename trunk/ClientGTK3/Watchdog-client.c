@@ -134,7 +134,7 @@
     client->settings = g_settings_new ( "fr.abls-habitat.watchdog" );
     client->window = gtk_application_window_new (app);
     gtk_window_set_title (GTK_WINDOW (client->window), TITRE_FENETRE );
-    gtk_window_set_default_size (GTK_WINDOW (client->window), 400, 400);
+    gtk_window_set_default_size (GTK_WINDOW (client->window), 800, 600);
     gtk_window_set_icon_name ( GTK_WINDOW(client->window), "fr.abls-habitat.watchdog" );
     GtkWidget *box = gtk_box_new( GTK_ORIENTATION_VERTICAL, 10 );
     gtk_container_add (GTK_CONTAINER (client->window), box);

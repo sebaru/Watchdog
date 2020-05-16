@@ -37,7 +37,6 @@
  #include "Reseaux.h"
  #include "client.h"
 
-
  #define TEMPS_MAX_PULSE   10                                            /* 10 secondes de battements maximum pour le serveur */
 
  #define PRINT_FOOTER_LEFT          "Sebastien & Bruno LEFEVRE"
@@ -73,6 +72,7 @@
   { struct CLIENT *client;
     SoupWebsocketConnection *ws_motifs;
     guint timer_id;                                    /* Id du timer pour l'animation des motifs sur la trame de supervision */
+    gboolean timer_hidden;                                            /* Pour savoir si les motifs doivent etre allumé ou non */
     JsonNode *syn;                                                                       /* Id du synoptique en cours de visu */
     GtkWidget *Dialog_horloge;                                                  /* Boite de dialogue d'affichage des horloges */
     GtkWidget *Liste_horloge;
@@ -164,13 +164,7 @@
  extern void Afficher_histo_alive_CB (SoupSession *session, SoupMessage *msg, gpointer user_data);
 // extern void Acquitter_histo ( struct CLIENT *Client );
 
-#ifdef bouh
- extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );
- extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
- extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
- extern gchar *Type_vers_string ( guint type );
- extern gchar *Type_sms_vers_string ( guint type );
-#endif
+ extern gboolean Timer ( gpointer data );                                                                     /* Dans timer.c */
 
  extern void Log( struct CLIENT *client, gchar *chaine );                                                       /* Dans ihm.c */
  extern GtkWidget *Creer_boite_travail ( struct CLIENT *Client );
@@ -221,8 +215,6 @@
  extern void Gerer_protocole_lowlevel ( struct CONNEXION *connexion );
  extern void Gerer_protocole_admin ( struct CONNEXION *connexion );
  extern gint Get_icone_version( void );
-
- extern gboolean Timer ( gpointer data );                                                                     /* Dans timer.c */
 
  extern void Proto_afficher_un_admin( struct CMD_TYPE_ADMIN *admin );                                         /* Dans admin.c */
  extern void Creer_page_admin( void );

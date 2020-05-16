@@ -58,8 +58,7 @@
 /* Sortie: void                                                                                                               */
 /******************************************************************************************************************************/
  void Effacer_pages ( struct CLIENT *client )
-  { GSList *liste;
-    while( client->Liste_pages )
+  { while( client->Liste_pages )
      { struct PAGE_NOTEBOOK *page = client->Liste_pages->data;
        switch(page->type)
         { case TYPE_PAGE_SUPERVISION : Detruire_page_supervision ( page ); break;

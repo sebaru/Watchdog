@@ -48,7 +48,7 @@
 
     soup_websocket_connection_close ( infos->ws_motifs, 0, "Thanks, Bye !" );
     json_node_unref( infos->syn );
-    /*g_timeout_remove( infos->timer_id );*/
+    g_source_remove( infos->timer_id );
     Trame_detruire_trame( infos->Trame );
 
     gint num = gtk_notebook_page_num( GTK_NOTEBOOK(infos->client->Notebook), GTK_WIDGET(page->child) );
@@ -117,7 +117,77 @@
     g_snprintf(chaine, sizeof(chaine), "horloges/list/%s", Json_get_string(infos->syn, "page") );
 //    Firefox_exec ( chaine );
   }
+/******************************************************************************************************************************/
+/* Envoyer_action_immediate: Envoi d'une commande Mxxx au serveur                                                             */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
+  { gsize taille_buf;
 
+    JsonBuilder *builder = Json_create ();
+    if (builder == NULL) return;
+    Json_add_string ( builder, "msg_type", "SET_CDE" );
+    Json_add_string ( builder, "tech_id", trame_motif->motif->tech_id );
+    Json_add_string ( builder, "acronyme", trame_motif->motif->acronyme );
+    if (trame_motif->motif->bit_clic!=-1) Json_add_int ( builder, "bit_clic", trame_motif->motif->bit_clic );
+    printf("%s: envoi SET_CDE '%s':'%s' (bit_clic %d)\n", __func__,
+           trame_motif->motif->tech_id, trame_motif->motif->acronyme, trame_motif->motif->bit_clic );
+    gchar *buf = Json_get_buf (builder, &taille_buf);
+    GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
+    soup_websocket_connection_send_message (trame_motif->infos->ws_motifs, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
+    g_bytes_unref( gbytes );
+  }
+/******************************************************************************************************************************/
+/* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision                       */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                          GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
+  { if (!(trame_motif && event)) return;
+
+    if (event->type == GDK_BUTTON_PRESS)
+     { if (trame_motif->motif->type_gestion == TYPE_BOUTON && (trame_motif->last_clic + 1 <= time(NULL)) )
+        { printf("Appui sur bouton num_image=%d\n", trame_motif->num_image );
+          //if ( (trame_motif->num_image % 3) == 1 )
+           { Trame_choisir_frame( trame_motif, trame_motif->num_image + 1,                          /* Frame 2: bouton appuyé */
+                                  trame_motif->rouge,
+                                  trame_motif->vert,
+                                  trame_motif->bleu );
+           }
+          time(&trame_motif->last_clic);                                                   /* Mémorisation de la date de clic */
+        }
+     }
+    else if (event->type == GDK_BUTTON_RELEASE)
+     { if (trame_motif->motif->type_gestion == TYPE_BOUTON)                               /* On met la frame 1: bouton relevé */
+        { if ( (trame_motif->num_image % 3) == 2 )
+           { Trame_choisir_frame( trame_motif, trame_motif->num_image - 1, trame_motif->rouge, trame_motif->vert, trame_motif->bleu );
+             switch ( trame_motif->motif->type_dialog )
+              { case ACTION_IMMEDIATE: Envoyer_action_immediate( trame_motif ); break;
+                //case ACTION_CONFIRME : Envoyer_action_confirme( trame_motif );  break;
+                default: break;
+              }
+           }
+        }
+       else if ( ((GdkEventButton *)event)->button == 1)                          /* Release sur le motif qui a été appuyé ?? */
+        { switch( trame_motif->motif->type_dialog )
+           { case ACTION_SANS:      printf("action sans !!\n");
+                                    break;
+             case ACTION_IMMEDIATE: printf("action immediate !!\n");
+                                    Envoyer_action_immediate( trame_motif );
+                                    break;
+/*             case ACTION_CONFIRME: printf("action programme !!\n");
+                                    Envoyer_action_programme( trame_motif );
+                                    break;*/
+/*             case ACTION_DIFFERE:
+             case ACTION_REPETE:
+                                    break;*/
+             default: printf("Clic_sur_motif_supervision: type dialog inconnu\n");
+           }
+        }
+     }
+  }
 /******************************************************************************************************************************/
 /* Changer_etat_motif: Changement d'etat d'un motif                                                                           */
 /* Entrée: une reference sur le message                                                                                       */
@@ -245,21 +315,20 @@ printf("%s\n", __func__);
     motif->bit_clic     = Json_get_int ( element, "bitclic" );
     motif->rafraich     = Json_get_int ( element, "rafraich" );
     printf("%s, add motif %s\n", __func__, motif->libelle );
-    trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
+    trame_motif = Trame_ajout_motif ( FALSE, infos, motif );
     if (!trame_motif)
      { printf("Erreur creation d'un nouveau motif\n");
        return;                                                          /* Ajout d'un test anti seg-fault */
      }
-  //  trame_motif->groupe_dpl = Nouveau_groupe();                   /* Numéro de groupe pour le deplacement */
     trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */
     trame_motif->vert   = motif->vert0;                                          /* Sauvegarde etat motif */
     trame_motif->bleu   = motif->bleu0;                                          /* Sauvegarde etat motif */
     trame_motif->mode   = 0;                                                     /* Sauvegarde etat motif */
     trame_motif->cligno = 0;                                                     /* Sauvegarde etat motif */
-   // g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
-   //                   G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
-   // g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
-   //                   G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
+                      G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
+                      G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
   }
 /******************************************************************************************************************************/
 /* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MOTIF                                 */
@@ -374,14 +443,13 @@ printf("%s\n", __func__);
  void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
   { GtkWidget *bouton, *boite, *hboite, *scroll, *frame, *label;
     struct CLIENT *client = user_data;
-    GtkAdjustment *adj;
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
-    static gint init_timer;
     GBytes *response_brute;
     gchar *reason_phrase;
-    gint status_code;
+    GtkAdjustment *adj;
     gchar chaine[128];
+    gint status_code;
     gsize taille;
 
     printf("%s\n", __func__ );
@@ -399,8 +467,7 @@ printf("%s\n", __func__);
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
 
-    page->infos = (struct TYPE_INFO_SUPERVISION *)g_try_malloc0( sizeof(struct TYPE_INFO_SUPERVISION) );
-    infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
+    infos = page->infos = (struct TYPE_INFO_SUPERVISION *)g_try_malloc0( sizeof(struct TYPE_INFO_SUPERVISION) );
     if (!page->infos) { g_free(page); return; }
     infos->client = client;
 
@@ -409,7 +476,7 @@ printf("%s\n", __func__);
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     infos->syn = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
 
-    //if (!init_timer) { g_timeout_add( 500, Timer, NULL ); init_timer = 1; }
+    infos->timer_id = g_timeout_add( 500, Timer, page );
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     page->child = hboite;
@@ -475,9 +542,6 @@ printf("%s\n", __func__);
 
     label = gtk_event_box_new ();
     gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( Json_get_string( infos->syn, "libelle" ) ) );
-//    gdk_color_parse ("cyan", &color);
-//    gtk_widget_modify_bg ( label, GTK_STATE_NORMAL, &color );
-//    gtk_widget_modify_bg ( label, GTK_STATE_ACTIVE, &color );
     gtk_widget_show_all( label );
     gint page_num = gtk_notebook_append_page( GTK_NOTEBOOK(client->Notebook), page->child, label );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(client->Notebook), page_num );

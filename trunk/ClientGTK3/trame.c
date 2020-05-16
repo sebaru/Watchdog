@@ -637,15 +637,16 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame, struct CMD_TYPE_MOTIF *motif )
+ struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_MOTIF *motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
 
-    if (!(trame && motif)) return(NULL);
+    if (!(infos && infos->Trame && motif)) return(NULL);
 
     trame_motif = Trame_new_item();
     if (!trame_motif) { printf("Trame_ajout_motif: Erreur mémoire\n"); return(NULL); }
 
     trame_motif->motif = motif;
+    trame_motif->infos = infos;
     trame_motif->type = TYPE_MOTIF;
 
     Charger_pixbuf_id( trame_motif, motif->icone_id );
@@ -656,7 +657,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
      }
 
     Trame_peindre_motif( trame_motif, motif->rouge0, motif->vert0, motif->bleu0 );
-    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
+    trame_motif->item_groupe = goo_canvas_group_new ( infos->Trame->canvas_root, NULL );         /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
                                                (-(gdouble)(trame_motif->gif_largeur/2)),
@@ -670,27 +671,19 @@ printf("Charger_pixbuf_file: %s\n", fichier );
      { GdkPixbuf *pixbuf;
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_hg.gif", NULL );
-       trame_motif->select_hg = goo_canvas_image_new ( trame->canvas_root,
-                                                       pixbuf, 0.0, 0.0,
-                                                       NULL );
+       trame_motif->select_hg = goo_canvas_image_new ( infos->Trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
        g_object_unref(pixbuf);
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_hd.gif", NULL );
-       trame_motif->select_hd = goo_canvas_image_new ( trame->canvas_root,
-                                                       pixbuf, 0.0, 0.0,
-                                                       NULL );
+       trame_motif->select_hd = goo_canvas_image_new ( infos->Trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
        g_object_unref(pixbuf);
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_bg.gif", NULL );
-       trame_motif->select_bg = goo_canvas_image_new ( trame->canvas_root,
-                                                       pixbuf, 0.0, 0.0,
-                                                       NULL );
+       trame_motif->select_bg = goo_canvas_image_new ( infos->Trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
        g_object_unref(pixbuf);
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_bd.gif", NULL );
-       trame_motif->select_bd = goo_canvas_image_new ( trame->canvas_root,
-                                                       pixbuf, 0.0, 0.0,
-                                                       NULL );
+       trame_motif->select_bd = goo_canvas_image_new ( infos->Trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
        g_object_unref(pixbuf);
 
        g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
@@ -701,10 +694,10 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
     Trame_rafraichir_motif ( trame_motif );
 
-    trame->trame_items = g_list_append( trame->trame_items, trame_motif );
+    infos->Trame->trame_items = g_list_append( infos->Trame->trame_items, trame_motif );
     if (trame_motif->motif->type_gestion == TYPE_FOND)
      { goo_canvas_item_lower( trame_motif->item_groupe, NULL );
-       goo_canvas_item_lower( trame->fond, NULL );
+       goo_canvas_item_lower( infos->Trame->fond, NULL );
      }
     else if (!flag) g_object_set ( G_OBJECT(trame_motif->item_groupe), "tooltip", motif->libelle, NULL );
     return(trame_motif);
