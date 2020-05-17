@@ -156,48 +156,50 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean Gerer_popup_histo ( GtkWidget *widget, GdkEventButton *event, gpointer data )
-  { static GtkWidget *Popup=NULL;
-    static GMenu *Model=NULL;
+  { GtkWidget *Popup, *item, *hbox;
     struct CLIENT *client = data;
     GtkTreeSelection *selection;
-    gboolean ya_selection;
     GtkTreePath *path;
     gint cellx, celly;
     if (!event) return(FALSE);
 
-    if (!Model)
-     { GtkWidget *item;
-       Popup = gtk_menu_new();                                                                            /* Creation si besoin */
-       item = gtk_menu_item_new_with_label ( "Acquitter le message" );
-       g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
-       gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
-
-       item = gtk_menu_item_new_with_label ( "Voir le synoptique" );
-       g_signal_connect_swapped ( item, "activate", G_CALLBACK (Go_to_syn), client );
-       gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
-       gtk_widget_show_all(Popup);
-     }
-
-    ya_selection = FALSE;
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );                        /* On recupere la selection */
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );                /* On recupere la selection */
     if (gtk_tree_selection_count_selected_rows(selection) == 0)
      { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(client->Liste_histo), event->x, event->y, &path, NULL, &cellx, &celly );
        if (path)
         { gtk_tree_selection_select_path( selection, path );
           gtk_tree_path_free( path );
-          ya_selection = TRUE;
         }
-     } else ya_selection = TRUE;                                                     /* ya bel et bien qqchose de selectionné */
+     }
 
-    if ( event->button == 3 && ya_selection )                                                             /* Gestion du popup */
-     { gtk_menu_popup_at_pointer ( GTK_MENU(Popup), (GdkEvent *)event );
+    if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                                            /* Double clic ?? */
+     { //GotoSyn;
        return(TRUE);
      }
-    else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                                       /* Double clic ?? */
-     { /*Menu_go_to_syn();*/
-       return(TRUE);
-     }
-    return(FALSE);
+
+    if ( event->button != 3 ) return(FALSE);                                                              /* Gestion du popup */
+
+    Popup = gtk_menu_new();
+
+    item = gtk_menu_item_new();
+    hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( "emblem-default", GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new("Acquitter le message"), FALSE, FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER(item), hbox );
+    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+
+    item = gtk_menu_item_new();
+    hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( "emblem-web", GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new("Voir le synoptique"), FALSE, FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER(item), hbox );
+    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Go_to_syn), client );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    gtk_widget_show_all(Popup);
+
+    gtk_menu_popup_at_pointer ( GTK_MENU(Popup), (GdkEvent *)event );
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Reset_page_histo: Efface les enregistrements de la page histo                                                              */

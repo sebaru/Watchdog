@@ -209,7 +209,7 @@
        return;
      }
 
-    Json_add_string ( builder, "msg_type", "delete_ok" );
+    Json_add_string ( builder, "msg_type", "delete_syn_ok" );
     Json_add_int ( builder, "id", syn_id );
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/

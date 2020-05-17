@@ -483,46 +483,86 @@
     g_object_unref( compositor);
     g_object_unref(buffer);
   }
+#endif
 /******************************************************************************************************************************/
 /* Gerer_popup_plugin_dls: Gestion du menu popup quand on clique droite sur la liste des plugin_dls                           */
 /* Entrée: la liste(widget), l'evenement bouton, et les data                                                                  */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean Gerer_popup_plugin_dls ( GtkWidget *widget, GdkEventButton *event, gpointer data )
-  { static GtkWidget *Popup_select=NULL, *Popup_nonselect=NULL;
+  { GtkWidget *Popup, *item, *hbox;
+    struct CLIENT *client = data;
     GtkTreeSelection *selection;
-    gboolean ya_selection;
     GtkTreePath *path;
     gint cellx, celly;
+
     if (!event) return(FALSE);
 
-    if ( event->button == 3 )                                                         /* Gestion du popup */
-     { if (!Popup_select)    Popup_select = gnome_popup_menu_new( Menu_popup_select );/*Creation si besoin*/
-       if (!Popup_nonselect) Popup_nonselect = gnome_popup_menu_new( Menu_popup_nonselect );
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_plugin_dls) );                        /* On recupere la selection */
+    if (gtk_tree_selection_count_selected_rows(selection) == 0)
+     { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(client->Liste_plugin_dls), event->x, event->y, &path, NULL, &cellx, &celly );
+       if (path)
+        { gtk_tree_selection_select_path( selection, path );
+          gtk_tree_path_free( path );
+        }
+     }
 
-       ya_selection = FALSE;
-       selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_plugin_dls) );
-                                                                              /* On recupere la selection */
-       if (gtk_tree_selection_count_selected_rows(selection) == 0)
-        { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(client->Liste_plugin_dls), event->x, event->y,
-                                          &path, NULL, &cellx, &celly );
-
-          if (path)
-           { gtk_tree_selection_select_path( selection, path );
-             gtk_tree_path_free( path );
-             ya_selection = TRUE;
-           }
-        } else ya_selection = TRUE;                              /* ya bel et bien qqchose de selectionné */
-
-       gnome_popup_menu_do_popup_modal( (ya_selection ? Popup_select : Popup_nonselect),
-                                        NULL, NULL, event, NULL, F_client );
+    if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                                            /* Double clic ?? */
+     { //Menu_editer_source_dls();
        return(TRUE);
      }
-    else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                   /* Double clic ?? */
-     { Menu_editer_source_dls(); }
-    return(FALSE);
+
+    if ( event->button != 3 ) return(FALSE);                                                              /* Gestion du popup */
+
+    Popup = gtk_menu_new();
+
+    item = gtk_menu_item_new();
+    hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( "document-open", GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new("Editer la source"), FALSE, FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER(item), hbox );
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+
+    item = gtk_menu_item_new();
+    hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( "preferences-system", GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new("Propriétés"), FALSE, FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER(item), hbox );
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+
+    item = gtk_menu_item_new();
+    hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( "system-run", GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new("Voir le RUN"), FALSE, FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER(item), hbox );
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+
+    item = gtk_menu_item_new();
+    hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( "list-add", GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new("Ajouter"), FALSE, FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER(item), hbox );
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+
+    item = gtk_separator_menu_item_new ();
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+
+    item = gtk_menu_item_new();
+    hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( "edit-delete", GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new("Supprimer"), FALSE, FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER(item), hbox );
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+
+    gtk_widget_show_all(Popup);
+    gtk_menu_popup_at_pointer ( GTK_MENU(Popup), (GdkEvent *)event );
+    return(TRUE);
   }
-#endif
 /******************************************************************************************************************************/
 /* Updater_synoptique_CB: Met à jour la liste synoptique en fonction des parametres recu du serveur                           */
 /* Entrée: les données issues de la librairie libsoup                                                                         */
@@ -794,8 +834,8 @@
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NBR_LIGNE);                                  /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_plugin_dls), colonne );
 
-//    g_signal_connect( G_OBJECT(client->Liste_plugin_dls), "button_press_event",                              /* Gestion du menu popup */
-//                      G_CALLBACK(Gerer_popup_plugin_dls), NULL );
+    g_signal_connect( G_OBJECT(client->Liste_plugin_dls), "button_press_event",                      /* Gestion du menu popup */
+                      G_CALLBACK(Gerer_popup_plugin_dls), client );
     g_object_unref (G_OBJECT (store));                                            /* nous n'avons plus besoin de notre modele */
 
 /*********************************************** Les boutons de controles *****************************************************/
@@ -805,10 +845,15 @@
 
     bouton = gtk_button_new_with_label( "Fermer" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "window-close", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
+    gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Fermer l'onglet Plugin DLS" );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Detruire_page_plugin_dls), page );
 
     bouton = gtk_button_new_with_label( "Refresh" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "document-revert", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
+    gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Recharger la liste" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_refresh_plugin_dls), NULL );
@@ -817,16 +862,25 @@
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
 
     bouton = gtk_button_new_with_label( "Ouvrir" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "document-open", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
+    gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Ouvrir le code source" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_editer_source_dls), NULL );
 
-    bouton = gtk_button_new_with_label( "Créer" );
+    bouton = gtk_button_new_with_label( "Ajouter" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "list-add", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
+    gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Ajouter un module DLS" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_ajouter_editer_plugin_dls), NULL );
 
     bouton = gtk_button_new_with_label( "Imprimer" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "document-print", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
+    gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Imprimer la liste des plugins DLS" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_exporter_plugin_dls), NULL );
@@ -835,6 +889,9 @@
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
 
     bouton = gtk_button_new_with_label( "Supprimer" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "edit-delete", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
+    gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Supprimer un plugin et ses dependances" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_effacer_un_plugin), page );

@@ -70,6 +70,8 @@
   { struct CLIENT *client = user_data;
     GBytes *response_brute;
     gchar *reason_phrase;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
     gint status_code;
     gsize taille;
     printf("%s\n", __func__ );
@@ -84,6 +86,24 @@
      }
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
+    if ( !Json_has_member ( response, "msg_type" ) ) goto end;
+    if (!strcmp( Json_get_string ( response, "msg_type" ), "delete_syn_ok" ) )
+     { gboolean valide;
+       gint id;
+
+       store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_synoptique) );
+       valide = gtk_tree_model_get_iter_first( store, &iter );
+
+       while ( valide )
+        { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
+          if ( id == Json_get_int(response, "syn_id" ) ) break;
+          valide = gtk_tree_model_iter_next( store, &iter );
+        }
+
+       if (valide)
+        { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
+     }
+end:
     json_node_unref(response);
   }
 /******************************************************************************************************************************/
