@@ -308,12 +308,12 @@ again:
 
     GtkTreeModel *store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
     gboolean valide      = gtk_tree_model_get_iter_first( store, &iter );
-
+    gboolean found = FALSE;
     while ( valide )                                              /* A la recherche de l'iter perdu. Si trouvé, on met a jour */
      { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
        if ( !strcmp(tech_id, tech_id_recu) && !strcmp(acronyme,acronyme_recu) )
         { gchar ack[80];
-
+          found = TRUE;
           if(Json_has_member(element, "nom_ack"))
            { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") );
              gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, ack, -1 );
@@ -325,7 +325,7 @@ again:
        g_free(acronyme);
        valide = gtk_tree_model_iter_next( store, &iter );
      }
-    Afficher_un_histo( NULL, 0, element, client );                                /* Sinon on en affiche un nouveau complet ! */
+    if (!found) Afficher_un_histo( NULL, 0, element, client );                    /* Sinon on en affiche un nouveau complet ! */
   }
 /******************************************************************************************************************************/
 /* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */

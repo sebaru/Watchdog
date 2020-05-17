@@ -847,7 +847,7 @@
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "window-close", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
     gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
-    gtk_widget_set_tooltip_text ( bouton, "Fermer l'onglet Plugin DLS" );
+    gtk_widget_set_tooltip_text ( bouton, "Fermer la page" );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Detruire_page_plugin_dls), page );
 
     bouton = gtk_button_new_with_label( "Refresh" );
