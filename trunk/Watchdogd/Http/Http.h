@@ -28,7 +28,6 @@
 #ifndef _HTTP_H_
  #define _HTTP_H_
  #include <libsoup/soup.h>
- #include <libxml/xmlwriter.h>
  #include <json-glib/json-glib.h>
 
  #define NOM_THREAD                    "http"
@@ -48,7 +47,6 @@
  #define HTTP_SERVER_ERROR             100
 
  #define HTTP_CONTENT_JSON             "application/json"
- #define HTTP_CONTENT_XML              "application/xml"
 
  struct WS_CLIENT_SESSION
   { SoupWebsocketConnection *connexion;

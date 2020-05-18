@@ -7,6 +7,6 @@ apt install -y libglib2.0-dev bison flex libreadline-dev libgif-dev libgcrypt20-
 apt install -y libupsclient-dev libcurl4-gnutls-dev libssl-dev default-libmysqlclient-dev libstrophe-dev libgammu-dev
 apt install -y liblircclient-dev libpopt-dev libssl-dev libmariadbclient-dev libzmq3-dev
 apt install -y sox libsox-fmt-all python3-pip mpg123
-apt install -y libxml2-dev libjson-glib-dev libmosquitto-dev vlc 
+apt install -y libjson-glib-dev libmosquitto-dev vlc 
 apt install -y libgtk-3-dev libsoup2.4-dev libgoocanvas-2.0-dev
 pip3 install gTTS
