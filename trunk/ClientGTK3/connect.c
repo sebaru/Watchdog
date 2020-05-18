@@ -180,7 +180,7 @@
 /* Sortie: kedal                                                                                                              */
 /******************************************************************************************************************************/
  void Connecter ( struct CLIENT *client )
-  { GtkWidget *table, *texte, *boite, *frame, *content_area, *hbox, *image;
+  { GtkWidget *table, *texte, *content_area, *hbox, *image;
     GtkWidget *Entry_host, *Entry_nom, *Entry_code;
     gint retour;
 
