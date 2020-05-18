@@ -56,7 +56,7 @@
  #define CMD_FERME_WAIT_BP <-> _B(libelle="Prepare la fermeture");
  #define CMD_FERME <-> _B(libelle="Volet en mode fermeture");
 
- #define TC_MANOEUVRE <-> _T(daa=350,libelle="Tempo de manoeuvre volet");
+ #define TC_MANOEUVRE <-> _T(daa=400,libelle="Tempo de manoeuvre volet");
  #define CI_MANOEUVRE <-> _CI(libelle="Compteurs de manoeuvre");
 
 /**************************************************** Initialisation **********************************************************/
