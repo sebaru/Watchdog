@@ -66,11 +66,11 @@
 /******************************************************************************************************************************/
  void Envoi_au_serveur ( struct CLIENT *client, gchar *methode, gchar *payload, gsize taille_buf, gchar *URI, SoupSessionCallback callback )
   { gchar target[128];
-    printf("%s : %p\n", __func__, client );
+    printf("%s : sending %s\n", __func__, URI );
     g_snprintf( target, sizeof(target), "http://%s:5560/%s", client->hostname, URI );
     SoupMessage *msg = soup_message_new ( methode, target );
-    g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
     client->network_size_sent = 0;
+    g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
     if (payload)
      { soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
        client->network_size_to_send = taille_buf;
@@ -78,6 +78,10 @@
        g_snprintf ( chaine, (taille_buf>sizeof(chaine) ? taille_buf : sizeof(chaine)) - 1, "Sending %s : %s\n", URI, payload );
        printf(chaine);
      }
+    SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", client->wtd_session, "/", NULL, 0 );
+    GSList *liste = g_slist_append ( NULL, wtd_session );
+    soup_cookies_to_request ( liste, msg );
+    g_slist_free(liste);
     if (!msg) { Log( client, "Erreur envoi au serveur"); Deconnecter_sale(client); }
     else soup_session_queue_message (client->connexion, msg, callback, client);
   }
@@ -135,6 +139,22 @@
        Deconnecter_sale(client);
        return;
      }
+
+    GSList *cookies, *liste;
+    cookies = soup_cookies_from_response(msg);
+    liste = cookies;
+    while ( liste )
+     { SoupCookie *cookie = liste->data;
+       const char *name = soup_cookie_get_name (cookie);
+       if (!strcmp(name,"wtd_session"))
+        { g_snprintf(client->wtd_session, sizeof(client->wtd_session), "%s", soup_cookie_get_value(cookie) );
+          printf("Get session %s\n", client->wtd_session);
+          break;
+        }
+       liste = g_slist_next(liste);
+     }
+    soup_cookies_free(cookies);
+
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
     g_snprintf( chaine, sizeof(chaine), "Connected with %s@%s to %s Instance '%s' with %s. Version %s - %s",
@@ -147,7 +167,7 @@
     json_node_unref(response);
     g_snprintf( chaine, sizeof(chaine), "histo/alive" );
     Envoi_au_serveur( client, "GET", NULL, 0, chaine, Afficher_histo_alive_CB );
-    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/ws/live-msgs", client->hostname );
+    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/live-msgs", client->hostname );
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
                                            NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
   }

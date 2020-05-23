@@ -842,7 +842,6 @@
     boite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
-
     bouton = gtk_button_new_with_label( "Fermer" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "window-close", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
@@ -855,7 +854,6 @@
     gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "document-revert", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
     gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Recharger la liste" );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_refresh_plugin_dls), NULL );
 
     separateur = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
@@ -866,7 +864,6 @@
     gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "document-open", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
     gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Ouvrir le code source" );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_editer_source_dls), NULL );
 
     bouton = gtk_button_new_with_label( "Ajouter" );
@@ -874,7 +871,6 @@
     gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "list-add", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
     gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Ajouter un module DLS" );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_ajouter_editer_plugin_dls), NULL );
 
     bouton = gtk_button_new_with_label( "Imprimer" );
@@ -882,7 +878,6 @@
     gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "document-print", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
     gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Imprimer la liste des plugins DLS" );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_exporter_plugin_dls), NULL );
 
     separateur = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
@@ -893,7 +888,6 @@
     gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "edit-delete", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
     gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Supprimer un plugin et ses dependances" );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_effacer_un_plugin), page );
 
     json_array_foreach_element ( Json_get_array ( response, "plugins" ), Afficher_un_plugin, page );

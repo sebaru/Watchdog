@@ -254,8 +254,11 @@
 /******************************************************************************************************************************/
  struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client )
   { struct HTTP_CLIENT_SESSION *session = Http_rechercher_session_by_msg ( msg );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: %s from %s@%s", __func__,
-              path, (session ? session->username : soup_client_context_get_auth_user (client)), soup_client_context_get_host(client) );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: sid '%s' (%s@%s) : '%s'", __func__,
+              (session ? session->wtd_session : "none"),
+              (session ? session->username : soup_client_context_get_auth_user (client)), soup_client_context_get_host(client),
+              path
+               );
     return(session);
   }
 /******************************************************************************************************************************/
@@ -274,6 +277,8 @@
      { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Session '%s' disconnected", __func__, session->wtd_session );
        g_free(session);
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                 "%s: '%d' session left", __func__, g_slist_length(Cfg_http.liste_http_clients) );
      }
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }

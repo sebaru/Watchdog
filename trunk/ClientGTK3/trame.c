@@ -44,9 +44,6 @@
  #include "protocli.h"
  #include "client.h"
 
- static gchar *Gif_received_buffer;
- static gint   Gif_received_size;
-
 /**********************************************************************************************************/
 /* Reduire_en_vignette: Met un motif aux dimensions de vignette                                           */
 /* Entrée: Le trame_motif souhaité                                                                        */
