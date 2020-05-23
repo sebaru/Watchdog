@@ -127,7 +127,7 @@
                                        "FROM dls AS d "
                                        "INNER JOIN syns as s ON d.syn_id=s.id "
                                        "INNER JOIN syns as ps ON s.parent_id = ps.id" );
-    if (Select_SQL_to_JSON ( builder, "plugins", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, "plugins", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
@@ -205,7 +205,7 @@
 
     g_snprintf(chaine, sizeof(chaine),  "DELETE FROM dls WHERE tech_id='%s'", target );
     g_free(target);
-    if (Update_Delete_SQL (chaine)==FALSE)
+    if (SQL_Write (chaine)==FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
        return;
      }

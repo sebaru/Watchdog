@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/liste_synoptique.c        Configuration des synoptiques de Watchdog v2.0                        */
-/* Projet WatchDog version 3.0       Gestion d'habitat                       dim 02 nov 2003 17:21:39 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/liste_synoptique.c        Configuration des synoptiques de Watchdog v3.0                                            */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           dim 02 nov 2003 17:21:39 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * liste_synoptique.c
  * This file is part of Watchdog
@@ -35,9 +35,80 @@
      COLONNE_LIBELLE,
      NBR_COLONNE
   };
-/********************************* Définitions des prototypes programme ***********************************/
+/***************************************** Définitions des prototypes programme ***********************************************/
  #include "protocli.h"
 
+/******************************************************************************************************************************/
+/* Afficher_un_plugin: Rafraichissement d'un synoptique dans la liste à l'écran                                               */
+/* Entrée: une reference sur le synoptique au format json                                                                     */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Afficher_un_synoptique (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct PAGE_NOTEBOOK *page=user_data;
+    GtkTreeIter iter;
+
+    GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(page->client->Liste_synoptique) ));
+    gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
+
+    gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
+                         COLONNE_ID, Json_get_int( element, "id" ),
+                         COLONNE_ACCESS_LEVEL, Json_get_int( element, "access_level" ),
+                         COLONNE_PPAGE, Json_get_string( element, "ppage" ),
+                         COLONNE_PAGE, Json_get_string( element, "page" ),
+                         COLONNE_LIBELLE, Json_get_string( element, "libelle" ),
+                         -1
+                       );
+  }
+/******************************************************************************************************************************/
+/* Synoptique_edited_CB: Appelé après la mise a jour/création d'un synoptique                                                 */
+/* Entrée: les données issues de la librairie libsoup                                                                         */
+/* sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Synoptique_edited_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
+  { struct CLIENT *client = user_data;
+    GBytes *response_brute;
+    gchar *reason_phrase;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    gint status_code;
+    gboolean valide;
+    gsize taille;
+    gint id;
+    printf("%s\n", __func__ );
+    g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
+    if (status_code != 200)
+     { GtkWidget *dialog = gtk_message_dialog_new ( GTK_WINDOW(client->window), GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                    GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error Code %d: %s",
+                                                    status_code, reason_phrase);
+       gtk_dialog_run (GTK_DIALOG (dialog));
+       gtk_widget_destroy (dialog);
+       return;
+     }
+
+    g_object_get ( msg, "response-body-data", &response_brute, NULL );
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
+
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_synoptique) );
+    valide = gtk_tree_model_get_iter_first( store, &iter );
+
+    while ( valide )
+     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
+       if ( id == Json_get_int(response, "id" ) ) break;
+       valide = gtk_tree_model_iter_next( store, &iter );
+     }
+
+    if (valide)
+     { gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
+                            COLONNE_ACCESS_LEVEL, Json_get_int( response, "access_level" ),
+                            COLONNE_PPAGE, Json_get_string( response, "ppage" ),
+                            COLONNE_PAGE, Json_get_string( response, "page" ),
+                            COLONNE_LIBELLE, Json_get_string( response, "libelle" ),
+                            -1
+                          );
+     }
+    else Afficher_un_synoptique( NULL, 0, response, client );                     /* Sinon on en affiche un nouveau complet ! */
+    json_node_unref(response);
+  }
 /******************************************************************************************************************************/
 /* Creer_Ajouter_Editer_synoptique: Affiche la fenetre d'edition des proprietes synoptique                                    */
 /* Entrée: la page cliente et le synoptique au format JSON                                                                    */
@@ -85,7 +156,7 @@
 
 /*    texte = gtk_label_new( "Access Level" );                                       /* Création du spin du niveau de clearance */
 /*    gtk_grid_attach( GTK_GRID(table), texte, 0, i, 1, 1 );*/
-    GtkWidget *Spin_access_level = gtk_spin_button_new_with_range( 0, client->access_level, 1 );
+    GtkWidget *Spin_access_level = gtk_spin_button_new_with_range( 0, client->access_level-1, 1 );
     gtk_widget_set_tooltip_text ( Spin_access_level, "Niveau d'accès minimum" );
     gtk_grid_attach( GTK_GRID(table),  Spin_access_level, 2, i, 1, 1 );
 
@@ -111,7 +182,23 @@
     gtk_widget_show_all( dialog );
 
     if (gtk_dialog_run( GTK_DIALOG(dialog) ) == GTK_RESPONSE_OK)                       /* Attente de reponse de l'utilisateur */
-     {
+     { gsize taille_buf;
+       gchar chaine[80];
+       JsonBuilder *builder = Json_create ();
+       if (builder)
+        { Json_add_string ( builder, "libelle", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
+          Json_add_string ( builder, "page", gtk_entry_get_text( GTK_ENTRY(Entry_page) ) );
+          Json_add_string ( builder, "ppage", gtk_entry_get_text( GTK_ENTRY(Entry_ppage) ) );
+          Json_add_int    ( builder, "access_level", gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_access_level) ) );
+          if (syn)
+           { Json_add_int ( builder, "id", Json_get_int( syn, "id" ) );
+             g_snprintf( chaine, sizeof( chaine ), "syn/edit" );
+           }
+          else
+           { g_snprintf( chaine, sizeof( chaine ), "syn/new" ); }
+          gchar *buf = Json_get_buf (builder, &taille_buf);
+          Envoi_au_serveur( client, "POST", buf, taille_buf, chaine, Synoptique_edited_CB );
+        }
      }
     gtk_widget_destroy( dialog );
   }
@@ -194,28 +281,26 @@
      }
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
-    if ( !Json_has_member ( response, "msg_type" ) ) goto end;
-    if (!strcmp( Json_get_string ( response, "msg_type" ), "delete_syn_ok" ) )
-     { gboolean valide;
-       gint id;
 
-       store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_synoptique) );
-       valide = gtk_tree_model_get_iter_first( store, &iter );
+    gboolean valide;
+    gint id;
 
-       while ( valide )
-        { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
-          if ( id == Json_get_int(response, "syn_id" ) ) break;
-          valide = gtk_tree_model_iter_next( store, &iter );
-        }
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_synoptique) );
+    valide = gtk_tree_model_get_iter_first( store, &iter );
 
-       if (valide)
-        { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
+    while ( valide )
+     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
+       if ( id == Json_get_int(response, "id" ) ) break;
+       valide = gtk_tree_model_iter_next( store, &iter );
      }
-end:
+
+    if (valide)
+     { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
+
     json_node_unref(response);
   }
 /******************************************************************************************************************************/
-/* Send_Effacer_synoptique: Fonction appelée qd on appuie sur le bouton de suppression et que l'ona validé l'ordre                 */
+/* Send_Effacer_synoptique: Fonction appelée qd on appuie sur le bouton de suppression et que l'ona validé l'ordre            */
 /* Entrée: la page source                                                                                                     */
 /* sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -234,7 +319,7 @@ end:
        gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                /* Recup du id */
        g_snprintf(chaine, sizeof(chaine), "syn/del/%d", id );
-       Envoi_au_serveur ( page->client, "GET", NULL, 0, chaine, Synoptique_deleted_CB );
+       Envoi_au_serveur ( page->client, "DELETE", NULL, 0, chaine, Synoptique_deleted_CB );
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
      }
@@ -375,27 +460,6 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
     gtk_widget_show_all(Popup);
     gtk_menu_popup_at_pointer ( GTK_MENU(Popup), (GdkEvent *)event );
     return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Afficher_un_plugin: Rafraichissement d'un synoptique dans la liste à l'écran                                               */
-/* Entrée: une reference sur le synoptique au format json                                                                     */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Afficher_un_synoptique (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct PAGE_NOTEBOOK *page=user_data;
-    GtkTreeIter iter;
-
-    GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(page->client->Liste_synoptique) ));
-    gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
-
-    gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
-                         COLONNE_ID, Json_get_int( element, "id" ),
-                         COLONNE_ACCESS_LEVEL, Json_get_int( element, "access_level" ),
-                         COLONNE_PPAGE, Json_get_string( element, "ppage" ),
-                         COLONNE_PAGE, Json_get_string( element, "page" ),
-                         COLONNE_LIBELLE, Json_get_string( element, "libelle" ),
-                         -1
-                       );
   }
 /******************************************************************************************************************************/
 /* Detruire_page_atelier: L'utilisateur veut fermer la page de plugin dls                                                     */

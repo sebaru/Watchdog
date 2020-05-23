@@ -61,7 +61,7 @@
      }
 
     g_snprintf(chaine, sizeof(chaine), "SELECT syn.*,psyn.page as ppage FROM syns AS syn INNER JOIN syns as psyn ON psyn.id=syn.parent_id" );
-    if (Select_SQL_to_JSON ( builder, "synoptiques", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, "synoptiques", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
@@ -107,14 +107,14 @@
      }
 
     g_snprintf(chaine, sizeof(chaine), "SELECT * from syns WHERE id=%d", syn_id );
-    if (Select_SQL_to_JSON ( builder, NULL, chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, NULL, chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
      }
 
     g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_motifs WHERE syn_id=%d", syn_id );
-    if (Select_SQL_to_JSON ( builder, "motifs", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, "motifs", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
@@ -122,28 +122,28 @@
 
     g_snprintf(chaine, sizeof(chaine), "SELECT sp.*,syn.page,syn.libelle FROM syns_pass as sp "
                                        "INNER JOIN syns as syn ON sp.syn_cible_id=syn.id WHERE sp.syn_id=%d", syn_id );
-    if (Select_SQL_to_JSON ( builder, "passerelles", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, "passerelles", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
      }
 
     g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_liens WHERE syn_id=%d", syn_id );
-    if (Select_SQL_to_JSON ( builder, "liens", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, "liens", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
      }
 
     g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_rectangles WHERE syn_id=%d", syn_id );
-    if (Select_SQL_to_JSON ( builder, "rectangles", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, "rectangles", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
      }
 
     g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_comments WHERE syn_id=%d", syn_id );
-    if (Select_SQL_to_JSON ( builder, "comments", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, "comments", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
@@ -151,14 +151,14 @@
 
     g_snprintf(chaine, sizeof(chaine), "SELECT *,src.location,src.libelle from syns_camerasup AS cam "
                                        "INNER JOIN cameras AS src ON cam.camera_src_id=src.id WHERE syn_id=%d", syn_id );
-    if (Select_SQL_to_JSON ( builder, "cameras", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, "cameras", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
      }
 
     g_snprintf(chaine, sizeof(chaine), "SELECT syns_cadrans.* FROM syns_cadrans WHERE syn_id=%d", syn_id );
-    if (Select_SQL_to_JSON ( builder, "cadrans", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, "cadrans", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
@@ -179,31 +179,36 @@
   { gchar *buf, chaine[256];
     gsize taille_buf;
     gint syn_id;
-    if (msg->method != SOUP_METHOD_GET)
+    if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    Http_print_request ( server, msg, path, client );
-
-    if ( ! g_str_has_prefix ( path, "/syn/del/" ) )
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (session && session->access_level<6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges");
+       return;
+     }
+    gchar *prefix = "/syn/del/";
+    if ( ! g_str_has_prefix ( path, prefix ) )
      { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
        return;
      }
 
-    if (!strlen (path+9))
+    if (!strlen (path+strlen(prefix)))
      { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
        return;
      }
-    syn_id = atoi(path+9);
+    syn_id = atoi(path+strlen(prefix));
 
     if (syn_id==1)
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Syn 1 can not be deleted");
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine),  "DELETE from syns WHERE id=%d", syn_id );
-    if (Update_Delete_SQL (chaine)==FALSE)
+    g_snprintf(chaine, sizeof(chaine), "DELETE from syns WHERE id=%d AND access_level<'%d'",
+               syn_id, (session ? session->access_level : 10));
+    if (SQL_Write (chaine)==FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
        return;
      }
@@ -214,7 +219,6 @@
        return;
      }
 
-    Json_add_string ( builder, "msg_type", "delete_syn_ok" );
     Json_add_int ( builder, "id", syn_id );
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
@@ -226,11 +230,87 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
+ void Http_traiter_post_syn_edit ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                   SoupClientContext *client, gpointer user_data )
+  { GBytes *request_brute;
+    gchar requete[256];
+    gsize taille;
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (session && session->access_level<6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges");
+       return;
+     }
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( ! (Json_has_member ( request, "libelle" ) && Json_has_member ( request, "page" ) &&
+            Json_has_member ( request, "ppage" ) && Json_has_member ( request, "access_level" ) ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    gchar *libelle     = Normaliser_chaine ( Json_get_string( request, "libelle" ) );
+    gchar *page        = Normaliser_chaine ( Json_get_string( request, "page" ) );
+    gchar *ppage       = Normaliser_chaine ( Json_get_string( request, "ppage" ) );
+    gint  access_level = Json_get_int ( request, "access_level" );
+    if (session && access_level>=session->access_level) access_level = session->access_level-1;
+
+    if ( Json_has_member ( request, "id" ) )                                                                       /* Edition */
+     { g_snprintf( requete, sizeof(requete),
+                  "UPDATE syns SET libelle='%s', page='%s', access_level='%d' WHERE id='%d' AND access_level<'%d'",
+                   libelle, page, access_level, Json_get_int(request,"id"), (session ? session->access_level : 10) );
+     }
+    else
+     {
+       g_snprintf( requete, sizeof(requete),
+                  "INSERT INTO syns SET libelle='%s', page='%s', parent_id=(SELECT psyn.id FROM syns AS psyn WHERE psyn.page='%s'), "
+                  "access_level='%d'",
+                   libelle, page, ppage, access_level );
+     }
+    if (SQL_Write (requete))
+     { gchar chaine[256];
+       gsize taille_buf;
+       JsonBuilder *builder = Json_create ();
+       if (!builder)
+        { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
+          goto end;
+        }
+       g_snprintf(chaine, sizeof(chaine), "SELECT s.*, ps.page AS ppage FROM syns AS s INNER JOIN syns AS ps ON s.parent_id = ps.id "
+                                          "WHERE s.page='%s'", page );
+       if (SQL_Select_to_JSON ( builder, NULL, chaine ) == FALSE)
+        { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+          g_object_unref(builder);
+          goto end;
+        }
+       gchar *buf = Json_get_buf (builder, &taille_buf);
+       soup_message_set_status (msg, SOUP_STATUS_OK);
+       soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+     }
+    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+end:
+    g_free(libelle);
+    g_free(page);
+    g_free(ppage);
+    json_node_unref(request);
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
  void Http_traiter_syn_edit ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                               SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
     gsize taille_buf;
     gint syn_id;
+
+    if (msg->method == SOUP_METHOD_POST)
+     {	Http_traiter_post_syn_edit ( server, msg, path, query, client, user_data );
+		     return;
+     }
+
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -258,7 +338,7 @@
 
     g_snprintf(chaine, sizeof(chaine), "SELECT s.*, ps.page AS ppage FROM syns AS s INNER JOIN syns AS ps ON s.parent_id = ps.id "
                                        "WHERE s.id=%d AND s.access_level<%d", syn_id, (session ? session->access_level : 10) );
-    if (Select_SQL_to_JSON ( builder, NULL, chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, NULL, chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;

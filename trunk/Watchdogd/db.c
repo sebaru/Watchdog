@@ -131,11 +131,11 @@
                                Partage->com_arch.archdb_password, Partage->com_arch.archdb_database, Partage->com_arch.archdb_port ) );
   }
 /******************************************************************************************************************************/
-/* Select_SQL_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
+/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
- gboolean Select_SQL_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete )
+ gboolean SQL_Select_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete )
   { struct DB *db = Init_DB_SQL ();
     if (!db)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
@@ -175,11 +175,11 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Select_SQL_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
+/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
- gboolean Update_Delete_SQL ( gchar *requete )
+ gboolean SQL_Write ( gchar *requete )
   { struct DB *db = Init_DB_SQL ();
     if (!db)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
@@ -191,6 +191,7 @@
        Libere_DB_SQL ( &db );
        return(FALSE);
      }
+    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
 
     Libere_DB_SQL ( &db );
     return(TRUE);

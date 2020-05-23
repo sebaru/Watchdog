@@ -88,7 +88,7 @@
                 " INNER JOIN syns as syn ON syn.id = dls.syn_id"
                 " INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id"
                 " WHERE alive = 1 ORDER BY histo.date_create" );
-    if (Select_SQL_to_JSON ( builder, "enregs", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, "enregs", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;

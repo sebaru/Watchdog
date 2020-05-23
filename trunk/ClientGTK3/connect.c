@@ -75,7 +75,8 @@
      { soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
        client->network_size_to_send = taille_buf;
        gchar chaine[128];
-       g_snprintf ( chaine, (taille_buf>sizeof(chaine) ? taille_buf : sizeof(chaine)) - 1, "Sending %s : %s\n", URI, payload );
+       g_snprintf ( chaine, sizeof(chaine), "Sending %s : %s\n", URI, payload );
+       chaine[126]='\n';
        printf(chaine);
      }
     SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", client->wtd_session, "/", NULL, 0 );
