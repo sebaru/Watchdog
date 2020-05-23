@@ -832,7 +832,6 @@ CREATE TABLE IF NOT EXISTS `users` (
   `imsg_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
   `imsg_available` tinyint(1) NOT NULL DEFAULT '0',
   `ssrv_bit_presence` int(11) NOT NULL DEFAULT '0',
-  `session_id` varchar(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'NONE',
   PRIMARY KEY (`id`),
   KEY(`username`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
@@ -842,13 +841,10 @@ INSERT INTO `users` (`id`, `enable`, `access_level`, `username`, `hash`, `commen
 (1, 1, 0, 'guest', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 'Guest user ', NOW(), NOW());
 
 CREATE TABLE `users_sessions` (
-  `id` VARCHAR(128) NOT NULL,
-  `login` VARCHAR(32) NOT NULL,
-  `last_date` datetime NOT NULL,
-  `remote_addr` VARCHAR(50) NOT NULL,
-  `x_forwarded_for` VARCHAR(50) NOT NULL,
-  `data` text NOT NULL,
-  PRIMARY KEY (`id`)
+  `username` VARCHAR(32) NOT NULL,
+  `wtd_session` VARCHAR(42) NOT NULL,
+  `date_create` datetime NOT NULL,
+  FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `audit_log` (

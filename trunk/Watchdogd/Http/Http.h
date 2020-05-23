@@ -29,6 +29,7 @@
  #define _HTTP_H_
  #include <libsoup/soup.h>
  #include <json-glib/json-glib.h>
+ #include <uuid/uuid.h>
 
  #define NOM_THREAD                    "http"
  #define HTTP_DEFAUT_FILE_CA           "http_cacert.pem"
@@ -55,6 +56,13 @@
     GSList *Liste_bit_motifs;
   };
 
+ struct HTTP_CLIENT_SESSION
+  { gchar username[32];
+    gchar wtd_session[42];
+    gint  access_level;
+    gint  last_request;
+  };
+
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;
 
@@ -67,6 +75,7 @@
     gboolean authenticate;
     GSList *liste_ws_motifs_clients;
     GSList *liste_ws_msgs_clients;
+    GSList *liste_http_clients;
  };
 
 /*************************************************** Définitions des prototypes ***********************************************/
@@ -100,7 +109,7 @@
  extern void Http_traiter_histo_alive ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                         SoupClientContext *client, gpointer user_data);
  extern void Http_Memory_get_all ( SoupMessage *msg, gchar *tech_id );
- extern void Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
+ extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern void Http_Envoyer_les_cadrans ( void );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -1740,9 +1740,23 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4722)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users ENGINE=INNODB");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "DROP TABLE users_sessions;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "CREATE TABLE `users_sessions` ("
+                                             "`username` VARCHAR(32) NOT NULL,"
+                                             "`wtd_session` VARCHAR(42) NOT NULL,"
+                                             "`date_create` datetime NOT NULL,"
+                                             "FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE"
+                                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 fin:
-    database_version=4567;
+    database_version=4722;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
