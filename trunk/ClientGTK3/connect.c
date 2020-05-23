@@ -163,6 +163,7 @@
                 Json_get_string(response, "instance"),
                 (Json_get_bool(response, "ssl") ? "SSL" : "NO SSL"),
                 Json_get_string(response, "version"), Json_get_string(response, "message") );
+    client->access_level = Json_get_int ( response, "access_level" );
     Log(client, chaine);
     json_node_unref(response);
     g_snprintf( chaine, sizeof(chaine), "histo/alive" );
@@ -202,7 +203,6 @@
  void Connecter ( struct CLIENT *client )
   { GtkWidget *table, *texte, *content_area, *hbox, *image;
     GtkWidget *Entry_host, *Entry_nom, *Entry_code;
-    gint retour;
 
     if (client->connexion) return;
     GtkWidget *fenetre = gtk_dialog_new_with_buttons ( "Identification Required", GTK_WINDOW(client->window),
@@ -227,12 +227,18 @@
     gtk_grid_attach( GTK_GRID(table), texte, 0, 0, 1, 1 );
     Entry_host = gtk_entry_new();
     gtk_entry_set_text( GTK_ENTRY(Entry_host), g_settings_get_string ( client->settings, "hostname" ) );
+    gtk_entry_set_placeholder_text ( GTK_ENTRY(Entry_host), "Votre serveur" );
+    gtk_widget_set_tooltip_text ( Entry_host, "Entrez le nom du serveur distant" );
+    gtk_entry_set_icon_from_icon_name ( GTK_ENTRY(Entry_host), GTK_ENTRY_ICON_PRIMARY, "system-run" );
     gtk_grid_attach( GTK_GRID(table), Entry_host, 1, 0, 1, 1 );
 
     texte = gtk_label_new( "Username" );
     gtk_grid_attach( GTK_GRID(table), texte, 0, 1, 1, 1 );
     Entry_nom = gtk_entry_new();
     gtk_entry_set_text( GTK_ENTRY(Entry_nom), g_settings_get_string ( client->settings, "username" ) );
+    gtk_entry_set_placeholder_text ( GTK_ENTRY(Entry_nom), "Votre nom" );
+    gtk_widget_set_tooltip_text ( Entry_nom, "Entrez votre login de connexion" );
+    gtk_entry_set_icon_from_icon_name ( GTK_ENTRY(Entry_nom), GTK_ENTRY_ICON_PRIMARY, "system-users" );
     gtk_grid_attach( GTK_GRID(table), Entry_nom, 1, 1, 1, 1 );
 
     texte = gtk_label_new( "Password" );
@@ -240,6 +246,9 @@
     Entry_code = gtk_entry_new();
     gtk_entry_set_visibility( GTK_ENTRY(Entry_code), FALSE );
     gtk_entry_set_text( GTK_ENTRY(Entry_code), g_settings_get_string ( client->settings, "password" ) );
+    gtk_entry_set_placeholder_text ( GTK_ENTRY(Entry_code), "Votre mot de passe" );
+    gtk_widget_set_tooltip_text ( Entry_code, "Entrez votre mot de passe de connexion" );
+    gtk_entry_set_icon_from_icon_name ( GTK_ENTRY(Entry_code), GTK_ENTRY_ICON_PRIMARY, "dialog-password" );
     gtk_grid_attach( GTK_GRID(table), Entry_code, 1, 2, 1, 1 );
 
     g_signal_connect_swapped( Entry_host, "activate", (GCallback)gtk_widget_grab_focus, Entry_nom );
@@ -247,9 +256,8 @@
 
     gtk_widget_grab_focus( Entry_nom );
     gtk_widget_show_all( hbox );
-    retour = gtk_dialog_run( GTK_DIALOG(fenetre) );                                    /* Attente de reponse de l'utilisateur */
 
-    if (retour == GTK_RESPONSE_OK)
+    if (gtk_dialog_run( GTK_DIALOG(fenetre) ) == GTK_RESPONSE_OK)                      /* Attente de reponse de l'utilisateur */
      { g_snprintf( client->hostname, sizeof(client->hostname), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
        g_snprintf( client->username, sizeof(client->username), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
        g_snprintf( client->password, sizeof(client->password), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_code) ) );

@@ -254,10 +254,10 @@
 /******************************************************************************************************************************/
  struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client )
   { struct HTTP_CLIENT_SESSION *session = Http_rechercher_session_by_msg ( msg );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: sid '%s' (%s@%s) : '%s'", __func__,
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: sid '%s' (%s@%s, Level %d) : '%s'", __func__,
               (session ? session->wtd_session : "none"),
               (session ? session->username : soup_client_context_get_auth_user (client)), soup_client_context_get_host(client),
-              path
+              (session ? session->access_level : -1), path
                );
     return(session);
   }
@@ -297,7 +297,7 @@
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
-    Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
     if (builder == NULL)
@@ -313,6 +313,7 @@
     Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
     Json_add_bool   ( builder, "ssl", soup_server_is_https (server) );
     Json_add_string ( builder, "message", "Welcome back Home !" );
+    Json_add_int    ( builder, "access_level", (session ? session->access_level : 10) );
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -348,8 +349,9 @@ reload:
     soup_server_add_handler ( socket, "/dls/del/",   Http_traiter_dls_del, NULL, NULL );
     soup_server_add_handler ( socket, "/dls",        Http_traiter_dls, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/list",   Http_traiter_syn_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/get/",   Http_traiter_syn_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/show/",  Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/del/",   Http_traiter_syn_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/edit/",  Http_traiter_syn_edit, NULL, NULL );
     soup_server_add_handler ( socket, "/process",    Http_traiter_process, NULL, NULL );
     soup_server_add_handler ( socket, "/status",     Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/log",        Http_traiter_log, NULL, NULL );

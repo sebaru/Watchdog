@@ -550,7 +550,7 @@ printf("%s\n", __func__);
     json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, infos );
     json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, infos );
 
-    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/ws/live-motifs", client->hostname );
+    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/live-motifs", client->hostname );
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
                                            NULL, NULL, g_cancellable_new(), Traiter_connect_ws_motifs_CB, infos );
   }
@@ -717,7 +717,7 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
 /******************************************************************************************************************************/
  void Demander_synoptique_supervision ( struct CLIENT *client, gint id )
   { gchar chaine[80];
-    g_snprintf( chaine, sizeof(chaine), "syn/get/%d", id );
+    g_snprintf( chaine, sizeof(chaine), "syn/show/%d", id );
     Envoi_au_serveur( client, "GET", NULL, 0, chaine, Creer_page_supervision_CB );
   }
 /******************************************************************************************************************************/

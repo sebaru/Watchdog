@@ -77,8 +77,8 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_syn_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                             SoupClientContext *client, gpointer user_data )
+ void Http_traiter_syn_show ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                              SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
     gsize taille_buf;
     gint syn_id;
@@ -197,6 +197,11 @@
      }
     syn_id = atoi(path+9);
 
+    if (syn_id==1)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Syn 1 can not be deleted");
+       return;
+     }
+
     g_snprintf(chaine, sizeof(chaine),  "DELETE from syns WHERE id=%d", syn_id );
     if (Update_Delete_SQL (chaine)==FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
@@ -211,6 +216,54 @@
 
     Json_add_string ( builder, "msg_type", "delete_syn_ok" );
     Json_add_int ( builder, "id", syn_id );
+    buf = Json_get_buf (builder, &taille_buf);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_syn_edit ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                              SoupClientContext *client, gpointer user_data )
+  { gchar *buf, chaine[256];
+    gsize taille_buf;
+    gint syn_id;
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+
+    gchar *prefix = "/syn/edit/";
+    if ( ! g_str_has_prefix ( path, prefix ) )
+     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
+     }
+
+    if (!strlen (path+strlen(prefix)))
+     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
+     }
+    syn_id = atoi(path+strlen(prefix));
+
+    JsonBuilder *builder = Json_create ();
+    if (!builder)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT s.*, ps.page AS ppage FROM syns AS s INNER JOIN syns AS ps ON s.parent_id = ps.id "
+                                       "WHERE s.id=%d AND s.access_level<%d", syn_id, (session ? session->access_level : 10) );
+    if (Select_SQL_to_JSON ( builder, NULL, chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
+
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);

@@ -147,6 +147,8 @@
        Libere_DB_SQL ( &db );
        return(FALSE);
      }
+    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
+
 
     db->result = mysql_store_result ( db->mysql );
     if ( ! db->result )

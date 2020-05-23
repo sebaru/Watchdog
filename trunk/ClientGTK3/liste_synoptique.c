@@ -38,22 +38,143 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
-#ifdef bouh
-/**********************************************************************************************************/
-/* Menu_ajouter_synoptique: Ajout d'un synoptique                                                         */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Menu_ajouter_synoptique ( void )
-  { Menu_ajouter_editer_synoptique(NULL);
-  }
-#endif
 /******************************************************************************************************************************/
-/* Updater_synoptique_CB: Met à jour la liste synoptique en fonction des parametres recu du serveur                           */
+/* Creer_Ajouter_Editer_synoptique: Affiche la fenetre d'edition des proprietes synoptique                                    */
+/* Entrée: la page cliente et le synoptique au format JSON                                                                    */
+/* sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Creer_Fenetre_Ajouter_Editer_synoptique ( struct CLIENT *client, JsonNode *syn )
+  { gint i;
+    GtkWidget *dialog = gtk_dialog_new_with_buttons( (syn ? "Editer le synoptique" : "Ajouter un synoptique"),
+                                                     GTK_WINDOW(client->window),
+                                                     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                     "Annuler", GTK_RESPONSE_CANCEL,
+                                                     (syn ? "Valider" : "Ajouter"), GTK_RESPONSE_OK,
+                                                     NULL);
+    GtkWidget *content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+
+    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+    gtk_container_set_border_width (GTK_CONTAINER (hbox), 6);
+    gtk_box_pack_start (GTK_BOX (content_area), hbox, FALSE, FALSE, 0);
+
+    GtkWidget *image = gtk_image_new_from_icon_name ("preferences-system", GTK_ICON_SIZE_DIALOG);
+    gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
+
+    GtkWidget *table = gtk_grid_new();
+    gtk_box_pack_start( GTK_BOX(hbox), table, TRUE, TRUE, 0 );
+    gtk_grid_set_row_spacing( GTK_GRID(table), 5 );
+    gtk_grid_set_column_spacing( GTK_GRID(table), 5 );
+    /*gtk_grid_set_column_homogeneous ( GTK_GRID(table), TRUE );*/
+
+    i=0;
+    GtkWidget *texte = gtk_label_new( "Parent" );
+    gtk_grid_attach( GTK_GRID(table), texte, 0, i, 1, 1 );
+    GtkWidget *Entry_ppage = gtk_entry_new();
+    gtk_editable_set_editable( GTK_EDITABLE(Entry_ppage), FALSE );
+    gtk_grid_attach( GTK_GRID(table), Entry_ppage, 1, i, 2, 1 );
+
+    i++;
+    texte = gtk_label_new( "Page" );
+    gtk_grid_attach( GTK_GRID(table), texte, 0, i, 1, 1 );
+    GtkWidget *Entry_page = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_page), NBR_CARAC_PAGE_SYNOPTIQUE );
+    gtk_entry_set_placeholder_text ( GTK_ENTRY(Entry_page), "Entrez le nom court" );
+    gtk_widget_set_tooltip_text ( Entry_page, "Entrez le nom court" );
+    /*gtk_entry_set_progress_fraction (GTK_ENTRY(Entry_page), 0.5 );*/
+    gtk_grid_attach( GTK_GRID(table), Entry_page, 1, i, 1, 1 );
+
+/*    texte = gtk_label_new( "Access Level" );                                       /* Création du spin du niveau de clearance */
+/*    gtk_grid_attach( GTK_GRID(table), texte, 0, i, 1, 1 );*/
+    GtkWidget *Spin_access_level = gtk_spin_button_new_with_range( 0, client->access_level, 1 );
+    gtk_widget_set_tooltip_text ( Spin_access_level, "Niveau d'accès minimum" );
+    gtk_grid_attach( GTK_GRID(table),  Spin_access_level, 2, i, 1, 1 );
+
+    i++;
+    texte = gtk_label_new( "Description" );
+    gtk_grid_attach( GTK_GRID(table), texte, 0, i, 1, 1 );
+    GtkWidget *Entry_lib = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_SYNOPTIQUE );
+    gtk_entry_set_placeholder_text ( GTK_ENTRY(Entry_lib), "Entrez la description du synoptique" );
+    gtk_widget_set_tooltip_text ( Entry_lib, "Entrez la description du synoptique" );
+    gtk_grid_attach( GTK_GRID(table), Entry_lib, 1, i, 2, 1 );
+
+    g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(gtk_widget_grab_focus), Entry_page );
+
+    if (syn)                                                                                    /* Si edition d'un synoptique */
+     { gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_access_level), Json_get_int ( syn, "access_level" ) );
+       gtk_entry_set_text( GTK_ENTRY(Entry_lib), Json_get_string ( syn, "libelle" ) );
+       gtk_entry_set_text( GTK_ENTRY(Entry_page), Json_get_string ( syn, "page" ) );
+       gtk_entry_set_text( GTK_ENTRY(Entry_ppage), Json_get_string ( syn, "ppage" ) );
+     }
+
+    gtk_widget_grab_focus( Entry_lib );
+    gtk_widget_show_all( dialog );
+
+    if (gtk_dialog_run( GTK_DIALOG(dialog) ) == GTK_RESPONSE_OK)                       /* Attente de reponse de l'utilisateur */
+     {
+     }
+    gtk_widget_destroy( dialog );
+  }
+/******************************************************************************************************************************/
+/* Show_Proprietes_synoptique: Edite les propriétés d'un synoptique                                                           */
+/* Entrée: les données issues de libsoup                                                                                      */
+/* sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Show_Proprietes_synoptique_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
+  { struct CLIENT *client = user_data;
+    GBytes *response_brute;
+    gchar *reason_phrase;
+    gint status_code;
+    gsize taille;
+    printf("%s\n", __func__ );
+    g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
+    if (status_code != 200)
+     { GtkWidget *dialog = gtk_message_dialog_new ( GTK_WINDOW(client->window), GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                    GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error Code %d: %s",
+                                                    status_code, reason_phrase);
+       gtk_dialog_run (GTK_DIALOG (dialog));
+       gtk_widget_destroy (dialog);
+       return;
+     }
+    g_object_get ( msg, "response-body-data", &response_brute, NULL );
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
+    Creer_Fenetre_Ajouter_Editer_synoptique ( client, response );
+    json_node_unref(response);
+  }
+/******************************************************************************************************************************/
+/* Menu_editer_synoptique: Demande d'edition du synoptique selectionné                                                        */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Menu_Want_Proprietes_synoptique ( struct PAGE_NOTEBOOK *page )
+  { GtkTreeSelection *selection;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    GList *lignes;
+    guint nbr, id;
+
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(page->client->Liste_synoptique) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(page->client->Liste_synoptique) );
+
+    nbr = gtk_tree_selection_count_selected_rows( selection );
+    if (!nbr) return;                                                        /* Si rien n'est selectionné */
+
+    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
+    gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                   /* Recup du id */
+
+    gchar chaine[80];
+    g_snprintf(chaine, sizeof(chaine), "syn/edit/%d", id );
+    Envoi_au_serveur( page->client, "GET", NULL, 0, chaine, Show_Proprietes_synoptique_CB );
+    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (lignes);                                                           /* Liberation mémoire */
+  }
+/******************************************************************************************************************************/
+/* Synoptique_deleted_CB: Met à jour la liste synoptique en fonction des parametres recu du serveur                           */
 /* Entrée: les données issues de la librairie libsoup                                                                         */
 /* sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Updater_synoptique_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
+ static void Synoptique_deleted_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
   { struct CLIENT *client = user_data;
     GBytes *response_brute;
     gchar *reason_phrase;
@@ -94,11 +215,11 @@ end:
     json_node_unref(response);
   }
 /******************************************************************************************************************************/
-/* Effacer_synoptique: Fonction appelée qd on appuie sur le bouton de suppression et que l'ona validé l'ordre                 */
+/* Send_Effacer_synoptique: Fonction appelée qd on appuie sur le bouton de suppression et que l'ona validé l'ordre                 */
 /* Entrée: la page source                                                                                                     */
 /* sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Effacer_synoptique ( struct PAGE_NOTEBOOK *page )
+ static void Send_Effacer_synoptique ( struct PAGE_NOTEBOOK *page )
   { GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
@@ -113,7 +234,7 @@ end:
        gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                /* Recup du id */
        g_snprintf(chaine, sizeof(chaine), "syn/del/%d", id );
-       Envoi_au_serveur ( page->client, "GET", NULL, 0, chaine, Updater_synoptique_CB );
+       Envoi_au_serveur ( page->client, "GET", NULL, 0, chaine, Synoptique_deleted_CB );
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
      }
@@ -121,11 +242,11 @@ end:
     g_list_free (lignes);                                                                               /* Liberation mémoire */
   }
 /******************************************************************************************************************************/
-/* Menu_effacer_synoptique: Retrait des synoptiques selectionnés                                                              */
+/* Menu_Want_Effacer_synoptique: Retrait des synoptiques selectionnés                                                         */
 /* Entrée: la page du client                                                                                                  */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Menu_effacer_synoptique ( struct PAGE_NOTEBOOK *page )
+ static void Menu_Want_Effacer_synoptique ( struct PAGE_NOTEBOOK *page )
   { GtkTreeSelection *selection;
     GtkWidget *dialog;
     gboolean retour;
@@ -143,43 +264,9 @@ end:
     gtk_widget_show_all( dialog );
     retour = gtk_dialog_run( GTK_DIALOG(dialog) );                                     /* Attente de reponse de l'utilisateur */
     gtk_widget_destroy(dialog);
-    if (retour == GTK_RESPONSE_OK) Effacer_synoptique(page);
+    if (retour == GTK_RESPONSE_OK) Send_Effacer_synoptique(page);
   }
 #ifdef bouh
-/**********************************************************************************************************/
-/* Menu_editer_synoptique: Demande d'edition du synoptique selectionné                                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Menu_editer_synoptique ( void )
-  { GtkTreeSelection *selection;
-    struct CMD_TYPE_SYNOPTIQUE rezo_synoptique;
-    GtkTreeModel *store;
-    GtkTreeIter iter;
-    GList *lignes;
-    gchar *libelle;
-    guint nbr;
-
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_synoptique) );
-    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(client->Liste_synoptique) );
-
-    nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                        /* Si rien n'est selectionné */
-
-    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_synoptique.id, -1 );               /* Recup du id */
-    gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-
-    memcpy( &rezo_synoptique.libelle, libelle, sizeof(rezo_synoptique.libelle) );
-    g_free( libelle );
-
-printf("on veut editer le synoptique num %d %s\n", rezo_synoptique.id, rezo_synoptique.libelle );
-    Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_EDIT_SYNOPTIQUE,
-                  (gchar *)&rezo_synoptique, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
-  }
 /**********************************************************************************************************/
 /* Menu_atelier_synoptique: Edition physique d'un synoptique via l'atelier                                */
 /* Entrée: rien                                                                                           */
@@ -225,16 +312,16 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
 /******************************************************************************************************************************/
  static gboolean Gerer_popup_synoptique ( GtkWidget *widget, GdkEventButton *event, gpointer data )
   { GtkWidget *Popup, *item, *hbox;
-    struct CLIENT *client = data;
+    struct PAGE_NOTEBOOK *page = data;
     GtkTreeSelection *selection;
     GtkTreePath *path;
     gint cellx, celly;
 
     if (!event) return(FALSE);
 
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_synoptique) );           /* On recupere la selection */
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(page->client->Liste_synoptique) );     /* On recupere la selection */
     if (gtk_tree_selection_count_selected_rows(selection) == 0)
-     { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(client->Liste_synoptique), event->x, event->y, &path, NULL, &cellx, &celly );
+     { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(page->client->Liste_synoptique), event->x, event->y, &path, NULL, &cellx, &celly );
        if (path)
         { gtk_tree_selection_select_path( selection, path );
           gtk_tree_path_free( path );
@@ -263,7 +350,7 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
     gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( "preferences-system", GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
     gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new("Propriétés"), FALSE, FALSE, 0 );
     gtk_container_add ( GTK_CONTAINER(item), hbox );
-    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
+    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Menu_Want_Proprietes_synoptique), page );
     gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
 
     item = gtk_menu_item_new();
@@ -282,7 +369,7 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
     gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( "edit-delete", GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
     gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new("Supprimer"), FALSE, FALSE, 0 );
     gtk_container_add ( GTK_CONTAINER(item), hbox );
-    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
+    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Menu_Want_Effacer_synoptique), page );
     gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
 
     gtk_widget_show_all(Popup);
@@ -420,7 +507,7 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
     gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_synoptique), colonne );
 
     g_signal_connect( G_OBJECT(client->Liste_synoptique), "button_press_event",                      /* Gestion du menu popup */
-                      G_CALLBACK(Gerer_popup_synoptique), client );
+                      G_CALLBACK(Gerer_popup_synoptique), page );
     g_object_unref (G_OBJECT (store));                                            /* nous n'avons plus besoin de notre modele */
 
 /************************************************ Les boutons de controles ****************************************************/
@@ -444,6 +531,13 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
     gtk_widget_set_tooltip_text ( bouton, "Ouvrir le synoptique pour l'éditer" );
     //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_editer_source_dls), NULL );
 
+    bouton = gtk_button_new_with_label( "Propriétés" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "preferences-system", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
+    gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
+    gtk_widget_set_tooltip_text ( bouton, "Editer les propriétés du synoptique" );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_Want_Proprietes_synoptique), page );
+
     bouton = gtk_button_new_with_label( "Ajouter" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "list-add", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
@@ -466,7 +560,7 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
     gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "edit-delete", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
     gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Supprimer un synoptique et toutes ses dependances" );
-    //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_effacer_un_plugin), page );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_Want_Effacer_synoptique), page );
 
     json_array_foreach_element ( Json_get_array ( response, "synoptiques" ), Afficher_un_synoptique, page );
     json_node_unref ( response );
@@ -474,75 +568,6 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
     gint page_num = gtk_notebook_append_page( GTK_NOTEBOOK(client->Notebook), page->child, gtk_label_new("Atelier") );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(client->Notebook), page_num );
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Afficher_un_synoptique: Ajoute un synoptique dans la liste des synoptiques                             */
-/* Entrée: une reference sur le synoptique                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_afficher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique )
-  { GtkListStore *store;
-    GtkTreeIter iter;
-
-    if (!Tester_page_notebook(TYPE_PAGE_SYNOPTIQUE)) Creer_page_synoptique();
-
-    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(client->Liste_synoptique) ));
-    gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
-    Rafraichir_visu_synoptique ( &iter, synoptique );
-  }
-/**********************************************************************************************************/
-/* Cacher_un_synoptique: Enleve un synoptique de la liste des synoptiques                                 */
-/* Entrée: une reference sur le synoptique                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_cacher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique )
-  { GtkTreeModel *store;
-    GtkTreeIter iter;
-    gboolean valide;
-    gint id;
-
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_synoptique) );
-    valide = gtk_tree_model_get_iter_first( store, &iter );
-
-    while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
-       if ( id == synoptique->id )
-        { printf("elimination synoptique %s\n", synoptique->libelle );
-          break;
-        }
-       valide = gtk_tree_model_iter_next( store, &iter );
-     }
-
-    if (valide)
-     { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
-  }
-/**********************************************************************************************************/
-/* Proto_rafrachir_un_synoptique: Rafraichissement du synoptique en parametre                             */
-/* Entrée: une reference sur le synoptique                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_rafraichir_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique )
-  { GtkTreeModel *store;
-    GtkTreeIter iter;
-    gboolean valide;
-    gint id;
-
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_synoptique) );
-    valide = gtk_tree_model_get_iter_first( store, &iter );
-
-    while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
-       if ( id == synoptique->id )
-        { printf("maj synoptique %s\n", synoptique->libelle );
-          break;
-        }
-       valide = gtk_tree_model_iter_next( store, &iter );
-     }
-
-    if (valide)
-     { Rafraichir_visu_synoptique( &iter, synoptique ); }
-  }
-#endif
 /******************************************************************************************************************************/
 /* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                                                 */
 /* Entrée/Sortie: rien                                                                                                        */
