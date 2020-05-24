@@ -135,7 +135,8 @@
            trame_motif->motif->tech_id, trame_motif->motif->acronyme, trame_motif->motif->bit_clic );
     gchar *buf = Json_get_buf (builder, &taille_buf);
     GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
-    soup_websocket_connection_send_message (trame_motif->infos->ws_motifs, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
+    struct TYPE_INFO_SUPERVISION *infos = trame_motif->page->infos;
+    soup_websocket_connection_send_message (infos->ws_motifs, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
     g_bytes_unref( gbytes );
   }
 /******************************************************************************************************************************/
@@ -143,8 +144,8 @@
 /* Entrée: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
-                                          GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
+ void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                   GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
   { if (!(trame_motif && event)) return;
 
     if (event->type == GDK_BUTTON_PRESS)
@@ -277,58 +278,6 @@ printf("%s\n", __func__);
      { /*Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_CADRAN_UNKNOWN,*/
 
      }
-  }
-/******************************************************************************************************************************/
-/* Afficher_un_motif: Ajoute un motif sur la trame de supervision                                                             */
-/* Entrée: les parametres iteratif JSon                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Afficher_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct TYPE_INFO_SUPERVISION *infos=user_data;
-    struct TRAME_ITEM_MOTIF *trame_motif;
-    struct CMD_TYPE_MOTIF *motif;
-
-    if (!(infos && infos->Trame)) return;
-
-    motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
-    if (!motif) return;
-
-    motif->position_x   = Json_get_int ( element, "posx" );
-    motif->position_y   = Json_get_int ( element, "posy" );
-    motif->largeur      = Json_get_int ( element, "larg" );
-    motif->hauteur      = Json_get_int ( element, "haut" );
-    motif->angle        = Json_get_int ( element, "angle" );
-    motif->icone_id     = Json_get_int ( element, "icone" );
-    motif->type_dialog  = Json_get_int ( element, "dialog" );
-    motif->type_gestion = Json_get_int ( element, "gestion" );
-    motif->rouge0       = Json_get_int ( element, "rouge" );
-    motif->vert0        = Json_get_int ( element, "vert" );
-    motif->bleu0        = Json_get_int ( element, "bleu" );
-    motif->layer        = Json_get_int ( element, "layer" );
-    g_snprintf( motif->tech_id,       sizeof(motif->tech_id),       "%s", Json_get_string( element, "tech_id" ) );
-    g_snprintf( motif->acronyme,      sizeof(motif->acronyme),      "%s", Json_get_string( element, "acronyme" ) );
-    g_snprintf( motif->clic_tech_id,  sizeof(motif->clic_tech_id),  "%s", Json_get_string( element, "clic_tech_id" ) );
-    g_snprintf( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", Json_get_string( element, "clic_acronyme" ) );
-    g_snprintf( motif->libelle,       sizeof(motif->libelle),       "%s", Json_get_string( element, "libelle" ) );
-    motif->access_level = Json_get_int ( element, "access_level" );
-    motif->bit_controle = Json_get_int ( element, "bitctrl" );
-    motif->bit_clic     = Json_get_int ( element, "bitclic" );
-    motif->rafraich     = Json_get_int ( element, "rafraich" );
-    printf("%s, add motif %s\n", __func__, motif->libelle );
-    trame_motif = Trame_ajout_motif ( FALSE, infos, motif );
-    if (!trame_motif)
-     { printf("Erreur creation d'un nouveau motif\n");
-       return;                                                          /* Ajout d'un test anti seg-fault */
-     }
-    trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */
-    trame_motif->vert   = motif->vert0;                                          /* Sauvegarde etat motif */
-    trame_motif->bleu   = motif->bleu0;                                          /* Sauvegarde etat motif */
-    trame_motif->mode   = 0;                                                     /* Sauvegarde etat motif */
-    trame_motif->cligno = 0;                                                     /* Sauvegarde etat motif */
-    g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
-                      G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
-                      G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
   }
 /******************************************************************************************************************************/
 /* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MOTIF                                 */
@@ -485,15 +434,18 @@ printf("%s\n", __func__);
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_ALWAYS, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-    infos->Trame = Trame_creer_trame( TAILLE_SYNOPTIQUE_X, TAILLE_SYNOPTIQUE_Y, "darkgray", 0 );
+    infos->Trame = Trame_creer_trame( page, TAILLE_SYNOPTIQUE_X, TAILLE_SYNOPTIQUE_Y, "darkgray", 0 );
     gtk_container_add( GTK_CONTAINER(scroll), infos->Trame->trame_widget );
 
 /************************************************** Boutons de controle *******************************************************/
     boite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
-    bouton = gtk_button_new_from_icon_name( "Fermer", GTK_ICON_SIZE_BUTTON );
+    bouton = gtk_button_new_with_label( "Fermer" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "window-close", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
+    gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
+    gtk_widget_set_tooltip_text ( bouton, "Fermer la page" );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Detruire_page_supervision), page );
 
     bouton = gtk_button_new_with_label( "Imprimer" );
@@ -544,11 +496,11 @@ printf("%s\n", __func__);
     gtk_widget_show_all( label );
     gint page_num = gtk_notebook_append_page( GTK_NOTEBOOK(client->Notebook), page->child, label );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(client->Notebook), page_num );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ),      Afficher_un_motif, infos );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, infos );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Afficher_un_commentaire, infos );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, infos );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, infos );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ),      Afficher_un_motif, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Afficher_un_commentaire, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, page );
 
     g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/live-motifs", client->hostname );
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),

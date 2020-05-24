@@ -326,23 +326,36 @@
  extern void Changer_couleur_motif_directe( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Proto_afficher_mnemo_atelier ( int tag, struct CMD_TYPE_MNEMO_BASE *mnemo );
 
- extern void Creer_fenetre_ajout_motif ( void );                                                /* Dans atelier_ajout_motif.c */
+
+#endif
+ extern void Afficher_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data);/* Dans atelier_motif.c */
+#ifdef bouh
+
+ extern void Creer_fenetre_ajout_motif ( void );
  extern void Detruire_fenetre_ajout_motif ( void );
  extern void Choisir_motif_a_ajouter ( void );
+#endif
 
- extern void Creer_fenetre_ajout_commentaire ( void );                                        /* Dans atelier_ajout_comment.c */
+                                                                                                    /* Dans atelier_comment.c */
+ extern void Afficher_un_commentaire (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+#ifdef bouh
+ extern void Creer_fenetre_ajout_commentaire ( void );
  extern void Proto_afficher_un_comment_atelier( struct CMD_TYPE_COMMENT *rezo_comment );
  extern void Proto_cacher_un_comment_atelier( struct CMD_TYPE_COMMENT *comment );
 
 #endif
-                                                                                           /* Dans atelier_ajout_passerelle.c */
+                                                                                                 /* Dans atelier_passerelle.c */
+ extern void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
 #ifdef bouh
  extern void Creer_fenetre_ajout_passerelle ( void );
  extern void Proto_afficher_un_syn_for_passerelle_atelier( struct CMD_TYPE_SYNOPTIQUE *syn );
  extern void Proto_afficher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *rezo_pass );
  extern void Proto_cacher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *pass );
 
-                                                                                               /* Dans atelier_ajout_cadran.c */
+#endif
+                                                                                                     /* Dans atelier_cadran.c */
+ extern void Afficher_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+#ifdef bouh
  extern void Menu_ajouter_editer_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Proto_afficher_un_cadran_atelier( struct CMD_TYPE_CADRAN *rezo_cadran );
  extern void Proto_cacher_un_cadran_atelier( struct CMD_TYPE_CADRAN *cadran );
@@ -354,7 +367,11 @@
  extern void Proto_cacher_une_palette_atelier( struct CMD_TYPE_PALETTE *palette );
  extern void Proto_afficher_un_syn_for_palette_atelier( struct CMD_TYPE_SYNOPTIQUE *synoptique );
 
-                                                                                           /* Dans atelier_ajout_camera_sup.c */
+#endif
+                                                                                                     /* Dans atelier_camera.c */
+ extern void Afficher_une_camera (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+
+#ifdef bouh
  extern struct TRAME_ITEM_CAMERA_SUP *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id );
  extern void Menu_ajouter_camera_sup ( void );
  extern void Proto_afficher_un_camera_for_atelier( struct CMD_TYPE_CAMERA *camera );
@@ -367,13 +384,15 @@
  extern void Demander_synoptique_supervision ( struct CLIENT *client, gint id );
  extern void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data);
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
- extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( struct CLIENT *client, gint syn_id );
+ extern void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                          GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
 
                                                                                                 /* Dans supervision_comment.c */
- extern void Afficher_un_commentaire (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
 
                                                                                                  /* Dans supervision_camera.c */
- extern void Afficher_une_camera (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+ extern void Clic_sur_camera_sup_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                               GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+
 #ifdef bouh
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
  extern void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif );
@@ -392,16 +411,18 @@
 
 #endif
                                                                                              /* Dans supervision_passerelle.c */
- extern void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
  extern void Changer_vue_directe ( struct CLIENT *client, guint num_syn );
+ extern gboolean Supervision_clic_passerelle (GooCanvasItem *canvasitem, GooCanvasItem *target,
+                                              GdkEvent *event, struct TRAME_ITEM_PASS *trame_pass );
 #ifdef bouh
                                                                                                 /* Dans supervision_palette.c */
  extern void Proto_afficher_une_palette_supervision( struct CMD_TYPE_PALETTE *rezo_palette );
 
 #endif
                                                                                                  /* Dans supervision_cadran.c */
- extern void Afficher_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
  extern void Updater_les_cadrans( struct TYPE_INFO_SUPERVISION *infos, JsonNode *cadran );
+ extern void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                           GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran );
 #ifdef bouh
  extern void Proto_changer_etat_cadran( struct CMD_ETAT_BIT_CADRAN *etat_cadran );
 

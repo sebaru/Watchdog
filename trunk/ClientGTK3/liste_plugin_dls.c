@@ -709,7 +709,7 @@
      }
 
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
-    printf("Recu SYNS: %s %p\n", g_bytes_get_data ( response_brute, &taille ), client );
+    printf("Recu SYNS: %s %p\n", (gchar *)g_bytes_get_data ( response_brute, &taille ), client );
 
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;

@@ -25,14 +25,7 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
- #include <string.h>
- #include <stdlib.h>
-
- #include "Config_cli.h"
- #include "Reseaux.h"
- #include "trame.h"
-
+ #include <gtk/gtk.h>
  enum
   {  COLONNE_CLASSE_ID,
      COLONNE_CLASSE_LIBELLE,
@@ -45,25 +38,94 @@
      NBR_COLONNE
   };
 
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 /***************************************** Définitions des prototypes programme ***********************************************/
  #include "protocli.h"
 
- extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;                         /* Des pitites boules ! */
- extern GdkPixmap *Rouge, *Bleue, *Verte, *Orange, *Jaune;
- extern GtkWidget *F_trame;                       /* C'est bien le widget referencant la trame synoptique */
+/******************************************************************************************************************************/
+/* Atelier_Afficher_un_motif: Ajoute un motif sur la page atelier                                                             */
+/* Entrée: les données JSON recu de la requete HTTP                                                                           */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Afficher_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct PAGE_NOTEBOOK *page = user_data;
+    struct TRAME_ITEM_MOTIF *trame_motif;
+    struct CMD_TYPE_MOTIF *motif;
 
- static GtkWidget *F_ajout_motif;                                    /* Pour acceder la fenetre graphique */
- static GtkWidget *Liste_classe;                      /* GtkTreeView pour la gestion des classes Watchdog */
- static GtkWidget *Liste_icone;                        /* GtkTreeView pour la gestion des icones Watchdog */
- static struct TRAME *Trame_preview0;                             /* Previsualisation du motif par défaut */
- static struct TRAME_ITEM_MOTIF *Trame_motif_p0;                           /* Motif en cours de selection */
- static struct CMD_TYPE_MOTIF Motif_preview0;
+    if (!page) return;
 
- static gchar *Package_received_buffer;                                                /* Buffer de reception du code package */
- static gint   Package_received_size;                                               /* Taille actuelle du buffer de reception */
+    motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
+    if (!motif) return;
 
+    motif->position_x   = Json_get_int ( element, "posx" );
+    motif->position_y   = Json_get_int ( element, "posy" );
+    motif->largeur      = Json_get_int ( element, "larg" );
+    motif->hauteur      = Json_get_int ( element, "haut" );
+    motif->angle        = Json_get_int ( element, "angle" );
+    motif->icone_id     = Json_get_int ( element, "icone" );
+    motif->type_dialog  = Json_get_int ( element, "dialog" );
+    motif->type_gestion = Json_get_int ( element, "gestion" );
+    motif->rouge0       = Json_get_int ( element, "rouge" );
+    motif->vert0        = Json_get_int ( element, "vert" );
+    motif->bleu0        = Json_get_int ( element, "bleu" );
+    motif->layer        = Json_get_int ( element, "layer" );
+    g_snprintf( motif->tech_id,       sizeof(motif->tech_id),       "%s", Json_get_string( element, "tech_id" ) );
+    g_snprintf( motif->acronyme,      sizeof(motif->acronyme),      "%s", Json_get_string( element, "acronyme" ) );
+    g_snprintf( motif->clic_tech_id,  sizeof(motif->clic_tech_id),  "%s", Json_get_string( element, "clic_tech_id" ) );
+    g_snprintf( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", Json_get_string( element, "clic_acronyme" ) );
+    g_snprintf( motif->libelle,       sizeof(motif->libelle),       "%s", Json_get_string( element, "libelle" ) );
+    motif->access_level = Json_get_int ( element, "access_level" );
+    motif->bit_controle = Json_get_int ( element, "bitctrl" );
+    motif->bit_clic     = Json_get_int ( element, "bitclic" );
+    motif->rafraich     = Json_get_int ( element, "rafraich" );
+
+    if (page->type == TYPE_PAGE_SUPERVISION)
+     { struct TYPE_INFO_SUPERVISION *infos=page->infos;
+       trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
+       if (!trame_motif)
+        { printf("Erreur creation d'un nouveau motif\n");
+          return;                                                          /* Ajout d'un test anti seg-fault */
+        }
+       trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */
+       trame_motif->vert   = motif->vert0;                                          /* Sauvegarde etat motif */
+       trame_motif->bleu   = motif->bleu0;                                          /* Sauvegarde etat motif */
+       trame_motif->mode   = 0;                                                     /* Sauvegarde etat motif */
+       trame_motif->cligno = 0;                                                     /* Sauvegarde etat motif */
+       g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
+                         G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
+                         G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
+     }
+    else if (page->type == TYPE_PAGE_ATELIER)
+     { struct TYPE_INFO_ATELIER *infos=page->infos;
+       trame_motif = Trame_ajout_motif ( TRUE, infos->Trame_atelier, motif );
+       if (!trame_motif) { g_free(motif); return; }                                                            /* Si probleme */
+       trame_motif->groupe_dpl = index;                                               /* Numéro de groupe pour le deplacement */
+
+/*    g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->item), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->item), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->item), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
+
+    g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-press-event",   G_CALLBACK(Agrandir_hg), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-release-event", G_CALLBACK(Agrandir_hg), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->select_hg), "motion-notify-event",  G_CALLBACK(Agrandir_hg), trame_motif );
+
+    g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-press-event",   G_CALLBACK(Agrandir_hd), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-release-event", G_CALLBACK(Agrandir_hd), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->select_hd), "motion-notify-event",  G_CALLBACK(Agrandir_hd), trame_motif );
+
+    g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-press-event",   G_CALLBACK(Agrandir_bg), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-release-event", G_CALLBACK(Agrandir_bg), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->select_bg), "motion-notify-event",  G_CALLBACK(Agrandir_bg), trame_motif );
+
+    g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-press-event",   G_CALLBACK(Agrandir_bd), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-release-event", G_CALLBACK(Agrandir_bd), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->select_bd), "motion-notify-event",  G_CALLBACK(Agrandir_bd), trame_motif );
+*/
+     }
+  }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Menu_editer_icone: Demande d'edition du icone selectionné                                              */
 /* Entrée: rien                                                                                           */
@@ -482,4 +544,5 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Trame_preview0->trame_widget, 0, 1, 0, 3 );
     Remplir_liste_classe();                                  /* Récupération de la liste des classes et affichage sur l'ecran */
   }
-/*--------------------------------------------------------------------------------------------------------*/
+#endif
+/*----------------------------------------------------------------------------------------------------------------------------*/

@@ -21,31 +21,55 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
- #include <string.h>
- #include <stdlib.h>
-
- #include "Reseaux.h"
- #include "trame.h"
- #include "Config_cli.h"
-
-/********************************* Définitions des prototypes programme ***********************************/
+ #include <gtk/gtk.h>
+/******************************************* Définitions des prototypes programme *********************************************/
  #include "protocli.h"
-
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
-
- static GtkWidget *F_ajout_comment = NULL;                   /* Fenetre graphique de choix de commentaire */
- static GtkWidget *Entry_comment;                                           /* Commentaire proprement dit */
- static GtkWidget *Couleur_comment=NULL;                             /* Definit la couleur du commentaire */
- static GtkWidget *Font_comment=NULL;                                 /* Definit la police du commentaire */
 
  enum
   { STYLE_TITRE, STYLE_SOUS_TITRE, STYLE_ANNOTATION };
+
+/******************************************************************************************************************************/
+/* Afficher_un_commentaire: Ajoute un commentaire sur un synoptique                                                           */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Afficher_un_commentaire (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct PAGE_NOTEBOOK *page=user_data;
+    struct CMD_TYPE_COMMENT *comment;
+
+    comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
+    if (!comment)
+     { return;
+     }
+
+    comment->id           = atoi(Json_get_string ( element, "id" ));
+    comment->syn_id       = atoi(Json_get_string ( element, "syn_id" ));
+    comment->position_x   = atoi(Json_get_string ( element, "posx" ));
+    comment->position_y   = atoi(Json_get_string ( element, "posy" ));
+    comment->angle        = atoi(Json_get_string ( element, "angle" ));
+    comment->rouge        = atoi(Json_get_string ( element, "rouge" ));
+    comment->vert         = atoi(Json_get_string ( element, "vert" ));
+    comment->bleu         = atoi(Json_get_string ( element, "bleu" ));
+    //comment->font_size    = atoi(Json_get_string ( element, "bleu" ));
+    g_snprintf( comment->libelle, sizeof(comment->libelle), "%s", Json_get_string ( element, "libelle" ));
+    g_snprintf( comment->font,    sizeof(comment->font),    "%s", Json_get_string ( element, "font" ));
+    //g_snprintf( comment->def_color,    sizeof(comment->def_color),    "%s", Json_get_string ( element, "def_color" ));
+
+    if (page->type == TYPE_PAGE_SUPERVISION)
+     { struct TYPE_INFO_SUPERVISION *infos=page->infos;
+       Trame_ajout_commentaire ( FALSE, infos->Trame, comment );
+     }
+    else if (page->type == TYPE_PAGE_ATELIER)
+     { struct TYPE_INFO_ATELIER *infos=page->infos;
+       Trame_ajout_commentaire ( TRUE, infos->Trame_atelier, comment );
+     }
+
+  }
+#ifdef bouh
 
 /**********************************************************************************************************/
 /* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                    */
@@ -72,7 +96,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Changer_commentaire ( GtkWidget *widget, gpointer data )
-  { gnome_font_picker_set_preview_text( GNOME_FONT_PICKER(Font_comment), 
+  { gnome_font_picker_set_preview_text( GNOME_FONT_PICKER(Font_comment),
                                         gtk_entry_get_text( GTK_ENTRY(Entry_comment) ) );
   }
 /**********************************************************************************************************/
@@ -128,7 +152,7 @@
                                                          &add_comment.vert,
                                                          &add_comment.bleu, NULL );
                              add_comment.position_x = TAILLE_SYNOPTIQUE_X/2;
-                             add_comment.position_y = TAILLE_SYNOPTIQUE_Y/2;                            
+                             add_comment.position_y = TAILLE_SYNOPTIQUE_Y/2;
                              add_comment.syn_id = infos->syn.id;
 
                              Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_COMMENT,
@@ -163,7 +187,7 @@
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_ajout_comment)->vbox ), hboite, TRUE, TRUE, 0 );
-    
+
     table = gtk_table_new( 3, 3, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
@@ -215,7 +239,7 @@
   { struct TRAME_ITEM_COMMENT *trame_comment;
     struct TYPE_INFO_ATELIER *infos;
     struct CMD_TYPE_COMMENT *comment;
-        
+
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_comment->syn_id );
     comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment)
@@ -245,7 +269,7 @@
  void Proto_cacher_un_comment_atelier( struct CMD_TYPE_COMMENT *comment )
   { struct TRAME_ITEM_COMMENT *trame_comment;
     struct TYPE_INFO_ATELIER *infos;
-        
+
     infos = Rechercher_infos_atelier_par_id_syn ( comment->syn_id );
     trame_comment = Id_vers_trame_comment( infos, comment->id );
     printf("Proto_cacher_un_comment_atelier debut: ID=%d %p\n", comment->id, trame_comment );
@@ -257,4 +281,5 @@
     infos->Trame_atelier->trame_items = g_list_remove( infos->Trame_atelier->trame_items, trame_comment );
     printf("Proto_cacher_un_comment_atelier fin..\n");
   }
+#endif
 /*--------------------------------------------------------------------------------------------------------*/

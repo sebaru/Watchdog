@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/atelier_clic_trame.c        Gestion des evenements sur la trame                                 */
-/* Projet WatchDog version 3.0       Gestion d'habitat                   sam. 19 sept. 2009 11:59:15 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/atelier_clic_trame.c        Gestion des evenements sur la trame                                                     */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                       sam. 19 sept. 2009 11:59:15 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * atelier_clic_trame.c
  * This file is part of Watchdog
@@ -25,19 +25,16 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
+ #include <gtk/gtk.h>
 
- #include "trame.h"
-
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
-/********************************* Définitions des prototypes programme ***********************************/
+/******************************************* Définitions des prototypes programme *********************************************/
  #include "protocli.h"
 
-/**********************************************************************************************************/
-/* Nouveau_groupe: Renvoie un numero de groupe unique                                                     */
-/* Entrée: Rien                                                                                           */
-/* Sortie: un gint                                                                                        */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Nouveau_groupe: Renvoie un numero de groupe unique                                                                         */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: un gint                                                                                                            */
+/******************************************************************************************************************************/
  gint Nouveau_groupe ( void )
   { static gint groupe = 0;
     groupe++;

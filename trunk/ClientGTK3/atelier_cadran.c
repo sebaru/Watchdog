@@ -25,27 +25,49 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
- #include <string.h>
- #include <stdlib.h>
-
- #include "Reseaux.h"
- #include "trame.h"
- #include "Config_cli.h"
-
-/********************************************* Définitions des prototypes programme *******************************************/
+ #include <gtk/gtk.h>
+/******************************************* Définitions des prototypes programme *********************************************/
  #include "protocli.h"
 
- extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
+/******************************************************************************************************************************/
+/* Afficher_un_cadran: Ajoute un cadran sur la trame                                                                          */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Afficher_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct PAGE_NOTEBOOK *page=user_data;
+    struct TRAME_ITEM_CADRAN *trame_cadran;
+    struct CMD_TYPE_CADRAN *cadran;
 
- static GtkWidget *F_ajout_cadran = NULL;                                             /* Fenetre graphique de choix de cadran */
- static GtkWidget *Entry_bitctrl;                                                                   /* Libelle proprement dit */
- static GtkWidget *Entry_tech_id;                                                                   /* Libelle proprement dit */
- static GtkWidget *Entry_acronyme;                                                                  /* Libelle proprement dit */
- static GtkWidget *Spin_nb_decimal;
- static GtkWidget *Combo_type;
+    if (!page) return;
+    cadran = (struct CMD_TYPE_CADRAN *)g_try_malloc0( sizeof(struct CMD_TYPE_CADRAN) );
+    if (!cadran)
+     { return;
+     }
 
+    cadran->id         = Json_get_int ( element, "id" );
+    cadran->syn_id     = Json_get_int ( element, "syn_id" );
+    cadran->position_x = Json_get_int ( element, "posx" );
+    cadran->position_y = Json_get_int ( element, "posy" );
+    cadran->angle      = Json_get_int ( element, "angle" );
+    cadran->nb_decimal = Json_get_int ( element, "nb_decimal" );
+    //cadran->font_size    = atoi(Json_get_string ( element, "bleu" ));
+    g_snprintf( cadran->tech_id,  sizeof(cadran->tech_id),  "%s", Json_get_string ( element, "tech_id" ));
+    g_snprintf( cadran->acronyme, sizeof(cadran->acronyme), "%s", Json_get_string ( element, "acronyme" ));
+
+    if (page->type == TYPE_PAGE_SUPERVISION)
+     { struct TYPE_INFO_SUPERVISION *infos=page->infos;
+       trame_cadran = Trame_ajout_cadran ( FALSE, infos->Trame, cadran );
+       g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "button-press-event",
+                         G_CALLBACK(Clic_sur_cadran_supervision), trame_cadran );
+     }
+    else if (page->type == TYPE_PAGE_ATELIER)
+     { struct TYPE_INFO_ATELIER *infos=page->infos;
+       trame_cadran = Trame_ajout_cadran ( TRUE, infos->Trame_atelier, cadran );
+     }
+  }
+
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                                        */
 /* Entrée: Un id motif                                                                                                        */
@@ -243,4 +265,5 @@
     infos->Trame_atelier->trame_items = g_list_remove( infos->Trame_atelier->trame_items, trame_cadran );
     printf("Proto_cacher_un_cadran_atelier fin..\n");
   }
+#endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

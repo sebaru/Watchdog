@@ -21,26 +21,53 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
- #include <string.h>
- #include <stdlib.h>
-
- #include "Reseaux.h"
- #include "trame.h"
- #include "Config_cli.h"
-
-/******************************************** Définitions des prototypes programme ********************************************/
+ #include <gtk/gtk.h>
+/******************************************* Définitions des prototypes programme *********************************************/
  #include "protocli.h"
 
- extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
+/******************************************************************************************************************************/
+/* Afficher_une_camera: Ajoute une camera sur un synoptique                                                                   */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Afficher_une_camera (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct PAGE_NOTEBOOK *page=user_data;
+    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    struct CMD_TYPE_CAMERASUP *camera_sup;
 
- static GtkWidget *F_ajout_camera_sup = NULL;                                     /* Fenetre graphique de choix de camera_sup */
- static GtkWidget *Liste_camera;                                          /* GtkTreeView pour la gestion des cameras Watchdog */
+    if (!page) return;
+    camera_sup = (struct CMD_TYPE_CAMERASUP *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERASUP) );
+    if (!camera_sup)
+     { return;
+     }
+
+    camera_sup->id     = Json_get_int ( element, "id" );
+    camera_sup->syn_id = Json_get_int ( element, "syn_id" );
+    camera_sup->posx   = Json_get_int ( element, "posx" );
+    camera_sup->posy   = Json_get_int ( element, "posy" );
+    //camera_sup->font_size    = atoi(Json_get_string ( element, "bleu" ));
+    g_snprintf( camera_sup->libelle,  sizeof(camera_sup->libelle),  "%s", Json_get_string ( element, "libelle" ));
+    g_snprintf( camera_sup->location, sizeof(camera_sup->location), "%s", Json_get_string ( element, "location" ));
+
+    if (page->type == TYPE_PAGE_SUPERVISION)
+     { struct TYPE_INFO_SUPERVISION *infos=page->infos;
+       trame_camera_sup = Trame_ajout_camera_sup ( FALSE, infos->Trame, camera_sup );
+       g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "button-press-event",
+                         G_CALLBACK(Clic_sur_camera_sup_supervision), trame_camera_sup );
+       g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "button-release-event",
+                         G_CALLBACK(Clic_sur_camera_sup_supervision), trame_camera_sup );
+     }
+    else if (page->type == TYPE_PAGE_ATELIER)
+     { struct TYPE_INFO_ATELIER *infos=page->infos;
+       trame_camera_sup = Trame_ajout_camera_sup ( TRUE, infos->Trame_atelier, camera_sup );
+     }
+
+  }
+#ifdef bouh
 
 /******************************************************************************************************************************/
 /* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                                        */
@@ -94,7 +121,7 @@
                g_list_free (lignes);                                                                    /* Liberation mémoire */
 
                add_camera_sup.posx   = TAILLE_SYNOPTIQUE_X/2;
-               add_camera_sup.posy   = TAILLE_SYNOPTIQUE_Y/2;                            
+               add_camera_sup.posy   = TAILLE_SYNOPTIQUE_Y/2;
                add_camera_sup.syn_id = infos->syn.id;
                add_camera_sup.camera_src_id = id;
 
@@ -129,7 +156,7 @@
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_ajout_camera_sup)->vbox ), hboite, TRUE, TRUE, 0 );
-    
+
 /**************************************************** La liste des cameras ****************************************************/
     Creer_liste_camera ( &Liste_camera, &scroll );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
@@ -161,7 +188,7 @@
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     struct TYPE_INFO_ATELIER *infos;
     struct CMD_TYPE_CAMERASUP *camera_sup;
-        
+
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_camera_sup->syn_id );
     camera_sup = (struct CMD_TYPE_CAMERASUP *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERASUP) );
     if (!camera_sup)
@@ -193,7 +220,7 @@
  void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *camera_sup )
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     struct TYPE_INFO_ATELIER *infos;
-        
+
     infos = Rechercher_infos_atelier_par_id_syn ( camera_sup->syn_id );
     trame_camera_sup = Id_vers_trame_camera_sup( infos, camera_sup->id );
     printf("Proto_cacher_un_camera_sup_atelier debut: ID=%d %p\n", camera_sup->id, trame_camera_sup );
@@ -204,4 +231,5 @@
     infos->Trame_atelier->trame_items = g_list_remove( infos->Trame_atelier->trame_items, trame_camera_sup );
     printf("Proto_cacher_un_camera_sup_atelier fin..\n");
   }
+#endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

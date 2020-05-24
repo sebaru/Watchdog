@@ -634,27 +634,27 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_MOTIF *motif )
+ struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame, struct CMD_TYPE_MOTIF *motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
 
-    if (!(infos && infos->Trame && motif)) return(NULL);
+    if (!(trame && motif)) return(NULL);
 
     trame_motif = Trame_new_item();
     if (!trame_motif) { printf("Trame_ajout_motif: Erreur mémoire\n"); return(NULL); }
 
     trame_motif->motif = motif;
-    trame_motif->infos = infos;
+    trame_motif->page = trame->page;
     trame_motif->type = TYPE_MOTIF;
 
     Charger_pixbuf_id( trame_motif, motif->icone_id );
-    if (!trame_motif->images)                                                               /* En cas de probleme, on sort */
+    if (!trame_motif->images)                                                                  /* En cas de probleme, on sort */
      { Trame_del_item(trame_motif);
        g_free(trame_motif);
        return(NULL);
      }
 
     Trame_peindre_motif( trame_motif, motif->rouge0, motif->vert0, motif->bleu0 );
-    trame_motif->item_groupe = goo_canvas_group_new ( infos->Trame->canvas_root, NULL );         /* Groupe MOTIF */
+    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
                                                (-(gdouble)(trame_motif->gif_largeur/2)),
@@ -668,19 +668,19 @@ printf("Charger_pixbuf_file: %s\n", fichier );
      { GdkPixbuf *pixbuf;
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_hg.gif", NULL );
-       trame_motif->select_hg = goo_canvas_image_new ( infos->Trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
+       trame_motif->select_hg = goo_canvas_image_new ( trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
        g_object_unref(pixbuf);
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_hd.gif", NULL );
-       trame_motif->select_hd = goo_canvas_image_new ( infos->Trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
+       trame_motif->select_hd = goo_canvas_image_new ( trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
        g_object_unref(pixbuf);
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_bg.gif", NULL );
-       trame_motif->select_bg = goo_canvas_image_new ( infos->Trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
+       trame_motif->select_bg = goo_canvas_image_new ( trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
        g_object_unref(pixbuf);
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_bd.gif", NULL );
-       trame_motif->select_bd = goo_canvas_image_new ( infos->Trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
+       trame_motif->select_bd = goo_canvas_image_new ( trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
        g_object_unref(pixbuf);
 
        g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
@@ -691,10 +691,10 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
     Trame_rafraichir_motif ( trame_motif );
 
-    infos->Trame->trame_items = g_list_append( infos->Trame->trame_items, trame_motif );
+    trame->trame_items = g_list_append( trame->trame_items, trame_motif );
     if (trame_motif->motif->type_gestion == TYPE_FOND)
      { goo_canvas_item_lower( trame_motif->item_groupe, NULL );
-       goo_canvas_item_lower( infos->Trame->fond, NULL );
+       goo_canvas_item_lower( trame->fond, NULL );
      }
     else if (!flag) g_object_set ( G_OBJECT(trame_motif->item_groupe), "tooltip", motif->libelle, NULL );
     return(trame_motif);
@@ -704,7 +704,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: la structure referencant la camera de supervision, ou NULL si erreur                                               */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( struct CLIENT *client, gint flag, struct TRAME *trame,
+ struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
                                                         struct CMD_TYPE_CAMERASUP *camera_sup )
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GdkPixbuf *pixbuf;
@@ -714,7 +714,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     trame_camera_sup = g_try_malloc0( sizeof(struct TRAME_ITEM_CAMERA_SUP) );
     if (!trame_camera_sup) return(NULL);
     trame_camera_sup->camera_sup = camera_sup;
-    trame_camera_sup->client = client;
+    trame_camera_sup->page = trame->page;
     pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                      /* Chargement du fichier Camera */
     if (!pixbuf)
      { //Download_gif ( 1, 0 );
@@ -854,7 +854,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 /* Entrée: une structure passerelle, la trame de reference                                                                    */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( struct CLIENT *client, gint flag, struct TRAME *trame, struct CMD_TYPE_PASSERELLE *pass )
+ struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame, struct CMD_TYPE_PASSERELLE *pass )
   { struct TRAME_ITEM_PASS *trame_pass;
     gint taillex, tailley;
 
@@ -862,8 +862,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame_pass = g_try_malloc0( sizeof(struct TRAME_ITEM_PASS) );
     if (!trame_pass) return(NULL);
 
-    trame_pass->trame  = trame;
-    trame_pass->client = client;
+    trame_pass->page   = trame->page;
     trame_pass->pass   = pass;
     trame_pass->type   = TYPE_PASSERELLE;
     trame_pass->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );     /* Groupe PASSERELLE */
@@ -911,7 +910,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 /* Entrée: une structure cadran, la trame de reference                                                                        */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( struct CLIENT *client, gint flag, struct TRAME *trame,
+ struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
                                                 struct CMD_TYPE_CADRAN *cadran )
   { struct TRAME_ITEM_CADRAN *trame_cadran;
     gchar *couleur_bordure;
@@ -921,7 +920,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     if (!trame_cadran) return(NULL);
 
     trame_cadran->cadran = cadran;
-    trame_cadran->client = client;
+    trame_cadran->page   = trame->page;
     trame_cadran->item_groupe = goo_canvas_group_new ( trame->canvas_root,                                   /* Groupe cadran */
                                                         NULL);
 
@@ -958,13 +957,14 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 /* Entrée: les tailles x, y et la couleur de fond                                                                             */
 /* Sortie: un widget GTK                                                                                                      */
 /******************************************************************************************************************************/
- struct TRAME *Trame_creer_trame ( guint taille_x, guint taille_y, char *coul, guint grille )
+ struct TRAME *Trame_creer_trame ( struct PAGE_NOTEBOOK *page, guint taille_x, guint taille_y, char *coul, guint grille )
   { struct TRAME *trame;
     gdouble x, y;
 
     trame = g_try_malloc0( sizeof(struct TRAME) );
     if (!trame) return(NULL);
 
+    trame->page = page;
     trame->trame_widget = goo_canvas_new();
     g_object_set( trame->trame_widget, "background-color", coul, "anchor", GOO_CANVAS_ANCHOR_CENTER, NULL );
     g_object_set( trame->trame_widget, "has-tooltip", TRUE, NULL );

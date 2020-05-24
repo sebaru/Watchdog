@@ -29,48 +29,6 @@
 /****************************************** Définitions des prototypes programme **********************************************/
  #include "protocli.h"
 
-#ifdef bouh
-/******************************************************************************************************************************/
-/* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                                        */
-/* Entrée: Un id motif                                                                                                        */
-/* sortie: un struct TRAME_ITEM_MOTIF                                                                                         */
-/******************************************************************************************************************************/
- struct TRAME_ITEM_MOTIF *Id_vers_trame_motif ( struct TYPE_INFO_ATELIER *infos, gint id )
-  { GList *liste;
-    liste = infos->Trame_atelier->trame_items;
-    while( liste )
-     { if ( *(gint *)(liste->data) == TYPE_MOTIF &&
-            ((struct TRAME_ITEM_MOTIF *)(liste->data))->motif->id == id ) break;
-       else liste = liste->next;
-     }
-    if (!liste)
-     { printf("Id_vers_trame_motif: item %d non trouvé\n", id );
-       return(NULL);
-     }
-    return( (struct TRAME_ITEM_MOTIF *)(liste->data) );
-  }
-/******************************************************************************************************************************/
-/* Rechercher_infos_atelier_par_id_syn: Recherche une page synoptique par son numéro                                          */
-/* Entrée: Un numéro de synoptique                                                                                            */
-/* Sortie: Une référence sur les champs d'information de la page en question                                                  */
-/******************************************************************************************************************************/
- struct TYPE_INFO_ATELIER *Rechercher_infos_atelier_par_id_syn ( gint syn_id )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    GList *liste;
-    liste = Liste_pages;
-    infos = NULL;
-    while( liste )
-     { page = (struct PAGE_NOTEBOOK *)liste->data;
-       if ( page->type == TYPE_PAGE_ATELIER )                                            /* Est-ce bien une page d'atelier ?? */
-        { infos = (struct TYPE_INFO_ATELIER *)page->infos;
-          if (infos->syn.id == syn_id) break;                                                  /* Nous avons trouvé le syn !! */
-        }
-       liste = liste->next;                                                                            /* On passe au suivant */
-     }
-    return(infos);
-  }
-#endif
 /******************************************************************************************************************************/
 /* Detruire_page_atelier: Destruction d'une page atelier                                                                      */
 /* Entrée: la page en question                                                                                                */
@@ -96,6 +54,7 @@
   { struct TYPE_INFO_ATELIER *infos = page->infos;
     gtk_widget_set_sensitive( infos->Spin_grid, gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON(infos->Check_grid) ) );
   }
+
 #ifdef bouh
 /******************************************************************************************************************************/
 /* Menu_ajouter_motif: Ajout d'un motif                                                                                       */
@@ -201,7 +160,7 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Creer_page_atelier_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
-  { GtkWidget *bouton, *boite, *hboite, *vboite , *table, *scroll, *frame, *texte, *spin, *boite1, *separateur;
+  { GtkWidget *bouton, *boite, *hboite, *vboite , *table, *scroll, *texte, *spin, *boite1, *separateur;
     struct CLIENT *client = user_data;
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
@@ -213,7 +172,7 @@
 
     printf("%s\n", __func__ );
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
-    printf("Recu SYNS: %s %p\n", (gchar *)g_bytes_get_data ( response_brute, &taille ), client );
+  /*  printf("Recu SYNS: %s %p\n", (gchar *)g_bytes_get_data ( response_brute, &taille ), client );*/
 
     g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
     if (status_code != 200)
@@ -234,8 +193,6 @@
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     infos->syn = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
-
-
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     page->child = hboite;
@@ -282,7 +239,7 @@
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
     gtk_box_pack_start( GTK_BOX(boite), scroll, TRUE, TRUE, 0 );
 
-    infos->Trame_atelier = Trame_creer_trame( TAILLE_SYNOPTIQUE_X, TAILLE_SYNOPTIQUE_Y, "darkgray", 20 );
+    infos->Trame_atelier = Trame_creer_trame( page, TAILLE_SYNOPTIQUE_X, TAILLE_SYNOPTIQUE_Y, "darkgray", 20 );
     gtk_container_add( GTK_CONTAINER(scroll), infos->Trame_atelier->trame_widget );
 
   /*  g_signal_connect_swapped( G_OBJECT(infos->Trame_atelier->fond), "event",
@@ -340,13 +297,16 @@
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
 
 /***************************************************** Ajout de motifs ********************************************************/
-    frame = gtk_frame_new ( "Menu" );
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
+    texte = gtk_label_new ( "Ajouts" );
+    gtk_box_pack_start( GTK_BOX(boite), texte, FALSE, FALSE, 0 );
 
-    vboite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
-    gtk_container_add( GTK_CONTAINER(frame), vboite );
-    gtk_container_set_border_width( GTK_CONTAINER(vboite), 6 );
+    bouton = gtk_button_new_with_label( "Motifs" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "list-add", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
+    gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
+    gtk_widget_set_tooltip_text ( bouton, "Ajouter un motif dans la page" );
+    //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_ajouter_motif), page );
+
 
 #ifdef bouh
     menu_bar= gtk_menu_bar_new();
@@ -406,57 +366,13 @@
     g_snprintf( titre, sizeof(titre), "Atelier/%s", Json_get_string( infos->syn, "libelle" ) );
     gint page_num = gtk_notebook_append_page( GTK_NOTEBOOK(client->Notebook), page->child, gtk_label_new ( titre ) );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(client->Notebook), page_num );
-/*    json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ),      Afficher_un_motif, infos );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, infos );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Afficher_un_commentaire, infos );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, infos );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, infos );
-*/
+    json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ),      Afficher_un_motif, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, page );
+/*    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Atelier_Afficher_un_commentaire, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Atelier_Afficher_une_camera, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Atelier_Afficher_un_cadran, page );*/
   }
 #ifdef bouh
-/******************************************************************************************************************************/
-/* Afficher_un_message: Ajoute un message dans la liste des messages                                                          */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Proto_afficher_un_motif_atelier( struct CMD_TYPE_MOTIF *rezo_motif )
-  { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TYPE_INFO_ATELIER *infos;
-    struct CMD_TYPE_MOTIF *motif;
-
-    infos = Rechercher_infos_atelier_par_id_syn ( rezo_motif->syn_id );
-    if (!infos) return;
-    motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
-    if (!motif) { return; }
-
-    memcpy( motif, rezo_motif, sizeof(struct CMD_TYPE_MOTIF) );
-
-    trame_motif = Trame_ajout_motif ( TRUE, infos->Trame_atelier, motif );
-    if (!trame_motif) { g_free(motif); return; }                                                               /* Si probleme */
-    trame_motif->groupe_dpl = Nouveau_groupe();                                       /* Numéro de groupe pour le deplacement */
-
-    g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->item), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->item), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->item), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
-
-    g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-press-event",   G_CALLBACK(Agrandir_hg), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-release-event", G_CALLBACK(Agrandir_hg), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->select_hg), "motion-notify-event",  G_CALLBACK(Agrandir_hg), trame_motif );
-
-    g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-press-event",   G_CALLBACK(Agrandir_hd), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-release-event", G_CALLBACK(Agrandir_hd), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->select_hd), "motion-notify-event",  G_CALLBACK(Agrandir_hd), trame_motif );
-
-    g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-press-event",   G_CALLBACK(Agrandir_bg), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-release-event", G_CALLBACK(Agrandir_bg), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->select_bg), "motion-notify-event",  G_CALLBACK(Agrandir_bg), trame_motif );
-
-    g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-press-event",   G_CALLBACK(Agrandir_bd), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-release-event", G_CALLBACK(Agrandir_bd), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->select_bd), "motion-notify-event",  G_CALLBACK(Agrandir_bd), trame_motif );
-  }
 /******************************************************************************************************************************/
 /* Cacher_un_message: Enleve un message de la liste des messages                                                              */
 /* Entrée: une reference sur le message                                                                                       */

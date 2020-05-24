@@ -35,8 +35,8 @@
 /* Entrée: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
-                                           GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran )
+ void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                    GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran )
   { if ( !(event->button.button == 1 &&                                                                     /* clic gauche ?? */
            event->type == GDK_BUTTON_PRESS)
        ) return;
@@ -47,41 +47,11 @@
      { gchar chaine[256];
        g_snprintf( chaine, sizeof(chaine),
                   "https://%s.abls-habitat.fr/archive/show/%s/%s/HOUR",
-                   trame_cadran->client->hostname, trame_cadran->cadran->tech_id, trame_cadran->cadran->acronyme );
+                   trame_cadran->page->client->hostname, trame_cadran->cadran->tech_id, trame_cadran->cadran->acronyme );
        execlp( "firefox", "firefox", chaine, NULL );
        printf("Lancement de firefox failed\n");
        _exit(0);
      }
-  }
-/******************************************************************************************************************************/
-/* Afficher_un_cadran: Ajoute un cadran sur la trame                                                                          */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Afficher_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct TYPE_INFO_SUPERVISION *infos=user_data;
-    struct TRAME_ITEM_CADRAN *trame_cadran;
-    struct CMD_TYPE_CADRAN *cadran;
-
-    if (!(infos && infos->Trame)) return;
-    cadran = (struct CMD_TYPE_CADRAN *)g_try_malloc0( sizeof(struct CMD_TYPE_CADRAN) );
-    if (!cadran)
-     { return;
-     }
-
-    cadran->id         = Json_get_int ( element, "id" );
-    cadran->syn_id     = Json_get_int ( element, "syn_id" );
-    cadran->position_x = Json_get_int ( element, "posx" );
-    cadran->position_y = Json_get_int ( element, "posy" );
-    cadran->angle      = Json_get_int ( element, "angle" );
-    cadran->nb_decimal = Json_get_int ( element, "nb_decimal" );
-    //cadran->font_size    = atoi(Json_get_string ( element, "bleu" ));
-    g_snprintf( cadran->tech_id,  sizeof(cadran->tech_id),  "%s", Json_get_string ( element, "tech_id" ));
-    g_snprintf( cadran->acronyme, sizeof(cadran->acronyme), "%s", Json_get_string ( element, "acronyme" ));
-
-    trame_cadran = Trame_ajout_cadran ( infos->client, FALSE, infos->Trame, cadran );
-    g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "button-press-event",
-                      G_CALLBACK(Clic_sur_cadran_supervision), trame_cadran );
   }
 /******************************************************************************************************************************/
 /* Met a jour le libelle d'un cadran                                                                                          */

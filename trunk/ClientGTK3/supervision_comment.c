@@ -31,33 +31,5 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
-/******************************************************************************************************************************/
-/* Afficher_un_commentaire: Ajoute un commentaire sur un synoptique                                                           */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Afficher_un_commentaire (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct TYPE_INFO_SUPERVISION *infos=user_data;
-    struct CMD_TYPE_COMMENT *comment;
 
-    comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
-    if (!comment)
-     { return;
-     }
-
-    comment->id           = atoi(Json_get_string ( element, "id" ));
-    comment->syn_id       = atoi(Json_get_string ( element, "syn_id" ));
-    comment->position_x   = atoi(Json_get_string ( element, "posx" ));
-    comment->position_y   = atoi(Json_get_string ( element, "posy" ));
-    comment->angle        = atoi(Json_get_string ( element, "angle" ));
-    comment->rouge        = atoi(Json_get_string ( element, "rouge" ));
-    comment->vert         = atoi(Json_get_string ( element, "vert" ));
-    comment->bleu         = atoi(Json_get_string ( element, "bleu" ));
-    //comment->font_size    = atoi(Json_get_string ( element, "bleu" ));
-    g_snprintf( comment->libelle, sizeof(comment->libelle), "%s", Json_get_string ( element, "libelle" ));
-    g_snprintf( comment->font,    sizeof(comment->font),    "%s", Json_get_string ( element, "font" ));
-    //g_snprintf( comment->def_color,    sizeof(comment->def_color),    "%s", Json_get_string ( element, "def_color" ));
-
-    Trame_ajout_commentaire ( TRUE, infos->Trame, comment );
-  }
 /*--------------------------------------------------------------------------------------------------------*/
