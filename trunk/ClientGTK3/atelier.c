@@ -202,7 +202,7 @@
     gtk_box_pack_start( GTK_BOX(hboite), vboite, TRUE, TRUE, 0 );
     table = gtk_grid_new();                                                                        /* Barre de controle trame */
     gtk_grid_set_row_spacing( GTK_GRID(table), 5 );
-    gtk_grid_set_column_homogeneous( GTK_GRID(table), TRUE );
+    //gtk_grid_set_column_homogeneous( GTK_GRID(table), TRUE );
     gtk_grid_set_column_spacing( GTK_GRID(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
 

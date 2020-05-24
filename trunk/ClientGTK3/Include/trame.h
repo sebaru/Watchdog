@@ -31,7 +31,6 @@
  #include <gtk/gtk.h>
  #include <goocanvas.h>
  #include <gdk-pixbuf/gdk-pixbuf.h>                                                              /* Gestion des images/motifs */
- #include "protocli.h"                                                                                 /* Interface GooCanvas */
  #include "Reseaux.h"
 
  #define TAILLE_SYNOPTIQUE_X        1024                                  /* Généralités sur la taille de la Trame synoptique */
@@ -117,7 +116,7 @@
     time_t last_clic;
 
     struct CMD_TYPE_MOTIF *motif;
-    gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
+    gint   layer;                                                                      /* Groupe de deplacement du motif */
     gint selection;                                                                                      /* Encore utilisé ?? */
   };
 
@@ -133,7 +132,7 @@
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     struct CMD_TYPE_PASSERELLE *pass;
-    gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
+    gint   layer;                                                                      /* Groupe de deplacement du motif */
     gint selection;
   };
 
@@ -145,7 +144,7 @@
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     struct CMD_TYPE_COMMENT *comment;
-    gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
+    gint   layer;                                                                      /* Groupe de deplacement du motif */
     gint   selection;
   };
 
@@ -159,7 +158,7 @@
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     struct CMD_TYPE_CADRAN *cadran;
-    gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
+    gint   layer;                                                                      /* Groupe de deplacement du motif */
     gint   selection;
     gfloat valeur;
   };
@@ -173,7 +172,7 @@
     GooCanvasItem *select_mi;
 
     struct CMD_TYPE_CAMERASUP *camera_sup;
-    gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
+    gint   layer;                                                                      /* Groupe de deplacement du motif */
     gint selection;
   };
 

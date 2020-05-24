@@ -71,8 +71,7 @@
   };
 
  struct TYPE_INFO_SUPERVISION
-  { struct CLIENT *client;
-    SoupWebsocketConnection *ws_motifs;
+  { SoupWebsocketConnection *ws_motifs;
     guint timer_id;                                    /* Id du timer pour l'animation des motifs sur la trame de supervision */
     gboolean timer_hidden;                                            /* Pour savoir si les motifs doivent etre allumé ou non */
     JsonNode *syn;                                                                       /* Id du synoptique en cours de visu */
@@ -127,28 +126,16 @@
   { JsonNode *syn;                                                                       /* Id du synoptique en cours de visu */
                                                                     /* Interface de plus haut niveau: affichage du synoptique */
     struct TRAME *Trame_atelier;                                                             /* La trame de fond de l'atelier */
-    struct
-     { gint type;                                                                     /* Type de l'item selectionné principal */
-       gint groupe;                                                                     /* Le groupe actuellement selectionné */
-       union { struct TRAME_ITEM_MOTIF *trame_motif;                             /* Pointeur sur l'item selectionné principal */
-               struct TRAME_ITEM_PASS  *trame_pass;                              /* Pointeur sur l'item selectionné principal */
-               struct TRAME_ITEM_COMMENT *trame_comment;
-               struct TRAME_ITEM_CADRAN *trame_cadran;
-               struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
-             };
-
-       GList *items;                                                          /* Tous les items faisant parti de la selection */
-     } Selection;
+    gint new_layer;                                               /* Numéro du prochain groupe "layer" pour grouper les items */
+    GSList *Selection;                                                             /* Les de TRAME_ITEM qui sont sélectionnés */
     GtkWidget *Option_zoom;                                                                    /* Choix du zoom sur l'atelier */
     GtkWidget *Check_grid;                                                                 /* La grille est-elle magnétique ? */
     GtkWidget *Spin_grid;                                                  /* Quel est l'ecartement de la grille magnetique ? */
     GtkWidget *Entry_posxy;                                                /* Affichage des coordonnées X de l'objet en cours */
     GtkWidget *Entry_libelle;                                                       /* Gestion du libelle de l'objet en cours */
     GtkAdjustment *Adj_angle;                                                        /* Angle de rotation de l'objet en cours */
-
-    GtkWidget *F_ajout_palette;                                                              /* Le fenetre d'ajout de palette */
-    GtkWidget *Liste_syn;                                            /* La liste des synoptiques pour la fenetre des palettes */
-    GtkWidget *Liste_palette;                                                /* La liste des palettes associées au synoptique */
+    gdouble Clic_x, Clic_y;
+    gint Appui;
   };
 
  enum                                       /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
@@ -282,8 +269,8 @@
  extern void Detruire_page_liste_synoptique ( struct PAGE_NOTEBOOK *page );
  extern struct TYPE_INFO_ATELIER *Rechercher_infos_atelier_par_id_syn ( gint syn_id );
 
+#endif
                                                                                                  /* Dans atelier_clic_trame.c */
- extern void Clic_sur_fond ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event, gpointer data );
  extern void Clic_sur_motif ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                               struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Clic_sur_comment ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
@@ -294,12 +281,13 @@
                                struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                                    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+#ifdef bouh
+ extern void Clic_sur_fond ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event, gpointer data );
  extern gint Nouveau_groupe ( void );
-
+#endif
                                                                                                   /* Dans atelier_selection.c */
  extern void Tout_deselectionner ( struct TYPE_INFO_ATELIER *infos );
- extern gboolean Tester_selection ( struct TYPE_INFO_ATELIER *infos, gint groupe );
- extern void Selectionner ( struct TYPE_INFO_ATELIER *infos, gint groupe, gboolean deselect );
+ extern void Selectionner ( struct TYPE_INFO_ATELIER *infos, gint layer );
  extern void Deplacer_selection ( struct TYPE_INFO_ATELIER *infos, gint deltax, gint deltay );
  extern void Rotationner_selection ( struct TYPE_INFO_ATELIER *infos );
  extern void Effacer_selection ( void );
@@ -310,6 +298,7 @@
  extern void Mettre_echelle_selection_1_1 ( void );
  extern void Mettre_echelle_selection_1_Y ( void );
  extern void Mettre_echelle_selection_X_1 ( void );
+#ifdef bouh
                                                                                                    /* Dans atelier_agrandir.c */
  extern void Agrandir_bd ( GooCanvasItem *widget, GooCanvasItem *target,
                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );

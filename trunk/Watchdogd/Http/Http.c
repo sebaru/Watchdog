@@ -228,15 +228,21 @@
        return(FALSE);
      }
 
-    g_snprintf( session->username, sizeof(session->username), "%s", username );
     session->access_level = atoi(db->row[3]);
+    Liberer_resultat_SQL (db);
+    Libere_DB_SQL( &db );
+
+    g_snprintf( session->username, sizeof(session->username), "%s", username );
     session->last_request = Partage->top;
     uuid_t uuid_hex;
     uuid_generate(uuid_hex);
     uuid_unparse_lower(uuid_hex, session->wtd_session);
+    if (strlen(session->wtd_session) != 36)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Session Parse Error (%d)", __func__, strlen(session->wtd_session) );
+       g_free(session);
+       return(FALSE);
+     }
     Cfg_http.liste_http_clients = g_slist_append ( Cfg_http.liste_http_clients, session );
-    Liberer_resultat_SQL (db);
-    Libere_DB_SQL( &db );
 
     SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", session->wtd_session, NULL, "/", 86400 );
     soup_cookie_set_http_only ( wtd_session, TRUE );

@@ -51,9 +51,9 @@
     g_source_remove( infos->timer_id );
     Trame_detruire_trame( infos->Trame );
 
-    gint num = gtk_notebook_page_num( GTK_NOTEBOOK(infos->client->Notebook), GTK_WIDGET(page->child) );
-    gtk_notebook_remove_page( GTK_NOTEBOOK(infos->client->Notebook), num );
-    infos->client->Liste_pages = g_slist_remove( infos->client->Liste_pages, page );
+    gint num = gtk_notebook_page_num( GTK_NOTEBOOK(page->client->Notebook), GTK_WIDGET(page->child) );
+    gtk_notebook_remove_page( GTK_NOTEBOOK(page->client->Notebook), num );
+    page->client->Liste_pages = g_slist_remove( page->client->Liste_pages, page );
     g_free(infos);                                                                     /* Libération des infos le cas échéant */
     g_free(page);
   }
@@ -313,12 +313,14 @@ printf("%s\n", __func__);
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Traiter_connect_ws_motifs_CB (GObject *source_object, GAsyncResult *res, gpointer user_data )
-  { struct TYPE_INFO_SUPERVISION *infos = user_data;
+  { struct PAGE_NOTEBOOK *page = user_data;
+    struct TYPE_INFO_SUPERVISION *infos = user_data;
     GError *error = NULL;
     gsize taille_buf;
     GList *liste;
     printf("%s\n", __func__ );
-    infos->ws_motifs = soup_session_websocket_connect_finish ( infos->client->connexion, res, &error );
+
+    infos->ws_motifs = soup_session_websocket_connect_finish ( page->client->connexion, res, &error );
     if (!infos->ws_motifs)                                                                    /* No limit on incoming packet ! */
      { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
        g_error_free (error);
@@ -418,7 +420,6 @@ printf("%s\n", __func__);
 
     infos = page->infos = (struct TYPE_INFO_SUPERVISION *)g_try_malloc0( sizeof(struct TYPE_INFO_SUPERVISION) );
     if (!page->infos) { g_free(page); return; }
-    infos->client = client;
 
     page->type   = TYPE_PAGE_SUPERVISION;
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
@@ -504,7 +505,7 @@ printf("%s\n", __func__);
 
     g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/live-motifs", client->hostname );
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
-                                           NULL, NULL, g_cancellable_new(), Traiter_connect_ws_motifs_CB, infos );
+                                           NULL, NULL, g_cancellable_new(), Traiter_connect_ws_motifs_CB, page );
   }
 #ifdef bouh
 /******************************************************************************************************************************/

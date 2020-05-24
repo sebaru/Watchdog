@@ -29,6 +29,7 @@
 
 /******************************************* Définitions des prototypes programme *********************************************/
  #include "protocli.h"
+#ifdef bouh
 
 /******************************************************************************************************************************/
 /* Nouveau_groupe: Renvoie un numero de groupe unique                                                                         */
@@ -151,6 +152,7 @@ printf("Afficher_propriete: debut\n");
        default: printf("Changer_couleur_directe: Type de selection inconnu\n");
      }
   }
+#endif
 /**********************************************************************************************************/
 /* Mettre_a_jour_position: S'occupe des rulers et des entry posxy pour affichage position souris/objet    */
 /* Entrée: la nouvelle position X et Y                                                                    */
@@ -162,11 +164,13 @@ printf("Afficher_propriete: debut\n");
     snprintf( chaine, sizeof(chaine), "X = %d, Y = %d", x, y );
     gtk_entry_set_text( GTK_ENTRY(infos->Entry_posxy), chaine );
 
+#ifdef bouh
     g_signal_handlers_block_by_func( G_OBJECT(infos->Adj_angle),
                                      G_CALLBACK(Rotationner_selection), infos );
     gtk_adjustment_set_value ( infos->Adj_angle, (gdouble)angle );
     g_signal_handlers_unblock_by_func( G_OBJECT(infos->Adj_angle),
                                        G_CALLBACK(Rotationner_selection), infos );
+#endif
   }
 /**********************************************************************************************************/
 /* Mettre_a_jour_position: S'occupe des rulers et des entry posxy pour affichage position souris/objet    */
@@ -184,99 +188,89 @@ printf("Afficher_propriete: debut\n");
 /* Entrée: une structure Event                                                                            */
 /* Sortie :rien                                                                                           */
 /**********************************************************************************************************/
- void Clic_sur_fond ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event, gpointer data )
+ static void Clic_sur_fond ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event, gpointer data )
   { switch (event->type)
      { case GDK_LEAVE_NOTIFY:  break;
        case GDK_ENTER_NOTIFY:
        case GDK_MOTION_NOTIFY: Mettre_a_jour_position( infos, event->motion.x, event->motion.y, 0.0 );
                                break;
        case GDK_BUTTON_PRESS:  if ( !(event->button.state & 0x4) )                         /* Si pas CTRL */
-                                { Tout_deselectionner( infos );
-                                  infos->Selection.type = TYPE_RIEN;
-                                  infos->Selection.trame_motif = NULL;
-                                  infos->Selection.groupe = 0;
-                                }
+                                { Tout_deselectionner( infos ); }
                                break;
        default: break;
      }
   }
-/**********************************************************************************************************/
-/* Clic_general: Fonction generale de traitement du clic sur la trame                                     */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
- static void Clic_general ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event )
-  { static gdouble Clic_x, Clic_y;
-    static gint Appui=0;
-    gfloat angle;
-    gint x, y;
+/******************************************************************************************************************************/
+/* Clic_general: Fonction generale de traitement du clic sur la trame                                                         */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Clic_general ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event, gint layer )
+  { gint x, y, angle;
 
     if (!event) { printf("Clic_general: event=NULL\n"); return; }
     switch (event->type)
-     { case GDK_BUTTON_RELEASE: Appui = 0;
+     { case GDK_BUTTON_RELEASE: infos->Appui = 0;
                                 /* Update BD */
                                 break;
-       case GDK_BUTTON_PRESS:   Clic_x = event->button.x_root;
-                                Clic_y = event->button.y_root;
+       case GDK_BUTTON_PRESS:   infos->Clic_x = event->button.x_root;
+                                infos->Clic_y = event->button.y_root;
                                 printf("Clic_general:  Appui: ClicXY=%f %f  rootx=%f, rooty=%f\n",
                                        event->button.x, event->button.y,
                                        event->button.x_root, event->button.y_root );
-                                Appui = 1;
+                                infos->Appui = 1;
                                 /*if (event->button.button == 1) */             /* Bouton gauche souris ? */
-                                 { if ( event->button.state & 0x4 )                           /* CTRL ?? */
-                                    { Selectionner ( infos, infos->Selection.groupe, TRUE ); }
-                                   else
-                                    { if ( !Tester_selection( infos, infos->Selection.groupe ) )
-                                       { Tout_deselectionner( infos ); }
-                                      Selectionner ( infos, infos->Selection.groupe, FALSE );
-                                    }
+                                 { if (! (event->button.state & 0x4) )                         /* CTRL ?? */
+                                    { Tout_deselectionner( infos ); }
+                                   Selectionner ( infos, layer );
                                  }
                                 break;
        case GDK_MOTION_NOTIFY:
-                               if (Appui)
+                               if (infos->Appui)
                                 { if (event->motion.state & 0x100)           /* Motion + Bouton gauche ?? */
                                    { gdouble posx, posy;
-                                     posx = event->motion.x_root-Clic_x;
-                                     posy = event->motion.y_root-Clic_y;
-                                     printf("Clic_general: Appel a Deplacer_selection posx=%f, posy=%f\n", posx, posy );
+                                     posx = event->motion.x_root-infos->Clic_x;
+                                     posy = event->motion.y_root-infos->Clic_y;
+                                     printf("Clic_general: Appel a Deplacer_selection posx=%d, posy=%d\n", (gint)posx, (gint)posy );
                                      Deplacer_selection( infos, (gint)posx, (gint)posy);
                                    }
                                   else if (event->motion.state & 0x200)      /* Motion + Bouton gauche ?? */
                                    { printf("Clic_general: bouh\n");
                                    }
                                 }
-                               switch (infos->Selection.type)        /* Mise a jour des entrys positions */
+                               if (!infos->Selection) { Mettre_a_jour_position( infos, -1, -1, 0 ); return; }
+                               switch ( *((gint *)(infos->Selection->data)) )               /* Mise a jour des entrys positions */
                                 { case TYPE_PASSERELLE:
-                                       x = infos->Selection.trame_pass->pass->position_x;
-                                       y = infos->Selection.trame_pass->pass->position_y;
-                                       angle = infos->Selection.trame_pass->pass->angle;
+                                       x = ((struct TRAME_ITEM_PASS *)infos->Selection->data)->pass->position_x;
+                                       y = ((struct TRAME_ITEM_PASS *)infos->Selection->data)->pass->position_y;
+                                       angle = ((struct TRAME_ITEM_PASS *)infos->Selection->data)->pass->angle;
                                        break;
                                   case TYPE_COMMENTAIRE:
-                                       x = infos->Selection.trame_comment->comment->position_x;
-                                       y = infos->Selection.trame_comment->comment->position_y;
-                                       angle = infos->Selection.trame_comment->comment->angle;
+                                       x = ((struct TRAME_ITEM_COMMENT *)infos->Selection->data)->comment->position_x;
+                                       y = ((struct TRAME_ITEM_COMMENT *)infos->Selection->data)->comment->position_y;
+                                       angle = ((struct TRAME_ITEM_COMMENT *)infos->Selection->data)->comment->angle;
                                        break;
                                   case TYPE_MOTIF:
-                                       x = infos->Selection.trame_motif->motif->position_x;
-                                       y = infos->Selection.trame_motif->motif->position_y;
-                                       angle = infos->Selection.trame_motif->motif->angle;
+                                       x = ((struct TRAME_ITEM_MOTIF *)infos->Selection->data)->motif->position_x;
+                                       y = ((struct TRAME_ITEM_MOTIF *)infos->Selection->data)->motif->position_y;
+                                       angle = ((struct TRAME_ITEM_MOTIF *)infos->Selection->data)->motif->angle;
                                        break;
                                   case TYPE_CADRAN:
-                                       x = infos->Selection.trame_cadran->cadran->position_x;
-                                       y = infos->Selection.trame_cadran->cadran->position_y;
-                                       angle = infos->Selection.trame_cadran->cadran->angle;
+                                       x = ((struct TRAME_ITEM_CADRAN *)infos->Selection->data)->cadran->position_x;
+                                       y = ((struct TRAME_ITEM_CADRAN *)infos->Selection->data)->cadran->position_y;
+                                       angle = ((struct TRAME_ITEM_CADRAN *)infos->Selection->data)->cadran->angle;
                                        break;
                                   case TYPE_CAMERA_SUP:
-                                       x = infos->Selection.trame_camera_sup->camera_sup->posx;
-                                       y = infos->Selection.trame_camera_sup->camera_sup->posy;
+                                       x = ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection->data)->camera_sup->posx;
+                                       y = ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection->data)->camera_sup->posy;
                                        angle = 0.0;
                                        break;
-                                  default: printf("Clic_general: type inconnu %d\n", infos->Selection.type );
-                                           x=-1; y=-1; angle = 0.0;
+                                  default: printf("Clic_general: type inconnu\n" );
+                                           x=-1; y=-1; angle = 0;
                                 }
-                               if (Appui)
-                                { Clic_x = x;
-                                  Clic_y = y;
+                               if (infos->Appui)
+                                { infos->Clic_x = x;
+                                  infos->Clic_y = y;
                                 }
                                Mettre_a_jour_position( infos, x, y, angle );
                                break;
@@ -290,16 +284,14 @@ printf("Afficher_propriete: debut\n");
 /**********************************************************************************************************/
  void Clic_sur_motif ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                        struct TRAME_ITEM_MOTIF *trame_motif )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    static GtkWidget *Popup = NULL;
-    static GnomeUIInfo Popup_scale[]=                                      /*!< Définition du popup scale */
+  { /*static GtkWidget *Popup = NULL;
+    static GnomeUIInfo Popup_scale[]=
      { GNOMEUIINFO_ITEM_STOCK( N_("Scale to 1:1"), NULL, Mettre_echelle_selection_1_1, GNOME_STOCK_PIXMAP_ALIGN_JUSTIFY ),
        GNOMEUIINFO_ITEM_STOCK( N_("Scale to 1:Y"), NULL, Mettre_echelle_selection_1_Y, GNOME_STOCK_PIXMAP_ALIGN_JUSTIFY ),
        GNOMEUIINFO_ITEM_STOCK( N_("Scale to X:1"), NULL, Mettre_echelle_selection_X_1, GNOME_STOCK_PIXMAP_ALIGN_JUSTIFY ),
        GNOMEUIINFO_END
      };
-    static GnomeUIInfo Popup_raise[]=                                      /*!< Définition du popup raise */
+    static GnomeUIInfo Popup_raise[]=
      { GNOMEUIINFO_ITEM_STOCK( N_("Raise to top"), NULL, Raise_to_top, GNOME_STOCK_PIXMAP_TOP ),
        GNOMEUIINFO_ITEM_STOCK( N_("Lower to bottom"), NULL, Lower_to_bottom, GNOME_STOCK_PIXMAP_BOTTOM ),
        GNOMEUIINFO_END
@@ -317,22 +309,17 @@ printf("Afficher_propriete: debut\n");
        GNOMEUIINFO_SEPARATOR,
        GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
        GNOMEUIINFO_END
-     };
+     };*/
 
     if (!(trame_motif && event)) return;
 
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
-
-    infos->Selection.type = TYPE_MOTIF;
-    infos->Selection.groupe = trame_motif->groupe_dpl;
-    infos->Selection.trame_motif = trame_motif;
+    struct PAGE_NOTEBOOK *page = trame_motif->page;
+    struct TYPE_INFO_ATELIER *infos = page->infos;
 
     if (trame_motif->motif->type_gestion == TYPE_FOND)
      { Clic_sur_fond( infos, event, NULL ); }
     else
-     { Clic_general( infos, event );                                             /* Fonction de base clic */
+     { Clic_general( infos, event, trame_motif->layer );                                             /* Fonction de base clic */
      }
 
     Mettre_a_jour_description( infos, trame_motif->motif->icone_id, trame_motif->motif->libelle );
@@ -344,14 +331,16 @@ printf("Afficher_propriete: debut\n");
           if (trame_motif->select_bd) goo_canvas_item_raise( trame_motif->select_bd, NULL );
         }
        else if (event->button.button == 3)
-        { if (!Popup) Popup = gnome_popup_menu_new( Popup_motif );                       /* Creation menu */
-          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
+        {// if (!Popup) Popup = gnome_popup_menu_new( Popup_motif );                       /* Creation menu */
+       //   gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
 
         }
      }
-    else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
-              event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
+  //  else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
+    //          event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
   }
+#ifdef bouh
+
 /**********************************************************************************************************/
 /* Clic_sur_motif: Appelé quand un evenement est capté sur un motif                                       */
 /* Entrée: une structure Event                                                                            */
@@ -538,4 +527,5 @@ printf("Afficher_propriete: debut\n");
         }
      }
   }
+#endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

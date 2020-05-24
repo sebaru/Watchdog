@@ -39,6 +39,7 @@
 /******************************************************************************************************************************/
  void Afficher_un_commentaire (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct PAGE_NOTEBOOK *page=user_data;
+    struct TRAME_ITEM_COMMENT *trame_comment;
     struct CMD_TYPE_COMMENT *comment;
 
     comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
@@ -65,8 +66,9 @@
      }
     else if (page->type == TYPE_PAGE_ATELIER)
      { struct TYPE_INFO_ATELIER *infos=page->infos;
-       Trame_ajout_commentaire ( TRUE, infos->Trame_atelier, comment );
-     }
+       trame_comment = Trame_ajout_commentaire ( TRUE, infos->Trame_atelier, comment );
+       trame_comment->layer = infos->new_layer++;
+    }
 
   }
 #ifdef bouh

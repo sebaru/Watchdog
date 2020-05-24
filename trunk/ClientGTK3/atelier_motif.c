@@ -99,14 +99,13 @@
      { struct TYPE_INFO_ATELIER *infos=page->infos;
        trame_motif = Trame_ajout_motif ( TRUE, infos->Trame_atelier, motif );
        if (!trame_motif) { g_free(motif); return; }                                                            /* Si probleme */
-       trame_motif->groupe_dpl = index;                                               /* Numéro de groupe pour le deplacement */
-
-/*    g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->item), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->item), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-    g_signal_connect( G_OBJECT(trame_motif->item), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
-
+       trame_motif->layer = infos->new_layer++;
+       g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
+/*
     g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-press-event",   G_CALLBACK(Agrandir_hg), trame_motif );
     g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-release-event", G_CALLBACK(Agrandir_hg), trame_motif );
     g_signal_connect( G_OBJECT(trame_motif->select_hg), "motion-notify-event",  G_CALLBACK(Agrandir_hg), trame_motif );
