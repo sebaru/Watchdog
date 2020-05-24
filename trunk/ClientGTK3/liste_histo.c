@@ -369,7 +369,7 @@ again:
      }
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
 
-    printf("Recu MSGS: %s %p\n", g_bytes_get_data ( response_brute, &taille ), client );
+    printf("Recu MSGS: %s %p\n", (gchar *)g_bytes_get_data ( response_brute, &taille ), client );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
     if (!response || Json_has_member ( response, "enregs" ) == FALSE ) return;
     json_array_foreach_element ( Json_get_array(response, "enregs"), Afficher_un_histo, client );

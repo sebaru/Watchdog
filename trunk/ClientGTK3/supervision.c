@@ -454,7 +454,7 @@ printf("%s\n", __func__);
 
     printf("%s\n", __func__ );
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
-    printf("Recu SYNS: %s %p\n", g_bytes_get_data ( response_brute, &taille ), client );
+    printf("Recu SYNS: %s %p\n", (gchar *)g_bytes_get_data ( response_brute, &taille ), client );
 
     g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
     if (status_code != 200)

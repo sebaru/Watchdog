@@ -62,8 +62,9 @@
      { struct PAGE_NOTEBOOK *page = client->Liste_pages->data;
        switch(page->type)
         { case TYPE_PAGE_SUPERVISION : Detruire_page_supervision ( page ); break;
+          case TYPE_PAGE_ATELIER     : Detruire_page_atelier     ( page ); break;
           case TYPE_PAGE_PLUGIN_DLS  : Detruire_page_plugin_dls  ( page ); break;
-          case TYPE_PAGE_SYNOPTIQUE  : Detruire_page_atelier     ( page ); break;
+          case TYPE_PAGE_SYNOPTIQUE  : Detruire_page_liste_synoptique     ( page ); break;
           default : client->Liste_pages = g_slist_remove ( client->Liste_pages, page );
         }
      }
@@ -145,7 +146,7 @@ printf("searching page %d %d\n", type, id );
        if (page->type == type)                                    /* Si la page existe deja, on l'affiche */
         { switch( type )
            { case TYPE_PAGE_ATELIER:
-                  if ( ((struct TYPE_INFO_ATELIER *)page->infos)->syn.id != id )
+                  if ( Json_get_int ( ((struct TYPE_INFO_ATELIER *)page->infos)->syn , "id" ) != id )
                    { liste = liste->next; continue; }
                   break;
              case TYPE_PAGE_HISTO_MSGS:

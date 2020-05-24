@@ -36,6 +36,7 @@
 
  #include "Reseaux.h"
  #include "client.h"
+ #include "trame.h"
 
  #define TEMPS_MAX_PULSE   10                                            /* 10 secondes de battements maximum pour le serveur */
 
@@ -123,7 +124,7 @@
   };
 
  struct TYPE_INFO_ATELIER
-  { struct CMD_TYPE_SYNOPTIQUE syn;                                                    /* Id du synoptique en cours d'edition */
+  { JsonNode *syn;                                                                       /* Id du synoptique en cours de visu */
                                                                     /* Interface de plus haut niveau: affichage du synoptique */
     struct TRAME *Trame_atelier;                                                             /* La trame de fond de l'atelier */
     struct
@@ -243,12 +244,9 @@
  extern void Creer_page_synoptique( void );
 #endif
                                                                                                     /* Dans liste_synoptique.c*/
- extern void Menu_want_atelier_synoptique ( struct CLIENT *client );
- extern void Detruire_page_atelier( struct PAGE_NOTEBOOK *page );
+ extern void Menu_want_liste_synoptique ( struct CLIENT *client );
+ extern void Detruire_page_liste_synoptique( struct PAGE_NOTEBOOK *page );
 #ifdef bouh
-
- extern void Menu_ajouter_editer_synoptique ( struct CMD_TYPE_SYNOPTIQUE *edit_syn );                    /* ajout_synoptique.c*/
- extern void Proto_afficher_un_dls_for_mnemonique ( struct CMD_TYPE_PLUGIN_DLS *dls );
 
  extern void Proto_cacher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique );                  /* Dans liste_mnemonique.c*/
  extern void Proto_afficher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique );
@@ -271,11 +269,17 @@
  extern void Menu_want_page_admin ( void );
  extern void Menu_want_compilation_forcee ( void );
 
+#endif
+ extern void Detruire_page_atelier ( struct PAGE_NOTEBOOK *page );                                          /* Dans atelier.c */
+ extern void Creer_page_atelier_CB (SoupSession *session, SoupMessage *msg, gpointer user_data);
+
+#ifdef bouh
+
  extern void Proto_afficher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );                               /* Dans atelier.c */
  extern void Proto_cacher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );
  extern void Reduire_en_vignette ( struct CMD_TYPE_MOTIF *motif );
  extern void Creer_page_atelier( gint syn_id, gchar *libelle_syn );
- extern void Detruire_page_atelier ( struct PAGE_NOTEBOOK *page );
+ extern void Detruire_page_liste_synoptique ( struct PAGE_NOTEBOOK *page );
  extern struct TYPE_INFO_ATELIER *Rechercher_infos_atelier_par_id_syn ( gint syn_id );
 
                                                                                                  /* Dans atelier_clic_trame.c */
