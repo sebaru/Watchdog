@@ -87,16 +87,16 @@
     g_free(infos);                                                                     /* Libération des infos le cas échéant */
     g_free(page);
   }
-#ifdef bouh
 /******************************************************************************************************************************/
-/* Menu_ajouter_message: Ajout d'un message                                                                                   */
+/* Menu_grille_magnetique: Active ou non la sensibilité du Check_Grid                                                         */
 /* Entrée: rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Menu_grille_magnetique ( struct TYPE_INFO_ATELIER *infos )
-  { printf("Menu grille magnetique: %d\n", GTK_TOGGLE_BUTTON(infos->Check_grid)->active );
-    gtk_widget_set_sensitive( infos->Spin_grid, GTK_TOGGLE_BUTTON(infos->Check_grid)->active );
+ static void Menu_grille_magnetique ( struct PAGE_NOTEBOOK *page  )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    gtk_widget_set_sensitive( infos->Spin_grid, gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON(infos->Check_grid) ) );
   }
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Menu_ajouter_motif: Ajout d'un motif                                                                                       */
 /* Entrée: rien                                                                                                               */
@@ -183,17 +183,18 @@
        objet=objet->next;
      }
   }
+#endif
 /******************************************************************************************************************************/
 /* Changer_option_zoom: Change le niveau de zoom du canvas                                                                    */
 /* Entrée: la page en question                                                                                                */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Changer_option_zoom (GtkRange *range, struct TYPE_INFO_ATELIER *infos )
-  { GtkAdjustment *adj;
+ static void Changer_option_zoom (GtkRange *range, struct PAGE_NOTEBOOK *page  )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    GtkAdjustment *adj;
     g_object_get( infos->Option_zoom, "adjustment", &adj, NULL );
     goo_canvas_set_scale ( GOO_CANVAS(infos->Trame_atelier->trame_widget), gtk_adjustment_get_value(adj) );
   }
-#endif
 /******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
 /* Entrée: rien                                                                                                               */
@@ -315,18 +316,28 @@
     gtk_box_pack_start( GTK_BOX(boite), infos->Option_zoom, FALSE, FALSE, 0 );
     g_object_get( infos->Option_zoom, "adjustment", &adj, NULL );
     gtk_adjustment_set_value( adj, 1.0 );
-   // g_signal_connect( G_OBJECT( infos->Option_zoom ), "value-changed", G_CALLBACK( Changer_option_zoom ), infos );
+    g_signal_connect( G_OBJECT( infos->Option_zoom ), "value-changed", G_CALLBACK( Changer_option_zoom ), page );
 
-    infos->Check_grid = gtk_check_button_new_with_label( "Grille magnetique" );
+    separateur = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
+
+    texte = gtk_label_new ( "Grille" );
+    gtk_box_pack_start( GTK_BOX(boite), texte, FALSE, FALSE, 0 );
+
+    infos->Check_grid = gtk_check_button_new_with_label( "Aimantée" );
     gtk_box_pack_start( GTK_BOX(boite), infos->Check_grid, FALSE, FALSE, 0 );
     gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON(infos->Check_grid), TRUE );
     gtk_widget_set_tooltip_text ( infos->Check_grid, "Activer ou non la\ngrille magnétique" );
-    //g_signal_connect_swapped( G_OBJECT(infos->Check_grid), "toggled", G_CALLBACK(Menu_grille_magnetique), infos );
+    g_signal_connect_swapped( G_OBJECT(infos->Check_grid), "toggled", G_CALLBACK(Menu_grille_magnetique), page );
 
     infos->Spin_grid = gtk_spin_button_new_with_range( 1.0, 20.0, 5.0 );
     gtk_box_pack_start( GTK_BOX(boite), infos->Spin_grid, FALSE, FALSE, 0 );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(infos->Spin_grid), 10.0 );
-    //Menu_grille_magnetique( infos );
+    gtk_widget_set_tooltip_text ( infos->Spin_grid, "Taille des maillons d'aimantage" );
+    Menu_grille_magnetique( page );
+
+    separateur = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
 
 /***************************************************** Ajout de motifs ********************************************************/
     frame = gtk_frame_new ( "Menu" );

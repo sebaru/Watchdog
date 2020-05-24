@@ -242,10 +242,10 @@
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(page->client->Liste_synoptique) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                        /* Si rien n'est selectionné */
+    if (!nbr) return;                                                                            /* Si rien n'est selectionné */
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                   /* Recup du id */
 
     gchar chaine[80];
@@ -421,7 +421,7 @@
      }
 
     if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                                            /* Double clic ?? */
-     { //Menu_editer_source_dls();
+     { Menu_Want_Atelier_synoptique ( page );
        return(TRUE);
      }
 
