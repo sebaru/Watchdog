@@ -238,7 +238,7 @@
     uuid_generate(uuid_hex);
     uuid_unparse_lower(uuid_hex, session->wtd_session);
     if (strlen(session->wtd_session) != 36)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Session Parse Error (%d)", __func__, strlen(session->wtd_session) );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SID Parse Error (%d)", __func__, strlen(session->wtd_session) );
        g_free(session);
        return(FALSE);
      }

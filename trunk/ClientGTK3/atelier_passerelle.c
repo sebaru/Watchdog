@@ -35,7 +35,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct PAGE_NOTEBOOK *page=user_data;
+  { struct PAGE_NOTEBOOK *page = user_data;
     struct TRAME_ITEM_PASS *trame_pass;
     struct CMD_TYPE_PASSERELLE *pass;
 

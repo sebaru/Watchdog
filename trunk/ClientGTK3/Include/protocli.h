@@ -157,6 +157,7 @@
 
  extern void Log( struct CLIENT *client, gchar *chaine );                                                       /* Dans ihm.c */
  extern GtkWidget *Creer_boite_travail ( struct CLIENT *Client );
+ extern GtkWidget *Bouton ( gchar *libelle, gchar *icone, gchar *tooltip );
  extern void Effacer_pages ( struct CLIENT *client );
  extern void Update_progress_bar( SoupMessage *msg, SoupBuffer *chunk, gpointer data );
  extern void Set_progress_pulse( struct CLIENT *client );

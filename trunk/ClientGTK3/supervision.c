@@ -314,7 +314,7 @@ printf("%s\n", __func__);
 /******************************************************************************************************************************/
  static void Traiter_connect_ws_motifs_CB (GObject *source_object, GAsyncResult *res, gpointer user_data )
   { struct PAGE_NOTEBOOK *page = user_data;
-    struct TYPE_INFO_SUPERVISION *infos = user_data;
+    struct TYPE_INFO_SUPERVISION *infos = page->infos;
     GError *error = NULL;
     gsize taille_buf;
     GList *liste;
@@ -417,6 +417,7 @@ printf("%s\n", __func__);
 
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
+    page->client = client;
 
     infos = page->infos = (struct TYPE_INFO_SUPERVISION *)g_try_malloc0( sizeof(struct TYPE_INFO_SUPERVISION) );
     if (!page->infos) { g_free(page); return; }
@@ -442,14 +443,11 @@ printf("%s\n", __func__);
     boite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
-    bouton = gtk_button_new_with_label( "Fermer" );
+    bouton = Bouton ( "Fermer", "window-close", "Fermer la page" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "window-close", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
-    gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
-    gtk_widget_set_tooltip_text ( bouton, "Fermer la page" );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Detruire_page_supervision), page );
 
-    bouton = gtk_button_new_with_label( "Imprimer" );
+    bouton = Bouton ( "Imprimer", "dpcument-print", "Imprime le synoptique de la page" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_exporter_synoptique), infos );
 
@@ -479,13 +477,13 @@ printf("%s\n", __func__);
     gtk_container_add( GTK_CONTAINER(frame), infos->Box_palette );
 
 /******************************************************* Acquitter ************************************************************/
-    infos->bouton_acq = gtk_button_new_with_label( "Acquitter" );
+    infos->bouton_acq = Bouton ( "Acquitter", "emblem-default", "Acquitte les anomalies" );
     gtk_box_pack_start( GTK_BOX(boite), infos->bouton_acq, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(infos->bouton_acq), "clicked",
                               G_CALLBACK(Menu_acquitter_synoptique), infos );
 
 /******************************************************* Horloges *************************************************************/
-    bouton = gtk_button_new_with_label( "Horloges" );
+    bouton = Bouton ( "Horloges", "appointment-new", "Liste les horloges de la page" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_get_horloge_synoptique), infos );
