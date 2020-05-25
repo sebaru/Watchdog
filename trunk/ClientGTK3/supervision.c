@@ -464,8 +464,7 @@ printf("%s\n", __func__);
     gtk_box_pack_start( GTK_BOX(hboite), infos->Option_zoom, FALSE, FALSE, 0 );
     g_object_get( infos->Option_zoom, "adjustment", &adj, NULL );
     gtk_adjustment_set_value( adj, 1.0 );
-    g_signal_connect( G_OBJECT( infos->Option_zoom ), "value-changed",
-                      G_CALLBACK( Changer_option_zoom ), infos );
+    g_signal_connect( G_OBJECT( infos->Option_zoom ), "value-changed", G_CALLBACK( Changer_option_zoom ), infos );
 
 /************************************************************* Palettes *******************************************************/
     frame = gtk_frame_new( "Palette" );

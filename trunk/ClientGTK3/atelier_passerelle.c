@@ -64,6 +64,11 @@ printf("%s: %d\n", __func__, pass->syn_cible_id );
      { struct TYPE_INFO_ATELIER *infos=page->infos;
        trame_pass = Trame_ajout_passerelle ( TRUE, infos->Trame_atelier, pass );
        trame_pass->layer = infos->new_layer++;
+       g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-press-event", G_CALLBACK(Clic_sur_pass), trame_pass );
+       g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-release-event", G_CALLBACK(Clic_sur_pass), trame_pass );
+       g_signal_connect( G_OBJECT(trame_pass->item_groupe), "enter-notify-event", G_CALLBACK(Clic_sur_pass), trame_pass );
+       g_signal_connect( G_OBJECT(trame_pass->item_groupe), "leave-notify-event", G_CALLBACK(Clic_sur_pass), trame_pass );
+       g_signal_connect( G_OBJECT(trame_pass->item_groupe), "motion-notify-event", G_CALLBACK(Clic_sur_pass), trame_pass );
      }
   }
 #ifdef bouh

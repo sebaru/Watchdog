@@ -388,52 +388,48 @@ printf("Afficher_propriete: debut\n");
 /*    else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
 /*              event->type == GDK_2BUTTON_PRESS) Afficher_propriete();*/
   }
-/**********************************************************************************************************/
-/* Clic_sur_pass: Appelé quand un evenement est capté sur une passerelle                                  */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+#endif
+/******************************************************************************************************************************/
+/* Clic_sur_pass: Appelé quand un evenement est capté sur une passerelle                                                      */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  void Clic_sur_pass ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                       struct TRAME_ITEM_PASS *trame_pass )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    static GtkWidget *Popup = NULL;
+  {
+/*    static GtkWidget *Popup = NULL;
     static GnomeUIInfo Popup_pass[]=
      { GNOMEUIINFO_ITEM_STOCK( N_("Properties"), NULL, Afficher_propriete, GNOME_STOCK_PIXMAP_PROPERTIES ),
        GNOMEUIINFO_SEPARATOR,
        /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
-       GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
+   /*    GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
        GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_TEXT_BULLETED_LIST ),
        GNOMEUIINFO_ITEM_STOCK( N_("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),
        GNOMEUIINFO_SEPARATOR,
        GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
        GNOMEUIINFO_END
-     };
+     };*/
     if (!(trame_pass && event)) return;
 
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;                             /* Pointeur sur les infos de la page atelier */
+    struct PAGE_NOTEBOOK *page = trame_pass->page;
+    struct TYPE_INFO_ATELIER *infos = page->infos;
 
-    infos->Selection.type = TYPE_PASSERELLE;
-    infos->Selection.groupe = trame_pass->groupe_dpl;
-    infos->Selection.trame_pass = trame_pass;
+    Clic_general( infos, event, trame_pass->layer );                                                 /* Fonction de base clic */
 
-    Clic_general( infos, event );                                                /* Fonction de base clic */
-
-    Mettre_a_jour_description( infos, 0, _("Gateway") );
+    Mettre_a_jour_description( infos, 0, "Gateway" );
     if (event->type == GDK_BUTTON_PRESS)
      { if ( event->button.button == 1)
         { goo_canvas_item_raise( trame_pass->item_groupe, NULL ); }
        else if (event->button.button == 3)
-        { if (!Popup) Popup = gnome_popup_menu_new( Popup_pass );                        /* Creation menu */
-          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
+        { /*if (!Popup) Popup = gnome_popup_menu_new( Popup_pass );                        /* Creation menu */
+          /*gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );*/
 
         }
      }
-    else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
-              event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
+/*    else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
+  /*            event->type == GDK_2BUTTON_PRESS) Afficher_propriete();*/
   }
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Clic_sur_cadran: Appelé quand un evenement est capté sur un cadran                                                         */
 /* Entrée: une structure Event                                                                                                */

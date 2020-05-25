@@ -113,7 +113,7 @@
                      g_object_set( trame_motif->select_bg, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                      g_object_set( trame_motif->select_bd, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                      trame_motif->selection = TRUE;
-                     infos->Selection = g_slist_append( infos->Selection, objet->data );
+                     infos->Selection = g_slist_prepend( infos->Selection, objet->data );
                    }
                 }
                break;
@@ -123,7 +123,7 @@
                 { if (!trame_pass->selection)
                    { g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                      trame_pass->selection = TRUE;
-                     infos->Selection = g_slist_append( infos->Selection, objet->data );
+                     infos->Selection = g_slist_prepend( infos->Selection, objet->data );
                    }
                 }
                break;
@@ -133,7 +133,7 @@
                 { if (!trame_comm->selection)
                    { g_object_set( trame_comm->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                      trame_comm->selection = TRUE;
-                     infos->Selection = g_slist_append( infos->Selection, objet->data );
+                     infos->Selection = g_slist_prepend( infos->Selection, objet->data );
                    }
                  }
                 break;
@@ -143,7 +143,7 @@
                  { if (!trame_cadran->selection)
                     { g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                       trame_cadran->selection = TRUE;
-                      infos->Selection = g_slist_append( infos->Selection, objet->data );
+                      infos->Selection = g_slist_prepend( infos->Selection, objet->data );
                     }
                  }
                 break;
@@ -153,7 +153,7 @@
                  { if (!trame_camera_sup->selection)
                     { g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                       trame_camera_sup->selection = TRUE;
-                      infos->Selection = g_slist_append( infos->Selection, objet->data );
+                      infos->Selection = g_slist_prepend( infos->Selection, objet->data );
                     }
                  }
                break;
