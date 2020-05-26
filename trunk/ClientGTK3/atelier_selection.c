@@ -41,8 +41,9 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Tout_deselectionner ( struct TYPE_INFO_ATELIER *infos )
-  { struct TRAME_ITEM_MOTIF      *trame_motif;
+ void Tout_deselectionner ( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CADRAN     *trame_cadran;
@@ -93,8 +94,9 @@
 /* Entrée: un numero de groupe, deselect=1 si on doit deselectionner les motifs qui sont selectionnes                         */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Selectionner ( struct TYPE_INFO_ATELIER *infos, gint layer )
-  { struct TRAME_ITEM_MOTIF      *trame_motif;
+ void Selectionner ( struct PAGE_NOTEBOOK *page, gint layer )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CADRAN     *trame_cadran;
@@ -168,8 +170,9 @@
 /* Entrée: Les variations en pixels                                                                                           */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Deplacer_selection ( struct TYPE_INFO_ATELIER *infos, gint deltax, gint deltay )
-  { struct TRAME_ITEM_MOTIF      *trame_motif;
+ void Deplacer_selection ( struct PAGE_NOTEBOOK *page, gint deltax, gint deltay )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CADRAN     *trame_cadran;

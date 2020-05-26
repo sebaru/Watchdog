@@ -39,6 +39,7 @@
     GList *liste;
     gint layer;
 
+    if (!infos->Selection) return;
     switch ( *((gint *)(infos->Selection->data) ) )
      { case TYPE_MOTIF:
         { struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
@@ -80,6 +81,7 @@
   { struct TYPE_INFO_ATELIER *infos = page->infos;
     GList *liste;
 
+    if (!infos->Selection) return;
     switch ( *((gint *)(infos->Selection->data) ) )
      { case TYPE_MOTIF:
         { struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
@@ -89,7 +91,7 @@
            { switch ( *((gint *)liste->data) )
               { case TYPE_MOTIF:
                  { struct TRAME_ITEM_MOTIF *item= liste->data;
-                   if (item->type == TYPE_FOND)
+                   if (item->motif->type_gestion == TYPE_FOND)
                     { goo_canvas_item_lower ( item->item_groupe, NULL );
                       item->motif->layer = 0;
                     }
@@ -136,46 +138,49 @@ printf("Afficher_propriete: debut\n");
        default: printf("Afficher_propriete: Type de selection inconnu\n");
      }
   }
-/**********************************************************************************************************/
-/* Changer_couleur_directe: Change directement la couleur sans passer par toutes les fenetres de choix    */
-/* Entrée: Rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Changer_couleur_directe ( void )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+#endif
+/******************************************************************************************************************************/
+/* Changer_couleur_directe: Change directement la couleur sans passer par toutes les fenetres de choix                        */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Changer_couleur_directe ( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
 
-    switch (infos->Selection.type)
-     { case TYPE_MOTIF      : Changer_couleur_motif_directe ( infos->Selection.trame_motif ); break;
+    if (!infos->Selection) return;
+    switch ( *((gint *)(infos->Selection->data) ) )
+     { case TYPE_MOTIF:
+        { struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
+          Changer_couleur_motif_directe ( trame_motif );
+          break;
+        }
        default: printf("Changer_couleur_directe: Type de selection inconnu\n");
      }
   }
-#endif
 /******************************************************************************************************************************/
 /* Mettre_a_jour_position: S'occupe des rulers et des entry posxy pour affichage position souris/objet                        */
 /* Entrée: la nouvelle position X et Y                                                                                        */
 /* Sortie: sans                                                                                                               */
 /******************************************************************************************************************************/
- static void Mettre_a_jour_position ( struct TYPE_INFO_ATELIER *infos, gint x, gint y, gint angle )
-  { gchar chaine[30];
+ static void Mettre_a_jour_position ( struct PAGE_NOTEBOOK *page, gint x, gint y, gint angle )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    gchar chaine[30];
 
     snprintf( chaine, sizeof(chaine), "X = %d, Y = %d", x, y );
     gtk_entry_set_text( GTK_ENTRY(infos->Entry_posxy), chaine );
 
-    g_signal_handlers_block_by_func( G_OBJECT(infos->Adj_angle), G_CALLBACK(Rotationner_selection), infos );
+    g_signal_handlers_block_by_func( G_OBJECT(infos->Adj_angle), G_CALLBACK(Rotationner_selection), page );
     gtk_adjustment_set_value ( infos->Adj_angle, (gdouble)angle );
-    g_signal_handlers_unblock_by_func( G_OBJECT(infos->Adj_angle), G_CALLBACK(Rotationner_selection), infos );
+    g_signal_handlers_unblock_by_func( G_OBJECT(infos->Adj_angle), G_CALLBACK(Rotationner_selection), page );
   }
 /******************************************************************************************************************************/
 /* Mettre_a_jour_position: S'occupe des rulers et des entry posxy pour affichage position souris/objet                        */
 /* Entrée: la nouvelle position X et Y                                                                                        */
 /* Sortie: sans                                                                                                               */
 /******************************************************************************************************************************/
- static void Mettre_a_jour_description ( struct TYPE_INFO_ATELIER *infos, gint icone_id, gchar *description )
-  { gchar chaine[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];
+ static void Mettre_a_jour_description ( struct PAGE_NOTEBOOK *page, gint icone_id, gchar *description )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    gchar chaine[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];
 
     snprintf( chaine, sizeof(chaine), "%4d - %s", icone_id, description );
     gtk_entry_set_text( GTK_ENTRY(infos->Entry_libelle), chaine );
@@ -185,14 +190,14 @@ printf("Afficher_propriete: debut\n");
 /* Entrée: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Clic_sur_fond ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event, gpointer data )
+ static void Clic_sur_fond ( struct PAGE_NOTEBOOK *page, GdkEvent *event, gpointer data )
   { switch (event->type)
      { case GDK_LEAVE_NOTIFY:  break;
        case GDK_ENTER_NOTIFY:
-       case GDK_MOTION_NOTIFY: Mettre_a_jour_position( infos, event->motion.x, event->motion.y, 0.0 );
+       case GDK_MOTION_NOTIFY: Mettre_a_jour_position( page, event->motion.x, event->motion.y, 0.0 );
                                break;
        case GDK_BUTTON_PRESS:  if ( !(event->button.state & 0x4) )                         /* Si pas CTRL */
-                                { Tout_deselectionner( infos ); }
+                                { Tout_deselectionner( page ); }
                                break;
        default: break;
      }
@@ -202,8 +207,9 @@ printf("Afficher_propriete: debut\n");
 /* Entrée: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Clic_general ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event, gint layer )
-  { gint x, y;
+ static void Clic_general ( struct PAGE_NOTEBOOK *page, GdkEvent *event, gint layer )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    gint x, y;
 
     if (!event) { printf("Clic_general: event=NULL\n"); return; }
     switch (event->type)
@@ -218,8 +224,8 @@ printf("Afficher_propriete: debut\n");
                                 infos->Appui = 1;
                                 /*if (event->button.button == 1) */             /* Bouton gauche souris ? */
                                  { if (! (event->button.state & 0x4) )                         /* CTRL ?? */
-                                    { Tout_deselectionner( infos ); }
-                                   Selectionner ( infos, layer );
+                                    { Tout_deselectionner( page ); }
+                                   Selectionner ( page, layer );
                                  }
                                 break;
        case GDK_MOTION_NOTIFY:
@@ -229,7 +235,7 @@ printf("Afficher_propriete: debut\n");
                                      posx = event->motion.x_root-infos->Clic_x;
                                      posy = event->motion.y_root-infos->Clic_y;
                                      printf("Clic_general: Appel a Deplacer_selection posx=%d, posy=%d\n", (gint)posx, (gint)posy );
-                                     Deplacer_selection( infos, (gint)posx, (gint)posy);
+                                     Deplacer_selection( page, (gint)posx, (gint)posy);
                                    }
                                   else if (event->motion.state & 0x200)      /* Motion + Bouton gauche ?? */
                                    { printf("Clic_general: bouh\n");
@@ -277,19 +283,17 @@ printf("Afficher_propriete: debut\n");
   { if (!(trame_motif && event)) return;
 
     struct PAGE_NOTEBOOK *page = trame_motif->page;
-    struct TYPE_INFO_ATELIER *infos = page->infos;
 
     if (trame_motif->motif->type_gestion == TYPE_FOND)
-     { Clic_sur_fond( infos, event, NULL );
-       Mettre_a_jour_position( infos, event->motion.x_root, event->motion.y_root, 0 );
+     { Clic_sur_fond( page, event, NULL );
+       Mettre_a_jour_position( page, event->motion.x_root, event->motion.y_root, 0 );
      }
     else
-     { Clic_general( infos, event, trame_motif->layer );                                             /* Fonction de base clic */
-       Mettre_a_jour_position( infos, trame_motif->motif->position_x, trame_motif->motif->position_y, trame_motif->motif->angle );
+     { Clic_general( page, event, trame_motif->layer );                                              /* Fonction de base clic */
+       Mettre_a_jour_position( page, trame_motif->motif->position_x, trame_motif->motif->position_y, trame_motif->motif->angle );
      }
 
-
-    Mettre_a_jour_description( infos, trame_motif->motif->icone_id, trame_motif->motif->libelle );
+    Mettre_a_jour_description( trame_motif->page, trame_motif->motif->icone_id, trame_motif->motif->libelle );
 
   //  else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
     //          event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
@@ -312,7 +316,7 @@ printf("Afficher_propriete: debut\n");
 
     item = Menu ( "Couleur par défaut", "applications-graphics" );
     gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
-    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Changer_couleur_directe), client );
+    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Changer_couleur_directe), page );
 
     gtk_menu_shell_append (GTK_MENU_SHELL(Popup), gtk_separator_menu_item_new () );
 
@@ -443,12 +447,11 @@ printf("Afficher_propriete: debut\n");
     if (!(trame_pass && event)) return;
 
     struct PAGE_NOTEBOOK *page = trame_pass->page;
-    struct TYPE_INFO_ATELIER *infos = page->infos;
 
-    Clic_general( infos, event, trame_pass->layer );                                                 /* Fonction de base clic */
-    Mettre_a_jour_position( infos, trame_pass->pass->position_x, trame_pass->pass->position_y, trame_pass->pass->angle );
+    Clic_general( page, event, trame_pass->layer );                                                 /* Fonction de base clic */
+    Mettre_a_jour_position( trame_pass->page, trame_pass->pass->position_x, trame_pass->pass->position_y, trame_pass->pass->angle );
 
-    Mettre_a_jour_description( infos, 0, "Gateway" );
+    Mettre_a_jour_description( page, 0, "Gateway" );
     if (event->type == GDK_BUTTON_PRESS)
      { if ( event->button.button == 1)
         { goo_canvas_item_raise( trame_pass->item_groupe, NULL ); }

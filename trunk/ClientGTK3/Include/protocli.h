@@ -287,9 +287,9 @@
  extern void Clic_sur_fond ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event, gpointer data );
 #endif
                                                                                                   /* Dans atelier_selection.c */
- extern void Tout_deselectionner ( struct TYPE_INFO_ATELIER *infos );
- extern void Selectionner ( struct TYPE_INFO_ATELIER *infos, gint layer );
- extern void Deplacer_selection ( struct TYPE_INFO_ATELIER *infos, gint deltax, gint deltay );
+ extern void Tout_deselectionner ( struct PAGE_NOTEBOOK *page );
+ extern void Selectionner ( struct PAGE_NOTEBOOK *page, gint layer );
+ extern void Deplacer_selection (  struct PAGE_NOTEBOOK *page, gint deltax, gint deltay );
  extern void Rotationner_selection ( struct PAGE_NOTEBOOK *page );
  extern void Effacer_selection ( struct PAGE_NOTEBOOK *page );
  extern void Dupliquer_selection ( struct PAGE_NOTEBOOK *page );

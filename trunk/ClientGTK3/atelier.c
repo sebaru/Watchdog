@@ -368,9 +368,9 @@
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(client->Notebook), page_num );
     json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ),      Afficher_un_motif, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, page );
-/*    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Atelier_Afficher_un_commentaire, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Atelier_Afficher_une_camera, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Atelier_Afficher_un_cadran, page );*/
+    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Afficher_un_commentaire, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, page );
   }
 #ifdef bouh
 /******************************************************************************************************************************/

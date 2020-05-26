@@ -25,12 +25,9 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
- #include <string.h>
- #include <stdlib.h>
-
- #include "Reseaux.h"
- #include "trame.h"
+ #include <gtk/gtk.h>
+/******************************************* Définitions des prototypes programme *********************************************/
+ #include "protocli.h"
 
  static gchar *TYPE_GESTION_MOTIF[]=                      /* Type de gestion d'un motif sur un synoptique */
   { "Inerte (Mur)",
@@ -60,34 +57,7 @@
  #define VERT1    255
  #define BLEU1      0
 
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
-/******************************************* Définitions des prototypes programme *********************************************/
- #include "protocli.h"
-
- extern GtkWidget *F_trame;                                           /* C'est bien le widget referencant la trame synoptique */
-
- static GtkWidget *F_propriete;                                                          /* Pour acceder la fenetre graphique */
- static GtkWidget *Combo_gestion;                                                                 /* Type de gestion du motif */
- static GtkWidget *Option_dialog_cde;                                          /* Type de boite de dialogue clic gauche motif */
- static GtkWidget *Spin_access_level;                                                       /* groupe d'appartenance du motif */
- static GtkWidget *Spin_rafraich;                                        /* Frequence de refraichissement d'un motif cyclique */
- static GtkWidget *Couleur_inactive;                                                           /* Parametres visuels du motif */
- static GtkWidget *Entry_libelle;                                                      /* Libelle du motif en cours d'edition */
- static GtkWidget *Spin_bit_clic;                                                             /* Numero du bit de clic gauche */
- static GtkWidget *Entry_bit_clic;                                                               /* Mnemonique du bit de clic */
- static GtkWidget *Entry_clic_tech_id;                                            /* tech_id dls a positionner si clic gauche */
- static GtkWidget *Entry_clic_acronyme;                                          /* acronyme dls a positionner si clic gauche */
- static GtkWidget *Spin_bit_ctrl;                                                          /* Bit de controle (Ixxx) du motif */
- static GtkWidget *Entry_bit_ctrl;                                                           /* Mnemonique du bit de controle */
- static struct TRAME *Trame_preview0;                                                 /* Previsualisation du motif par défaut */
- static struct TRAME *Trame_preview1;                                                      /* Previsualisation du motif actif */
- static struct TRAME_ITEM_MOTIF *Trame_motif;                                                  /* Motif en cours de selection */
- static struct TRAME_ITEM_MOTIF *Trame_motif_p0;                                               /* Motif en cours de selection */
- static struct TRAME_ITEM_MOTIF *Trame_motif_p1;                                               /* Motif en cours de selection */
- static struct CMD_TYPE_MOTIF Motif_preview0;
- static struct CMD_TYPE_MOTIF Motif_preview1;
- static gint Tag_timer, ok_timer;                                                 /* Gestion des motifs cycliques/indicateurs */
- static GList *Liste_index_groupe;                     /* Pour correspondance index de l'option menu/Id du groupe en question */
+#ifdef bouh
 /**********************************************************************************************************/
 /* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                          */
 /* Entrée: le numero du type                                                                              */
@@ -247,67 +217,57 @@
  static void Changer_rafraich( GtkWidget *widget, gpointer data )
   { Trame_motif->motif->rafraich = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Spin_rafraich));
   }
-/**********************************************************************************************************/
-/* Changer_couleur: Changement de la couleur du motif                                                     */
-/* Entrée: widget, data = 0 pour un chgmt via propriete DLS, 1 pour chgmt via Couleur par Def             */
-/* Sortie: la base de données est mise à jour                                                             */
-/**********************************************************************************************************/
- static void Changer_couleur( GtkWidget *widget, gpointer data )
-  { guint8 r, v, b;
-printf("Changer_couleur %p\n", data);
-
-    if (widget == Couleur_inactive)                                     /* Changement de couleur inactive */
-     { gnome_color_picker_get_i8( GNOME_COLOR_PICKER(Couleur_inactive), &r, &v, &b, NULL );
-       Trame_motif->motif->rouge0 = r;
-       Trame_motif->motif->vert0  = v;
-       Trame_motif->motif->bleu0  = b;
-       Trame_peindre_motif( Trame_motif, r, v, b );
-       Trame_peindre_motif( Trame_motif_p0, r, v, b );
-     }
-    else                                                                     /* Rafraichissement direct ? */
-     { gdouble coul[8];
-       gtk_color_selection_get_color( GTK_COLOR_SELECTION(data), &coul[0] );
-       Trame_motif->motif->rouge0 = (guchar)(coul[0]*255.0);
-       Trame_motif->motif->vert0  = (guchar)(coul[1]*255.0);
-       Trame_motif->motif->bleu0  = (guchar)(coul[2]*255.0);
-       Trame_peindre_motif( Trame_motif, Trame_motif->motif->rouge0,
-                                         Trame_motif->motif->vert0,
-                                         Trame_motif->motif->bleu0 );
-     }
+#endif
+/******************************************************************************************************************************/
+/* Changer_couleur: Changement de la couleur du motif                                                                         */
+/* Entrée: widget, data = 0 pour un chgmt via propriete DLS, 1 pour chgmt via Couleur par Def                                 */
+/* Sortie: la base de données est mise à jour                                                                                 */
+/******************************************************************************************************************************/
+ static void Changer_default_couleur ( GtkColorChooser *chooser, GdkRGBA *color, gpointer user_data)
+  { struct TRAME_ITEM_MOTIF *trame_motif = user_data;
+printf("%s\n", __func__ );
+    //g_snprintf( trame_motif->motif->def_color, sizeof(trame_motif->motif->def_color), "%s", gdk_rgba_to_string (color) );
+    trame_motif->motif->rouge0 = color->red*255.0;
+    trame_motif->motif->vert0  = color->green*255.0;
+    trame_motif->motif->bleu0  = color->blue*255.0;
+    Trame_peindre_motif( trame_motif, trame_motif->motif->rouge0,
+                                      trame_motif->motif->vert0,
+                                      trame_motif->motif->bleu0 );
   }
-/**********************************************************************************************************/
-/* Changer_couleur_motif_directe: Changement de la couleur du motif en direct live                        */
-/* Entrée: widget, data =0 pour inactive, 1 pour active                                                   */
-/* Sortie: la base de données est mise à jour                                                             */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Changer_couleur_motif_directe: Changement de la couleur du motif en direct live                                            */
+/* Entrée: widget, data =0 pour inactive, 1 pour active                                                                       */
+/* Sortie: la base de données est mise à jour                                                                                 */
+/******************************************************************************************************************************/
  void Changer_couleur_motif_directe( struct TRAME_ITEM_MOTIF *trame_motif )
-  { GtkWidget *fen, *choix;
-    gdouble coul[8];
+  { GtkWidget *dialog = gtk_dialog_new_with_buttons( "Choisir la couleur par défaut",
+                                                     GTK_WINDOW(trame_motif->page->client),
+                                                     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                     "Annuler", GTK_RESPONSE_CANCEL,
+                                                     "Valider", GTK_RESPONSE_OK,
+                                                     NULL);
 
-    Trame_motif = trame_motif;              /* On sauvegarde la reference pour peindre le motif plus tard */
-    fen = gtk_dialog_new_with_buttons( _("Edit the default color"),
-                                       GTK_WINDOW(F_client),
-                                       GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                                       GTK_STOCK_OK, GTK_RESPONSE_OK,
-                                       NULL);
-    g_signal_connect_swapped( fen, "response",
-                              G_CALLBACK(gtk_widget_destroy), fen );
+    GtkWidget *content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
 
-    choix = gtk_color_selection_new();          /* Creation de la zone de saisie de la couleur par defaut */
-    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(fen)->vbox ), choix, TRUE, TRUE, 0 );
+    GtkWidget *choix = gtk_color_chooser_widget_new();              /* Creation de la zone de saisie de la couleur par defaut */
+    gtk_box_pack_start (GTK_BOX (content_area), choix, TRUE, TRUE, 5);
 
-    coul[0] = trame_motif->motif->rouge0/255.0;
-    coul[1] = trame_motif->motif->vert0/255.0;
-    coul[2] = trame_motif->motif->bleu0/255.0;
-    coul[3] = 0.0; coul[4] = 0.0;
-    coul[5] = 0.0; coul[6] = 0.0;
-    coul[7] = 0.0;
-
-    gtk_color_selection_set_color( GTK_COLOR_SELECTION(choix), &coul[0] );
-    g_signal_connect( G_OBJECT( choix ), "color_changed",
-                      G_CALLBACK( Changer_couleur ), choix );
-    gtk_widget_show_all( fen );
+    GdkRGBA color;
+    //gdk_rgba_parse ( &color, trame_motif->motif->def_color );
+    color.red   = trame_motif->motif->rouge0/255.0;
+    color.green = trame_motif->motif->vert0/255.0;
+    color.blue  = trame_motif->motif->bleu0/255.0;
+    color.alpha = 1.0;
+    gtk_color_chooser_set_rgba ( GTK_COLOR_CHOOSER(choix), &color );
+    gtk_color_chooser_set_use_alpha ( GTK_COLOR_CHOOSER(choix), TRUE );
+    g_signal_connect( G_OBJECT( choix ), "color-activated", G_CALLBACK( Changer_default_couleur ), trame_motif );
+    gtk_widget_show_all ( dialog );
+    if (gtk_dialog_run( GTK_DIALOG(dialog) ) == GTK_RESPONSE_OK)                       /* Attente de reponse de l'utilisateur */
+     { gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(choix), &color); }
+    Changer_default_couleur ( GTK_COLOR_CHOOSER(choix), &color, trame_motif );
+    gtk_widget_destroy ( dialog );
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Rafraichir_propriete: Rafraichit les données de la fenetre d'edition des proprietes du motif           */
 /* Entrée: Le trame_motif souhaité                                                                        */
@@ -629,4 +589,5 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     Tag_timer = gtk_timeout_add( RESOLUTION_TIMER, Timer_preview, NULL );      /* Enregistrement du timer */
     gtk_widget_show_all( Frame );                     /* On voit tout sauf la fenetre de plus haut niveau */
   }
+#endif
 /*--------------------------------------------------------------------------------------------------------*/
