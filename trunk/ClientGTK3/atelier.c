@@ -219,7 +219,7 @@
     spin = gtk_spin_button_new(infos->Adj_angle, 1.0, 1);
     gtk_widget_set_tooltip_text ( spin, "Angle de l'élément sélectionné" );
     gtk_grid_attach( GTK_GRID(table), spin, 4, 0, 1, 1 );
-    //g_signal_connect_swapped( G_OBJECT(infos->Adj_angle), "value_changed", G_CALLBACK(Rotationner_selection), infos );
+    g_signal_connect_swapped( G_OBJECT(infos->Adj_angle), "value_changed", G_CALLBACK(Rotationner_selection), page );
 
     texte = gtk_label_new( "Description" );
     gtk_grid_attach( GTK_GRID(table), texte, 5, 0, 1, 1 );

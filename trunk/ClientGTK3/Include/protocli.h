@@ -291,7 +291,7 @@
  extern void Tout_deselectionner ( struct TYPE_INFO_ATELIER *infos );
  extern void Selectionner ( struct TYPE_INFO_ATELIER *infos, gint layer );
  extern void Deplacer_selection ( struct TYPE_INFO_ATELIER *infos, gint deltax, gint deltay );
- extern void Rotationner_selection ( struct TYPE_INFO_ATELIER *infos );
+ extern void Rotationner_selection ( struct PAGE_NOTEBOOK *page );
  extern void Effacer_selection ( struct PAGE_NOTEBOOK *page );
  extern void Dupliquer_selection ( struct PAGE_NOTEBOOK *page );
  extern void Deselectionner ( struct TYPE_INFO_ATELIER *infos, struct TRAME_ITEM *item );

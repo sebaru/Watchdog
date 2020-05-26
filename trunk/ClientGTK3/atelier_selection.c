@@ -465,53 +465,52 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
        }
     printf("Fin detacher_selection\n");
   }
-/**********************************************************************************************************/
-/* Rotationner_selection: Fait tourner la selection                                                       */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Rotationner_selection ( struct TYPE_INFO_ATELIER *infos )
-  { struct TRAME_ITEM_MOTIF      *trame_motif;
-    struct TRAME_ITEM_PASS       *trame_pass;
-    struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CADRAN    *trame_cadran;
-    GList *selection;
+#endif
+/******************************************************************************************************************************/
+/* Rotationner_selection: Fait tourner la selection                                                                           */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Rotationner_selection ( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    GSList *selection;
     gfloat angle;
 
     angle = (gfloat) gtk_adjustment_get_value ( infos->Adj_angle );
 
-
-    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
+    selection = infos->Selection;                                                        /* Pour tous les objets selectionnés */
     while(selection)
      { switch ( *((gint *)selection->data) )
        { case TYPE_MOTIF:
-              trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
-              trame_motif->motif->angle = angle;
-              Trame_rafraichir_motif(trame_motif);
-              break;
+          { struct TRAME_ITEM_MOTIF *trame_motif = selection->data;
+            trame_motif->motif->angle = angle;
+            Trame_rafraichir_motif(trame_motif);
+            break;
+          }
          case TYPE_PASSERELLE:
-              trame_pass = ((struct TRAME_ITEM_PASS *)selection->data);
-              trame_pass->pass->angle = angle;
-              Trame_rafraichir_passerelle(trame_pass);
-              break;
+          { struct TRAME_ITEM_PASS *trame_pass = selection->data;
+            trame_pass->pass->angle = angle;
+            Trame_rafraichir_passerelle(trame_pass);
+            break;
+          }
          case TYPE_COMMENTAIRE:
-              trame_comm = ((struct TRAME_ITEM_COMMENT *)selection->data);
-              trame_comm->comment->angle = angle;
-              Trame_rafraichir_comment(trame_comm);
-              break;
+          { struct TRAME_ITEM_COMMENT *trame_comm = selection->data;
+            trame_comm->comment->angle = angle;
+            Trame_rafraichir_comment(trame_comm);
+            break;
+          }
          case TYPE_CADRAN:
-              trame_cadran = (struct TRAME_ITEM_CADRAN *)selection->data;
-              trame_cadran->cadran->angle = angle;
-              Trame_rafraichir_cadran(trame_cadran);
-              break;
-         case TYPE_CAMERA_SUP:
-              break;
+          { struct TRAME_ITEM_CADRAN *trame_cadran = selection->data;
+            trame_cadran->cadran->angle = angle;
+            Trame_rafraichir_cadran(trame_cadran);
+            break;
+          }
+         case TYPE_CAMERA_SUP: break;
          default: printf("Rotationner_selection: type inconnu\n" );
        }
-      selection = selection->next;
+      selection = g_slist_next(selection);
      }
   }
-#endif
 /******************************************************************************************************************************/
 /* Mettre_echelle_selection_1_1 : Mise à l'echelle 1 des motifs selectionnés                                                  */
 /* Entrée: Rien                                                                                                               */
