@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/ajout_plugin_dls.c        Configuration des plugin_dlss de Watchdog v2.0                                            */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                         sam. 31 déc. 2011 17:34:23 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                         sam. 31 dÃ©c. 2011 17:34:23 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * ajout_plugin_dls.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sébastien Lefevre
+ * Copyright (C) 2010-2020 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,23 +31,23 @@
 
  extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
  extern struct CONFIG Config;                                                              /* Configuration generale watchdog */
-/**************************************** Définitions des prototypes programme ************************************************/
+/**************************************** DÃ©finitions des prototypes programme ************************************************/
  #include "protocli.h"
 
  static GtkWidget *F_ajout;                                   /* Widget de reference sur la fenetre d'ajout/edition du plugin */
  static GtkWidget *Entry_nom;                                                 /* Le nom en clair du plugin en cours d'edition */
  static GtkWidget *Entry_shortname;                                           /* Le nom en clair du plugin en cours d'edition */
- static GtkWidget *Entry_id;                                                        /* Le numéro de plugin en cours d'edition */
- static GtkWidget *Entry_tech_id;                                                   /* Le numéro de plugin en cours d'edition */
- static GtkWidget *Combo_syn;                                                                           /* Synoptique associé */
+ static GtkWidget *Entry_id;                                                        /* Le numÃ©ro de plugin en cours d'edition */
+ static GtkWidget *Entry_tech_id;                                                   /* Le numÃ©ro de plugin en cours d'edition */
+ static GtkWidget *Combo_syn;                                                                           /* Synoptique associÃ© */
  static GtkWidget *Entry_package;                                                      /* Type du plugin (module, ssgrpupe, ...) */
- static GtkWidget *Check_actif;                                                      /* Le plugin est-il activé dans le dls ? */
- static struct CMD_TYPE_PLUGIN_DLS Edit_dls;                                                     /* Plugin en cours d'édition */
+ static GtkWidget *Check_actif;                                                      /* Le plugin est-il activÃ© dans le dls ? */
+ static struct CMD_TYPE_PLUGIN_DLS Edit_dls;                                                     /* Plugin en cours d'Ã©dition */
  static GList *Liste_index_syn;
 
 /******************************************************************************************************************************/
-/* CB_ajouter_editer_groupe: Fonction appelée qd on appuie sur un des boutons de l'interface                                  */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* CB_ajouter_editer_groupe: Fonction appelÃ©e qd on appuie sur un des boutons de l'interface                                  */
+/* EntrÃ©e: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
 /* sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean CB_ajouter_editer_plugin_dls ( GtkDialog *dialog, gint reponse,
@@ -81,7 +81,7 @@
   }
 /******************************************************************************************************************************/
 /* Proto_afficher_un_groupe_existant: ajoute un groupe dans la liste des groupes existants                                    */
-/* Entrée: rien                                                                                                               */
+/* EntrÃ©e: rien                                                                                                               */
 /* sortie: kedal                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_afficher_un_syn_for_plugin_dls ( struct CMD_TYPE_SYNOPTIQUE *syn )
@@ -97,7 +97,7 @@
   }
 /******************************************************************************************************************************/
 /* Menu_ajouter_plugin_dls: Ajoute un plugin_dls au systeme                                                                   */
-/* Entrée: la structure d'edition du plugin                                                                                   */
+/* EntrÃ©e: la structure d'edition du plugin                                                                                   */
 /* sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Menu_ajouter_editer_plugin_dls ( struct CMD_TYPE_PLUGIN_DLS *edit_dls )
@@ -127,7 +127,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(vboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), vboite );
 
-/************************************************** Paramètres du plugin_dls **************************************************/
+/************************************************** ParamÃ¨tres du plugin_dls **************************************************/
     table = gtk_table_new( 5, 3, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
@@ -144,7 +144,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Check_actif, 2, 3, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Tech_ID\n(AlphaNum Only)") );      /* Création de l'option menu pour le choix du type de message */
+    texte = gtk_label_new( _("Tech_ID\n(AlphaNum Only)") );      /* CrÃ©ation de l'option menu pour le choix du type de message */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_tech_id = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_tech_id), sizeof(Edit_dls.tech_id)-1 );

@@ -285,7 +285,6 @@
                                    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
 #ifdef bouh
  extern void Clic_sur_fond ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event, gpointer data );
- extern gint Nouveau_groupe ( void );
 #endif
                                                                                                   /* Dans atelier_selection.c */
  extern void Tout_deselectionner ( struct TYPE_INFO_ATELIER *infos );

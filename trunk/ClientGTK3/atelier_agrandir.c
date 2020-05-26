@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/atelier_agrandir.c             gestion du resizing des motifs sur la trame                                          */
-/* Projet WatchDog version 1.6       Gestion d'habitat                                           sam 20 déc 2003 17:13:29 CET */
+/* Projet WatchDog version 1.6       Gestion d'habitat                                           sam 20 dÃ©c 2003 17:13:29 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * atelier_agrandir.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sébastien Lefevre
+ * Copyright (C) 2010-2020 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,14 +27,14 @@
 
  #include <gtk/gtk.h>
  #include <math.h>
-/****************************************** Définitions des prototypes programme **********************************************/
+/****************************************** DÃ©finitions des prototypes programme **********************************************/
  #include "protocli.h"
 
  #define PI 3.141592654
 
 /******************************************************************************************************************************/
-/* Agrandir_general_motif: Mise a jour des données de base                                                                    */
-/* Entrée: une structure Event                                                                                                */
+/* Agrandir_general_motif: Mise a jour des donnÃ©es de base                                                                    */
+/* EntrÃ©e: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Agrandir_general_motif ( struct TRAME_ITEM_MOTIF *trame_motif, gdouble dx, gdouble dy,
@@ -54,8 +54,8 @@
         }
   }
 /******************************************************************************************************************************/
-/* Agrandir_bd: Appelé quand un evenement est capté sur un carré de selection BD                                              */
-/* Entrée: une structure Event                                                                                                */
+/* Agrandir_bd: AppelÃ© quand un evenement est captÃ© sur un carrÃ© de selection BD                                              */
+/* EntrÃ©e: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
  void Agrandir_bd ( GooCanvasItem *widget, GooCanvasItem *target,
@@ -90,8 +90,8 @@
      }
   }
 /******************************************************************************************************************************/
-/* Agrandir_bg: Appelé quand un evenement est capté sur un carré de selection BG                                              */
-/* Entrée: une structure Event                                                                                                */
+/* Agrandir_bg: AppelÃ© quand un evenement est captÃ© sur un carrÃ© de selection BG                                              */
+/* EntrÃ©e: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
  void Agrandir_bg ( GooCanvasItem *widget, GooCanvasItem *target,
@@ -127,8 +127,8 @@
      }
   }
 /******************************************************************************************************************************/
-/* Agrandir_hg: Appelé quand un evenement est capté sur un carré de selection HG                                              */
-/* Entrée: une structure Event                                                                                                */
+/* Agrandir_hg: AppelÃ© quand un evenement est captÃ© sur un carrÃ© de selection HG                                              */
+/* EntrÃ©e: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
  void Agrandir_hg ( GooCanvasItem *widget, GooCanvasItem *target,
@@ -164,8 +164,8 @@
      }
   }
 /******************************************************************************************************************************/
-/* Agrandir_hd: Appelé quand un evenement est capté sur un carré de selection HD                                              */
-/* Entrée: une structure Event                                                                                                */
+/* Agrandir_hd: AppelÃ© quand un evenement est captÃ© sur un carrÃ© de selection HD                                              */
+/* EntrÃ©e: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
  void Agrandir_hd ( GooCanvasItem *widget, GooCanvasItem *target,

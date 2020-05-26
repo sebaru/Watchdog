@@ -7,7 +7,7 @@
  * atelier_ajout_camera_sup.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sébastien Lefevre
+ * Copyright (C) 2010-2020 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,13 +26,13 @@
  */
 
  #include <gtk/gtk.h>
-/******************************************* Définitions des prototypes programme *********************************************/
+/******************************************* DÃ©finitions des prototypes programme *********************************************/
  #include "protocli.h"
 
 /******************************************************************************************************************************/
 /* Afficher_une_camera: Ajoute une camera sur un synoptique                                                                   */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: une reference sur le message                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Afficher_une_camera (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct PAGE_NOTEBOOK *page=user_data;
@@ -72,7 +72,7 @@
 
 /******************************************************************************************************************************/
 /* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                                        */
-/* Entrée: Un id motif                                                                                                        */
+/* EntrÃ©e: Un id motif                                                                                                        */
 /* sortie: un struct TRAME_ITEM_MOTIF                                                                                         */
 /******************************************************************************************************************************/
  struct TRAME_ITEM_CAMERA_SUP *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id )
@@ -84,14 +84,14 @@
        else liste = liste->next;
      }
     if (!liste)
-     { printf("Id_vers_trame_camera_sup: item %d non trouvé\n", id );
+     { printf("Id_vers_trame_camera_sup: item %d non trouvÃ©\n", id );
        return(NULL);
      }
     return( (struct TRAME_ITEM_CAMERA_SUP *)(liste->data) );
   }
 /******************************************************************************************************************************/
-/* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface                                  */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* CB_editier_propriete_TOR: Fonction appelÃ©e qd on appuie sur un des boutons de l'interface                                  */
+/* EntrÃ©e: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
 /* sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean CB_ajouter_camera_sup ( GtkDialog *dialog, gint reponse, gpointer data )
@@ -116,10 +116,10 @@
             lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
             printf("lignes = %p\n", lignes );
             if (lignes)
-             { gtk_tree_model_get_iter( store, &iter, lignes->data );                      /* Recuperation ligne selectionnée */
+             { gtk_tree_model_get_iter( store, &iter, lignes->data );                      /* Recuperation ligne selectionnÃ©e */
                gtk_tree_model_get( store, &iter, COL_CAM_ID, &id, -1 );                                       /* Recup du num */
                g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-               g_list_free (lignes);                                                                    /* Liberation mémoire */
+               g_list_free (lignes);                                                                    /* Liberation mÃ©moire */
 
                add_camera_sup.posx   = TAILLE_SYNOPTIQUE_X/2;
                add_camera_sup.posy   = TAILLE_SYNOPTIQUE_Y/2;
@@ -139,8 +139,8 @@
   }
 /******************************************************************************************************************************/
 /* Commenter: Met en route le processus permettant de camera_super un synoptique                                              */
-/* Entrée: widget/data                                                                                                        */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: widget/data                                                                                                        */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Menu_ajouter_camera_sup ( void )
   { GtkWidget *hboite, *scroll;
@@ -168,8 +168,8 @@
   }
 /******************************************************************************************************************************/
 /* Afficher_un_camera: Ajoute un camera dans la liste des cameras                                                             */
-/* Entrée: une reference sur le camera                                                                                        */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: une reference sur le camera                                                                                        */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_afficher_un_camera_for_atelier( struct CMD_TYPE_CAMERA *camera )
   { GtkListStore *store;
@@ -182,8 +182,8 @@
   }
 /******************************************************************************************************************************/
 /* Afficher_un_message: Ajoute un message dans la liste des messages                                                          */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: une reference sur le message                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *rezo_camera_sup )
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
@@ -200,7 +200,7 @@
 
     trame_camera_sup = Trame_ajout_camera_sup ( TRUE, infos->Trame_atelier, camera_sup );
     if (!trame_camera_sup) return;
-    trame_camera_sup->groupe_dpl = Nouveau_groupe();              /* Numéro de groupe pour le deplacement */
+    trame_camera_sup->groupe_dpl = Nouveau_groupe();              /* NumÃ©ro de groupe pour le deplacement */
 
     g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "button-press-event",
                       G_CALLBACK(Clic_sur_camera_sup), trame_camera_sup );
@@ -215,8 +215,8 @@
   }
 /******************************************************************************************************************************/
 /* Cacher_un_message: Enleve un message de la liste des messages                                                              */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: une reference sur le message                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *camera_sup )
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
@@ -226,7 +226,7 @@
     trame_camera_sup = Id_vers_trame_camera_sup( infos, camera_sup->id );
     printf("Proto_cacher_un_camera_sup_atelier debut: ID=%d %p\n", camera_sup->id, trame_camera_sup );
     if (!trame_camera_sup) return;
-    Deselectionner( infos, (struct TRAME_ITEM *)trame_camera_sup );                 /* Au cas ou il aurait été selectionné... */
+    Deselectionner( infos, (struct TRAME_ITEM *)trame_camera_sup );                 /* Au cas ou il aurait Ã©tÃ© selectionnÃ©... */
     Trame_del_camera_sup( trame_camera_sup );
     g_free(trame_camera_sup);
     infos->Trame_atelier->trame_items = g_list_remove( infos->Trame_atelier->trame_items, trame_camera_sup );

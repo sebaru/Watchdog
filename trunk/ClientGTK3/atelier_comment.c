@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Client/atelier_ajout_comment.c     Gestion des commentaires pour Watchdog                              */
-/* Projet WatchDog version 1.5     Gestion d'habitat                         jeu 03 fév 2005 16:25:06 CET */
+/* Projet WatchDog version 1.5     Gestion d'habitat                         jeu 03 fÃ©v 2005 16:25:06 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * atelier_ajout_comment.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sébastien Lefevre
+ * Copyright (C) 2010-2020 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
  */
 
  #include <gtk/gtk.h>
-/******************************************* Définitions des prototypes programme *********************************************/
+/******************************************* DÃ©finitions des prototypes programme *********************************************/
  #include "protocli.h"
 
  enum
@@ -34,8 +34,8 @@
 
 /******************************************************************************************************************************/
 /* Afficher_un_commentaire: Ajoute un commentaire sur un synoptique                                                           */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* EntrÃ©e: une reference sur le message                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Afficher_un_commentaire (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct PAGE_NOTEBOOK *page=user_data;
@@ -75,7 +75,7 @@
 
 /**********************************************************************************************************/
 /* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                    */
-/* Entrée: Un id motif                                                                                    */
+/* EntrÃ©e: Un id motif                                                                                    */
 /* sortie: un struct TRAME_ITEM_MOTIF                                                                     */
 /**********************************************************************************************************/
  struct TRAME_ITEM_COMMENT *Id_vers_trame_comment ( struct TYPE_INFO_ATELIER *infos, gint id )
@@ -87,24 +87,24 @@
        else liste = liste->next;
      }
     if (!liste)
-     { printf("Id_vers_trame_comment: item %d non trouvé\n", id );
+     { printf("Id_vers_trame_comment: item %d non trouvÃ©\n", id );
        return(NULL);
      }
     return( (struct TRAME_ITEM_COMMENT *)(liste->data) );
   }
 /**********************************************************************************************************/
 /* Changer_commentaire: Synchronise le commentaire avec le preview gnome                                  */
-/* Entrée: widget/data                                                                                    */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: widget/data                                                                                    */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  static void Changer_commentaire ( GtkWidget *widget, gpointer data )
   { gnome_font_picker_set_preview_text( GNOME_FONT_PICKER(Font_comment),
                                         gtk_entry_get_text( GTK_ENTRY(Entry_comment) ) );
   }
 /**********************************************************************************************************/
-/* Mise_en_style_prog: Charge un style préprogrammé dans le code source                                   */
-/* Entrée: widget, un numero de style                                                                     */
-/* Sortie: Néant                                                                                          */
+/* Mise_en_style_prog: Charge un style prÃ©programmÃ© dans le code source                                   */
+/* EntrÃ©e: widget, un numero de style                                                                     */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  static void Mise_en_style_prog( GtkWidget *widget, gpointer data )
   { int style;
@@ -131,8 +131,8 @@
      }
   }
 /**********************************************************************************************************/
-/* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface              */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
+/* CB_editier_propriete_TOR: Fonction appelÃ©e qd on appuie sur un des boutons de l'interface              */
+/* EntrÃ©e: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajout_comment ( GtkDialog *dialog, gint reponse )
@@ -159,7 +159,7 @@
 
                              Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_COMMENT,
                                            (gchar *)&add_comment, sizeof(struct CMD_TYPE_COMMENT) );
-                             printf("Requete d'ajout de commentaire envoyée au serveur....\n");
+                             printf("Requete d'ajout de commentaire envoyÃ©e au serveur....\n");
                              return(TRUE);                                /* On laisse la fenetre ouverte */
                                  break;
        case GTK_RESPONSE_CLOSE: break;
@@ -170,8 +170,8 @@
   }
 /**********************************************************************************************************/
 /* Commenter: Met en route le processus permettant de commenter un synoptique                             */
-/* Entrée: widget/data                                                                                    */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: widget/data                                                                                    */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Creer_fenetre_ajout_commentaire ( void )
   { GtkWidget *hboite, *table, *texte, *bouton;
@@ -234,8 +234,8 @@
   }
 /**********************************************************************************************************/
 /* Afficher_un_message: Ajoute un message dans la liste des messages                                      */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: une reference sur le message                                                                   */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Proto_afficher_un_comment_atelier( struct CMD_TYPE_COMMENT *rezo_comment )
   { struct TRAME_ITEM_COMMENT *trame_comment;
@@ -251,7 +251,7 @@
     memcpy( comment, rezo_comment, sizeof(struct CMD_TYPE_COMMENT) );
 
     trame_comment = Trame_ajout_commentaire ( TRUE, infos->Trame_atelier, comment );
-    trame_comment->groupe_dpl = Nouveau_groupe();                 /* Numéro de groupe pour le deplacement */
+    trame_comment->groupe_dpl = Nouveau_groupe();                 /* NumÃ©ro de groupe pour le deplacement */
     g_signal_connect( G_OBJECT(trame_comment->item_groupe), "button-press-event",
                       G_CALLBACK(Clic_sur_comment), trame_comment );
     g_signal_connect( G_OBJECT(trame_comment->item_groupe), "button-release-event",
@@ -265,8 +265,8 @@
   }
 /**********************************************************************************************************/
 /* Cacher_un_message: Enleve un message de la liste des messages                                          */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: une reference sur le message                                                                   */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Proto_cacher_un_comment_atelier( struct CMD_TYPE_COMMENT *comment )
   { struct TRAME_ITEM_COMMENT *trame_comment;
@@ -276,9 +276,9 @@
     trame_comment = Id_vers_trame_comment( infos, comment->id );
     printf("Proto_cacher_un_comment_atelier debut: ID=%d %p\n", comment->id, trame_comment );
     if (!trame_comment) return;
-    Deselectionner( infos, (struct TRAME_ITEM *)trame_comment );/* Au cas ou il aurait été selectionné... */
+    Deselectionner( infos, (struct TRAME_ITEM *)trame_comment );/* Au cas ou il aurait Ã©tÃ© selectionnÃ©... */
     goo_canvas_item_remove( trame_comment->item_groupe );
-    if (trame_comment->comment) g_free(trame_comment->comment);          /* On libere la mémoire associée */
+    if (trame_comment->comment) g_free(trame_comment->comment);          /* On libere la mÃ©moire associÃ©e */
     g_free(trame_comment);
     infos->Trame_atelier->trame_items = g_list_remove( infos->Trame_atelier->trame_items, trame_comment );
     printf("Proto_cacher_un_comment_atelier fin..\n");
