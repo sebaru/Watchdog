@@ -328,7 +328,7 @@ printf("Afficher_propriete: debut\n");
 
       item = Menu ( "Scale to 1:1", "zoom-original" );
       gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
-      //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Mettre_echelle_selection_1_1), client );
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Mettre_echelle_selection_1_1), page );
 
       item = Menu ( "Scale to 1:Y", "object-flip-horizontal" );
       gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);

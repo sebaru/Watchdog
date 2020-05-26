@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/atelier_agrandir.c             gestion du resizing des motifs sur la trame                      */
-/* Projet WatchDog version 1.6       Gestion d'habitat                       sam 20 déc 2003 17:13:29 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/atelier_agrandir.c             gestion du resizing des motifs sur la trame                                          */
+/* Projet WatchDog version 1.6       Gestion d'habitat                                           sam 20 déc 2003 17:13:29 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * atelier_agrandir.c
  * This file is part of Watchdog
@@ -21,26 +21,22 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
+ #include <gtk/gtk.h>
  #include <math.h>
- 
- #include "trame.h"
+/****************************************** Définitions des prototypes programme **********************************************/
+ #include "protocli.h"
 
  #define PI 3.141592654
 
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
-
-/**********************************************************************************************************/
-/* Agrandir_general_motif: Mise a jour des données de base                                                */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Agrandir_general_motif: Mise a jour des données de base                                                                    */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Agrandir_general_motif ( struct TRAME_ITEM_MOTIF *trame_motif, gdouble dx, gdouble dy,
                                       gdouble dposx, gdouble dposy )
   {
@@ -57,11 +53,11 @@
           Trame_rafraichir_motif(trame_motif);
         }
   }
-/**********************************************************************************************************/
-/* Agrandir_bd: Appelé quand un evenement est capté sur un carré de selection BD                          */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Agrandir_bd: Appelé quand un evenement est capté sur un carré de selection BD                                              */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  void Agrandir_bd ( GooCanvasItem *widget, GooCanvasItem *target,
                     GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
   { static gdouble Clic_x, Clic_y;
@@ -93,11 +89,11 @@
        Clic_y = event->motion.y_root;
      }
   }
-/**********************************************************************************************************/
-/* Agrandir_bg: Appelé quand un evenement est capté sur un carré de selection BG                          */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Agrandir_bg: Appelé quand un evenement est capté sur un carré de selection BG                                              */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  void Agrandir_bg ( GooCanvasItem *widget, GooCanvasItem *target,
                     GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
   { static gdouble Clic_x, Clic_y;
@@ -130,11 +126,11 @@
        Clic_y = event->motion.y_root;
      }
   }
-/**********************************************************************************************************/
-/* Agrandir_hg: Appelé quand un evenement est capté sur un carré de selection HG                          */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Agrandir_hg: Appelé quand un evenement est capté sur un carré de selection HG                                              */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  void Agrandir_hg ( GooCanvasItem *widget, GooCanvasItem *target,
                     GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
   { static gdouble Clic_x, Clic_y;
@@ -167,11 +163,11 @@
        Clic_y = event->motion.y_root;
      }
   }
-/**********************************************************************************************************/
-/* Agrandir_hd: Appelé quand un evenement est capté sur un carré de selection HD                          */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Agrandir_hd: Appelé quand un evenement est capté sur un carré de selection HD                                              */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  void Agrandir_hd ( GooCanvasItem *widget, GooCanvasItem *target,
                     GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
   { static gdouble Clic_x, Clic_y;
@@ -204,4 +200,4 @@
        Clic_y = event->motion.y_root;
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

@@ -511,35 +511,32 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
       selection = selection->next;
      }
   }
-/**********************************************************************************************************/
-/* Mettre_echelle_selection_1_1 : Mise à l'echelle 1 des motifs selectionnés                              */
-/* Entrée: Rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Mettre_echelle_selection_1_1 ( void )
-  { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    GList *selection;
+#endif
+/******************************************************************************************************************************/
+/* Mettre_echelle_selection_1_1 : Mise à l'echelle 1 des motifs selectionnés                                                  */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Mettre_echelle_selection_1_1 ( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    GSList *selection;
 
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
-
-    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
+    selection = infos->Selection;                                                        /* Pour tous les objets selectionnés */
     while(selection)
      { switch ( *((gint *)selection->data) )
         { case TYPE_MOTIF:
-               trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
-               trame_motif->motif->largeur = (gfloat)trame_motif->gif_largeur;
-               trame_motif->motif->hauteur = (gfloat)trame_motif->gif_hauteur;
-               Trame_rafraichir_motif(trame_motif);
-               break;
+           { struct TRAME_ITEM_MOTIF *trame_motif = selection->data;
+             trame_motif->motif->largeur = (gfloat)trame_motif->gif_largeur;
+             trame_motif->motif->hauteur = (gfloat)trame_motif->gif_hauteur;
+             Trame_rafraichir_motif(trame_motif);
+             break;
+           }
           default: printf("Mettre_echelle_selection_1_1: type non inconnu\n" );
         }
-       selection = selection->next;
+       selection = g_slist_next(selection);
      }
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Mettre_echelle_selection_1_1 : Mise à l'echelle 1 des motifs selectionnés                              */
 /* Entrée: Rien                                                                                           */

@@ -29,7 +29,7 @@ Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResourc
                                liste_plugin_dls.c \
                                liste_synoptique.c \
                                atelier.c atelier_motif.c atelier_passerelle.c atelier_cadran.c atelier_camera.c atelier_comment.c \
-                               atelier_clic_trame.c atelier_selection.c
+                               atelier_clic_trame.c atelier_selection.c atelier_agrandir.c
 #                          protocole.c protocole_gtk_message.c \
 #                          protocole_dls.c protocole_mnemonique.c \
 #                          protocole_connexion.c \

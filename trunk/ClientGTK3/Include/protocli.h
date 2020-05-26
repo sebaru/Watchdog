@@ -292,15 +292,14 @@
  extern void Selectionner ( struct TYPE_INFO_ATELIER *infos, gint layer );
  extern void Deplacer_selection ( struct TYPE_INFO_ATELIER *infos, gint deltax, gint deltay );
  extern void Rotationner_selection ( struct TYPE_INFO_ATELIER *infos );
- extern void Effacer_selection ( void );
- extern void Dupliquer_selection ( void );
+ extern void Effacer_selection ( struct PAGE_NOTEBOOK *page );
+ extern void Dupliquer_selection ( struct PAGE_NOTEBOOK *page );
  extern void Deselectionner ( struct TYPE_INFO_ATELIER *infos, struct TRAME_ITEM *item );
- extern void Fusionner_selection ( void );
- extern void Detacher_selection ( void );
- extern void Mettre_echelle_selection_1_1 ( void );
- extern void Mettre_echelle_selection_1_Y ( void );
- extern void Mettre_echelle_selection_X_1 ( void );
-#ifdef bouh
+ extern void Fusionner_selection ( struct PAGE_NOTEBOOK *page );
+ extern void Detacher_selection ( struct PAGE_NOTEBOOK *page );
+ extern void Mettre_echelle_selection_1_1 ( struct PAGE_NOTEBOOK *page );
+ extern void Mettre_echelle_selection_1_Y ( struct PAGE_NOTEBOOK *page );
+ extern void Mettre_echelle_selection_X_1 ( struct PAGE_NOTEBOOK *page );
                                                                                                    /* Dans atelier_agrandir.c */
  extern void Agrandir_bd ( GooCanvasItem *widget, GooCanvasItem *target,
                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
@@ -310,6 +309,7 @@
                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Agrandir_hg ( GooCanvasItem *widget, GooCanvasItem *target,
                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
+#ifdef bouh
 
  extern void Creer_fenetre_propriete_TOR ( struct TYPE_INFO_ATELIER *infos );                     /* Dans atelier_propriete.c */
  extern void Detruire_fenetre_propriete_TOR ();
