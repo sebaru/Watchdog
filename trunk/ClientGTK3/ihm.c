@@ -81,7 +81,19 @@
     gtk_widget_set_tooltip_text ( bouton, tooltip );
     return(bouton);
   }
-
+/******************************************************************************************************************************/
+/* Menu : Prepare un menu icone                                                                                               */
+/* Entrée: le libelle, l'icone                                                                                                */
+/* Sortie: le menu                                                                                                            */
+/******************************************************************************************************************************/
+ GtkWidget *Menu ( gchar *libelle, gchar *icone )
+  { GtkWidget *item = gtk_menu_item_new();
+    GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( icone, GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new(libelle), FALSE, FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER(item), hbox );
+    return(item);
+  }
 #ifdef bouh
 /**********************************************************************************************************/
 /* Nbr_page_type: Renvoie le nombre de page notebook de type type                                         */
