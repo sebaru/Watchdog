@@ -318,8 +318,9 @@
     Json_add_string ( builder, "instance", g_get_host_name() );
     Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
     Json_add_bool   ( builder, "ssl", soup_server_is_https (server) );
-    Json_add_string ( builder, "message", "Welcome back Home !" );
     Json_add_int    ( builder, "access_level", (session ? session->access_level : 10) );
+    Json_add_string ( builder, "wtd_session", (session ? session->wtd_session : "none") );
+    Json_add_string ( builder, "message", "Welcome back Home !" );
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);

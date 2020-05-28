@@ -35,19 +35,7 @@
  #define HTTP_DEFAUT_FILE_CA           "http_cacert.pem"
  #define HTTP_DEFAUT_FILE_CERT         "http_serveursigne.pem"
  #define HTTP_DEFAUT_FILE_KEY          "http_serveurkey.pem"
- #define HTTP_DEFAUT_SSL_CIPHER        "HIGH:NORMAL"
- #define HTTP_DEFAUT_MAX_CONNEXION     16
  #define HTTP_DEFAUT_TCP_PORT          5560
- #define HTTP_DEFAUT_MAX_UPLOAD_BYTES  10240000
- #define HTTP_DEFAUT_LWS_DEBUG_LEVEL   0
-
- #define HTTP_200_OK                   200
- #define HTTP_BAD_REQUEST              400
- #define HTTP_UNAUTHORIZED             401
- #define HTTP_BAD_METHOD               405
- #define HTTP_SERVER_ERROR             100
-
- #define HTTP_CONTENT_JSON             "application/json"
 
  struct WS_CLIENT_SESSION
   { SoupWebsocketConnection *connexion;
