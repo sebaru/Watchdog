@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="google" content="notranslate">
         <meta name="robots" content="noindex, nofollow">
-        <link rel="icon" href="<?php echo base_url('/logo.svg')?>">
+        <link rel="icon" href="<?php echo base_url('/logo.png')?>">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
         <script src="https://kit.fontawesome.com/1ca1f7ba56.js" crossorigin="anonymous"></script>
         <style>
@@ -23,12 +23,11 @@
 
         .card { margin-top: auto;
                 margin-bottom: auto;
-                background-color: rgba(30,28,56,0.5) !important;
+                background-color: rgba(30,28,56,0.8) !important;
               }
 
         .wtd_title { color: white; }
 
-        .card-link { color: white; }
         .input-group-prepend span { width: 50px;
                                     background-color: #F1E413;
                                     color: black;
