@@ -500,7 +500,7 @@
 		     return;
      }
 
-    Http_print_request ( server, msg, path, client );
+    /*struct HTTP_CLIENT_SESSION *session =*/ Http_print_request ( server, msg, path, client );
 
     g_object_get ( msg, "request-body-data", &request, NULL );
     if (!request)
@@ -511,12 +511,6 @@
     data = g_bytes_unref_to_data ( request, &taille );
     Query = json_from_string ( data, NULL );
     g_free(data);
-    if (!Query)
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
-       return;
-     }
-
-
     if (!Query)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ );
        soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);

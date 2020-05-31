@@ -33,7 +33,6 @@
 				<div class="d-flex justify-content-center">
 					<a class="card-link" href="https://wiki.abls-habitat.fr"><i class="fas fa-info-circle"></i> Go to ABLS Wiki !</a>
 				</div>
-				</div>
 			</div>
 		</div>
 	</div>

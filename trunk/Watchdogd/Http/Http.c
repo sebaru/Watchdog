@@ -46,10 +46,11 @@
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_http.lib->Thread_debug = FALSE;                                                        /* Settings default parameters */
-    Cfg_http.tcp_port          = HTTP_DEFAUT_TCP_PORT;
-    Cfg_http.ssl_enable        = FALSE;
-    Cfg_http.authenticate      = TRUE;
+    Cfg_http.lib->Thread_debug  = FALSE;                                                        /* Settings default parameters */
+    Cfg_http.tcp_port           = HTTP_DEFAUT_TCP_PORT;
+    Cfg_http.ssl_enable         = FALSE;
+    Cfg_http.authenticate       = TRUE;
+    Cfg_http.wtd_session_expiry = 3600*2;
     g_snprintf( Cfg_http.ssl_cert_filepath,        sizeof(Cfg_http.ssl_cert_filepath), "%s", HTTP_DEFAUT_FILE_CERT );
     g_snprintf( Cfg_http.ssl_private_key_filepath, sizeof(Cfg_http.ssl_private_key_filepath), "%s", HTTP_DEFAUT_FILE_KEY );
 
@@ -70,6 +71,8 @@
         { Cfg_http.tcp_port = atoi(valeur);  }
        else if ( ! g_ascii_strcasecmp ( nom, "authenticate" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "false" ) ) Cfg_http.authenticate = FALSE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "wtd_session_expiry" ) )
+        { Cfg_http.wtd_session_expiry = atoi(valeur); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.lib->Thread_debug = TRUE;  }
        else
@@ -178,7 +181,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT username,comment,enable,access_level,hash "
+                "SELECT username,comment,enable,hash "
                 "FROM users WHERE username='%s' LIMIT 1", name );
     g_free(name);
 
@@ -212,44 +215,14 @@
        return(FALSE);
      }
 /*********************************************** Authentification du client par login mot de passe ****************************/
-    if ( Http_check_utilisateur_password( db->row[4], password ) == FALSE )                          /* Comparaison des codes */
+    if ( Http_check_utilisateur_password( db->row[3], password ) == FALSE )                          /* Comparaison des codes */
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Password error for '%s'(id=%d)", __func__, username );
        return(FALSE);
      }
-
-
-    struct HTTP_CLIENT_SESSION *session = g_try_malloc0( sizeof(struct HTTP_CLIENT_SESSION) );
-    if (!session)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Session creation Error", __func__ );
-       Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       return(FALSE);
-     }
-
-    session->access_level = atoi(db->row[3]);
     Liberer_resultat_SQL (db);
     Libere_DB_SQL( &db );
-
-    g_snprintf( session->username, sizeof(session->username), "%s", username );
-    session->last_request = Partage->top;
-    uuid_t uuid_hex;
-    uuid_generate(uuid_hex);
-    uuid_unparse_lower(uuid_hex, session->wtd_session);
-    if (strlen(session->wtd_session) != 36)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SID Parse Error (%d)", __func__, strlen(session->wtd_session) );
-       g_free(session);
-       return(FALSE);
-     }
-    Cfg_http.liste_http_clients = g_slist_append ( Cfg_http.liste_http_clients, session );
-
-    SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", session->wtd_session, NULL, "/", 86400 );
-    soup_cookie_set_http_only ( wtd_session, TRUE );
-    if (Cfg_http.ssl_enable) soup_cookie_set_secure ( wtd_session, TRUE );
-    GSList *liste = g_slist_append ( NULL, wtd_session );
-    soup_cookies_to_response ( liste, msg );
-    g_slist_free(liste);
 
     return(TRUE);
   }
@@ -295,7 +268,8 @@
 /******************************************************************************************************************************/
  static void Http_traiter_connect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data )
-  { JsonBuilder *builder;
+  { gchar requete[256], *name;
+    JsonBuilder *builder;
     gsize taille_buf;
     gchar *buf;
 
@@ -303,7 +277,75 @@
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+
+    Http_print_request ( server, msg, path, client );
+
+    name = Normaliser_chaine ( soup_client_context_get_auth_user(client) );                                 /* Formatage correct des chaines */
+    if (!name)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+       return;
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT username,comment,access_level FROM users WHERE username='%s' LIMIT 1", name );
+    g_free(name);
+
+    struct DB *db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "%s: DB connexion failed for user '%s'", __func__, soup_client_context_get_auth_user(client) );
+       return;
+     }
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "%s: DB request failed for user '%s'",__func__, soup_client_context_get_auth_user(client) );
+       return;
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                "%s: User '%s' not found in DB", __func__, soup_client_context_get_auth_user(client) );
+       return;
+     }
+
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: User '%s' (%s) found in database.",
+              __func__, db->row[0], db->row[1] );
+
+    struct HTTP_CLIENT_SESSION *session = g_try_malloc0( sizeof(struct HTTP_CLIENT_SESSION) );
+    if (!session)
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Session creation Error", __func__ );
+       return;
+     }
+
+    g_snprintf( session->username, sizeof(session->username), "%s", soup_client_context_get_auth_user(client) );
+    session->access_level = atoi(db->row[2]);
+    Liberer_resultat_SQL (db);
+    Libere_DB_SQL( &db );
+
+    session->last_request = Partage->top;
+    uuid_t uuid_hex;
+    uuid_generate(uuid_hex);
+    uuid_unparse_lower(uuid_hex, session->wtd_session);
+    if (strlen(session->wtd_session) != 36)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SID Parse Error (%d)", __func__, strlen(session->wtd_session) );
+       g_free(session);
+       return;
+     }
+    Cfg_http.liste_http_clients = g_slist_append ( Cfg_http.liste_http_clients, session );
+
+    SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", session->wtd_session, NULL, "/", 86400 );
+    soup_cookie_set_http_only ( wtd_session, TRUE );
+    if (Cfg_http.ssl_enable) soup_cookie_set_secure ( wtd_session, TRUE );
+    GSList *liste = g_slist_append ( NULL, wtd_session );
+    soup_cookies_to_response ( liste, msg );
+    g_slist_free(liste);
+
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
     if (builder == NULL)
@@ -315,11 +357,13 @@
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_add_bool   ( builder, "connected", TRUE );
     Json_add_string ( builder, "version",  VERSION );
+    Json_add_string ( builder, "username", soup_client_context_get_auth_user(client) );
     Json_add_string ( builder, "instance", g_get_host_name() );
     Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
     Json_add_bool   ( builder, "ssl", soup_server_is_https (server) );
-    Json_add_int    ( builder, "access_level", (session ? session->access_level : 10) );
-    Json_add_string ( builder, "wtd_session", (session ? session->wtd_session : "none") );
+    Json_add_int    ( builder, "access_level", session->access_level );
+    Json_add_string ( builder, "wtd_session", session->wtd_session );
+    Json_add_int    ( builder, "wtd_session_expiry", Cfg_http.wtd_session_expiry );
     Json_add_string ( builder, "message", "Welcome back Home !" );
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
@@ -477,7 +521,7 @@ reload:
           while(liste)
            { struct HTTP_CLIENT_SESSION *session = liste->data;
              liste = g_slist_next ( liste );
-             if (session->last_request + 864000 < Partage->top )
+             if (session->last_request + Cfg_http.wtd_session_expiry*10 < Partage->top )
               { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
                 Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Session '%s' out of time", __func__, session->wtd_session );
                 g_free(session);

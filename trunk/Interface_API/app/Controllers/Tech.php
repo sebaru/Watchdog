@@ -19,7 +19,7 @@ class Tech extends BaseController
 
 /******************************************************************************************************************************/
  public function dashboard()
-   { if ( !isset(session()->get('user') )
+   { if ( session()->get('user') === NULL )
       { return redirect()->to('/auth/login'); }
      if ( session()->get('user')->access_level<6 )
       { return redirect()->to('/auth/login'); }

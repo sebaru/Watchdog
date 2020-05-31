@@ -1,10 +1,10 @@
 
 
 <!-- Footer -->
-<footer class="page-footer font-small blue pt-4">
- 
+<footer class="page-footer bg-info mt-2 pt-0">
+
   <!-- Copyright -->
-  <div class="footer-copyright text-center py-3">© 2020 Copyright:
+  <div class="footer-copyright text-center py-2">© 2020 Copyright:
     <a href="https://ABLS-habitat.fr/">ABLS-habitat.fr</a>
   </div>
   <!-- Copyright -->

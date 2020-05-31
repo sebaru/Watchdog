@@ -64,6 +64,7 @@
     GSList *liste_ws_motifs_clients;
     GSList *liste_ws_msgs_clients;
     GSList *liste_http_clients;
+    gint wtd_session_expiry;
  };
 
 /*************************************************** Définitions des prototypes ***********************************************/

@@ -34,24 +34,25 @@ class Auth extends BaseController
           $this->response->setStatusCode(401, "UnAuthorized");
           return;
         }
-       /*log_message ( "error", $source );*/
+       log_message ( "error", $source );
        $result = json_decode($source);
-       curl_close($ch);
        if (!isset($result->wtd_session))
-        { $this->response->setStatusCode(401, "NoCookie");
+        { curl_close($ch);
+          $this->response->setStatusCode(401, "NoCookie");
           return;
         }
        session()->set( 'user', $result );
-       if (session()->get('user')->access_level >= 6)
-        { return redirect()->to('/tech'); }
-       else
-        { return redirect()->to('/'); }
+       $this->response->setStatusCode(200);
+       $this->response->setHeader("Content-Type", "application/json; charset=UTF-8");
+	   	  echo $source;
+       curl_close($ch);
+       return;
      }
-
-    $data['title'] = "Chez moi !";
-    echo view('Auth/header', $data);
-    echo view('Auth/body', $data);
-    echo view('Auth/footer', $data);
-
+    else
+     { $data['title'] = "Chez moi !";
+       echo view('Auth/header', $data);
+       echo view('Auth/body', $data);
+       echo view('Auth/footer', $data);
+     }
   }
 }
