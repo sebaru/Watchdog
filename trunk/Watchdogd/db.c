@@ -1757,20 +1757,20 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4741)
+    if (database_version < 4745)
      { g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
-                   "(SELECT COUNT(*) FROM syns) AS db_nbr_syns, "
-                   "(SELECT COUNT(*) FROM syns_motifs) AS db_nbr_syns_motifs, "
-                   "(SELECT COUNT(*) FROM dls) AS db_nbr_dls, "
-                   "(SELECT SUM(dls.nbr_ligne) FROM dls) AS db_nbr_lignes, "
-                   "(SELECT COUNT(*) FROM users) AS db_nbr_users, "
-                   "(SELECT COUNT(*) FROM audit_log) AS db_nbr_audit_log" );
+                                             "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
+                                             "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "
+                                             "(SELECT COUNT(*) FROM dls) AS nbr_dls, "
+                                             "(SELECT SUM(dls.nbr_ligne) FROM dls) AS nbr_lignes, "
+                                             "(SELECT COUNT(*) FROM users) AS nbr_users, "
+                                             "(SELECT COUNT(*) FROM audit_log) AS nbr_audit_log" );
        Lancer_requete_SQL ( db, requete );
      }
 
     Libere_DB_SQL(&db);
 fin:
-    database_version=4740;
+    database_version=4745;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

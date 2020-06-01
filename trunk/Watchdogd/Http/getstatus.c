@@ -94,6 +94,16 @@
 
     SQL_Select_to_JSON ( builder, NULL, "SELECT * FROM db_status");
 
+    Json_add_string ( builder, "db_username", Config.db_username );
+    Json_add_string ( builder, "db_hostname", Config.db_host );
+    Json_add_int    ( builder, "db_port", Config.db_port );
+    Json_add_string ( builder, "db_database", Config.db_database );
+
+    Json_add_string ( builder, "archdb_username", Partage->com_arch.archdb_username );
+    Json_add_string ( builder, "archdb_hostname", Partage->com_arch.archdb_host );
+    Json_add_int    ( builder, "archdb_port", Partage->com_arch.archdb_port );
+    Json_add_string ( builder, "archdb_database", Partage->com_arch.archdb_database );
+
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
