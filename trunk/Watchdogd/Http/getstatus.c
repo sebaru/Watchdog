@@ -65,7 +65,7 @@
     Json_add_string ( builder, "version",  VERSION );
     Json_add_string ( builder, "instance", g_get_host_name() );
     Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
-    Json_add_string ( builder, "runs_as", Config.run_as );
+    Json_add_string ( builder, "run_as", Config.run_as );
 
     temps = localtime( (time_t *)&Partage->start_time );
     if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
@@ -87,9 +87,6 @@
     num = g_slist_length( Partage->com_msrv.liste_msg );                                       /* Recuperation du numero de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
     Json_add_int  ( builder, "length_msg", num );
-    pthread_mutex_lock( &Partage->com_msrv.synchro );                                                              /* Synchro */
-    num = g_slist_length( Partage->com_msrv.liste_msg_repeat );                                           /* liste des repeat */
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
     Json_add_int  ( builder, "length_msg_repeat", num );
 
     SQL_Select_to_JSON ( builder, NULL, "SELECT * FROM db_status");

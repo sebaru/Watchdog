@@ -89,7 +89,6 @@
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
 
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    GSList *liste_msg_repeat;                                                          /* liste de struct MSGDB msg a envoyer */
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
     GSList *liste_i;                                                             /* liste de I a traiter dans la distribution */
@@ -166,8 +165,7 @@
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */
- extern void Gerer_histo_repeat ( void );
-
+ 
  extern void Gerer_arrive_Ixxx_dls ( void );                                                           /* Dans distrib_Ixxx.c */
 
  #endif
