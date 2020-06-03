@@ -190,7 +190,8 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Send_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille )
-  { if (zmq_send( zmq->socket, buf, taille, 0 ) == -1)
+  { if (!zmq) return;
+    if (zmq_send( zmq->socket, buf, taille, 0 ) == -1)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "%s: Send to ZMQ '%s' ('%s') failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
        return(FALSE);
@@ -211,6 +212,7 @@
   { struct ZMQ_TARGET event;
     void *buffer;
     gboolean retour;
+    if (!zmq) return;
     if (taille==-1) taille = strlen(source)+1;
     buffer = g_try_malloc( taille + sizeof(struct ZMQ_TARGET) );
     if (!buffer)
@@ -291,6 +293,7 @@
     gchar *result;
     gsize taille;
 
+    if (!zmq) return;
     builder = Json_create ();
     if(!builder) return;
     Json_add_string ( builder, "tech_id",  tech_id );
@@ -310,6 +313,7 @@
     gchar *result;
     gsize taille;
 
+    if (!zmq) return;
     builder = Json_create ();
     if(!builder) return;
     Json_add_string ( builder, "tech_id",  tech_id );
@@ -330,6 +334,7 @@
     gchar *result;
     gsize taille;
 
+    if (!zmq) return;
     builder = Json_create ();
     if(!builder) return;
     Json_add_string ( builder, "tech_id",  tech_id );

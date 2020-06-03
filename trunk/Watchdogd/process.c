@@ -273,18 +273,18 @@
 /* Entré/Sortie: néant                                                                                                        */
 /******************************************************************************************************************************/
  void Stopper_fils ( void )
-  { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Debut stopper_fils", __func__ );
+  { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Debut stopper_fils", __func__ );
 
-    Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Waiting for DLS (%p) to finish", __func__, Partage->com_dls.TID );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Waiting for DLS (%p) to finish", __func__, Partage->com_dls.TID );
     Partage->com_dls.Thread_run = FALSE;
     while ( Partage->com_dls.TID != 0 ) sched_yield();                                                     /* Attente fin DLS */
-    Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: ok, DLS is down", __func__ );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: ok, DLS is down", __func__ );
 
-    Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Waiting for ARCH (%p) to finish", __func__, Partage->com_arch.TID );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Waiting for ARCH (%p) to finish", __func__, Partage->com_arch.TID );
     Partage->com_arch.Thread_run = FALSE;
     while ( Partage->com_arch.TID != 0 ) sched_yield();                                                    /* Attente fin DLS */
-    Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: ok, ARCH is down", __func__ );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: ok, ARCH is down", __func__ );
 
-    Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Fin stopper_fils", __func__ );
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Fin stopper_fils", __func__ );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

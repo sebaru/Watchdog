@@ -509,7 +509,9 @@
 
 /***************************************** Socket de subscription au master ***************************************************/
     Partage->com_msrv.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",    "tcp", Config.master_host, 5556 );
+    if (!Partage->com_msrv.zmq_to_master) goto end;
     zmq_from_master                 = Connect_zmq ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
+    if (!zmq_from_master) goto end;
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
@@ -583,6 +585,7 @@
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, NULL, "msrv", "*", "msrv", "SLAVE_STOP", NULL, 0 );
+end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
