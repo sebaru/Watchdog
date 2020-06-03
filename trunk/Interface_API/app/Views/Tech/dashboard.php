@@ -5,11 +5,17 @@
 <div class="card-columns">
   <div class="card">
     <div class="card-header bg-highlight">
-      <i class="fas fa-2x fa-image text-primary"></i>
+      <div class="row">
+        <div class="col-4">
+          <i class="fas fa-2x fa-image text-primary"></i>
+        </div>
+        <div class="col-8 mt-1">
+          SYNOPTIQUES
+        </div>
+      </div>
     </div>
     <div class="card-body">
-      <p class="card-text"> 56 SYNOPTIQUES</p>
-      <p class="card-text"> 56 SYNOPTIQUES</p>
+      <h3 class="card-text text-center"><strong>56</strong></h3>
     </div>
     <!--<p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>-->
   </div>
