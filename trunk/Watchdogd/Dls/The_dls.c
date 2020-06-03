@@ -1418,6 +1418,7 @@
        tempo->delai_off = delai_off;
        tempo->random    = random;
        tempo->init      = TRUE;
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Initializing TEMPO '%s:%s'", __func__, tech_id, acronyme );
      }
     ST_local ( tempo, etat );                                                                     /* Recopie dans la variable */
   }

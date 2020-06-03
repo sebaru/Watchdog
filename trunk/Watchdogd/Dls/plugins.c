@@ -94,8 +94,8 @@
      { struct DLS_TEMPO *tempo = liste_bit->data;
        if (!strcmp(tempo->tech_id, plugin->plugindb.tech_id))
         { tempo->status = DLS_TEMPO_NOT_COUNTING;                                           /* La tempo ne compte pas du tout */
-          tempo->state = FALSE;
-          tempo->init  = FALSE;
+          tempo->state  = FALSE;
+          tempo->init   = FALSE;
         }
        liste_bit = g_slist_next(liste_bit);
      }
