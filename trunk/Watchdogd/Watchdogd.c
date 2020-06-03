@@ -279,7 +279,7 @@
        if (!query)
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); return; }
 
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
                  "%s: receive SET_CDE=1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
                  event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
                  Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
@@ -292,7 +292,7 @@
        if (!query)
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); return; }
 
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
                  "%s: receive SET_DI from %s/%s to %s/%s : '%s:%s'=%d", __func__,
                  event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
                  Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ), Json_get_bool ( query, "etat" ) );

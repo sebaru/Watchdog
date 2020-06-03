@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `config` (
   `nom` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `valeur` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
   UNIQUE (`instance_id`,`nom_thread`,`nom`)
-) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `class` (
   `date_create` datetime NOT NULL DEFAULT NOW(),
   `libelle` varchar(241) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `icons` (
   `nbr_matrice` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`id_classe`) REFERENCES `class` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
 
 -- --------------------------------------------------------
 
@@ -467,7 +467,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
   `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id_mnemo`),
   FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -549,7 +549,7 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
@@ -606,7 +606,7 @@ CREATE TABLE IF NOT EXISTS `syns_palettes` (
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
@@ -624,7 +624,7 @@ CREATE TABLE IF NOT EXISTS `syns_pass` (
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
@@ -687,7 +687,7 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `map_A` int(11) NOT NULL,
   `map_AA` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 
 -- --------------------------------------------------------
@@ -755,7 +755,7 @@ CREATE TABLE IF NOT EXISTS `ups` (
   `date_create` DATETIME NOT NULL DEFAULT NOW(),
 
   PRIMARY KEY (`id`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 
 -- --------------------------------------------------------
@@ -781,7 +781,7 @@ CREATE TABLE IF NOT EXISTS `rs485` (
   `bit_comm` int(11) NOT NULL DEFAULT '0',
   `libelle` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -805,7 +805,7 @@ CREATE TABLE IF NOT EXISTS `rfxcom` (
   `map_A` int(11) NOT NULL DEFAULT '-1',
   `libelle` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -834,7 +834,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `ssrv_bit_presence` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY(`username`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `users` (`id`, `enable`, `access_level`, `username`, `hash`, `comment`, `date_create`, `date_modif`) VALUES
 (0, 1, 10, 'root', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 'Root user ', NOW(), NOW()),
@@ -854,4 +854,4 @@ CREATE TABLE IF NOT EXISTS `audit_log` (
   `message` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `date` DATETIME NOT NULL DEFAULT NOW(),
   PRIMARY KEY (`id`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;

@@ -8,4 +8,3 @@ dnf install -y gtk3-devel goocanvas2-devel popt-devel libsoup-devel
 dnf install -y gtksourceview2-devel goocanvas-devel json-glib-devel gammu-devel
 dnf install -y vlc alsa-utils alsa-firmware 
 dnf install -y mpg123 sox mosquitto-devel
-pip3 install gTTS
