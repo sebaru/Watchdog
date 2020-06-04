@@ -100,7 +100,7 @@ if [ "$web" = "oui" ]
      sudo a2dissite 000-default
      sudo systemctl reload apache2
      sudo chown www-data /var/www/html/WEB
-     sudo -u www-data svn https://svn.abls-habitat.fr/repo/Watchdog/trunk/Interface_WEB /var/www/html/WEB
+     sudo -u www-data svn co https://svn.abls-habitat.fr/repo/Watchdog/trunk/Interface_WEB /var/www/html/WEB
     fi
 
 
