@@ -86,21 +86,31 @@ read -p "install_web: " web
 
 if [ "$web" = "oui" ]
  then
-    sudo mkdir -p /var/www/html/WEB
+    targetdir="/var/www/html/WEB"
+    sudo mkdir -p $targetdir
     if [ "$SOCLE" = "fedora" ]
      then sudo dnf -y install httpd php-json php php-mysqlnd mariadb-server
-     sudo chmod apache.apache -R /var/www/html/WEB
+     sudo chmod apache.apache -R $targetdir
     fi
     if [ "$SOCLE" = "debian" ]
-     then sudo apt -y install apache2 php7.3-mysql php-curl
+     then sudo apt -y install apache2 php php7.3-mysql php-curl
      sudo a2enmod proxy
      sudo a2enmod proxy_wstunnel
      sudo a2enmod headers
      sudo a2enmod rewrite
      sudo a2dissite 000-default
-     sudo chown www-data /var/www/html/WEB
-     sudo -u www-data svn co https://svn.abls-habitat.fr/repo/Watchdog/trunk/Interface_WEB /var/www/html/WEB
+     sudo chown www-data $targetdir
+     sudo -u www-data svn co https://svn.abls-habitat.fr/repo/Watchdog/trunk/Interface_WEB $targetdir
      sudo cp Interface_WEB/watchdogd-httpd.conf /etc/apache2/sites-available/
+     if [ ! -f "$targetdir/application/config/config.php" ]
+	     then 
+		     sudo cp Interface_WEB/application/config/config.php.sample $targetdir/application/config/
+     fi
+     if [ ! -f "$targetdir/application/config/database.php" ]
+	     then
+		     sudo cp Interface_WEB/application/config/database.php.sample $targetdir/application/config/
+		     sudo sed -i $targetdir/application/config/database.php -e "s#dbpasstobechanged#$NEWPASSWORD#g"
+     fi
      sudo a2ensite watchdogd-httpd
      sudo systemctl reload apache2
     fi
