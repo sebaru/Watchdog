@@ -840,7 +840,7 @@ INSERT INTO `users` (`id`, `enable`, `access_level`, `username`, `hash`, `commen
 (0, 1, 10, 'root', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 'Root user ', NOW(), NOW()),
 (1, 1, 0, 'guest', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 'Guest user ', NOW(), NOW());
 
-CREATE TABLE `users_sessions` (
+CREATE TABLE IF NOT EXISTS `users_sessions` (
   `username` VARCHAR(32) NOT NULL,
   `wtd_session` VARCHAR(42) NOT NULL,
   `date_create` datetime NOT NULL,
