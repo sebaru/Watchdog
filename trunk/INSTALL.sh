@@ -92,7 +92,7 @@ if [ "$web" = "oui" ]
      sudo chmod apache.apache -R /var/www/html/WEB
     fi
     if [ "$SOCLE" = "debian" ]
-     then sudo apt -y apache2 php7.3-mysql php-curl
+     then sudo apt -y install apache2 php7.3-mysql php-curl
      sudo a2enmod proxy
      sudo a2enmod proxy_wstunnel
      sudo a2enmod proxy_headers

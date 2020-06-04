@@ -1,0 +1,6 @@
+--2018-11-10 01:33:50--  http://localhost:5560/compil
+Résolution de localhost (localhost)… 127.0.0.1
+Connexion à localhost (localhost)|127.0.0.1|:5560… connecté.
+requête HTTP transmise, en attente de la réponse… 400 Bad Request
+2018-11-10 01:33:50 erreur 400 : Bad Request.
+
