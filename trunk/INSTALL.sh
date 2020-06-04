@@ -81,6 +81,30 @@ if [ "$sgbd" = "oui" ]
     /usr/bin/mysql_secure_installation
 fi
 
+echo "faut-il installer l'interface WEB ? (oui/non)"
+read -p "install_web: " web
+
+if [ "$web" = "oui" ]
+ then
+    sudo mkdir -p /var/www/html/WEB
+    if [ "$SOCLE" = "fedora" ]
+     then sudo dnf -y install httpd php-json php php-mysqlnd mariadb-server
+     sudo chmod apache.apache -R /var/www/html/WEB
+    fi
+    if [ "$SOCLE" = "debian" ]
+     then sudo apt -y apache2 php7.3-mysql php-curl
+     sudo a2enmod proxy
+     sudo a2enmod proxy_wstunnel
+     sudo a2enmod proxy_headers
+     sudo a2enmod proxy_rewrite
+     sudo a2dissite 000-default
+     sudo cp Interface_WEB/* /var/www/html/WEB/
+     sudo chmod www-data.www-data -R /var/www/html/WEB
+    fi
+
+
+fi
+
 if [ "$SOCLE" = "fedora" ]
  then
   echo "Executing dnf auto-remove"
