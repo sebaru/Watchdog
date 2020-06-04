@@ -110,11 +110,11 @@ if [ "$web" = "oui" ]
     fi
     if [ ! -f "$targetdir/application/config/config.php" ]
      then 
-	     sudo cp Interface_WEB/application/config/config.php.sample $targetdir/application/config/
+	     sudo cp Interface_WEB/application/config/config.php.sample $targetdir/application/config/config.php
     fi
     if [ ! -f "$targetdir/application/config/database.php" ]
      then
-	     sudo cp Interface_WEB/application/config/database.php.sample $targetdir/application/config/
+	     sudo cp Interface_WEB/application/config/database.php.sample $targetdir/application/config/database.php
 	     sudo sed -i $targetdir/application/config/database.php -e "s#dbpasstobechanged#$NEWPASSWORD#g"
     fi
     fi
@@ -131,3 +131,5 @@ if [ "$SOCLE" = "debian" ]
   echo "Executing apt auto-remove"
   sudo apt autoremove
 fi
+
+sudo systemctl restart Watchdogd
