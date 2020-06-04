@@ -99,8 +99,8 @@ if [ "$web" = "oui" ]
      sudo a2enmod rewrite
      sudo a2dissite 000-default
      sudo systemctl reload apache2
-     sudo cp Interface_WEB/* /var/www/html/WEB/
-     sudo chmod www-data.www-data -R /var/www/html/WEB
+     sudo chmod www-data /var/www/html/WEB
+     sudo -u www-data https://svn.abls-habitat.fr/repo/Watchdog/trunk/Interface_WEB /var/www/html/WEB
     fi
 
 
