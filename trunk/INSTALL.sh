@@ -55,10 +55,10 @@ sudo make install
 CONFFILE="/etc/watchdogd.conf"
 if [ ! -f $CONFFILE ]
  then
-    cp "/usr/local/etc/watchdogd.conf.sample" $CONFFILE
+    sudo cp "/usr/local/etc/watchdogd.conf.sample" $CONFFILE
 fi
 
-sed -i $CONFFILE -e "s#usertobechanged#$USER#g"
+sudo sed -i $CONFFILE -e "s#usertobechanged#$USER#g"
 
 echo "faut-il installer le SGBD ? (oui/non)"
 read -p "install_sgbd: " sgbd
@@ -66,15 +66,15 @@ read -p "install_sgbd: " sgbd
 if [ "$sgbd" = "oui" ]
  then
     if [ "$SOCLE" = "fedora" ]
-     then dnf -y install mariadb-server
+     then sudo dnf -y install mariadb-server
     fi
     if [ "$SOCLE" = "debian" ]
-     then apt -y install mariadb-server
+     then sudo apt -y install mariadb-server
     fi
     sudo systemctl restart mariadb
 
     NEWPASSWORD=`openssl rand -base64 32`
-    sed $CONFFILE "s#dbpasstobechanged#$NEWPASSWORD#g"
+    sudo sed $CONFFILE "s#dbpasstobechanged#$NEWPASSWORD#g"
     /usr/bin/mysqladmin -u root create WatchdogDB
      echo "CREATE USER 'watchdog' IDENTIFIED BY '$NEWPASSWORD'; GRANT ALL PRIVILEGES ON WatchdogDB.* TO watchdog; FLUSH PRIVILEGES; source /usr/local/share/Watchdog/init_db.sql;" | mysql -u root WatchdogDB
     /usr/bin/mysql_secure_installation
