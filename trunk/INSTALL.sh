@@ -79,3 +79,15 @@ if [ "$sgbd" = "oui" ]
      echo "CREATE USER 'watchdog' IDENTIFIED BY '$NEWPASSWORD'; GRANT ALL PRIVILEGES ON WatchdogDB.* TO watchdog; FLUSH PRIVILEGES; source /usr/local/share/Watchdog/init_db.sql;" | mysql -u root WatchdogDB
     /usr/bin/mysql_secure_installation
 fi
+
+if [ "$SOCLE" = "fedora" ]
+ then
+  echo "Executing dnf auto-remove"
+  sudo dnf autoremove
+fi
+
+if [ "$SOCLE" = "debian" ]
+ then
+  echo "Executing apt auto-remove"
+  sudo apt autoremove
+fi
