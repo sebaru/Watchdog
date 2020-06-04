@@ -95,9 +95,10 @@ if [ "$web" = "oui" ]
      then sudo apt -y install apache2 php7.3-mysql php-curl
      sudo a2enmod proxy
      sudo a2enmod proxy_wstunnel
-     sudo a2enmod proxy_headers
-     sudo a2enmod proxy_rewrite
+     sudo a2enmod headers
+     sudo a2enmod rewrite
      sudo a2dissite 000-default
+     sudo systemctl reload apache2
      sudo cp Interface_WEB/* /var/www/html/WEB/
      sudo chmod www-data.www-data -R /var/www/html/WEB
     fi
