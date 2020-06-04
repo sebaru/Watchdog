@@ -101,9 +101,9 @@ if [ "$web" = "oui" ]
      sudo systemctl reload apache2
      sudo chown www-data /var/www/html/WEB
      sudo -u www-data svn co https://svn.abls-habitat.fr/repo/Watchdog/trunk/Interface_WEB /var/www/html/WEB
+     sudo cp Interface_WEB/watchdogd-httpd.conf /etc/apache2/sites-available/
+     sudo a2ensite watchdogd-httpd
     fi
-
-
 fi
 
 if [ "$SOCLE" = "fedora" ]
