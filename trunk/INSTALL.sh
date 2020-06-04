@@ -29,6 +29,17 @@ if [ "$SOCLE" = "debian" ]
   sudo apt install -y libgtk-3-dev libsoup2.4-dev libgoocanvas-2.0-dev
 fi
 
+echo "Copying data files for $USER"
+mkdir -p ~/Son
+mkdir -p ~/Dls
+cp -r Son/* ~/Son
+echo "done."
+sleep 2
+
+echo "Compiling and installing"
+./autogen.sh
+sudo make install
+
 echo "L'instance est-elle master ? (oui/non)"
 read -p "instance_is_master: " master
 
@@ -40,17 +51,6 @@ if [ "$master" = "oui" ]
 fi
 sudo systemctl daemon-reload
 sudo usermod -a -G audio,dialout $USER
-
-echo "Copying data files for $USER"
-mkdir -p ~/Son
-mkdir -p ~/Dls
-cp -r Son/* ~/Son
-echo "done."
-sleep 2
-
-echo "Compiling and installing"
-./autogen.sh
-sudo make install
 
 CONFFILE="/etc/watchdogd.conf"
 if [ ! -f $CONFFILE ]
@@ -98,11 +98,11 @@ if [ "$web" = "oui" ]
      sudo a2enmod headers
      sudo a2enmod rewrite
      sudo a2dissite 000-default
-     sudo systemctl reload apache2
      sudo chown www-data /var/www/html/WEB
      sudo -u www-data svn co https://svn.abls-habitat.fr/repo/Watchdog/trunk/Interface_WEB /var/www/html/WEB
      sudo cp Interface_WEB/watchdogd-httpd.conf /etc/apache2/sites-available/
      sudo a2ensite watchdogd-httpd
+     sudo systemctl reload apache2
     fi
 fi
 
