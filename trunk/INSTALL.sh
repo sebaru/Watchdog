@@ -118,7 +118,6 @@ if [ "$web" = "oui" ]
 	     sudo sed -i $targetdir/application/config/database.php -e "s#dbpasstobechanged#$NEWPASSWORD#g"
     fi
     fi
-fi
 
 if [ "$SOCLE" = "fedora" ]
  then
