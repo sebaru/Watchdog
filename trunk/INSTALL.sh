@@ -70,11 +70,12 @@ if [ "$sgbd" = "oui" ]
     fi
     if [ "$SOCLE" = "debian" ]
      then sudo apt -y install mariadb-server
+	  sudo mysql_install_db
     fi
     sudo systemctl restart mariadb
 
     NEWPASSWORD=`openssl rand -base64 32`
-    sudo sed $CONFFILE "s#dbpasstobechanged#$NEWPASSWORD#g"
+    sudo sed -i $CONFFILE -e "s#dbpasstobechanged#$NEWPASSWORD#g"
     /usr/bin/mysqladmin -u root create WatchdogDB
      echo "CREATE USER 'watchdog' IDENTIFIED BY '$NEWPASSWORD'; GRANT ALL PRIVILEGES ON WatchdogDB.* TO watchdog; FLUSH PRIVILEGES; source /usr/local/share/Watchdog/init_db.sql;" | mysql -u root WatchdogDB
     /usr/bin/mysql_secure_installation
