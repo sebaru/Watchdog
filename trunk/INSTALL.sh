@@ -101,7 +101,7 @@ if [ "$web" = "oui" ]
      sudo chown apache.apache -R $targetdir
      sudo -u apache svn co https://svn.abls-habitat.fr/repo/Watchdog/trunk/Interface_WEB $targetdir
      sudo cp Interface_WEB/watchdogd-httpd.conf /etc/httpd/conf.d/
-     sudo systemctl reload httpd
+     sudo systemctl restart httpd
     fi
     if [ "$SOCLE" = "debian" ]
      then sudo apt -y install apache2 php php7.3-mysql php-curl
