@@ -70,7 +70,7 @@ if [ "$sgbd" = "oui" ]
     fi
     if [ "$SOCLE" = "debian" ]
      then sudo apt -y install mariadb-server
-	  sudo mysql_install_db
+	   sudo mysql_install_db
     fi
     sudo systemctl restart mariadb
 
@@ -109,7 +109,7 @@ if [ "$web" = "oui" ]
      sudo systemctl reload apache2
     fi
     if [ ! -f "$targetdir/application/config/config.php" ]
-     then 
+     then
 	     sudo cp Interface_WEB/application/config/config.php.sample $targetdir/application/config/config.php
     fi
     if [ ! -f "$targetdir/application/config/database.php" ]
