@@ -6,14 +6,22 @@ USER=`whoami`
 if [ "$SOCLE" = "fedora" ]
  then
   echo "Installing Fedora dependencies"
-  sudo dnf update
   sudo dnf install -y subversion libtool automake autoconf gcc gcc-c++ redhat-rpm-config
   sudo dnf install -y glib2-devel bison flex readline-devel giflib-devel libgcrypt-devel
-  sudo dnf install -y libcurl-devel nut-devel mariadb-devel zeromq-devel
+  sudo dnf install -y libcurl-devel nut-devel mariadb-devel zeromq-devel libuuid-devel
   sudo dnf install -y gtk3-devel goocanvas2-devel popt-devel libsoup-devel
   sudo dnf install -y gtksourceview2-devel goocanvas-devel json-glib-devel gammu-devel
   sudo dnf install -y vlc alsa-utils alsa-firmware
   sudo dnf install -y mpg123 sox mosquitto-devel
+  sudo dnf install -y libgnomeui-devel 
+  sudo dnf install -y git
+  git clone https://github.com/strophe/libstrophe.git
+  cd libstrophe
+  ./bootstrap.sh
+  ./configure
+  make
+  sudo make install
+  cd ..
 fi
 
 if [ "$SOCLE" = "debian" ]
@@ -89,7 +97,7 @@ if [ "$web" = "oui" ]
     targetdir="/var/www/html/WEB"
     sudo mkdir -p $targetdir
     if [ "$SOCLE" = "fedora" ]
-     then sudo dnf -y install httpd httpd-mod_proxy php-json php php-mysqlnd mariadb-server
+     then sudo dnf -y install httpd php-json php php-mysqlnd
      sudo chown apache.apache -R $targetdir
      sudo -u apache svn co https://svn.abls-habitat.fr/repo/Watchdog/trunk/Interface_WEB $targetdir
      sudo cp Interface_WEB/watchdogd-httpd.conf /etc/httpd/conf.d/
