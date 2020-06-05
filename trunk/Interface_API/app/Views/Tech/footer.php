@@ -5,7 +5,7 @@
 
   <!-- Copyright -->
   <div class="footer-copyright text-center py-2">© 2020 Copyright:
-    <a href="https://ABLS-habitat.fr/">ABLS-habitat.fr</a>
+    <a href="https://ABLS-habitat.fr/">ABLS-Habitat.fr</a>
   </div>
   <!-- Copyright -->
 

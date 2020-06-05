@@ -24,4 +24,40 @@
       </style>
 
     </head>
-    <body class="">
+
+    <body>
+
+<!--
+ <div id="toast-error" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="position: absolute; top: 0; right: 0;">
+   <div class="toast-header">
+     <i class="fas exclamation-circle"></i>
+     <strong class="mr-auto">Erreur !</strong>
+     <small>so sorry !</small>
+     <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+       <span aria-hidden="true">&times;</span>
+     </button>
+   </div>
+   <div class="toast-body">
+     This is a Error Toast.
+   </div>
+ </div>
+-->
+
+<div id="idModalError" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title text-justify"><i class="fas fa-exclamation-circle"></i>Erreur</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="idModalDetail">Une erreur est survenue !</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

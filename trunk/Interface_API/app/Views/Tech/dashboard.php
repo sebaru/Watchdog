@@ -1,3 +1,4 @@
+
 <div class="container">
 
 
@@ -78,3 +79,6 @@
 
 
 </div>
+
+    <script src="<?php echo base_url('js/dashboard.js')?>" type="text/javascript"></script>
+
