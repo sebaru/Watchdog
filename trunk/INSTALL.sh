@@ -101,6 +101,7 @@ if [ "$web" = "oui" ]
      sudo chown apache.apache -R $targetdir
      sudo -u apache svn co https://svn.abls-habitat.fr/repo/Watchdog/trunk/Interface_WEB $targetdir
      sudo cp Interface_WEB/watchdogd-httpd.conf /etc/httpd/conf.d/
+     sudo /sbin/restorecon -rv $targetdir
      sudo systemctl restart httpd
     fi
     if [ "$SOCLE" = "debian" ]
