@@ -1757,16 +1757,22 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4745)
-     { g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
-                                             "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
-                                             "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "
-                                             "(SELECT COUNT(*) FROM dls) AS nbr_dls, "
-                                             "(SELECT SUM(dls.nbr_ligne) FROM dls) AS nbr_lignes, "
-                                             "(SELECT COUNT(*) FROM users) AS nbr_users, "
-                                             "(SELECT COUNT(*) FROM audit_log) AS nbr_audit_log" );
-       Lancer_requete_SQL ( db, requete );
-     }
+    g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
+                                          "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
+                                          "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "
+                                          "(SELECT COUNT(*) FROM syns_liens) AS nbr_syns_liens, "
+                                          "(SELECT COUNT(*) FROM dls) AS nbr_dls, "
+                                          "(SELECT COUNT(*) FROM mnemos_DI) AS nbr_dls_di, "
+                                          "(SELECT COUNT(*) FROM mnemos_DO) AS nbr_dls_do, "
+                                          "(SELECT COUNT(*) FROM mnemos_AI) AS nbr_dls_ai, "
+                                          "(SELECT COUNT(*) FROM mnemos_AO) AS nbr_dls_ao, "
+                                          "(SELECT COUNT(*) FROM mnemos_BOOL) AS nbr_dls_bool, "
+                                          "(SELECT SUM(dls.nbr_ligne) FROM dls) AS nbr_dls_lignes, "
+                                          "(SELECT COUNT(*) FROM users) AS nbr_users, "
+                                          "(SELECT COUNT(*) FROM msgs) AS nbr_msgs, "
+                                          "(SELECT COUNT(*) FROM histo_msgs) AS nbr_histo_msgs, "
+                                          "(SELECT COUNT(*) FROM audit_log) AS nbr_audit_log" );
+    Lancer_requete_SQL ( db, requete );
 
     Libere_DB_SQL(&db);
 fin:
