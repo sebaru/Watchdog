@@ -1,8 +1,4 @@
-
-<div class="container">
-
-
-
+    <div class="container">
 <div class="card-columns">
   <div class="card">
     <div class="card-header bg-highlight">
@@ -94,6 +90,6 @@
 
 </div>
 
-</div>
 <script src="<?php echo base_url('js/dashboard.js')?>" type="text/javascript"></script>
-
+<!-- Container -->
+</div>

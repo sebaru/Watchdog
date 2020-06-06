@@ -61,3 +61,71 @@
     </div>
   </div>
 </div>
+
+<header>
+	<nav class="navbar navbar-dark bg-primary navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
+  <a class="navbar-brand" href="<?php echo base_url('/');?>"><img src="<?php echo base_url('/logo.svg')?>" alt="Watchdog Logo" width=50></a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbar-toggled">
+    <ul class="navbar-nav mr-auto">
+      <a class="nav-link active" href="<?php echo base_url('tech/dashboard'); ?>"> <i class="fas fa-tachometer-alt"></i><span> Dashboard</span></a>
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarCONFIG" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-cog"></i> Configuration
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarCONFIG">
+          <a class="dropdown-item" href="<?php echo base_url('tech/syn'); ?>"> <i class="fas fa-image text-danger"></i> <span> Synoptiques</span> </a>
+          <a class="dropdown-item" href="<?php echo site_url('tech/dls'); ?>"> <i class="fas fa-code text-primary"></i> <span>Modules D.L.S</span> </a>
+          <a class="dropdown-item" href="<?php echo site_url('tech/tableau'); ?>"> <i class="fas fa-chart-line text-secondary"></i> <span>Tableaux</span> </a>
+        </div>
+      </li>
+
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarINSTANCE" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Instance
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarINSTANCE">
+          <a class="dropdown-item" href="<?php echo site_url('tech/process'); ?>"><i class="fas fa-microchip text-primary"></i> <span>Gestion des Processus</span></a>
+          <a class="dropdown-item" href="<?php echo site_url('tech/maintenance'); ?>"><i class="fas fa-wrench text-warning"></i> <span>Maintenance</span></a>
+        </div>
+      </li>
+
+      <a class="nav-link" href="https://icons.abls-habitat.fr/admin/icons"><i class="fas fa-file-photo-o"></i> <span>Gestion des Icones</span></a>
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarIO" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-robot"></i> Inputs/Outputs
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarIO">
+          <a class="dropdown-item" href="<?php echo site_url('tech/modbus'); ?>"> <i class="fas fa-cogs text-info"></i> <span>Module Wago/Modbus</span> </a>
+          <a class="dropdown-item" href="<?php echo site_url('tech/ups'); ?>"> <i class="fas fa-battery-half text-success"></i> <span>Onduleurs</span> </a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">Something else here</a>
+        </div>
+      </li>
+    </ul>
+    <ul class="navbar-nav">
+    <form class="form-inline ml-2 my-2 my-lg-0">
+      <input class="form-control mr-sm-2" type="search" placeholder="Rechercher" aria-label="Rechercher">
+      <button class="btn btn-success my-2 my-sm-0" type="submit">Search</button> <!--btn-outline-success-->
+    </form>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-user"></i> Utilisateurs
+        </a>
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUSER">
+          <a class="dropdown-item" href="<?php echo site_url('tech/users'); ?>"><i class="fas fa-user text-info"></i> <span>Gestion des utilisateurs</span></a>
+          <a class="dropdown-item" href="<?php echo site_url('tech/log'); ?>"><i class="fas fa-database text-warning"></i> <span>Audit Log</span></a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="auth/logout"><i class="fas fa-sign-out-alt text-danger"></i> <span>Logout</span> </a>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+</header>
