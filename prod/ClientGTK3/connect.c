@@ -66,18 +66,23 @@
 /******************************************************************************************************************************/
  void Envoi_au_serveur ( struct CLIENT *client, gchar *methode, gchar *payload, gsize taille_buf, gchar *URI, SoupSessionCallback callback )
   { gchar target[128];
-    printf("%s : %p\n", __func__, client );
+    printf("%s : sending %s\n", __func__, URI );
     g_snprintf( target, sizeof(target), "http://%s:5560/%s", client->hostname, URI );
     SoupMessage *msg = soup_message_new ( methode, target );
-    g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
     client->network_size_sent = 0;
+    g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
     if (payload)
      { soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
        client->network_size_to_send = taille_buf;
        gchar chaine[128];
-       g_snprintf ( chaine, (taille_buf>sizeof(chaine) ? taille_buf : sizeof(chaine)) - 1, "Sending %s : %s\n", URI, payload );
+       g_snprintf ( chaine, sizeof(chaine), "Sending %s : %s\n", URI, payload );
+       chaine[126]='\n';
        printf(chaine);
      }
+    SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", client->wtd_session, "/", NULL, 0 );
+    GSList *liste = g_slist_append ( NULL, wtd_session );
+    soup_cookies_to_request ( liste, msg );
+    g_slist_free(liste);
     if (!msg) { Log( client, "Erreur envoi au serveur"); Deconnecter_sale(client); }
     else soup_session_queue_message (client->connexion, msg, callback, client);
   }
@@ -135,6 +140,22 @@
        Deconnecter_sale(client);
        return;
      }
+
+    GSList *cookies, *liste;
+    cookies = soup_cookies_from_response(msg);
+    liste = cookies;
+    while ( liste )
+     { SoupCookie *cookie = liste->data;
+       const char *name = soup_cookie_get_name (cookie);
+       if (!strcmp(name,"wtd_session"))
+        { g_snprintf(client->wtd_session, sizeof(client->wtd_session), "%s", soup_cookie_get_value(cookie) );
+          printf("Get session %s\n", client->wtd_session);
+          break;
+        }
+       liste = g_slist_next(liste);
+     }
+    soup_cookies_free(cookies);
+
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
     g_snprintf( chaine, sizeof(chaine), "Connected with %s@%s to %s Instance '%s' with %s. Version %s - %s",
@@ -143,11 +164,12 @@
                 Json_get_string(response, "instance"),
                 (Json_get_bool(response, "ssl") ? "SSL" : "NO SSL"),
                 Json_get_string(response, "version"), Json_get_string(response, "message") );
+    client->access_level = Json_get_int ( response, "access_level" );
     Log(client, chaine);
     json_node_unref(response);
     g_snprintf( chaine, sizeof(chaine), "histo/alive" );
     Envoi_au_serveur( client, "GET", NULL, 0, chaine, Afficher_histo_alive_CB );
-    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/ws/live-msgs", client->hostname );
+    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/live-msgs", client->hostname );
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
                                            NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
   }
@@ -180,42 +202,44 @@
 /* Sortie: kedal                                                                                                              */
 /******************************************************************************************************************************/
  void Connecter ( struct CLIENT *client )
-  { GtkWidget *table, *texte, *boite, *frame;
+  { GtkWidget *table, *texte, *content_area, *hbox, *image;
     GtkWidget *Entry_host, *Entry_nom, *Entry_code;
-    gint retour;
 
     if (client->connexion) return;
-    GtkWidget *fenetre = gtk_message_dialog_new ( GTK_WINDOW(client->window), GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
-                                                  GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
-                                                  "Identification required" );
-    gtk_window_set_resizable (GTK_WINDOW (fenetre), FALSE);
+    GtkWidget *fenetre = gtk_dialog_new_with_buttons ( "Identification Required", GTK_WINDOW(client->window),
+                                                       GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+                                                       "Annuler", GTK_RESPONSE_CANCEL, "Connecter", GTK_RESPONSE_OK, NULL );
 
-    frame = gtk_frame_new( "Put your ID and password" );
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_container_set_border_width( GTK_CONTAINER(frame), 6 );
-    gtk_box_pack_start( GTK_BOX(gtk_dialog_get_content_area (GTK_DIALOG(fenetre))), frame, TRUE, TRUE, 0 );
+    content_area = gtk_dialog_get_content_area (GTK_DIALOG (fenetre));
 
-    boite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
-    gtk_container_set_border_width( GTK_CONTAINER(boite), 6 );
-    gtk_container_add( GTK_CONTAINER(frame), boite );
+    hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
+    gtk_container_set_border_width (GTK_CONTAINER (hbox), 8);
+    gtk_box_pack_start (GTK_BOX (content_area), hbox, FALSE, FALSE, 0);
+
+    image = gtk_image_new_from_icon_name ("dialog-question", GTK_ICON_SIZE_DIALOG);
+    gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
 
     table = gtk_grid_new();                                                                   /* Table des entrys identifiant */
-    gtk_box_pack_start( GTK_BOX(boite), table, TRUE, TRUE, 0 );
-    //gtk_grid_set_row_homogeneous ( GTK_GRID(table), TRUE );
-    //gtk_grid_set_column_homogeneous ( GTK_GRID(table), TRUE );
+    gtk_box_pack_start( GTK_BOX(hbox), table, TRUE, TRUE, 0 );
     gtk_grid_set_row_spacing( GTK_GRID(table), 5 );
     gtk_grid_set_column_spacing( GTK_GRID(table), 5 );
 
-    texte = gtk_label_new( "Serveur" );
+    texte = gtk_label_new( "Hostname" );
     gtk_grid_attach( GTK_GRID(table), texte, 0, 0, 1, 1 );
     Entry_host = gtk_entry_new();
     gtk_entry_set_text( GTK_ENTRY(Entry_host), g_settings_get_string ( client->settings, "hostname" ) );
+    gtk_entry_set_placeholder_text ( GTK_ENTRY(Entry_host), "Votre serveur" );
+    gtk_widget_set_tooltip_text ( Entry_host, "Entrez le nom du serveur distant" );
+    gtk_entry_set_icon_from_icon_name ( GTK_ENTRY(Entry_host), GTK_ENTRY_ICON_PRIMARY, "system-run" );
     gtk_grid_attach( GTK_GRID(table), Entry_host, 1, 0, 1, 1 );
 
-    texte = gtk_label_new( "Name" );
+    texte = gtk_label_new( "Username" );
     gtk_grid_attach( GTK_GRID(table), texte, 0, 1, 1, 1 );
     Entry_nom = gtk_entry_new();
     gtk_entry_set_text( GTK_ENTRY(Entry_nom), g_settings_get_string ( client->settings, "username" ) );
+    gtk_entry_set_placeholder_text ( GTK_ENTRY(Entry_nom), "Votre nom" );
+    gtk_widget_set_tooltip_text ( Entry_nom, "Entrez votre login de connexion" );
+    gtk_entry_set_icon_from_icon_name ( GTK_ENTRY(Entry_nom), GTK_ENTRY_ICON_PRIMARY, "system-users" );
     gtk_grid_attach( GTK_GRID(table), Entry_nom, 1, 1, 1, 1 );
 
     texte = gtk_label_new( "Password" );
@@ -223,16 +247,18 @@
     Entry_code = gtk_entry_new();
     gtk_entry_set_visibility( GTK_ENTRY(Entry_code), FALSE );
     gtk_entry_set_text( GTK_ENTRY(Entry_code), g_settings_get_string ( client->settings, "password" ) );
+    gtk_entry_set_placeholder_text ( GTK_ENTRY(Entry_code), "Votre mot de passe" );
+    gtk_widget_set_tooltip_text ( Entry_code, "Entrez votre mot de passe de connexion" );
+    gtk_entry_set_icon_from_icon_name ( GTK_ENTRY(Entry_code), GTK_ENTRY_ICON_PRIMARY, "dialog-password" );
     gtk_grid_attach( GTK_GRID(table), Entry_code, 1, 2, 1, 1 );
 
     g_signal_connect_swapped( Entry_host, "activate", (GCallback)gtk_widget_grab_focus, Entry_nom );
     g_signal_connect_swapped( Entry_nom,  "activate", (GCallback)gtk_widget_grab_focus, Entry_code );
 
     gtk_widget_grab_focus( Entry_nom );
-    gtk_widget_show_all( frame );
-    retour = gtk_dialog_run( GTK_DIALOG(fenetre) );                                    /* Attente de reponse de l'utilisateur */
+    gtk_widget_show_all( hbox );
 
-    if (retour == GTK_RESPONSE_OK)
+    if (gtk_dialog_run( GTK_DIALOG(fenetre) ) == GTK_RESPONSE_OK)                      /* Attente de reponse de l'utilisateur */
      { g_snprintf( client->hostname, sizeof(client->hostname), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
        g_snprintf( client->username, sizeof(client->username), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
        g_snprintf( client->password, sizeof(client->password), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_code) ) );

@@ -1,13 +1,13 @@
-/**********************************************************************************************************/
-/* Client/atelier_clic_trame.c        Gestion des evenements sur la trame                                 */
-/* Projet WatchDog version 3.0       Gestion d'habitat                   sam. 19 sept. 2009 11:59:15 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/atelier_clic_trame.c        Gestion des evenements sur la trame                                                     */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                       sam. 19 sept. 2009 11:59:15 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * atelier_clic_trame.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sébastien Lefevre
+ * Copyright (C) 2010-2020 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,101 +25,102 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <gnome.h>
+ #include <gtk/gtk.h>
 
- #include "trame.h"
-
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
-/********************************* Définitions des prototypes programme ***********************************/
+/******************************************* DÃ©finitions des prototypes programme *********************************************/
  #include "protocli.h"
-
-/**********************************************************************************************************/
-/* Nouveau_groupe: Renvoie un numero de groupe unique                                                     */
-/* Entrée: Rien                                                                                           */
-/* Sortie: un gint                                                                                        */
-/**********************************************************************************************************/
- gint Nouveau_groupe ( void )
-  { static gint groupe = 0;
-    groupe++;
-    return(groupe);
-  }
-/**********************************************************************************************************/
-/* Raise_to_top : Raise le item selectionné                                                               */
-/* Entrée: Rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void Raise_to_top ( void )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
+/******************************************************************************************************************************/
+/* Raise_to_top : Raise le item selectionnÃ©                                                                                   */
+/* EntrÃ©e: Rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Raise_to_top ( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
     GList *liste;
     gint layer;
 
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
-
-    switch (infos->Selection.type)
-     { case TYPE_MOTIF      : goo_canvas_item_raise ( infos->Selection.trame_motif->item_groupe, NULL );
-                              liste = infos->Trame_atelier->trame_items;
-                              layer = 0;
-                              while (liste)
-                               { struct TRAME_ITEM_MOTIF *trame_motif;
-                                 switch ( *((gint *)liste->data) )
-                                  { case TYPE_MOTIF:
-                                         trame_motif = ((struct TRAME_ITEM_MOTIF *)liste->data);
-                                         if (trame_motif->motif->layer > layer) layer = trame_motif->motif->layer;
-                                         break;
-                                  }
-                                 liste = liste->next;
-                               }
-                              infos->Selection.trame_motif->motif->layer = layer + 1;
-                              break;
-       case TYPE_CADRAN    : goo_canvas_item_raise ( infos->Selection.trame_cadran->item_groupe, NULL );
-                              break;
-       case TYPE_PASSERELLE : goo_canvas_item_raise ( infos->Selection.trame_pass->item_groupe, NULL );
-                              break;
+    if (!infos->Selection) return;
+    switch ( *((gint *)(infos->Selection->data) ) )
+     { case TYPE_MOTIF:
+        { struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
+          goo_canvas_item_raise ( trame_motif->item_groupe, NULL );
+          liste = infos->Trame_atelier->trame_items;
+          layer = 0;
+          while (liste)
+           { switch ( *((gint *)liste->data) )
+              { case TYPE_MOTIF:
+                 { struct TRAME_ITEM_MOTIF *item= liste->data;
+                   if (item->motif->layer > layer) layer = item->motif->layer;
+                   break;
+                 }
+              }
+             liste = liste->next;
+           }
+          trame_motif->motif->layer = layer + 1;
+          break;
+        }
+       case TYPE_CADRAN:
+        { struct TRAME_ITEM_CADRAN *trame_cadran = infos->Selection->data;
+          goo_canvas_item_raise ( trame_cadran->item_groupe, NULL );
+          break;
+        }
+       case TYPE_PASSERELLE:
+        { struct TRAME_ITEM_PASS *trame_pass = infos->Selection->data;
+          goo_canvas_item_raise ( trame_pass->item_groupe, NULL );
+          break;
+        }
        default: printf("Raise_to_top: Type de selection inconnu\n");
      }
   }
-/**********************************************************************************************************/
-/* Lower_to_bottom : Lower le motif au fond                                                               */
-/* Entrée: Rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void Lower_to_bottom ( void )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
+/******************************************************************************************************************************/
+/* Lower_to_bottom : Lower le motif au fond                                                                                   */
+/* EntrÃ©e: Rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Lower_to_bottom ( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
     GList *liste;
 
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
-
-    switch (infos->Selection.type)
-     { case TYPE_MOTIF      : goo_canvas_item_lower ( infos->Selection.trame_motif->item_groupe, NULL );
-                              liste = infos->Trame_atelier->trame_items;
-                              while (liste)
-                               { struct TRAME_ITEM_MOTIF *trame_motif;
-                                 switch ( *((gint *)liste->data) )
-                                  { case TYPE_MOTIF:
-                                         trame_motif = ((struct TRAME_ITEM_MOTIF *)liste->data);
-                                         trame_motif->motif->layer++;
-                                         break;
-                                  }
-                                 liste = liste->next;
-                               }
-                              infos->Selection.trame_motif->motif->layer = 0;
-                              break;
-       case TYPE_CADRAN    : goo_canvas_item_lower ( infos->Selection.trame_cadran->item_groupe, NULL );
-                              break;
-       case TYPE_PASSERELLE : goo_canvas_item_lower ( infos->Selection.trame_pass->item_groupe, NULL );
-                              break;
-       default: printf("Lower_to_bottom: Type de selection inconnu\n");
+    if (!infos->Selection) return;
+    switch ( *((gint *)(infos->Selection->data) ) )
+     { case TYPE_MOTIF:
+        { struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
+          goo_canvas_item_lower ( trame_motif->item_groupe, NULL );
+          liste = infos->Trame_atelier->trame_items;
+          while (liste)
+           { switch ( *((gint *)liste->data) )
+              { case TYPE_MOTIF:
+                 { struct TRAME_ITEM_MOTIF *item= liste->data;
+                   if (item->motif->type_gestion == TYPE_FOND)
+                    { goo_canvas_item_lower ( item->item_groupe, NULL );
+                      item->motif->layer = 0;
+                    }
+                   else item->motif->layer++;
+                   break;
+                 }
+              }
+             liste = liste->next;
+           }
+          trame_motif->motif->layer = 1;
+         break;
+        }
+       case TYPE_CADRAN:
+        { struct TRAME_ITEM_CADRAN *trame_cadran = infos->Selection->data;
+          goo_canvas_item_lower ( trame_cadran->item_groupe, NULL );
+          break;
+        }
+       case TYPE_PASSERELLE:
+        { struct TRAME_ITEM_PASS *trame_pass = infos->Selection->data;
+          goo_canvas_item_lower ( trame_pass->item_groupe, NULL );
+          break;
+        }
+       default: printf("%s: Type de selection inconnu\n", __func__);
      }
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Afficher_propriete: Affiche les proprietes de l'objet                                                  */
-/* Entrée: Rien                                                                                           */
+/* EntrÃ©e: Rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Afficher_propriete ( void )
@@ -137,227 +138,247 @@ printf("Afficher_propriete: debut\n");
        default: printf("Afficher_propriete: Type de selection inconnu\n");
      }
   }
-/**********************************************************************************************************/
-/* Changer_couleur_directe: Change directement la couleur sans passer par toutes les fenetres de choix    */
-/* Entrée: Rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Changer_couleur_directe ( void )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+#endif
+/******************************************************************************************************************************/
+/* Changer_couleur_directe: Change directement la couleur sans passer par toutes les fenetres de choix                        */
+/* EntrÃ©e: Rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Changer_couleur_directe ( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
 
-    switch (infos->Selection.type)
-     { case TYPE_MOTIF      : Changer_couleur_motif_directe ( infos->Selection.trame_motif ); break;
+    if (!infos->Selection) return;
+    switch ( *((gint *)(infos->Selection->data) ) )
+     { case TYPE_MOTIF:
+        { struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
+          Changer_couleur_motif_directe ( trame_motif );
+          break;
+        }
        default: printf("Changer_couleur_directe: Type de selection inconnu\n");
      }
   }
-/**********************************************************************************************************/
-/* Mettre_a_jour_position: S'occupe des rulers et des entry posxy pour affichage position souris/objet    */
-/* Entrée: la nouvelle position X et Y                                                                    */
-/* Sortie: sans                                                                                           */
-/**********************************************************************************************************/
- static void Mettre_a_jour_position ( struct TYPE_INFO_ATELIER *infos, gint x, gint y, gfloat angle )
-  { gchar chaine[30];
+/******************************************************************************************************************************/
+/* Mettre_a_jour_position: S'occupe des rulers et des entry posxy pour affichage position souris/objet                        */
+/* EntrÃ©e: la nouvelle position X et Y                                                                                        */
+/* Sortie: sans                                                                                                               */
+/******************************************************************************************************************************/
+ static void Mettre_a_jour_position ( struct PAGE_NOTEBOOK *page, gint x, gint y, gint angle )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    gchar chaine[30];
 
     snprintf( chaine, sizeof(chaine), "X = %d, Y = %d", x, y );
     gtk_entry_set_text( GTK_ENTRY(infos->Entry_posxy), chaine );
 
-    g_signal_handlers_block_by_func( G_OBJECT(infos->Adj_angle),
-                                     G_CALLBACK(Rotationner_selection), infos );
+    g_signal_handlers_block_by_func( G_OBJECT(infos->Adj_angle), G_CALLBACK(Rotationner_selection), page );
     gtk_adjustment_set_value ( infos->Adj_angle, (gdouble)angle );
-    g_signal_handlers_unblock_by_func( G_OBJECT(infos->Adj_angle),
-                                       G_CALLBACK(Rotationner_selection), infos );
+    g_signal_handlers_unblock_by_func( G_OBJECT(infos->Adj_angle), G_CALLBACK(Rotationner_selection), page );
   }
-/**********************************************************************************************************/
-/* Mettre_a_jour_position: S'occupe des rulers et des entry posxy pour affichage position souris/objet    */
-/* Entrée: la nouvelle position X et Y                                                                    */
-/* Sortie: sans                                                                                           */
-/**********************************************************************************************************/
- static void Mettre_a_jour_description ( struct TYPE_INFO_ATELIER *infos, gint icone_id, gchar *description )
-  { gchar chaine[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];
+/******************************************************************************************************************************/
+/* Mettre_a_jour_position: S'occupe des rulers et des entry posxy pour affichage position souris/objet                        */
+/* EntrÃ©e: la nouvelle position X et Y                                                                                        */
+/* Sortie: sans                                                                                                               */
+/******************************************************************************************************************************/
+ static void Mettre_a_jour_description ( struct PAGE_NOTEBOOK *page, gint icone_id, gchar *description )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    gchar chaine[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];
 
     snprintf( chaine, sizeof(chaine), "%4d - %s", icone_id, description );
     gtk_entry_set_text( GTK_ENTRY(infos->Entry_libelle), chaine );
   }
-/**********************************************************************************************************/
-/* Clic_sur_fond: Appelé quand un evenement est capté sur le fond synoptique                              */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
- void Clic_sur_fond ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event, gpointer data )
+/******************************************************************************************************************************/
+/* Clic_sur_fond: AppelÃ© quand un evenement est captÃ© sur le fond synoptique                                                  */
+/* EntrÃ©e: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Clic_sur_fond ( struct PAGE_NOTEBOOK *page, GdkEvent *event, gpointer data )
   { switch (event->type)
      { case GDK_LEAVE_NOTIFY:  break;
        case GDK_ENTER_NOTIFY:
-       case GDK_MOTION_NOTIFY: Mettre_a_jour_position( infos, event->motion.x, event->motion.y, 0.0 );
+       case GDK_MOTION_NOTIFY: Mettre_a_jour_position( page, event->motion.x, event->motion.y, 0.0 );
                                break;
        case GDK_BUTTON_PRESS:  if ( !(event->button.state & 0x4) )                         /* Si pas CTRL */
-                                { Tout_deselectionner( infos );
-                                  infos->Selection.type = TYPE_RIEN;
-                                  infos->Selection.trame_motif = NULL;
-                                  infos->Selection.groupe = 0;
-                                }
+                                { Tout_deselectionner( page ); }
                                break;
        default: break;
      }
   }
-/**********************************************************************************************************/
-/* Clic_general: Fonction generale de traitement du clic sur la trame                                     */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
- static void Clic_general ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event )
-  { static gdouble Clic_x, Clic_y;
-    static gint Appui=0;
-    gfloat angle;
+/******************************************************************************************************************************/
+/* Clic_general: Fonction generale de traitement du clic sur la trame                                                         */
+/* EntrÃ©e: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Clic_general ( struct PAGE_NOTEBOOK *page, GdkEvent *event, gint layer )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
     gint x, y;
 
     if (!event) { printf("Clic_general: event=NULL\n"); return; }
     switch (event->type)
-     { case GDK_BUTTON_RELEASE: Appui = 0;
+     { case GDK_BUTTON_RELEASE: infos->Appui = 0;
                                 /* Update BD */
                                 break;
-       case GDK_BUTTON_PRESS:   Clic_x = event->button.x_root;
-                                Clic_y = event->button.y_root;
+       case GDK_BUTTON_PRESS:   infos->Clic_x = event->button.x_root;
+                                infos->Clic_y = event->button.y_root;
                                 printf("Clic_general:  Appui: ClicXY=%f %f  rootx=%f, rooty=%f\n",
                                        event->button.x, event->button.y,
                                        event->button.x_root, event->button.y_root );
-                                Appui = 1;
+                                infos->Appui = 1;
                                 /*if (event->button.button == 1) */             /* Bouton gauche souris ? */
-                                 { if ( event->button.state & 0x4 )                           /* CTRL ?? */
-                                    { Selectionner ( infos, infos->Selection.groupe, TRUE ); }
-                                   else
-                                    { if ( !Tester_selection( infos, infos->Selection.groupe ) )
-                                       { Tout_deselectionner( infos ); }
-                                      Selectionner ( infos, infos->Selection.groupe, FALSE );
-                                    }
+                                 { if (! (event->button.state & 0x4) )                         /* CTRL ?? */
+                                    { Tout_deselectionner( page ); }
+                                   Selectionner ( page, layer );
                                  }
                                 break;
        case GDK_MOTION_NOTIFY:
-                               if (Appui)
+                               if (infos->Appui)
                                 { if (event->motion.state & 0x100)           /* Motion + Bouton gauche ?? */
                                    { gdouble posx, posy;
-                                     posx = event->motion.x_root-Clic_x;
-                                     posy = event->motion.y_root-Clic_y;
-                                     printf("Clic_general: Appel a Deplacer_selection posx=%f, posy=%f\n", posx, posy );
-                                     Deplacer_selection( infos, (gint)posx, (gint)posy);
+                                     posx = event->motion.x_root-infos->Clic_x;
+                                     posy = event->motion.y_root-infos->Clic_y;
+                                     printf("Clic_general: Appel a Deplacer_selection posx=%d, posy=%d\n", (gint)posx, (gint)posy );
+                                     Deplacer_selection( page, (gint)posx, (gint)posy);
                                    }
                                   else if (event->motion.state & 0x200)      /* Motion + Bouton gauche ?? */
                                    { printf("Clic_general: bouh\n");
                                    }
                                 }
-                               switch (infos->Selection.type)        /* Mise a jour des entrys positions */
+                               if (!infos->Selection) { return; }
+                               switch ( *((gint *)(infos->Selection->data)) )               /* Mise a jour des entrys positions */
                                 { case TYPE_PASSERELLE:
-                                       x = infos->Selection.trame_pass->pass->position_x;
-                                       y = infos->Selection.trame_pass->pass->position_y;
-                                       angle = infos->Selection.trame_pass->pass->angle;
+                                       x = ((struct TRAME_ITEM_PASS *)infos->Selection->data)->pass->position_x;
+                                       y = ((struct TRAME_ITEM_PASS *)infos->Selection->data)->pass->position_y;
                                        break;
                                   case TYPE_COMMENTAIRE:
-                                       x = infos->Selection.trame_comment->comment->position_x;
-                                       y = infos->Selection.trame_comment->comment->position_y;
-                                       angle = infos->Selection.trame_comment->comment->angle;
+                                       x = ((struct TRAME_ITEM_COMMENT *)infos->Selection->data)->comment->position_x;
+                                       y = ((struct TRAME_ITEM_COMMENT *)infos->Selection->data)->comment->position_y;
                                        break;
                                   case TYPE_MOTIF:
-                                       x = infos->Selection.trame_motif->motif->position_x;
-                                       y = infos->Selection.trame_motif->motif->position_y;
-                                       angle = infos->Selection.trame_motif->motif->angle;
+                                       x = ((struct TRAME_ITEM_MOTIF *)infos->Selection->data)->motif->position_x;
+                                       y = ((struct TRAME_ITEM_MOTIF *)infos->Selection->data)->motif->position_y;
                                        break;
                                   case TYPE_CADRAN:
-                                       x = infos->Selection.trame_cadran->cadran->position_x;
-                                       y = infos->Selection.trame_cadran->cadran->position_y;
-                                       angle = infos->Selection.trame_cadran->cadran->angle;
+                                       x = ((struct TRAME_ITEM_CADRAN *)infos->Selection->data)->cadran->position_x;
+                                       y = ((struct TRAME_ITEM_CADRAN *)infos->Selection->data)->cadran->position_y;
                                        break;
                                   case TYPE_CAMERA_SUP:
-                                       x = infos->Selection.trame_camera_sup->camera_sup->posx;
-                                       y = infos->Selection.trame_camera_sup->camera_sup->posy;
-                                       angle = 0.0;
+                                       x = ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection->data)->camera_sup->posx;
+                                       y = ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection->data)->camera_sup->posy;
                                        break;
-                                  default: printf("Clic_general: type inconnu %d\n", infos->Selection.type );
-                                           x=-1; y=-1; angle = 0.0;
+                                  default: printf("Clic_general: type inconnu\n" );
+                                           x=-1; y=-1;
                                 }
-                               if (Appui)
-                                { Clic_x = x;
-                                  Clic_y = y;
+                               if (infos->Appui)
+                                { infos->Clic_x = x;
+                                  infos->Clic_y = y;
                                 }
-                               Mettre_a_jour_position( infos, x, y, angle );
                                break;
        default: printf("Clic_general: event=%d\n", event->type ); return;
      }
   }
-/**********************************************************************************************************/
-/* Clic_sur_motif: Appelé quand un evenement est capté sur un motif                                       */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
- void Clic_sur_motif ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
-                       struct TRAME_ITEM_MOTIF *trame_motif )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    static GtkWidget *Popup = NULL;
-    static GnomeUIInfo Popup_scale[]=                                      /*!< Définition du popup scale */
-     { GNOMEUIINFO_ITEM_STOCK( N_("Scale to 1:1"), NULL, Mettre_echelle_selection_1_1, GNOME_STOCK_PIXMAP_ALIGN_JUSTIFY ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Scale to 1:Y"), NULL, Mettre_echelle_selection_1_Y, GNOME_STOCK_PIXMAP_ALIGN_JUSTIFY ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Scale to X:1"), NULL, Mettre_echelle_selection_X_1, GNOME_STOCK_PIXMAP_ALIGN_JUSTIFY ),
-       GNOMEUIINFO_END
-     };
-    static GnomeUIInfo Popup_raise[]=                                      /*!< Définition du popup raise */
-     { GNOMEUIINFO_ITEM_STOCK( N_("Raise to top"), NULL, Raise_to_top, GNOME_STOCK_PIXMAP_TOP ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Lower to bottom"), NULL, Lower_to_bottom, GNOME_STOCK_PIXMAP_BOTTOM ),
-       GNOMEUIINFO_END
-     };
-    static GnomeUIInfo Popup_motif[]=
-     { GNOMEUIINFO_ITEM_STOCK( N_("DLS properties"), NULL, Afficher_propriete, GNOME_STOCK_PIXMAP_PROPERTIES ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Default color"), NULL,
-                               Changer_couleur_directe, GNOME_STOCK_PIXMAP_COLORSELECTOR ),
-       GNOMEUIINFO_SUBTREE(N_("_Scale"), Popup_scale),
-       GNOMEUIINFO_SUBTREE(N_("_Raise/Lower"), Popup_raise),
-       GNOMEUIINFO_SEPARATOR,
-       GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_TEXT_BULLETED_LIST ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),
-       GNOMEUIINFO_SEPARATOR,
-       GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
-       GNOMEUIINFO_END
-     };
+/******************************************************************************************************************************/
+/* Clic_sur_motif: AppelÃ© quand un evenement est captÃ© sur un motif                                                           */
+/* EntrÃ©e: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Clic_sur_motif ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
+  { if (!(trame_motif && event)) return;
 
-    if (!(trame_motif && event)) return;
-
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
-
-    infos->Selection.type = TYPE_MOTIF;
-    infos->Selection.groupe = trame_motif->groupe_dpl;
-    infos->Selection.trame_motif = trame_motif;
+    struct PAGE_NOTEBOOK *page = trame_motif->page;
 
     if (trame_motif->motif->type_gestion == TYPE_FOND)
-     { Clic_sur_fond( infos, event, NULL ); }
+     { Clic_sur_fond( page, event, NULL );
+       Mettre_a_jour_position( page, event->motion.x_root, event->motion.y_root, 0 );
+     }
     else
-     { Clic_general( infos, event );                                             /* Fonction de base clic */
+     { Clic_general( page, event, trame_motif->layer );                                              /* Fonction de base clic */
+       Mettre_a_jour_position( page, trame_motif->motif->position_x, trame_motif->motif->position_y, trame_motif->motif->angle );
      }
 
-    Mettre_a_jour_description( infos, trame_motif->motif->icone_id, trame_motif->motif->libelle );
-    if (event->type == GDK_BUTTON_PRESS)
-     { if ( event->button.button == 1)
-        { if (trame_motif->select_hg) goo_canvas_item_raise( trame_motif->select_hg, NULL );
-          if (trame_motif->select_hd) goo_canvas_item_raise( trame_motif->select_hd, NULL );
-          if (trame_motif->select_hg) goo_canvas_item_raise( trame_motif->select_bg, NULL );
-          if (trame_motif->select_bd) goo_canvas_item_raise( trame_motif->select_bd, NULL );
-        }
-       else if (event->button.button == 3)
-        { if (!Popup) Popup = gnome_popup_menu_new( Popup_motif );                       /* Creation menu */
-          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
+    Mettre_a_jour_description( trame_motif->page, trame_motif->motif->icone_id, trame_motif->motif->libelle );
 
-        }
+  //  else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
+    //          event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
+
+    if (event->type == GDK_BUTTON_PRESS && event->button.button == 1)
+     { if (trame_motif->select_hg) goo_canvas_item_raise( trame_motif->select_hg, NULL );
+       if (trame_motif->select_hd) goo_canvas_item_raise( trame_motif->select_hd, NULL );
+       if (trame_motif->select_hg) goo_canvas_item_raise( trame_motif->select_bg, NULL );
+       if (trame_motif->select_bd) goo_canvas_item_raise( trame_motif->select_bd, NULL );
+       return;
      }
-    else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
-              event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
+
+    if ( ! (event->type == GDK_BUTTON_PRESS && event->button.button == 3)) return;
+    GtkWidget *Popup = gtk_menu_new();
+    GtkWidget *item, *submenu;
+
+    item = Menu ( "PropriÃ©tÃ©s", "preferences-system" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Afficher_propriete), client );
+
+    item = Menu ( "Couleur par dÃ©faut", "applications-graphics" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Changer_couleur_directe), page );
+
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), gtk_separator_menu_item_new () );
+
+    item = Menu ( "Scale", "insert-link" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    submenu = gtk_menu_new();
+    gtk_menu_item_set_submenu ( GTK_MENU_ITEM(item), submenu );
+
+      item = Menu ( "Scale to 1:1", "zoom-original" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Mettre_echelle_selection_1_1), page );
+
+      item = Menu ( "Scale to 1:Y", "object-flip-horizontal" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Mettre_echelle_selection_1_Y), page );
+
+      item = Menu ( "Scale to X:1", "object-flip-vertical" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Mettre_echelle_selection_X_1), page );
+
+
+    item = Menu ( "Raise/Lower", "insert-link" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    submenu = gtk_menu_new();
+    gtk_menu_item_set_submenu ( GTK_MENU_ITEM(item), submenu );
+
+      item = Menu ( "Raise to top", "go-top" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Raise_to_top), page );
+
+      item = Menu ( "Lower to bottom", "go-bottom" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Lower_to_bottom), page );
+
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), gtk_separator_menu_item_new () );
+
+    item = Menu ( "DÃ©tacher la sÃ©lection", "view-restore" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Detacher_selection), client );
+
+    item = Menu ( "Fusionner la sÃ©lection", "view-fullscreen" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Fusionner_selection), client );
+
+    item = Menu ( "Dupliquer la sÃ©lection", "edit-copy" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Dupliquer_selection), client );
+
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), gtk_separator_menu_item_new () );
+
+    item = Menu ( "Supprimer la sÃ©lection", "edit-delete" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Effacer_selection), client );
+
+    gtk_widget_show_all(Popup);
+    gtk_menu_popup_at_pointer ( GTK_MENU(Popup), (GdkEvent *)event );
   }
+#ifdef bouh
+
 /**********************************************************************************************************/
-/* Clic_sur_motif: Appelé quand un evenement est capté sur un motif                                       */
-/* Entrée: une structure Event                                                                            */
+/* Clic_sur_motif: AppelÃ© quand un evenement est captÃ© sur un motif                                       */
+/* EntrÃ©e: une structure Event                                                                            */
 /* Sortie :rien                                                                                           */
 /**********************************************************************************************************/
  void Clic_sur_comment ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
@@ -402,55 +423,51 @@ printf("Afficher_propriete: debut\n");
 /*    else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
 /*              event->type == GDK_2BUTTON_PRESS) Afficher_propriete();*/
   }
-/**********************************************************************************************************/
-/* Clic_sur_pass: Appelé quand un evenement est capté sur une passerelle                                  */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+#endif
+/******************************************************************************************************************************/
+/* Clic_sur_pass: AppelÃ© quand un evenement est captÃ© sur une passerelle                                                      */
+/* EntrÃ©e: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  void Clic_sur_pass ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                       struct TRAME_ITEM_PASS *trame_pass )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    static GtkWidget *Popup = NULL;
+  {
+/*    static GtkWidget *Popup = NULL;
     static GnomeUIInfo Popup_pass[]=
      { GNOMEUIINFO_ITEM_STOCK( N_("Properties"), NULL, Afficher_propriete, GNOME_STOCK_PIXMAP_PROPERTIES ),
        GNOMEUIINFO_SEPARATOR,
        /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
-       GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
+   /*    GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
        GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_TEXT_BULLETED_LIST ),
        GNOMEUIINFO_ITEM_STOCK( N_("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),
        GNOMEUIINFO_SEPARATOR,
        GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
        GNOMEUIINFO_END
-     };
+     };*/
     if (!(trame_pass && event)) return;
 
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;                             /* Pointeur sur les infos de la page atelier */
+    struct PAGE_NOTEBOOK *page = trame_pass->page;
 
-    infos->Selection.type = TYPE_PASSERELLE;
-    infos->Selection.groupe = trame_pass->groupe_dpl;
-    infos->Selection.trame_pass = trame_pass;
+    Clic_general( page, event, trame_pass->layer );                                                 /* Fonction de base clic */
+    Mettre_a_jour_position( trame_pass->page, trame_pass->pass->position_x, trame_pass->pass->position_y, trame_pass->pass->angle );
 
-    Clic_general( infos, event );                                                /* Fonction de base clic */
-
-    Mettre_a_jour_description( infos, 0, _("Gateway") );
+    Mettre_a_jour_description( page, 0, "Gateway" );
     if (event->type == GDK_BUTTON_PRESS)
      { if ( event->button.button == 1)
         { goo_canvas_item_raise( trame_pass->item_groupe, NULL ); }
        else if (event->button.button == 3)
-        { if (!Popup) Popup = gnome_popup_menu_new( Popup_pass );                        /* Creation menu */
-          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
+        { /*if (!Popup) Popup = gnome_popup_menu_new( Popup_pass );                        /* Creation menu */
+          /*gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );*/
 
         }
      }
-    else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
-              event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
+/*    else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
+  /*            event->type == GDK_2BUTTON_PRESS) Afficher_propriete();*/
   }
+#ifdef bouh
 /******************************************************************************************************************************/
-/* Clic_sur_cadran: Appelé quand un evenement est capté sur un cadran                                                         */
-/* Entrée: une structure Event                                                                                                */
+/* Clic_sur_cadran: AppelÃ© quand un evenement est captÃ© sur un cadran                                                         */
+/* EntrÃ©e: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
  void Clic_sur_cadran ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
@@ -498,8 +515,8 @@ printf("Afficher_propriete: debut\n");
               event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
   }
 /******************************************************************************************************************************/
-/* Clic_sur_camera_sup: Appelé quand un evenement est capté sur une camera de supervision                                     */
-/* Entrée: une structure Event                                                                                                */
+/* Clic_sur_camera_sup: AppelÃ© quand un evenement est captÃ© sur une camera de supervision                                     */
+/* EntrÃ©e: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
  void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
@@ -541,4 +558,5 @@ printf("Afficher_propriete: debut\n");
         }
      }
   }
+#endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

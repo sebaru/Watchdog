@@ -131,11 +131,11 @@
                                Partage->com_arch.archdb_password, Partage->com_arch.archdb_database, Partage->com_arch.archdb_port ) );
   }
 /******************************************************************************************************************************/
-/* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                                         */
+/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
- gboolean Select_SQL_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete )
+ gboolean SQL_Select_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete )
   { struct DB *db = Init_DB_SQL ();
     if (!db)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
@@ -147,6 +147,8 @@
        Libere_DB_SQL ( &db );
        return(FALSE);
      }
+    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
+
 
     db->result = mysql_store_result ( db->mysql );
     if ( ! db->result )
@@ -154,7 +156,12 @@
        db->nbr_result = 0;
      }
     else
-     { if (array_name) Json_add_array( builder, array_name );
+     { if (array_name)
+        { gchar chaine[80];
+          g_snprintf(chaine, sizeof(chaine), "nbr_%s", array_name );
+          Json_add_int ( builder, chaine, mysql_num_rows ( db->result ));
+          Json_add_array( builder, array_name );
+        }
        while ( (db->row = mysql_fetch_row(db->result)) != NULL )
         { if (array_name) Json_add_object ( builder, NULL );
           for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
@@ -165,6 +172,28 @@
        mysql_free_result( db->result );
      }
     Libere_DB_SQL( &db );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
+/* Entrée: La DB, la requete                                                                                                  */
+/* Sortie: TRUE si pas de souci                                                                                               */
+/******************************************************************************************************************************/
+ gboolean SQL_Write ( gchar *requete )
+  { struct DB *db = Init_DB_SQL ();
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
+       return(FALSE);
+     }
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
+       Libere_DB_SQL ( &db );
+       return(FALSE);
+     }
+    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
+
+    Libere_DB_SQL ( &db );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -1714,9 +1743,40 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4722)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users ENGINE=INNODB");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "DROP TABLE users_sessions;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "CREATE TABLE `users_sessions` ("
+                                             "`username` VARCHAR(32) NOT NULL,"
+                                             "`wtd_session` VARCHAR(42) NOT NULL,"
+                                             "`date_create` datetime NOT NULL,"
+                                             "FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE"
+                                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
+                                          "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
+                                          "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "
+                                          "(SELECT COUNT(*) FROM syns_liens) AS nbr_syns_liens, "
+                                          "(SELECT COUNT(*) FROM dls) AS nbr_dls, "
+                                          "(SELECT COUNT(*) FROM mnemos_DI) AS nbr_dls_di, "
+                                          "(SELECT COUNT(*) FROM mnemos_DO) AS nbr_dls_do, "
+                                          "(SELECT COUNT(*) FROM mnemos_AI) AS nbr_dls_ai, "
+                                          "(SELECT COUNT(*) FROM mnemos_AO) AS nbr_dls_ao, "
+                                          "(SELECT COUNT(*) FROM mnemos_BOOL) AS nbr_dls_bool, "
+                                          "(SELECT SUM(dls.nbr_ligne) FROM dls) AS nbr_dls_lignes, "
+                                          "(SELECT COUNT(*) FROM users) AS nbr_users, "
+                                          "(SELECT COUNT(*) FROM msgs) AS nbr_msgs, "
+                                          "(SELECT COUNT(*) FROM histo_msgs) AS nbr_histo_msgs, "
+                                          "(SELECT COUNT(*) FROM audit_log) AS nbr_audit_log" );
+    Lancer_requete_SQL ( db, requete );
+
     Libere_DB_SQL(&db);
 fin:
-    database_version=4567;
+    database_version=4745;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

@@ -113,6 +113,8 @@
        if (builder == NULL) break;
        Json_add_string( builder, "tech_id", tech_id );
        Json_add_string( builder, "acronyme", acronyme );
+       g_free(tech_id);
+       g_free(acronyme);
        buf = Json_get_buf (builder, &taille_buf);
        Envoi_au_serveur( client, "POST", buf, taille_buf, "histo/ack", NULL );
        gtk_tree_selection_unselect_iter( selection, &iter );
@@ -154,48 +156,50 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean Gerer_popup_histo ( GtkWidget *widget, GdkEventButton *event, gpointer data )
-  { static GtkWidget *Popup=NULL;
-    static GMenu *Model=NULL;
+  { GtkWidget *Popup, *item, *hbox;
     struct CLIENT *client = data;
     GtkTreeSelection *selection;
-    gboolean ya_selection;
     GtkTreePath *path;
     gint cellx, celly;
     if (!event) return(FALSE);
 
-    if (!Model)
-     { GtkWidget *item;
-       Popup = gtk_menu_new();                                                                            /* Creation si besoin */
-       item = gtk_menu_item_new_with_label ( "Acquitter le message" );
-       g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
-       gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
-
-       item = gtk_menu_item_new_with_label ( "Voir le synoptique" );
-       g_signal_connect_swapped ( item, "activate", G_CALLBACK (Go_to_syn), client );
-       gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
-       gtk_widget_show_all(Popup);
-     }
-
-    ya_selection = FALSE;
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );                        /* On recupere la selection */
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );                /* On recupere la selection */
     if (gtk_tree_selection_count_selected_rows(selection) == 0)
      { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(client->Liste_histo), event->x, event->y, &path, NULL, &cellx, &celly );
        if (path)
         { gtk_tree_selection_select_path( selection, path );
           gtk_tree_path_free( path );
-          ya_selection = TRUE;
         }
-     } else ya_selection = TRUE;                                                     /* ya bel et bien qqchose de selectionné */
+     }
 
-    if ( event->button == 3 && ya_selection )                                                             /* Gestion du popup */
-     { gtk_menu_popup_at_pointer ( GTK_MENU(Popup), (GdkEvent *)event );
+    if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                                            /* Double clic ?? */
+     { //GotoSyn;
        return(TRUE);
      }
-    else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                                       /* Double clic ?? */
-     { /*Menu_go_to_syn();*/
-       return(TRUE);
-     }
-    return(FALSE);
+
+    if ( event->button != 3 ) return(FALSE);                                                              /* Gestion du popup */
+
+    Popup = gtk_menu_new();
+
+    item = gtk_menu_item_new();
+    hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( "emblem-default", GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new("Acquitter le message"), FALSE, FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER(item), hbox );
+    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Acquitter_histo), client );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+
+    item = gtk_menu_item_new();
+    hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( "emblem-web", GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new("Voir le synoptique"), FALSE, FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER(item), hbox );
+    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Go_to_syn), client );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    gtk_widget_show_all(Popup);
+
+    gtk_menu_popup_at_pointer ( GTK_MENU(Popup), (GdkEvent *)event );
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Reset_page_histo: Efface les enregistrements de la page histo                                                              */
@@ -229,6 +233,8 @@ again:
      { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
        if ( !strcmp(tech_id, Json_get_string(element, "tech_id")) && !strcmp(acronyme,Json_get_string(element, "acronyme")) )
         { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); goto again; }
+       g_free(tech_id);
+       g_free(acronyme);
        valide = gtk_tree_model_iter_next( store, &iter );
      }
   }
@@ -302,24 +308,24 @@ again:
 
     GtkTreeModel *store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
     gboolean valide      = gtk_tree_model_get_iter_first( store, &iter );
-
+    gboolean found = FALSE;
     while ( valide )                                              /* A la recherche de l'iter perdu. Si trouvé, on met a jour */
      { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
        if ( !strcmp(tech_id, tech_id_recu) && !strcmp(acronyme,acronyme_recu) )
         { gchar ack[80];
-
+          found = TRUE;
           if(Json_has_member(element, "nom_ack"))
            { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") );
              gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, ack, -1 );
            }
           if(Json_has_member(element, "date_create"))
            { gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_DATE_CREATE, Json_get_string(element, "date_create"), -1 ); }
-
-          return;
         }
+       g_free(tech_id);
+       g_free(acronyme);
        valide = gtk_tree_model_iter_next( store, &iter );
      }
-    Afficher_un_histo( NULL, 0, element, client );                                /* Sinon on en affiche un nouveau complet ! */
+    if (!found) Afficher_un_histo( NULL, 0, element, client );                    /* Sinon on en affiche un nouveau complet ! */
   }
 /******************************************************************************************************************************/
 /* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
@@ -347,11 +353,11 @@ again:
 /* Sortie: un widget boite                                                                                                    */
 /******************************************************************************************************************************/
  void Afficher_histo_alive_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
-  { GBytes *response_brute;
+  { struct CLIENT *client = user_data;
+    GBytes *response_brute;
     gchar *reason_phrase;
     gint status_code;
     gsize taille;
-    struct CLIENT *client = user_data;
     printf("%s\n", __func__ );
 
     g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
@@ -363,7 +369,7 @@ again:
      }
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
 
-    printf("Recu MSGS: %s %p\n", g_bytes_get_data ( response_brute, &taille ), client );
+    printf("Recu MSGS: %s %p\n", (gchar *)g_bytes_get_data ( response_brute, &taille ), client );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
     if (!response || Json_has_member ( response, "enregs" ) == FALSE ) return;
     json_array_foreach_element ( Json_get_array(response, "enregs"), Afficher_un_histo, client );

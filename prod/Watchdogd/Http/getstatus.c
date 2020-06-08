@@ -62,12 +62,10 @@
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    Json_add_object ( builder, "Status" );
-
     Json_add_string ( builder, "version",  VERSION );
     Json_add_string ( builder, "instance", g_get_host_name() );
     Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
-    Json_add_string ( builder, "runs_as", Config.run_as );
+    Json_add_string ( builder, "run_as", Config.run_as );
 
     temps = localtime( (time_t *)&Partage->start_time );
     if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
@@ -89,11 +87,18 @@
     num = g_slist_length( Partage->com_msrv.liste_msg );                                       /* Recuperation du numero de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
     Json_add_int  ( builder, "length_msg", num );
-    pthread_mutex_lock( &Partage->com_msrv.synchro );                                                              /* Synchro */
-    num = g_slist_length( Partage->com_msrv.liste_msg_repeat );                                           /* liste des repeat */
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    Json_add_int  ( builder, "length_msg_repeat", num );
-    json_builder_end_object (builder);                                                                        /* End Document */
+
+    SQL_Select_to_JSON ( builder, NULL, "SELECT * FROM db_status");
+
+    Json_add_string ( builder, "db_username", Config.db_username );
+    Json_add_string ( builder, "db_hostname", Config.db_host );
+    Json_add_int    ( builder, "db_port", Config.db_port );
+    Json_add_string ( builder, "db_database", Config.db_database );
+
+    Json_add_string ( builder, "archdb_username", Partage->com_arch.archdb_username );
+    Json_add_string ( builder, "archdb_hostname", Partage->com_arch.archdb_host );
+    Json_add_int    ( builder, "archdb_port", Partage->com_arch.archdb_port );
+    Json_add_string ( builder, "archdb_database", Partage->com_arch.archdb_database );
 
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/

@@ -36,7 +36,7 @@
 
  #include "Reseaux.h"
  #include "client.h"
-
+ #include "trame.h"
 
  #define TEMPS_MAX_PULSE   10                                            /* 10 secondes de battements maximum pour le serveur */
 
@@ -65,14 +65,15 @@
 
  struct PAGE_NOTEBOOK
   { gint type;
+    struct CLIENT *client;
     GtkWidget *child;                                                   /* Le widget toplevel, placé dans la page du notebook */
     void *infos;                                                                  /* Pointeur sur une structure TYPE_INFO_xxx */
   };
 
  struct TYPE_INFO_SUPERVISION
-  { struct CLIENT *client;
-    SoupWebsocketConnection *ws_motifs;
+  { SoupWebsocketConnection *ws_motifs;
     guint timer_id;                                    /* Id du timer pour l'animation des motifs sur la trame de supervision */
+    gboolean timer_hidden;                                            /* Pour savoir si les motifs doivent etre allumé ou non */
     JsonNode *syn;                                                                       /* Id du synoptique en cours de visu */
     GtkWidget *Dialog_horloge;                                                  /* Boite de dialogue d'affichage des horloges */
     GtkWidget *Liste_horloge;
@@ -122,31 +123,19 @@
   };
 
  struct TYPE_INFO_ATELIER
-  { struct CMD_TYPE_SYNOPTIQUE syn;                                                    /* Id du synoptique en cours d'edition */
+  { JsonNode *syn;                                                                       /* Id du synoptique en cours de visu */
                                                                     /* Interface de plus haut niveau: affichage du synoptique */
     struct TRAME *Trame_atelier;                                                             /* La trame de fond de l'atelier */
-    struct
-     { gint type;                                                                     /* Type de l'item selectionné principal */
-       gint groupe;                                                                     /* Le groupe actuellement selectionné */
-       union { struct TRAME_ITEM_MOTIF *trame_motif;                             /* Pointeur sur l'item selectionné principal */
-               struct TRAME_ITEM_PASS  *trame_pass;                              /* Pointeur sur l'item selectionné principal */
-               struct TRAME_ITEM_COMMENT *trame_comment;
-               struct TRAME_ITEM_CADRAN *trame_cadran;
-               struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
-             };
-
-       GList *items;                                                          /* Tous les items faisant parti de la selection */
-     } Selection;
+    gint new_layer;                                               /* Numéro du prochain groupe "layer" pour grouper les items */
+    GSList *Selection;                                                             /* Les de TRAME_ITEM qui sont sélectionnés */
     GtkWidget *Option_zoom;                                                                    /* Choix du zoom sur l'atelier */
     GtkWidget *Check_grid;                                                                 /* La grille est-elle magnétique ? */
     GtkWidget *Spin_grid;                                                  /* Quel est l'ecartement de la grille magnetique ? */
     GtkWidget *Entry_posxy;                                                /* Affichage des coordonnées X de l'objet en cours */
     GtkWidget *Entry_libelle;                                                       /* Gestion du libelle de l'objet en cours */
     GtkAdjustment *Adj_angle;                                                        /* Angle de rotation de l'objet en cours */
-
-    GtkWidget *F_ajout_palette;                                                              /* Le fenetre d'ajout de palette */
-    GtkWidget *Liste_syn;                                            /* La liste des synoptiques pour la fenetre des palettes */
-    GtkWidget *Liste_palette;                                                /* La liste des palettes associées au synoptique */
+    gdouble Clic_x, Clic_y;
+    gint Appui;
   };
 
  enum                                       /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
@@ -164,16 +153,12 @@
  extern void Afficher_histo_alive_CB (SoupSession *session, SoupMessage *msg, gpointer user_data);
 // extern void Acquitter_histo ( struct CLIENT *Client );
 
-#ifdef bouh
- extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );
- extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
- extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
- extern gchar *Type_vers_string ( guint type );
- extern gchar *Type_sms_vers_string ( guint type );
-#endif
+ extern gboolean Timer ( gpointer data );                                                                     /* Dans timer.c */
 
  extern void Log( struct CLIENT *client, gchar *chaine );                                                       /* Dans ihm.c */
  extern GtkWidget *Creer_boite_travail ( struct CLIENT *Client );
+ extern GtkWidget *Bouton ( gchar *libelle, gchar *icone, gchar *tooltip );
+ extern GtkWidget *Menu ( gchar *libelle, gchar *icone );
  extern void Effacer_pages ( struct CLIENT *client );
  extern void Update_progress_bar( SoupMessage *msg, SoupBuffer *chunk, gpointer data );
  extern void Set_progress_pulse( struct CLIENT *client );
@@ -222,12 +207,14 @@
  extern void Gerer_protocole_admin ( struct CONNEXION *connexion );
  extern gint Get_icone_version( void );
 
- extern gboolean Timer ( gpointer data );                                                                     /* Dans timer.c */
-
  extern void Proto_afficher_un_admin( struct CMD_TYPE_ADMIN *admin );                                         /* Dans admin.c */
  extern void Creer_page_admin( void );
 
- extern void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );                      /* Dans liste_plugin_dls.c */
+#endif
+ extern void Menu_want_edition_DLS ( struct CLIENT *client );                                      /* Dans liste_plugin_dls.c */
+ extern void Detruire_page_plugin_dls( struct PAGE_NOTEBOOK *page );
+#ifdef bouh
+ extern void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern void Proto_cacher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern void Proto_rafraichir_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern void Creer_page_plugin_dls( void );
@@ -244,9 +231,11 @@
  extern void Proto_afficher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );
  extern void Proto_rafraichir_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );
  extern void Creer_page_synoptique( void );
-
- extern void Menu_ajouter_editer_synoptique ( struct CMD_TYPE_SYNOPTIQUE *edit_syn );                    /* ajout_synoptique.c*/
- extern void Proto_afficher_un_dls_for_mnemonique ( struct CMD_TYPE_PLUGIN_DLS *dls );
+#endif
+                                                                                                    /* Dans liste_synoptique.c*/
+ extern void Menu_want_liste_synoptique ( struct CLIENT *client );
+ extern void Detruire_page_liste_synoptique( struct PAGE_NOTEBOOK *page );
+#ifdef bouh
 
  extern void Proto_cacher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique );                  /* Dans liste_mnemonique.c*/
  extern void Proto_afficher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique );
@@ -269,15 +258,21 @@
  extern void Menu_want_page_admin ( void );
  extern void Menu_want_compilation_forcee ( void );
 
+#endif
+ extern void Detruire_page_atelier ( struct PAGE_NOTEBOOK *page );                                          /* Dans atelier.c */
+ extern void Creer_page_atelier_CB (SoupSession *session, SoupMessage *msg, gpointer user_data);
+
+#ifdef bouh
+
  extern void Proto_afficher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );                               /* Dans atelier.c */
  extern void Proto_cacher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );
  extern void Reduire_en_vignette ( struct CMD_TYPE_MOTIF *motif );
  extern void Creer_page_atelier( gint syn_id, gchar *libelle_syn );
- extern void Detruire_page_atelier ( struct PAGE_NOTEBOOK *page );
+ extern void Detruire_page_liste_synoptique ( struct PAGE_NOTEBOOK *page );
  extern struct TYPE_INFO_ATELIER *Rechercher_infos_atelier_par_id_syn ( gint syn_id );
 
+#endif
                                                                                                  /* Dans atelier_clic_trame.c */
- extern void Clic_sur_fond ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event, gpointer data );
  extern void Clic_sur_motif ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                               struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Clic_sur_comment ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
@@ -288,22 +283,22 @@
                                struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                                    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
- extern gint Nouveau_groupe ( void );
-
+#ifdef bouh
+ extern void Clic_sur_fond ( struct TYPE_INFO_ATELIER *infos, GdkEvent *event, gpointer data );
+#endif
                                                                                                   /* Dans atelier_selection.c */
- extern void Tout_deselectionner ( struct TYPE_INFO_ATELIER *infos );
- extern gboolean Tester_selection ( struct TYPE_INFO_ATELIER *infos, gint groupe );
- extern void Selectionner ( struct TYPE_INFO_ATELIER *infos, gint groupe, gboolean deselect );
- extern void Deplacer_selection ( struct TYPE_INFO_ATELIER *infos, gint deltax, gint deltay );
- extern void Rotationner_selection ( struct TYPE_INFO_ATELIER *infos );
- extern void Effacer_selection ( void );
- extern void Dupliquer_selection ( void );
+ extern void Tout_deselectionner ( struct PAGE_NOTEBOOK *page );
+ extern void Selectionner ( struct PAGE_NOTEBOOK *page, gint layer );
+ extern void Deplacer_selection (  struct PAGE_NOTEBOOK *page, gint deltax, gint deltay );
+ extern void Rotationner_selection ( struct PAGE_NOTEBOOK *page );
+ extern void Effacer_selection ( struct PAGE_NOTEBOOK *page );
+ extern void Dupliquer_selection ( struct PAGE_NOTEBOOK *page );
  extern void Deselectionner ( struct TYPE_INFO_ATELIER *infos, struct TRAME_ITEM *item );
- extern void Fusionner_selection ( void );
- extern void Detacher_selection ( void );
- extern void Mettre_echelle_selection_1_1 ( void );
- extern void Mettre_echelle_selection_1_Y ( void );
- extern void Mettre_echelle_selection_X_1 ( void );
+ extern void Fusionner_selection ( struct PAGE_NOTEBOOK *page );
+ extern void Detacher_selection ( struct PAGE_NOTEBOOK *page );
+ extern void Mettre_echelle_selection_1_1 ( struct PAGE_NOTEBOOK *page );
+ extern void Mettre_echelle_selection_1_Y ( struct PAGE_NOTEBOOK *page );
+ extern void Mettre_echelle_selection_X_1 ( struct PAGE_NOTEBOOK *page );
                                                                                                    /* Dans atelier_agrandir.c */
  extern void Agrandir_bd ( GooCanvasItem *widget, GooCanvasItem *target,
                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
@@ -313,6 +308,7 @@
                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Agrandir_hg ( GooCanvasItem *widget, GooCanvasItem *target,
                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
+#ifdef bouh
 
  extern void Creer_fenetre_propriete_TOR ( struct TYPE_INFO_ATELIER *infos );                     /* Dans atelier_propriete.c */
  extern void Detruire_fenetre_propriete_TOR ();
@@ -320,23 +316,36 @@
  extern void Changer_couleur_motif_directe( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Proto_afficher_mnemo_atelier ( int tag, struct CMD_TYPE_MNEMO_BASE *mnemo );
 
- extern void Creer_fenetre_ajout_motif ( void );                                                /* Dans atelier_ajout_motif.c */
+
+#endif
+ extern void Afficher_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data);/* Dans atelier_motif.c */
+#ifdef bouh
+
+ extern void Creer_fenetre_ajout_motif ( void );
  extern void Detruire_fenetre_ajout_motif ( void );
  extern void Choisir_motif_a_ajouter ( void );
+#endif
 
- extern void Creer_fenetre_ajout_commentaire ( void );                                        /* Dans atelier_ajout_comment.c */
+                                                                                                    /* Dans atelier_comment.c */
+ extern void Afficher_un_commentaire (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+#ifdef bouh
+ extern void Creer_fenetre_ajout_commentaire ( void );
  extern void Proto_afficher_un_comment_atelier( struct CMD_TYPE_COMMENT *rezo_comment );
  extern void Proto_cacher_un_comment_atelier( struct CMD_TYPE_COMMENT *comment );
 
 #endif
-                                                                                           /* Dans atelier_ajout_passerelle.c */
+                                                                                                 /* Dans atelier_passerelle.c */
+ extern void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
 #ifdef bouh
  extern void Creer_fenetre_ajout_passerelle ( void );
  extern void Proto_afficher_un_syn_for_passerelle_atelier( struct CMD_TYPE_SYNOPTIQUE *syn );
  extern void Proto_afficher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *rezo_pass );
  extern void Proto_cacher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *pass );
 
-                                                                                               /* Dans atelier_ajout_cadran.c */
+#endif
+                                                                                                     /* Dans atelier_cadran.c */
+ extern void Afficher_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+#ifdef bouh
  extern void Menu_ajouter_editer_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Proto_afficher_un_cadran_atelier( struct CMD_TYPE_CADRAN *rezo_cadran );
  extern void Proto_cacher_un_cadran_atelier( struct CMD_TYPE_CADRAN *cadran );
@@ -348,7 +357,11 @@
  extern void Proto_cacher_une_palette_atelier( struct CMD_TYPE_PALETTE *palette );
  extern void Proto_afficher_un_syn_for_palette_atelier( struct CMD_TYPE_SYNOPTIQUE *synoptique );
 
-                                                                                           /* Dans atelier_ajout_camera_sup.c */
+#endif
+                                                                                                     /* Dans atelier_camera.c */
+ extern void Afficher_une_camera (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+
+#ifdef bouh
  extern struct TRAME_ITEM_CAMERA_SUP *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id );
  extern void Menu_ajouter_camera_sup ( void );
  extern void Proto_afficher_un_camera_for_atelier( struct CMD_TYPE_CAMERA *camera );
@@ -361,13 +374,15 @@
  extern void Demander_synoptique_supervision ( struct CLIENT *client, gint id );
  extern void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data);
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
- extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( struct CLIENT *client, gint syn_id );
+ extern void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                          GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
 
                                                                                                 /* Dans supervision_comment.c */
- extern void Afficher_un_commentaire (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
 
                                                                                                  /* Dans supervision_camera.c */
- extern void Afficher_une_camera (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
+ extern void Clic_sur_camera_sup_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                               GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+
 #ifdef bouh
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
  extern void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif );
@@ -386,16 +401,18 @@
 
 #endif
                                                                                              /* Dans supervision_passerelle.c */
- extern void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
  extern void Changer_vue_directe ( struct CLIENT *client, guint num_syn );
+ extern gboolean Supervision_clic_passerelle (GooCanvasItem *canvasitem, GooCanvasItem *target,
+                                              GdkEvent *event, struct TRAME_ITEM_PASS *trame_pass );
 #ifdef bouh
                                                                                                 /* Dans supervision_palette.c */
  extern void Proto_afficher_une_palette_supervision( struct CMD_TYPE_PALETTE *rezo_palette );
 
 #endif
                                                                                                  /* Dans supervision_cadran.c */
- extern void Afficher_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
  extern void Updater_les_cadrans( struct TYPE_INFO_SUPERVISION *infos, JsonNode *cadran );
+ extern void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                           GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran );
 #ifdef bouh
  extern void Proto_changer_etat_cadran( struct CMD_ETAT_BIT_CADRAN *etat_cadran );
 

@@ -58,14 +58,41 @@
 /* Sortie: void                                                                                                               */
 /******************************************************************************************************************************/
  void Effacer_pages ( struct CLIENT *client )
-  { GSList *liste;
-    while( client->Liste_pages )
+  { while( client->Liste_pages )
      { struct PAGE_NOTEBOOK *page = client->Liste_pages->data;
        switch(page->type)
         { case TYPE_PAGE_SUPERVISION : Detruire_page_supervision ( page ); break;
+          case TYPE_PAGE_ATELIER     : Detruire_page_atelier     ( page ); break;
+          case TYPE_PAGE_PLUGIN_DLS  : Detruire_page_plugin_dls  ( page ); break;
+          case TYPE_PAGE_SYNOPTIQUE  : Detruire_page_liste_synoptique ( page ); break;
+          default : client->Liste_pages = g_slist_remove ( client->Liste_pages, page );
         }
-       client->Liste_pages = g_slist_remove ( client->Liste_pages, page );
      }
+  }
+/******************************************************************************************************************************/
+/* Bouton : Prepare un bouton avec tooltip et icone                                                                           */
+/* Entrée: le libelle, l'icone et le tooltip                                                                                  */
+/* Sortie: le bouton                                                                                                          */
+/******************************************************************************************************************************/
+ GtkWidget *Bouton ( gchar *libelle, gchar *icone, gchar *tooltip )
+  { GtkWidget *bouton = gtk_button_new_with_label( libelle );
+    gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( icone, GTK_ICON_SIZE_LARGE_TOOLBAR ) );
+    gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
+    gtk_widget_set_tooltip_text ( bouton, tooltip );
+    return(bouton);
+  }
+/******************************************************************************************************************************/
+/* Menu : Prepare un menu icone                                                                                               */
+/* Entrée: le libelle, l'icone                                                                                                */
+/* Sortie: le menu                                                                                                            */
+/******************************************************************************************************************************/
+ GtkWidget *Menu ( gchar *libelle, gchar *icone )
+  { GtkWidget *item = gtk_menu_item_new();
+    GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_image_new_from_icon_name ( icone, GTK_ICON_SIZE_LARGE_TOOLBAR ), FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(hbox), gtk_label_new(libelle), FALSE, FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER(item), hbox );
+    return(item);
   }
 #ifdef bouh
 /**********************************************************************************************************/
@@ -144,7 +171,7 @@ printf("searching page %d %d\n", type, id );
        if (page->type == type)                                    /* Si la page existe deja, on l'affiche */
         { switch( type )
            { case TYPE_PAGE_ATELIER:
-                  if ( ((struct TYPE_INFO_ATELIER *)page->infos)->syn.id != id )
+                  if ( Json_get_int ( ((struct TYPE_INFO_ATELIER *)page->infos)->syn , "id" ) != id )
                    { liste = liste->next; continue; }
                   break;
              case TYPE_PAGE_HISTO_MSGS:

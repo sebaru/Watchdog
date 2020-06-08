@@ -49,21 +49,17 @@
     GtkWidget *Notebook;
     GSList *Liste_pages;
     GtkWidget *Liste_histo;
+    GtkWidget *Liste_plugin_dls;
+    GtkWidget *Liste_synoptique;
     GtkWidget *Barre_pulse;
     GtkWidget *Barre_progress;
     GtkWidget *Entry_status;
+    gchar wtd_session[42];
     gint network_size_sent;
     gint network_size_to_send;
     gint access_level;
     SoupSession *connexion;
     SoupWebsocketConnection *ws_msgs;
-    /*struct REZO_CLI_IDENT ident;
-    struct CONNEXION *connexion;
-    SSL_CTX *ssl_ctx;
-    X509 *srv_certif;
-    X509 *cli_certif;
-    gboolean ssl_needed;
-    gboolean ssl_needed_with_cert;*/
     gchar hostname[32];                                                             /* Nom du serveur sur lequel se connecter */
     gchar username[32];
     gchar password[32];

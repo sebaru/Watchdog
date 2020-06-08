@@ -53,6 +53,7 @@
     Cfg_smsg.lib->Thread_debug = FALSE;                                                        /* Settings default parameters */
     Cfg_smsg.enable            = FALSE;
     g_snprintf( Cfg_smsg.smsbox_apikey, sizeof(Cfg_smsg.smsbox_apikey), "%s", DEFAUT_SMSBOX_APIKEY );
+    g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "GSM01" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,

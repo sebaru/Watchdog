@@ -236,7 +236,7 @@
        if (!cpt_imp)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: cpt_imp '%s:%s' non trouvée", __func__, tech_id, acronyme );
           g_object_unref(builder);
-   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
+   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found in running memory");
           return;
         }
        Dls_CI_to_json ( builder, cpt_imp );
@@ -250,7 +250,7 @@
        if (!cpt_h)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: cpth '%s:%s' non trouvée", __func__, tech_id, acronyme );
           g_object_unref(builder);
-   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
+   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found in running memory");
           return;
         }
        Dls_CH_to_json ( builder, cpt_h );
@@ -264,7 +264,7 @@
        if (!ai)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ai '%s:%s' non trouvée", __func__, tech_id, acronyme );
           g_object_unref(builder);
-   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
+   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found in running memory");
           return;
         }
        Dls_AI_to_json ( builder, ai );
@@ -278,7 +278,7 @@
        if (!ao)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ao '%s:%s' non trouvée", __func__, tech_id, acronyme );
           g_object_unref(builder);
-   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
+   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found in running memory");
           return;
         }
        Dls_AO_to_json ( builder, ao );
@@ -292,7 +292,7 @@
        if (!bool)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: bool '%s:%s' non trouvé", __func__, tech_id, acronyme );
           g_object_unref(builder);
-   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
+   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found in running memory");
           return;
         }
        Dls_BOOL_to_json ( builder, bool );
@@ -306,7 +306,7 @@
        if (!tempo)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: tempo '%s:%s' non trouvée", __func__, tech_id, acronyme );
           g_object_unref(builder);
-   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
+   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found in running memory");
           return;
         }
        Dls_TEMPO_to_json ( builder, tempo );
@@ -320,43 +320,24 @@
        if (!di)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: DI '%s:%s' non trouvé", __func__, tech_id, acronyme );
           g_object_unref(builder);
-   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
+   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found in running memory");
           return;
         }
        Dls_DI_to_json ( builder, di );
      }
 /*---------------------------------------------------- Visuels ---------------------------------------------------------------*/
     else if (!strcasecmp(type,"I"))
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: HTTP/ request for GET I. cheking num", __func__ );
-       gchar *num_s = json_object_get_string_member ( request, "num" );
-       gint num;
-       if (!num_s)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: num non trouvée", __func__ );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                 "%s: HTTP/ request for GET VISUEL %s:%s", __func__, tech_id, acronyme );
+       struct DLS_VISUEL *visu=NULL;
+       Dls_data_get_VISUEL ( tech_id, acronyme, (gpointer *)&visu );
+       if (!visu)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: visu '%s:%s' non trouvé", __func__, tech_id, acronyme );
           g_object_unref(builder);
-   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
+          soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found in running memory");
           return;
         }
-       num = atoi(num_s);
-       if (num!=-1)
-        { Json_add_int ( builder, "etat",   Partage->i[num].etat );
-          Json_add_int ( builder, "rouge",  Partage->i[num].rouge);
-          Json_add_int ( builder, "vert",   Partage->i[num].vert );
-          Json_add_int ( builder, "bleu",   Partage->i[num].bleu );
-          Json_add_int ( builder, "cligno", Partage->i[num].cligno );
-        }
-       else
-        { struct DLS_VISUEL *visu=NULL;
-          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                    "%s: HTTP/ request for GET I %s:%s", __func__, tech_id, acronyme );
-          Dls_data_get_VISUEL ( tech_id, acronyme, (gpointer *)&visu );
-          if (!visu)
-           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: visu '%s:%s' non trouvé", __func__, tech_id, acronyme );
-             g_object_unref(builder);
-      	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
-             return;
-           }
-          Dls_VISUEL_to_json ( builder, visu );
-        }
+       Dls_VISUEL_to_json ( builder, visu );
      }
 /*---------------------------------------------------- Messages --------------------------------------------------------------*/
     else if (!strcasecmp(type,"MSG"))
@@ -367,7 +348,7 @@
        if (!dls_msg)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: msg '%s:%s' non trouvée", __func__, tech_id, acronyme );
           g_object_unref(builder);
-   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
+   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found in running memory");
           return;
         }
        Dls_MESSAGE_to_json ( builder, dls_msg );
@@ -381,7 +362,7 @@
        if (!r)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: r '%s:%s' non trouvée", __func__, tech_id, acronyme );
           g_object_unref(builder);
-   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found");
+   	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Not found in running memory");
           return;
         }
        Dls_REGISTRE_to_json ( builder, r );
@@ -519,7 +500,7 @@
 		     return;
      }
 
-    Http_print_request ( server, msg, path, client );
+    /*struct HTTP_CLIENT_SESSION *session =*/ Http_print_request ( server, msg, path, client );
 
     g_object_get ( msg, "request-body-data", &request, NULL );
     if (!request)
@@ -530,12 +511,6 @@
     data = g_bytes_unref_to_data ( request, &taille );
     Query = json_from_string ( data, NULL );
     g_free(data);
-    if (!Query)
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
-       return;
-     }
-
-
     if (!Query)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ );
        soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);

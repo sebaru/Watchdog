@@ -279,7 +279,7 @@
        if (!query)
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); return; }
 
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
                  "%s: receive SET_CDE=1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
                  event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
                  Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ) );
@@ -292,7 +292,7 @@
        if (!query)
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: requete non Json", __func__ ); return; }
 
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
                  "%s: receive SET_DI from %s/%s to %s/%s : '%s:%s'=%d", __func__,
                  event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
                  Json_get_string ( query, "tech_id" ), Json_get_string ( query, "acronyme" ), Json_get_bool ( query, "etat" ) );
@@ -509,7 +509,9 @@
 
 /***************************************** Socket de subscription au master ***************************************************/
     Partage->com_msrv.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",    "tcp", Config.master_host, 5556 );
+    if (!Partage->com_msrv.zmq_to_master) goto end;
     zmq_from_master                 = Connect_zmq ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
+    if (!zmq_from_master) goto end;
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
@@ -583,6 +585,7 @@
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, NULL, "msrv", "*", "msrv", "SLAVE_STOP", NULL, 0 );
+end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );

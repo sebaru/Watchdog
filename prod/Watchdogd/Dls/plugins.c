@@ -94,8 +94,8 @@
      { struct DLS_TEMPO *tempo = liste_bit->data;
        if (!strcmp(tempo->tech_id, plugin->plugindb.tech_id))
         { tempo->status = DLS_TEMPO_NOT_COUNTING;                                           /* La tempo ne compte pas du tout */
-          tempo->state = FALSE;
-          tempo->init  = FALSE;
+          tempo->state  = FALSE;
+          tempo->init   = FALSE;
         }
        liste_bit = g_slist_next(liste_bit);
      }
@@ -443,6 +443,7 @@
        g_snprintf( source, sizeof(source), "Dls/%06d.c", id );
        g_snprintf( cible,  sizeof(cible),  "Dls/libdls%06d.so", id );
        execlp( "gcc", "gcc", "-I/usr/include/glib-2.0", "-I/usr/lib/glib-2.0/include", "-I/usr/lib64/glib-2.0/include",
+               "-I/usr/lib/i386-linux-gnu/glib-2.0/include", "-I/usr/lib/x86_64-linux-gnu/glib-2.0/include",
                "-shared", "--no-gnu-unique", "-ggdb", "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
        _exit(0);
      }

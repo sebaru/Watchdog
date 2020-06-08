@@ -28,32 +28,27 @@
 #ifndef _HTTP_H_
  #define _HTTP_H_
  #include <libsoup/soup.h>
- #include <libxml/xmlwriter.h>
  #include <json-glib/json-glib.h>
+ #include <uuid/uuid.h>
 
  #define NOM_THREAD                    "http"
  #define HTTP_DEFAUT_FILE_CA           "http_cacert.pem"
  #define HTTP_DEFAUT_FILE_CERT         "http_serveursigne.pem"
  #define HTTP_DEFAUT_FILE_KEY          "http_serveurkey.pem"
- #define HTTP_DEFAUT_SSL_CIPHER        "HIGH:NORMAL"
- #define HTTP_DEFAUT_MAX_CONNEXION     16
  #define HTTP_DEFAUT_TCP_PORT          5560
- #define HTTP_DEFAUT_MAX_UPLOAD_BYTES  10240000
- #define HTTP_DEFAUT_LWS_DEBUG_LEVEL   0
-
- #define HTTP_200_OK                   200
- #define HTTP_BAD_REQUEST              400
- #define HTTP_UNAUTHORIZED             401
- #define HTTP_BAD_METHOD               405
- #define HTTP_SERVER_ERROR             100
-
- #define HTTP_CONTENT_JSON             "application/json"
- #define HTTP_CONTENT_XML              "application/xml"
 
  struct WS_CLIENT_SESSION
   { SoupWebsocketConnection *connexion;
     SoupClientContext *context;
     GSList *Liste_bit_cadrans;
+    GSList *Liste_bit_motifs;
+  };
+
+ struct HTTP_CLIENT_SESSION
+  { gchar username[32];
+    gchar wtd_session[42];
+    gint  access_level;
+    gint  last_request;
   };
 
  struct HTTP_CONFIG
@@ -68,11 +63,15 @@
     gboolean authenticate;
     GSList *liste_ws_motifs_clients;
     GSList *liste_ws_msgs_clients;
+    GSList *liste_http_clients;
+    gint wtd_session_expiry;
  };
 
 /*************************************************** Définitions des prototypes ***********************************************/
  extern gboolean Http_Lire_config ( void );
  extern void Http_traiter_status  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                    SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_dls_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_dls     ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
@@ -82,8 +81,14 @@
                                     SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_memory  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_syn_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ extern void Http_traiter_syn_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                     SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_syn_show ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                     SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_syn_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_syn_edit ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                     SoupClientContext *client, gpointer user_data );
  extern void Http_msgs_send_histo_to_all ( struct CMD_TYPE_HISTO *histo );
  extern void Http_msgs_send_pulse_to_all ( void );
  extern void Http_traiter_open_websocket_msgs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
@@ -95,6 +100,7 @@
  extern void Http_traiter_histo_alive ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                         SoupClientContext *client, gpointer user_data);
  extern void Http_Memory_get_all ( SoupMessage *msg, gchar *tech_id );
- extern void Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
+ extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
+ extern void Http_Envoyer_les_cadrans ( void );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -40,8 +40,71 @@
     gfloat old_valeur;
     gfloat valeur;
     gboolean in_range;
+    gint last_update;
   };
 
+ struct WS_MOTIF
+  { gchar tech_id[32];
+    gchar acronyme[64];
+    gpointer dls_data;
+  };
+
+/******************************************************************************************************************************/
+/* Envoyer_un_motif: Envoi un update motif au client                                                                          */
+/* Entrée: une reference sur la session en cours, et le cadran a envoyer                                                      */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Envoyer_un_motif ( struct WS_CLIENT_SESSION *client, struct WS_MOTIF *ws_motif )
+  { gsize taille_buf;
+    JsonBuilder *builder = Json_create ();
+    if (!builder) { return; }
+    Json_add_string ( builder, "msg_type", "update_motif" );
+    Dls_VISUEL_to_json ( builder, ws_motif->dls_data );
+    gchar *buf = Json_get_buf ( builder, &taille_buf );
+    GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
+    soup_websocket_connection_send_message ( client->connexion, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
+    g_bytes_unref( gbytes );
+  }
+/******************************************************************************************************************************/
+/* Chercher_bit_motif: Renvoie 0 si l'element en argument est dans la liste                                                   */
+/* Entrée: L'element                                                                                                          */
+/* Sortie: 0 si present, 1 sinon                                                                                              */
+/******************************************************************************************************************************/
+ static gint Chercher_bit_motif ( struct WS_MOTIF *element, struct WS_MOTIF *cherche )
+  { if ( (!strcasecmp(element->tech_id, cherche->tech_id) && !strcasecmp(element->acronyme, cherche->acronyme)) ) return 0;
+    return 1;
+  }
+/******************************************************************************************************************************/
+/* Abonner_un_motif: Abonne le client aux changements motifs                                                                  */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Abonner_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct WS_CLIENT_SESSION *client = user_data;
+    struct WS_MOTIF *ws_motif;
+    ws_motif = (struct WS_MOTIF *)g_try_malloc0(sizeof(struct WS_MOTIF));
+    if (!ws_motif)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: user '%s': Memory Error pour %s:%s", __func__,
+                 soup_client_context_get_auth_user (client->context), ws_motif->tech_id, ws_motif->acronyme );
+       return;
+     }
+
+    g_snprintf( ws_motif->tech_id,  sizeof(ws_motif->tech_id), "%s", Json_get_string(element, "tech_id") );
+    g_snprintf( ws_motif->acronyme, sizeof(ws_motif->acronyme), "%s", Json_get_string(element, "acronyme") );
+
+    if ( g_slist_find_custom(client->Liste_bit_motifs, ws_motif, (GCompareFunc) Chercher_bit_motif) ) /* Si pas dans la liste */
+     { Dls_data_get_VISUEL ( ws_motif->tech_id, ws_motif->acronyme, &ws_motif->dls_data);
+       if (!ws_motif->dls_data)                                                                              /* Si pas trouvé */
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: user '%s': bit %s:%s not found", __func__,
+                    soup_client_context_get_auth_user (client->context), ws_motif->tech_id, ws_motif->acronyme );
+          g_free(ws_motif); return;
+        }
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné à %s:%s", __func__,
+                 soup_client_context_get_auth_user (client->context), ws_motif->tech_id, ws_motif->acronyme );
+       Envoyer_un_motif ( client, ws_motif );                                                        /* Envoi de l'init motif */
+       client->Liste_bit_motifs = g_slist_prepend( client->Liste_bit_motifs, ws_motif );
+     }
+  }
 /******************************************************************************************************************************/
 /* Formater_cadran: Formate la structure dédiée cadran pour envoi au client                                                   */
 /* Entrée: un cadran                                                                                                          */
@@ -80,12 +143,12 @@
        case MNEMO_CPT_IMP:
              { cadran->valeur = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
                struct DLS_CI *ci=cadran->dls_data;
-               if (!ci)                                       /* si AI pas trouvée, on remonte le nom du cadran en libellé */
+               if (!ci)                                          /* si AI pas trouvée, on remonte le nom du cadran en libellé */
                 { cadran->in_range = FALSE;
                   break;
                 }
                cadran->in_range = TRUE;
-               cadran->valeur *= ci->multi;                                                            /* Multiplication ! */
+               cadran->valeur *= ci->multi;                                                               /* Multiplication ! */
                g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ci->unite );
              }
             break;
@@ -114,7 +177,7 @@
       }
   }
 /******************************************************************************************************************************/
-/* Envoyer_un_cadran: Envoi nu update cadran au client                                                                        */
+/* Envoyer_un_cadran: Envoi un update cadran au client                                                                        */
 /* Entrée: une reference sur la session en cours, et le cadran a envoyer                                                      */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -197,21 +260,56 @@
      { JsonArray *array;
        array = Json_get_array ( response, "cadrans" );
        if (array) { json_array_foreach_element ( array, Abonner_un_cadran, client ); }
+       array = Json_get_array ( response, "motifs" );
+       if (array) { json_array_foreach_element ( array, Abonner_un_motif, client ); }
+     }
+    else if(!strcmp(msg_type,"SET_CDE"))
+     { gchar *tech_id  = Json_get_string ( response, "tech_id" );
+       gchar *acronyme = Json_get_string ( response, "acronyme" );
+       if (Json_has_member ( response, "bit_clic" ) ) Envoyer_commande_dls ( Json_get_int ( response, "bit_clic" ) );
+       else if (tech_id && acronyme) Envoyer_commande_dls_data ( tech_id, acronyme );
      }
     json_node_unref(response);
   }
-
+/******************************************************************************************************************************/
+/* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Http_Envoyer_les_cadrans ( void )
+  { GSList *clients = Cfg_http.liste_ws_motifs_clients;
+    while (clients)
+     { struct WS_CLIENT_SESSION *client = clients->data;
+       GSList *cadrans = client->Liste_bit_cadrans;
+       while (cadrans)
+        { struct WS_CADRAN *cadran = cadrans->data;
+          if (cadran->last_update +10 <= Partage->top)
+           { Formater_cadran ( cadran );
+             Envoyer_un_cadran ( client, cadran );
+             cadran->last_update = Partage->top;
+           }
+          cadrans = g_slist_next(cadrans);
+        }
+       clients = g_slist_next(clients);
+     }
+  }
+/******************************************************************************************************************************/
+/* Http_ws_motifs_on_closed: Traite une deconnexion                                                                           */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Http_ws_motifs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
   { struct WS_CLIENT_SESSION *client = user_data;
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Close Connexion received !", __func__ );
     g_object_unref(connexion);
+    g_slist_foreach ( client->Liste_bit_cadrans, (GFunc)g_free, NULL );
+    g_slist_foreach ( client->Liste_bit_motifs, (GFunc)g_free, NULL );
     Cfg_http.liste_ws_motifs_clients = g_slist_remove ( Cfg_http.liste_ws_motifs_clients, client );
     g_free(client);
   }
  static void Http_ws_motifs_on_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
   }
-
 /******************************************************************************************************************************/
 /* Http_traiter_websocket: Traite une requete websocket                                                                       */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */

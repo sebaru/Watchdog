@@ -7,7 +7,7 @@
  * trame.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sébastien Lefevre
+ * Copyright (C) 2010-2020 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,10 +31,9 @@
  #include <gtk/gtk.h>
  #include <goocanvas.h>
  #include <gdk-pixbuf/gdk-pixbuf.h>                                                              /* Gestion des images/motifs */
-// #include <goocanvas.h>                                                                                /* Interface GooCanvas */
  #include "Reseaux.h"
 
- #define TAILLE_SYNOPTIQUE_X        1024                                  /* Généralités sur la taille de la Trame synoptique */
+ #define TAILLE_SYNOPTIQUE_X        1024                                  /* GÃ©nÃ©ralitÃ©s sur la taille de la Trame synoptique */
  #define TAILLE_SYNOPTIQUE_Y        768
  #define TAILLE_FONT                60                                      /* Nombre de caractere pour la police d'affichage */
  #define COULEUR_FOND_SYN           "MidnightBlue"
@@ -43,7 +42,7 @@
  #define TAILLE_ICONE_X             100
  #define TAILLE_ICONE_Y             100
 
- enum                                                                                /* Différents types de gestion de motifs */
+ enum                                                                                /* DiffÃ©rents types de gestion de motifs */
   { TYPE_INERTE,
     TYPE_FOND,
     TYPE_STATIQUE,
@@ -56,7 +55,7 @@
     NBR_TYPE_GESTION_MOTIF
   };
 
- enum                                                                                 /* Différente action associée à un item */
+ enum                                                                                 /* DiffÃ©rente action associÃ©e Ã  un item */
   { ACTION_SANS,
     ACTION_IMMEDIATE,
     ACTION_CONFIRME,
@@ -82,6 +81,7 @@
 
  struct TRAME_ITEM_MOTIF
   { gint type;                                                                                              /* Type de l'item */
+    struct PAGE_NOTEBOOK *page;
     GooCanvasItem *item;
     cairo_matrix_t transform;
     cairo_matrix_t transform_hg;
@@ -94,10 +94,10 @@
     GooCanvasItem *select_bg;
     GooCanvasItem *select_bd;
     GooCanvasItem *item_acro_syn;
-    GList *images;                                                         /* Toutes les images présentes dans le fichier GIF */
-    GList *image;                                                                     /* Image en cours d'affichage à l'écran */
-    GdkPixbuf *pixbuf;                                                               /* Pixbuf colorié et visualisé à l'écran */
-    guchar num_image;                                                             /* Numero de l'image actuellement présentée */
+    GList *images;                                                         /* Toutes les images prÃ©sentes dans le fichier GIF */
+    GList *image;                                                                     /* Image en cours d'affichage Ã  l'Ã©cran */
+    GdkPixbuf *pixbuf;                                                               /* Pixbuf coloriÃ© et visualisÃ© Ã  l'Ã©cran */
+    guchar num_image;                                                             /* Numero de l'image actuellement prÃ©sentÃ©e */
     guchar nbr_images;                                                                   /* Nombre total d'image dans le .gif */
 
     guchar rouge;                                                                                /* Couleur attendue du motif */
@@ -116,14 +116,13 @@
     time_t last_clic;
 
     struct CMD_TYPE_MOTIF *motif;
-    gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
-    gint selection;                                                                                      /* Encore utilisé ?? */
+    gint   layer;                                                                      /* Groupe de deplacement du motif */
+    gint selection;                                                                                      /* Encore utilisÃ© ?? */
   };
 
  struct TRAME_ITEM_PASS
   { gint type;                                                                                              /* Type de l'item */
-    struct CLIENT *client;
-    struct TRAME *trame;
+    struct PAGE_NOTEBOOK *page;
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_texte;
     struct TRAME_ITEM_SVG *item_1;
@@ -133,24 +132,25 @@
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     struct CMD_TYPE_PASSERELLE *pass;
-    gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
+    gint   layer;                                                                      /* Groupe de deplacement du motif */
     gint selection;
   };
 
  struct TRAME_ITEM_COMMENT
   { gint type;                                                                                              /* Type de l'item */
+    struct PAGE_NOTEBOOK *page;
     GooCanvasItem *item_groupe;
     GooCanvasItem *item;
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     struct CMD_TYPE_COMMENT *comment;
-    gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
+    gint   layer;                                                                      /* Groupe de deplacement du motif */
     gint   selection;
   };
 
  struct TRAME_ITEM_CADRAN
   { gint type;                                                                                              /* Type de l'item */
-    struct CLIENT *client;
+    struct PAGE_NOTEBOOK *page;
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_carre;
     GooCanvasItem *item_entry;
@@ -158,21 +158,21 @@
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     struct CMD_TYPE_CADRAN *cadran;
-    gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
+    gint   layer;                                                                      /* Groupe de deplacement du motif */
     gint   selection;
     gfloat valeur;
   };
 
  struct TRAME_ITEM_CAMERA_SUP
   { gint type;                                                                                              /* Type de l'item */
-    struct CLIENT *client;
+    struct PAGE_NOTEBOOK *page;
     GooCanvasItem *item;
     cairo_matrix_t transform;
     GooCanvasItem *item_groupe;
     GooCanvasItem *select_mi;
 
     struct CMD_TYPE_CAMERASUP *camera_sup;
-    gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
+    gint   layer;                                                                      /* Groupe de deplacement du motif */
     gint selection;
   };
 
@@ -186,7 +186,8 @@
   };
 
  struct TRAME
-  { GooCanvasItem *canvas_root;
+  { struct PAGE_NOTEBOOK *page;
+    GooCanvasItem *canvas_root;
     GtkWidget *trame_widget;
     GooCanvasItem *fond;
     GList *trame_items;
@@ -197,7 +198,7 @@
     struct TRAME_ITEM_SVG *Vignette_secu_personne;
   };
 
-/*********************************************** Déclaration des prototypes****************************************************/
+/*********************************************** DÃ©claration des prototypes****************************************************/
  extern void Trame_rafraichir_motif ( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Trame_rafraichir_comment ( struct TRAME_ITEM_COMMENT *trame_comment );
  extern void Trame_rafraichir_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
@@ -209,25 +210,24 @@
  extern void Trame_set_svg ( struct TRAME_ITEM_SVG *trame_svg, gchar *couleur, gint mode, gboolean cligno );
  extern void Charger_gif ( struct TRAME_ITEM_MOTIF *trame_item, gchar *nom_fichier );
  extern void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier );
- extern struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame,
-                                                     struct CMD_TYPE_MOTIF *motif );
+ extern struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame, struct CMD_TYPE_MOTIF *motif );
  extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame,
                                                             struct CMD_TYPE_COMMENT *comm );
- extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( struct CLIENT *client, gint flag, struct TRAME *trame,
+ extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,
                                                          struct CMD_TYPE_PASSERELLE *pass );
- extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( struct CLIENT *client, gint flag, struct TRAME *trame,
+ extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
                                                        struct CMD_TYPE_CADRAN *cadran );
  extern void Trame_ajout_motif_par_item ( struct TRAME *trame,
                                           struct TRAME_ITEM_MOTIF *trame_motif );
  extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );
- extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( struct CLIENT *client, gint flag, struct TRAME *trame,
+ extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
                                                                struct CMD_TYPE_CAMERASUP *camera_sup );
  extern void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm );
  extern void Trame_del_item ( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
- extern struct TRAME *Trame_creer_trame ( guint taille_x, guint taille_y, char *coul, guint grille );
+ extern struct TRAME *Trame_creer_trame ( struct PAGE_NOTEBOOK *page, guint taille_x, guint taille_y, char *coul, guint grille );
  extern void Trame_effacer_trame ( struct TRAME *trame );
  extern void Trame_detruire_trame ( struct TRAME *trame );
 

@@ -404,6 +404,18 @@
                  Partage->i[num].bleu   = bleu;
                  Partage->i[num].cligno = cligno;
                }
+          gchar chaine[20], *color;
+          g_snprintf( chaine, sizeof(chaine), "%d", num );
+               if (rouge == 255 && vert ==   0 && bleu ==   0) color="red";
+          else if (rouge ==   0 && vert == 255 && bleu ==   0) color="lime";
+          else if (rouge ==   0 && vert ==   0 && bleu == 255) color="blue";
+          else if (rouge == 255 && vert == 255 && bleu ==   0) color="yellow";
+          else if (rouge == 255 && vert == 190 && bleu ==   0) color="orange";
+          else if (rouge == 255 && vert == 255 && bleu == 255) color="white";
+          else if (rouge == 127 && vert == 127 && bleu == 127) color="lightgray";
+          else if (rouge ==   0 && vert == 100 && bleu ==   0) color="brown";
+          else color = "black";
+          Dls_data_set_VISUEL ( NULL, "OLD_I", chaine, NULL, etat, color, cligno );
 
           Partage->i[num].last_change = Partage->top;                               /* Date de la photo ! */
           pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de i a traiter */
@@ -1406,6 +1418,7 @@
        tempo->delai_off = delai_off;
        tempo->random    = random;
        tempo->init      = TRUE;
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Initializing TEMPO '%s:%s'", __func__, tech_id, acronyme );
      }
     ST_local ( tempo, etat );                                                                     /* Recopie dans la variable */
   }
@@ -1642,7 +1655,7 @@
      { visu = (struct DLS_VISUEL *)*visu_p;
        return( visu->mode );
      }
-    if (!tech_id || !acronyme) return(FALSE);
+    if (!tech_id || !acronyme) return(0);
 
     liste = Partage->Dls_data_VISUEL;
     while (liste)
@@ -1651,7 +1664,7 @@
        liste = g_slist_next(liste);
      }
 
-    if (!liste) return(FALSE);
+    if (!liste) return(0);
     if (visu_p) *visu_p = (gpointer)visu;                                           /* Sauvegarde pour acceleration si besoin */
     return( visu->mode );
   }
