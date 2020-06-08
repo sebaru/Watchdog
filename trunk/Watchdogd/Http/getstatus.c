@@ -87,7 +87,6 @@
     num = g_slist_length( Partage->com_msrv.liste_msg );                                       /* Recuperation du numero de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
     Json_add_int  ( builder, "length_msg", num );
-    Json_add_int  ( builder, "length_msg_repeat", num );
 
     SQL_Select_to_JSON ( builder, NULL, "SELECT * FROM db_status");
 
