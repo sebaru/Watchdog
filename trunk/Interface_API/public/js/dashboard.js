@@ -28,7 +28,9 @@
        document.getElementById("idNbrAuditLog").innerHTML = Response.nbr_audit_log;
        document.getElementById("idNbrMsgs").innerHTML = Response.nbr_msgs;
        document.getElementById("idNbrHistoMsgs").innerHTML = Response.nbr_histo_msgs;
+
+
      };
     xhr.send();
-
+    document.getElementById("idUsername").innerHTML = sessionStorage.getItem("username");
   }

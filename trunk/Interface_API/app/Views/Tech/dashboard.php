@@ -1,6 +1,7 @@
-    <div class="container">
-<div class="card-deck mb-2">
-  <div class="card">
+    <div class="container-fluid">
+<div class="row justify-content-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+<div class="col">
+  <div class="card m-1">
     <div class="card-header bg-highlight">
       <div class="row">
         <div class="col-4">
@@ -19,8 +20,9 @@
     </div>
     <!--<p class="card-text text-center"><small class="text-muted">Last updated 3 mins ago</small></p>-->
   </div>
-
-  <div class="card">
+</div>
+<div class="col">
+  <div class="card m-1">
     <div class="card-header bg-highlight">
       <div class="row">
         <div class="col-4">
@@ -39,8 +41,9 @@
     </div>
     <!--<p class="card-text text-center"><small class="text-muted">Last updated 3 mins ago</small></p>-->
   </div>
-
-  <div class="card">
+</div>
+<div class="col">
+  <div class="card m-1">
     <div class="card-header bg-highlight">
       <div class="row">
         <div class="col-4">
@@ -60,11 +63,9 @@
     </div>
     <!--<p class="card-text text-center"><small class="text-muted">Last updated 3 mins ago</small></p>-->
   </div>
-
 </div>
-
-<div class="card-deck">
-  <div class="card">
+<div class="col">
+  <div class="card m-1">
     <div class="card-header bg-highlight">
       <div class="row">
         <div class="col-4">
@@ -81,9 +82,9 @@
     </div>
     <!--<p class="card-text text-center"><small class="text-muted">Last updated 3 mins ago</small></p>-->
   </div>
-
-
-  <div class="card">
+</div>
+<div class="col">
+  <div class="card m-1">
     <div class="card-header bg-highlight">
       <div class="row">
         <div class="col-4">
@@ -102,6 +103,7 @@
     </div>
     <!--<p class="card-text text-center"><small class="text-muted">Last updated 3 mins ago</small></p>-->
   </div>
+</div>
 
 </div>
 
