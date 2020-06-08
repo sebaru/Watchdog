@@ -78,10 +78,11 @@
         <div class="col-4">
           <i class="fas fa-2x fa-user text-primary"></i>
         </div>
-        <div class="col-8 mt-1"><h5><span id="idNbrUsers">-</strong></span> Utilisateurs</h5></div>
+        <div class="col-8 mt-1"><h5>Utilisateurs</h5></div>
       </div>
     </div>
     <div class="card-body">
+      <h6 class="card-text"><span id="idNbrUsers">-</strong></span> Utilisateurs</h6>
       <h6 class="card-text"><span id="idNbrAuditLog">-</span> Enregistrements Logs</h6>
       <!--<h3 class="card-text text-center"><strong>56</strong></h3>-->
     </div>

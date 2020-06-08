@@ -71,14 +71,14 @@
 
   <div class="collapse navbar-collapse" id="navbar-toggled">
     <ul class="navbar-nav mr-auto">
-      <a class="nav-link active" href="<?php echo base_url('tech/dashboard'); ?>"> <i class="fas fa-tachometer-alt"></i><span> Dashboard</span></a>
+      <a class="nav-link active" href="<?php echo base_url('tech/dashboard'); ?>"> <i class="fas fa-tachometer-alt"></i> Dashboard</a>
 
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarCONFIG" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fa fa-cog"></i> Configuration
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarCONFIG">
-          <a class="dropdown-item" href="<?php echo base_url('tech/syn'); ?>"> <i class="fas fa-image text-danger"></i> <span> Synoptiques</span> </a>
+          <a class="dropdown-item" href="<?php echo base_url('tech/syn'); ?>"> <i class="fas fa-image text-danger"></i> <span>Synoptiques</span> </a>
           <a class="dropdown-item" href="<?php echo site_url('tech/dls'); ?>"> <i class="fas fa-code text-primary"></i> <span>Modules D.L.S</span> </a>
           <a class="dropdown-item" href="<?php echo site_url('tech/tableau'); ?>"> <i class="fas fa-chart-line text-secondary"></i> <span>Tableaux</span> </a>
         </div>
@@ -122,7 +122,7 @@
           <a class="dropdown-item" href="<?php echo site_url('tech/users'); ?>"><i class="fas fa-user text-info"></i> <span>Gestion des utilisateurs</span></a>
           <a class="dropdown-item" href="<?php echo site_url('tech/log'); ?>"><i class="fas fa-database text-warning"></i> <span>Audit Log</span></a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="auth/logout"><i class="fas fa-sign-out-alt text-danger"></i> <span>Logout</span> </a>
+          <a class="dropdown-item" href="auth/logout"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
         </div>
       </li>
     </ul>
