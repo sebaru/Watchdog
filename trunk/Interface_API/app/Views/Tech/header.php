@@ -25,7 +25,6 @@
         .navbar { background-color: rgba(30,28,56,0.8);
                 }
 
-
         .nav-link:hover { color: white;
                           background-color: #48BBC0;
                         }
@@ -84,7 +83,7 @@
 
       <li class="nav-item dropdown">
         <a class="nav-link rounded dropdown-toggle" href="#" id="navbarCONFIG" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fa fa-cog"></i> Configuration
+          <i class="fas fa-wrench"></i> Configuration
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarCONFIG">
           <a class="dropdown-item" href="<?php echo base_url('tech/syn'); ?>"> <i class="fas fa-image text-danger"></i> <span>Synoptiques</span> </a>
@@ -108,7 +107,7 @@
 
       <li class="nav-item dropdown">
         <a class="nav-link rounded dropdown-toggle" href="#" id="navbarIO" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fa fa-robot"></i> Inputs/Outputs
+          <i class="fas fa-robot"></i> Inputs/Outputs
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarIO">
           <a class="dropdown-item" href="<?php echo site_url('tech/modbus'); ?>"> <i class="fas fa-cogs text-info"></i> <span>Module Wago/Modbus</span> </a>
