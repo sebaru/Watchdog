@@ -43,9 +43,11 @@
        document.getElementById("idConfigRunAs").innerHTML = Response.run_as;
        document.getElementById("idConfigStarted").innerHTML = Response.started;
        document.getElementById("idConfigTop").innerHTML = Response.top;
-
-
      };
     xhr.send();
     document.getElementById("idUsername").innerHTML = sessionStorage.getItem("username");
+    Charger_une_courbe ( "idCourbeDlsTourParSec", "SYS", "DLS_TOUR_PER_SEC" );
+    Charger_une_courbe ( "idCourbeDlsBitParSec", "SYS", "DLS_BIT_PER_SEC" );
+    Charger_une_courbe ( "idCourbeDlsAttente", "SYS", "DLS_WAIT" );
+    Charger_une_courbe ( "idCourbeNbArchive", "SYS", "ARCH_REQUEST_NUMBER" );
   }

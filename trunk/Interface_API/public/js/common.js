@@ -6,9 +6,9 @@
     document.getElementById("idHrefUsername").href = "/tech/user/"+sessionStorage.getItem("username");
   }
 
-/********************************************* Chargement d'une courbe dans u synoptique 1 au démrrage *****************************************/
- function Charger_unique_courbe ( idChart, tech_id, acronyme, period )
-  { $.getJSON( base_url + "archive/get_ea/"+tech_id+"/"+acronyme+"/"+period, function (json)
+/********************************* Chargement d'une courbe dans u synoptique 1 au démrrage ************************************/
+ function Charger_une_courbe ( idChart, tech_id, acronyme, period )
+  { $.getJSON( "api/archive/get/"+tech_id+"/"+acronyme+"/"+period, function (json)
      { var dates = json.data.map( function(item) { return item.date; } );
        var valeurs = json.data.map( function(item) { return item.moyenne; } );
        var data = { labels: dates,
