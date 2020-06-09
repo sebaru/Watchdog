@@ -1774,6 +1774,21 @@
                                           "(SELECT COUNT(*) FROM audit_log) AS nbr_audit_log" );
     Lancer_requete_SQL ( db, requete );
 
+    g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW dictionnaire AS "
+                                          "SELECT 'AI',tech_id,acronyme from mnemos_AI UNION "
+                                          "SELECT 'DI',tech_id,acronyme from mnemos_DI UNION "
+                                          "SELECT 'DO',tech_id,acronyme from mnemos_DO UNION "
+                                          "SELECT 'AO',tech_id,acronyme from mnemos_AO UNION "
+                                          "SELECT 'BOOL',tech_id,acronyme from mnemos_BOOL UNION "
+                                          "SELECT 'CH',tech_id,acronyme from mnemos_CH UNION "
+                                          "SELECT 'CI',tech_id,acronyme from mnemos_CI UNION "
+                                          "SELECT 'HORLOGE',tech_id,acronyme from mnemos_HORLOGE UNION "
+                                          "SELECT 'TEMPO',tech_id,acronyme from mnemos_Tempo UNION "
+                                          "SELECT 'REGISTRE',tech_id,acronyme from mnemos_R UNION "
+                                          "SELECT 'VISUEL',tech_id,acronyme from syns_motifs" );
+    Lancer_requete_SQL ( db, requete );
+
+
     Libere_DB_SQL(&db);
 fin:
     database_version=4745;
