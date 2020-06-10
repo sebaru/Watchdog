@@ -42,13 +42,17 @@
                                  SoupClientContext *client, gpointer user_data )
   { gchar *buf, requete[256];
     gsize taille_buf;
-    gint syn_id;
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+
+    if ( session->access_level < 6 )
+     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
+       return;
+     }
 
     gchar *prefix = "/archive/get/";
     if ( ! g_str_has_prefix ( path, prefix ) )
@@ -103,7 +107,7 @@
     if (!strcasecmp(period, "MONTH")) g_strlcat ( requete, " WHERE date_time>=NOW() - INTERVAL 9 WEEK", sizeof(requete) );
     if (!strcasecmp(period, "YEAR"))  g_strlcat ( requete, " WHERE date_time>=NOW() - INTERVAL 13 MONTH", sizeof(requete) );
 
-    g_strlcat ( requete, " GROUP BY 'date' ORDER BY 'date'", sizeof(requete) );
+    g_strlcat ( requete, " GROUP BY date ORDER BY date", sizeof(requete) );
 
     if (SQL_Arch_to_JSON ( builder, "enregs", requete ) == FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");

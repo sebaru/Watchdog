@@ -190,10 +190,15 @@
 		     return;
      }
 
-    Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
 
     if ( ! g_str_has_prefix ( path, "/dls/del/" ) )
      { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
+     }
+
+    if ( session->access_level < 6 )
+     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
        return;
      }
 

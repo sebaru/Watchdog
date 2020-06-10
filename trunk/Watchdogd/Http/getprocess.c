@@ -161,7 +161,12 @@
 		     return;
      }
 
-    Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+
+    if ( session->access_level < 6 )
+     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
+       return;
+     }
 
          if (!strcasecmp(path, "/process/list"))          { Http_traiter_process_list(msg); }
     else if (g_str_has_prefix(path, "/process/stop/"))    { Http_traiter_process_start_stop( msg, path+14, FALSE ); }
