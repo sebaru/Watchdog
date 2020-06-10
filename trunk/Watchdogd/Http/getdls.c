@@ -192,15 +192,16 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
 
+    if ( ! (session && session->access_level >= 6) )
+     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
+       return;
+     }
+
     if ( ! g_str_has_prefix ( path, "/dls/del/" ) )
      { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
        return;
      }
 
-    if ( session->access_level < 6 )
-     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
-       return;
-     }
 
     gchar *target = Normaliser_chaine ( path+9 );
     if (!target)

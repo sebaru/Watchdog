@@ -49,7 +49,7 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
 
-    if ( session->access_level < 6 )
+    if ( !session )
      { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
        return;
      }
