@@ -190,7 +190,7 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Send_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille )
-  { if (!zmq) return;
+  { if (!zmq) return(FALSE);
     if (zmq_send( zmq->socket, buf, taille, 0 ) == -1)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "%s: Send to ZMQ '%s' ('%s') failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
@@ -212,7 +212,7 @@
   { struct ZMQ_TARGET event;
     void *buffer;
     gboolean retour;
-    if (!zmq) return;
+    if (!zmq) return(FALSE);
     if (taille==-1) taille = strlen(source)+1;
     buffer = g_try_malloc( taille + sizeof(struct ZMQ_TARGET) );
     if (!buffer)
