@@ -36,7 +36,6 @@
 /******************************************************************************************************************************/
  static void Admin_Http_status ( JsonBuilder *builder )
   { Json_add_int    ( builder, "tcp_port",                 Cfg_http.tcp_port );
-    Json_add_bool   ( builder, "tcp_authenticate",         Cfg_http.authenticate );
     Json_add_int    ( builder, "ssl_enable",               Cfg_http.ssl_enable );
     Json_add_string ( builder, "ssl_cert_filepath",        Cfg_http.ssl_cert_filepath );
     Json_add_string ( builder, "ssl_private_key_filepath", Cfg_http.ssl_private_key_filepath );
