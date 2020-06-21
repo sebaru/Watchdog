@@ -510,12 +510,13 @@
 
     data = g_bytes_unref_to_data ( request, &taille );
     Query = json_from_string ( data, NULL );
-    g_free(data);
     if (!Query)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: requete non Json '%s'", __func__, data );
+       g_free(data);
        soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
        return;
      }
+    g_free(data);
 
     object = json_node_get_object (Query);
     if (!request)
