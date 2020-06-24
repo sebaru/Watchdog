@@ -188,7 +188,7 @@
    <div id="idCourbeNbArchive" class="col"></div>
  </div>
 
-
+<script src="<?php echo base_url('js/archive.js')?>" type="text/javascript"></script>
 <script src="<?php echo base_url('js/dashboard.js')?>" type="text/javascript"></script>
 <!-- Container -->
 </div>
