@@ -17,6 +17,7 @@
         }
        var Response = JSON.parse(xhr.responseText);
        console.debug(Response);
+       sessionStorage.setItem("username", Response.username );
        if (Response.access_level < 6) window.location.replace("/");
                                  else window.location.replace("/tech");
      };

@@ -179,6 +179,50 @@
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
+ gboolean SQL_Arch_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete )
+  { struct DB *db = Init_ArchDB_SQL ();
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
+       return(FALSE);
+     }
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
+       Libere_DB_SQL ( &db );
+       return(FALSE);
+     }
+    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
+
+
+    db->result = mysql_store_result ( db->mysql );
+    if ( ! db->result )
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: store_result failed (%s)", __func__, (char *) mysql_error(db->mysql) );
+       db->nbr_result = 0;
+     }
+    else
+     { if (array_name)
+        { gchar chaine[80];
+          g_snprintf(chaine, sizeof(chaine), "nbr_%s", array_name );
+          Json_add_int ( builder, chaine, mysql_num_rows ( db->result ));
+          Json_add_array( builder, array_name );
+        }
+       while ( (db->row = mysql_fetch_row(db->result)) != NULL )
+        { if (array_name) Json_add_object ( builder, NULL );
+          for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
+           { Json_add_string( builder, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
+          if (array_name) Json_end_object ( builder );
+        }
+       if (array_name) Json_end_array ( builder );
+       mysql_free_result( db->result );
+     }
+    Libere_DB_SQL( &db );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
+/* Entrée: La DB, la requete                                                                                                  */
+/* Sortie: TRUE si pas de souci                                                                                               */
+/******************************************************************************************************************************/
  gboolean SQL_Write ( gchar *requete )
   { struct DB *db = Init_DB_SQL ();
     if (!db)
@@ -1773,6 +1817,21 @@
                                           "(SELECT COUNT(*) FROM histo_msgs) AS nbr_histo_msgs, "
                                           "(SELECT COUNT(*) FROM audit_log) AS nbr_audit_log" );
     Lancer_requete_SQL ( db, requete );
+
+    g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW dictionnaire AS "
+                                          "SELECT 'AI' AS type_bit,tech_id,acronyme,libelle from mnemos_AI UNION "
+                                          "SELECT 'DI' AS type_bit,tech_id,acronyme,libelle from mnemos_DI UNION "
+                                          "SELECT 'DO' AS type_bit,tech_id,acronyme,libelle from mnemos_DO UNION "
+                                          "SELECT 'AO' AS type_bit,tech_id,acronyme,libelle from mnemos_AO UNION "
+                                          "SELECT 'BOOL' AS type_bit,tech_id,acronyme,libelle from mnemos_BOOL UNION "
+                                          "SELECT 'CH' AS type_bit,tech_id,acronyme,libelle from mnemos_CH UNION "
+                                          "SELECT 'CI' AS type_bit,tech_id,acronyme,libelle from mnemos_CI UNION "
+                                          "SELECT 'HORLOGE' AS type_bit,tech_id,acronyme,libelle from mnemos_HORLOGE UNION "
+                                          "SELECT 'TEMPO' AS type_bit,tech_id,acronyme,libelle from mnemos_Tempo UNION "
+                                          "SELECT 'REGISTRE' AS type_bit,tech_id,acronyme,libelle from mnemos_R UNION "
+                                          "SELECT 'VISUEL' AS type_bit,tech_id,acronyme,libelle from syns_motifs" );
+    Lancer_requete_SQL ( db, requete );
+
 
     Libere_DB_SQL(&db);
 fin:

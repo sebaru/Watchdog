@@ -49,7 +49,6 @@
     Cfg_http.lib->Thread_debug  = FALSE;                                                        /* Settings default parameters */
     Cfg_http.tcp_port           = HTTP_DEFAUT_TCP_PORT;
     Cfg_http.ssl_enable         = FALSE;
-    Cfg_http.authenticate       = TRUE;
     Cfg_http.wtd_session_expiry = 3600*2;
     g_snprintf( Cfg_http.ssl_cert_filepath,        sizeof(Cfg_http.ssl_cert_filepath), "%s", HTTP_DEFAUT_FILE_CERT );
     g_snprintf( Cfg_http.ssl_private_key_filepath, sizeof(Cfg_http.ssl_private_key_filepath), "%s", HTTP_DEFAUT_FILE_KEY );
@@ -69,8 +68,6 @@
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.ssl_enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "tcp_port" ) )
         { Cfg_http.tcp_port = atoi(valeur);  }
-       else if ( ! g_ascii_strcasecmp ( nom, "authenticate" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "false" ) ) Cfg_http.authenticate = FALSE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "wtd_session_expiry" ) )
         { Cfg_http.wtd_session_expiry = atoi(valeur); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
@@ -377,6 +374,7 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { void *zmq_motifs, *zmq_msgs;
+    SoupAuthDomain *domain;
     gint last_pulse = 0;
 
     prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
@@ -403,6 +401,7 @@ reload:
     soup_server_add_handler ( socket, "/syn/show/",  Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/del/",   Http_traiter_syn_del, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/edit",   Http_traiter_syn_edit, NULL, NULL );
+    soup_server_add_handler ( socket, "/archive/get/", Http_traiter_archive_get, NULL, NULL );
     soup_server_add_handler ( socket, "/process",    Http_traiter_process, NULL, NULL );
     soup_server_add_handler ( socket, "/status",     Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/log",        Http_traiter_log, NULL, NULL );
@@ -414,24 +413,23 @@ reload:
     soup_server_add_websocket_handler ( socket, "/live-motifs", "*", protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
     soup_server_add_websocket_handler ( socket, "/live-msgs",   "*", protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
 
-    if (Cfg_http.authenticate)
-     { SoupAuthDomain *domain;
-       domain = soup_auth_domain_basic_new ( SOUP_AUTH_DOMAIN_REALM, "WatchdogServer",
-	                                            SOUP_AUTH_DOMAIN_BASIC_AUTH_CALLBACK, Http_authenticate_CB,
-                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/connect",
-                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/disconnect",
-                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/dls",
-                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/syn",
-                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/process",
-                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/log",
-                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/histo",
-                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/bus",
-                                             SOUP_AUTH_DOMAIN_ADD_PATH, "/memory",
-                                             NULL );
-       soup_auth_domain_set_filter ( domain, Http_test_session_CB, NULL, NULL );
-       soup_server_add_auth_domain(socket, domain);
-       g_object_unref (domain);
-     }
+    domain = soup_auth_domain_basic_new ( SOUP_AUTH_DOMAIN_REALM, "WatchdogServer",
+                                          SOUP_AUTH_DOMAIN_BASIC_AUTH_CALLBACK, Http_authenticate_CB,
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/archive",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/connect",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/disconnect",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/dls",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/syn",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/process",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/log",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/histo",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/bus",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/memory",
+                                          NULL );
+    soup_auth_domain_set_filter ( domain, Http_test_session_CB, NULL, NULL );
+    soup_server_add_auth_domain(socket, domain);
+    g_object_unref (domain);
+
 
     if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
      { struct stat sbuf;
@@ -460,8 +458,8 @@ reload:
        goto end;
      }
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-              "%s: HTTP SoupServer Listen OK on port %d, SSL=%d, authenticate=%d !", __func__,
-              Cfg_http.tcp_port, Cfg_http.ssl_enable, Cfg_http.authenticate );
+              "%s: HTTP SoupServer Listen OK on port %d, SSL=%d !", __func__,
+              Cfg_http.tcp_port, Cfg_http.ssl_enable );
 
     GMainLoop *loop = g_main_loop_new (NULL, TRUE);
     GMainContext *loop_context = g_main_loop_get_context ( loop );

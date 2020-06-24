@@ -27,7 +27,6 @@
 
  #include <string.h>
  #include <unistd.h>
- #include <libxml/xmlwriter.h>
 
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
@@ -47,7 +46,7 @@
 		     return;
      }
 
-    Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
 
     if ( strcmp ( path, "/syn/list" ) )
      { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
@@ -60,7 +59,9 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT syn.*,psyn.page as ppage FROM syns AS syn INNER JOIN syns as psyn ON psyn.id=syn.parent_id" );
+    g_snprintf(chaine, sizeof(chaine), "SELECT syn.*,psyn.page as ppage FROM syns AS syn"
+                                       " INNER JOIN syns as psyn ON psyn.id=syn.parent_id"
+                                       " WHERE syn.access_level<='%d'", session->access_level);
     if (SQL_Select_to_JSON ( builder, "synoptiques", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);

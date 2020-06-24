@@ -21,6 +21,14 @@
                       box-shadow: 0 0 0 0 !important;
                     }
 
+
+        .navbar { background-color: rgba(30,28,56,0.8);
+                }
+
+        .nav-link:hover { color: white;
+                          background-color: #48BBC0;
+                        }
+
       </style>
 
     </head>
@@ -63,7 +71,7 @@
 </div>
 
 <header>
-	<nav class="navbar navbar-dark bg-primary navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
+	<nav class="navbar navbar-dark  navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
   <a class="navbar-brand" href="<?php echo base_url('/');?>"><img src="<?php echo base_url('/logo.svg')?>" alt="Watchdog Logo" width=50></a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -71,11 +79,11 @@
 
   <div class="collapse navbar-collapse" id="navbar-toggled">
     <ul class="navbar-nav mr-auto">
-      <a class="nav-link active" href="<?php echo base_url('tech/dashboard'); ?>"> <i class="fas fa-tachometer-alt"></i> Dashboard</a>
+      <a class="nav-link rounded" href="<?php echo base_url('tech/dashboard'); ?>"> <i class="fas fa-tachometer-alt"></i> Dashboard</a>
 
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarCONFIG" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fa fa-cog"></i> Configuration
+        <a class="nav-link rounded dropdown-toggle" href="#" id="navbarCONFIG" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-wrench"></i> Configuration
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarCONFIG">
           <a class="dropdown-item" href="<?php echo base_url('tech/syn'); ?>"> <i class="fas fa-image text-danger"></i> <span>Synoptiques</span> </a>
@@ -86,7 +94,7 @@
 
 
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarINSTANCE" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link rounded dropdown-toggle" href="#" id="navbarINSTANCE" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Instance
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarINSTANCE">
@@ -95,11 +103,11 @@
         </div>
       </li>
 
-      <a class="nav-link" href="https://icons.abls-habitat.fr/admin/icons"><i class="fas fa-file-photo-o"></i> <span>Gestion des Icones</span></a>
+      <a class="nav-link rounded" href="https://icons.abls-habitat.fr/admin/icons"><i class="fas fa-file-photo-o"></i> <span>Gestion des Icones</span></a>
 
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarIO" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fa fa-robot"></i> Inputs/Outputs
+        <a class="nav-link rounded dropdown-toggle" href="#" id="navbarIO" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-robot"></i> Inputs/Outputs
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarIO">
           <a class="dropdown-item" href="<?php echo site_url('tech/modbus'); ?>"> <i class="fas fa-cogs text-info"></i> <span>Module Wago/Modbus</span> </a>
@@ -109,23 +117,27 @@
         </div>
       </li>
     </ul>
+
     <ul class="navbar-nav">
     <form class="form-inline ml-2 my-2 my-lg-0">
       <input class="form-control mr-sm-2" type="search" placeholder="Rechercher" aria-label="Rechercher">
-      <button class="btn btn-success my-2 my-sm-0" type="submit">Search</button> <!--btn-outline-success-->
+      <button class="btn btn-success rounded my-2 my-sm-0" type="submit">Search</button> <!--btn-outline-success-->
     </form>
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fas fa-user"></i> Utilisateurs
+        <a class="nav-link rounded dropdown-toggle" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-user"></i>
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUSER">
-          <a class="dropdown-item" href="<?php echo site_url('tech/users'); ?>"><i class="fas fa-user text-info"></i> <span>Gestion des utilisateurs</span></a>
+          <a class="dropdown-item" id="idHrefUsername" href="#"><i class="fas fa-user text-info"></i> <span id="idUsername">-</span></a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="<?php echo site_url('tech/users'); ?>"><i class="fas fa-users text-info"></i> <span>Gestion des utilisateurs</span></a>
           <a class="dropdown-item" href="<?php echo site_url('tech/log'); ?>"><i class="fas fa-database text-warning"></i> <span>Audit Log</span></a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="auth/logout"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
         </div>
       </li>
     </ul>
+
   </div>
 </nav>
 </header>

@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -56,11 +56,11 @@
 
     log = g_try_malloc0( sizeof(struct LOG) );
     if (!log) return(NULL);
-    
+
     g_snprintf( log->entete,  sizeof(log->entete), "%s", entete  );
     log->log_level = debug;
     on_exit( Info_stop, log );
-    
+
     openlog( log->entete, LOG_CONS | LOG_PID, LOG_USER );
     return(log);
   }
@@ -76,23 +76,12 @@
 /* Entrée: le niveau, le texte, et la chaine à afficher                                                                       */
 /******************************************************************************************************************************/
  void Info_new( struct LOG *log, gboolean override, guint priority, gchar *format, ... )
-  { gchar chaine[512], nom_thread[32], *prio_string;
+  { gchar chaine[512], nom_thread[32];
     va_list ap;
 
-    switch (priority)
-     { case LOG_EMERG   : prio_string="EMER"; break;
-       case LOG_ALERT   : prio_string="ALRT"; break;
-       case LOG_CRIT    : prio_string="CRIT"; break;
-       case LOG_ERR     : prio_string="EROR"; break;
-       case LOG_WARNING : prio_string="WARN"; break;
-       case LOG_NOTICE  : prio_string="NOTE"; break;
-       default:
-       case LOG_INFO    : prio_string="INFO"; break;
-       case LOG_DEBUG   : prio_string="DBUG"; break;
-     } 
     if ( log != NULL && (override == TRUE || (priority <= log->log_level)) )                      /* LOG_EMERG = 0, DEBUG = 7 */
      { prctl( PR_GET_NAME, &nom_thread, 0, 0, 0);
-       g_snprintf( chaine, sizeof(chaine), "[%s] %10s - %s", prio_string, nom_thread, format );
+       g_snprintf( chaine, sizeof(chaine), "{ \"thread\":\"%s\", \"message\":\"%s\" }", nom_thread, format );
 
        va_start( ap, format );
        vsyslog ( priority, chaine, ap );
