@@ -27,7 +27,6 @@
 
  #include <string.h>
  #include <unistd.h>
- #include <libxml/xmlwriter.h>
 
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"

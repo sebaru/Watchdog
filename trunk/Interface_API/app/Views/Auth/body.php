@@ -63,7 +63,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <p>Vos identifiants et mots de passe sont incorrects.</p>
+        <p id="id-error-detail">Vos identifiants et mots de passe sont incorrects.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>

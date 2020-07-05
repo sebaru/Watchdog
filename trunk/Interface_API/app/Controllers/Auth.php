@@ -26,7 +26,8 @@ class Auth extends BaseController
        $source = curl_exec($ch);
        if ($source===FALSE)
         { curl_close($ch);
-          return redirect()->to('');
+          $this->response->setStatusCode(500, "Internal API Error");
+          return;
         }
        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
        if ($code == 401)
