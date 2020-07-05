@@ -201,8 +201,8 @@
        return(FALSE);
      }
 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: User '%s' (%s) found in database for domain '%s'.",
-              __func__, db->row[0], db->row[1], domain );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: User '%s' (%s) found in database.",
+              __func__, db->row[0], db->row[1] );
 
 /*********************************************************** Compte du client *************************************************/
     if (atoi(db->row[2]) != 1)                                                 /* Est-ce que son compte est toujours actif ?? */
@@ -410,8 +410,8 @@ reload:
     soup_server_add_handler ( socket, "/histo/alive",Http_traiter_histo_alive, NULL, NULL );
     soup_server_add_handler ( socket, "/histo/ack",  Http_traiter_histo_ack, NULL, NULL );
     gchar *protocols[] = { "live-motifs", "live-msgs" };
-    soup_server_add_websocket_handler ( socket, "/live-motifs", "*", protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
-    soup_server_add_websocket_handler ( socket, "/live-msgs",   "*", protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
+    soup_server_add_websocket_handler ( socket, "/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
+    soup_server_add_websocket_handler ( socket, "/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
 
     domain = soup_auth_domain_basic_new ( SOUP_AUTH_DOMAIN_REALM, "WatchdogServer",
                                           SOUP_AUTH_DOMAIN_BASIC_AUTH_CALLBACK, Http_authenticate_CB,
