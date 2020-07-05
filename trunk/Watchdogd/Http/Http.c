@@ -201,8 +201,8 @@
        return(FALSE);
      }
 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: User '%s' (%s) found in database.",
-              __func__, db->row[0], db->row[1] );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: User '%s' (%s) found in database for domain '%s'.",
+              __func__, db->row[0], db->row[1], domain );
 
 /*********************************************************** Compte du client *************************************************/
     if (atoi(db->row[2]) != 1)                                                 /* Est-ce que son compte est toujours actif ?? */
