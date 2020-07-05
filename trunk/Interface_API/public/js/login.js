@@ -14,6 +14,7 @@ console.debug(xhr.status);
         { var Response = JSON.parse(xhr.responseText);
           console.debug(Response);
           sessionStorage.setItem("username", Response.username );
+          document.cookie = "wtd_session="+Response.wtd_session+"; path=/";
           if (Response.access_level < 6) window.location.replace("/");
                                     else window.location.replace("/tech");
         }

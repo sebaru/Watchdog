@@ -16,7 +16,6 @@ class Auth extends BaseController
   { return redirect()->to('/auth/login');
   }
 
-
 /******************************************************************************************************************************/
  public function login()
   {
@@ -55,5 +54,10 @@ class Auth extends BaseController
        echo view('Auth/body', $data);
        echo view('Auth/footer', $data);
      }
+  }
+/******************************************************************************************************************************/
+ public function logout()
+  { session()->destroy();
+    return redirect()->to('/auth/login');
   }
 }

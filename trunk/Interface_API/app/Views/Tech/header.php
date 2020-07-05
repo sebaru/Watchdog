@@ -9,7 +9,7 @@
         <meta name="robots" content="noindex, nofollow">
         <link rel="icon" href="<?php echo base_url('/logo.svg')?>">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-        <script src="https://kit.fontawesome.com/1ca1f7ba56.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.21/datatables.min.css"/>
         <style>
         .input-group-prepend span { width: 50px;
                                     background-color: #F1E413;
@@ -119,12 +119,12 @@
     </ul>
 
     <ul class="navbar-nav">
-    <form class="form-inline ml-2 my-2 my-lg-0">
+    <form class="form-inline ml-2">
       <input class="form-control mr-sm-2" type="search" placeholder="Rechercher" aria-label="Rechercher">
-      <button class="btn btn-success rounded my-2 my-sm-0" type="submit">Search</button> <!--btn-outline-success-->
+      <button class="btn btn-success rounded my-1 my-sm-0" type="submit">Search</button> <!--btn-outline-success-->
     </form>
       <li class="nav-item dropdown">
-        <a class="nav-link rounded dropdown-toggle" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link rounded dropdown-toggle ml-2" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-user"></i>
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUSER">
@@ -133,7 +133,7 @@
           <a class="dropdown-item" href="<?php echo site_url('tech/users'); ?>"><i class="fas fa-users text-info"></i> <span>Gestion des utilisateurs</span></a>
           <a class="dropdown-item" href="<?php echo site_url('tech/log'); ?>"><i class="fas fa-database text-warning"></i> <span>Audit Log</span></a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="auth/logout"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
+          <a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
         </div>
       </li>
     </ul>
