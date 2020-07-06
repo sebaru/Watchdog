@@ -109,7 +109,7 @@
        return;
      }
                                                                       /* Lancement de la requete de recuperation des messages */
-    g_snprintf( chaine, sizeof(chaine), "SELECT * FROM audit_log WHERE access_level<=%d", session->access_level );
+    g_snprintf( chaine, sizeof(chaine), "SELECT * FROM audit_log WHERE access_level<=%d LIMIT 2000", session->access_level );
     SQL_Select_to_JSON ( builder, "logs", chaine );
 
     buf = Json_get_buf (builder, &taille_buf);
