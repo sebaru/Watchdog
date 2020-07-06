@@ -79,6 +79,44 @@
      }
     return(TRUE);
   }
+
+/******************************************************************************************************************************/
+/* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_traiter_log_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                    SoupClientContext *client, gpointer user_data)
+  { gchar *buf, chaine[256];
+    JsonBuilder *builder;
+    gsize taille_buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
+       return;
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+                                                                      /* Lancement de la requete de recuperation des messages */
+    g_snprintf( chaine, sizeof(chaine), "SELECT * FROM audit_log WHERE access_level<=%d", session->access_level );
+    SQL_Select_to_JSON ( builder, "logs", chaine );
+
+    buf = Json_get_buf (builder, &taille_buf);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
 /******************************************************************************************************************************/
 /* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
@@ -277,7 +315,7 @@
 
     Http_print_request ( server, msg, path, client );
 
-    name = Normaliser_chaine ( soup_client_context_get_auth_user(client) );                                 /* Formatage correct des chaines */
+    name = Normaliser_chaine ( soup_client_context_get_auth_user(client) );                  /* Formatage correct des chaines */
     if (!name)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Normalisation impossible", __func__ );
        return;
@@ -404,6 +442,7 @@ reload:
     soup_server_add_handler ( socket, "/archive/get/", Http_traiter_archive_get, NULL, NULL );
     soup_server_add_handler ( socket, "/process",    Http_traiter_process, NULL, NULL );
     soup_server_add_handler ( socket, "/status",     Http_traiter_status, NULL, NULL );
+    soup_server_add_handler ( socket, "/log/get",    Http_traiter_log_get, NULL, NULL );
     soup_server_add_handler ( socket, "/log",        Http_traiter_log, NULL, NULL );
     soup_server_add_handler ( socket, "/bus",        Http_traiter_bus, NULL, NULL );
     soup_server_add_handler ( socket, "/memory",     Http_traiter_memory, NULL, NULL );
