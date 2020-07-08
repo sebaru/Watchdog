@@ -61,7 +61,7 @@
 
     g_snprintf(chaine, sizeof(chaine), "SELECT syn.*,psyn.page as ppage FROM syns AS syn"
                                        " INNER JOIN syns as psyn ON psyn.id=syn.parent_id"
-                                       " WHERE syn.access_level<='%d'", session->access_level);
+                                       " WHERE syn.access_level<='%d' ORDER BY syn.page", session->access_level);
     if (SQL_Select_to_JSON ( builder, "synoptiques", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);

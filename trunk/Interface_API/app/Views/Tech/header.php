@@ -28,7 +28,6 @@
         .nav-link:hover { color: white;
                           background-color: #48BBC0;
                         }
-
       </style>
 
     </head>
@@ -86,7 +85,7 @@
           <i class="fas fa-wrench"></i> Configuration
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarCONFIG">
-          <a class="dropdown-item" href="<?php echo base_url('tech/syn'); ?>"> <i class="fas fa-image text-danger"></i> <span>Synoptiques</span> </a>
+          <a class="dropdown-item" href="<?php echo base_url('tech/synoptiques'); ?>"> <i class="fas fa-image text-danger"></i> <span>Synoptiques</span> </a>
           <a class="dropdown-item" href="<?php echo site_url('tech/dls'); ?>"> <i class="fas fa-code text-primary"></i> <span>Modules D.L.S</span> </a>
           <a class="dropdown-item" href="<?php echo site_url('tech/tableau'); ?>"> <i class="fas fa-chart-line text-secondary"></i> <span>Tableaux</span> </a>
         </div>
