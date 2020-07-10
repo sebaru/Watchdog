@@ -27,7 +27,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
    	public function status()
 	    { $ch = curl_init( $this->CI->wtd_webservice->get_ws_url().'/status' );
 		     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-       $result = json_decode(curl_exec($ch))->Status;
+       $result = json_decode(curl_exec($ch));
        curl_close($ch);
 		     return $result;
 	    }
@@ -35,7 +35,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
    	public function master_status()
 	    { $ch = curl_init( $this->CI->wtd_webservice->get_primary_ws_url().'/status' );
 		     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-       $result = json_decode(curl_exec($ch))->Status;
+       $result = json_decode(curl_exec($ch));
        curl_close($ch);
 		     return $result;
 	    }
