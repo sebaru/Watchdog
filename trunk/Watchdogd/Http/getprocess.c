@@ -159,6 +159,9 @@
      { if (status==FALSE) { Partage->com_dls.Thread_run  = FALSE; }
        else Demarrer_dls();                                                                               /* Démarrage D.L.S. */
      }
+    if ( ! strcasecmp ( thread, "db"  ) )
+     { status=TRUE;                                                                       /* Le thread DB ne peut etre arreté */
+     }
     else
      { GSList *liste;
        liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
