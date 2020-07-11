@@ -60,7 +60,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
        $source = curl_exec($ch);
        $result = json_decode($source);
-       /*error_log( "result ".$this->CI->wtd_webservice->get_ws_url().$uri. " = ".$source );*/
+       error_log( "result ".$this->CI->wtd_webservice->get_ws_url().$uri. " = ".$source );
        if ($result==NULL) error_log("Json decode error:". json_last_error_msg());
        curl_close($ch);
 		     return($result);

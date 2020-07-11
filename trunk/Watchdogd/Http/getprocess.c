@@ -51,28 +51,34 @@
        return;
      }
 
-    Json_add_object ( builder, "msrv");                                                                  /* Contenu du Status */
+    Json_add_array ( builder, "Process" );                                                               /* Contenu du Status */
+
+    Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
+    Json_add_string ( builder, "tech_id", "msrv" );
     Json_add_bool   ( builder, "debug",   Config.log_msrv );
     Json_add_bool   ( builder, "started", Partage->com_msrv.Thread_run );
     Json_add_string ( builder, "objet",   "Local Master Server" );
     Json_add_string ( builder, "fichier", "built-in" );
     Json_end_object ( builder );                                                                              /* End Document */
 
-    Json_add_object ( builder, "dls" );                                                                  /* Contenu du Status */
+    Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
+    Json_add_string ( builder, "tech_id", "dls" );
     Json_add_bool   ( builder, "debug",   Partage->com_dls.Thread_debug );
     Json_add_bool   ( builder, "started", Partage->com_dls.Thread_run );
     Json_add_string ( builder, "objet",   "D.L.S" );
     Json_add_string ( builder, "fichier", "built-in" );
     Json_end_object ( builder );                                                                              /* End Document */
 
-    Json_add_object ( builder, "arch" );                                                                 /* Contenu du Status */
+    Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
+    Json_add_string ( builder, "tech_id", "arch" );
     Json_add_bool   ( builder, "debug",   Config.log_arch );
     Json_add_bool   ( builder, "started", Partage->com_arch.Thread_run );
     Json_add_string ( builder, "objet",   "Archivage" );
     Json_add_string ( builder, "fichier", "built-in" );
     Json_end_object ( builder );                                                                              /* End Document */
 
-    Json_add_object ( builder, "db" );                                                                   /* Contenu du Status */
+    Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
+    Json_add_string ( builder, "tech_id", "db" );
     Json_add_bool   ( builder, "debug",   Config.log_db );
     Json_add_bool   ( builder, "started", TRUE );
     Json_add_string ( builder, "objet",   "Database Access" );
@@ -82,7 +88,8 @@
     liste = Partage->com_msrv.Librairies;                                                /* Parcours de toutes les librairies */
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
-       Json_add_object ( builder, lib->admin_prompt );                                                   /* Contenu du Status */
+       Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
+       Json_add_string ( builder, "tech_id", lib->admin_prompt );
        Json_add_bool   ( builder, "debug",   lib->Thread_debug );
        Json_add_bool   ( builder, "started", lib->Thread_run );
        Json_add_string ( builder, "objet",   lib->admin_help );
@@ -91,6 +98,7 @@
 
        liste = liste->next;
      }
+    Json_end_array ( builder );
 
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/

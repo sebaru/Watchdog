@@ -34,21 +34,37 @@
 
     <body>
 
-<!--
- <div id="toast-error" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="position: absolute; top: 0; right: 0;">
+
+
+  <div id="idToastAlert" class="toast" role="status" style="position: absolute; bottom: 50px; right: 50px; z-index: 99">
    <div class="toast-header">
-     <i class="fas exclamation-circle"></i>
-     <strong class="mr-auto">Erreur !</strong>
-     <small>so sorry !</small>
+     <i class="fas fa-exclamation-circle"></i>
+     <strong class="mr-auto">Bootstrap</strong>
+     <!--<small>11 mins ago</small>-->
      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
        <span aria-hidden="true">&times;</span>
      </button>
    </div>
    <div class="toast-body">
-     This is a Error Toast.
+     Hello, world! This is a toast message.
    </div>
- </div>
--->
+</div>
+
+
+<div class="position-fixed" style="bottom: 3rem; right: 3rem; z-index:9999">
+  <div id="idToastStatus" data-delay="3000" class="toast bg-success" role="status">
+   <div class="toast-header">
+     <strong class="mr-auto"> Résultat de la commande</strong>
+     <!--<small>11 mins ago</small>-->
+     <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+       <span aria-hidden="true">&times;</span>
+     </button>
+   </div>
+   <div class="toast-header">
+     <i class="fas fa-check-circle text-success"></i><span>Succès !</span>
+   </div>
+  </div>
+</div>
 
 <div id="idModalError" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -140,3 +156,4 @@
   </div>
 </nav>
 </header>
+

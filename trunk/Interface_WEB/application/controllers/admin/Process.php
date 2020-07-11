@@ -108,7 +108,7 @@ class Process extends Admin_Controller{
 	function index()
 	 { if ( ! $this->wtd_auth->logged_in() ) {	redirect('auth/login', 'refresh');	}
 			 $this->data['breadcrumb'] = $this->admin_breadcrumbs->show();
-    $this->data['processus'] = $this->wtd_webservice->get_local("/process/list");    /* Get all running process */
+    $this->data['processus'] = $this->wtd_webservice->get_local("/process/list")->Process;    /* Get all running process */
     $this->template->admin_render('admin/process/index', $this->data);                                       /* Load Template */
  	}
  }
