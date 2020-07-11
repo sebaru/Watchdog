@@ -447,6 +447,7 @@ reload:
     soup_server_add_handler ( socket, "/bus",        Http_traiter_bus, NULL, NULL );
     soup_server_add_handler ( socket, "/memory",     Http_traiter_memory, NULL, NULL );
     soup_server_add_handler ( socket, "/users/list", Http_traiter_users_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/users/kill", Http_traiter_users_kill, NULL, NULL );
     soup_server_add_handler ( socket, "/users/sessions", Http_traiter_users_sessions, NULL, NULL );
     soup_server_add_handler ( socket, "/histo/alive",Http_traiter_histo_alive, NULL, NULL );
     soup_server_add_handler ( socket, "/histo/ack",  Http_traiter_histo_ack, NULL, NULL );

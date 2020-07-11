@@ -11,9 +11,7 @@
           console.debug(Response);*/
           $('#idToastStatus').toast('show');
         }
-       else { $('#idErrorDetail').innerHtml = "Une erreur s'est produite...";
-              $('#idModalError').modal("show");
-            }
+       else { Show_Error( xhr.statusText ); }
      };
     xhr.send();
   }
@@ -27,17 +25,11 @@
     xhr.onreadystatechange = function( )
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status == 200)
-        { var Response = JSON.parse(xhr.responseText);
-          button = $('#idButtonDebug_'+Response.thread).attr("debug", Response.debug );
-          if (Response.debug==false)
-           { button.removeClass("btn-warning").addClass("btn-outline-secondary").html("Non"); }
-          else
-           { button.removeClass("btn-outline-secondary").addClass("btn-warning").html("Oui"); }
+        { $('#idTableProcess').DataTable().ajax.reload();
           $('#idToastStatus').toast('show');
         }
-       else { $('#idErrorDetail').innerHtml = "Une erreur s'est produite...";
-              $('#idModalError').modal("show");
-            }
+       else { Show_Error( xhr.statusText ); }
+
      };
     xhr.send();
   }
@@ -52,16 +44,11 @@
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status == 200)
         { var Response = JSON.parse(xhr.responseText);
-          button = $('#idButtonStarted_'+Response.thread).attr("started", Response.started );
-          if (Response.started==false)
-           { button.removeClass("btn-success").addClass("btn-outline-secondary").html("Inactif").attr("title","Activer le process"); }
-          else
-           { button.removeClass("btn-outline-secondary").addClass("btn-success").html("Actif").attr("title","Désactiver le process"); }
+          $('#idTableProcess').DataTable().ajax.reload();
           $('#idToastStatus').toast('show');
         }
-       else { $('#idErrorDetail').innerHtml = "Une erreur s'est produite...";
-              $('#idModalError').modal("show");
-            }
+       else { Show_Error( xhr.statusText ); }
+
      };
     xhr.send();
   }
@@ -71,7 +58,9 @@
     $('#idTableProcess').DataTable(
        { pageLength : 25,
          fixedHeader: true,
-         ajax: {	url : "/api/process/list",	type : "GET", dataSrc: "Process" },
+         ajax: {	url : "/api/process/list",	type : "GET", dataSrc: "Process",
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
          columns:
           [ { "data": "thread", "title":"Thread", "className": "text-center" },
             { "data": null,

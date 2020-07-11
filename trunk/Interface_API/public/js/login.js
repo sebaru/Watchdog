@@ -9,7 +9,6 @@
     xhr.open('POST', "/auth/login", true);
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
-console.debug(xhr.status);
        if (xhr.status == 200)
         { var Response = JSON.parse(xhr.responseText);
           console.debug(Response);

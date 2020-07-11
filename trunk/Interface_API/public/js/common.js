@@ -6,6 +6,12 @@
     document.getElementById("idHrefUsername").href = "/tech/user/"+sessionStorage.getItem("username");
   }
 
+/********************************************* Chargement du synoptique 1 au démrrage *****************************************/
+ function Show_Error ( message )
+  { $('#idModalDetail').html( "Une erreur s'est produite: "+message );
+    $('#idModalError').modal("show");
+  }
+
 /********************************* Chargement d'une courbe dans u synoptique 1 au démrrage ************************************/
  function Charger_une_courbe ( idChart, tech_id, acronyme, period )
   { $.getJSON( "api/archive/get/"+tech_id+"/"+acronyme+"/"+period, function (json)

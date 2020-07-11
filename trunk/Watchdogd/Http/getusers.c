@@ -32,6 +32,81 @@
  #include "watchdogd.h"
  #include "Http.h"
  extern struct HTTP_CONFIG Cfg_http;
+
+/******************************************************************************************************************************/
+/* Http_Traiter_users_kill: Kill une session utilisateur                                                                      */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
+/******************************************************************************************************************************/
+ void Http_traiter_users_kill ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                SoupClientContext *client, gpointer user_data )
+  { JsonObject *object;
+    GBytes *request;
+    JsonNode *Query;
+    gchar * data;
+    gsize taille;
+
+    if (msg->method != SOUP_METHOD_DELETE)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+
+    if ( ! (session && session->access_level >= 1) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, HTTP_FORBIDDEN_ERROR );
+       return;
+     }
+
+    g_object_get ( msg, "request-body-data", &request, NULL );
+    if (!request)
+     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       return;
+     }
+
+    data = g_bytes_unref_to_data ( request, &taille );                     /* Récupération du buffer et ajout d'un \0 d'arret */
+    data = g_try_realloc( data, taille + 1 );
+    data [taille] = 0;
+    Query = json_from_string ( data, NULL );
+    if (!Query)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: requete non Json '%s'", __func__, data );
+       g_free(data);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Wrong format");
+       return;
+     }
+    g_free(data);
+
+    object = json_node_get_object (Query);
+    if (!request)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
+       json_node_unref (Query);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Object");
+       return;
+     }
+
+    gchar *target = json_object_get_string_member ( object, "wtd_session" );
+    if (!target)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: tech_id non trouvé", __func__ );
+       json_node_unref (Query);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No target");
+       return;
+     }
+
+    GSList *liste = Cfg_http.liste_http_clients;
+    while(liste)
+     { struct HTTP_CLIENT_SESSION *sess = liste->data;
+       if (!strcmp(sess->wtd_session, target))
+        { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, sess );
+          g_free(sess);
+          break;
+        }
+       liste = g_slist_next ( liste );
+     }
+
+    json_node_unref (Query);
+    if (liste) soup_message_set_status (msg, SOUP_STATUS_OK);
+    else soup_message_set_status_full (msg, SOUP_STATUS_NO_CONTENT, "Session not found" );
+  }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getusers_list: Traite une requete sur l'URI users/list                                                */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -51,7 +126,7 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
 
     if ( ! (session && session->access_level >= 1) )
-     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, HTTP_FORBIDDEN_ERROR );
        return;
      }
 
@@ -89,7 +164,7 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
 
     if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, HTTP_FORBIDDEN_ERROR );
        return;
      }
 
@@ -105,10 +180,12 @@
     GSList *liste = Cfg_http.liste_http_clients;
     while(liste)
      { struct HTTP_CLIENT_SESSION *sess = liste->data;
+       Json_add_object ( builder, NULL );
        Json_add_string ( builder, "username", sess->username );
        Json_add_string ( builder, "wtd_session", sess->wtd_session );
        Json_add_int    ( builder, "access_level", sess->access_level );
        Json_add_int    ( builder, "last_request", sess->last_request );
+       Json_end_object ( builder );
        liste = g_slist_next ( liste );
      }
     Json_end_array ( builder );
