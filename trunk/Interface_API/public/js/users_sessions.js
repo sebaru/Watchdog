@@ -32,9 +32,9 @@
                },
          columns:
           [ { "data": "username", "title":"Username", "className": "text-center" },
-            { "data": "wtd_session", "title":"Wtd_session" },
-            { "data": "access_level", "title":"Level" },
-            { "data": "last_request", "title":"Dernier accès" },
+            { "data": "access_level", "title":"Level", "className": "hidden-xs" },
+            { "data": "wtd_session", "title":"Wtd_session", "className": "hidden-xs" },
+            { "data": "last_request", "title":"Dernier accès", "className": "hidden-xs" },
             { "data": null,
               "render": function (item)
                 { return("<button class='btn btn-danger btn-block btn-sm' data-toggle='tooltip' title='Supprime la session' "+

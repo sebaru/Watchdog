@@ -84,8 +84,8 @@
        return;
      }
 
-    gchar *target = json_object_get_string_member ( object, "wtd_session" );
-    if (!target)
+    gchar *target_sid = json_object_get_string_member ( object, "wtd_session" );
+    if (!target_sid)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: tech_id non trouvé", __func__ );
        json_node_unref (Query);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No target");
@@ -94,18 +94,21 @@
 
     GSList *liste = Cfg_http.liste_http_clients;
     while(liste)
-     { struct HTTP_CLIENT_SESSION *sess = liste->data;
-       if (!strcmp(sess->wtd_session, target))
-        { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, sess );
-          g_free(sess);
+     { struct HTTP_CLIENT_SESSION *target = liste->data;
+       if ( !strcmp(target->wtd_session, target_sid) )
+        { if ( session->access_level > target->access_level)
+           { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, target );
+             g_free(target);
+             soup_message_set_status (msg, SOUP_STATUS_OK );
+           }
+          else soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Droits insuffisants" );
           break;
         }
        liste = g_slist_next ( liste );
      }
 
     json_node_unref (Query);
-    if (liste) soup_message_set_status (msg, SOUP_STATUS_OK);
-    else soup_message_set_status_full (msg, SOUP_STATUS_NO_CONTENT, "Session not found" );
+    if (!liste) soup_message_set_status_full (msg, SOUP_STATUS_NO_CONTENT, "Session not found" );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getusers_list: Traite une requete sur l'URI users/list                                                */
