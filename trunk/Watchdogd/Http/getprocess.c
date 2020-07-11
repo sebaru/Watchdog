@@ -54,7 +54,7 @@
     Json_add_array ( builder, "Process" );                                                               /* Contenu du Status */
 
     Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
-    Json_add_string ( builder, "tech_id", "msrv" );
+    Json_add_string ( builder, "thread",  "msrv" );
     Json_add_bool   ( builder, "debug",   Config.log_msrv );
     Json_add_bool   ( builder, "started", Partage->com_msrv.Thread_run );
     Json_add_string ( builder, "objet",   "Local Master Server" );
@@ -62,7 +62,7 @@
     Json_end_object ( builder );                                                                              /* End Document */
 
     Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
-    Json_add_string ( builder, "tech_id", "dls" );
+    Json_add_string ( builder, "thread",  "dls" );
     Json_add_bool   ( builder, "debug",   Partage->com_dls.Thread_debug );
     Json_add_bool   ( builder, "started", Partage->com_dls.Thread_run );
     Json_add_string ( builder, "objet",   "D.L.S" );
@@ -70,7 +70,7 @@
     Json_end_object ( builder );                                                                              /* End Document */
 
     Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
-    Json_add_string ( builder, "tech_id", "arch" );
+    Json_add_string ( builder, "thread",  "arch" );
     Json_add_bool   ( builder, "debug",   Config.log_arch );
     Json_add_bool   ( builder, "started", Partage->com_arch.Thread_run );
     Json_add_string ( builder, "objet",   "Archivage" );
@@ -78,7 +78,7 @@
     Json_end_object ( builder );                                                                              /* End Document */
 
     Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
-    Json_add_string ( builder, "tech_id", "db" );
+    Json_add_string ( builder, "thread",  "db" );
     Json_add_bool   ( builder, "debug",   Config.log_db );
     Json_add_bool   ( builder, "started", TRUE );
     Json_add_string ( builder, "objet",   "Database Access" );
@@ -89,7 +89,7 @@
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
        Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
-       Json_add_string ( builder, "tech_id", lib->admin_prompt );
+       Json_add_string ( builder, "thread",  lib->admin_prompt );
        Json_add_bool   ( builder, "debug",   lib->Thread_debug );
        Json_add_bool   ( builder, "started", lib->Thread_run );
        Json_add_string ( builder, "objet",   lib->admin_help );
@@ -111,7 +111,8 @@
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
  static void Http_traiter_process_debug ( SoupMessage *msg,  gchar *thread, gboolean status )
-  {      if ( ! strcasecmp ( thread, "arch" ) ) { Config.log_arch = status; }
+  { gsize taille_buf;
+         if ( ! strcasecmp ( thread, "arch" ) ) { Config.log_arch = status; }
     else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
     else if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
     else if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }
@@ -126,6 +127,20 @@
         }
      }
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' debug to %d", __func__, thread, status );
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonBuilder *builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    Json_add_string ( builder, "thread",  thread );
+    Json_add_bool   ( builder, "debug", status );
+
+    gchar *buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
@@ -134,7 +149,9 @@
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
  static void Http_traiter_process_start_stop ( SoupMessage *msg, gchar *thread, gboolean status )
-  { if ( ! strcasecmp ( thread, "arch" ) )
+  { gsize taille_buf;
+
+    if ( ! strcasecmp ( thread, "arch" ) )
      { if (status==FALSE) { Partage->com_arch.Thread_run = FALSE; }
        else Demarrer_arch();                                                                   /* Demarrage gestion Archivage */
      } else
@@ -155,6 +172,20 @@
      }
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' to '%s'",
                           __func__, thread, (status ? "start" : "stop") );
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonBuilder *builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    Json_add_string ( builder, "thread",  thread );
+    Json_add_bool   ( builder, "started", status );
+
+    gchar *buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
