@@ -110,7 +110,7 @@
 
       <li class="nav-item dropdown">
         <a class="nav-link rounded dropdown-toggle" href="#" id="navbarINSTANCE" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Instance
+          <i class="fas fa-crown"></i> Instance
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarINSTANCE">
           <a class="dropdown-item" href="<?php echo site_url('tech/process'); ?>"><i class="fas fa-microchip text-primary"></i> <span>Gestion des Processus</span></a>

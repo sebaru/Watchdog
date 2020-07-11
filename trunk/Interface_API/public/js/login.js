@@ -18,17 +18,9 @@
                                     else window.location.replace("/tech");
         }
        else if (xhr.status == 401)
-        { $('#id-error-detail').innerHtml = "Vos identifiants et mots de passe sont incorrects";
-          $('#id-modal-error').modal("show");
-        }
-       else if (xhr.status == 500)
-        { $('#id-error-detail').innerHtml = "test";
-          $('#id-modal-error').modal("show");
-        }
+        { Show_Error ( "Vos identifiants et mots de passe sont incorrects" ); }
        else
-        { $('#id-error-detail').innerHtml = "Une erreur s'est produite...";
-          $('#id-modal-error').modal("show");
-        }
+        { Show_Error ( xhr.statusText ); }
      };
     xhr.send(data);
   }
