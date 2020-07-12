@@ -15,7 +15,9 @@
 /********************************* Chargement d'une courbe dans u synoptique 1 au démrrage ************************************/
  function Charger_une_courbe ( idChart, tech_id, acronyme, period )
   { $.getJSON( "/api/archive/get/"+tech_id+"/"+acronyme+"/"+period, function (json)
-     { var dates = json.enregs.map( function(item) { return item.date; } );
+     { var dates;
+       if (period=="HOUR") dates = json.enregs.map( function(item) { return item.date.split(' ')[1]; } );
+                      else dates = json.enregs.map( function(item) { return item.date; } );
        var valeurs = json.enregs.map( function(item) { return item.moyenne; } );
        var data = { labels: dates,
                     datasets: [ { label: json.libelle,
