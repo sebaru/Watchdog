@@ -112,7 +112,7 @@
             },
             { "data": null,
               "render": function (item)
-                { return("<button class='btn btn-info btn-block btn-sm' data-toggle='tooltip' title='Recharger le process' "+
+                { return("<button class='btn btn-outline-info btn-block btn-sm' data-toggle='tooltip' title='Recharger le process' "+
                          "onclick=Process_clic_reload('"+item.thread+"')>"+
                          "Reload</button>")
                 },

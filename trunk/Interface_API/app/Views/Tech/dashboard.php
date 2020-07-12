@@ -114,7 +114,7 @@
     <div class="card-header bg-highlight">
       <div class="row">
         <div class="col-4">
-          <i class="fas fa-2x fa-user text-primary"></i>
+          <i class="fas fa-2x fa-users text-primary"></i>
         </div>
         <div class="col-8 mt-1"><h5>Utilisateurs</h5></div>
       </div>
