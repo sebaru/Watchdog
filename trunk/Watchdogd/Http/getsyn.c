@@ -241,8 +241,8 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_syn_update ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                SoupClientContext *client, gpointer user_data )
+ void Http_traiter_syn_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                             SoupClientContext *client, gpointer user_data )
   { GBytes *request_brute;
     gchar requete[256];
     gsize taille;
@@ -285,27 +285,9 @@
                   "access_level='%d'",
                    libelle, page, ppage, access_level );
      }
-    if (SQL_Write (requete))
-     { gchar chaine[256];
-       gsize taille_buf;
-       JsonBuilder *builder = Json_create ();
-       if (!builder)
-        { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
-          goto end;
-        }
-       g_snprintf(chaine, sizeof(chaine), "SELECT s.*, ps.page AS ppage FROM syns AS s INNER JOIN syns AS ps ON s.parent_id = ps.id "
-                                          "WHERE s.page='%s'", page );
-       if (SQL_Select_to_JSON ( builder, NULL, chaine ) == FALSE)
-        { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-          g_object_unref(builder);
-          goto end;
-        }
-       gchar *buf = Json_get_buf (builder, &taille_buf);
-       soup_message_set_status (msg, SOUP_STATUS_OK);
-       soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-     }
+    if (SQL_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-end:
+
     g_free(libelle);
     g_free(page);
     g_free(ppage);
@@ -316,8 +298,8 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_syn_edit ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                              SoupClientContext *client, gpointer user_data )
+ void Http_traiter_syn_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                            SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
     gsize taille_buf;
     gint syn_id;

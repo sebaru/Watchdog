@@ -1,5 +1,9 @@
 <div class="container-fluid">
 
+ <div class ="row float-right mb-1 mr-2">
+       <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
+ </div>
+
 <div class="table-responsive-lg">
   <table id="idTableSyn" class="table table-striped table-bordered table-hover">
     <thead class="thead-dark">
@@ -8,15 +12,17 @@
     </tbody>
   </table>
 </div>
-<script src="<?php echo base_url('js/synoptiques.js')?>" type="text/javascript"></script>
+
+
 <!-- Container -->
 </div>
+
 
 <div id="idModalSynEdit" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
-        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> Editer - <span id="idModalSynEditTitre"></span></h5>
+        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalSynEditTitre"></span></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -67,3 +73,6 @@
     </div>
   </div>
 </div>
+
+
+<script src="<?php echo base_url('js/synoptiques.js')?>" type="text/javascript"></script>

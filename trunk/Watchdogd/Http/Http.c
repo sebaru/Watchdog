@@ -438,8 +438,8 @@ reload:
     soup_server_add_handler ( socket, "/syn/list",       Http_traiter_syn_list, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/show/",      Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/del/",       Http_traiter_syn_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/edit/",      Http_traiter_syn_edit, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/update",     Http_traiter_syn_update, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/get/",       Http_traiter_syn_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/set",        Http_traiter_syn_set, NULL, NULL );
     soup_server_add_handler ( socket, "/archive/get/",   Http_traiter_archive_get, NULL, NULL );
     soup_server_add_handler ( socket, "/process",        Http_traiter_process, NULL, NULL );
     soup_server_add_handler ( socket, "/status",         Http_traiter_status, NULL, NULL );
