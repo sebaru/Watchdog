@@ -23,6 +23,20 @@
      };
     xhr.send(json_request);
   }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function Show_Modal_Edit ( syn_id )
+  { table = $('#idTableSyn').DataTable();
+    $('#idModalSynEditTitre').text ( "Editer - " + table.cell( "#"+syn_id, "page:name" ).data() );
+    $('#idModalSynEditPage').val ( table.cell( "#"+syn_id, "page:name" ).data() );
+    $('#idModalSynEditPPage').val ( table.cell( "#"+syn_id, "ppage:name" ).data() );
+    $('#idModalSynEditPPage').attr ( "readonly", true );
+    $('#idModalSynEditDescription').val(table.cell( "#"+syn_id, "libelle:name" ).data());
+    $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level")-1 );
+    $('#idModalSynEditAccessLevel').val(table.cell( "#"+syn_id, "access_level:name" ).data() );
+    $('#idModalSynEditValider').attr( "onclick", "Valide_edit_synoptique("+syn_id+")" );
+    $('#idModalSynEdit').modal("show");
+  }
+
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valide_new_synoptique ( )
   { var xhr = new XMLHttpRequest;
@@ -46,20 +60,6 @@
     xhr.send(json_request);
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Edit ( syn_id )
-  { table = $('#idTableSyn').DataTable();
-    $('#idModalSynEditTitre').text ( "Editer - " + table.cell( "#"+syn_id, "page:name" ).data() );
-    $('#idModalSynEditPage').val ( table.cell( "#"+syn_id, "page:name" ).data() );
-    $('#idModalSynEditPPage').val ( table.cell( "#"+syn_id, "ppage:name" ).data() );
-    $('#idModalSynEditPPage').attr ( "readonly", true );
-    $('#idModalSynEditDescription').val(table.cell( "#"+syn_id, "libelle:name" ).data());
-    $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level")-1 );
-    $('#idModalSynEditAccessLevel').val(table.cell( "#"+syn_id, "access_level:name" ).data() );
-    $('#idModalSynEditValider').attr( "onclick", "Valide_edit_synoptique("+syn_id+")" );
-    $('#idModalSynEdit').modal("show");
-  }
-
-/********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Add ( ppage )
   { table = $('#idTableSyn').DataTable();
     $('#idModalSynEditTitre').text ( "Ajouter un synoptique" );
@@ -71,6 +71,33 @@
     $('#idModalSynEditAccessLevel').val(0);
     $('#idModalSynEditValider').attr( "onclick", "Valide_new_synoptique()" );
     $('#idModalSynEdit').modal("show");
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Valide_del_synoptique ( syn_id )
+  { var xhr = new XMLHttpRequest;
+    xhr.open('DELETE', "/api/syn/del/"+syn_id );
+    xhr.onreadystatechange = function( )
+     { if ( xhr.readyState != 4 ) return;
+       if (xhr.status == 200)
+        { $('#idTableSyn').DataTable().ajax.reload(null, false);
+          $('#idToastStatus').toast('show');
+        }
+       else { Show_Error( xhr.statusText ); }
+     };
+    xhr.send();
+  }
+
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function Show_Modal_Del ( syn_id )
+  { table = $('#idTableSyn').DataTable();
+    $('#idModalSynDelTitre').text ( "Détruire le synoptique ?" );
+    $('#idModalSynDelMessage').html("Etes-vous sur de vouloir supprimer le synoptique suivant "+
+                                    "et toutes ses dépendances (DLS, mnémoniques, ...) ?<hr>"+
+                                    "<strong>"+table.cell( "#"+syn_id, "page:name" ).data()+" - "+
+                                    table.cell( "#"+syn_id, "libelle:name" ).data()+
+                                    "</strong>" );
+    $('#idModalSynDelValider').attr( "onclick", "Valide_del_synoptique("+syn_id+")" );
+    $('#idModalSynDel').modal("show");
   }
 
 /********************************************* Appelé au chargement de la page ************************************************/
@@ -106,6 +133,7 @@
                                             "data-toggle='tooltip' title='Ajout un module D.L.S'>"+
                                             "<i class='fas fa-plus'></i> <i class='fas fa-code'></i></button>"+
                                 "    <button class='btn btn-danger btn-sm' "+
+                                            "onclick=Show_Modal_Del("+item.id+") "+
                                             "data-toggle='tooltip' title='Supprimer le Synoptique\net ses dépendances'>"+
                                             "<i class='fas fa-trash'></i></button>"+
                                 "</div>"
