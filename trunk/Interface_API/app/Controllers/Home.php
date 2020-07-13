@@ -7,6 +7,16 @@ class Home extends BaseController
 		return view('welcome_message');
 	}
 
+/******************************************************************************************************************************/
+ public function archive()
+  { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
+
+    echo view('Home/header');
+    echo view('Home/archive');
+    echo view('Home/footer');
+
+  }
+
 	//--------------------------------------------------------------------
 
 }

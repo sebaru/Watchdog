@@ -114,7 +114,7 @@
                     { "data": "access_level", "name": "access_level", "title": "Level", "className": "text-center hidden-xs" },
                     { "data": "ppage", "title": "Parent", "name": "ppage", "className": "hidden-xs" },
                     { "data": "page", "name": "page", "title":"Page" },
-                    { "data": "libelle", "name": "libelle", "title":"Description" },
+                    { "data": "libelle", "name": "libelle", "title":"Description", "className": "hidden-xs" },
                     { "data": null,
                       "render": function (item)
                        { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+

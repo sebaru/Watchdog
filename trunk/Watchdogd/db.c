@@ -149,7 +149,6 @@
      }
     else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
 
-
     db->result = mysql_store_result ( db->mysql );
     if ( ! db->result )
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: store_result failed (%s)", __func__, (char *) mysql_error(db->mysql) );
