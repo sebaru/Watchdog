@@ -47,6 +47,10 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
 
     if ( strcmp ( path, "/syn/list" ) )
      { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
@@ -88,7 +92,12 @@
 		     return;
      }
 
-    Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
     gchar *prefix = "/syn/show/";
     if ( ! g_str_has_prefix ( path, prefix ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
@@ -186,10 +195,11 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (session && session->access_level<6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges");
+    if (!session || session->access_level<6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
+
     gchar *prefix = "/syn/del/";
     if ( ! g_str_has_prefix ( path, prefix ) )
      { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
@@ -231,15 +241,20 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_post_syn_edit ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                   SoupClientContext *client, gpointer user_data )
+ void Http_traiter_syn_update ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                SoupClientContext *client, gpointer user_data )
   { GBytes *request_brute;
     gchar requete[256];
     gsize taille;
 
+    if ( msg->method != SOUP_METHOD_POST )
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (session && session->access_level<6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges");
+    if (!session || session->access_level<6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
 
@@ -256,12 +271,12 @@
     gchar *page        = Normaliser_chaine ( Json_get_string( request, "page" ) );
     gchar *ppage       = Normaliser_chaine ( Json_get_string( request, "ppage" ) );
     gint  access_level = Json_get_int ( request, "access_level" );
-    if (session && access_level>=session->access_level) access_level = session->access_level-1;
+    if (access_level>=session->access_level) access_level = session->access_level-1;
 
     if ( Json_has_member ( request, "id" ) )                                                                       /* Edition */
      { g_snprintf( requete, sizeof(requete),
                   "UPDATE syns SET libelle='%s', page='%s', access_level='%d' WHERE id='%d' AND access_level<'%d'",
-                   libelle, page, access_level, Json_get_int(request,"id"), (session ? session->access_level : 10) );
+                   libelle, page, access_level, Json_get_int(request,"id"), session->access_level );
      }
     else
      {
@@ -307,17 +322,16 @@ end:
     gsize taille_buf;
     gint syn_id;
 
-    if (msg->method == SOUP_METHOD_POST)
-     {	Http_traiter_post_syn_edit ( server, msg, path, query, client, user_data );
-		     return;
-     }
-
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session || session->access_level<6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
 
     gchar *prefix = "/syn/edit/";
     if ( ! g_str_has_prefix ( path, prefix ) )

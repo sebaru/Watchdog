@@ -28,6 +28,7 @@
        document.getElementById("idNbrDlsBOOL").innerHTML = Response.nbr_dls_bool;
        document.getElementById("idNbrUsers").innerHTML = Response.nbr_users;
        document.getElementById("idNbrAuditLog").innerHTML = Response.nbr_audit_log;
+       document.getElementById("idNbrSessions").innerHTML = Response.nbr_sessions;
        document.getElementById("idNbrMsgs").innerHTML = Response.nbr_msgs;
        document.getElementById("idNbrHistoMsgs").innerHTML = Response.nbr_histo_msgs;
        document.getElementById("idArchDBUsername").innerHTML = Response.archdb_username;

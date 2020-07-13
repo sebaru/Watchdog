@@ -2,8 +2,8 @@
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Load_common ()
-  { document.getElementById("idUsername").innerHTML = sessionStorage.getItem("username");
-    document.getElementById("idHrefUsername").href = "/tech/user/"+sessionStorage.getItem("username");
+  { document.getElementById("idUsername").innerHTML = localStorage.getItem("username");
+    document.getElementById("idHrefUsername").href = "/tech/user/"+localStorage.getItem("username");
   }
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/

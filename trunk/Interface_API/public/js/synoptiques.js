@@ -1,25 +1,58 @@
  document.addEventListener('DOMContentLoaded', Load_syn, false);
 
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Valide_edit_synoptique ( syn_id )
+  { var xhr = new XMLHttpRequest;
+    xhr.open('POST', "/api/syn/update");
+    xhr.setRequestHeader('Content-type', 'application/json');
+    var json_request = JSON.stringify(
+       { id: syn_id,
+         page: $('#idModalSynEditPage').val(),
+         ppage: $('#idModalSynEditPPage').val(),
+         libelle: $('#idModalSynEditDescription').val(),
+         access_level: $('#idModalSynEditAccessLevel').val()
+       }
+     );
+    xhr.onreadystatechange = function( )
+     { if ( xhr.readyState != 4 ) return;
+       if (xhr.status == 200)
+        { $('#idTableSyn').DataTable().ajax.reload();
+          $('#idToastStatus').toast('show');
+        }
+       else { Show_Error( xhr.statusText ); }
+     };
+    xhr.send(json_request);
+  }
+
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Edit ( syn_id )
   { table = $('#idTableSyn').DataTable();
     console.debug ( table.cell( "#"+syn_id, "libelle:name" ).data() );
-    /*$('#idModalSynEditDescription').html ( table.cell( "#"+syn_id, "libelle:name" ).data() );*/
+    $('#idModalSynEditTitre').text ( table.cell( "#"+syn_id, "page:name" ).data() );
+    $('#idModalSynEditPage').val ( table.cell( "#"+syn_id, "page:name" ).data() );
+    $('#idModalSynEditPPage').val ( table.cell( "#"+syn_id, "ppage:name" ).data() );
+    $('#idModalSynEditPPage').attr ( "readonly", true );
     $('#idModalSynEditDescription').val(table.cell( "#"+syn_id, "libelle:name" ).data());
+    $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level")-1 );
+    $('#idModalSynEditAccessLevel').val(table.cell( "#"+syn_id, "access_level:name" ).data() );
+    $('#idModalSynEditValider').attr( "onclick", "Valide_edit_synoptique("+syn_id+")" );
     $('#idModalSynEdit').modal("show");
   }
 
-/********************************************* Chargement du synoptique 1 au démrrage *****************************************/
+/********************************************* Appelé au chargement de la page ************************************************/
  function Load_syn ()
   { console.log ("in load synoptique !");
     $('#idTableSyn').DataTable(
        { pageLength : 25,
          fixedHeader: true,
-         ajax: {	url : "/api/syn/list",	type : "GET", dataSrc: "synoptiques" },
+         ajax: {	url : "/api/syn/list",	type : "GET", dataSrc: "synoptiques",
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
          rowId: "id",
          columns: [ { "data": "id", "title":"#", "className": "text-center hidden-xs" },
-                    { "data": "access_level", name: "access_level", "title": "Level", "className": "hidden-xs" },
-                    { "data": "ppage", "title": "Parent", "className": "hidden-xs" },
-                    { "data": "page", "title":"Page" },
+                    { "data": "access_level", "name": "access_level", "title": "Level", "className": "text-center hidden-xs" },
+                    { "data": "ppage", "title": "Parent", "name": "ppage", "className": "hidden-xs" },
+                    { "data": "page", "name": "page", "title":"Page" },
                     { "data": "libelle", "name": "libelle", "title":"Description" },
                     { "data": null,
                       "render": function (item)
