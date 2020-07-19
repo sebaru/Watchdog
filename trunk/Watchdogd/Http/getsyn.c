@@ -37,6 +37,53 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
+ void Http_traiter_syn_clic ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                              SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+
+    if ( !session )
+     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
+       return;
+     }
+
+    gchar *prefix = "/syn/clic/";
+    if ( ! g_str_has_prefix ( path, prefix ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+       return;
+     }
+
+    if (!strlen (path+strlen(prefix)))
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+
+    gchar *temp = g_utf8_strup( path+strlen(prefix), -1 );
+    gchar **params = g_strsplit ( temp, "/", 2 );
+    g_free(temp);
+    if( ! (params && params[0] && params[1]) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       g_strfreev( params );
+       return;
+     }
+
+    gchar *tech_id  = Normaliser_chaine ( params[0] );
+    gchar *acronyme = Normaliser_chaine ( params[1] );
+    g_strfreev( params );
+
+    Envoyer_commande_dls_data ( tech_id, acronyme );
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
  void Http_traiter_syn_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                               SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
