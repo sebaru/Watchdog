@@ -5,7 +5,7 @@
   { console.log(" Clic sur motif " + svg.motif.libelle + " icone_id = " + svg.motif.icone +
                 "target techid/acro: " + svg.motif.clic_tech_id + ":" + svg.motif.clic_acronyme);
     var xhr = new XMLHttpRequest;
-    xhr.open('get',base_url + "/api/syn/clic/" + svg.motif.clic_tech_id + "/" + svg.motif.clic_acronyme, true);
+    xhr.open('get', "/api/syn/clic/" + svg.motif.clic_tech_id + "/" + svg.motif.clic_acronyme, true);
     xhr.onreadystatechange = function()
      { if ( ! (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) ) return;
      };
