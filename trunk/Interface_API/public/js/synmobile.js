@@ -22,13 +22,13 @@
          svg.motif = Motif;                                                            /* Sauvegarde du pointeur Motif source */
          if(Motif.icone==428) console.debug(Motif);
          svg.setAttribute( "id", "WTD-motif-"+svg.motif.id );
-         svg.setAttribute( "class", "WTDControl_bit_" + Motif.bitctrl );                        /* Affectation du control bit */
-         svg.setAttribute( "width", 80 );                                                       /* Affectation du control bit */
-         svg.setAttribute( "height", 80 );                                                      /* Affectation du control bit */
+         svg.setAttribute( "class", "WTDCtrl_bit_"+ svg.motif.tech_id+"_"+svg.motif.acronyme ); /* Affectation du control bit */
+         svg.setAttribute( "width", "100%" );                                                       /* Affectation du control bit */
+         svg.setAttribute( "height", "100%" );                                                      /* Affectation du control bit */
          svg.currentColor  = Motif.def_color;
          svg.currentState  = 0;
          svg.currentCligno = 0;
-         svg.ChangeState = function ( state, color, cligno )                                 /* Fonction de changement d'etat */
+         svg.SetState = function ( state, color, cligno )                                    /* Fonction de changement d'etat */
            { if (color==undefined) color=this.motif.def_color;
              targets = this.getElementsByClassName('WTD-ActiveFillColor');
              for (target of targets)
@@ -43,7 +43,7 @@
                 target.animate ( chg_matrice, chg_timing );                                                   /* Go Animate ! */
               }
              this.currentColor = color;
-             this.ChangeCligno ( cligno );
+             this.SetCligno ( cligno );
            }
                                                                                        /* ajout des objects de clignottements */
          var myanim=document.createElementNS("http://www.w3.org/2000/svg", 'animate');
@@ -71,7 +71,7 @@
                                      { if (svg.currentCligno==1) svg.getElementById("fadeout").beginElement(); }, false );
          svg.appendChild(myanim);
 
-         svg.ChangeCligno = function ( cligno )
+         svg.SetCligno = function ( cligno )
            { if (cligno==this.currentCligno) return;
              if (cligno==1)
               { svg.currentCligno=1;
@@ -84,7 +84,7 @@
                                                                                                   /* Connexion aux listeners  */
          svg.addEventListener ( "click", function (event) { Clic_sur_motif ( svg ) }, false);
          $("#idSVG-"+svg.motif.id).append(svg);                                               /* ajout du SVG dans le Top SVG */
-         setTimeout(function(){ svg.ChangeState ( 0, Motif.def_color, false ); }, 500);
+         setTimeout(function(){ svg.SetState ( 0, Motif.def_color, false ); }, 500);
        }
      };
     request.send(null);
@@ -111,4 +111,26 @@
         }
      }
     xhr.send();
+
+    var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/ws/live-motifs", "live-motifs");
+    WTDWebSocket.onopen = function (event)
+     { console.log("Connecté au websocket !");
+       this.send ( JSON.stringify( { syn_id: id } ) );
+     }
+    WTDWebSocket.onerror = function (event)
+     { console.log("Error au websocket !");
+       console.debug(event);
+     }
+    WTDWebSocket.onclose = function (event)
+     { console.log("Close au websocket !");
+       console.debug(event);
+     }
+    WTDWebSocket.onmessage = function (event)
+     { console.log("Recu WS Motif "+event.data);
+       var Response = JSON.parse(event.data);                                               /* Pointe sur <synoptique a=1 ..> */
+       Liste = document.getElementsByClassName("WTDCtrl_bit_" + Response.tech_id + "_" + Response.acronyme);
+       for (const svg of Liste)
+        { svg.SetState ( Response.mode, Response.color, Response.cligno ); }
+     }
+
   }

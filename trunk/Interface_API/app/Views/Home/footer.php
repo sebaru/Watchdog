@@ -3,7 +3,7 @@
 <footer class="page-footer bg-info mt-2 pt-0">
 
   <!-- Copyright -->
-  <div class="footer-copyright text-center py-2">© 2020 Copyright:
+  <div class="footer-copyright text-center py-2"><span>© </span>
     <a href="https://ABLS-habitat.fr/">ABLS-Habitat.fr</a>
   </div>
   <!-- Copyright -->
