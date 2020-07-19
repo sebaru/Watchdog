@@ -60,6 +60,26 @@ class Tech extends BaseController
 
    }
 /******************************************************************************************************************************/
+ public function atelier()
+   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
+     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+
+    echo view('Tech/header');
+    echo view('Tech/atelier');
+    echo view('Tech/footer');
+
+   }
+/******************************************************************************************************************************/
+ public function atelier_list()
+   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
+     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+
+    echo view('Tech/header');
+    echo view('Tech/atelier_list');
+    echo view('Tech/footer');
+
+   }
+/******************************************************************************************************************************/
  public function users_sessions()
    { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
      if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }

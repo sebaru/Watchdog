@@ -119,6 +119,7 @@
                       "render": function (item)
                        { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
                                 "    <button class='btn btn-outline-primary btn-sm' "+
+                                            "onclick=window.location.href='atelier/"+item.id+"' "+
                                             "data-toggle='tooltip' title='Ouvrir Atelier'>"+
                                             "<i class='fas fa-image'></i></button>"+
                                 "    <button class='btn btn-outline-secondary btn-sm' "+

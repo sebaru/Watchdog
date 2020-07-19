@@ -17,6 +17,15 @@ class Home extends BaseController
 
   }
 
+/******************************************************************************************************************************/
+ public function synmobile()
+  { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
+
+    echo view('Home/header');
+    echo view('Home/synmobile');
+    echo view('Home/footer');
+
+   }
 	//--------------------------------------------------------------------
 
 }

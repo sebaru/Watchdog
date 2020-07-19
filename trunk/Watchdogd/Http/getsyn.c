@@ -315,7 +315,7 @@
        return;
      }
 
-    gchar *prefix = "/syn/edit/";
+    gchar *prefix = "/syn/get/";
     if ( ! g_str_has_prefix ( path, prefix ) )
      { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
        return;
