@@ -23,8 +23,8 @@
          if(Motif.icone==428) console.debug(Motif);
          svg.setAttribute( "id", "WTD-motif-"+svg.motif.id );
          svg.setAttribute( "class", "WTDCtrl_bit_"+ svg.motif.tech_id+"_"+svg.motif.acronyme ); /* Affectation du control bit */
-         svg.setAttribute( "width", "100%" );                                                       /* Affectation du control bit */
-         svg.setAttribute( "height", "100%" );                                                      /* Affectation du control bit */
+         svg.setAttribute( "width", "60" );                                                     /* Affectation du control bit */
+         svg.setAttribute( "height", "60" );                                                    /* Affectation du control bit */
          svg.currentColor  = Motif.def_color;
          svg.currentState  = 0;
          svg.currentCligno = 0;
