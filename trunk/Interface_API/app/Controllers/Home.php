@@ -3,9 +3,10 @@
 class Home extends BaseController
 {
 	public function index()
-	{
-		return view('welcome_message');
-	}
+	 {	if ( session()->get('user') === NULL )         { return redirect()->to('/auth/login'); }
+    if ( session()->get('user')->access_level>=6 ) { return redirect()->to('/tech/dashboard'); }
+    return redirect()->to('/home/synmobile/1');
+	 }
 
 /******************************************************************************************************************************/
  public function archive()

@@ -5,7 +5,7 @@
   { console.log(" Clic sur motif " + svg.motif.libelle + " icone_id = " + svg.motif.icone +
                 "target techid/acro: " + svg.motif.clic_tech_id + ":" + svg.motif.clic_acronyme);
     var xhr = new XMLHttpRequest;
-    xhr.open('get',base_url + "syn/clic/" + svg.motif.clic_tech_id + "/" + svg.motif.clic_acronyme, true);
+    xhr.open('get',base_url + "/api/syn/clic/" + svg.motif.clic_tech_id + "/" + svg.motif.clic_acronyme, true);
     xhr.onreadystatechange = function()
      { if ( ! (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) ) return;
      };
@@ -105,7 +105,7 @@
         { var motif = Response.motifs[i];
           $('#idContainer').append("<div class='row border border-warning mb-1'>"+
                                      "<div id='idSVG-"+motif.id+"' class='col-3 p-1 justify-center' ></div>"+
-                                     "<div class='col-90 align-self-center' ><label class='text-light'>"+motif.libelle+"</label></div>"+
+                                     "<div class='col-90 align-self-center' ><p class='text-light'>"+motif.libelle+"</p></div>"+
                                    "</div>");
           Load_Motif_to_canvas ( motif );
         }

@@ -143,6 +143,8 @@
           <a class="dropdown-item" href="<?php echo site_url('tech/users_sessions'); ?>"><i class="fas fa-list text-info"></i> <span>Gestion des sessions</span></a>
           <a class="dropdown-item" href="<?php echo site_url('tech/log'); ?>"><i class="fas fa-database text-warning"></i> <span>Audit Log</span></a>
           <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="/home/synmobile/1"><i class="fas fa-home text-primary"></i> <span>Mode Client</span> </a>
+          <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
         </div>
       </li>
