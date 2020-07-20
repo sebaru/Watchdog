@@ -170,10 +170,10 @@
     </div>
     <div class="card-body">
         <ul>
-          <li><h6 class="card-text">ArchDB Username: <span id="idArchDBUsername">-</span></h6></li>
-          <li><h6 class="card-text">ArchDB Hostname: <span id="idArchDBHostname">-</span></h6></li>
-          <li><h6 class="card-text">ArchDB Port: <span id="idArchDBPort">-</span></h6></li>
-          <li><h6 class="card-text">ArchDB Database: <span id="idArchDBDatabase">-</span></h6></li>
+          <li><h6 class="card-text">DB Username: <span id="idArchDBUsername">-</span></h6></li>
+          <li><h6 class="card-text">DB Hostname: <span id="idArchDBHostname">-</span></h6></li>
+          <li><h6 class="card-text">DB Port: <span id="idArchDBPort">-</span></h6></li>
+          <li><h6 class="card-text">DB Database: <span id="idArchDBDatabase">-</span></h6></li>
         </ul>
 <!--<h3 class="card-text text-center"><strong>56</h3>-->
     </div>
