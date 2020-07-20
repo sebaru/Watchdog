@@ -508,7 +508,9 @@
        return;
      }
 
-    data = g_bytes_unref_to_data ( request, &taille );
+    data = g_bytes_unref_to_data ( request, &taille );                     /* Récupération du buffer et ajout d'un \0 d'arret */
+    data = g_try_realloc( data, taille + 1 );
+    data [taille] = 0;
     Query = json_from_string ( data, NULL );
     if (!Query)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: requete non Json '%s'", __func__, data );

@@ -9,8 +9,8 @@
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status != 200)
-        { document.getElementById("idModalDetail").innerHTML = "Une erreur inconnue est survenue.";
-          $('#idModalError').modal("show");
+        { Show_Error ( xhr.statusText );
+          return;
         }
        var Response = JSON.parse(xhr.responseText);
        console.debug(Response);
@@ -28,6 +28,7 @@
        document.getElementById("idNbrDlsBOOL").innerHTML = Response.nbr_dls_bool;
        document.getElementById("idNbrUsers").innerHTML = Response.nbr_users;
        document.getElementById("idNbrAuditLog").innerHTML = Response.nbr_audit_log;
+       document.getElementById("idNbrSessions").innerHTML = Response.nbr_sessions;
        document.getElementById("idNbrMsgs").innerHTML = Response.nbr_msgs;
        document.getElementById("idNbrHistoMsgs").innerHTML = Response.nbr_histo_msgs;
        document.getElementById("idArchDBUsername").innerHTML = Response.archdb_username;
@@ -46,8 +47,8 @@
      };
     xhr.send();
     document.getElementById("idUsername").innerHTML = sessionStorage.getItem("username");
-    Charger_une_courbe ( "idCourbeDlsTourParSec", "SYS", "DLS_TOUR_PER_SEC" );
-    Charger_une_courbe ( "idCourbeDlsBitParSec", "SYS", "DLS_BIT_PER_SEC" );
-    Charger_une_courbe ( "idCourbeDlsAttente", "SYS", "DLS_WAIT" );
-    Charger_une_courbe ( "idCourbeNbArchive", "SYS", "ARCH_REQUEST_NUMBER" );
+    Charger_une_courbe ( "idCourbeDlsTourParSec", "SYS", "DLS_TOUR_PER_SEC", "HOUR" );
+    Charger_une_courbe ( "idCourbeDlsBitParSec", "SYS", "DLS_BIT_PER_SEC", "HOUR" );
+    Charger_une_courbe ( "idCourbeDlsAttente", "SYS", "DLS_WAIT", "HOUR" );
+    Charger_une_courbe ( "idCourbeNbArchive", "SYS", "ARCH_REQUEST_NUMBER", "HOUR" );
   }

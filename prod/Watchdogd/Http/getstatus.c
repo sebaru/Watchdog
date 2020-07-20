@@ -27,7 +27,6 @@
 
  #include <string.h>
  #include <unistd.h>
- #include <libxml/xmlwriter.h>
 
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
@@ -89,6 +88,7 @@
     Json_add_int  ( builder, "length_msg", num );
 
     SQL_Select_to_JSON ( builder, NULL, "SELECT * FROM db_status");
+    Json_add_int    ( builder, "nbr_sessions", g_slist_length(Cfg_http.liste_http_clients) );
 
     Json_add_string ( builder, "db_username", Config.db_username );
     Json_add_string ( builder, "db_hostname", Config.db_host );

@@ -1,5 +1,6 @@
-    <div class="container-fluid">
-<div class="row justify-content-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+    <div class="container">
+
+<div class="row justify-content-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 row-cols-xl-3">
 <div class="col p-1">
   <div class="card h-100">
     <div class="card-header bg-highlight">
@@ -114,7 +115,7 @@
     <div class="card-header bg-highlight">
       <div class="row">
         <div class="col-4">
-          <i class="fas fa-2x fa-user text-primary"></i>
+          <i class="fas fa-2x fa-users text-primary"></i>
         </div>
         <div class="col-8 mt-1"><h5>Utilisateurs</h5></div>
       </div>
@@ -180,15 +181,21 @@
   </div>
 </div>
 
+</div>
 
-<div class="row justify-content-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
-   <div id="idCourbeDlsTourParSec" class="col"></div>
-   <div id="idCourbeDlsBitParSec" class="col"></div>
-   <div id="idCourbeDlsAttente" class="col"></div>
-   <div id="idCourbeNbArchive" class="col"></div>
- </div>
+<div class="row m-1 border border-info">
+   <canvas id="idCourbeDlsTourParSec" class="col"></canvas>
+</div>
+<div class="row m-1 border border-info">
+   <canvas id="idCourbeDlsBitParSec" class="col"></canvas>
+</div>
+<div class="row m-1 border border-info">
+   <canvas id="idCourbeDlsAttente" class="col"></canvas>
+</div>
+<div class="row m-1 border border-info">
+   <canvas id="idCourbeNbArchive" class="col"></canvas>
+</div>
 
-<script src="<?php echo base_url('js/archive.js')?>" type="text/javascript"></script>
 <script src="<?php echo base_url('js/dashboard.js')?>" type="text/javascript"></script>
 <!-- Container -->
 </div>

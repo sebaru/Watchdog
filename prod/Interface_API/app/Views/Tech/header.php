@@ -9,14 +9,8 @@
         <meta name="robots" content="noindex, nofollow">
         <link rel="icon" href="<?php echo base_url('/logo.svg')?>">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-        <script src="https://kit.fontawesome.com/1ca1f7ba56.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.21/fh-3.1.7/r-2.2.5/datatables.min.css"/>
         <style>
-        .input-group-prepend span { width: 50px;
-                                    background-color: #F1E413;
-                                    color: black;
-                                    border:0 !important;
-                                  }
-
         input:focus { outline: 0 0 0 0  !important;
                       box-shadow: 0 0 0 0 !important;
                     }
@@ -28,28 +22,43 @@
         .nav-link:hover { color: white;
                           background-color: #48BBC0;
                         }
-
       </style>
 
     </head>
 
     <body>
 
-<!--
- <div id="toast-error" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="position: absolute; top: 0; right: 0;">
+
+
+  <div id="idToastAlert" class="toast" role="status" style="position: absolute; bottom: 50px; right: 50px; z-index: 99">
    <div class="toast-header">
-     <i class="fas exclamation-circle"></i>
-     <strong class="mr-auto">Erreur !</strong>
-     <small>so sorry !</small>
+     <i class="fas fa-exclamation-circle"></i>
+     <strong class="mr-auto">Bootstrap</strong>
+     <!--<small>11 mins ago</small>-->
      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
        <span aria-hidden="true">&times;</span>
      </button>
    </div>
    <div class="toast-body">
-     This is a Error Toast.
+     Hello, world! This is a toast message.
    </div>
- </div>
--->
+</div>
+
+
+<div class="position-fixed" style="bottom: 3rem; right: 3rem; z-index:9999">
+  <div id="idToastStatus" data-delay="3000" class="toast bg-success" role="status">
+   <div class="toast-header">
+     <strong class="mr-auto"> Résultat de la commande</strong>
+     <!--<small>11 mins ago</small>-->
+     <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+       <span aria-hidden="true">&times;</span>
+     </button>
+   </div>
+   <div class="toast-header">
+     <i class="fas fa-check-circle text-success"></i><span>Succès !</span>
+   </div>
+  </div>
+</div>
 
 <div id="idModalError" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -86,7 +95,7 @@
           <i class="fas fa-wrench"></i> Configuration
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarCONFIG">
-          <a class="dropdown-item" href="<?php echo base_url('tech/syn'); ?>"> <i class="fas fa-image text-danger"></i> <span>Synoptiques</span> </a>
+          <a class="dropdown-item" href="<?php echo base_url('tech/synoptiques'); ?>"> <i class="fas fa-image text-danger"></i> <span>Synoptiques</span> </a>
           <a class="dropdown-item" href="<?php echo site_url('tech/dls'); ?>"> <i class="fas fa-code text-primary"></i> <span>Modules D.L.S</span> </a>
           <a class="dropdown-item" href="<?php echo site_url('tech/tableau'); ?>"> <i class="fas fa-chart-line text-secondary"></i> <span>Tableaux</span> </a>
         </div>
@@ -95,7 +104,7 @@
 
       <li class="nav-item dropdown">
         <a class="nav-link rounded dropdown-toggle" href="#" id="navbarINSTANCE" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Instance
+          <i class="fas fa-crown"></i> Instance
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarINSTANCE">
           <a class="dropdown-item" href="<?php echo site_url('tech/process'); ?>"><i class="fas fa-microchip text-primary"></i> <span>Gestion des Processus</span></a>
@@ -119,21 +128,24 @@
     </ul>
 
     <ul class="navbar-nav">
-    <form class="form-inline ml-2 my-2 my-lg-0">
+    <form class="form-inline ml-2">
       <input class="form-control mr-sm-2" type="search" placeholder="Rechercher" aria-label="Rechercher">
-      <button class="btn btn-success rounded my-2 my-sm-0" type="submit">Search</button> <!--btn-outline-success-->
+      <button class="btn btn-success rounded my-1 my-sm-0" type="submit">Search</button> <!--btn-outline-success-->
     </form>
       <li class="nav-item dropdown">
-        <a class="nav-link rounded dropdown-toggle" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link rounded dropdown-toggle ml-2" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-user"></i>
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUSER">
           <a class="dropdown-item" id="idHrefUsername" href="#"><i class="fas fa-user text-info"></i> <span id="idUsername">-</span></a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="<?php echo site_url('tech/users'); ?>"><i class="fas fa-users text-info"></i> <span>Gestion des utilisateurs</span></a>
+          <a class="dropdown-item" href="<?php echo site_url('tech/users'); ?>"><i class="fas fa-users-cog text-info"></i> <span>Gestion des utilisateurs</span></a>
+          <a class="dropdown-item" href="<?php echo site_url('tech/users_sessions'); ?>"><i class="fas fa-list text-info"></i> <span>Gestion des sessions</span></a>
           <a class="dropdown-item" href="<?php echo site_url('tech/log'); ?>"><i class="fas fa-database text-warning"></i> <span>Audit Log</span></a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="auth/logout"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
+          <a class="dropdown-item" href="/home/synmobile/1"><i class="fas fa-home text-primary"></i> <span>Mode Client</span> </a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
         </div>
       </li>
     </ul>
@@ -141,3 +153,4 @@
   </div>
 </nav>
 </header>
+

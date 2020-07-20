@@ -79,6 +79,44 @@
      }
     return(TRUE);
   }
+
+/******************************************************************************************************************************/
+/* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_traiter_log_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                    SoupClientContext *client, gpointer user_data)
+  { gchar *buf, chaine[256];
+    JsonBuilder *builder;
+    gsize taille_buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
+       return;
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+                                                                      /* Lancement de la requete de recuperation des messages */
+    g_snprintf( chaine, sizeof(chaine), "SELECT * FROM audit_log WHERE access_level<=%d LIMIT 2000", session->access_level );
+    SQL_Select_to_JSON ( builder, "logs", chaine );
+
+    buf = Json_get_buf (builder, &taille_buf);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
 /******************************************************************************************************************************/
 /* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
@@ -277,7 +315,7 @@
 
     Http_print_request ( server, msg, path, client );
 
-    name = Normaliser_chaine ( soup_client_context_get_auth_user(client) );                                 /* Formatage correct des chaines */
+    name = Normaliser_chaine ( soup_client_context_get_auth_user(client) );                  /* Formatage correct des chaines */
     if (!name)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Normalisation impossible", __func__ );
        return;
@@ -393,25 +431,31 @@ reload:
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer new Failed !", __func__ );
        goto end;
      }
-    soup_server_add_handler ( socket, "/connect",    Http_traiter_connect, NULL, NULL );
-    soup_server_add_handler ( socket, "/disconnect", Http_traiter_disconnect, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/del/",   Http_traiter_dls_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls",        Http_traiter_dls, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/list",   Http_traiter_syn_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/show/",  Http_traiter_syn_show, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/del/",   Http_traiter_syn_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/edit",   Http_traiter_syn_edit, NULL, NULL );
-    soup_server_add_handler ( socket, "/archive/get/", Http_traiter_archive_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/process",    Http_traiter_process, NULL, NULL );
-    soup_server_add_handler ( socket, "/status",     Http_traiter_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/log",        Http_traiter_log, NULL, NULL );
-    soup_server_add_handler ( socket, "/bus",        Http_traiter_bus, NULL, NULL );
-    soup_server_add_handler ( socket, "/memory",     Http_traiter_memory, NULL, NULL );
-    soup_server_add_handler ( socket, "/histo/alive",Http_traiter_histo_alive, NULL, NULL );
-    soup_server_add_handler ( socket, "/histo/ack",  Http_traiter_histo_ack, NULL, NULL );
+    soup_server_add_handler ( socket, "/connect",        Http_traiter_connect, NULL, NULL );
+    soup_server_add_handler ( socket, "/disconnect",     Http_traiter_disconnect, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/del/",       Http_traiter_dls_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls",            Http_traiter_dls, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/list",       Http_traiter_syn_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/show/",      Http_traiter_syn_show, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/del/",       Http_traiter_syn_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/get/",       Http_traiter_syn_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/set",        Http_traiter_syn_set, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/clic/",      Http_traiter_syn_clic, NULL, NULL );
+    soup_server_add_handler ( socket, "/archive/get/",   Http_traiter_archive_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/process",        Http_traiter_process, NULL, NULL );
+    soup_server_add_handler ( socket, "/status",         Http_traiter_status, NULL, NULL );
+    soup_server_add_handler ( socket, "/log/get",        Http_traiter_log_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/log",            Http_traiter_log, NULL, NULL );
+    soup_server_add_handler ( socket, "/bus",            Http_traiter_bus, NULL, NULL );
+    soup_server_add_handler ( socket, "/memory",         Http_traiter_memory, NULL, NULL );
+    soup_server_add_handler ( socket, "/users/list",     Http_traiter_users_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/users/kill",     Http_traiter_users_kill, NULL, NULL );
+    soup_server_add_handler ( socket, "/users/sessions", Http_traiter_users_sessions, NULL, NULL );
+    soup_server_add_handler ( socket, "/histo/alive",    Http_traiter_histo_alive, NULL, NULL );
+    soup_server_add_handler ( socket, "/histo/ack",      Http_traiter_histo_ack, NULL, NULL );
     gchar *protocols[] = { "live-motifs", "live-msgs" };
-    soup_server_add_websocket_handler ( socket, "/live-motifs", "*", protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
-    soup_server_add_websocket_handler ( socket, "/live-msgs",   "*", protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
+    soup_server_add_websocket_handler ( socket, "/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
+    soup_server_add_websocket_handler ( socket, "/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
 
     domain = soup_auth_domain_basic_new ( SOUP_AUTH_DOMAIN_REALM, "WatchdogServer",
                                           SOUP_AUTH_DOMAIN_BASIC_AUTH_CALLBACK, Http_authenticate_CB,
@@ -424,6 +468,7 @@ reload:
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/log",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/histo",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/bus",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/users",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/memory",
                                           NULL );
     soup_auth_domain_set_filter ( domain, Http_test_session_CB, NULL, NULL );

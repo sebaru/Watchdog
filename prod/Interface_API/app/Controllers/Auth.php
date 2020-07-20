@@ -16,7 +16,6 @@ class Auth extends BaseController
   { return redirect()->to('/auth/login');
   }
 
-
 /******************************************************************************************************************************/
  public function login()
   {
@@ -26,7 +25,8 @@ class Auth extends BaseController
        $source = curl_exec($ch);
        if ($source===FALSE)
         { curl_close($ch);
-          return redirect()->to('');
+          $this->response->setStatusCode(500, "Internal API Error");
+          return;
         }
        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
        if ($code == 401)
@@ -54,5 +54,10 @@ class Auth extends BaseController
        echo view('Auth/body', $data);
        echo view('Auth/footer', $data);
      }
+  }
+/******************************************************************************************************************************/
+ public function logout()
+  { session()->destroy();
+    return redirect()->to('/auth/login');
   }
 }

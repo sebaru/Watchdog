@@ -37,6 +37,53 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
+ void Http_traiter_syn_clic ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                              SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+
+    if ( !session )
+     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
+       return;
+     }
+
+    gchar *prefix = "/syn/clic/";
+    if ( ! g_str_has_prefix ( path, prefix ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+       return;
+     }
+
+    if (!strlen (path+strlen(prefix)))
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+
+    gchar *temp = g_utf8_strup( path+strlen(prefix), -1 );
+    gchar **params = g_strsplit ( temp, "/", 2 );
+    g_free(temp);
+    if( ! (params && params[0] && params[1]) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       g_strfreev( params );
+       return;
+     }
+
+    gchar *tech_id  = Normaliser_chaine ( params[0] );
+    gchar *acronyme = Normaliser_chaine ( params[1] );
+    g_strfreev( params );
+
+    Envoyer_commande_dls_data ( tech_id, acronyme );
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
  void Http_traiter_syn_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                               SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
@@ -47,6 +94,10 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
 
     if ( strcmp ( path, "/syn/list" ) )
      { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
@@ -61,7 +112,7 @@
 
     g_snprintf(chaine, sizeof(chaine), "SELECT syn.*,psyn.page as ppage FROM syns AS syn"
                                        " INNER JOIN syns as psyn ON psyn.id=syn.parent_id"
-                                       " WHERE syn.access_level<='%d'", session->access_level);
+                                       " WHERE syn.access_level<='%d' ORDER BY syn.page", session->access_level);
     if (SQL_Select_to_JSON ( builder, "synoptiques", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
@@ -88,7 +139,12 @@
 		     return;
      }
 
-    Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
     gchar *prefix = "/syn/show/";
     if ( ! g_str_has_prefix ( path, prefix ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
@@ -186,10 +242,11 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (session && session->access_level<6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges");
+    if (!session || session->access_level<6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
+
     gchar *prefix = "/syn/del/";
     if ( ! g_str_has_prefix ( path, prefix ) )
      { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
@@ -231,15 +288,20 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_post_syn_edit ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                   SoupClientContext *client, gpointer user_data )
+ void Http_traiter_syn_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                             SoupClientContext *client, gpointer user_data )
   { GBytes *request_brute;
     gchar requete[256];
     gsize taille;
 
+    if ( msg->method != SOUP_METHOD_POST )
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (session && session->access_level<6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges");
+    if (!session || session->access_level<6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
 
@@ -256,12 +318,12 @@
     gchar *page        = Normaliser_chaine ( Json_get_string( request, "page" ) );
     gchar *ppage       = Normaliser_chaine ( Json_get_string( request, "ppage" ) );
     gint  access_level = Json_get_int ( request, "access_level" );
-    if (session && access_level>=session->access_level) access_level = session->access_level-1;
+    if (access_level>=session->access_level) access_level = session->access_level-1;
 
     if ( Json_has_member ( request, "id" ) )                                                                       /* Edition */
      { g_snprintf( requete, sizeof(requete),
                   "UPDATE syns SET libelle='%s', page='%s', access_level='%d' WHERE id='%d' AND access_level<'%d'",
-                   libelle, page, access_level, Json_get_int(request,"id"), (session ? session->access_level : 10) );
+                   libelle, page, access_level, Json_get_int(request,"id"), session->access_level );
      }
     else
      {
@@ -270,27 +332,9 @@
                   "access_level='%d'",
                    libelle, page, ppage, access_level );
      }
-    if (SQL_Write (requete))
-     { gchar chaine[256];
-       gsize taille_buf;
-       JsonBuilder *builder = Json_create ();
-       if (!builder)
-        { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
-          goto end;
-        }
-       g_snprintf(chaine, sizeof(chaine), "SELECT s.*, ps.page AS ppage FROM syns AS s INNER JOIN syns AS ps ON s.parent_id = ps.id "
-                                          "WHERE s.page='%s'", page );
-       if (SQL_Select_to_JSON ( builder, NULL, chaine ) == FALSE)
-        { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-          g_object_unref(builder);
-          goto end;
-        }
-       gchar *buf = Json_get_buf (builder, &taille_buf);
-       soup_message_set_status (msg, SOUP_STATUS_OK);
-       soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-     }
+    if (SQL_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-end:
+
     g_free(libelle);
     g_free(page);
     g_free(ppage);
@@ -301,16 +345,11 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_syn_edit ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                              SoupClientContext *client, gpointer user_data )
+ void Http_traiter_syn_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                            SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
     gsize taille_buf;
     gint syn_id;
-
-    if (msg->method == SOUP_METHOD_POST)
-     {	Http_traiter_post_syn_edit ( server, msg, path, query, client, user_data );
-		     return;
-     }
 
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -318,8 +357,12 @@ end:
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session || session->access_level<6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
 
-    gchar *prefix = "/syn/edit/";
+    gchar *prefix = "/syn/get/";
     if ( ! g_str_has_prefix ( path, prefix ) )
      { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
        return;

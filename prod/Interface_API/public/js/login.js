@@ -9,17 +9,19 @@
     xhr.open('POST', "/auth/login", true);
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
-       if (xhr.status != 200)
-        { /*$('.toast').toast( { delay: 2000 } );
-          $('.toast').toast('show');*/
-          $('#id-error-detail').innerHtml = "Vos identifiants et mots de passe sont incorrects";
-          $('#id-modal-error').modal("show");
+       if (xhr.status == 200)
+        { var Response = JSON.parse(xhr.responseText);
+          console.debug(Response);
+          localStorage.setItem("username", Response.username );
+          localStorage.setItem("access_level", Response.access_level );
+          document.cookie = "wtd_session="+Response.wtd_session+"; path=/";
+          if (Response.access_level < 6) window.location.replace("/");
+                                    else window.location.replace("/tech");
         }
-       var Response = JSON.parse(xhr.responseText);
-       console.debug(Response);
-       sessionStorage.setItem("username", Response.username );
-       if (Response.access_level < 6) window.location.replace("/");
-                                 else window.location.replace("/tech");
+       else if (xhr.status == 401)
+        { Show_Error ( "Vos identifiants et mots de passe sont incorrects" ); }
+       else
+        { Show_Error ( xhr.statusText ); }
      };
     xhr.send(data);
   }

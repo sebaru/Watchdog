@@ -125,7 +125,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 										                    <span class="text"><b>Tour par Sec  : </b><?=$status->tour_par_sec?></span><br>
 									  	                  <span class="text"><b>Lenght i : </b><?=$status->length_i?></span><br>
 										                    <span class="text"><b>Lenght msg : </b><?=$status->length_msg?></span><br>
-										                    <span class="text"><b>Lenght msg repeat : </b><?=$status->length_msg_repeat?></span><br>
 									         							 		</li>
 									      								   </ul>
                         </div>

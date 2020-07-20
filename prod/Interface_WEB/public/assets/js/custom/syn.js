@@ -66,7 +66,7 @@
     xhr.send();
 
     if (window.location.hostname=="test.watchdog.fr")
-         var WTDWebSocket = new WebSocket("ws://test.watchdog.fr:5560/ws/live-motifs", "live-motifs");
+         var WTDWebSocket = new WebSocket("ws://test.watchdog.fr/ws/live-motifs", "live-motifs");
     else var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/ws/live-motifs", "live-motifs");
     WTDWebSocket.onopen = function (event)
      { console.log("Connecté au websocket !");

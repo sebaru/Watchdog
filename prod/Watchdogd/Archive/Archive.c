@@ -143,7 +143,7 @@
     else if (Partage->com_arch.Thread_run == FALSE)                                      /* Si administratively DOWN, on sort */
      { if ( last_log + 600 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "%s: Thread is down. Dropping '%s:%s'", __func__, Partage->com_arch.max_buffer_size, tech_id, nom );
+                   "%s: Thread is down. Dropping '%s:%s'=%f", __func__, tech_id, nom, valeur );
           last_log = Partage->top;
         }
        return;
