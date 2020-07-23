@@ -1,6 +1,8 @@
 <div class="container-fluid">
 
- <div class ="row float-right mb-1 mr-2">
+ <h3>Liste des Synoptiques</h3>
+
+ <div class ="row justify-items-center mb-1">
        <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
  </div>
 

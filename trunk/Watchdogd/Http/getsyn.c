@@ -450,7 +450,6 @@
  void Http_traiter_syn_update_motifs ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                        SoupClientContext *client, gpointer user_data )
   { GBytes *request_brute;
-    gchar requete[256];
     gsize taille;
 
     if ( msg->method != SOUP_METHOD_POST )

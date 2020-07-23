@@ -1,0 +1,136 @@
+<div class="container-fluid">
+
+ <div class="row m-2">
+ <h3>Liste des Mnémoniques du <strong id="idTitle">D.L.S</strong></h3>
+
+ <div class ="ml-auto">
+              <?php echo anchor('admin/dls/sourceedit/'.$tech_id, '<i class="fa fa-code"></i> Voir la source DLS', array('class' => 'btn btn-primary')); ?>
+             <?php echo anchor('admin/dls/run/'.$tech_id, '<i class="fa fa-eye"></i> Voir le RUN', array('class' => 'btn btn-primary')); ?>
+       <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
+ </div>
+</div>
+
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#idTabEntreeTor">
+                  <img style="width: 30px" data-toggle="tooltip" title="Entrées TOR"
+                       src="https://icons.abls-habitat.fr/assets/gif/Entree.png" />Entrées TOR</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#entreeana">
+                  <img style="width: 30px" data-toggle="tooltip" title="Entrées ANA"
+                       src="https://icons.abls-habitat.fr/assets/gif/Entree_Analogique.png" />Entrées ANA</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#sortietor">
+                  <img style="width: 30px" data-toggle="tooltip" title="Sorties TOR"
+                       src="https://icons.abls-habitat.fr/assets/gif/Sortie.png" />Sorties TOR</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#sortieana">
+                  <img style="width: 30px" data-toggle="tooltip" title="Sorties ANA"
+                       src="https://icons.abls-habitat.fr/assets/gif/Sortie_Analogique.png" />Sorties ANA</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#registre">
+                  <img style="width: 30px" data-toggle="tooltip" title="Registres"
+                       src="https://icons.abls-habitat.fr/assets/gif/Calculatrice.png" />Registres</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#cptimp">
+                  <img style="width: 30px" data-toggle="tooltip" title="Compteurs d'impulsion"
+                       src="https://icons.abls-habitat.fr/assets/gif/Front_montant.png" />Compteurs d'impulsion</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#cpth">
+                  <img style="width: 30px" data-toggle="tooltip" title="Compteurs horaire"
+                       src="https://icons.abls-habitat.fr/assets/gif/Compteur_horaire.png" />Compteurs horaire</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tempo">
+                  <img style="width: 30px" data-toggle="tooltip" title="Temporisations"
+                       src="https://icons.abls-habitat.fr/assets/gif/Sablier.png" />Tempos</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#horloge">
+                  <img style="width: 30px" data-toggle="tooltip" title="Horloge"
+                       src="https://icons.abls-habitat.fr/assets/gif/Calendar.png" />Horloges</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#messages">
+                  <img style="width: 30px" data-toggle="tooltip" title="Messages"
+                       src="https://icons.abls-habitat.fr/assets/gif/Message.png" />Messages</a></li>
+          </ul>
+
+  <div id="idTabEntreeTor" class="tab-pane fade in table-responsive-lg mt-1">
+    <table id="idTableEntreeTor" class="table table-striped table-bordered table-hover">
+      <thead class="thead-dark">
+				  </thead>
+			   <tbody>
+      </tbody>
+    </table>
+  </div>
+
+
+<!-- Container -->
+</div>
+
+
+<div id="idModalSynEdit" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content ">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalSynEditTitre"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div class="form-group">
+					     <div class="input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text">Parent</span>
+						     </div>
+						     <input id="idModalSynEditPPage" type="text" class="form-control" placeholder="Parent du synoptique">
+     					</div>
+        </div>
+
+        <div class="form-row form-group">
+
+					     <div class="col-7 input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text">Page</span>
+						     </div>
+						     <input id="idModalSynEditPage" type="text" class="form-control" placeholder="Titre du synoptique">
+     					</div>
+
+					     <div class="col-5 input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text"><i class="fas fa-star"></i></span>
+						     </div>
+						     <input id="idModalSynEditAccessLevel" type="number" class="form-control" min=0 max=9 placeholder="Level">
+     					</div>
+
+        </div>
+
+        <div class="form-group">
+					     <div class="input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text">Description</span>
+						     </div>
+						     <input id="idModalSynEditDescription" type="text" class="form-control" placeholder="Description du synoptique">
+     					</div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
+        <button id="idModalSynEditValider" type="button" class="btn btn-primary" data-dismiss="modal"><i class="fas fa-save"></i> Valider</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="idModalSynDel" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content ">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title text-justify"><i class="fas fa-trash"></i> <span id="idModalSynDelTitre"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="idModalSynDelMessage">Une erreur est survenue !</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
+        <button id="idModalSynDelValider" type="button" class="btn btn-danger" data-dismiss="modal"><i class="fas fa-trash"></i> Valider</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="<?php echo base_url('js/mnemos.js')?>" type="text/javascript"></script>

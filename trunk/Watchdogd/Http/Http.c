@@ -435,6 +435,7 @@ reload:
     soup_server_add_handler ( socket, "/disconnect",     Http_traiter_disconnect, NULL, NULL );
     soup_server_add_handler ( socket, "/dls/del/",       Http_traiter_dls_del, NULL, NULL );
     soup_server_add_handler ( socket, "/dls",            Http_traiter_dls, NULL, NULL );
+    soup_server_add_handler ( socket, "/mnemos/list/",   Http_traiter_mnemos_list, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/list",       Http_traiter_syn_list, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/show/",      Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/del/",       Http_traiter_syn_del, NULL, NULL );
@@ -468,6 +469,7 @@ reload:
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/process",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/log",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/histo",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/mnemos",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/bus",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/users",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/memory",

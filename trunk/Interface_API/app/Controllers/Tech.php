@@ -97,4 +97,14 @@ class Tech extends BaseController
     echo view('Tech/users_list');
     echo view('Tech/footer');
    }
+/******************************************************************************************************************************/
+ public function mnemos( $tech_id )
+   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
+     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+
+    $data['tech_id'] = $tech_id;
+    echo view('Tech/header');
+    echo view('Tech/mnemos', $data);
+    echo view('Tech/footer');
+   }
 }
