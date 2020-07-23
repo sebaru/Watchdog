@@ -441,6 +441,7 @@ reload:
     soup_server_add_handler ( socket, "/syn/get/",       Http_traiter_syn_get, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/set",        Http_traiter_syn_set, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/clic/",      Http_traiter_syn_clic, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/update_motifs", Http_traiter_syn_update_motifs, NULL, NULL );
     soup_server_add_handler ( socket, "/archive/get/",   Http_traiter_archive_get, NULL, NULL );
     soup_server_add_handler ( socket, "/process",        Http_traiter_process, NULL, NULL );
     soup_server_add_handler ( socket, "/status",         Http_traiter_status, NULL, NULL );

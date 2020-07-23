@@ -264,37 +264,61 @@
 
     var json_request = JSON.stringify(Motifs);
     var xhr = new XMLHttpRequest;
-    xhr.open('post',base_url + "admin/syn/update_motifs", true);
+    xhr.open('POST', "/api/syn/update_motifs", true);
     xhr.setRequestHeader('Content-type', 'application/json');
     xhr.onreadystatechange = function()
-     { if ( ! (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) ) return;
+     { if ( xhr.readyState != 4 ) return;
+       if (xhr.status == 200)
+        { $('#idToastStatus').toast('show'); }
+       else if (xhr.status == 401)
+        { Show_Error ( "Vos identifiants et mots de passe sont incorrects" ); }
+       else
+        { Show_Error ( xhr.statusText ); }
      };
     xhr.send(json_request);
 
     var json_request = JSON.stringify(Liens);
     var xhr = new XMLHttpRequest;
-    xhr.open('post',base_url + "admin/syn/update_liens", true);
+    xhr.open('post', "/api/syn/update_liens", true);
     xhr.setRequestHeader('Content-type', 'application/json');
     xhr.onreadystatechange = function()
-     { if ( ! (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) ) return;
+     { if ( xhr.readyState != 4 ) return;
+       if (xhr.status == 200)
+        { $('#idToastStatus').toast('show'); }
+       else if (xhr.status == 401)
+        { Show_Error ( "Vos identifiants et mots de passe sont incorrects" ); }
+       else
+        { Show_Error ( xhr.statusText ); }
      };
     xhr.send(json_request);
 
     var json_request = JSON.stringify(Rectangles);
     var xhr = new XMLHttpRequest;
-    xhr.open('post',base_url + "admin/syn/update_rectangles", true);
+    xhr.open('post', "/api/syn/update_rectangles", true);
     xhr.setRequestHeader('Content-type', 'application/json');
     xhr.onreadystatechange = function()
-     { if ( ! (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) ) return;
+     { if ( xhr.readyState != 4 ) return;
+       if (xhr.status == 200)
+        { $('#idToastStatus').toast('show'); }
+       else if (xhr.status == 401)
+        { Show_Error ( "Vos identifiants et mots de passe sont incorrects" ); }
+       else
+        { Show_Error ( xhr.statusText ); }
      };
     xhr.send(json_request);
 
     var json_request = JSON.stringify(Comments);
     var xhr = new XMLHttpRequest;
-    xhr.open('post',base_url + "admin/syn/update_comments", true);
+    xhr.open('post', "/api/syn/update_comments", true);
     xhr.setRequestHeader('Content-type', 'application/json');
     xhr.onreadystatechange = function()
-     { if ( ! (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) ) return;
+     { if ( xhr.readyState != 4 ) return;
+       if (xhr.status == 200)
+        { $('#idToastStatus').toast('show'); }
+       else if (xhr.status == 401)
+        { Show_Error ( "Vos identifiants et mots de passe sont incorrects" ); }
+       else
+        { Show_Error ( xhr.statusText ); }
      };
     xhr.send(json_request);
 
@@ -374,9 +398,20 @@
     svg_selected.UpdateSVGMatrix();
   }
 /********************************************* Appeler quand l'utilisateur selectionne un motif *******************************/
- function Clic_sur_motif ( svg, event )
-  { if (svg_selected !== undefined)
-     { console.log("svg_selected =" + svg_selected.motid);
+ function svgPoint(element, x, y)
+  { var pt = document.getElementById("TopSVG").createSVGPoint();
+    pt.x = x;
+    pt.y = y;
+    return pt.matrixTransform(element.getScreenCTM().inverse());
+  }
+
+/********************************************* Appeler quand l'utilisateur selectionne un motif *******************************/
+ function Down_sur_motif ( svg, event )
+  { console.log(" Down sur motif " + svg.motif.libelle + " offsetx = " + event.clientX + " offsetY="+event.clientY );
+    svg.motif.selected = true;
+
+    if (svg_selected != undefined)
+     { console.log("svg_selected =" + svg_selected.motif);
        if (svg.motif.id != svg_selected.motif.id) Deselectionner();
      }
 
@@ -396,28 +431,22 @@
     document.getElementById("WTD-ctrl-panel-motif-color").value         = svg.motif.def_color;
     svg_selected = svg;
     svg_selected.ChangeState ( 0, "#0000dd", 0 );
-  }
 
-/********************************************* Appeler quand l'utilisateur selectionne un motif *******************************/
- function Down_sur_motif ( svg, event )
-  { console.log(" Down sur motif " + svg.motif.libelle + " offsetx = " + event.offsetX + " offsetY="+event.offsetY );
-    svg.motif.eventdown = true;
-    svg.motif.eventdownx = event.offsetX;
-    svg.motif.eventdowny = event.offsetY;
   }
 /********************************************* Appeler quand l'utilisateur selectionne un motif *******************************/
  function Move_sur_motif ( svg, event )
-  { if (svg.motif.eventdown)
-     { console.log(" Clic sur motif " + svg.motif.libelle + " offsetx = " + event.offsetX + " offsetY="+event.offsetY );
-       svg.motif.posx = (parseInt(svg.motif.posx) + event.offsetX - svg.motif.eventdownx).toString();
-       svg.motif.posy = (parseInt(svg.motif.posy) + event.offsetY - svg.motif.eventdowny).toString();
+  { if (svg.motif.selected)
+     { console.log(" Clic sur motif " + svg.motif.libelle + " offsetx = " + event.clientX + " offsetY="+event.clientY );
+       target = svgPoint ( document.getElementById("TopSVG"), event.clientX, event.clientY );
+       svg.motif.posx = target.x.toString();
+       svg.motif.posy = target.y.toString();
        svg.UpdateSVGMatrix ();
      }
   }
 /********************************************* Appeler quand l'utilisateur selectionne un motif *******************************/
  function Up_sur_motif ( svg, event )
-  { console.log(" Up sur motif " + svg.motif.libelle + " offsetx = " + event.offsetX + " offsetY="+event.offsetY );
-    svg.motif.eventdown = false;
+  { console.log(" Up sur motif " + svg.motif.libelle + " offsetx = " + event.clientX + " offsetY="+event.clientY );
+    svg.motif.selected = false;
   }
 
 /********************************************* Prepare un objet SVG et l'affiche sur la page **********************************/
@@ -501,7 +530,7 @@
                                                                                                   /* Connexion aux listeners  */
          svg.addEventListener ( "click", function (event) { Clic_sur_motif ( svg ) }, false);
          svg.addEventListener ( "mouseup", function (event) { Up_sur_motif( svg, event ) }, false);
-         svg.addEventListener ( "mouseleave", function (event) { Up_sur_motif( svg, event ) }, false);
+         /*svg.addEventListener ( "mouseleave", function (event) { Up_sur_motif( svg, event ) }, false);*/
          svg.addEventListener ( "mousedown", function (event) { Down_sur_motif( svg, event ) }, false);
          svg.addEventListener ( "mousemove", function (event) { Move_sur_motif( svg, event ) }, false);
          svg.UpdateSVGMatrix();                     /* Mise a jour du SVG en fonction des parametres de positionnements Motif */

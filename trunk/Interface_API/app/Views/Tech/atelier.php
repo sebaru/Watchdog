@@ -24,9 +24,10 @@
 
 -->
   			<div class="col-md-2 border border-info">
-       <div class="">
-         <button class="btn btn-block btn-success m-2" onclick="Sauvegarder_synoptique()"><i class="fas fa-save"> </i>Sauvegarder</button>
-       </span>
+       <div class="btn-group btn-block m-1" role="group">
+         <button class="btn btn-success" onclick="Sauvegarder_synoptique()"><i class="fas fa-save"> </i></button>
+         <button class="btn btn-outline-danger ml-1" onclick="Supprimer_svg()"><i class="fas fa-trash"> </i></button>
+       </div>
     			<div class="" id="WTD-ctrl-panel"><p>Rien n'est sélectionné</p></div>
      </div>
   </div>
