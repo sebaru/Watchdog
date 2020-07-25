@@ -14,37 +14,38 @@
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#idTabEntreeTor">
                   <img style="width: 30px" data-toggle="tooltip" title="Entrées TOR"
                        src="https://icons.abls-habitat.fr/assets/gif/Entree.png" />Entrées TOR</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#entreeana">
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabEntreeAna">
                   <img style="width: 30px" data-toggle="tooltip" title="Entrées ANA"
                        src="https://icons.abls-habitat.fr/assets/gif/Entree_Analogique.png" />Entrées ANA</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#sortietor">
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieTor">
                   <img style="width: 30px" data-toggle="tooltip" title="Sorties TOR"
                        src="https://icons.abls-habitat.fr/assets/gif/Sortie.png" />Sorties TOR</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#sortieana">
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieAna">
                   <img style="width: 30px" data-toggle="tooltip" title="Sorties ANA"
                        src="https://icons.abls-habitat.fr/assets/gif/Sortie_Analogique.png" />Sorties ANA</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#registre">
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabRegistre">
                   <img style="width: 30px" data-toggle="tooltip" title="Registres"
                        src="https://icons.abls-habitat.fr/assets/gif/Calculatrice.png" />Registres</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#cptimp">
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabCptImp">
                   <img style="width: 30px" data-toggle="tooltip" title="Compteurs d'impulsion"
                        src="https://icons.abls-habitat.fr/assets/gif/Front_montant.png" />Compteurs d'impulsion</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#cpth">
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabCptH">
                   <img style="width: 30px" data-toggle="tooltip" title="Compteurs horaire"
                        src="https://icons.abls-habitat.fr/assets/gif/Compteur_horaire.png" />Compteurs horaire</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tempo">
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabTempo">
                   <img style="width: 30px" data-toggle="tooltip" title="Temporisations"
                        src="https://icons.abls-habitat.fr/assets/gif/Sablier.png" />Tempos</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#horloge">
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabHorloge">
                   <img style="width: 30px" data-toggle="tooltip" title="Horloge"
                        src="https://icons.abls-habitat.fr/assets/gif/Calendar.png" />Horloges</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#messages">
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabMessages">
                   <img style="width: 30px" data-toggle="tooltip" title="Messages"
                        src="https://icons.abls-habitat.fr/assets/gif/Message.png" />Messages</a></li>
           </ul>
 
-  <div id="idTabEntreeTor" class="tab-pane fade in table-responsive-lg mt-1">
-    <table id="idTableEntreeTor" class="table table-striped table-bordered table-hover">
+<div class="tab-content">
+  <div id="idTabEntreeTor" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+    <table id="idTableEntreeTor" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
 				  </thead>
 			   <tbody>
@@ -52,6 +53,88 @@
     </table>
   </div>
 
+  <div id="idTabSortieTor" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+    <table id="idTableSortieTor" class="table table-striped table-bordered table-hover w-100">
+      <thead class="thead-dark">
+				  </thead>
+			   <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="idTabEntreeAna" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+    <table id="idTableEntreeAna" class="table table-striped table-bordered table-hover w-100">
+      <thead class="thead-dark">
+				  </thead>
+			   <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="idTabSortieAna" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+    <table id="idTableSortieAna" class="table table-striped table-bordered table-hover w-100">
+      <thead class="thead-dark">
+				  </thead>
+			   <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="idTabCptH" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+    <table id="idTableCptH" class="table table-striped table-bordered table-hover w-100">
+      <thead class="thead-dark">
+				  </thead>
+			   <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="idTabCptImp" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+    <table id="idTableCptImp" class="table table-striped table-bordered table-hover w-100">
+      <thead class="thead-dark">
+				  </thead>
+			   <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="idTabRegistre" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+    <table id="idTableRegistre" class="table table-striped table-bordered table-hover w-100">
+      <thead class="thead-dark">
+				  </thead>
+			   <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="idTabTempo" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+    <table id="idTableTempo" class="table table-striped table-bordered table-hover w-100">
+      <thead class="thead-dark">
+				  </thead>
+			   <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="idTabMessage" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+    <table id="idTableMessage" class="table table-striped table-bordered table-hover w-100">
+      <thead class="thead-dark">
+				  </thead>
+			   <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="idTabHorloge" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+    <table id="idTableHorloge" class="table table-striped table-bordered table-hover w-100">
+      <thead class="thead-dark">
+				  </thead>
+			   <tbody>
+      </tbody>
+    </table>
+  </div>
+
+</div> <!-- tab content -->
 
 <!-- Container -->
 </div>

@@ -79,9 +79,21 @@
     g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_DI AS m WHERE m.tech_id='%s'", tech_id );
     SQL_Select_to_JSON ( builder, "DI", chaine );
 
+    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_DO AS m WHERE m.tech_id='%s'", tech_id );
+    SQL_Select_to_JSON ( builder, "DO", chaine );
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_AI AS m WHERE m.tech_id='%s'", tech_id );
+    SQL_Select_to_JSON ( builder, "AI", chaine );
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_AO AS m WHERE m.tech_id='%s'", tech_id );
+    SQL_Select_to_JSON ( builder, "AO", chaine );
+
     g_free(tech_id);
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
+    SoupMessageHeaders *headers;
+    g_object_get ( G_OBJECT(msg), "response-headers", &headers, NULL );
+    soup_message_headers_append ( headers, "Cache-Control", "private, max-age=10" );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
