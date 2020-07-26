@@ -549,15 +549,9 @@
 reload:
     memset( &Cfg_ups, 0, sizeof(Cfg_ups) );                                         /* Mise a zero de la structure de travail */
     Cfg_ups.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
+    Thread_init ( "W-UPS", lib, NOM_THREAD, "Manage UPS Module" );
     Cfg_ups.lib->TID = pthread_self();                                                      /* Sauvegarde du TID pour le pere */
     Ups_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
-
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
-    Cfg_ups.lib->Thread_run = TRUE;                                                                     /* Le thread tourne ! */
-
-    g_snprintf( Cfg_ups.lib->admin_prompt, sizeof(Cfg_ups.lib->admin_prompt), "ups" );
-    g_snprintf( Cfg_ups.lib->admin_help,   sizeof(Cfg_ups.lib->admin_help),   "Manage UPS Modules" );
-
 
     if (!Cfg_ups.enable)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
@@ -637,9 +631,6 @@ end:
        lib->Thread_reload = FALSE;
        goto reload;
      }
-
-    Cfg_ups.lib->Thread_run = FALSE;                                                            /* Le thread ne tourne plus ! */
-    Cfg_ups.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */
-    pthread_exit(GINT_TO_POINTER(0));
+    Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

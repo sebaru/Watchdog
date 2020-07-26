@@ -392,6 +392,7 @@
     struct ZMQUEUE *zmq_from_slave, *zmq_from_bus;
 
     prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
+    Modifier_configDB ( "msrv", "thread_version", VERSION );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
@@ -499,6 +500,7 @@
     struct ZMQUEUE *zmq_from_master, *zmq_from_bus;
 
     prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
+    Modifier_configDB ( "msrv", "thread_version", VERSION );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 

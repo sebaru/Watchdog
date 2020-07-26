@@ -394,18 +394,11 @@ end:
   { struct ZMQUEUE *zmq_msg;
     gint retour;
 
-    prctl(PR_SET_NAME, "W-IMSGS", 0, 0, 0 );
 reload:
     memset( &Cfg_imsgs, 0, sizeof(Cfg_imsgs) );                                     /* Mise a zero de la structure de travail */
     Cfg_imsgs.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
-    Cfg_imsgs.lib->TID = pthread_self();                                                    /* Sauvegarde du TID pour le pere */
+    Thread_init ( "W-IMSGS", lib, NOM_THREAD, "Manage Instant Messaging system (libstrophe)" );
     Imsgs_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
-
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE,
-              "%s: Demarrage v%s . . . TID = %p", __func__, VERSION, pthread_self() );
-
-    g_snprintf( Cfg_imsgs.lib->admin_prompt, sizeof(Cfg_imsgs.lib->admin_prompt), NOM_THREAD );
-    g_snprintf( Cfg_imsgs.lib->admin_help,   sizeof(Cfg_imsgs.lib->admin_help),   "Manage Instant Messaging system (libstrophe)" );
 
     if (!Cfg_imsgs.enable)
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE,
@@ -477,15 +470,11 @@ reconnect:
     Close_zmq ( zmq_msg );
 
 end:
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     if (lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;
      }
-
-    Cfg_imsgs.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */
-    Cfg_imsgs.lib->TID = 0;                                                   /* On indique au master que le thread est mort. */
-    pthread_exit(GINT_TO_POINTER(0));
+    Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

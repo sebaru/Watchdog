@@ -161,11 +161,13 @@
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
  extern struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_fichier );
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
+ extern void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *prompt, gchar *description );
+ extern void Thread_end ( struct LIBRAIRIE *lib );
 
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */
- 
+
  extern void Gerer_arrive_Ixxx_dls ( void );                                                           /* Dans distrib_Ixxx.c */
 
  #endif

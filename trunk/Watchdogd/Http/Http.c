@@ -415,16 +415,11 @@
     SoupAuthDomain *domain;
     gint last_pulse = 0;
 
-    prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
 reload:
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Cfg_http.lib->TID = pthread_self();                                                     /* Sauvegarde du TID pour le pere */
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
+    Thread_init ( "W-HTTP", lib, NOM_THREAD, "Manage Web Services with external Devices" );
     Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
-
-    g_snprintf( Cfg_http.lib->admin_prompt, sizeof(Cfg_http.lib->admin_prompt), NOM_THREAD );
-    g_snprintf( Cfg_http.lib->admin_help,   sizeof(Cfg_http.lib->admin_help),   "Manage Web Services with external Devices" );
 
     SoupServer *socket = soup_server_new("server-header", "Watchdogd HTTP Server", NULL);
     if (!socket)
@@ -605,8 +600,6 @@ end:
        lib->Thread_reload = FALSE;
        goto reload;
      }
-    Cfg_http.lib->Thread_run = FALSE;                                                           /* Le thread ne tourne plus ! */
-    Cfg_http.lib->TID = 0;                                                    /* On indique au master que le thread est mort. */
-    pthread_exit(GINT_TO_POINTER(0));
+    Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

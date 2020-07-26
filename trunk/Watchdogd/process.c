@@ -28,6 +28,7 @@
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
+ #include <sys/prctl.h>
  #include <unistd.h>
  #include <stdlib.h>
  #include <dirent.h>
@@ -44,8 +45,35 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
+/* Entrée: Le nom du thread, son niveau de log                                                                                */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *prompt, gchar *description )
+  { prctl(PR_SET_NAME, pr_name, 0, 0, 0 );
+
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
+    Modifier_configDB ( prompt, "thread_version", VERSION );
+    lib->TID = pthread_self();                                                              /* Sauvegarde du TID pour le pere */
+    lib->Thread_run = TRUE;                                                                             /* Le thread tourne ! */
+
+    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), prompt );
+    g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   description );
+  }
+/******************************************************************************************************************************/
+/* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
+/* Entrée: Le nom du thread, son niveau de log                                                                                */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ void Thread_end ( struct LIBRAIRIE *lib )
+  { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    lib->Thread_run = FALSE;                                                                    /* Le thread ne tourne plus ! */
+    lib->TID = 0;                                                             /* On indique au master que le thread est mort. */
+    pthread_exit(GINT_TO_POINTER(0));
+  }
+/******************************************************************************************************************************/
 /* Start_librairie: Demarre le thread en paremetre                                                                            */
-/* EntrÃée: La structure associÃée au thread                                                                                    */
+/* Entrée: La structure associée au thread                                                                                    */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Start_librairie ( struct LIBRAIRIE *lib )
