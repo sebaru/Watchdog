@@ -1,7 +1,7 @@
 <div class="container-fluid">
 
  <div class="row m-2">
- <h3>Liste des Mnémoniques du <strong id="idTitle">D.L.S</strong></h3>
+ <h3>Liste des Mnémoniques - '<strong id="idTitle"></strong>'</h3>
 
  <div class ="ml-auto">
               <?php echo anchor('admin/dls/sourceedit/'.$tech_id, '<i class="fa fa-code"></i> Voir la source DLS', array('class' => 'btn btn-primary')); ?>
