@@ -1,10 +1,24 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
+ var Instances;
 
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { vars = window.location.pathname.split('/');
     console.log ("in load page !");
     $('#idTitle').html(vars[4]);
+
+    var xhr = new XMLHttpRequest;
+    xhr.open('GET', "/api/instance/list", true);
+    xhr.onreadystatechange = function()
+     { if ( xhr.readyState != 4 ) return;
+       if (xhr.status != 200)
+        { Show_Error ( xhr.statusText );
+          return;
+        }
+       var Response = JSON.parse(xhr.responseText);
+       Instance = Response.instance;
+     };
+    xhr.send();
 
 
     var xhr = new XMLHttpRequest;

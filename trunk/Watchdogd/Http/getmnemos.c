@@ -58,7 +58,6 @@
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
        return;
      }
-
     if (!strlen (path+strlen(prefix)))
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
        return;
@@ -91,9 +90,6 @@
     g_free(tech_id);
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
-    SoupMessageHeaders *headers;
-    g_object_get ( G_OBJECT(msg), "response-headers", &headers, NULL );
-    soup_message_headers_append ( headers, "Cache-Control", "private, max-age=10" );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
