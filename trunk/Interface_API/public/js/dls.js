@@ -29,8 +29,12 @@
   }
 
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Go_to_dls_source_edit ( dls_id )
-  { window.location = "/tech/dls_source/"+dls_id;
+ function Go_to_dls_source_edit ( tech_id )
+  { window.location = "/tech/dls_source/"+tech_id;
+  }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function Go_to_dls_mnemos ( tech_id )
+  { window.location = "/tech/mnemos/"+tech_id;
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
@@ -57,8 +61,11 @@
               "render": function (item)
                 { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
                          "<button class='btn btn-outline-primary btn-sm' data-toggle='tooltip' title='Voir le code' "+
-                         "onclick=Go_to_dls_source_edit('"+item.id+"')>"+
+                         "onclick=Go_to_dls_source_edit('"+item.tech_id+"')>"+
                          "<i class='fas fa-code'></i></button>"+
+                         "<button class='btn btn-outline-primary btn-sm' data-toggle='tooltip' title='Voir les mnemos' "+
+                         "onclick=Go_to_dls_mnemos('"+item.tech_id+"')>"+
+                         "<i class='fas fa-book'></i></button>"+
                          "<button class='btn btn-danger btn-block btn-sm' data-toggle='tooltip' title='Supprimer le plugin' "+
                          "onclick=Show_Modal_Dls_Del('"+item.id+"')>"+
                          "<i class='fas fa-trash'></i></button>"+

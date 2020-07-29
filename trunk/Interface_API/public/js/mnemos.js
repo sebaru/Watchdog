@@ -5,7 +5,7 @@
  function Load_page ()
   { vars = window.location.pathname.split('/');
     console.log ("in load page !");
-    $('#idTitle').html(vars[4]);
+    $('#idTitle').html(vars[3]);
 
     var xhr = new XMLHttpRequest;
     xhr.open('GET', "/api/instance/list", true);
@@ -22,7 +22,7 @@
 
 
     var xhr = new XMLHttpRequest;
-    xhr.open('GET', "/api/mnemos/list/"+vars[4], true);
+    xhr.open('GET', "/api/mnemos/list/"+vars[3], true);
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status != 200)
