@@ -36,6 +36,10 @@
  function Go_to_dls_mnemos ( tech_id )
   { window.location = "/tech/mnemos/"+tech_id;
   }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function Go_to_dls_run ( tech_id )
+  { window.location = "/tech/run/"+tech_id;
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTableDLS').DataTable(
@@ -66,6 +70,9 @@
                          "<button class='btn btn-outline-primary btn-sm' data-toggle='tooltip' title='Voir les mnemos' "+
                          "onclick=Go_to_dls_mnemos('"+item.tech_id+"')>"+
                          "<i class='fas fa-book'></i></button>"+
+                         "<button class='btn btn-outline-primary btn-sm' data-toggle='tooltip' title='Voir le RUN' "+
+                         "onclick=Go_to_dls_run('"+item.tech_id+"')>"+
+                         "<i class='fas fa-eye'></i></button>"+
                          "<button class='btn btn-danger btn-block btn-sm' data-toggle='tooltip' title='Supprimer le plugin' "+
                          "onclick=Show_Modal_Dls_Del('"+item.id+"')>"+
                          "<i class='fas fa-trash'></i></button>"+
