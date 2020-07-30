@@ -30,12 +30,12 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Dls_Del ( dls_id )
   { table = $('#idTableDLS').DataTable();
+    selection = table.ajax.json().plugins.filter( function(item) { return item.id==dls_id } )[0];
     $('#idModalDLSDelTitre').text ( "Détruire le module ?" );
     $('#idModalDLSDelMessage').html("Etes-vous sur de vouloir supprimer le module DLS "+
                                     "et toutes ses dépendances (Mnémoniques, ...) ?<hr>"+
-                                    "<strong>"+table.cell( "#"+dls_id, "tech_id:name" ).data()+" - "+
-                                    table.cell( "#"+dls_id, "shortname:name" ).data()+
-                                    "</strong>" );
+                                    "<strong>"+selection.tech_id + " - " + selection.shortname + "</strong>" + "<br>" + selection.name
+                                   );
     $('#idModalDLSDelValider').attr( "onclick", "Valider_Dls_Del("+dls_id+")" );
     $('#idModalDLSDel').modal("show");
   }
@@ -52,24 +52,26 @@
          columns:
           [ { "data": "ppage", "title":"PPage", "className": "align-middle hidden-xs text-center" },
             { "data": "page", "title":"Page", "className": "align-middle hidden-xs text-center" },
-            { "data": "tech_id", "title":"TechID", "name":"tech_id", "className": "align-middle text-center" },
+            { "data": null, "className": "align-middle hidden-xs text-center",
+              "render": function (item)
+                { return( "<a href='/tech/dls_source/"+item.tech_id+"'>"+item.tech_id+"</a>" );
+                },
+              "title":"tech_id", "orderable": true
+            },
             { "data": "package", "title":"Package", "className": "align-middle hidden-xs" },
-            { "data": "shortname", "title":"Nom court", "name":"shortname", "className": "align-middle text-center" },
-            { "data": "name", "title":"Libellé", "className": "align-middle hidden-xs" },
             { "data": null, "className": "align-middle hidden-xs",
               "render": function (item)
-                { if (item.actif==true)
-                   { return( Bouton ( "success", "Désactiver le plugin",
-                                      "Dls_disable_plugin", item.tech_id, "Actif" ) );
-                   }
-                  else
-                   { return( Bouton ( "outline-secondary", "Activer le plugin",
-                                      "Dls_enable_plugin", item.tech_id, "Désactivé" ) );
-                   }
+                { return( "<a href='/tech/dls_source/"+item.tech_id+"'>"+item.shortname+"</a>" );
                 },
-              "title":"Started", "orderable": true
+              "title":"Nom court", "orderable": true
             },
-            { "data": null, "className": "align-middle ",
+            { "data": null, "className": "align-middle hidden-xs",
+              "render": function (item)
+                { return( "<a href='/tech/dls_source/"+item.tech_id+"'>"+item.name+"</a>" );
+                },
+              "title":"Libellé", "orderable": true
+            },
+            { "data": null, "className": "align-middle hidden-xs text-center",
               "render": function (item)
                 { if (item.actif==true)
                    { return( Bouton ( "success", "Désactiver le plugin",
@@ -84,11 +86,7 @@
             },
             { "data": null, "className": "align-middle hidden-xs",
               "render": function (item)
-                { console.log ( Bouton ( compil_status[item.compil_status][1],
-                                  "Statut de la compilation", null, null,
-                                  compil_status[item.compil_status][0]
-                                ) );
-                  return( Bouton ( compil_status[item.compil_status][1],
+                { return( Bouton ( compil_status[item.compil_status][1],
                                   "Statut de la compilation", null, null,
                                   compil_status[item.compil_status][0]
                                 )

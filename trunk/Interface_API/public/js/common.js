@@ -37,6 +37,10 @@
    return( result );
   }
 
+ function Lien ( target, texte )
+  { return( "<a href='"+target+"'>"+texte+"</a>" );
+  }
+
  function Badge ( color, tooltip, texte )
   { return("<span "+
            "class='badge badge-pill badge-"+color+"' "+
