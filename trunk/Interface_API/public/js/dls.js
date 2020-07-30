@@ -54,20 +54,20 @@
             { "data": "page", "title":"Page", "className": "align-middle hidden-xs text-center" },
             { "data": null, "className": "align-middle hidden-xs text-center",
               "render": function (item)
-                { return( "<a href='/tech/dls_source/"+item.tech_id+"'>"+item.tech_id+"</a>" );
+                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) );
                 },
               "title":"tech_id", "orderable": true
             },
             { "data": "package", "title":"Package", "className": "align-middle hidden-xs" },
             { "data": null, "className": "align-middle hidden-xs",
               "render": function (item)
-                { return( "<a href='/tech/dls_source/"+item.tech_id+"'>"+item.shortname+"</a>" );
+                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.shortname ) );
                 },
               "title":"Nom court", "orderable": true
             },
             { "data": null, "className": "align-middle hidden-xs",
               "render": function (item)
-                { return( "<a href='/tech/dls_source/"+item.tech_id+"'>"+item.name+"</a>" );
+                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.name ) );
                 },
               "title":"Libellé", "orderable": true
             },
