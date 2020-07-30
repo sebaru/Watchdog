@@ -1,5 +1,17 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
+ var compil_status = [ [ "Never compiled yet", "info" ],
+                       [ "Database Export failed", "outline-danger" ],
+                       [ "Error loading source file", "outline-danger" ],
+                       [ "Error loading log file", "outline-danger" ],
+                       [ "Syntax error", "outline-danger" ],
+                       [ "Error Fork GCC", "outline-danger" ],
+                       [ "Warnings", "outline-warning" ],
+                       [ "OK", "success" ],
+                       [ "Functions are missing<br>Need compiling again", "outline-danger" ],
+                       [ "Error, plugin is setting bits he does not own", "outline-danger" ],
+                       [ "Error", "outline-danger" ]
+                     ];
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Dls_Del ( dls_id )
   { var xhr = new XMLHttpRequest;
@@ -28,18 +40,6 @@
     $('#idModalDLSDel').modal("show");
   }
 
-/********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Go_to_dls_source_edit ( tech_id )
-  { window.location = "/tech/dls_source/"+tech_id;
-  }
-/********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Go_to_dls_mnemos ( tech_id )
-  { window.location = "/tech/mnemos/"+tech_id;
-  }
-/********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Go_to_dls_run ( tech_id )
-  { window.location = "/tech/run/"+tech_id;
-  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTableDLS').DataTable(
@@ -50,28 +50,65 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "id", "title":"#", "className": "text-center" },
-            { "data": "ppage", "title":"PPage", "className": "hidden-xs text-center" },
-            { "data": "page", "title":"Page", "className": "hidden-xs text-center" },
-            { "data": "tech_id", "title":"TechID", "name":"tech_id", "className": "text-center" },
-            { "data": "package", "title":"Package", "className": "hidden-xs" },
-            { "data": "shortname", "title":"Nom court", "name":"shortname", "className": "text-center" },
-            { "data": "name", "title":"Libellé", "className": "hidden-xs" },
-            { "data": "actif", "title":"Enable", "className": "hidden-xs" },
-            { "data": "compil_status", "title":"Compil_status", "className": "hidden-xs" },
-            { "data": "nbr_compil", "title":"Nbr Compil", "className": "hidden-xs" },
-            { "data": "nbr_ligne", "title":"Nbr Ligne", "className": "hidden-xs" },
+          [ { "data": "ppage", "title":"PPage", "className": "align-middle hidden-xs text-center" },
+            { "data": "page", "title":"Page", "className": "align-middle hidden-xs text-center" },
+            { "data": "tech_id", "title":"TechID", "name":"tech_id", "className": "align-middle text-center" },
+            { "data": "package", "title":"Package", "className": "align-middle hidden-xs" },
+            { "data": "shortname", "title":"Nom court", "name":"shortname", "className": "align-middle text-center" },
+            { "data": "name", "title":"Libellé", "className": "align-middle hidden-xs" },
+            { "data": null, "className": "align-middle hidden-xs",
+              "render": function (item)
+                { if (item.actif==true)
+                   { return( Bouton ( "success", "Désactiver le plugin",
+                                      "Dls_disable_plugin", item.tech_id, "Actif" ) );
+                   }
+                  else
+                   { return( Bouton ( "outline-secondary", "Activer le plugin",
+                                      "Dls_enable_plugin", item.tech_id, "Désactivé" ) );
+                   }
+                },
+              "title":"Started", "orderable": true
+            },
+            { "data": null, "className": "align-middle ",
+              "render": function (item)
+                { if (item.actif==true)
+                   { return( Bouton ( "success", "Désactiver le plugin",
+                                      "Dls_disable_plugin", item.tech_id, "Actif" ) );
+                   }
+                  else
+                   { return( Bouton ( "outline-secondary", "Activer le plugin",
+                                      "Dls_enable_plugin", item.tech_id, "Désactivé" ) );
+                   }
+                },
+              "title":"Started", "orderable": true
+            },
+            { "data": null, "className": "align-middle hidden-xs",
+              "render": function (item)
+                { console.log ( Bouton ( compil_status[item.compil_status][1],
+                                  "Statut de la compilation", null, null,
+                                  compil_status[item.compil_status][0]
+                                ) );
+                  return( Bouton ( compil_status[item.compil_status][1],
+                                  "Statut de la compilation", null, null,
+                                  compil_status[item.compil_status][0]
+                                )
+                        );
+                },
+              "title":"Compil", "orderable": true
+            },
+            { "data": "nbr_compil", "title":"Nbr Compil", "className": "align-middle text-center hidden-xs" },
+            { "data": "nbr_ligne", "title":"Nbr Lignes", "className": "align-middle text-center hidden-xs" },
             { "data": null,
               "render": function (item)
                 { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
                          "<button class='btn btn-outline-primary btn-sm' data-toggle='tooltip' title='Voir le code' "+
-                         "onclick=Go_to_dls_source_edit('"+item.tech_id+"')>"+
+                         "onclick=Redirect('/tech/dls_source/"+item.tech_id+"')>"+
                          "<i class='fas fa-code'></i></button>"+
                          "<button class='btn btn-outline-primary btn-sm' data-toggle='tooltip' title='Voir les mnemos' "+
-                         "onclick=Go_to_dls_mnemos('"+item.tech_id+"')>"+
+                         "onclick=Redirect('/tech/mnemos/"+item.tech_id+"')>"+
                          "<i class='fas fa-book'></i></button>"+
                          "<button class='btn btn-outline-primary btn-sm' data-toggle='tooltip' title='Voir le RUN' "+
-                         "onclick=Go_to_dls_run('"+item.tech_id+"')>"+
+                         "onclick=Redirect('/tech/run/"+item.tech_id+"')>"+
                          "<i class='fas fa-eye'></i></button>"+
                          "<button class='btn btn-danger btn-block btn-sm' data-toggle='tooltip' title='Supprimer le plugin' "+
                          "onclick=Show_Modal_Dls_Del('"+item.id+"')>"+

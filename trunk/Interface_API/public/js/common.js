@@ -14,6 +14,36 @@
     $('#idModalError').modal("show");
   }
 
+/********************************************* Redirige la page ***************************************************************/
+ function Redirect ( url )
+  { window.location = url;
+  }
+
+ function Bouton ( color, tooltip, clic_func, key, texte )
+  { if (clic_func !== null)
+     { result = "<button "+
+                "class='btn btn-"+color+" btn-block btn-sm' "+
+                "data-toggle='tooltip' title='"+tooltip+"' "+
+                "onclick="+clic_func+"('"+key+"')>"+texte+
+                "</button>";
+     }
+   else
+    { result =  "<button "+
+                "class='btn btn-"+color+" btn-block btn-sm' "+
+                "data-toggle='tooltip' title='"+tooltip+"' "+
+                ">"+texte+
+                "</button>";
+    }
+   return( result );
+  }
+
+ function Badge ( color, tooltip, texte )
+  { return("<span "+
+           "class='badge badge-pill badge-"+color+"' "+
+           "data-toggle='tooltip' title='"+tooltip+"'>"+texte+
+           "</span>" );
+  }
+
 /********************************* Chargement d'une courbe dans u synoptique 1 au démrrage ************************************/
  function Charger_une_courbe ( idChart, tech_id, acronyme, period )
   { var xhr = new XMLHttpRequest;
