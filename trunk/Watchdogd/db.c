@@ -1817,18 +1817,22 @@
                                           "(SELECT COUNT(*) FROM audit_log) AS nbr_audit_log" );
     Lancer_requete_SQL ( db, requete );
 
-    g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW dictionnaire AS "
-                                          "SELECT 'AI' AS type_bit,tech_id,acronyme,libelle from mnemos_AI UNION "
-                                          "SELECT 'DI' AS type_bit,tech_id,acronyme,libelle from mnemos_DI UNION "
-                                          "SELECT 'DO' AS type_bit,tech_id,acronyme,libelle from mnemos_DO UNION "
-                                          "SELECT 'AO' AS type_bit,tech_id,acronyme,libelle from mnemos_AO UNION "
-                                          "SELECT 'BOOL' AS type_bit,tech_id,acronyme,libelle from mnemos_BOOL UNION "
-                                          "SELECT 'CH' AS type_bit,tech_id,acronyme,libelle from mnemos_CH UNION "
-                                          "SELECT 'CI' AS type_bit,tech_id,acronyme,libelle from mnemos_CI UNION "
-                                          "SELECT 'HORLOGE' AS type_bit,tech_id,acronyme,libelle from mnemos_HORLOGE UNION "
-                                          "SELECT 'TEMPO' AS type_bit,tech_id,acronyme,libelle from mnemos_Tempo UNION "
-                                          "SELECT 'REGISTRE' AS type_bit,tech_id,acronyme,libelle from mnemos_R UNION "
-                                          "SELECT 'VISUEL' AS type_bit,tech_id,acronyme,libelle from syns_motifs" );
+    g_snprintf( requete, sizeof(requete),
+       "CREATE OR REPLACE VIEW dictionnaire AS "
+       "SELECT 'AI' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_AI UNION "
+       "SELECT 'DI' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_DI UNION "
+       "SELECT 'DO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_DO UNION "
+       "SELECT 'AO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_AO UNION "
+       "SELECT 'BOOL' AS type_bit, type AS type_bit_int,tech_id,acronyme,libelle from mnemos_BOOL UNION "
+       "SELECT 'CH' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_CH UNION "
+       "SELECT 'CI' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_CI UNION "
+       "SELECT 'HORLOGE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_HORLOGE UNION "
+       "SELECT 'TEMPO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_Tempo UNION "
+       "SELECT 'REGISTRE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_R UNION "
+       "SELECT 'VISUEL' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from syns_motifs",
+        MNEMO_ENTREE_ANA, MNEMO_ENTREE, MNEMO_SORTIE, MNEMO_SORTIE_ANA, MNEMO_CPTH, MNEMO_CPT_IMP, MNEMO_HORLOGE,
+        MNEMO_TEMPO, MNEMO_REGISTRE, -1
+      );
     Lancer_requete_SQL ( db, requete );
 
 
