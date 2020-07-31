@@ -1,9 +1,9 @@
 <div class="container-fluid">
 
+ <div class="row m-2">
  <h3>Liste des Synoptiques</h3>
-
- <div class ="row justify-items-center mb-1">
-       <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
+ <div class ="ml-auto">
+ </div>
  </div>
 
 <div class="table-responsive-lg">
