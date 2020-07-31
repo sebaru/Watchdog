@@ -163,6 +163,40 @@
           }
         );
 
+       $('#idTableRegistre').DataTable(
+          { pageLength : 50,
+            fixedHeader: true,
+            data: Response.DO,
+            rowId: "id",
+            columns: [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
+                       { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
+                       { "data": "libelle",    "title":"Libellé",    "className": "" },
+                       { "data": "dst_host",   "title":"dst_host",   "className": "hidden-xs" },
+                       { "data": "dst_thread", "title":"dst_thread", "className": "hidden-xs" },
+                       { "data": "dst_tag",    "title":"dst_tag",    "className": "hidden-xs" },
+                       { "data": "dst_param1", "title":"dst_param1", "className": "hidden-xs" },
+                       { "data": null,
+                         "render": function (item)
+                          { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
+                                   "    <button class='btn btn-outline-primary btn-sm' "+
+                                               "onclick=window.location.href='atelier/"+item.id+"' "+
+                                               "data-toggle='tooltip' title='Ouvrir Atelier'>"+
+                                               "<i class='fas fa-image'></i></button>"+
+                                   "    <button class='btn btn-danger btn-sm' "+
+                                               "onclick=Show_Modal_Del("+item.acronyme+") "+
+                                               "data-toggle='tooltip' title='Supprimer le mnémonique'>"+
+                                               "<i class='fas fa-trash'></i></button>"+
+                                   "</div>"
+                                  )
+                           },
+                         "title":"Actions", "orderable": false, "className":"text-center"
+                       }
+                     ],
+            /*order: [ [0, "desc"] ],*/
+            responsive: true,
+          }
+        );
+
 
      };
     xhr.send();

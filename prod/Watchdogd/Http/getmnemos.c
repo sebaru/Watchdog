@@ -87,6 +87,27 @@
     g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_AO AS m WHERE m.tech_id='%s'", tech_id );
     SQL_Select_to_JSON ( builder, "AO", chaine );
 
+    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_R AS m WHERE m.tech_id='%s'", tech_id );
+    SQL_Select_to_JSON ( builder, "REGISTRE", chaine );
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_CI AS m WHERE m.tech_id='%s'", tech_id );
+    SQL_Select_to_JSON ( builder, "CI", chaine );
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_CH AS m WHERE m.tech_id='%s'", tech_id );
+    SQL_Select_to_JSON ( builder, "CH", chaine );
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_HORLOGE AS m WHERE m.tech_id='%s'", tech_id );
+    SQL_Select_to_JSON ( builder, "HORLOGE", chaine );
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_TEMPO AS m WHERE m.tech_id='%s'", tech_id );
+    SQL_Select_to_JSON ( builder, "TEMPO", chaine );
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_BOOL AS m WHERE m.tech_id='%s'", tech_id );
+    SQL_Select_to_JSON ( builder, "BOOL", chaine );
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from msgs AS m WHERE m.tech_id='%s'", tech_id );
+    SQL_Select_to_JSON ( builder, "MSG", chaine );
+
     g_free(tech_id);
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
