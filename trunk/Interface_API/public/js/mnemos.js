@@ -166,32 +166,28 @@
        $('#idTableRegistre').DataTable(
           { pageLength : 50,
             fixedHeader: true,
-            data: Response.DO,
+            data: Response.REGISTRE,
             rowId: "id",
-            columns: [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
-                       { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                       { "data": "libelle",    "title":"Libellé",    "className": "" },
-                       { "data": "dst_host",   "title":"dst_host",   "className": "hidden-xs" },
-                       { "data": "dst_thread", "title":"dst_thread", "className": "hidden-xs" },
-                       { "data": "dst_tag",    "title":"dst_tag",    "className": "hidden-xs" },
-                       { "data": "dst_param1", "title":"dst_param1", "className": "hidden-xs" },
-                       { "data": null,
-                         "render": function (item)
-                          { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
-                                   "    <button class='btn btn-outline-primary btn-sm' "+
-                                               "onclick=window.location.href='atelier/"+item.id+"' "+
-                                               "data-toggle='tooltip' title='Ouvrir Atelier'>"+
-                                               "<i class='fas fa-image'></i></button>"+
-                                   "    <button class='btn btn-danger btn-sm' "+
-                                               "onclick=Show_Modal_Del("+item.acronyme+") "+
-                                               "data-toggle='tooltip' title='Supprimer le mnémonique'>"+
-                                               "<i class='fas fa-trash'></i></button>"+
-                                   "</div>"
-                                  )
-                           },
-                         "title":"Actions", "orderable": false, "className":"text-center"
+            columns:
+              [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
+                { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
+                { "data": "libelle",    "title":"Libellé",    "className": "" },
+                { "data": "valeur",     "title":"Valeur",   "className": "hidden-xs" },
+                { "data": "unite",      "title":"Unité",    "className": "hidden-xs" },
+                { "data": null, "className": "",
+                  "title":"Archivage", "orderable": true,
+                  "render": function (item)
+                    { if (item.archivage==true)
+                       { return( Bouton ( "success", "Archivage activé", null, null, "Actif" ) );
                        }
-                     ],
+                      else
+                       { return( Bouton ( "outline-secondary", "Archivage désactivé", null, null, "Inactif" ) );
+                       }
+                    },
+                },
+                { "data": "map_question_vocale",    "title":"Question Vocale",    "className": "hidden-xs" },
+                { "data": "map_reponse_vocale",    "title":"Reponse Vocale",    "className": "hidden-xs" }
+              ],
             /*order: [ [0, "desc"] ],*/
             responsive: true,
           }
