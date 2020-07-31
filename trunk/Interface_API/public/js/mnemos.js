@@ -1,6 +1,15 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
  var Instances;
 
+ function Go_to_source ()
+  { vars = window.location.pathname.split('/');
+    Redirect ( "/tech/dls_source/"+vars[3] );
+  }
+
+ function Go_to_run ()
+  { vars = window.location.pathname.split('/');
+    Redirect ( "/tech/run/"+vars[3] );
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { vars = window.location.pathname.split('/');
@@ -172,7 +181,7 @@
               [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
                 { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
                 { "data": "libelle",    "title":"Libellé",    "className": "" },
-                { "data": "valeur",     "title":"Valeur",   "className": "hidden-xs" },
+                { "data": "valeur",     "title":"Valeur en base",   "className": "hidden-xs" },
                 { "data": "unite",      "title":"Unité",    "className": "hidden-xs" },
                 { "data": null, "className": "",
                   "title":"Archivage", "orderable": true,
