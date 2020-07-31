@@ -635,20 +635,11 @@
   { struct CMD_TYPE_HISTO *histo, histo_buf;
     struct ZMQUEUE *zmq_msg;
     struct ZMQUEUE *zmq_from_bus;
-
-    prctl(PR_SET_NAME, "W-SMSG", 0, 0, 0 );
 reload:
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
-    Cfg_smsg.lib->TID = pthread_self();                                                      /* Sauvegarde du TID pour le pere */
+    Thread_init ( "W-SMSG", lib, NOM_THREAD, "Manage SMS system (libgammu)" );
     Smsg_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
-
-    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
-              "%s: Demarrage %s . . . TID = %p (thread %s)", __func__, VERSION, pthread_self(), NOM_THREAD );
-    Cfg_smsg.lib->Thread_run = TRUE;                                                                     /* Le thread tourne ! */
-
-    g_snprintf( Cfg_smsg.lib->admin_prompt, sizeof(Cfg_smsg.lib->admin_prompt), NOM_THREAD );
-    g_snprintf( Cfg_smsg.lib->admin_help,   sizeof(Cfg_smsg.lib->admin_help),   "Manage SMS system (libgammu)" );
 
     if (!Cfg_smsg.enable)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
@@ -711,14 +702,11 @@ reload:
     Close_zmq ( Cfg_smsg.zmq_to_master );
 
 end:
-    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     if (lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;
      }
-    Cfg_smsg.lib->Thread_run = FALSE;
-    Cfg_smsg.lib->TID = 0;                                                    /* On indique au master que le thread est mort. */
-    pthread_exit(GINT_TO_POINTER(0));
+    Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

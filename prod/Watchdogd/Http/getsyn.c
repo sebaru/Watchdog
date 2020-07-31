@@ -393,4 +393,83 @@
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
+/******************************************************************************************************************************/
+/* Http_get_syn_save_un_motif: Enregistre un motif en base de données                                                         */
+/* Entrée: les données JSON recu de la requete HTTP                                                                           */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_syn_save_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct HTTP_CLIENT_SESSION *session = user_data;
+    gchar requete[256];
+    if ( ! (Json_has_member ( element, "id" ) &&
+            Json_has_member ( element, "posx" ) &&
+            Json_has_member ( element, "posy" ) &&
+            Json_has_member ( element, "def_color" ) &&
+            Json_has_member ( element, "tech_id" ) &&
+            Json_has_member ( element, "acronyme" ) &&
+            Json_has_member ( element, "clic_tech_id" ) &&
+            Json_has_member ( element, "clic_acronyme" ) &&
+            Json_has_member ( element, "angle" ) &&
+            Json_has_member ( element, "gestion" ) &&
+            Json_has_member ( element, "libelle" ) &&
+            Json_has_member ( element, "scale" )
+           ) )
+     { return; }
+
+    gchar *libelle = Normaliser_chaine( Json_get_string ( element, "libelle" ) );
+    gchar *tech_id  = Normaliser_chaine( Json_get_string ( element, "tech_id" ) );
+    gchar *acronyme = Normaliser_chaine( Json_get_string ( element, "acronyme" ) );
+    gchar *clic_tech_id  = Normaliser_chaine( Json_get_string ( element, "clic_tech_id" ) );
+    gchar *clic_acronyme = Normaliser_chaine( Json_get_string ( element, "clic_acronyme" ) );
+    gchar *def_color = Normaliser_chaine( Json_get_string ( element, "def_color" ) );
+
+    g_snprintf( requete, sizeof(requete),
+               "UPDATE syns_motifs AS m INNER JOIN syns AS s ON m.syn_id = s.id SET m.libelle='%s', "
+               "m.tech_id='%s', m.acronyme='%s', "
+               "m.clic_tech_id='%s', m.clic_acronyme='%s', "
+               "m.def_color='%s', m.angle='%s', m.scale='%s', m.gestion='%d' "
+               " WHERE id='%d' AND s.access_level<'%d'",
+                libelle, tech_id, acronyme, clic_tech_id, clic_acronyme, def_color,
+                Json_get_string( element, "angle" ), Json_get_string(element,"scale"), Json_get_int(element,"gestion"),
+                Json_get_int(element,"id"), session->access_level );
+
+    g_free(libelle);
+    g_free(tech_id);
+    g_free(acronyme);
+    g_free(clic_tech_id);
+    g_free(clic_acronyme);
+    g_free(def_color);
+
+    SQL_Write (requete);
+ }
+/******************************************************************************************************************************/
+/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_syn_update_motifs ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                       SoupClientContext *client, gpointer user_data )
+  { GBytes *request_brute;
+    gsize taille;
+
+    if ( msg->method != SOUP_METHOD_POST )
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( Json_has_member ( request, "motifs" ) )
+     { json_array_foreach_element ( Json_get_array ( request, "motifs" ), Http_syn_save_un_motif, session ); }
+
+    json_node_unref(request);
+  }
+
 /*----------------------------------------------------------------------------------------------------------------------------*/

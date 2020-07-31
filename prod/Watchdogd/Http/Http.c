@@ -415,16 +415,11 @@
     SoupAuthDomain *domain;
     gint last_pulse = 0;
 
-    prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
 reload:
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Cfg_http.lib->TID = pthread_self();                                                     /* Sauvegarde du TID pour le pere */
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
+    Thread_init ( "W-HTTP", lib, NOM_THREAD, "Manage Web Services with external Devices" );
     Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
-
-    g_snprintf( Cfg_http.lib->admin_prompt, sizeof(Cfg_http.lib->admin_prompt), NOM_THREAD );
-    g_snprintf( Cfg_http.lib->admin_help,   sizeof(Cfg_http.lib->admin_help),   "Manage Web Services with external Devices" );
 
     SoupServer *socket = soup_server_new("server-header", "Watchdogd HTTP Server", NULL);
     if (!socket)
@@ -435,14 +430,17 @@ reload:
     soup_server_add_handler ( socket, "/disconnect",     Http_traiter_disconnect, NULL, NULL );
     soup_server_add_handler ( socket, "/dls/del/",       Http_traiter_dls_del, NULL, NULL );
     soup_server_add_handler ( socket, "/dls",            Http_traiter_dls, NULL, NULL );
+    soup_server_add_handler ( socket, "/mnemos/list/",   Http_traiter_mnemos_list, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/list",       Http_traiter_syn_list, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/show/",      Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/del/",       Http_traiter_syn_del, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/get/",       Http_traiter_syn_get, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/set",        Http_traiter_syn_set, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/clic/",      Http_traiter_syn_clic, NULL, NULL );
+    soup_server_add_handler ( socket, "/syn/update_motifs", Http_traiter_syn_update_motifs, NULL, NULL );
     soup_server_add_handler ( socket, "/archive/get/",   Http_traiter_archive_get, NULL, NULL );
     soup_server_add_handler ( socket, "/process",        Http_traiter_process, NULL, NULL );
+    soup_server_add_handler ( socket, "/instance/list",  Http_traiter_instance_list, NULL, NULL );
     soup_server_add_handler ( socket, "/status",         Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/log/get",        Http_traiter_log_get, NULL, NULL );
     soup_server_add_handler ( socket, "/log",            Http_traiter_log, NULL, NULL );
@@ -465,8 +463,10 @@ reload:
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/dls",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/syn",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/process",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/instance",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/log",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/histo",
+                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/mnemos",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/bus",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/users",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/memory",
@@ -602,8 +602,6 @@ end:
        lib->Thread_reload = FALSE;
        goto reload;
      }
-    Cfg_http.lib->Thread_run = FALSE;                                                           /* Le thread ne tourne plus ! */
-    Cfg_http.lib->TID = 0;                                                    /* On indique au master que le thread est mort. */
-    pthread_exit(GINT_TO_POINTER(0));
+    Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -1,13 +1,11 @@
 <div class="container-fluid">
 
- <div class="row m-2">
- <h3>Liste des Synoptiques</h3>
- <div class ="ml-auto">
- </div>
+ <div class ="row float-right mb-1 mr-2">
+       <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
  </div>
 
 <div class="table-responsive-lg">
-  <table id="idTableSyn" class="table table-striped table-bordered table-hover">
+  <table id="idTableMotif" class="table table-striped table-bordered table-hover">
     <thead class="thead-dark">
 				</thead>
 			 <tbody>
@@ -96,4 +94,4 @@
   </div>
 </div>
 
-<script src="<?php echo base_url('js/synoptiques.js')?>" type="text/javascript"></script>
+<script src="<?php echo base_url('js/atelier_list.js')?>" type="text/javascript"></script>

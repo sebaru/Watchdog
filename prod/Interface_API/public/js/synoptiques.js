@@ -26,13 +26,14 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Edit ( syn_id )
   { table = $('#idTableSyn').DataTable();
-    $('#idModalSynEditTitre').text ( "Editer - " + table.cell( "#"+syn_id, "page:name" ).data() );
-    $('#idModalSynEditPage').val ( table.cell( "#"+syn_id, "page:name" ).data() );
-    $('#idModalSynEditPPage').val ( table.cell( "#"+syn_id, "ppage:name" ).data() );
+    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
+    $('#idModalSynEditTitre').text ( "Editer - " + selection.page );
+    $('#idModalSynEditPage').val ( selection.page );
+    $('#idModalSynEditPPage').val ( selection.ppage );
     $('#idModalSynEditPPage').attr ( "readonly", true );
-    $('#idModalSynEditDescription').val(table.cell( "#"+syn_id, "libelle:name" ).data());
+    $('#idModalSynEditDescription').val(selection.libelle);
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level")-1 );
-    $('#idModalSynEditAccessLevel').val(table.cell( "#"+syn_id, "access_level:name" ).data() );
+    $('#idModalSynEditAccessLevel').val(selection.access_level );
     $('#idModalSynEditValider').attr( "onclick", "Valide_edit_synoptique("+syn_id+")" );
     $('#idModalSynEdit').modal("show");
   }
@@ -90,11 +91,11 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Del ( syn_id )
   { table = $('#idTableSyn').DataTable();
+    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
     $('#idModalSynDelTitre').text ( "Détruire le synoptique ?" );
     $('#idModalSynDelMessage').html("Etes-vous sur de vouloir supprimer le synoptique suivant "+
                                     "et toutes ses dépendances (DLS, mnémoniques, ...) ?<hr>"+
-                                    "<strong>"+table.cell( "#"+syn_id, "page:name" ).data()+" - "+
-                                    table.cell( "#"+syn_id, "libelle:name" ).data()+
+                                    "<strong>"+selection.page+" - "+selection.libelle+
                                     "</strong>" );
     $('#idModalSynDelValider').attr( "onclick", "Valide_del_synoptique("+syn_id+")" );
     $('#idModalSynDel').modal("show");
@@ -110,40 +111,56 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          rowId: "id",
-         columns: [ { "data": "id", "title":"#", "className": "text-center hidden-xs" },
-                    { "data": "access_level", "name": "access_level", "title": "Level", "className": "text-center hidden-xs" },
-                    { "data": "ppage", "title": "Parent", "name": "ppage", "className": "hidden-xs" },
-                    { "data": "page", "name": "page", "title":"Page" },
-                    { "data": "libelle", "name": "libelle", "title":"Description", "className": "hidden-xs" },
-                    { "data": null,
-                      "render": function (item)
-                       { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
-                                "    <button class='btn btn-outline-primary btn-sm' "+
-                                            "onclick=window.location.href='atelier/"+item.id+"' "+
-                                            "data-toggle='tooltip' title='Ouvrir Atelier'>"+
-                                            "<i class='fas fa-image'></i></button>"+
-                                "    <button class='btn btn-outline-secondary btn-sm' "+
-                                            "onclick=Show_Modal_Edit("+item.id+") "+
-                                            "data-toggle='tooltip' title='Configurer le synoptique'>"+
-                                            "<i class='fas fa-pen'></i></button>"+
-                                "    <button class='btn btn-outline-success btn-sm' "+
-                                            "onclick=Show_Modal_Add('"+item.page+"') "+
-                                            "data-toggle='tooltip' title='Ajoute un synoptique fils'>"+
-                                            "<i class='fas fa-plus'></i></button>"+
-                                "    <button class='btn btn-outline-info btn-sm' "+
-                                            "data-toggle='tooltip' title='Ajout un module D.L.S'>"+
-                                            "<i class='fas fa-plus'></i> <i class='fas fa-code'></i></button>"+
-                                "    <button class='btn btn-danger btn-sm' "+
-                                            "onclick=Show_Modal_Del("+item.id+") "+
-                                            "data-toggle='tooltip' title='Supprimer le Synoptique\net ses dépendances'>"+
-                                            "<i class='fas fa-trash'></i></button>"+
-                                "</div>"
-                               )
-                        },
-                      "title":"Actions", "orderable": false, "className":"text-center"
-                    }
-                  ],
-         order: [ [0, "desc"] ],
+         columns:
+          [ { "data": "id", "title":"#", "className": "text-center hidden-xs" },
+            { "data": null, "className": "text-center align-middle hidden-xs",
+              "render": function (item)
+                { return( Badge ( (item.access_level>=6 ? "warning" : "info"), "Niveau de privilèges", item.access_level ) );
+                },
+              "title":"Level", "orderable": true
+            },
+            { "data": "ppage", "title": "Parent", "name": "ppage", "className": "hidden-xs" },
+            { "data": null, "className": "align-middle hidden-xs",
+              "render": function (item)
+                { return( Lien ( "/atelier/"+item.id, "Ouvrir Atelier", item.page ) );
+                },
+              "title":"Page", "orderable": true
+            },
+            { "data": null, "className": "align-middle hidden-xs",
+              "render": function (item)
+                { return( Lien ( "/atelier/"+item.id, "Ouvrir Atelier", item.libelle ) );
+                },
+              "title":"Description", "orderable": true
+            },
+            { "data": null,
+              "render": function (item)
+                { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
+                         "    <button class='btn btn-outline-primary btn-sm' "+
+                                     "onclick=window.location.href='/atelier/"+item.id+"' "+
+                                     "data-toggle='tooltip' title='Ouvrir Atelier'>"+
+                                     "<i class='fas fa-image'></i></button>"+
+                         "    <button class='btn btn-outline-secondary btn-sm' "+
+                                     "onclick=Show_Modal_Edit("+item.id+") "+
+                                     "data-toggle='tooltip' title='Configurer le synoptique'>"+
+                                     "<i class='fas fa-pen'></i></button>"+
+                         "    <button class='btn btn-outline-success btn-sm' "+
+                                     "onclick=Show_Modal_Add('"+item.page+"') "+
+                                     "data-toggle='tooltip' title='Ajoute un synoptique fils'>"+
+                                     "<i class='fas fa-plus'></i></button>"+
+                         "    <button class='btn btn-outline-info btn-sm' "+
+                                     "data-toggle='tooltip' title='Ajout un module D.L.S'>"+
+                                     "<i class='fas fa-plus'></i> <i class='fas fa-code'></i></button>"+
+                         "    <button class='btn btn-danger btn-sm' "+
+                                     "onclick=Show_Modal_Del("+item.id+") "+
+                                     "data-toggle='tooltip' title='Supprimer le Synoptique\net ses dépendances'>"+
+                                     "<i class='fas fa-trash'></i></button>"+
+                         "</div>"
+                        )
+                },
+              "title":"Actions", "orderable": false, "className":"text-center"
+            }
+          ],
+         /*order: [ [0, "desc"] ],*/
          responsive: true,
        }
      );
