@@ -224,8 +224,6 @@
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     gboolean Compil_at_boot;                                            /* True si DLS doit compiler les plugins au démarrage */
     gchar Library_version[12];                       /* Version de librairie. Si différent, impose une recompilation complete */
-    guint admin_start;                                                                              /* Demande de deconnexion */
-    guint admin_stop;                                                                               /* Demande de deconnexion */
     guint temps_sched;                                          /* Delai d'attente DLS pour assurer 100 tours max par seconde */
     gboolean Top_check_horaire;                                                    /* True le controle horaire est réalisable */
   };
@@ -247,7 +245,7 @@
  extern void Decharger_plugins ( void );
  extern void Decharger_plugin_by_id ( gint id );
  extern gint Compiler_source_dls( gboolean reset, gint id, gchar *buffer, gint taille_buffer );
- extern void Activer_plugin_by_id ( gint id, gboolean actif );
+ extern void Activer_plugin ( gchar *tech_id, gboolean actif );
  extern void Reseter_un_plugin ( gint id );                                                                 /* Dans plugins.c */
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */

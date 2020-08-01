@@ -40,6 +40,44 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */
+/* Entrée : le Dls_tree et les fonctions a appliquer                                                                          */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_foreach_dls_tree ( struct DLS_TREE *dls_tree, void *user_data,
+                                    void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
+                                    void (*do_tree)   (void *user_data, struct DLS_TREE *) )
+  { GSList *liste;
+    liste = dls_tree->Liste_dls_tree;
+    while (liste)
+     { struct DLS_TREE *sub_tree;
+       sub_tree = (struct DLS_TREE *)liste->data;
+       Dls_foreach_dls_tree( sub_tree, user_data, do_plugin, do_tree );
+       liste = liste->next;
+     }
+    liste = dls_tree->Liste_plugin_dls;
+    while(liste && do_plugin)                                                        /* On execute tous les modules un par un */
+     { struct PLUGIN_DLS *plugin_actuel;
+       plugin_actuel = (struct PLUGIN_DLS *)liste->data;
+       do_plugin( user_data, plugin_actuel );
+       liste = liste->next;
+     }
+    if (do_tree) do_tree( user_data, dls_tree );
+  }
+/******************************************************************************************************************************/
+/* Dls_foreach: Parcours l'arbre DLS et execute des commandes en parametres                                                   */
+/* Entrée : les fonctions a appliquer                                                                                         */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_foreach ( void *user_data, void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
+                                     void (*do_tree)   (void *user_data, struct DLS_TREE *) )
+  { if (Partage->com_dls.Dls_tree)
+     { pthread_mutex_lock( &Partage->com_dls.synchro );
+       Dls_foreach_dls_tree( Partage->com_dls.Dls_tree, user_data, do_plugin, do_tree );
+       pthread_mutex_unlock( &Partage->com_dls.synchro );
+     }
+  }
+/******************************************************************************************************************************/
 /* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                                              */
 /* Entrée: Le plugin D.L.S                                                                                                    */
 /* Sortie: FALSE si problème                                                                                                  */
@@ -306,52 +344,42 @@
     Partage->com_dls.Compil_at_boot = FALSE;/* Apres le chargement initial, on considere que la recompil n'est pas necessaire */
   }
 /******************************************************************************************************************************/
-/* Activer_plugin_by_id_dls_tree: Active ou non un plugin by id                                                               */
-/* Entrée: l'ID du plugin, start ou stop et le dls_tree support                                                               */
-/* Sortie: FALSE si pas trouvé dans le dls_tree en parametre                                                                  */
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static gboolean Activer_plugin_by_id_dls_tree ( gint id, gboolean actif, struct DLS_TREE *dls_tree )
-  { struct PLUGIN_DLS *plugin;
-    GSList *plugins, *liste;
-
-    plugins = dls_tree->Liste_plugin_dls;
-    while(plugins)                                                                                  /* Pour chacun des plugin */
-     { plugin = (struct PLUGIN_DLS *)plugins->data;
-       if ( plugin->plugindb.id == id )
-        { if (actif == FALSE)
-           { plugin->plugindb.on = FALSE;
-             plugin->start_date = 0;
-             plugin->conso = 0.0;
-             Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: id %06d stopped (%s)", __func__, plugin->plugindb.id, plugin->plugindb.nom );
-           }
-          else
-           { plugin->plugindb.on = TRUE;
-             plugin->conso = 0.0;
-             plugin->start_date = time(NULL);
-             plugin->vars.starting = 1;
-             Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: id %06d started (%s)", __func__, plugin->plugindb.id, plugin->plugindb.nom );
-           }
-          return(TRUE);
-        }
-       plugins = plugins->next;
+ static void Dls_start_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
+  { gchar *tech_id = (gchar *)user_data;
+    if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
+     { plugin->plugindb.on = TRUE;
+       plugin->conso = 0.0;
+       plugin->start_date = time(NULL);
+       plugin->vars.starting = 1;
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' started (%s)", __func__, plugin->plugindb.tech_id, plugin->plugindb.nom );
      }
-
-    liste = dls_tree->Liste_dls_tree;                                             /* Si pas trouvé, on cherche dans les sub dls */
-    while (liste)
-     { if (Activer_plugin_by_id_dls_tree( id, actif, (struct DLS_TREE *)liste->data ) == TRUE ) return(TRUE);
-       liste = liste->next;
+  }
+/******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_stop_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
+  { gchar *tech_id = (gchar *)user_data;
+    if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
+     { plugin->plugindb.on = FALSE;
+       plugin->start_date = 0;
+       plugin->conso = 0.0;
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' stopped (%s)", __func__, plugin->plugindb.tech_id, plugin->plugindb.nom );
      }
-    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
 /* Entrée: l'ID du plugin                                                                                                     */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- void Activer_plugin_by_id ( gint id, gboolean actif )
-  { pthread_mutex_lock( &Partage->com_dls.synchro );
-    Activer_plugin_by_id_dls_tree( id, actif, Partage->com_dls.Dls_tree );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
+ void Activer_plugin ( gchar *tech_id, gboolean actif )
+  { if (actif) Dls_foreach ( tech_id, Dls_start_plugin_dls_tree, NULL );
+          else Dls_foreach ( tech_id, Dls_stop_plugin_dls_tree, NULL );
   }
 /******************************************************************************************************************************/
 /* Proto_compiler_source_dls: Compilation de la source DLS                                                                    */

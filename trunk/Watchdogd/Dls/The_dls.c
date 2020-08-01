@@ -1793,44 +1793,6 @@
     return(g_strdup(result));
   }
 /******************************************************************************************************************************/
-/* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */
-/* Entrée : le Dls_tree et les fonctions a appliquer                                                                          */
-/* Sortie : rien                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_foreach_dls_tree ( struct DLS_TREE *dls_tree, void *user_data,
-                                    void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
-                                    void (*do_tree)   (void *user_data, struct DLS_TREE *) )
-  { GSList *liste;
-    liste = dls_tree->Liste_dls_tree;
-    while (liste)
-     { struct DLS_TREE *sub_tree;
-       sub_tree = (struct DLS_TREE *)liste->data;
-       Dls_foreach_dls_tree( sub_tree, user_data, do_plugin, do_tree );
-       liste = liste->next;
-     }
-    liste = dls_tree->Liste_plugin_dls;
-    while(liste && do_plugin)                                                        /* On execute tous les modules un par un */
-     { struct PLUGIN_DLS *plugin_actuel;
-       plugin_actuel = (struct PLUGIN_DLS *)liste->data;
-       do_plugin( user_data, plugin_actuel );
-       liste = liste->next;
-     }
-    if (do_tree) do_tree( user_data, dls_tree );
-  }
-/******************************************************************************************************************************/
-/* Dls_foreach: Parcours l'arbre DLS et execute des commandes en parametres                                                   */
-/* Entrée : les fonctions a appliquer                                                                                         */
-/* Sortie : rien                                                                                                              */
-/******************************************************************************************************************************/
- void Dls_foreach ( void *user_data, void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
-                                     void (*do_tree)   (void *user_data, struct DLS_TREE *) )
-  { if (Partage->com_dls.Dls_tree)
-     { pthread_mutex_lock( &Partage->com_dls.synchro );
-       Dls_foreach_dls_tree( Partage->com_dls.Dls_tree, user_data, do_plugin, do_tree );
-       pthread_mutex_unlock( &Partage->com_dls.synchro );
-     }
-  }
-/******************************************************************************************************************************/
 /* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
 /* Entrée : le Dls_tree correspondant                                                                                         */
 /* Sortie : rien                                                                                                              */
@@ -2009,16 +1971,6 @@
        if (Partage->top-Update_heure>=600)                          /* Gestion des changements d'horaire (toutes les minutes) */
         { Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
           Update_heure=Partage->top;
-        }
-
-       if (Partage->com_dls.admin_start)                                                      /* A-t-on un plugin a allumer ? */
-        { Activer_plugin_by_id ( Partage->com_dls.admin_start, TRUE );
-          Partage->com_dls.admin_start = 0;
-        }
-
-       if (Partage->com_dls.admin_stop)                                                      /* A-t-on un plugin a eteindre ? */
-        { Activer_plugin_by_id ( Partage->com_dls.admin_stop, FALSE );
-          Partage->com_dls.admin_stop = 0;
         }
 
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
