@@ -1843,7 +1843,7 @@
 
     Libere_DB_SQL(&db);
 fin:
-    database_version=4745;
+    database_version=4851;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

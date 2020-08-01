@@ -428,6 +428,7 @@ reload:
      }
     soup_server_add_handler ( socket, "/connect",        Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/disconnect",     Http_traiter_disconnect, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/list",       Http_traiter_dls_list, NULL, NULL );
     soup_server_add_handler ( socket, "/dls/source/",    Http_traiter_dls_source, NULL, NULL );
     soup_server_add_handler ( socket, "/dls/del/",       Http_traiter_dls_del, NULL, NULL );
     soup_server_add_handler ( socket, "/dls/run/" ,      Http_traiter_dls_run, NULL, NULL );

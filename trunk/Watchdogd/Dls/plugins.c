@@ -223,8 +223,8 @@
            }
           dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
                                                                             /* Destruction de l'entete associée dans la GList */
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
-                    plugin->plugindb.id, plugin->plugindb.nom );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin '%s' unloaded (%s)", __func__,
+                    plugin->plugindb.tech_id, plugin->plugindb.nom );
           g_free( plugin );
           return;
         }
@@ -264,8 +264,8 @@
         }
        dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
                                                                              /* Destruction de l'entete associé dans la GList */
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
-                 plugin->plugindb.id, plugin->plugindb.nom );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin '%s' unloaded (%s)", __func__,
+                 plugin->plugindb.tech_id, plugin->plugindb.nom );
        g_free( plugin );
      }
 
