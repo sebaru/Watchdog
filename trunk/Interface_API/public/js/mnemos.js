@@ -78,7 +78,10 @@
             data: Response.AI,
                rowId: "id",
             columns: [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
-                       { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
+                       { "data": null, "title":"Acronyme", "className": "text-center",
+                         "render": function (item)
+                          { return( Lien ( "/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir la courbe", item.acronyme ) ); }
+                       },
                        { "data": "libelle",    "title":"Libellé",    "className": "" },
                        { "data": "type",   "title":"Type",   "className": "hidden-xs" },
                        { "data": "min", "title":"min", "className": "hidden-xs" },
