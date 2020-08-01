@@ -12,6 +12,10 @@
                        [ "Error, plugin is setting bits he does not own", "outline-danger" ],
                        [ "Error", "outline-danger" ]
                      ];
+
+ function Go_to_dls_run ()
+  { Redirect ( "/tech/dls_run" );
+  }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Dls_Del ( dls_id )
   { var xhr = new XMLHttpRequest;

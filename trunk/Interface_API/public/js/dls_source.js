@@ -1,14 +1,17 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
- function Go_to_mnemo ()
+ function Go_to_mnemos ()
   { vars = window.location.pathname.split('/');
     Redirect ( "/tech/mnemos/"+vars[3] );
+  }
+ function Go_to_source ()
+  { vars = window.location.pathname.split('/');
+    Redirect ( "/tech/dls_source/"+vars[3] );
   }
  function Go_to_run ()
   { vars = window.location.pathname.split('/');
     Redirect ( "/tech/run/"+vars[3] );
   }
-
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { vars = window.location.pathname.split('/');
