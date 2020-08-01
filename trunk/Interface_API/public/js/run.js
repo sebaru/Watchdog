@@ -97,8 +97,7 @@
             fixedHeader: true, paging: false, ordering: false, searching: false,
             data: Response.DO,
             rowId: "id",
-            columns: [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
-                       { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
+            columns: [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
                        { "data": "libelle",    "title":"Libellé",    "className": "" },
                        { "data": "dst_host",   "title":"dst_host",   "className": "hidden-xs" },
                        { "data": "dst_thread", "title":"dst_thread", "className": "hidden-xs" },
@@ -131,8 +130,7 @@
             fixedHeader: true, paging: false, ordering: false, searching: false,
             data: Response.AO,
             rowId: "id",
-            columns: [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
-                       { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
+            columns: [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
                        { "data": "libelle",    "title":"Libellé",    "className": "" },
                        { "data": "type",   "title":"Type",   "className": "hidden-xs" },
                        { "data": "min", "title":"min", "className": "hidden-xs" },
@@ -153,6 +151,38 @@
                            },
                          "title":"Actions", "orderable": false, "className":"text-center"
                        }
+                     ],
+            /*order: [ [0, "desc"] ],*/
+            responsive: true,
+          }
+        );
+
+       $('#idTableCI').DataTable(
+          { pageLength : 50,
+            fixedHeader: true, paging: false, ordering: false, searching: false,
+            data: Response.CI,
+            rowId: "id",
+            columns: [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center align-middle" },
+                       { "data": "etat",       "title":"Etat", "className": "text-center align-middle" },
+                       { "data": "valeur",     "title":"Valeur",     "className": "text-center align-middle" },
+                       { "data": "multi",      "title":"Multiplicateur", "className": "text-center align-middle hidden-xs" },
+                       { "data": "unite",      "title":"Unité", "className": "text-center align-middle hidden-xs" },
+/*                       { "data": null,
+                         "render": function (item)
+                          { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
+                                   "    <button class='btn btn-outline-primary btn-sm' "+
+                                               "onclick=window.location.href='atelier/"+item.id+"' "+
+                                               "data-toggle='tooltip' title='Ouvrir Atelier'>"+
+                                               "<i class='fas fa-image'></i></button>"+
+                                   "    <button class='btn btn-danger btn-sm' "+
+                                               "onclick=Show_Modal_Del("+item.acronyme+") "+
+                                               "data-toggle='tooltip' title='Supprimer le mnémonique'>"+
+                                               "<i class='fas fa-trash'></i></button>"+
+                                   "</div>"
+                                  )
+                           },
+                         "title":"Actions", "orderable": false, "className":"text-center"
+                       }*/
                      ],
             /*order: [ [0, "desc"] ],*/
             responsive: true,
