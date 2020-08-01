@@ -428,7 +428,10 @@ reload:
      }
     soup_server_add_handler ( socket, "/connect",        Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/disconnect",     Http_traiter_disconnect, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/source/",    Http_traiter_dls_source, NULL, NULL );
     soup_server_add_handler ( socket, "/dls/del/",       Http_traiter_dls_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/run/" ,      Http_traiter_dls_run, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/run" ,       Http_traiter_dls_run_all, NULL, NULL );
     soup_server_add_handler ( socket, "/dls",            Http_traiter_dls, NULL, NULL );
     soup_server_add_handler ( socket, "/mnemos/list/",   Http_traiter_mnemos_list, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/list",       Http_traiter_syn_list, NULL, NULL );

@@ -70,8 +70,14 @@
  extern gboolean Http_Lire_config ( void );
  extern void Http_traiter_status  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_dls_run ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                    SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_dls_run_all ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                        SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_dls_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_dls_source ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                       SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_dls     ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_process ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,

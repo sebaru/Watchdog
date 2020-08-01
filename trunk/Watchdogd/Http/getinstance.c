@@ -34,7 +34,7 @@
  extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
-/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Http_Traiter_instance_list: Fourni une list JSON des instances Watchdog dans le domaine                                    */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
