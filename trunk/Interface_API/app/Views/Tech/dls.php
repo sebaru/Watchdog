@@ -4,7 +4,7 @@
  <h3>Liste des Modules D.L.S</h3>
 
    <div class ="ml-auto btn-group">
-        <button type="button" onclick="Go_to_dls_run()"class="btn btn-primary"><i class="fas fa-eye"></i> RUN</button>
+        <button type="button" onclick="Go_to_dls_run()"class="btn btn-info"><i class="fas fa-eye"></i> RUN</button>
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>

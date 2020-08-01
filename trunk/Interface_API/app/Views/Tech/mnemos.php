@@ -4,7 +4,7 @@
  <h3>Liste des Mnémoniques - '<strong id="idTitle"></strong>'</h3>
 
    <div class ="ml-auto btn-group">
-        <button type="button" onclick="Go_to_run()"class="btn btn-primary"><i class="fas fa-eye"></i> RUN</button>
+        <button type="button" onclick="Go_to_run()"class="btn btn-info"><i class="fas fa-eye"></i> RUN</button>
         <button type="button" onclick="Go_to_source()" class="btn btn-primary"><i class="fas fa-code"></i> Source</button>
         <button type="button" onclick="window.location='/tech/dls'" class="btn btn-secondary"><i class="fas fa-list"></i> Retour</button>
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->

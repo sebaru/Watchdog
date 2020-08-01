@@ -58,6 +58,19 @@
             { "data": "page", "title":"Page", "className": "align-middle hidden-xs text-center" },
             { "data": null, "className": "align-middle hidden-xs text-center",
               "render": function (item)
+                { if (item.actif==true)
+                   { return( Bouton ( "success", "Désactiver le plugin",
+                                      "Dls_disable_plugin", item.tech_id, "Actif" ) );
+                   }
+                  else
+                   { return( Bouton ( "outline-secondary", "Activer le plugin",
+                                      "Dls_enable_plugin", item.tech_id, "Désactivé" ) );
+                   }
+                },
+              "title":"Started", "orderable": true
+            },
+            { "data": null, "className": "align-middle hidden-xs text-center",
+              "render": function (item)
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) );
                 },
               "title":"tech_id", "orderable": true
@@ -74,19 +87,6 @@
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.name ) );
                 },
               "title":"Libellé", "orderable": true
-            },
-            { "data": null, "className": "align-middle hidden-xs text-center",
-              "render": function (item)
-                { if (item.actif==true)
-                   { return( Bouton ( "success", "Désactiver le plugin",
-                                      "Dls_disable_plugin", item.tech_id, "Actif" ) );
-                   }
-                  else
-                   { return( Bouton ( "outline-secondary", "Activer le plugin",
-                                      "Dls_enable_plugin", item.tech_id, "Désactivé" ) );
-                   }
-                },
-              "title":"Started", "orderable": true
             },
             { "data": null, "className": "align-middle hidden-xs",
               "render": function (item)

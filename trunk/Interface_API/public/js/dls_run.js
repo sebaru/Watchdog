@@ -1,5 +1,11 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
+ function Dls_start_plugin ( tech_id )
+  { Send_to_API ( 'POST', "/api/dls/start/"+tech_id, function () { $('#idTableRunDLS').DataTable().ajax.reload(); } ); }
+
+ function Dls_stop_plugin ( tech_id )
+  { Send_to_API ( 'POST', "/api/dls/stop/"+tech_id, function () { $('#idTableRunDLS').DataTable().ajax.reload(); } ); }
+
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { console.log ("in load page !");
@@ -15,40 +21,92 @@
        var Response = JSON.parse(xhr.responseText);
        $('#idTableRunDLS').DataTable(
           { pageLength : 50,
-            fixedHeader: true, paging: false, ordering: false, searching: false,
+            fixedHeader: true, paging: false,
             data: Response.plugins,
             rowId: "id",
             columns:
              [ { "data": "tech_id",    "title":"TechId",     "className": "text-center align-middle" },
-               { "data": "shortname",  "title":"Nom court",    "className": "text-center align-middle" },
                { "data": "version",    "title":"Version",   "className": "text-center align-middle hidden-xs" },
-               { "data": "started",    "title":"Started",   "className": "text-center align-middle" },
+               { "data": null, title:"Started",  "className": "text-center align-middle",
+                 "render": function (item)
+                 { if (item.started==true)
+                   { return( Bouton ( "success", "Désactiver le plugin",
+                                      "Dls_stop_plugin", item.tech_id, "Actif" ) );
+                   }
+                  else
+                   { return( Bouton ( "outline-secondary", "Activer le plugin",
+                                      "Dls_start_plugin", item.tech_id, "Désactivé" ) );
+                   }
+                 }
+               },
                { "data": "start_date", "title":"Start Date",   "className": "text-center align-middle hidden-xs" },
-               { "data": "conso", "title":"Conso",   "className": "text-center align-middle hidden-xs" },
-               { "data": "debug", "title":"Debug",   "className": "text-center align-middle hidden-xs" },
-               { "data": "bit_comm_out", "title":"Comm_out",   "className": "text-center align-middle hidden-xs" },
-               { "data": "bit_defaut", "title":"Défaut",   "className": "text-center align-middle hidden-xs" },
-               { "data": "bit_alarme", "title":"Alarme",   "className": "text-center align-middle hidden-xs" },
-               { "data": "bit_alerte", "title":"Alerte",   "className": "text-center align-middle hidden-xs" },
-               { "data": "bit_veille", "title":"Veille",   "className": "text-center align-middle hidden-xs" },
-               { "data": "bit_danger", "title":"Danger",   "className": "text-center align-middle hidden-xs" },
-               { "data": "bit_derangement", "title":"Derangement",   "className": "text-center align-middle hidden-xs" },
-/*                       { "data": null,
-                         "render": function (item)
-                          { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
-                                   "    <button class='btn btn-outline-primary btn-sm' "+
-                                               "onclick=window.location.href='atelier/"+item.id+"' "+
-                                               "data-toggle='tooltip' title='Ouvrir Atelier'>"+
-                                               "<i class='fas fa-image'></i></button>"+
-                                   "    <button class='btn btn-danger btn-sm' "+
-                                               "onclick=Show_Modal_Del("+item.acronyme+") "+
-                                               "data-toggle='tooltip' title='Supprimer le mnémonique'>"+
-                                               "<i class='fas fa-trash'></i></button>"+
-                                   "</div>"
-                                  )
-                           },
-                         "title":"Actions", "orderable": false, "className":"text-center"
-                       }*/
+               { "data": null, title:"Conso",  "className": "text-center align-middle", "render": function (item)
+                  { return( item.conso.toFixed(2) ); }
+               },
+               { "data": null, title:"Debug",  "className": "text-center align-middle", "render": function (item)
+                 { if (item.debug==true)
+                   { return( Bouton ( "warning", "Désactiver le debug",
+                                      "Dls_debug_plugin", item.tech_id, "Actif" ) );
+                   }
+                  else
+                   { return( Bouton ( "outline-secondary", "Activer le débug",
+                                      "Dls_undebug_plugin", item.tech_id, "Désactivé" ) );
+                   }
+                 }
+               },
+               { "data": null, title:"Comm",  "className": "text-center align-middle", "render": function (item)
+                 { if (item.bit_comm_out==true)
+                   { return( Bouton ( "danger", "Communication perdue", null, null, "Hors Comm" ) ); }
+                  else
+                   { return( Bouton ( "outline-success", "Communication OK", null, null, "OK" ) ); }
+                 }
+               },
+               { "data": null, title:"Défaut",  "className": "text-center align-middle", "render": function (item)
+                 { if (item.bit_defaut==false)
+                   { return( Bouton ( "outline-secondary", "Pas de défaut", null, null, "Non" ) ); }
+                  else if (item.bit_defaut_fixe==true)
+                   { return( Bouton ( "warning", "Défaut Fixe", null, null, "Fixe" ) ); }
+                  else { return( Bouton ( "danger", "Défaut !", null, null, "OUI" ) ); }
+                 }
+               },
+               { "data": null, title:"Alarme",  "className": "text-center align-middle", "render": function (item)
+                 { if (item.bit_alarme==false)
+                   { return( Bouton ( "outline-secondary", "Pas d'alarme", null, null, "Non" ) ); }
+                  else if (item.bit_alarme_fixe==true)
+                   { return( Bouton ( "warning", "Alarme Fixe", null, null, "Fixe" ) ); }
+                  else { return( Bouton ( "danger", "Alarme !", null, null, "OUI" ) ); }
+                 }
+               },
+               { "data": null, title:"Alerte",  "className": "text-center align-middle", "render": function (item)
+                 { if (item.bit_alerte==false)
+                   { return( Bouton ( "outline-secondary", "Pas d'alerte", null, null, "Non" ) ); }
+                  else if (item.bit_alerte_fixe==true)
+                   { return( Bouton ( "warning", "Alerte Fixe", null, null, "Fixe" ) ); }
+                  else { return( Bouton ( "danger", "Alerte !", null, null, "OUI" ) ); }
+                 }
+               },
+               { "data": null, title:"Veille",  "className": "text-center align-middle", "render": function (item)
+                 { if (item.bit_veille==true)
+                   { return( Bouton ( "outline-success", "En veille", null, null, "OK" ) ); }
+                  else { return( Bouton ( "danger", "Pas en veille !", null, null, "NON" ) ); }
+                 }
+               },
+               { "data": null, title:"Danger",  "className": "text-center align-middle", "render": function (item)
+                 { if (item.bit_danger==false)
+                   { return( Bouton ( "outline-secondary", "Pas de danger", null, null, "Non" ) ); }
+                  else if (item.bit_danger_fixe==true)
+                   { return( Bouton ( "warning", "Danger Fixe", null, null, "Fixe" ) ); }
+                  else { return( Bouton ( "danger", "Danger !", null, null, "OUI" ) ); }
+                 }
+               },
+               { "data": null, title:"Dérang.",  "className": "text-center align-middle", "render": function (item)
+                 { if (item.bit_derangement==false)
+                   { return( Bouton ( "outline-secondary", "Pas de dérangement", null, null, "Non" ) ); }
+                  else if (item.bit_derangement_fixe==true)
+                   { return( Bouton ( "warning", "Dérangement Fixe", null, null, "Fixe" ) ); }
+                  else { return( Bouton ( "danger", "Dérangement !", null, null, "OUI" ) ); }
+                 }
+               },
              ],
             /*order: [ [0, "desc"] ],*/
             responsive: true,
@@ -265,6 +323,4 @@
 
      };
     xhr.send();
-    $('#idTabEntreeTor').tab('show');
-
   }

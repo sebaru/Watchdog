@@ -1,6 +1,23 @@
  document.addEventListener('DOMContentLoaded', Load_common, false);
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
+ function Send_to_API ( method, URL, fonction )
+  { var xhr = new XMLHttpRequest;
+    xhr.open(method, URL, true);
+    xhr.onreadystatechange = function()
+     { if ( xhr.readyState != 4 ) return;
+       if (xhr.status == 200)
+        { /*var Response = JSON.parse(xhr.responseText);
+          console.debug(Response);*/
+          $('#idToastStatus').toast('show');
+          fonction();
+        }
+       else { Show_Error( xhr.statusText ); }
+     }
+    xhr.send();
+  }
+
+/********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Load_common ()
   { if (document.getElementById("idUsername") !== null)
      { document.getElementById("idUsername").innerHTML = localStorage.getItem("username");
