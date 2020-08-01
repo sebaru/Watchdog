@@ -369,7 +369,8 @@
      { plugin->plugindb.on = FALSE;
        plugin->start_date = 0;
        plugin->conso = 0.0;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' stopped (%s)", __func__, plugin->plugindb.tech_id, plugin->plugindb.nom );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' stopped (%s)", __func__,
+                 plugin->plugindb.tech_id, plugin->plugindb.nom );
      }
   }
 /******************************************************************************************************************************/
@@ -380,6 +381,41 @@
  void Activer_plugin ( gchar *tech_id, gboolean actif )
   { if (actif) Dls_foreach ( tech_id, Dls_start_plugin_dls_tree, NULL );
           else Dls_foreach ( tech_id, Dls_stop_plugin_dls_tree, NULL );
+  }
+/******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_debug_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
+  { gchar *tech_id = (gchar *)user_data;
+    if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug started ('%s')", __func__,
+                 plugin->plugindb.tech_id, plugin->plugindb.nom );
+       plugin->vars.debug = TRUE;
+     }
+  }
+/******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_undebug_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
+  { gchar *tech_id = (gchar *)user_data;
+    if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug stopped ('%s')", __func__,
+                 plugin->plugindb.tech_id, plugin->plugindb.nom );
+       plugin->vars.debug = FALSE;
+     }
+  }
+/******************************************************************************************************************************/
+/* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
+/* Entrée: l'ID du plugin                                                                                                     */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Debug_plugin ( gchar *tech_id, gboolean actif )
+  { if (actif) Dls_foreach ( tech_id, Dls_debug_plugin_dls_tree, NULL );
+          else Dls_foreach ( tech_id, Dls_undebug_plugin_dls_tree, NULL );
   }
 /******************************************************************************************************************************/
 /* Proto_compiler_source_dls: Compilation de la source DLS                                                                    */

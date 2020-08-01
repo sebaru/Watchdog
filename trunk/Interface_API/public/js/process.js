@@ -56,6 +56,7 @@
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Load_process ()
   { console.log ("in load process !");
+
     $('#idTableProcess').DataTable(
        { pageLength : 25,
          fixedHeader: true,

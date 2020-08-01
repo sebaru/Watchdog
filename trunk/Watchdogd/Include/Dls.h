@@ -245,6 +245,7 @@
  extern void Decharger_plugins ( void );
  extern void Decharger_plugin_by_id ( gint id );
  extern gint Compiler_source_dls( gboolean reset, gint id, gchar *buffer, gint taille_buffer );
+ extern void Debug_plugin ( gchar *tech_id, gboolean actif );
  extern void Activer_plugin ( gchar *tech_id, gboolean actif );
  extern void Reseter_un_plugin ( gint id );                                                                 /* Dans plugins.c */
 

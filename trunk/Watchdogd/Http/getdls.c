@@ -441,6 +441,82 @@
   }
 
 /******************************************************************************************************************************/
+/* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_dls_debug ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                               SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_PUT)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    gchar *prefix = "/dls/debug/";
+    if ( ! g_str_has_prefix ( path, prefix ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+       return;
+     }
+    if (!strlen (path+strlen(prefix)))
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    gchar *tech_id = Normaliser_chaine ( path+strlen(prefix) );
+    if (!tech_id)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    Debug_plugin ( tech_id, TRUE );
+    g_free(tech_id);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    /*soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );*/
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_dls_undebug ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                 SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_PUT)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    gchar *prefix = "/dls/undebug/";
+    if ( ! g_str_has_prefix ( path, prefix ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+       return;
+     }
+    if (!strlen (path+strlen(prefix)))
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    gchar *tech_id = Normaliser_chaine ( path+strlen(prefix) );
+    if (!tech_id)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    Debug_plugin ( tech_id, FALSE );
+    g_free(tech_id);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    /*soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );*/
+  }
+/******************************************************************************************************************************/
 /* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
@@ -495,32 +571,6 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Synoptique %d -> plugin %s acquitté", __func__,
                  plugin->plugindb.id, plugin->plugindb.nom );
        plugin->vars.bit_acquit = TRUE;
-     }
-  }
-/******************************************************************************************************************************/
-/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_dls_debug_plugin ( void *user_data, struct PLUGIN_DLS *plugin )
-  { gint dls_id = *(gint *)user_data;
-    if (plugin->plugindb.id == dls_id)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Synoptique %d -> plugin %s en mode debug", __func__,
-                 plugin->plugindb.id, plugin->plugindb.nom );
-       plugin->vars.debug = TRUE;
-     }
-  }
-/******************************************************************************************************************************/
-/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_dls_undebug_plugin ( void *user_data, struct PLUGIN_DLS *plugin )
-  { gint dls_id = *(gint *)user_data;
-    if (plugin->plugindb.id == dls_id)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Synoptique %d -> plugin %s debug désactivé", __func__,
-                 plugin->plugindb.id, plugin->plugindb.nom );
-       plugin->vars.debug = FALSE;
      }
   }
 /******************************************************************************************************************************/
@@ -599,18 +649,6 @@
     else if ( ! strcasecmp( path, "/dls/acquit" ) )
      { gpointer id_string = g_hash_table_lookup ( query, "id" );
        if (id_string) { gint id = atoi(id_string); Dls_foreach ( &id, Http_dls_acquitter_plugin, NULL ); }
-     }
-    else if ( ! strcasecmp( path, "/dls/debug" ) )
-     { gpointer id_string = g_hash_table_lookup ( query, "id" );
-       if (id_string) { gint id = atoi(id_string); Dls_foreach ( &id, Http_dls_debug_plugin, NULL ); }
-     }
-    else if ( ! strcasecmp( path, "/dls/undebug" ) )
-     { gpointer id_string = g_hash_table_lookup ( query, "id" );
-       if (id_string) { gint id = atoi(id_string); Dls_foreach ( &id, Http_dls_undebug_plugin, NULL ); }
-     }
-    else if ( ! strcasecmp( path, "/dls/delete" ) )
-     { gpointer id_string = g_hash_table_lookup ( query, "id" );
-       if (id_string) { gint id = atoi(id_string); Decharger_plugin_by_id( id ); }
      }
     else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
   }

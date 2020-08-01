@@ -6,6 +6,12 @@
  function Dls_stop_plugin ( tech_id )
   { Send_to_API ( 'PUT', "/api/dls/stop/"+tech_id, function () { $('#idTableRunDLS').DataTable().ajax.reload(); } ); }
 
+ function Dls_debug_plugin ( tech_id )
+  { Send_to_API ( 'PUT', "/api/dls/debug/"+tech_id, function () { $('#idTableRunDLS').DataTable().ajax.reload(); } ); }
+
+ function Dls_undebug_plugin ( tech_id )
+  { Send_to_API ( 'PUT', "/api/dls/undebug/"+tech_id, function () { $('#idTableRunDLS').DataTable().ajax.reload(); } ); }
+
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { console.log ("in load page !");
@@ -19,8 +25,11 @@
        rowId: "id",
        data: Response.plugins,
        columns:
-        [ { "data": "tech_id",    "title":"TechId",     "className": "text-center align-middle" },
-          { "data": "version",    "title":"Version",   "className": "text-center align-middle hidden-xs" },
+        [ { "data": null, "title":"tech_id", "className": "align-middle hidden-xs text-center",
+              "render": function (item)
+                { return( Lien ( "/tech/dls_source/"+item.tech_id, item.version + "\n" + item.start_date, item.tech_id ) );
+                },
+            },
           { "data": null, title:"Started",  "className": "text-center align-middle",
             "render": function (item)
              { if (item.started==true)
@@ -33,18 +42,17 @@
                 }
              }
           },
-          { "data": "start_date", "title":"Start Date",   "className": "text-center align-middle hidden-xs" },
           { "data": null, title:"Conso",  "className": "text-center align-middle", "render": function (item)
              { return( item.conso.toFixed(2) ); }
           },
           { "data": null, title:"Debug",  "className": "text-center align-middle", "render": function (item)
             { if (item.debug==true)
                { return( Bouton ( "warning", "Désactiver le debug",
-                                  "Dls_debug_plugin", item.tech_id, "Actif" ) );
+                                  "Dls_undebug_plugin", item.tech_id, "Actif" ) );
                }
               else
                { return( Bouton ( "outline-secondary", "Activer le débug",
-                                  "Dls_undebug_plugin", item.tech_id, "Désactivé" ) );
+                                  "Dls_debug_plugin", item.tech_id, "Désactivé" ) );
                }
             }
           },
@@ -82,7 +90,7 @@
           { "data": null, title:"Veille",  "className": "text-center align-middle", "render": function (item)
             { if (item.bit_veille==true)
                { return( Bouton ( "outline-success", "En veille", null, null, "OK" ) ); }
-              else { return( Bouton ( "danger", "Pas en veille !", null, null, "NON" ) ); }
+              else { return( Bouton ( "danger", "Pas en veille !", null, null, "Non" ) ); }
             }
           },
           { "data": null, title:"Danger",  "className": "text-center align-middle", "render": function (item)
