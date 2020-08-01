@@ -1800,6 +1800,11 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4851)
+     { g_snprintf( requete, sizeof(requete), "DROP TABLE `mnemos_AnalogInput`");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
                                           "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "

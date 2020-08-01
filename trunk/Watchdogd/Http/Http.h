@@ -86,8 +86,6 @@
                                           SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_bus     ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_memory  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                    SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_mnemos_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                         SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_syn_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
@@ -122,7 +120,6 @@
                                       SoupClientContext *client, gpointer user_data);
  extern void Http_traiter_histo_alive ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                         SoupClientContext *client, gpointer user_data);
- extern void Http_Memory_get_all ( SoupMessage *msg, gchar *tech_id );
  extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern void Http_Envoyer_les_cadrans ( void );
  #endif

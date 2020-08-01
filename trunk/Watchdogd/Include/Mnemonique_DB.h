@@ -33,7 +33,6 @@
  #include "Db.h"
 
  #define NOM_TABLE_MNEMO          "mnemos"
- #define NOM_TABLE_MNEMO_AI       "mnemos_AnalogInput"
  #define NOM_TABLE_MNEMO_CPTH     "mnemos_CptHoraire"
  #define NOM_TABLE_MNEMO_CPTIMP   "mnemos_CptImp"
  #define NOM_TABLE_MNEMO_REGISTRE "mnemos_Registre"
@@ -52,14 +51,13 @@
  extern gboolean Modifier_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
  extern gint Rechercher_type_bit ( gchar *tech_id, gchar *acronyme );
 
- extern void Charger_analogInput ( void );                                                                 /* Dans Mnemo_AI.c */
+ extern void Charger_confDB_AI ( void );                                                                  /* Dans Mnemos_AI.c */
+ extern void Updater_confDB_AI( void );
  extern gboolean Mnemo_auto_create_AI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src );
  extern struct DB *Rechercher_AI ( gchar *tech_id, gchar *acronyme );
- extern void Charger_confDB_AI ( void );
  extern gboolean Recuperer_mnemos_AI_by_text ( struct DB **db_retour, gchar *thread, gchar *text );
  extern gboolean Recuperer_mnemos_AI_by_map_question_vocale ( struct DB **db_retour, gchar *map_snips );
  extern gboolean Recuperer_mnemos_AI_suite( struct DB **db_orig );
- extern void Updater_confDB_AI( void );
  extern void Dls_AI_to_json ( JsonBuilder *builder, struct DLS_AI *bit );
 
  extern gboolean Mnemo_auto_create_HORLOGE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src ); /* Dans Mnemos_Horloges.c */

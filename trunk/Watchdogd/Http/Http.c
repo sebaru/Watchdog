@@ -448,7 +448,6 @@ reload:
     soup_server_add_handler ( socket, "/log/get",        Http_traiter_log_get, NULL, NULL );
     soup_server_add_handler ( socket, "/log",            Http_traiter_log, NULL, NULL );
     soup_server_add_handler ( socket, "/bus",            Http_traiter_bus, NULL, NULL );
-    soup_server_add_handler ( socket, "/memory",         Http_traiter_memory, NULL, NULL );
     soup_server_add_handler ( socket, "/users/list",     Http_traiter_users_list, NULL, NULL );
     soup_server_add_handler ( socket, "/users/kill",     Http_traiter_users_kill, NULL, NULL );
     soup_server_add_handler ( socket, "/users/sessions", Http_traiter_users_sessions, NULL, NULL );
@@ -472,7 +471,6 @@ reload:
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/mnemos",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/bus",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/users",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/memory",
                                           NULL );
     soup_auth_domain_set_filter ( domain, Http_test_session_CB, NULL, NULL );
     soup_server_add_auth_domain(socket, domain);
