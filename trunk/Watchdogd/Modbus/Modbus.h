@@ -102,7 +102,6 @@
     gchar description[128];                                                                              /* Libelle du modbus */
     guint map_E;
     guint max_nbr_E;
-    guint map_EA;
     guint map_A;
     guint map_AA;
     gboolean mode_old_static;

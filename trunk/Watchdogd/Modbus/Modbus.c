@@ -119,7 +119,6 @@
        modbus->enable   = atoi(db->row[2]);
        modbus->watchdog = atoi(db->row[5]);
        modbus->map_E    = atoi(db->row[7]);
-       modbus->map_EA   = atoi(db->row[8]);
        modbus->map_A    = atoi(db->row[9]);
        modbus->map_AA   = atoi(db->row[10]);
        modbus->max_nbr_E= atoi(db->row[11]);
@@ -789,7 +788,6 @@
                module->mode = MODBUS_GET_AI;
                break;
           case MODBUS_GET_AI:
-               cpt_e = module->modbus.map_EA;
                for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
                 { struct DLS_AI *ai = module->AI[cpt];
                   if (!ai) continue;                                                 /* Si pas mappé, bah on ne la stocke pas */
@@ -813,7 +811,6 @@
                           break;
                      default : break;
                    }
-                  cpt_e++;
                 }
                module->mode = MODBUS_SET_DO;
                break;
