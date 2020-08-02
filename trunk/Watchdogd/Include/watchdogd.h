@@ -123,7 +123,6 @@
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                                      /* Com avec le thread ARCH */
 
-    struct ANALOG_INPUT ea [ NBR_ENTRE_ANA ];
     guchar m [ (NBR_BIT_MONOSTABLE>>3) + 1 ];                                      /* Monostables du DLS (DLS=rw, Sserveur=r) */
     struct DIGITAL_INPUT e [ NBR_ENTRE_TOR ];
     struct SORTIE_TOR a [ NBR_SORTIE_TOR ];

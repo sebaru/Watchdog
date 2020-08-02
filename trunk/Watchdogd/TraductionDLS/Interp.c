@@ -276,16 +276,10 @@
     if (in_range==1)
      { taille = 256;
        result = New_chaine( taille ); /* 10 caractères max */
-       if (alias->type==ALIAS_TYPE_STATIC)
-        { if (barre) g_snprintf( result, taille, "!EA_inrange(%d)", alias->num );
-                else g_snprintf( result, taille, "EA_inrange(%d)", alias->num );
-        }
-       else
-        { if (barre) g_snprintf( result, taille, "!Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
-                                 alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-                else g_snprintf( result, taille, "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
-                                 alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-        }
+       if (barre) g_snprintf( result, taille, "!Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
+                              alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+             else g_snprintf( result, taille, "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
+                              alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
        return(result);
      }
     if (!comparateur)                                                    /* Vérification des bits obligatoirement comparables */
@@ -305,37 +299,27 @@
     taille = 512;
     result = New_chaine( taille ); /* 10 caractères max */
     setlocale(LC_ALL, "C");
-     if (alias->type==ALIAS_TYPE_STATIC)
-     { switch(comparateur->type)
-        { case INF        : g_snprintf( result, taille, "EA_ech_inf(%f,%d)", comparateur->valf, alias->num ); break;
-          case SUP        : g_snprintf( result, taille, "EA_ech_sup(%f,%d)", comparateur->valf, alias->num ); break;
-          case INF_OU_EGAL: g_snprintf( result, taille, "EA_ech_inf_egal(%f,%d)", comparateur->valf, alias->num ); break;
-          case SUP_OU_EGAL: g_snprintf( result, taille, "EA_ech_sup_egal(%f,%d)", comparateur->valf, alias->num ); break;
-        }
-     }
-    else
-     { switch(comparateur->type)
-        { case INF:         g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
-                                                        " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<%f))",
-                                        alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
-                                        alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
-                            break;
-          case SUP:         g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
-                                                        " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>%f))",
-                                        alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
-                                        alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
-                            break;
-          case INF_OU_EGAL: g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
-                                                        " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<=%f))",
-                                        alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
-                                        alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
-                            break;
-          case SUP_OU_EGAL: g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
-                                                        " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>=%f))",
-                                        alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
-                                        alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
-                            break;
-        }
+    switch(comparateur->type)
+     { case INF:         g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
+                                                     " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<%f))",
+                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
+                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
+                         break;
+       case SUP:         g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
+                                                     " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>%f))",
+                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
+                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
+                         break;
+       case INF_OU_EGAL: g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
+                                                     " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<=%f))",
+                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
+                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
+                         break;
+       case SUP_OU_EGAL: g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
+                                                     " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>=%f))",
+                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
+                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
+                         break;
      }
     return(result);
   }

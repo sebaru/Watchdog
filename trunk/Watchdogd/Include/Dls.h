@@ -261,9 +261,6 @@
  extern gboolean Dls_data_get_DO_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_DO_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gint Dls_data_get_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p );
- extern void SEA( int num, float val_avant_ech );
- extern void SEA_range( int num, int range );
- extern void SEA_ech( int num, float val_ech );
  extern void Envoyer_commande_dls ( int num );
  extern void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme );
  extern void Dls_foreach ( void *user_data,

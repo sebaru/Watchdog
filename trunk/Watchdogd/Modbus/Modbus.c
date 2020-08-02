@@ -132,8 +132,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Deconnecter_module ( struct MODULE_MODBUS *module )
-  { gint cpt;
-    if (!module) return;
+  { if (!module) return;
     if (module->started == FALSE) return;
 
     close ( module->connexion );
@@ -142,8 +141,6 @@
     module->request = FALSE;
     module->nbr_deconnect++;
     module->date_retente = Partage->top + MODBUS_RETRY;
-    for ( cpt = module->modbus.map_EA; cpt<module->nbr_entree_ana; cpt++)
-     { if (!module->AI[cpt]) SEA_range( cpt, 0 ); }
     if (module->DI) g_free(module->DI);
     if (module->AI) g_free(module->AI);
     if (module->DO) g_free(module->DO);
@@ -794,28 +791,25 @@
                cpt_e = module->modbus.map_EA;
                for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
                 { struct DLS_AI *ai = module->AI[cpt];
-                  switch( (ai ? ai->type : Partage->ea[cpt_e].confDB.type) )
+                  switch( ai->type )
                    { case ENTREEANA_WAGO_750455:
                           if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
                            { int reponse;
                              reponse  = module->response.data[ 2*cpt + 1 ] << 5;
                              reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
-                             if (!ai) SEA( cpt_e, reponse );             /* Old style : positionnement par ancienne interface */
-                             else Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse, TRUE );
+                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse, TRUE );
                            }
-                          else { if (!ai) SEA_range( cpt_e, 0 );
-                                 else Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], 0.0, FALSE );
+                          else { Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], 0.0, FALSE );
                                }
                           break;
                      case ENTREEANA_WAGO_750461:                                                               /* Borne PT100 */
                            { gint16 reponse;
                              reponse  = module->response.data[ 2*cpt + 1 ] << 8;
                              reponse |= module->response.data[ 2*cpt + 2 ];
-                             if (!ai) SEA ( cpt_e, 1.0*reponse );        /* Old style : positionnement par ancienne interface */
-                             else Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse, TRUE );
+                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse, TRUE );
                            }
                           break;
-                     default : if(!ai) SEA_range( cpt_e, 0 );
+                     default : break;
                    }
                   cpt_e++;
                 }
