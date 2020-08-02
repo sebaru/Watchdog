@@ -792,6 +792,7 @@
                cpt_e = module->modbus.map_EA;
                for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
                 { struct DLS_AI *ai = module->AI[cpt];
+                  if (!ai) continue;                                                 /* Si pas mappé, bah on ne la stocke pas */
                   switch( ai->type )
                    { case ENTREEANA_WAGO_750455:
                           if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
