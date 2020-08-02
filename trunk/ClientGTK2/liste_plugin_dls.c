@@ -306,7 +306,7 @@
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, -1 );                                         /* Recup du id */
-    g_snprintf( chaine, sizeof(chaine), "admin/dls/sourceedit/%s", tech_id );
+    g_snprintf( chaine, sizeof(chaine), "tech/dls_source/%s", tech_id );
     g_free( tech_id );
     Firefox_exec( chaine );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
@@ -334,7 +334,7 @@
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, -1 );                                         /* Recup du id */
-    g_snprintf( chaine, sizeof(chaine), "admin/mnemo/index/%s", tech_id );
+    g_snprintf( chaine, sizeof(chaine), "tech/run/%s", tech_id );
     g_free( tech_id );
     Firefox_exec( chaine );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
@@ -362,7 +362,7 @@
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, -1 );                                         /* Recup du id */
-    g_snprintf( chaine, sizeof(chaine), "admin/dls/run/%s", tech_id );
+    g_snprintf( chaine, sizeof(chaine), "tech/run/%s", tech_id );
     g_free( tech_id );
     Firefox_exec( chaine );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
