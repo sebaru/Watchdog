@@ -101,56 +101,6 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Rechercher_mnemo_aiDB: Recupération de la conf de l'entrée analogique en parametre                                         */
-/* Entrée: l'id a récupérer                                                                                                   */
-/* Sortie: une structure hébergeant l'entrée analogique                                                                       */
-/******************************************************************************************************************************/
- struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_aiDB ( guint id )
-  { struct CMD_TYPE_MNEMO_AI *mnemo_ai;
-    gchar requete[512];
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_aiDB: DB connexion failed" );
-       return(NULL);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %s.min,%s.max,%s.type,%s.unite"
-                " FROM %s"
-                " INNER JOIN %s ON id_mnemo = id"
-                " WHERE id_mnemo=%d LIMIT 1",
-                NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI,
-                NOM_TABLE_MNEMO_AI,                                                                                   /* FROM */
-                NOM_TABLE_MNEMO,                                                                                /* INNER JOIN */
-                id                                                                                                   /* WHERE */
-              );
-
-    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
-     { Libere_DB_SQL (&db);
-       return(NULL);
-     }
-
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Libere_DB_SQL( &db );
-       return(NULL);
-     }
-
-    mnemo_ai = (struct CMD_TYPE_MNEMO_AI *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_AI) );
-    if (!mnemo_ai) Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                             "Rechercher_mnemo_aiDB: Erreur allocation mémoire" );
-    else
-     { mnemo_ai->min      = atof(db->row[0]);
-       mnemo_ai->max      = atof(db->row[1]);
-       mnemo_ai->type     = atoi(db->row[2]);
-       g_snprintf( mnemo_ai->unite, sizeof(mnemo_ai->unite), "%s", db->row[3] );
-     }
-    Libere_DB_SQL( &db );
-    return(mnemo_ai);
-  }
-/******************************************************************************************************************************/
 /* Rechercher_AI: Recupération des champs de base de données pour le AI tech_id:acro en parametre                             */
 /* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
 /* Sortie: la struct DB                                                                                                       */
@@ -308,54 +258,6 @@
                  ai->tech_id, ai->acronyme, ai->val_avant_ech, ai->unite );
      }
     Libere_DB_SQL( &db );
-  }
-/******************************************************************************************************************************/
-/* Charger_analogInput: Chargement des infos sur les Entrees ANA                                                              */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- void Charger_analogInput ( void )
-  { gchar requete[512];
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_analogInput: Connexion DB impossible" );
-       return;
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT num,min,max,%s.type,%s.unite"
-                " FROM %s"
-                " INNER JOIN %s ON id_mnemo = id ORDER BY num",
-                NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI,
-                NOM_TABLE_MNEMO,                                                                                      /* FROM */
-                NOM_TABLE_MNEMO_AI                                                                              /* INNER JOIN */
-              );
-
-    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
-     { Libere_DB_SQL (&db);
-       return;
-     }
-
-    while ( Recuperer_ligne_SQL(db) )                                                      /* Chargement d'une ligne resultat */
-     { gint num;
-       num = atoi( db->row[0] );
-       if (num < NBR_ENTRE_ANA)
-        { Partage->ea[num].confDB.min  = atof(db->row[1]);
-          Partage->ea[num].confDB.max      = atof(db->row[2]);
-          Partage->ea[num].confDB.type     = atoi(db->row[3]);
-          g_snprintf( Partage->ea[num].confDB.unite, sizeof(Partage->ea[num].confDB.unite), "%s", db->row[4] );
-          Partage->ea[num].last_arch = 0;                             /* Mise à zero du champ de la derniere date d'archivage */
-          Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                   "Charger_analogInput: Chargement config EA[%04d]=%d", num );
-        }
-       else
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-			       "Charger_analogInput: num (%d) out of range (max=%d)", num, NBR_ENTRE_ANA ); }
-     }
-    Libere_DB_SQL (&db);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_analogInput: DB reloaded" );
   }
 /******************************************************************************************************************************/
 /* Updater_confDB_R: Mise a jour des valeurs de R en base                                                                   */

@@ -119,7 +119,6 @@
        modbus->enable   = atoi(db->row[2]);
        modbus->watchdog = atoi(db->row[5]);
        modbus->map_E    = atoi(db->row[7]);
-       modbus->map_EA   = atoi(db->row[8]);
        modbus->map_A    = atoi(db->row[9]);
        modbus->map_AA   = atoi(db->row[10]);
        modbus->max_nbr_E= atoi(db->row[11]);
@@ -132,8 +131,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Deconnecter_module ( struct MODULE_MODBUS *module )
-  { gint cpt;
-    if (!module) return;
+  { if (!module) return;
     if (module->started == FALSE) return;
 
     close ( module->connexion );
@@ -142,13 +140,11 @@
     module->request = FALSE;
     module->nbr_deconnect++;
     module->date_retente = Partage->top + MODBUS_RETRY;
-    for ( cpt = module->modbus.map_EA; cpt<module->nbr_entree_ana; cpt++)
-     { if (!module->AI[cpt]) SEA_range( cpt, 0 ); }
     if (module->DI) g_free(module->DI);
     if (module->AI) g_free(module->AI);
     if (module->DO) g_free(module->DO);
     Dls_data_set_bool ( NULL, module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s : '%s': Module disconnected", __func__, module->modbus.tech_id );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module disconnected", __func__, module->modbus.tech_id );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -229,6 +225,7 @@
     module->DI = NULL;
     module->AI = NULL;
     module->DO = NULL;
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module Connected", __func__, module->modbus.tech_id );
 
     return(TRUE);
   }
@@ -791,33 +788,29 @@
                module->mode = MODBUS_GET_AI;
                break;
           case MODBUS_GET_AI:
-               cpt_e = module->modbus.map_EA;
                for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
                 { struct DLS_AI *ai = module->AI[cpt];
-                  switch( (ai ? ai->type : Partage->ea[cpt_e].confDB.type) )
+                  if (!ai) continue;                                                 /* Si pas mappé, bah on ne la stocke pas */
+                  switch( ai->type )
                    { case ENTREEANA_WAGO_750455:
                           if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
                            { int reponse;
                              reponse  = module->response.data[ 2*cpt + 1 ] << 5;
                              reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
-                             if (!ai) SEA( cpt_e, reponse );             /* Old style : positionnement par ancienne interface */
-                             else Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse, TRUE );
+                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse, TRUE );
                            }
-                          else { if (!ai) SEA_range( cpt_e, 0 );
-                                 else Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], 0.0, FALSE );
+                          else { Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], 0.0, FALSE );
                                }
                           break;
                      case ENTREEANA_WAGO_750461:                                                               /* Borne PT100 */
                            { gint16 reponse;
                              reponse  = module->response.data[ 2*cpt + 1 ] << 8;
                              reponse |= module->response.data[ 2*cpt + 2 ];
-                             if (!ai) SEA ( cpt_e, 1.0*reponse );        /* Old style : positionnement par ancienne interface */
-                             else Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse, TRUE );
+                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse, TRUE );
                            }
                           break;
-                     default : if(!ai) SEA_range( cpt_e, 0 );
+                     default : break;
                    }
-                  cpt_e++;
                 }
                module->mode = MODBUS_SET_DO;
                break;
@@ -1113,12 +1106,11 @@
        cpt++;                                                                  /* Nous avons ajouté un module dans la liste ! */
                                                                                             /* Ajout dans la liste de travail */
        Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                "%s: id=%d, enable=%d", __func__, module->modbus.id, module->modbus.enable );
+                "%s: tech_id='%s', enable='%d'", __func__, module->modbus.tech_id, module->modbus.enable );
        pthread_create( &tid, NULL, (void *)Run_modbus_thread, module );
        Cfg_modbus.Modules_MODBUS = g_slist_prepend ( Cfg_modbus.Modules_MODBUS, module );
      }
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-             "%s: %d modules MODBUS found  !", __func__, cpt );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: %d modules MODBUS found  !", __func__, cpt );
     Libere_DB_SQL( &db );
     return(TRUE);
   }

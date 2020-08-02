@@ -428,7 +428,15 @@ reload:
      }
     soup_server_add_handler ( socket, "/connect",        Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/disconnect",     Http_traiter_disconnect, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/list",       Http_traiter_dls_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/source/",    Http_traiter_dls_source, NULL, NULL );
     soup_server_add_handler ( socket, "/dls/del/",       Http_traiter_dls_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/run/" ,      Http_traiter_dls_run, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/run" ,       Http_traiter_dls_run_all, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/debug/" ,    Http_traiter_dls_debug, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/undebug/" ,  Http_traiter_dls_undebug, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/start/" ,    Http_traiter_dls_start, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/stop/" ,     Http_traiter_dls_stop, NULL, NULL );
     soup_server_add_handler ( socket, "/dls",            Http_traiter_dls, NULL, NULL );
     soup_server_add_handler ( socket, "/mnemos/list/",   Http_traiter_mnemos_list, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/list",       Http_traiter_syn_list, NULL, NULL );
@@ -445,7 +453,6 @@ reload:
     soup_server_add_handler ( socket, "/log/get",        Http_traiter_log_get, NULL, NULL );
     soup_server_add_handler ( socket, "/log",            Http_traiter_log, NULL, NULL );
     soup_server_add_handler ( socket, "/bus",            Http_traiter_bus, NULL, NULL );
-    soup_server_add_handler ( socket, "/memory",         Http_traiter_memory, NULL, NULL );
     soup_server_add_handler ( socket, "/users/list",     Http_traiter_users_list, NULL, NULL );
     soup_server_add_handler ( socket, "/users/kill",     Http_traiter_users_kill, NULL, NULL );
     soup_server_add_handler ( socket, "/users/sessions", Http_traiter_users_sessions, NULL, NULL );
@@ -469,7 +476,6 @@ reload:
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/mnemos",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/bus",
                                           SOUP_AUTH_DOMAIN_ADD_PATH, "/users",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/memory",
                                           NULL );
     soup_auth_domain_set_filter ( domain, Http_test_session_CB, NULL, NULL );
     soup_server_add_auth_domain(socket, domain);

@@ -545,12 +545,10 @@
   { struct MODULE_UPS *module;
     GSList *liste;
 
-    prctl(PR_SET_NAME, "W-UPS", 0, 0, 0 );
 reload:
     memset( &Cfg_ups, 0, sizeof(Cfg_ups) );                                         /* Mise a zero de la structure de travail */
     Cfg_ups.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
     Thread_init ( "W-UPS", lib, NOM_THREAD, "Manage UPS Module" );
-    Cfg_ups.lib->TID = pthread_self();                                                      /* Sauvegarde du TID pour le pere */
     Ups_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
     if (!Cfg_ups.enable)

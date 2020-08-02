@@ -371,4 +371,36 @@
      }
     return(TRUE);
   }
+/******************************************************************************************************************************/
+/* Rechercher_type_bit: Recherche le type d'un bit matérialisé par son tech_id:acronyme                                       */
+/* Entrée: le tech_id et acronyme                                                                                             */
+/* Sortie: -1 si erreur                                                                                                       */
+/******************************************************************************************************************************/
+ gint Rechercher_type_bit ( gchar *tech_id, gchar *acronyme )
+  { gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(-1);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT type_bit_int FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme
+              );
+
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+     { Libere_DB_SQL (&db);
+       return(-1);
+     }
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Libere_DB_SQL( &db );
+       return(-1);
+     }
+    gint result = atoi(db->row[0]);
+    Libere_DB_SQL( &db );
+    return(result);
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

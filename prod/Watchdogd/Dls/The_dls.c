@@ -121,76 +121,6 @@
        Partage->e[num].etat = etat;                                                          /* Changement d'etat de l'entrée */
      }
   }
-/******************************************************************************************************************************/
-/* EA_inrange : Renvoie 1 si l'EA en paramètre est dans le range de mesure                                                    */
-/******************************************************************************************************************************/
- int EA_inrange( int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) return( Partage->ea[ num ].inrange);
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "EA_range : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/******************************************************************************************************************************/
-/* EA_ech : Renvoie la valeur de l'EA interprétée (mis à l'échelle)                                                           */
-/******************************************************************************************************************************/
- float EA_ech( int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA)
-     { gfloat val_ech;
-       val_ech = Partage->ea[ num ].val_ech;
-       return ( val_ech );
-     }
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "EA_ech : num %d out of range", num ); }
-     }
-    return(0.0);
-  }
-/******************************************************************************************************************************/
-/* EA_ech_inf : Teste si la valeur de l'EA est inf à une mesure                                                               */
-/******************************************************************************************************************************/
- int EA_ech_inf( float val, int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) < val); }
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "EA_ech_inf : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/**********************************************************************************************************/
-/* EA_ech_inf_egal : Teste si la valeur de l'EA est inf ou egale à une mesure                             */
-/**********************************************************************************************************/
- int EA_ech_inf_egal( float val, int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) <= val); }
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "EA_ech_inf_egal : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/**********************************************************************************************************/
-/* EA_ech_sup : Teste si la valeur de l'EA est sup à une mesure                                           */
-/**********************************************************************************************************/
- int EA_ech_sup( float val, int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) > val); }
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "EA_ech_sup : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/**********************************************************************************************************/
-/* EA_ech_sup_egal : Teste si la valeur de l'EA est sup ou egale à une mesure                             */
-/**********************************************************************************************************/
- int EA_ech_sup_egal( float val, int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) >= val); }
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "EA_ech_sup_egal : num %d out of range", num ); }
-     }
-    return(0);
-  }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
@@ -223,93 +153,6 @@
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "M : num %d out of range", num ); }
      }
     return(0);
-  }
-/**********************************************************************************************************/
-/* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
-/**********************************************************************************************************/
- void SEA_range( int num, int range )
-  { if (num<0 || num>=NBR_ENTRE_ANA)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SEA_range : num %d out of range", num ); }
-       return;
-     }
-    Partage->ea[num].inrange = range;
-  }
-/**********************************************************************************************************/
-/* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                        */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
- void SEA ( int num, float val_avant_ech )
-  { gboolean need_arch;
-    if (num<0 || num>=NBR_ENTRE_ANA)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SEA : num %d out of range", num ); }
-       return;
-     }
-
-    need_arch = FALSE;
-    if (Partage->ea[ num ].val_avant_ech != val_avant_ech)
-     { Partage->ea[ num ].val_avant_ech = val_avant_ech;        /* Archive au mieux toutes les 5 secondes */
-       if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top )
-        { need_arch = TRUE; }
-
-       switch ( Partage->ea[num].confDB.type )
-        { case ENTREEANA_NON_INTERP:
-               Partage->ea[ num ].val_ech = val_avant_ech;                     /* Pas d'interprétation !! */
-               Partage->ea[ num ].inrange = 1;
-               break;
-          case ENTREEANA_4_20_MA_10BITS:
-               if (val_avant_ech < 100)                            /* 204) Modification du range pour 4mA */
-                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */
-                  Partage->ea[ num ].inrange = 0;
-                }
-               else
-                { if (val_avant_ech < 204) val_avant_ech = 204;
-                  Partage->ea[ num ].val_ech = (gfloat)
-                  ((val_avant_ech-204)*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/820.0
-                  + Partage->ea[num].confDB.min;                                    /* Valeur à l'echelle */
-
-                  Partage->ea[ num ].inrange = 1;
-                }
-               break;
-          case ENTREEANA_4_20_MA_12BITS:
-               if (val_avant_ech < 400)
-                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */
-                  Partage->ea[ num ].inrange = 0;
-                }
-               else
-                { if (val_avant_ech < 816) val_avant_ech = 816;
-                  Partage->ea[ num ].val_ech = (gfloat)
-                  ((val_avant_ech-816)*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/3280.0
-                     + Partage->ea[num].confDB.min;                          /* Valeur à l'echelle */
-                  Partage->ea[ num ].inrange = 1;
-                }
-               break;
-          case ENTREEANA_WAGO_750455:                                                                              /* 4/20 mA */
-               Partage->ea[ num ].val_ech = (gfloat)
-                  (val_avant_ech*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/4095.0
-                     + Partage->ea[num].confDB.min;                          /* Valeur à l'echelle */
-               Partage->ea[ num ].inrange = 1;
-               break;
-          case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
-               if (val_avant_ech > -32767 && val_avant_ech < 8500)
-                { Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);                         /* Valeur à l'echelle */
-                  Partage->ea[ num ].inrange = 1;
-                }
-               else Partage->ea[ num ].inrange = 0;
-               break;
-          default:
-               Partage->ea[ num ].val_ech = 0.0;
-               Partage->ea[ num ].inrange = 0;
-        }
-     }
-    else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
-     { need_arch = TRUE; }                                           /* Archive au pire toutes les 10 min */
-
-    if (need_arch)
-     { /*Ajouter_arch( MNEMO_ENTREE_ANA, num, Partage->ea[num].val_ech );            /* Archivage si besoin */
-       Partage->ea[ num ].last_arch = Partage->top;                       /* Communications aux threads ! */
-     }
   }
 /******************************************************************************************************************************/
 /* SB_SYS: Positionnement d'un bistable DLS sans controle sur le range reserved                                               */
@@ -1793,44 +1636,6 @@
     return(g_strdup(result));
   }
 /******************************************************************************************************************************/
-/* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */
-/* Entrée : le Dls_tree et les fonctions a appliquer                                                                          */
-/* Sortie : rien                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_foreach_dls_tree ( struct DLS_TREE *dls_tree, void *user_data,
-                                    void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
-                                    void (*do_tree)   (void *user_data, struct DLS_TREE *) )
-  { GSList *liste;
-    liste = dls_tree->Liste_dls_tree;
-    while (liste)
-     { struct DLS_TREE *sub_tree;
-       sub_tree = (struct DLS_TREE *)liste->data;
-       Dls_foreach_dls_tree( sub_tree, user_data, do_plugin, do_tree );
-       liste = liste->next;
-     }
-    liste = dls_tree->Liste_plugin_dls;
-    while(liste && do_plugin)                                                        /* On execute tous les modules un par un */
-     { struct PLUGIN_DLS *plugin_actuel;
-       plugin_actuel = (struct PLUGIN_DLS *)liste->data;
-       do_plugin( user_data, plugin_actuel );
-       liste = liste->next;
-     }
-    if (do_tree) do_tree( user_data, dls_tree );
-  }
-/******************************************************************************************************************************/
-/* Dls_foreach: Parcours l'arbre DLS et execute des commandes en parametres                                                   */
-/* Entrée : les fonctions a appliquer                                                                                         */
-/* Sortie : rien                                                                                                              */
-/******************************************************************************************************************************/
- void Dls_foreach ( void *user_data, void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
-                                     void (*do_tree)   (void *user_data, struct DLS_TREE *) )
-  { if (Partage->com_dls.Dls_tree)
-     { pthread_mutex_lock( &Partage->com_dls.synchro );
-       Dls_foreach_dls_tree( Partage->com_dls.Dls_tree, user_data, do_plugin, do_tree );
-       pthread_mutex_unlock( &Partage->com_dls.synchro );
-     }
-  }
-/******************************************************************************************************************************/
 /* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
 /* Entrée : le Dls_tree correspondant                                                                                         */
 /* Sortie : rien                                                                                                              */
@@ -2009,16 +1814,6 @@
        if (Partage->top-Update_heure>=600)                          /* Gestion des changements d'horaire (toutes les minutes) */
         { Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
           Update_heure=Partage->top;
-        }
-
-       if (Partage->com_dls.admin_start)                                                      /* A-t-on un plugin a allumer ? */
-        { Activer_plugin_by_id ( Partage->com_dls.admin_start, TRUE );
-          Partage->com_dls.admin_start = 0;
-        }
-
-       if (Partage->com_dls.admin_stop)                                                      /* A-t-on un plugin a eteindre ? */
-        { Activer_plugin_by_id ( Partage->com_dls.admin_stop, FALSE );
-          Partage->com_dls.admin_stop = 0;
         }
 
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */

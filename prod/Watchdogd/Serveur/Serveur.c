@@ -261,25 +261,12 @@
 /* Sortie: un code d'erreur EXIT_xxx                                                                                          */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { gchar nom[32];
-
-    g_snprintf(nom, sizeof(nom), "W-SSRV-LISTEN" );
-    prctl(PR_SET_NAME, nom, 0, 0, 0 );
-
-    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
-
+  { setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
                                                                       /* Initialisation de la zone interne et comm du serveur */
     memset( &Cfg_ssrv, 0, sizeof(Cfg_ssrv) );                                       /* Mise a zero de la structure de travail */
     Cfg_ssrv.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Cfg_ssrv.lib->TID = pthread_self();                                                     /* Sauvegarde du TID pour le pere */
+    Thread_init ( "W-SSRV-LISTEN", lib, NOM_THREAD, "Manage SSRV Module" );
     Ssrv_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
-
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
-    Cfg_ssrv.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
-
-    g_snprintf( Cfg_ssrv.lib->admin_prompt, sizeof(Cfg_ssrv.lib->admin_prompt), NOM_THREAD );
-    g_snprintf( Cfg_ssrv.lib->admin_help,   sizeof(Cfg_ssrv.lib->admin_help),   "Manage SSRV Modules" );
 
     if (Cfg_ssrv.ssl_needed)
      { Cfg_ssrv.Ssl_ctx = Init_ssl();                                                                   /* Initialisation SSL */
@@ -330,12 +317,8 @@ end:
                 "Run_thread: Wating for %03d clients to shutdown", nbr );
        sched_yield();
      }
-    Cfg_ssrv.lib->Thread_run = FALSE;                                                           /* Le thread ne tourne plus ! */
     Liberer_SSL ();                                                                                     /* Libération mémoire */
     if (Cfg_ssrv.Socket_ecoute>0) close(Cfg_ssrv.Socket_ecoute);
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Down . . . TID = %p", pthread_self() );
-    Cfg_ssrv.lib->TID = 0;                                                    /* On indique au master que le thread est mort. */
-    pthread_exit(GINT_TO_POINTER(0));
- }
+    Thread_end ( lib );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

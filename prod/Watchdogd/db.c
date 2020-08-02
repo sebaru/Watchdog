@@ -244,7 +244,8 @@
 /* Entrée: La DB                                                                                                              */
 /******************************************************************************************************************************/
  void Libere_DB_SQL( struct DB **adr_db )
-  { struct DB *db, *db_en_cours;
+  { static struct DLS_AI *ai_nbr_dbrequest = NULL;
+    struct DB *db, *db_en_cours;
     gboolean found;
     GSList *liste;
     gint taille;
@@ -279,7 +280,7 @@
              "Libere_DB_SQL: Deconnexion effective (DB%07d), Nbr_requete_en_cours=%d", db->id, taille );
     g_free( db );
     *adr_db = NULL;
-    SEA ( NUM_EA_SYS_DBREQUEST_SIMULT, taille );                                            /* Enregistrement pour historique */
+    Dls_data_set_AI ( "SYS", "DB_NBR_REQUEST", (gpointer)&ai_nbr_dbrequest, taille, TRUE );
   }
 /******************************************************************************************************************************/
 /* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                                         */
@@ -1800,6 +1801,11 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4851)
+     { g_snprintf( requete, sizeof(requete), "DROP TABLE `mnemos_AnalogInput`");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
                                           "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "
@@ -1817,24 +1823,28 @@
                                           "(SELECT COUNT(*) FROM audit_log) AS nbr_audit_log" );
     Lancer_requete_SQL ( db, requete );
 
-    g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW dictionnaire AS "
-                                          "SELECT 'AI' AS type_bit,tech_id,acronyme,libelle from mnemos_AI UNION "
-                                          "SELECT 'DI' AS type_bit,tech_id,acronyme,libelle from mnemos_DI UNION "
-                                          "SELECT 'DO' AS type_bit,tech_id,acronyme,libelle from mnemos_DO UNION "
-                                          "SELECT 'AO' AS type_bit,tech_id,acronyme,libelle from mnemos_AO UNION "
-                                          "SELECT 'BOOL' AS type_bit,tech_id,acronyme,libelle from mnemos_BOOL UNION "
-                                          "SELECT 'CH' AS type_bit,tech_id,acronyme,libelle from mnemos_CH UNION "
-                                          "SELECT 'CI' AS type_bit,tech_id,acronyme,libelle from mnemos_CI UNION "
-                                          "SELECT 'HORLOGE' AS type_bit,tech_id,acronyme,libelle from mnemos_HORLOGE UNION "
-                                          "SELECT 'TEMPO' AS type_bit,tech_id,acronyme,libelle from mnemos_Tempo UNION "
-                                          "SELECT 'REGISTRE' AS type_bit,tech_id,acronyme,libelle from mnemos_R UNION "
-                                          "SELECT 'VISUEL' AS type_bit,tech_id,acronyme,libelle from syns_motifs" );
+    g_snprintf( requete, sizeof(requete),
+       "CREATE OR REPLACE VIEW dictionnaire AS "
+       "SELECT 'AI' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_AI UNION "
+       "SELECT 'DI' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_DI UNION "
+       "SELECT 'DO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_DO UNION "
+       "SELECT 'AO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_AO UNION "
+       "SELECT 'BOOL' AS type_bit, type AS type_bit_int,tech_id,acronyme,libelle from mnemos_BOOL UNION "
+       "SELECT 'CH' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_CH UNION "
+       "SELECT 'CI' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_CI UNION "
+       "SELECT 'HORLOGE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_HORLOGE UNION "
+       "SELECT 'TEMPO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_Tempo UNION "
+       "SELECT 'REGISTRE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_R UNION "
+       "SELECT 'VISUEL' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from syns_motifs",
+        MNEMO_ENTREE_ANA, MNEMO_ENTREE, MNEMO_SORTIE, MNEMO_SORTIE_ANA, MNEMO_CPTH, MNEMO_CPT_IMP, MNEMO_HORLOGE,
+        MNEMO_TEMPO, MNEMO_REGISTRE, -1
+      );
     Lancer_requete_SQL ( db, requete );
 
 
     Libere_DB_SQL(&db);
 fin:
-    database_version=4745;
+    database_version=4851;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

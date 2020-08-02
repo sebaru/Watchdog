@@ -231,7 +231,6 @@
 /******************************************************************************************************************************/
  void Charger_config_bit_interne( void )
   { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
-    Charger_analogInput();
     Charger_confDB_Registre();
     Charger_confDB_AI();
     Charger_confDB_MSG();

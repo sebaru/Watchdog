@@ -63,6 +63,10 @@
           return( cadran->valeur != valeur );
         }
        case MNEMO_REGISTRE:
+        { gint valeur;
+          valeur = Dls_data_get_R ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+          return( cadran->valeur != valeur );
+        }
        default: return(FALSE);
      }
   }
@@ -76,24 +80,9 @@
     if (!cadran) return;
 
     if (cadran->dls_data == NULL)
-     { struct DB *db;
-       if ( (db=Rechercher_CI ( cadran->tech_id, cadran->acronyme )) != NULL )
-        { cadran->type = MNEMO_CPT_IMP;
-          Libere_DB_SQL (&db);
-        }
-       else if ( (db=Rechercher_AI ( cadran->tech_id, cadran->acronyme )) != NULL )
-        { cadran->type = MNEMO_ENTREE_ANA;
-          Libere_DB_SQL (&db);
-        }
-       else if ( (db=Rechercher_Tempo ( cadran->tech_id, cadran->acronyme )) != NULL )
-        { cadran->type = MNEMO_TEMPO;
-          Libere_DB_SQL (&db);
-        }
-       else if ( (db=Rechercher_CH ( cadran->tech_id, cadran->acronyme )) != NULL )
-        { cadran->type = MNEMO_CPTH;
-          Libere_DB_SQL (&db);
-        }
-       else return;                                                                                       /* Si pas trouvé... */
+     { gint type = Rechercher_type_bit(cadran->tech_id, cadran->acronyme );
+        if (type==-1) return;
+        cadran->type = type;
      }
 
     switch(cadran->type)
@@ -136,9 +125,15 @@
              }
             break;
        case MNEMO_REGISTRE:
-            cadran->valeur = -1.0;
-            g_snprintf( cadran->unite, sizeof(cadran->unite), "?" );
-            cadran->in_range = TRUE;
+             { cadran->valeur = Dls_data_get_R (cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+               struct DLS_REGISTRE *registre=cadran->dls_data;
+               if (!registre)                                       /* si AI pas trouvée, on remonte le nom du cadran en libellé */
+                { cadran->in_range = FALSE;
+                  break;
+                }
+               cadran->in_range = TRUE;
+               g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", registre->unite );
+             }
             break;
        case MNEMO_TEMPO:
             Dls_data_get_tempo ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );

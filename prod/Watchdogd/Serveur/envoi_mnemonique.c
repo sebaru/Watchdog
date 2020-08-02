@@ -111,9 +111,6 @@
                     (gchar *)result, sizeof(struct CMD_TYPE_MNEMO_BASE) );
      }
 
-    switch( result->type )
-     { case MNEMO_ENTREE_ANA :  Charger_analogInput (); break;                                 /* Update de la running config */
-     }
     g_free(result);
   }
 /******************************************************************************************************************************/

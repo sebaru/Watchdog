@@ -120,21 +120,6 @@
                    num, E(num) );
        response = Admin_write ( response, chaine );
      } else
-    if ( ! strcmp ( commande, "ea" ) )
-     { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
-       if (num<NBR_ENTRE_ANA)
-        { g_snprintf( chaine, sizeof(chaine),
-                      " | - EA%03d = %8.2f %s, val_avant_ech=%8.2f, inrange=%d, type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f",
-                      num, EA_ech(num), Partage->ea[num].confDB.unite, Partage->ea[num].val_avant_ech, EA_inrange(num),
-                      Partage->ea[num].confDB.type, Partage->ea[num].last_arch,
-                      (Partage->top - Partage->ea[num].last_arch)/10,
-                      Partage->ea[num].confDB.min, Partage->ea[num].confDB.max
-                    );
-        } else
-        { g_snprintf( chaine, sizeof(chaine), " | - EA -> num '%d' out of range (max=%d)", num, NBR_ENTRE_ANA ); }
-       response = Admin_write ( response, chaine );
-     } else
     if ( ! strcmp ( commande, "list" ) )
      { gchar tech_id[80];
        GSList *liste;

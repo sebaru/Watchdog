@@ -6,7 +6,8 @@
     xhr.open('get', "/api/process/reload/"+thread);
     /*xhr.setRequestHeader('Content-type', 'application/json');*/
     xhr.onreadystatechange = function()
-     { if (xhr.status == 200)
+     { if ( xhr.readyState != 4 ) return;
+       if (xhr.status == 200)
         { /*var Response = JSON.parse(xhr.responseText);
           console.debug(Response);*/
           $('#idToastStatus').toast('show');
@@ -55,6 +56,7 @@
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Load_process ()
   { console.log ("in load process !");
+
     $('#idTableProcess').DataTable(
        { pageLength : 25,
          fixedHeader: true,

@@ -3,10 +3,10 @@
  <div class="row m-2">
  <h3>Liste des Modules D.L.S</h3>
 
- <div class ="ml-auto">
-    <?php echo anchor('/tech/dls/run', '<i class="fa fa-eye"></i> Voir le RUN', array('class' => 'btn btn-primary')); ?>
-       <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
- </div>
+   <div class ="ml-auto btn-group">
+        <button type="button" onclick="Go_to_dls_run()"class="btn btn-info"><i class="fas fa-eye"></i> RUN</button>
+         <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
+   </div>
  </div>
 
     <table id="idTableDLS" class="table table-striped table-bordered table-hover">

@@ -56,7 +56,7 @@
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), prompt );
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   description );
     Modifier_configDB ( prompt, "thread_version", VERSION );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", lib->admin_prompt, pthread_self() );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Démarrage . . . TID = %p", lib->admin_prompt, pthread_self() );
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */

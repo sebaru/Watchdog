@@ -47,8 +47,9 @@
     if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
           else { g_snprintf(date, sizeof(date), "Erreur"); }
 
-    Json_add_object ( builder, dls->plugindb.tech_id );
+    Json_add_object ( builder, NULL );
     Json_add_int    ( builder, "id",        dls->plugindb.id );
+    Json_add_string ( builder, "tech_id",   dls->plugindb.tech_id );
     Json_add_string ( builder, "shortname", dls->plugindb.shortname );
     Json_add_string ( builder, "name" ,     dls->plugindb.nom );
     if (dls->version) Json_add_string ( builder, "version", dls->version() );
@@ -84,10 +85,17 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Http_dls_getrunlist ( SoupMessage *msg )
+ void Http_traiter_dls_run_all ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                 SoupClientContext *client, gpointer user_data )
   { JsonBuilder *builder;
     gchar *buf;
     gsize taille_buf;
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
 
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
@@ -98,7 +106,9 @@
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping dlslist ----------------------------------------------------*/
+    Json_add_array ( builder, "plugins" );
     Dls_foreach ( builder, Http_dls_do_plugin, NULL );
+    Json_end_array ( builder );
 
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
@@ -106,15 +116,427 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /******************************************************************************************************************************/
+/* Http_Traiter_dls_run: Donne l'état des bits d'un module, ou de tous les modules si pas de tech_id fourni                   */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_dls_run ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                             SoupClientContext *client, gpointer user_data )
+  { gsize taille_buf;
+    GSList *liste;
+    gchar *buf;
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    gchar *prefix = "/dls/run/";
+    if ( ! g_str_has_prefix ( path, prefix ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+       return;
+     }
+    if (!strlen (path+strlen(prefix)))
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    gchar *tech_id = Normaliser_chaine ( path+strlen(prefix) );
+    if (!tech_id)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+
+    JsonBuilder *builder = Json_create ();
+    if (!builder)
+     { g_free(tech_id);
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+/*------------------------------------------------------- Dumping status -----------------------------------------------------*/
+    Json_add_string ( builder, "tech_id", tech_id );
+    Json_add_int    ( builder, "top", Partage->top );
+/*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
+    Json_add_array ( builder, "CI" );
+    liste = Partage->Dls_data_CI;
+    while(liste)
+     { struct DLS_CI *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Dls_CI_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
+/*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
+    Json_add_array ( builder, "BOOL" );
+    liste = Partage->Dls_data_BOOL;
+    while(liste)
+     { struct DLS_BOOL *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Dls_BOOL_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
+/*--------------------------------------------------- Compteur horaires ------------------------------------------------------*/
+    Json_add_array ( builder, "CH" );
+    liste = Partage->Dls_data_CH;
+    while(liste)
+     { struct DLS_CH *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Dls_CH_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
+/*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
+    Json_add_array ( builder, "AI" );
+    liste = Partage->Dls_data_AI;
+    while(liste)
+     { struct DLS_AI *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Dls_AI_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
+/*----------------------------------------------- Sortie Analogique ----------------------------------------------------------*/
+    Json_add_array ( builder, "AO" );
+    liste = Partage->Dls_data_AO;
+    while(liste)
+     { struct DLS_AO *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Dls_AO_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
+/*----------------------------------------------- Temporisations -------------------------------------------------------------*/
+    Json_add_array ( builder, "T" );
+    liste = Partage->Dls_data_TEMPO;
+    while(liste)
+     { struct DLS_TEMPO *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Dls_TEMPO_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
+/*----------------------------------------------- Entrées TOR ----------------------------------------------------------------*/
+    Json_add_array ( builder, "DI" );
+    liste = Partage->Dls_data_DI;
+    while(liste)
+     { struct DLS_DI *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Dls_DI_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
+/*----------------------------------------------- Sortie TOR -----------------------------------------------------------------*/
+    Json_add_array ( builder, "DO" );
+    liste = Partage->Dls_data_DO;
+    while(liste)
+     { struct DLS_DO *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Dls_DO_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
+/*----------------------------------------------- Visuels --------------------------------------------------------------------*/
+    Json_add_array ( builder, "I" );
+    liste = Partage->Dls_data_VISUEL;
+    while(liste)
+     { struct DLS_VISUEL *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Dls_VISUEL_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
+
+/*----------------------------------------------- Messages -------------------------------------------------------------------*/
+    Json_add_array ( builder, "MSG" );
+    liste = Partage->Dls_data_MSG;
+    while(liste)
+     { struct DLS_MESSAGES *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Dls_MESSAGE_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
+/*----------------------------------------------- Registre -------------------------------------------------------------------*/
+    Json_add_array ( builder, "R" );
+    liste = Partage->Dls_data_REGISTRE;
+    while(liste)
+     { struct DLS_REGISTRE *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Dls_REGISTRE_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
+/*------------------------------------------------------- fin ----------------------------------------------------------------*/
+    g_free(tech_id);
+    buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_dls_source ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                SoupClientContext *client, gpointer user_data )
+  { gchar *buf, chaine[256];
+    gsize taille_buf;
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    gchar *prefix = "/dls/source/";
+    if ( ! g_str_has_prefix ( path, prefix ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+       return;
+     }
+    if (!strlen (path+strlen(prefix)))
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    gchar *tech_id = Normaliser_chaine ( path+strlen(prefix) );
+    if (!tech_id)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+
+    JsonBuilder *builder = Json_create ();
+    if (!builder)
+     { g_free(tech_id);
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+    g_snprintf( chaine, sizeof(chaine),
+               "SELECT d.* FROM dls as d INNER JOIN syns as s ON d.syn_id=s.id "
+               "WHERE tech_id='%s' AND s.access_level<'%d'", tech_id, session->access_level );
+    g_free(tech_id);
+    SQL_Select_to_JSON ( builder, NULL, chaine );
+
+    buf = Json_get_buf (builder, &taille_buf);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_dls_start ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                               SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_PUT)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    gchar *prefix = "/dls/start/";
+    if ( ! g_str_has_prefix ( path, prefix ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+       return;
+     }
+    if (!strlen (path+strlen(prefix)))
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    gchar *tech_id = Normaliser_chaine ( path+strlen(prefix) );
+    if (!tech_id)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    Activer_plugin ( tech_id, TRUE );
+    g_free(tech_id);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    /*soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );*/
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_dls_stop ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                              SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_PUT)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    gchar *prefix = "/dls/stop/";
+    if ( ! g_str_has_prefix ( path, prefix ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+       return;
+     }
+    if (!strlen (path+strlen(prefix)))
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    gchar *tech_id = Normaliser_chaine ( path+strlen(prefix) );
+    if (!tech_id)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    Activer_plugin ( tech_id, FALSE );
+    g_free(tech_id);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    /*soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );*/
+  }
+
+/******************************************************************************************************************************/
+/* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_dls_debug ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                               SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_PUT)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    gchar *prefix = "/dls/debug/";
+    if ( ! g_str_has_prefix ( path, prefix ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+       return;
+     }
+    if (!strlen (path+strlen(prefix)))
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    gchar *tech_id = Normaliser_chaine ( path+strlen(prefix) );
+    if (!tech_id)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    Debug_plugin ( tech_id, TRUE );
+    g_free(tech_id);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    /*soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );*/
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_dls_undebug ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                 SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_PUT)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    gchar *prefix = "/dls/undebug/";
+    if ( ! g_str_has_prefix ( path, prefix ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+       return;
+     }
+    if (!strlen (path+strlen(prefix)))
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    gchar *tech_id = Normaliser_chaine ( path+strlen(prefix) );
+    if (!tech_id)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       return;
+     }
+    Debug_plugin ( tech_id, FALSE );
+    g_free(tech_id);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    /*soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );*/
+  }
+/******************************************************************************************************************************/
 /* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Http_dls_getlist ( SoupMessage *msg )
+ void Http_traiter_dls_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                              SoupClientContext *client, gpointer user_data )
   { JsonBuilder *builder;
     gchar *buf, chaine[512];
     gsize taille_buf;
 
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
     if (builder == NULL)
@@ -126,7 +548,8 @@
                                        "d.nbr_compil, d.nbr_ligne, d.compil_date, ps.page as ppage, s.page as page "
                                        "FROM dls AS d "
                                        "INNER JOIN syns as s ON d.syn_id=s.id "
-                                       "INNER JOIN syns as ps ON s.parent_id = ps.id" );
+                                       "INNER JOIN syns as ps ON s.parent_id = ps.id "
+                                       "WHERE s.access_level<'%d'", session->access_level );
     if (SQL_Select_to_JSON ( builder, "plugins", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
@@ -134,7 +557,7 @@
      }
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /******************************************************************************************************************************/
@@ -148,32 +571,6 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Synoptique %d -> plugin %s acquitté", __func__,
                  plugin->plugindb.id, plugin->plugindb.nom );
        plugin->vars.bit_acquit = TRUE;
-     }
-  }
-/******************************************************************************************************************************/
-/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_dls_debug_plugin ( void *user_data, struct PLUGIN_DLS *plugin )
-  { gint dls_id = *(gint *)user_data;
-    if (plugin->plugindb.id == dls_id)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Synoptique %d -> plugin %s en mode debug", __func__,
-                 plugin->plugindb.id, plugin->plugindb.nom );
-       plugin->vars.debug = TRUE;
-     }
-  }
-/******************************************************************************************************************************/
-/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_dls_undebug_plugin ( void *user_data, struct PLUGIN_DLS *plugin )
-  { gint dls_id = *(gint *)user_data;
-    if (plugin->plugindb.id == dls_id)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Synoptique %d -> plugin %s debug désactivé", __func__,
-                 plugin->plugindb.id, plugin->plugindb.nom );
-       plugin->vars.debug = FALSE;
      }
   }
 /******************************************************************************************************************************/
@@ -245,8 +642,6 @@
 
          if ( ! strcasecmp( path, "/dls/debug_trad_on" ) )  { Trad_dls_set_debug ( TRUE ); }
     else if ( ! strcasecmp( path, "/dls/debug_trad_off" ) ) { Trad_dls_set_debug ( FALSE ); }
-    else if ( ! strcasecmp( path, "/dls/list" ) )           { Http_dls_getlist ( msg ); }
-    else if ( ! strcasecmp( path, "/dls/run/list" ) )       { Http_dls_getrunlist ( msg ); }
     else if ( ! strcasecmp( path, "/dls/compil" ) )
      { gpointer id_string = g_hash_table_lookup ( query, "id" );
        if (id_string) { Compiler_source_dls( TRUE, atoi(id_string), NULL, 0 ); }
@@ -255,36 +650,6 @@
      { gpointer id_string = g_hash_table_lookup ( query, "id" );
        if (id_string) { gint id = atoi(id_string); Dls_foreach ( &id, Http_dls_acquitter_plugin, NULL ); }
      }
-    else if ( ! strcasecmp( path, "/dls/debug" ) )
-     { gpointer id_string = g_hash_table_lookup ( query, "id" );
-       if (id_string) { gint id = atoi(id_string); Dls_foreach ( &id, Http_dls_debug_plugin, NULL ); }
-     }
-    else if ( ! strcasecmp( path, "/dls/undebug" ) )
-     { gpointer id_string = g_hash_table_lookup ( query, "id" );
-       if (id_string) { gint id = atoi(id_string); Dls_foreach ( &id, Http_dls_undebug_plugin, NULL ); }
-     }
-    else if ( ! strcasecmp( path, "/dls/delete" ) )
-     { gpointer id_string = g_hash_table_lookup ( query, "id" );
-       if (id_string) { gint id = atoi(id_string); Decharger_plugin_by_id( id ); }
-     }
-    else if ( ! strcasecmp( path, "/dls/start" ) )
-     { gpointer id_string = g_hash_table_lookup ( query, "id" );
-       if (id_string)
-        { gint id = atoi(id_string);
-          while (Partage->com_dls.admin_start) sched_yield();
-          Partage->com_dls.admin_start = id;
-        }
-     }
-    else if ( ! strcasecmp( path, "/dls/stop" ) )
-     { gpointer id_string = g_hash_table_lookup ( query, "id" );
-       if (id_string)
-        { gint id = atoi(id_string);
-          while (Partage->com_dls.admin_stop) sched_yield();
-          Partage->com_dls.admin_stop = id;
-        }
-     }
-    else if ( ! strncasecmp( path, "/dls/run/", 9 ) )
-     { return(Http_Memory_get_all ( msg, path+9 )); }
     else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
