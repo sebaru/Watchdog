@@ -145,7 +145,7 @@
     if (module->AI) g_free(module->AI);
     if (module->DO) g_free(module->DO);
     Dls_data_set_bool ( NULL, module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s : '%s': Module disconnected", __func__, module->modbus.tech_id );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module disconnected", __func__, module->modbus.tech_id );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -226,6 +226,7 @@
     module->DI = NULL;
     module->AI = NULL;
     module->DO = NULL;
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module Connected", __func__, module->modbus.tech_id );
 
     return(TRUE);
   }
@@ -1107,12 +1108,11 @@
        cpt++;                                                                  /* Nous avons ajouté un module dans la liste ! */
                                                                                             /* Ajout dans la liste de travail */
        Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                "%s: id=%d, enable=%d", __func__, module->modbus.id, module->modbus.enable );
+                "%s: tech_id='%s', enable='%d'", __func__, module->modbus.tech_id, module->modbus.enable );
        pthread_create( &tid, NULL, (void *)Run_modbus_thread, module );
        Cfg_modbus.Modules_MODBUS = g_slist_prepend ( Cfg_modbus.Modules_MODBUS, module );
      }
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-             "%s: %d modules MODBUS found  !", __func__, cpt );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: %d modules MODBUS found  !", __func__, cpt );
     Libere_DB_SQL( &db );
     return(TRUE);
   }
