@@ -501,31 +501,12 @@
     return(FALSE);
   }
 /******************************************************************************************************************************/
-/* New_action_sortie: Prepare une struct action avec une commande SA                                                          */
-/* Entrées: numero de la sortie, sa logique                                                                                   */
-/* Sortie: la structure action                                                                                                */
-/******************************************************************************************************************************/
- static struct ACTION *New_action_sortie_old( int num, int barre )
-  { struct ACTION *action;
-    int taille;
-
-    taille = 20;
-    Add_bit_to_list(MNEMO_SORTIE, num);
-    action = New_action();
-    action->alors = New_chaine( taille );
-    g_snprintf( action->alors, taille, "SA(%d,%d);", num, !barre );
-    return(action);
-  }
-/******************************************************************************************************************************/
 /* New_action_sortie: Prepare la structure ACTION associée à l'alias en paramètre                                             */
 /* Entrées: l'alias, le complement si besoin, les options                                                                     */
 /* Sortie: la structure ACTION associée                                                                                       */
 /******************************************************************************************************************************/
  struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options )
-  { if (alias->num != -1) /* Alias par numéro ? */
-     { return(New_action_sortie_old( alias->num, barre )); }
-    /* Alias par nom */
-    struct ACTION *action = New_action();
+  { struct ACTION *action = New_action();
     gint taille = 128;
     action->alors = New_chaine( taille );
     if ( (!barre && !alias->barre) || (barre && alias->barre) )
