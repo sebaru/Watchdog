@@ -577,11 +577,11 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',
   `watchdog` int(11) NOT NULL,
   `bit` int(11) NOT NULL,
-  `map_E` int(11) NOT NULL,
-  `max_nbr_E` int(11) NOT NULL,
-  `map_EA` int(11) NOT NULL,
-  `map_A` int(11) NOT NULL,
-  `map_AA` int(11) NOT NULL,
+  `map_E` int(11) NOT NULL DEFAULT '0',
+  `max_nbr_E` int(11) NOT NULL DEFAULT '0',
+  `map_EA` int(11) NOT NULL DEFAULT '0',
+  `map_A` int(11) NOT NULL DEFAULT '0',
+  `map_AA` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 

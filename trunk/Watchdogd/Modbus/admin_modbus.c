@@ -191,6 +191,91 @@
     Cfg_modbus.lib->Thread_reload = TRUE;
   }
 /******************************************************************************************************************************/
+/* Admin_json_set: Met à jour une entrée WAGO                                                                                 */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Admin_json_set ( SoupMessage *msg, gchar *username, gint access_level )
+  { GBytes *request_brute;
+    gchar requete[256];
+    gsize taille;
+
+    if ( msg->method != SOUP_METHOD_POST )
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "hostname" ) &&
+            Json_has_member ( request, "description" ) && Json_has_member ( request, "watchdog" ) ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
+    gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
+    gint  watchdog     = Json_get_int ( request, "watchdog" );
+
+    g_snprintf( requete, sizeof(requete),
+               "UPDATE modbus_modules SET description='%s', hostname='%s', watchdog='%d' WHERE tech_id='%s'",
+                description, hostname, watchdog, tech_id );
+    g_free(tech_id);
+    g_free(description);
+    g_free(hostname);
+    if (SQL_Write (requete))
+     { soup_message_set_status (msg, SOUP_STATUS_OK);
+       Cfg_modbus.lib->Thread_reload = TRUE;
+     }
+    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+    json_node_unref(request);
+  }
+/******************************************************************************************************************************/
+/* Admin_json_set: Met à jour une entrée WAGO                                                                                 */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Admin_json_add ( SoupMessage *msg, gchar *username, gint access_level )
+  { GBytes *request_brute;
+    gchar requete[256];
+    gsize taille;
+
+    if ( msg->method != SOUP_METHOD_POST )
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "hostname" ) &&
+            Json_has_member ( request, "description" ) && Json_has_member ( request, "watchdog" ) ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
+    gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
+    gint  watchdog     = Json_get_int ( request, "watchdog" );
+
+    g_snprintf( requete, sizeof(requete),
+               "INSERT INTO modbus_modules SET tech_id='%s', description='%s', hostname='%s', watchdog='%d', "
+               "enable=0, date_create=NOW()",
+                tech_id, description, hostname, watchdog );
+    g_free(tech_id);
+    g_free(description);
+    g_free(hostname);
+    if (SQL_Write (requete))
+     { soup_message_set_status (msg, SOUP_STATUS_OK);
+       Cfg_modbus.lib->Thread_reload = TRUE;
+     }
+    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+    json_node_unref(request);
+  }
+/******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
@@ -199,6 +284,8 @@
   {      if (!strcasecmp(commande, "/list")) { Admin_json_list ( msg, username, access_level ); }
     else if (!strcasecmp(commande, "/run"))  { Admin_json_run ( msg, username, access_level ); }
     else if (g_str_has_prefix(commande, "/del/")) { Admin_json_del ( msg, username, access_level, commande+strlen("/del/") ); }
+    else if (!strcasecmp(commande, "/set")) { Admin_json_set ( msg, username, access_level ); }
+    else if (!strcasecmp(commande, "/add")) { Admin_json_add ( msg, username, access_level ); }
     else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
     return;
   }

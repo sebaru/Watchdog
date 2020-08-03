@@ -225,12 +225,12 @@
  gboolean SQL_Write ( gchar *requete )
   { struct DB *db = Init_DB_SQL ();
     if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Init DB FAILED for '%s'", __func__, requete );
        return(FALSE);
      }
 
     if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
        Libere_DB_SQL ( &db );
        return(FALSE);
      }
