@@ -256,7 +256,9 @@
        return;
      }
 
-    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *tech_id     = Normaliser_chaine ( g_strcanon( Json_get_string( request, "tech_id" ),
+                                                         "abcdefghijklmnopqrstuvqxyz0123456789_", '_' )
+                                           );
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
     gint  watchdog     = Json_get_int ( request, "watchdog" );

@@ -119,7 +119,6 @@
        modbus->enable   = atoi(db->row[2]);
        modbus->watchdog = atoi(db->row[5]);
        modbus->map_E    = atoi(db->row[7]);
-       modbus->map_A    = atoi(db->row[9]);
        modbus->map_AA   = atoi(db->row[10]);
        modbus->max_nbr_E= atoi(db->row[11]);
      }
@@ -583,7 +582,7 @@
 /******************************************************************************************************************************/
  static void Interroger_sortie_tor( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
-    gint cpt_a, cpt_poid, cpt_byte, cpt, taille, nbr_data;
+    gint cpt_poid, cpt_byte, cpt, taille, nbr_data;
 
     memset(&requete, 0, sizeof(requete) );                                               /* Mise a zero globale de la requete */
     nbr_data = ((module->nbr_sortie_tor-1)/8)+1;
@@ -597,14 +596,15 @@
     requete.adresse        = 0x00;
     requete.nbr            = htons( module->nbr_sortie_tor );                                                    /* bit count */
     requete.data[2]        = nbr_data;                                                                          /* Byte count */
-    cpt_a = module->modbus.map_A;
-    for ( cpt_poid = 1, cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_tor; cpt++, cpt_a++)
-      { if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
-        if ( module->DO && module->DO[cpt] )
-         { if (Dls_data_get_DO( NULL, NULL, &module->DO[cpt] ) ) { requete.data[cpt_byte] |= cpt_poid; } }
-        else if (A(cpt_a)) requete.data[cpt_byte] |= cpt_poid;
-        cpt_poid = cpt_poid << 1;
-      }
+
+    if (module->DO)
+     { for ( cpt_poid = 1, cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_tor; cpt++ )
+        { if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
+          if ( module->DO[cpt] )
+           { if (Dls_data_get_DO( NULL, NULL, &module->DO[cpt] ) ) { requete.data[cpt_byte] |= cpt_poid; } }
+          cpt_poid = cpt_poid << 1;
+        }
+     }
 
     if ( write ( module->connexion, &requete, taille+6 ) != taille+6 )               /* Envoi de la requete (taille + header )*/
      { Deconnecter_module( module ); }
