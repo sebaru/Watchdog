@@ -142,4 +142,13 @@ class Tech extends BaseController
     echo view('Tech/dls_run');
     echo view('Tech/footer');
    }
+/******************************************************************************************************************************/
+ public function modbus()
+   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
+     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+
+    echo view('Tech/header');
+    echo view('Tech/modbus');
+    echo view('Tech/footer');
+   }
 }

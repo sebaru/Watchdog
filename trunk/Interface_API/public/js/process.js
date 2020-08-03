@@ -3,7 +3,7 @@
 /********************************************* Reload Process *****************************************************************/
  function Process_clic_reload ( thread )
   { var xhr = new XMLHttpRequest;
-    xhr.open('get', "/api/process/reload/"+thread);
+    xhr.open('PUT', "/api/process/reload/"+thread);
     /*xhr.setRequestHeader('Content-type', 'application/json');*/
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
@@ -22,7 +22,7 @@
     button = $('#idButtonDebug_'+thread);
     if (button.attr("debug") == "true") mode = "undebug";
     else mode = "debug";
-    xhr.open('get', "/api/process/"+mode+"/"+thread);
+    xhr.open('PUT', "/api/process/"+mode+"/"+thread);
     xhr.onreadystatechange = function( )
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status == 200)
@@ -40,7 +40,7 @@
     button = $('#idButtonStarted_'+thread);
     if (button.attr("started") == "true") mode = "stop";
     else mode = "start";
-    xhr.open('get', "/api/process/"+mode+"/"+thread);
+    xhr.open('PUT', "/api/process/"+mode+"/"+thread);
     xhr.onreadystatechange = function( )
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status == 200)

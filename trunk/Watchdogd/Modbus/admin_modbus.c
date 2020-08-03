@@ -68,8 +68,29 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_list ( JsonBuilder *builder )
+ static void Admin_json_run ( SoupMessage *msg, gchar *username, gint access_level )
   { GSList *liste_modules;
+    JsonBuilder *builder;
+    gsize taille_buf;
+    gchar *buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    if (access_level < 6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
 
     pthread_mutex_lock( &Cfg_modbus.lib->synchro );
     liste_modules = Cfg_modbus.Modules_MODBUS;
@@ -97,29 +118,88 @@
      }
     pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
     Json_end_array (builder);                                                                                 /* End Document */
+
+    buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ static void Admin_json_list ( SoupMessage *msg, gchar *username, gint access_level )
+  { JsonBuilder *builder;
+    gchar *buf, chaine[512];
+    gsize taille_buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    if (access_level < 6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM modbus_modules" );
+    if (SQL_Select_to_JSON ( builder, "modules", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
+    buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ static void Admin_json_del ( SoupMessage *msg, gchar *username, gint access_level, gchar *tech_id_src )
+  { gchar chaine[256];
+    if (msg->method != SOUP_METHOD_DELETE)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    if (access_level < 6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    gchar *tech_id = Normaliser_chaine ( tech_id_src );
+    if (!tech_id)
+     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Normalized failed");
+       return;
+     }
+
+    g_snprintf( chaine, sizeof(chaine), "DELETE FROM modbus_modules WHERE tech_id='%s'", tech_id );
+    g_free(tech_id);
+    SQL_Write ( chaine );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    Cfg_modbus.lib->Thread_reload = TRUE;
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( gchar *commande, gchar **buffer_p, gsize *taille_p )
-  { JsonBuilder *builder;
-
-    *buffer_p = NULL;
-    *taille_p = 0;
-
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-       return;
-     }
-/************************************************ Préparation du buffer JSON **************************************************/
-                                                                      /* Lancement de la requete de recuperation des messages */
-    if (!strcmp(commande, "/list")) { Admin_json_list ( builder ); }
-
-/************************************************ Génération du JSON **********************************************************/
-    *buffer_p = Json_get_buf ( builder, taille_p );
+ void Admin_json ( SoupMessage *msg, gchar *username, gint access_level, gchar *commande )
+  {      if (!strcasecmp(commande, "/list")) { Admin_json_list ( msg, username, access_level ); }
+    else if (!strcasecmp(commande, "/run"))  { Admin_json_run ( msg, username, access_level ); }
+    else if (g_str_has_prefix(commande, "/del/")) { Admin_json_del ( msg, username, access_level, commande+strlen("/del/") ); }
+    else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
     return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

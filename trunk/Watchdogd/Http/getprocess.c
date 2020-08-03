@@ -43,6 +43,11 @@
     GSList *liste;
     gchar *buf;
 
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
     if (builder == NULL)
@@ -112,6 +117,12 @@
 /******************************************************************************************************************************/
  static void Http_traiter_process_debug ( SoupMessage *msg,  gchar *thread, gboolean status )
   { gsize taille_buf;
+
+    if (msg->method != SOUP_METHOD_PUT)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
          if ( ! strcasecmp ( thread, "arch" ) ) { Config.log_arch = status; }
     else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
     else if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
@@ -150,6 +161,11 @@
 /******************************************************************************************************************************/
  static void Http_traiter_process_start_stop ( SoupMessage *msg, gchar *thread, gboolean status )
   { gsize taille_buf;
+
+    if (msg->method != SOUP_METHOD_PUT)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
 
     if ( ! strcasecmp ( thread, "arch" ) )
      { if (status==FALSE) { Partage->com_arch.Thread_run = FALSE; }
@@ -198,11 +214,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_process ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
+  {
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
 
     if ( ! (session && session->access_level >= 6) )
@@ -217,6 +229,11 @@
 /*************************************************** WS Reload library ********************************************************/
     else if (g_str_has_prefix(path, "/process/reload/"))
      { gchar *target = path+16;
+       if (msg->method != SOUP_METHOD_PUT)
+        {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		        return;
+        }
+
        GSList *liste;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading start for %s", __func__, target );
        if ( ! strcasecmp( target, "dls" ) )
@@ -264,13 +281,9 @@
                           "%s: library %s do not have Admin_json.", __func__, lib->admin_prompt );
               }
              else
-              { gint taille_buf;
-                gchar *buffer;
-                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Admin_json call for %s%s.", __func__,
+              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Admin_json call for %s%s.", __func__,
                           lib->admin_prompt, path+strlen(lib->admin_prompt) );
-                lib->Admin_json ( path+strlen(lib->admin_prompt), &buffer, &taille_buf );
-                soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buffer, taille_buf );
-                soup_message_set_status ( msg, SOUP_STATUS_OK) ;
+                lib->Admin_json ( msg, session->username, session->access_level, path+strlen(lib->admin_prompt) );
                 return;
               }
             }

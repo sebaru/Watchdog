@@ -36,6 +36,23 @@
   { window.location = url;
   }
 
+/********************************************* Barre de boutons ***************************************************************/
+ function Bouton_actions_start ( )
+  { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"); }
+
+ function Bouton_actions_add ( color, tooltip, clic_func, key, icone, texte )
+  { return( "<button "+
+            "class='btn btn-"+color+" btn-sm' "+
+            "data-toggle='tooltip' title='"+tooltip+"' "+
+            "onclick="+clic_func+"('"+key+"')>"+
+            (icone!==null ? "<i class='fas fa-"+icone+"'></i> " : "") +
+            (texte!==null ? texte : "") +
+            "</button>");
+  }
+ function Bouton_actions_end ( )
+  { return ("</div>"); }
+
+/********************************************** Bouton unitaire ***************************************************************/
  function Bouton ( color, tooltip, clic_func, key, texte )
   { if (clic_func !== null)
      { result = "<button "+
