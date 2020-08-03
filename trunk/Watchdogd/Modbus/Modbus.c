@@ -736,7 +736,7 @@
              if(module->DO[num] == NULL) Dls_data_set_DO ( NULL, tech_id, acro, &module->DO[num], FALSE );     /* Sinon, on le crée */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
-                         __func__, module->modbus.tech_id, dst_tag, num, module->nbr_entree_tor );
+                         __func__, module->modbus.tech_id, dst_tag, num, module->nbr_sortie_tor );
         }
        else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
                       __func__, module->modbus.tech_id, dst_tag );
