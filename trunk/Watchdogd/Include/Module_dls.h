@@ -86,7 +86,6 @@
  extern void SI( int num, int etat, int rouge, int vert, int bleu, int cligno );
  extern void SB( int num, int etat );
  extern void SM( int num, int etat );
- extern void SA( int num, int etat );
  extern void MSG( int num, int etat );
 
  extern int Heure( int heure, int minute );                                                        /* Tester l'heure actuelle */

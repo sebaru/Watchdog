@@ -189,12 +189,6 @@
        else { g_snprintf( chaine, sizeof(chaine), " | - Wrong number of parameters" ); }
        response = Admin_write ( response, chaine );
      } else
-    if ( ! strcmp ( commande, "a" ) )
-     { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
-       g_snprintf( chaine, sizeof(chaine), " | - A%03d = %d", num, A(num) );
-       response = Admin_write ( response, chaine );
-     } else
      { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s", ligne );
        response = Admin_write ( response, chaine );
      }

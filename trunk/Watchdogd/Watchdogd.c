@@ -92,10 +92,6 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Input Export to %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
-    if ( write (fd, Partage->a, sizeof(Partage->a)) != sizeof(Partage->a) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Output Export to %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
     close (fd);
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Exporter: Export successfull" );
   }
@@ -145,10 +141,6 @@
      }
     if ( read (fd, Partage->e, sizeof(Partage->e)) != sizeof(Partage->e) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Input Import from %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
-    if ( read (fd, Partage->a, sizeof(Partage->a)) != sizeof(Partage->a) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Output Import from %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
     close(fd);

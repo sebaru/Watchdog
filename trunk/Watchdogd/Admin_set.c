@@ -118,17 +118,6 @@
        else { g_snprintf( chaine, sizeof(chaine), " | - Wrong number of parameters" ); }
        response = Admin_write ( response, chaine );
      } else
-    if ( ! strcmp ( commande, "a" ) )
-     { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
-       if (num<NBR_SORTIE_TOR)
-        { if (val) val = 1;
-          SA ( num, val );
-          g_snprintf( chaine, sizeof(chaine), " | - A%03d = %d", num, val );
-        } else
-        { g_snprintf( chaine, sizeof(chaine), " | - A -> num '%d' out of range", num ); }
-       response = Admin_write ( response, chaine );
-     } else
      { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s", ligne );
        response = Admin_write ( response, chaine );
      }

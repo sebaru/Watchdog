@@ -122,17 +122,6 @@
      }
   }
 /**********************************************************************************************************/
-/* Renvoie la valeur d'une entre TOR                                                                      */
-/**********************************************************************************************************/
- int A( int num )
-  { if ( num>=0 && num<NBR_SORTIE_TOR ) return ( Partage->a[ num ].etat );
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "A : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/**********************************************************************************************************/
 /* Renvoie la valeur d'un bistable                                                                        */
 /**********************************************************************************************************/
  int B( int num )
@@ -342,32 +331,6 @@
 
     if (tempo->status == DLS_TEMPO_WAIT_FOR_COND_OFF && etat == 0 )
      { tempo->status = DLS_TEMPO_NOT_COUNTING; }
-  }
-/******************************************************************************************************************************/
-/* SA: Positionnement d'un actionneur DLS                                                                                     */
-/* Entrée: numero, etat                                                                                                       */
-/* Sortie: Neant                                                                                                              */
-/******************************************************************************************************************************/
- void SA( int num, int etat )
-  { if (num<0 || num>=NBR_SORTIE_TOR)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SA : num %d out of range", num ); }
-       return;
-     }
-
-    if ( Partage->a[num].etat != etat )
-     { Partage->a[num].etat = etat;
-
-       if ( Partage->top <= Partage->a[num].last_change + 3 )        /* Si changement en moins de 3 dizieme depuis le dernier */
-        { if ( ! (Partage->top % 50 ))                                         /* Si persistence on prévient toutes les 5 sec */
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: last_change trop tot pour A%d !", __func__, num ); }
-        }
-       else
-        { /*Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );                                              /* Sauvegarde de l'etat n */
-        }
-       Partage->a[num].last_change = Partage->top;
-       Partage->audit_bit_interne_per_sec++;
-     }
   }
 /******************************************************************************************************************************/
 /* Envoyer_commande_dls: Gestion des envois de commande DLS                                                                   */

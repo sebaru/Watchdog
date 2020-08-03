@@ -250,7 +250,6 @@
  extern void Reseter_un_plugin ( gint id );                                                                 /* Dans plugins.c */
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
- extern int A( int num );
  extern int EA_inrange( int num );
  extern void SB_SYS( int num, int etat );
  extern void SE( int num, int etat );
