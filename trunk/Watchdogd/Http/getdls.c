@@ -627,6 +627,67 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /******************************************************************************************************************************/
+/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_dls_compil ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                SoupClientContext *client, gpointer user_data )
+  { GBytes *request_brute;
+    gsize taille;
+    if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+
+    if ( ! (session && session->access_level >= 6) )
+     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
+       return;
+     }
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( ! (Json_has_member ( request, "id" ) && Json_has_member ( request, "tech_id" ) &&
+            Json_has_member ( request, "sourcecode" ) ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+    gchar *sourcecode = Json_get_string( request, "sourcecode" );
+    Save_source_dls_to_DB ( Json_get_int( request, "id" ), sourcecode, strlen(sourcecode) );
+
+    gchar log_buffer[1024];
+    switch ( Compiler_source_dls ( TRUE, Json_get_int( request, "id" ), log_buffer, sizeof(log_buffer) ) )
+     { case DLS_COMPIL_ERROR_LOAD_SOURCE:
+            g_snprintf( log_buffer, sizeof(log_buffer), "Unable to open file for '%s' compilation", Json_get_string ( request, "tech_id" ) );
+            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, log_buffer );
+       break;
+       case DLS_COMPIL_ERROR_LOAD_LOG:
+            g_snprintf( log_buffer, sizeof(log_buffer), "Unable to open log file for '%s'", Json_get_string ( request, "tech_id" ) );
+            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, log_buffer );
+            break;
+       case DLS_COMPIL_OK_WITH_WARNINGS:
+            /*Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_WARNING, (gchar *)&erreur, sizeof(erreur) );*/
+            break;
+       case DLS_COMPIL_ERROR_TRAD:
+            /*Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_ERREUR,(gchar *)&erreur, sizeof(erreur) );*/
+            break;
+       case DLS_COMPIL_ERROR_FORK_GCC:
+            g_snprintf( log_buffer, sizeof(log_buffer), "Gcc fork failed !" );
+            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, log_buffer );
+            break;
+       case DLS_COMPIL_OK:
+            g_snprintf( log_buffer, sizeof(log_buffer), "-- No error --\n-- Reset plugin OK --" );
+            soup_message_set_status (msg, SOUP_STATUS_OK);
+            break;
+       default : g_snprintf( log_buffer, sizeof(log_buffer), "Unknown Error !");
+            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Unknown Error" );
+     }
+    json_node_unref(request);
+  }
+/******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess: Traite une requete sur l'URI process                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
