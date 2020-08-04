@@ -33,8 +33,8 @@
 
  enum { TRAD_DLS_OK,                                                                   /* Retour de la fonction Traduire DLS. */
         TRAD_DLS_WARNING,
-        TRAD_DLS_ERROR,
-        TRAD_DLS_ERROR_FILE
+        TRAD_DLS_SYNTAX_ERROR,
+        TRAD_DLS_ERROR_NO_FILE
       };
 
  struct ACTION

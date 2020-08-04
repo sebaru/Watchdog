@@ -634,7 +634,8 @@
  void Http_traiter_dls_compil ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
   { GBytes *request_brute;
-    gsize taille;
+    gsize taille, taille_buf;
+    gchar log_buffer[1024];
     if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -658,33 +659,59 @@
     gchar *sourcecode = Json_get_string( request, "sourcecode" );
     Save_source_dls_to_DB ( Json_get_string( request, "tech_id" ), sourcecode, strlen(sourcecode) );
 
-    gchar log_buffer[1024];
-    switch ( Compiler_source_dls ( TRUE, Json_get_string( request, "tech_id" ), log_buffer, sizeof(log_buffer) ) )
+    gint retour = Compiler_source_dls ( TRUE, Json_get_string( request, "tech_id" ), log_buffer, sizeof(log_buffer) );
+
+    JsonBuilder *builder = Json_create ();
+    if (!builder)
+     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Json Memory Error");
+       return;
+     }
+
+
+    switch(retour)
      { case DLS_COMPIL_ERROR_LOAD_SOURCE:
-            g_snprintf( log_buffer, sizeof(log_buffer), "Unable to open file for '%s' compilation", Json_get_string ( request, "tech_id" ) );
-            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, log_buffer );
+            g_snprintf( log_buffer, sizeof(log_buffer), "Unable to open file for '%s' compilation",
+                        Json_get_string ( request, "tech_id" ) );
+            Json_add_string ( builder, "errorlog", log_buffer );
+            Json_add_string ( builder, "result", "error" );
+            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Source File Error" );
        break;
        case DLS_COMPIL_ERROR_LOAD_LOG:
-            g_snprintf( log_buffer, sizeof(log_buffer), "Unable to open log file for '%s'", Json_get_string ( request, "tech_id" ) );
-            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, log_buffer );
+            g_snprintf( log_buffer, sizeof(log_buffer), "Unable to open log file for '%s'",
+                        Json_get_string ( request, "tech_id" ) );
+            Json_add_string ( builder, "errorlog", log_buffer );
+            Json_add_string ( builder, "result", "error" );
+            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Log File Error" );
             break;
        case DLS_COMPIL_OK_WITH_WARNINGS:
-            /*Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_WARNING, (gchar *)&erreur, sizeof(erreur) );*/
+            Json_add_string ( builder, "errorlog", log_buffer );
+            Json_add_string ( builder, "result", "warning" );
+            soup_message_set_status (msg, SOUP_STATUS_OK );
             break;
-       case DLS_COMPIL_ERROR_TRAD:
-            /*Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_ERREUR,(gchar *)&erreur, sizeof(erreur) );*/
+       case DLS_COMPIL_SYNTAX_ERROR:
+            Json_add_string ( builder, "errorlog", log_buffer );
+            Json_add_string ( builder, "result", "error" );
+            soup_message_set_status (msg, SOUP_STATUS_OK );
             break;
        case DLS_COMPIL_ERROR_FORK_GCC:
             g_snprintf( log_buffer, sizeof(log_buffer), "Gcc fork failed !" );
-            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, log_buffer );
+            Json_add_string ( builder, "errorlog", log_buffer );
+            Json_add_string ( builder, "result", "error" );
+            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Gcc Error" );
             break;
        case DLS_COMPIL_OK:
             g_snprintf( log_buffer, sizeof(log_buffer), "-- No error --\n-- Reset plugin OK --" );
+            Json_add_string ( builder, "errorlog", log_buffer );
+            Json_add_string ( builder, "result", "success" );
             soup_message_set_status (msg, SOUP_STATUS_OK);
             break;
        default : g_snprintf( log_buffer, sizeof(log_buffer), "Unknown Error !");
+            Json_add_string ( builder, "errorlog", log_buffer );
+            Json_add_string ( builder, "result", "error" );
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Unknown Error" );
      }
+    gchar *buf = Json_get_buf (builder, &taille_buf);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
     json_node_unref(request);
   }
 /******************************************************************************************************************************/

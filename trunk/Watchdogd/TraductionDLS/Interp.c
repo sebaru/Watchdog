@@ -936,13 +936,16 @@
     FILE *rc;
 
     plugin = Rechercher_plugin_dlsDB ( tech_id );
-    if (!plugin) return (TRAD_DLS_ERROR);
+    if (!plugin)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: plugin '%s' not found.", __func__, tech_id );
+       return (TRAD_DLS_ERROR_NO_FILE);
+     }
     memcpy ( &Dls_plugin, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     g_free(plugin);
 
     Buffer_taille = 1024;
     Buffer = g_try_malloc0( Buffer_taille );                                             /* Initialisation du buffer resultat */
-    if (!Buffer) return ( TRAD_DLS_ERROR );
+    if (!Buffer) return ( TRAD_DLS_ERROR_NO_FILE );
     Buffer_used = 0;
 
     g_snprintf( source, sizeof(source), "Dls/%s.dls", tech_id );
@@ -957,7 +960,7 @@
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                 "%s: Log creation failed %s (%s)", __func__, log, strerror(errno) );
        close(Id_log);
-       return(TRAD_DLS_ERROR_FILE);
+       return(TRAD_DLS_ERROR_NO_FILE);
      }
 
     pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
@@ -969,7 +972,7 @@
     DlsScanner_set_lineno(1);                                                                     /* Reset du numéro de ligne */
     nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
     rc = fopen( source, "r" );
-    if (!rc) retour = TRAD_DLS_ERROR;
+    if (!rc) retour = TRAD_DLS_ERROR_NO_FILE;
     else
      { setlocale(LC_ALL, "C");
        DlsScanner_restart(rc);
@@ -979,11 +982,11 @@
 
     if (nbr_erreur)
      { Emettre_erreur_new( "%d error%s found", nbr_erreur, (nbr_erreur>1 ? "s" : "") );
-       retour = TRAD_DLS_ERROR;
+       retour = TRAD_DLS_SYNTAX_ERROR;
      }
     else
      { gint fd;
-       Emettre_erreur_new( "No error found" );                        /* Pas d'erreur rencontré (mais peu etre des warning !) */
+       Emettre_erreur_new( "No error found" );                      /* Pas d'erreur rencontré (mais peut etre des warnings !) */
        retour = TRAD_DLS_OK;
 
        unlink ( cible );
@@ -991,7 +994,7 @@
        if (fd<0)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                    "%s: Target creation failed %s (%s)", __func__, cible, strerror(errno) );
-          retour = TRAD_DLS_ERROR_FILE;
+          retour = TRAD_DLS_ERROR_NO_FILE;
         }
        else
         { gchar *include = " #include <Module_dls.h>\n";

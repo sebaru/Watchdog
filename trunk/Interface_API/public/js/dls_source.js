@@ -31,8 +31,13 @@
           return;
         }
        var Response = JSON.parse(xhr.responseText);
-       /*SourceCode.getDoc().setValue(Response.sourcecode);
-       $("#idErrorLog").html(Response.errorlog.replace(/(?:\r\n|\r|\n)/g, '<br>'));*/
+       $("#idErrorLog").html(Response.errorlog.replace(/(?:\r\n|\r|\n)/g, '<br>'));
+       $("#idErrorLog").removeClass("alert-info alert-warning alert-danger alert-success");
+       switch(Response.result)
+        { case "success" : $("#idErrorLog").addClass("alert-success"); break;
+          case "error"   : $("#idErrorLog").addClass("alert-danger"); break;
+          case "warning" : $("#idErrorLog").addClass("alert-warning"); break;
+        }
      };
     xhr.send(json_request);
   }

@@ -1806,6 +1806,22 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4880)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI CHANGE `map_host` `src_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI CHANGE `map_thread` `src_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI CHANGE `map_text` `src_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+       Lancer_requete_SQL ( db, requete );
+
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AO CHANGE `map_host` `dst_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AO CHANGE `map_thread` `dst_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AO CHANGE `map_text` `dst_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
                                           "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "
@@ -1844,7 +1860,7 @@
 
     Libere_DB_SQL(&db);
 fin:
-    database_version=4851;
+    database_version=4880;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

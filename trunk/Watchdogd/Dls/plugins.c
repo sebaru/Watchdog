@@ -108,7 +108,7 @@
     dls->go = dlsym( dls->handle, "Go" );                                                 /* Recherche de la fonction 'Go' */
     if (!dls->go)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                 "%s: Candidat %06d failed sur absence GO", __func__, dls->plugindb.id );
+                 "%s: Candidat '%s' failed sur absence GO", __func__, dls->plugindb.tech_id );
        dlclose( dls->handle );
        dls->handle = NULL;
      }
@@ -116,7 +116,7 @@
      { dls->version = dlsym( dls->handle, "version" );                                     /* Recherche de la fonction */
        if (!dls->version)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                   "%s: Candidat %06d does not provide version function", __func__, dls->plugindb.id );
+                   "%s: Candidat '%s' does not provide version function", __func__, dls->plugindb.tech_id );
           Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
         }
       }
@@ -176,17 +176,17 @@
         { Reseter_all_bit_interne ( plugin );
           if (plugin->handle)                                   /* Peut etre à 0 si changement de librairie et erreur de link */
            { if (dlclose( plugin->handle ))
-              { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for %06d (%s)", __func__,
-                          dlerror(), plugin->plugindb.id, plugin->plugindb.shortname );
+              { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for '%s' (%s)", __func__,
+                          dlerror(), plugin->plugindb.tech_id, plugin->plugindb.shortname );
               }
              plugin->handle = NULL;
-             Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin %06d (%s) unloaded", __func__,
-                       plugin->plugindb.id, plugin->plugindb.shortname );
+             Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin '%s' (%s) unloaded", __func__,
+                       plugin->plugindb.tech_id, plugin->plugindb.shortname );
            }
           Charger_un_plugin ( plugin );
           plugin->vars.starting = 1;                                               /* au chargement, le bit de start vaut 1 ! */
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin %06d (%s) loaded", __func__,
-                    plugin->plugindb.id, plugin->plugindb.shortname );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin '%s' (%s) loaded", __func__,
+                    plugin->plugindb.tech_id, plugin->plugindb.shortname );
           return;
         }
        liste=liste->next;
@@ -225,8 +225,8 @@
         { Reseter_all_bit_interne (plugin);
           if (plugin->handle)
            { if (dlclose( plugin->handle ))
-              { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for %06d (%s)", __func__,
-                          dlerror(), plugin->plugindb.id, plugin->plugindb.shortname );
+              { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for '%s' (%s)", __func__,
+                          dlerror(), plugin->plugindb.tech_id, plugin->plugindb.shortname );
               }
            }
           dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
@@ -267,8 +267,8 @@
     while(dls_tree->Liste_plugin_dls)                                                        /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)dls_tree->Liste_plugin_dls->data;
        if (plugin->handle && dlclose( plugin->handle ))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for %06d (%s)", __func__,
-                    dlerror(), plugin->plugindb.id, plugin->plugindb.shortname );
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for '%s' (%s)", __func__,
+                    dlerror(), plugin->plugindb.tech_id, plugin->plugindb.shortname );
         }
        dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
                                                                              /* Destruction de l'entete associé dans la GList */
@@ -472,7 +472,7 @@
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
              "%s: fin traduction '%s'. Code retour '%d'", __func__, tech_id, retour );
 
-    if (retour == TRAD_DLS_ERROR_FILE)                                                /* Retour de la traduction D.L.S vers C */
+    if (retour == TRAD_DLS_ERROR_NO_FILE)                                             /* Retour de la traduction D.L.S vers C */
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: envoi erreur file Traduction D.L.S '%s'", tech_id );
        Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_ERROR_LOAD_SOURCE, "Erreur chargement source" );
        return( DLS_COMPIL_ERROR_LOAD_SOURCE );
@@ -499,9 +499,9 @@
        if (buffer) memcpy ( buffer, log_buffer, nbr_car_lu );
      }
 
-    if ( retour == TRAD_DLS_ERROR )
-     { Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_ERROR_TRAD, log_buffer );
-       return ( DLS_COMPIL_ERROR_TRAD );
+    if ( retour == TRAD_DLS_SYNTAX_ERROR )
+     { Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_SYNTAX_ERROR, log_buffer );
+       return ( DLS_COMPIL_SYNTAX_ERROR );
      }
 
     pidgcc = fork();

@@ -94,7 +94,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT m.map_host, m.map_thread, m.map_text"
+                "SELECT m.dst_host, m.dst_thread, m.dst_text"
                 " FROM mnemos_AO as m"
                 " WHERE m.tech_id='%s' AND m.acronyme='%s' LIMIT 1",
                 tech_id, acronyme
@@ -122,10 +122,10 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),
-               "SELECT m.tech_id, m.acronyme, m.map_text, m.libelle, m.min, m.max, m.type, m.valeur "
+               "SELECT m.tech_id, m.acronyme, m.dst_text, m.libelle, m.min, m.max, m.type, m.valeur "
                "FROM mnemos_AO as m "
-               " WHERE (m.map_host='*' OR m.map_host LIKE '%s') AND (m.map_thread='*' OR m.map_thread LIKE '%s')"
-               " AND m.map_text LIKE '%s'", g_get_host_name(), thread, text );
+               " WHERE (m.dst_host='*' OR m.dst_host LIKE '%s') AND (m.dst_thread='*' OR m.dst_thread LIKE '%s')"
+               " AND m.dst_text LIKE '%s'", g_get_host_name(), thread, text );
 
     db = Init_DB_SQL();
     if (!db)

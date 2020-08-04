@@ -256,8 +256,8 @@
        return;
      }
 
-    gchar *tech_id     = Normaliser_chaine ( g_strcanon( Json_get_string( request, "tech_id" ),
-                                                         "abcdefghijklmnopqrstuvqxyz0123456789_", '_' )
+    gchar *tech_id     = Normaliser_chaine ( g_strcanon( g_ascii_strup (Json_get_string( request, "tech_id" ),-1),
+                                                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", '_' )
                                            );
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
@@ -278,6 +278,66 @@
     json_node_unref(request);
   }
 /******************************************************************************************************************************/
+/* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ static void Admin_json_map ( SoupMessage *msg, gchar *username, gint access_level )
+  { JsonBuilder *builder;
+    gchar *buf, chaine[512];
+    gsize taille_buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    if (access_level < 6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM mnemos_DI AS m WHERE src_thread LIKE 'MODBUS'" );
+    if (SQL_Select_to_JSON ( builder, "mapping_DI", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM mnemos_AI WHERE src_thread LIKE 'MODBUS'" );
+    if (SQL_Select_to_JSON ( builder, "mapping_AI", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM mnemos_DO WHERE dst_thread LIKE 'MODBUS'" );
+    if (SQL_Select_to_JSON ( builder, "mapping_DO", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM mnemos_AO WHERE dst_thread LIKE 'MODBUS'" );
+    if (SQL_Select_to_JSON ( builder, "mapping_AO", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
+
+    buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
@@ -288,6 +348,7 @@
     else if (g_str_has_prefix(commande, "/del/")) { Admin_json_del ( msg, username, access_level, commande+strlen("/del/") ); }
     else if (!strcasecmp(commande, "/set")) { Admin_json_set ( msg, username, access_level ); }
     else if (!strcasecmp(commande, "/add")) { Admin_json_add ( msg, username, access_level ); }
+    else if (!strcasecmp(commande, "/map")) { Admin_json_map ( msg, username, access_level ); }
     else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
     return;
   }

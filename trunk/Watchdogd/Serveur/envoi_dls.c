@@ -223,7 +223,7 @@
             Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_WARNING,
                            (gchar *)&erreur, sizeof(erreur) );
             break;
-       case DLS_COMPIL_ERROR_TRAD:
+       case DLS_COMPIL_SYNTAX_ERROR:
             Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_ERREUR,
                            (gchar *)&erreur, sizeof(erreur) );
             break;
