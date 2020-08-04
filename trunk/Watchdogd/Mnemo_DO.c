@@ -129,10 +129,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-               "SELECT m.tech_id, m.acronyme, m.dst_tag, m.libelle "
+               "SELECT m.tech_id, m.acronyme, m.map_tag, m.libelle "
                "FROM mnemos_DO as m"
-               " WHERE (m.dst_host='*' OR m.dst_host LIKE '%s') AND (m.dst_thread='*' OR m.dst_thread LIKE '%s')"
-               " AND m.dst_tag LIKE '%s'",
+               " WHERE (m.map_host IS NULL OR m.map_host LIKE '%s') AND (m.map_thread LIKE '%s')"
+               " AND m.map_tag LIKE '%s'",
                g_get_host_name(), thread, commande );
     g_free(commande);
     db = Init_DB_SQL();

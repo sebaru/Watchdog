@@ -120,7 +120,8 @@
           <i class="fas fa-cogs"></i> IO Threads
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarIO">
-          <a class="dropdown-item" href="<?php echo site_url('tech/modbus'); ?>"> <i class="fas fa-plug text-info"></i> <span>Module Wago/Modbus</span> </a>
+          <a class="dropdown-item" href="<?php echo site_url('tech/modbus'); ?>"> <i class="fas fa-plug text-info"></i> <span>Modules Wago/Modbus</span> </a>
+          <a class="dropdown-item" href="<?php echo site_url('tech/modbus_map'); ?>"> <i class="fas fa-directions text-info"></i> <span>Mappings Wago/Modbus</span> </a>
           <a class="dropdown-item" href="<?php echo site_url('tech/ups'); ?>"> <i class="fas fa-battery-half text-success"></i> <span>Onduleurs</span> </a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#">Something else here</a>

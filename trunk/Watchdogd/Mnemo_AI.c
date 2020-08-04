@@ -151,10 +151,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-               "SELECT m.tech_id, m.acronyme, m.src_text, m.libelle "
+               "SELECT m.tech_id, m.acronyme, m.map_tag, m.libelle "
                "FROM mnemos_AI as m "
-               " WHERE (m.src_host='*' OR m.src_host LIKE '%s') AND (m.src_thread='*' OR m.src_thread LIKE '%s')"
-               " AND m.src_text LIKE '%s'", g_get_host_name(), thread, commande );
+               " WHERE (m.map_host IS NULL OR m.map_host LIKE '%s') AND (m.map_thread LIKE '%s')"
+               " AND m.map_tag LIKE '%s'", g_get_host_name(), thread, commande );
 
     g_free(commande);
 

@@ -282,9 +282,9 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Admin_json_map ( SoupMessage *msg, gchar *username, gint access_level )
+ static void Admin_json_map ( SoupMessage *msg, gchar *username, gint access_level, gchar *commande )
   { JsonBuilder *builder;
-    gchar *buf, chaine[512];
+    gchar *buf, chaine[512], *target;
     gsize taille_buf;
 
     if (msg->method != SOUP_METHOD_GET)
@@ -296,6 +296,15 @@
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
+
+         if (! strcasecmp( commande, "DI" ) ) target = "mnemos_DI";
+    else if (! strcasecmp( commande, "DO" ) ) target = "mnemos_DO";
+    else if (! strcasecmp( commande, "AI" ) ) target = "mnemos_AI";
+    else if (! strcasecmp( commande, "AO" ) ) target = "mnemos_AO";
+    else
+     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Wrong URI" );
+		     return;
+     }
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
     if (builder == NULL)
@@ -304,29 +313,8 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM mnemos_DI AS m WHERE src_thread LIKE 'MODBUS'" );
-    if (SQL_Select_to_JSON ( builder, "mapping_DI", chaine ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       g_object_unref(builder);
-       return;
-     }
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM mnemos_AI WHERE src_thread LIKE 'MODBUS'" );
-    if (SQL_Select_to_JSON ( builder, "mapping_AI", chaine ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       g_object_unref(builder);
-       return;
-     }
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM mnemos_DO WHERE dst_thread LIKE 'MODBUS'" );
-    if (SQL_Select_to_JSON ( builder, "mapping_DO", chaine ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       g_object_unref(builder);
-       return;
-     }
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM mnemos_AO WHERE dst_thread LIKE 'MODBUS'" );
-    if (SQL_Select_to_JSON ( builder, "mapping_AO", chaine ) == FALSE)
+    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM %s AS m WHERE map_thread LIKE 'MODBUS'", target );
+    if (SQL_Select_to_JSON ( builder, "mappings", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
@@ -336,6 +324,54 @@
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ static void Admin_json_map_del ( SoupMessage *msg, gchar *username, gint access_level )
+  { gchar requete[256], *target;
+    GBytes *request_brute;
+    gsize taille;
+
+    if (msg->method != SOUP_METHOD_DELETE)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    if (access_level < 6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( ! (Json_has_member ( request, "type" ) && Json_has_member ( request, "map_tag" ) ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+         if (! strcasecmp( Json_get_string( request, "type" ), "DI" ) ) target = "mnemos_DI";
+    else if (! strcasecmp( Json_get_string( request, "type" ), "DO" ) ) target = "mnemos_DO";
+    else if (! strcasecmp( Json_get_string( request, "type" ), "AI" ) ) target = "mnemos_AI";
+    else if (! strcasecmp( Json_get_string( request, "type" ), "AO" ) ) target = "mnemos_AO";
+    else
+     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais type");
+		     return;
+     }
+
+    gchar *tag  = Normaliser_chaine ( Json_get_string( request, "map_tag" ) );
+    g_snprintf( requete, sizeof(requete), "DELETE FROM %s WHERE map_thread='MODBUS' AND map_tag='%s'", target, tag );
+    g_free(tag);
+
+    if (SQL_Write (requete))
+     { soup_message_set_status (msg, SOUP_STATUS_OK);
+       Cfg_modbus.lib->Thread_reload = TRUE;
+     }
+    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+    json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
@@ -348,7 +384,8 @@
     else if (g_str_has_prefix(commande, "/del/")) { Admin_json_del ( msg, username, access_level, commande+strlen("/del/") ); }
     else if (!strcasecmp(commande, "/set")) { Admin_json_set ( msg, username, access_level ); }
     else if (!strcasecmp(commande, "/add")) { Admin_json_add ( msg, username, access_level ); }
-    else if (!strcasecmp(commande, "/map")) { Admin_json_map ( msg, username, access_level ); }
+    else if (!strcasecmp(commande, "/map/del")) { Admin_json_map_del ( msg, username, access_level ); }
+    else if (g_str_has_prefix(commande, "/map/")) { Admin_json_map ( msg, username, access_level, commande+strlen("/map/") ); }
     else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
     return;
   }
