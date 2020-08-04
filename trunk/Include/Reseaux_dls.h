@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -64,9 +64,10 @@
     guint nbr_compil;                                                                         /* Nombre de compilation totale */
     guint nbr_ligne;                                                                               /* Nombre de ligne de code */
   };
- 
+
  struct CMD_TYPE_SOURCE_DLS
-  { guint id;
+  { gint id;
+    gchar tech_id[32];
     guint taille;                                                     /* Taille des données qui suivent dans le paquet reseau */
   };
 
@@ -83,7 +84,7 @@
     NBR_DLS_COMPIL_STATUS
   };
 
- enum 
+ enum
   { SSTAG_CLIENT_WANT_PAGE_DLS,
     SSTAG_SERVEUR_CREATE_PAGE_DLS_OK,                                                             /* Affichage de la page DLS */
     SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS,                                                                /* Envoi des plugins */
@@ -109,7 +110,7 @@
     SSTAG_SERVEUR_SOURCE_DLS_END,
 
     SSTAG_SERVEUR_DLS_COMPIL_STATUS,                                                           /* Résultat de ocmpilation DLS */
-            
+
     SSTAG_CLIENT_WANT_SYN_FOR_PLUGIN_DLS,                                           /* Envoi des synoptiques pour les plugins */
     SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS,
     SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS_FIN,

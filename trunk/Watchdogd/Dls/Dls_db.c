@@ -283,15 +283,15 @@
 /* Entrées: un id plugin DLS                                                                                                  */
 /* Sortie: une structure PLUGIN_DLS, ou null si erreur                                                                        */
 /******************************************************************************************************************************/
- struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( gint id )
+ struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( gchar *tech_id_src )
   { struct CMD_TYPE_PLUGIN_DLS *dls;
-    gchar requete[512];
+    gchar requete[512], *tech_id;
     struct DB *db;
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(NULL);
+    tech_id = Normaliser_chaine ( tech_id_src );                                             /* Formatage correct des chaines */
+    if (!tech_id)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation tech_id impossible", __func__ );
+       return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
@@ -299,10 +299,17 @@
                 "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne"
                 " FROM %s as dls INNER JOIN %s as syn ON dls.syn_id = syn.id "
                 " INNER JOIN %s AS parent_syn ON parent_syn.id=syn.parent_id"
-                " WHERE dls.id = %d",
+                " WHERE dls.tech_id = '%s'",
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                id                                                                                                   /* Where */
+                tech_id                                                                                              /* Where */
               );
+    g_free(tech_id);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(NULL);
+     }
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );
@@ -318,14 +325,21 @@
 /* Entrées: l'id du plugin DLS                                                                                                */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Set_compil_status_plugin_dlsDB( gint id, gint status, gchar *log_buffer )
-  { gchar requete[2048], *log;
+ gboolean Set_compil_status_plugin_dlsDB( gchar *tech_id_src, gint status, gchar *log_buffer )
+  { gchar requete[2048], *log, *tech_id;
     gboolean retour;
     struct DB *db;
 
+    tech_id = Normaliser_chaine ( tech_id_src );                                             /* Formatage correct des chaines */
+    if (!tech_id)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation tech_id impossible", __func__ );
+       return(FALSE);
+     }
+
     log = Normaliser_chaine ( log_buffer );                                                  /* Formatage correct des chaines */
     if (!log)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation buffer impossible", __func__ );
+       g_free(tech_id);
        return(FALSE);
      }
 
@@ -334,9 +348,10 @@
                 "compil_date=NOW(), compil_status='%d', nbr_compil=nbr_compil+1, "
                 "nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''))+1, "
                 "errorlog='%s' "
-                "WHERE id=%d",
-                NOM_TABLE_DLS, status, log, id );
+                "WHERE tech_id='%s'",
+                NOM_TABLE_DLS, status, log, tech_id );
     g_free(log);
+    g_free(tech_id);
 
     db = Init_DB_SQL();
     if (!db)
@@ -353,22 +368,29 @@
 /* Entrée: l'id associé et deux variables de retour: le buffer et sa taille                                                   */
 /* Sortie: FALSE si PB                                                                                                        */
 /******************************************************************************************************************************/
- gboolean Get_source_dls_from_DB ( gint id, gchar **result_buffer, gint *result_taille )
+ gboolean Get_source_dls_from_DB ( gchar *tech_id_src, gchar **result_buffer, gint *result_taille )
   { gchar requete[200];
-    gchar *buffer;
+    gchar *buffer, *tech_id;
     gint taille;
     struct DB *db;
+
+    tech_id = Normaliser_chaine ( tech_id_src );                                             /* Formatage correct des chaines */
+    if (!tech_id)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation tech_id impossible", __func__ );
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT sourcecode,LENGTH(sourcecode) FROM %s WHERE tech_id='%s'",
+                NOM_TABLE_DLS, tech_id
+              );
+    g_free(tech_id);
 
     db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed" );
        return(FALSE);
      }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT sourcecode,LENGTH(sourcecode) FROM %s WHERE id='%d'",
-                NOM_TABLE_DLS, id
-              );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );
@@ -397,7 +419,7 @@
 /* Entrées: l'id du plugin associé, le sourcecode et sa taille                                                                */
 /* Sortie: FALSE si PB                                                                                                        */
 /******************************************************************************************************************************/
- gboolean Save_source_dls_to_DB( gint id, gchar *buffer_raw, gint taille )
+ gboolean Save_source_dls_to_DB( gchar *tech_id, gchar *buffer_raw, gint taille )
   { gchar *source, *requete, *buffer;
     gint taille_requete;
     gboolean retour;
@@ -413,7 +435,7 @@
     source = Normaliser_chaine ( buffer );                                                   /* Formatage correct des chaines */
     g_free(buffer);
     if (!source)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation source impossible", __func__ );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Normalisation source impossible", __func__ );
        return(FALSE);
      }
 
@@ -426,8 +448,8 @@
      }
 
     g_snprintf( requete, taille_requete,                                                                       /* Requete SQL */
-               "UPDATE %s SET sourcecode='%s' WHERE id='%d'",
-                NOM_TABLE_DLS, source, id );
+               "UPDATE %s SET sourcecode='%s' WHERE tech_id='%s'",
+                NOM_TABLE_DLS, source, tech_id );
 
     g_free(source);
 

@@ -234,20 +234,20 @@
  extern gboolean Recuperer_plugins_dlsDB( struct DB **db );
  extern gboolean Recuperer_plugins_dlsDB_by_syn( struct DB **db_retour, gint syn_id );
  extern struct CMD_TYPE_PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct DB **db );
- extern struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( gint id );
+ extern struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( gchar *tech_id_src );
  extern gboolean Modifier_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
- extern gboolean Set_compil_status_plugin_dlsDB( gint id, gint status, gchar *log_buffer );
- extern gboolean Get_source_dls_from_DB ( gint id, gchar **result_buffer, gint *result_taille );
- extern gboolean Save_source_dls_to_DB( gint id, gchar *buffer, gint taille );
+ extern gboolean Set_compil_status_plugin_dlsDB( gchar *tech_id_src, gint status, gchar *log_buffer );
+ extern gboolean Get_source_dls_from_DB ( gchar *tech_id_src, gchar **result_buffer, gint *result_taille );
+ extern gboolean Save_source_dls_to_DB( gchar *tech_id, gchar *buffer, gint taille );
  extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *nom );
 
  extern void Charger_plugins ( void );                                                                      /* Dans plugins.c */
  extern void Decharger_plugins ( void );
  extern void Decharger_plugin_by_id ( gint id );
- extern gint Compiler_source_dls( gboolean reset, gint id, gchar *buffer, gint taille_buffer );
+ extern gint Compiler_source_dls( gboolean reset, gchar *tech_id, gchar *buffer, gint taille_buffer );
  extern void Debug_plugin ( gchar *tech_id, gboolean actif );
  extern void Activer_plugin ( gchar *tech_id, gboolean actif );
- extern void Reseter_un_plugin ( gint id );                                                                 /* Dans plugins.c */
+ extern void Reseter_un_plugin ( gchar *tech_id );
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
  extern int EA_inrange( int num );

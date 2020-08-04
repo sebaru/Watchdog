@@ -650,16 +650,16 @@
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
 
-    if ( ! (Json_has_member ( request, "id" ) && Json_has_member ( request, "tech_id" ) &&
+    if ( ! (Json_has_member ( request, "tech_id" ) &&
             Json_has_member ( request, "sourcecode" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
     gchar *sourcecode = Json_get_string( request, "sourcecode" );
-    Save_source_dls_to_DB ( Json_get_int( request, "id" ), sourcecode, strlen(sourcecode) );
+    Save_source_dls_to_DB ( Json_get_string( request, "tech_id" ), sourcecode, strlen(sourcecode) );
 
     gchar log_buffer[1024];
-    switch ( Compiler_source_dls ( TRUE, Json_get_int( request, "id" ), log_buffer, sizeof(log_buffer) ) )
+    switch ( Compiler_source_dls ( TRUE, Json_get_string( request, "tech_id" ), log_buffer, sizeof(log_buffer) ) )
      { case DLS_COMPIL_ERROR_LOAD_SOURCE:
             g_snprintf( log_buffer, sizeof(log_buffer), "Unable to open file for '%s' compilation", Json_get_string ( request, "tech_id" ) );
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, log_buffer );
@@ -703,10 +703,6 @@
 
          if ( ! strcasecmp( path, "/dls/debug_trad_on" ) )  { Trad_dls_set_debug ( TRUE ); }
     else if ( ! strcasecmp( path, "/dls/debug_trad_off" ) ) { Trad_dls_set_debug ( FALSE ); }
-    else if ( ! strcasecmp( path, "/dls/compil" ) )
-     { gpointer id_string = g_hash_table_lookup ( query, "id" );
-       if (id_string) { Compiler_source_dls( TRUE, atoi(id_string), NULL, 0 ); }
-     }
     else if ( ! strcasecmp( path, "/dls/acquit" ) )
      { gpointer id_string = g_hash_table_lookup ( query, "id" );
        if (id_string) { gint id = atoi(id_string); Dls_foreach ( &id, Http_dls_acquitter_plugin, NULL ); }
