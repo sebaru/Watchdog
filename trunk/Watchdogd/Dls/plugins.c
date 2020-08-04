@@ -85,34 +85,42 @@
  static gboolean Charger_un_plugin ( struct PLUGIN_DLS *dls )
   { gchar nom_fichier_absolu[60];
 
-    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%06d.so", dls->plugindb.id );
-    strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
-    dls->conso    = 0.0;
-
     if (Partage->com_dls.Compil_at_boot) Compiler_source_dls( FALSE, dls->plugindb.id, NULL, 0 );
+    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%s.so", dls->plugindb.tech_id );
+    strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
+
     dls->handle = dlopen( nom_fichier_absolu, RTLD_LOCAL | RTLD_NOW );                      /* Ouverture du fichier librairie */
     if (!dls->handle)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                "%s: Candidat %06d failed (%s)", __func__, dls->plugindb.id, dlerror() );
-       return(FALSE);
-     }
-    else
-     { dls->go = dlsym( dls->handle, "Go" );                                                 /* Recherche de la fonction 'Go' */
-       if (!dls->go)
+                   "%s: Candidat '%s' failed (%s). Trying with ID", __func__, dls->plugindb.tech_id, dlerror() );
+
+       g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%06d.so", dls->plugindb.id );
+       strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
+
+       dls->handle = dlopen( nom_fichier_absolu, RTLD_LOCAL | RTLD_NOW );                      /* Ouverture du fichier librairie */
+       if (!dls->handle)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                    "%s: Candidat %06d failed sur absence GO", __func__, dls->plugindb.id );
-          dlclose( dls->handle );
-          dls->handle = NULL;
+                   "%s: Candidat %06d failed (%s)", __func__, dls->plugindb.id, dlerror() );
+          return(FALSE);
         }
-       if (dls->handle)
-        { dls->version = dlsym( dls->handle, "version" );                                     /* Recherche de la fonction */
-          if (!dls->version)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                      "%s: Candidat %06d does not provide version function", __func__, dls->plugindb.id );
-             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
-           }
-         }
      }
+
+    dls->go = dlsym( dls->handle, "Go" );                                                 /* Recherche de la fonction 'Go' */
+    if (!dls->go)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
+                 "%s: Candidat %06d failed sur absence GO", __func__, dls->plugindb.id );
+       dlclose( dls->handle );
+       dls->handle = NULL;
+     }
+    if (dls->handle)
+     { dls->version = dlsym( dls->handle, "version" );                                     /* Recherche de la fonction */
+       if (!dls->version)
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
+                   "%s: Candidat %06d does not provide version function", __func__, dls->plugindb.id );
+          Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
+        }
+      }
+    dls->conso    = 0.0;
     if (dls->plugindb.on) dls->start_date = time(NULL);
                      else dls->start_date = 0;
     memset ( &dls->vars, 0, sizeof(dls->vars) );                                 /* Mise à zero de tous les bits de remontées */
