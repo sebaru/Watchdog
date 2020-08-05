@@ -55,7 +55,7 @@
  extern void Updater_confDB_AI( void );
  extern gboolean Mnemo_auto_create_AI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src );
  extern struct DB *Rechercher_AI ( gchar *tech_id, gchar *acronyme );
- extern gboolean Recuperer_mnemos_AI_by_text ( struct DB **db_retour, gchar *thread, gchar *text );
+ extern gboolean Recuperer_mnemos_AI_by_tag ( struct DB **db_retour, gchar *tech_id, gchar *tag );
  extern gboolean Recuperer_mnemos_AI_by_map_question_vocale ( struct DB **db_retour, gchar *map_snips );
  extern gboolean Recuperer_mnemos_AI_suite( struct DB **db_orig );
  extern void Dls_AI_to_json ( JsonBuilder *builder, struct DLS_AI *bit );

@@ -228,7 +228,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `max` float NOT NULL DEFAULT '0',
   `valeur` float NOT NULL DEFAULT '0',
   `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `map_tech_id` VARCHAR(320) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `map_question_vocale` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',

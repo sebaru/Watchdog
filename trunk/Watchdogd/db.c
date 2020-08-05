@@ -1807,25 +1807,7 @@
      }
 
     if (database_version < 4880)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI CHANGE `map_host` `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
-       Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI CHANGE `map_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
-       Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI CHANGE `map_text` `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
-       Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_AI` ADD UNIQUE(`map_tech_id`, `map_tag`); ");
-       Lancer_requete_SQL ( db, requete );
-
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AO CHANGE `map_host` `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
-       Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AO CHANGE `map_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
-       Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AO CHANGE `map_text` `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
-       Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_AO` ADD UNIQUE(`map_tech_id`, `map_tag`); ");
-       Lancer_requete_SQL ( db, requete );
-
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI CHANGE `src_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI CHANGE `src_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI CHANGE `src_text` `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
        Lancer_requete_SQL ( db, requete );
@@ -1839,9 +1821,39 @@
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "UPDATE mnemos_DI SET map_tag=RIGHT(map_tag,4) WHERE map_thread='MODBUS'");
        Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_DI` SET map_tech_id=NULL WHERE map_tech_id='*';");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_DI` SET map_tag=NULL WHERE map_tag='';");
+       Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_DI` ADD UNIQUE(`map_tech_id`, `map_tag`); ");
        Lancer_requete_SQL ( db, requete );
 
+     }
+
+    if (database_version < 4889)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI CHANGE `map_host` `map_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI CHANGE `map_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI CHANGE `map_text` `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_AI` SET map_tech_id=NULL WHERE map_tech_id='*';");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_AI` SET map_tag=NULL WHERE map_tag='';");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_AI` ADD UNIQUE(`map_tech_id`, `map_tag`); ");
+       Lancer_requete_SQL ( db, requete );
+
+/*       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AO CHANGE `map_host` `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AO CHANGE `map_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AO CHANGE `map_text` `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_AO` ADD UNIQUE(`map_tech_id`, `map_tag`); ");
+       Lancer_requete_SQL ( db, requete );
+
+*/
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DO CHANGE `dst_host` `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DO CHANGE `dst_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
