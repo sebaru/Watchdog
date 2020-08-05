@@ -318,7 +318,10 @@
               "render": function (item)
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
             },
-            { "data": "acronyme", "title":"BIT Acronyme", "className": "align-middle text-center" },
+            { "data": null, "title":"BIT Acronyme", "className": "align-middle text-center",
+              "render": function (item)
+                { return( Lien ( "/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir le graphe", item.acronyme ) ); }
+            },
             { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
