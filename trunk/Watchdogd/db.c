@@ -1837,7 +1837,13 @@
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI CHANGE `map_text` `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
        Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE mnemos_AI SET map_tech_id=LEFT(map_tag,7) WHERE map_thread='MODBUS'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE mnemos_AI SET map_tag=RIGHT(map_tag,4) WHERE map_thread='MODBUS'");
+       Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_AI` SET map_tech_id=NULL WHERE map_tech_id='*';");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_AI` SET map_thread=NULL WHERE map_thread='*';");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_AI` SET map_tag=NULL WHERE map_tag='';");
        Lancer_requete_SQL ( db, requete );
@@ -1853,7 +1859,7 @@
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_AO` ADD UNIQUE(`map_tech_id`, `map_tag`); ");
        Lancer_requete_SQL ( db, requete );
 
-*/
+
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DO CHANGE `dst_host` `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DO CHANGE `dst_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
@@ -1862,6 +1868,7 @@
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_DO` ADD UNIQUE(`map_tech_id`, `map_tag`); ");
        Lancer_requete_SQL ( db, requete );
+*/
      }
 
 /*
@@ -1906,7 +1913,7 @@
 
     Libere_DB_SQL(&db);
 fin:
-    database_version=4880;
+    database_version=4889;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
