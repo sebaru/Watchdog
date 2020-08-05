@@ -1825,6 +1825,10 @@
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_AO` ADD UNIQUE(`map_tech_id`, `map_tag`); ");
        Lancer_requete_SQL ( db, requete );
 
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI CHANGE `src_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI CHANGE `src_text` `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
+       Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI CHANGE `src_host` `map_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "UPDATE mnemos_DI SET map_tech_id=LEFT(map_tag,7) WHERE map_thread='MODBUS'");
@@ -1834,10 +1838,6 @@
        g_snprintf( requete, sizeof(requete), "UPDATE mnemos_DI SET map_tech_id='IMSGS' WHERE map_thread LIKE 'imsg%%'");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "UPDATE mnemos_DI SET map_tag=RIGHT(map_tag,4) WHERE map_thread='MODBUS'");
-       Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI CHANGE `src_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
-       Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI CHANGE `src_text` `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_DI` ADD UNIQUE(`map_tech_id`, `map_tag`); ");
        Lancer_requete_SQL ( db, requete );
