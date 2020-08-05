@@ -42,6 +42,7 @@
 
     Cfg_imsgs.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_imsgs.enable            = FALSE;
+    g_snprintf( Cfg_imsgs.tech_id,  sizeof(Cfg_imsgs.tech_id ), NOM_THREAD );
     g_snprintf( Cfg_imsgs.username, sizeof(Cfg_imsgs.username), IMSGS_DEFAUT_USERNAME );
     g_snprintf( Cfg_imsgs.password, sizeof(Cfg_imsgs.password), IMSGS_DEFAUT_PASSWORD );
 
@@ -58,6 +59,8 @@
         { g_snprintf( Cfg_imsgs.username, sizeof(Cfg_imsgs.username), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "password" ) )
         { g_snprintf( Cfg_imsgs.password, sizeof(Cfg_imsgs.password), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
+        { g_snprintf( Cfg_imsgs.tech_id,  sizeof(Cfg_imsgs.tech_id),  "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_imsgs.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
@@ -237,7 +240,7 @@
        goto end;
      }
 
-    if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, message ) )
+    if ( ! Recuperer_mnemos_DI_by_tag ( &db, Cfg_imsgs.tech_id, message ) )
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, message );
        Imsgs_Envoi_message_to( from, "Error searching Database .. Sorry .." );
        goto end;
