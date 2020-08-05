@@ -485,7 +485,7 @@
        return;
      }
 
-    if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, texte ) )
+    if ( ! Recuperer_mnemos_DI_by_tag ( &db, Cfg_smsg.tech_id, texte ) )
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
     else while ( Recuperer_mnemos_DI_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
