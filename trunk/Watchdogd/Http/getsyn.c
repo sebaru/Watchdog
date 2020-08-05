@@ -74,8 +74,9 @@
     gchar *tech_id  = Normaliser_chaine ( params[0] );
     gchar *acronyme = Normaliser_chaine ( params[1] );
     g_strfreev( params );
-
     Envoyer_commande_dls_data ( tech_id, acronyme );
+    g_free(tech_id);
+    g_free(acronyme);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }

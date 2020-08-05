@@ -114,4 +114,54 @@
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
+/******************************************************************************************************************************/
+/* Http_traiter_mnemos_validate: Valide la presence ou non d'un tech_id/acronyme dans le dico                                 */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_mnemos_validate ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                     SoupClientContext *client, gpointer user_data )
+  { gchar *buf, chaine[256], tech_id[32], acronyme[64];
+    gsize taille_buf;
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    gchar **params = g_strsplit ( path, "/", -1 );
+    if( ! (params && params[1] && params[2] && params[3]) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+       g_strfreev( params );
+       return;
+     }
+
+    g_snprintf( tech_id, sizeof(tech_id), "%s", params[3] );
+    g_snprintf( acronyme, sizeof(acronyme), "%s", (params[4] ? params[4] : "") );
+    g_strfreev( params );
+
+    JsonBuilder *builder = Json_create ();
+    if (!builder)
+     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) FROM dictionnaire WHERE tech_id LIKE '%%%s%%'", tech_id );
+    SQL_Select_to_JSON ( builder, "tech_ids_found", chaine );
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT acronyme FROM dictionnaire WHERE tech_id='%s' AND acronyme LIKE '%%%s%%'",
+               tech_id, acronyme );
+    SQL_Select_to_JSON ( builder, "acronymes_found", chaine );
+
+    buf = Json_get_buf (builder, &taille_buf);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+
 /*----------------------------------------------------------------------------------------------------------------------------*/
