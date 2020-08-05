@@ -274,14 +274,8 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": null, "title":"Wago Tech_id", "className": "align-middle text-center",
-              "render": function (item)
-                { return( item.map_tag.split(':')[0] ) }
-            },
-            { "data": null, "title":"Wago I/O", "className": "align-middle text-center",
-              "render": function (item)
-                { return( item.map_tag.split(':')[1] ) }
-            },
+          [ { "data": "map_tech_id", "title":"WAGO TechID", "className": "align-middle text-center" },
+            { "data": "map_tag", "title":"WAGO I/O", "className": "align-middle text-center" },
             { "data": null, "title":"Map", "className": "align-middle text-center",
               "render": function (item)
                 { return( "<->" ); }
@@ -314,15 +308,9 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": null, "title":"Wago Tech_id", "className": "align-middle text-center",
-              "render": function (item)
-                { return( item.map_tag.split(':')[0] ) }
-            },
-            { "data": null, "title":"Wago I/O", "className": "align-middle text-center",
-              "render": function (item)
-                { return( item.map_tag.split(':')[1] ) }
-            },
-            { "data": null, "title":"Map", "className": "align-middle text-center",
+          [ { "data": "map_tech_id", "title":"WAGO TechID", "className": "align-middle text-center" },
+            { "data": "map_tag", "title":"WAGO I/O", "className": "align-middle text-center" },
+             { "data": null, "title":"Map", "className": "align-middle text-center",
               "render": function (item)
                 { return( "<->" ); }
             },
@@ -334,8 +322,8 @@
             { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer le module", "Show_Modal_Map_Edit_AI", item.map_tag, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer le module", "Show_Modal_Map_Del_AI", item.map_tag, "trash", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer le module", "Show_Modal_Map_Edit_AI", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer le module", "Show_Modal_Map_Del_AI", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },
@@ -354,14 +342,8 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": null, "title":"Wago Tech_id", "className": "align-middle text-center",
-              "render": function (item)
-                { return( item.map_tag.split(':')[0] ) }
-            },
-            { "data": null, "title":"Wago I/O", "className": "align-middle text-center",
-              "render": function (item)
-                { return( item.map_tag.split(':')[1] ) }
-            },
+          [ { "data": "map_tech_id", "title":"WAGO TechID", "className": "align-middle text-center" },
+            { "data": "map_tag", "title":"WAGO I/O", "className": "align-middle text-center" },
             { "data": null, "title":"Map", "className": "align-middle text-center",
               "render": function (item)
                 { return( "<->" ); }
@@ -374,8 +356,8 @@
             { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer le module", "Show_Modal_Map_Edit_AO", item.map_tag, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer le module", "Show_Modal_Map_Del_AI", item.map_tag, "trash", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer le module", "Show_Modal_Map_Edit_AO", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer le module", "Show_Modal_Map_Del_AI", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },
