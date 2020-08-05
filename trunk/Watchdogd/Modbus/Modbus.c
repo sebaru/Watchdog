@@ -696,8 +696,8 @@
                       __func__, module->modbus.tech_id, map_text );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:DI%%", module->modbus.tech_id );
-    if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, critere ) )
+    g_snprintf( critere, sizeof(critere),"DI%%", module->modbus.tech_id );
+    if ( ! Recuperer_mnemos_DI_by_tag ( &db, module->modbus.tech_id, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
                  __func__, module->modbus.tech_id, critere );
      }
@@ -710,7 +710,7 @@
        if ( sscanf ( src_text, "%[^:]:DI%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_tor)
            { Dls_data_get_DI ( tech_id, acro, &module->DI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
-             if(module->DI[num] == NULL) Dls_data_set_DI ( NULL, tech_id, acro, &module->DI[num], FALSE );     /* Sinon, on le crée */
+             if(module->DI[num] == NULL) Dls_data_set_DI ( NULL, tech_id, acro, &module->DI[num], FALSE );/* Sinon, on le crée */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
                          __func__, module->modbus.tech_id, src_text, num, module->nbr_entree_tor );

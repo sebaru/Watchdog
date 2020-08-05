@@ -35,6 +35,14 @@
 /* Entrée : le module_modbus                                                                                                  */
 /* Sortie : char *mode_char                                                                                                   */
 /******************************************************************************************************************************/
+ static gchar *Canonize_string ( gchar *string )
+  { return ( Normaliser_chaine ( g_strcanon( string, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", '_' ) ) ); }
+
+/******************************************************************************************************************************/
+/* Modbus_mode_to_string: Convertit le mode modbus (int) en sa version chaine de caractere                                    */
+/* Entrée : le module_modbus                                                                                                  */
+/* Sortie : char *mode_char                                                                                                   */
+/******************************************************************************************************************************/
  static gchar *Modbus_mode_to_string ( struct MODULE_MODBUS *module )
   { static gchar chaine[32];
     if (!module)                     return("Wrong Module   ");
@@ -211,6 +219,7 @@
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "hostname" ) &&
             Json_has_member ( request, "description" ) && Json_has_member ( request, "watchdog" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       json_node_unref(request);
        return;
      }
 
@@ -253,18 +262,17 @@
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "hostname" ) &&
             Json_has_member ( request, "description" ) && Json_has_member ( request, "watchdog" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       json_node_unref(request);
        return;
      }
 
-    gchar *tech_id     = Normaliser_chaine ( g_strcanon( g_ascii_strup (Json_get_string( request, "tech_id" ),-1),
-                                                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", '_' )
-                                           );
+    gchar *tech_id     = Canonize_string   ( Json_get_string( request, "tech_id" ) );
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
     gint  watchdog     = Json_get_int ( request, "watchdog" );
 
     g_snprintf( requete, sizeof(requete),
-               "INSERT INTO modbus_modules SET tech_id='%s', description='%s', hostname='%s', watchdog='%d', "
+               "INSERT INTO modbus_modules SET tech_id=UPPER('%s'), description='%s', hostname='%s', watchdog='%d', "
                "enable=0, date_create=NOW()",
                 tech_id, description, hostname, watchdog );
     g_free(tech_id);
@@ -282,7 +290,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Admin_json_map ( SoupMessage *msg, gchar *username, gint access_level, gchar *commande )
+ static void Admin_json_map_list ( SoupMessage *msg, gchar *username, gint access_level, gchar *commande )
   { JsonBuilder *builder;
     gchar *buf, chaine[512], *target;
     gsize taille_buf;
@@ -313,7 +321,7 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM %s AS m WHERE map_thread LIKE 'MODBUS'", target );
+    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM %s AS m WHERE map_thread='MODBUS'", target );
     if (SQL_Select_to_JSON ( builder, "mappings", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
@@ -348,8 +356,10 @@
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
 
-    if ( ! (Json_has_member ( request, "type" ) && Json_has_member ( request, "map_tag" ) ) )
+    if ( ! (Json_has_member ( request, "type" ) && Json_has_member ( request, "map_tech_id" ) &&
+            Json_has_member ( request, "map_tag" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       json_node_unref(request);
        return;
      }
 
@@ -362,8 +372,11 @@
 		     return;
      }
 
-    gchar *tag  = Normaliser_chaine ( Json_get_string( request, "map_tag" ) );
-    g_snprintf( requete, sizeof(requete), "DELETE FROM %s WHERE map_thread='MODBUS' AND map_tag='%s'", target, tag );
+    gchar *tech_id = Normaliser_chaine ( Json_get_string( request, "map_tech_id" ) );
+    gchar *tag     = Normaliser_chaine ( Json_get_string( request, "map_tag" ) );
+    g_snprintf( requete, sizeof(requete), "UPDATE %s SET map_thread = NULL, map_tech_id = NULL, map_tag = NULL "
+                                          "WHERE map_tech_id='%s' AND map_tag='%s'", target, tech_id, tag );
+    g_free(tech_id);
     g_free(tag);
 
     if (SQL_Write (requete))
@@ -371,6 +384,74 @@
        Cfg_modbus.lib->Thread_reload = TRUE;
      }
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+    json_node_unref(request);
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ static void Admin_json_map_set ( SoupMessage *msg, gchar *username, gint access_level )
+  { GBytes *request_brute;
+    gsize taille;
+    gchar requete[512];
+
+    if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    if (access_level < 6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+            Json_has_member ( request, "map_tag" ) && Json_has_member ( request, "type" ) ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       json_node_unref(request);
+       return;
+     }
+
+    gchar *map_tech_id = Canonize_string   ( Json_get_string( request, "map_tech_id" ) );
+    gchar *map_tag     = Canonize_string   ( Json_get_string( request, "map_tag" ) );
+    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *acronyme    = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
+
+    if (! strcasecmp( Json_get_string( request, "type" ), "DI" ) )
+     {
+       g_snprintf( requete, sizeof(requete),
+                   "UPDATE mnemos_DI SET map_thread=NULL, map_tech_id=NULL, map_tag=NULL "
+                   "  WHERE map_tech_id='%s' AND map_tag='%s';", map_tech_id, map_tag );
+
+       SQL_Write (requete);
+
+       g_snprintf( requete, sizeof(requete),
+                   "UPDATE mnemos_DI SET map_thread='MODBUS', map_tech_id=UPPER('%s'), map_tag=UPPER('%s') "
+                   "  WHERE tech_id='%s' AND acronyme='%s';", map_tech_id, map_tag, tech_id, acronyme );
+
+       if (SQL_Write (requete))
+        { soup_message_set_status (msg, SOUP_STATUS_OK);
+          Cfg_modbus.lib->Thread_reload = TRUE;
+        }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+
+     }
+/*    else if (! strcasecmp( Json_get_string( request, "type" ), "DO" ) )
+    else if (! strcasecmp( Json_get_string( request, "type" ), "AI" ) )
+    else if (! strcasecmp( Json_get_string( request, "type" ), "AO" ) )*/
+    else
+     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais type");
+		     return;
+     }
+
+    g_free(map_tech_id);
+    g_free(map_tag);
+    g_free(tech_id);
+    g_free(acronyme);
     json_node_unref(request);
   }
 /******************************************************************************************************************************/
@@ -385,7 +466,8 @@
     else if (!strcasecmp(commande, "/set")) { Admin_json_set ( msg, username, access_level ); }
     else if (!strcasecmp(commande, "/add")) { Admin_json_add ( msg, username, access_level ); }
     else if (!strcasecmp(commande, "/map/del")) { Admin_json_map_del ( msg, username, access_level ); }
-    else if (g_str_has_prefix(commande, "/map/")) { Admin_json_map ( msg, username, access_level, commande+strlen("/map/") ); }
+    else if (!strcasecmp(commande, "/map/set")) { Admin_json_map_set ( msg, username, access_level ); }
+    else if (g_str_has_prefix(commande, "/map/")) { Admin_json_map_list ( msg, username, access_level, commande+strlen("/map/") ); }
     else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
     return;
   }

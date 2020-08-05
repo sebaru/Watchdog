@@ -182,11 +182,12 @@ CREATE TABLE IF NOT EXISTS `mnemos_DI` (
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
-  `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `map_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
+  UNIQUE (`map_tech_id`,`map_tag`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
@@ -207,6 +208,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_DO` (
   `dst_param1` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
+  UNIQUE (`map_tech_id`,`map_tag`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
@@ -233,7 +235,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `map_reponse_vocale` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
-  UNIQUE( `src_host`, `src_thread`, `src_text`),
+  UNIQUE (`map_tech_id`,`map_tag`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
@@ -257,7 +259,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AO` (
   `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
-  UNIQUE( `dst_host`, `dst_thread`, `dst_text`),
+  UNIQUE (`map_tech_id`,`map_tag`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
