@@ -715,27 +715,25 @@
                       __func__, module->modbus.tech_id, map_tag );
      }
 /*********************************** Recherche des events DO a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:DO%%", module->modbus.tech_id );
-    if ( ! Recuperer_mnemos_DO_by_tag ( &db, NOM_THREAD, critere ) )
+    if ( ! Recuperer_mnemos_DO_by_tag ( &db, NOM_THREAD, "DO%%" ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
                  __func__, module->modbus.tech_id, critere );
      }
     else while ( Recuperer_mnemos_DO_suite( &db ) )
-     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *dst_tag = db->row[2];
-       char debut[80];
+     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *map_tag = db->row[2];
        gint num;
        Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Match found '%s' '%s:%s' - %s",
-                 __func__, module->modbus.tech_id, dst_tag, tech_id, acro, libelle );
-       if ( sscanf ( dst_tag, "%[^:]:DO%d", debut, &num ) == 2 )                             /* Découpage de la ligne ev_text */
+                 __func__, module->modbus.tech_id, map_tag, tech_id, acro, libelle );
+       if ( sscanf ( map_tag, "DO%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
         { if (num<module->nbr_sortie_tor)
            { Dls_data_get_DO ( tech_id, acro, &module->DO[num] );        /* bit déjà existant deja dans la structure DLS DATA */
              if(module->DO[num] == NULL) Dls_data_set_DO ( NULL, tech_id, acro, &module->DO[num], FALSE );     /* Sinon, on le crée */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
-                         __func__, module->modbus.tech_id, dst_tag, num, module->nbr_sortie_tor );
+                         __func__, module->modbus.tech_id, map_tag, num, module->nbr_sortie_tor );
         }
        else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
-                      __func__, module->modbus.tech_id, dst_tag );
+                      __func__, module->modbus.tech_id, map_tag );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     Dls_data_set_bool ( NULL, module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
