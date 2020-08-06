@@ -431,10 +431,6 @@ reconnect:
        sched_yield();
 
        xmpp_run_once ( Cfg_imsgs.ctx, 500 ); /* En milliseconde */
-       if (Cfg_imsgs.lib->Thread_reload == TRUE)
-        { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: recu signal RELOAD", __func__ );
-          break;
-        }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
         { histo = &histo_buf;
@@ -463,7 +459,7 @@ reconnect:
 
     Close_zmq ( zmq_msg );
 
-    if (lib->Thread_reload == TRUE)
+    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;

@@ -162,18 +162,11 @@
     struct timeval tv;
     fd_set fdselect;
 
-    prctl(PR_SET_NAME, "W-TINFOEDF", 0, 0, 0 );
 reload:
     memset( &Cfg_teleinfo, 0, sizeof(Cfg_teleinfo) );                               /* Mise a zero de la structure de travail */
     Cfg_teleinfo.lib = lib;                                        /* Sauvegarde de la structure pointant sur cette librairie */
-    Cfg_teleinfo.lib->TID = pthread_self();                                                 /* Sauvegarde du TID pour le pere */
+    Thread_init ( "W-TINFOEDF", lib, NOM_THREAD, "Manage TELEINFOEDF Sensors" );
     Teleinfo_Lire_config ();                                                /* Lecture de la configuration logiciel du thread */
-
-    Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
-    Cfg_teleinfo.lib->Thread_run = TRUE;                                                                /* Le thread tourne ! */
-
-    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), NOM_THREAD );
-    g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage TELEINFOEDF sensors" );
 
     Cfg_teleinfo.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
@@ -200,6 +193,7 @@ reload:
                        "%s: Init TELEINFO failed. Re-trying in %ds", __func__, TINFO_RETRY_DELAI/10 );
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
+             Send_zmq_DI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", FALSE );
            }
           else
            { Cfg_teleinfo.mode = TINFO_CONNECTED;
@@ -267,16 +261,11 @@ reload:
     close(Cfg_teleinfo.fd);                                                                   /* Fermeture de la connexion FD */
     Close_zmq ( Cfg_teleinfo.zmq_to_master );
 
-    Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
-    if (lib->Thread_reload == TRUE)
+    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
-       Send_zmq_DI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", FALSE );
-       Cfg_teleinfo.comm_status = FALSE;
        goto reload;
      }
-    Cfg_teleinfo.lib->Thread_run = FALSE;                                                       /* Le thread ne tourne plus ! */
-    Cfg_teleinfo.lib->TID = 0;                                                /* On indique au master que le thread est mort. */
-    pthread_exit(GINT_TO_POINTER(0));
+    Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

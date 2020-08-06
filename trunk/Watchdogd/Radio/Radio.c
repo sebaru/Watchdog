@@ -114,19 +114,11 @@
   { struct ZMQUEUE *zmq_from_bus;
     gchar radio[128];
 
-    prctl(PR_SET_NAME, "W-RADIO", 0, 0, 0 );
 reload:
     memset( &Cfg_radio, 0, sizeof(Cfg_radio) );                                     /* Mise a zero de la structure de travail */
     Cfg_radio.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
-    Cfg_radio.lib->TID = pthread_self();                                                    /* Sauvegarde du TID pour le pere */
+    Thread_init ( "W-RADIO", lib, NOM_THREAD, "Manage RADIO Module" );
     Radio_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
-
-    Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_NOTICE,
-              "%s: Demarrage %s . . . TID = %p", __func__, VERSION, pthread_self() );
-    Cfg_radio.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
-
-    g_snprintf( Cfg_radio.lib->admin_prompt, sizeof(Cfg_radio.lib->admin_prompt), "radio" );
-    g_snprintf( Cfg_radio.lib->admin_help,   sizeof(Cfg_radio.lib->admin_help),   "Manage Radio system" );
 
     zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     g_snprintf( radio, sizeof(radio), "%s",                                                               /* Radio par défaut */
@@ -152,14 +144,11 @@ reload:
     Close_zmq ( zmq_from_bus );
     Stopper_radio();
 
-    Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
-    if (lib->Thread_reload == TRUE)
+    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;
      }
-    Cfg_radio.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */
-    Cfg_radio.lib->TID = 0;                                                   /* On indique au master que le thread est mort. */
-    pthread_exit(GINT_TO_POINTER(0));
+    Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -185,7 +185,9 @@
         { struct LIBRAIRIE *lib;
           lib = (struct LIBRAIRIE *)liste->data;
           if ( ! strcasecmp( lib->admin_prompt, thread ) )
-           { if (status) Start_librairie(lib); else Stop_librairie(lib); }
+           { if (status) Start_librairie(lib); else Stop_librairie(lib);
+             Modifier_configDB ( lib->admin_prompt, "enable", (status ? "TRUE" : "FALSE") );
+           }
           liste = liste->next;
         }
      }

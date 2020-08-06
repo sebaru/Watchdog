@@ -564,14 +564,9 @@ reload:
      }
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
-    while(lib->Thread_run == TRUE)                                                        /* On tourne tant que l'on a besoin */
+    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { usleep(10000);
        sched_yield();
-
-       if (lib->Thread_reload == TRUE)
-        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
-          break;
-        }
 
        Envoyer_sortie_aux_ups();
 
@@ -613,9 +608,7 @@ reload:
     Close_zmq ( Cfg_ups.zmq_from_bus );
 
 end:
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
-
-    if (lib->Thread_reload == TRUE)
+    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;

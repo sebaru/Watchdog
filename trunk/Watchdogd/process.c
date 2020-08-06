@@ -251,7 +251,7 @@
              lib = Charger_librairie_par_prompt( prompt );
              if (lib)
               { gchar *enable = Recuperer_configDB_by_nom ( prompt, "enable" );
-                if ( enable==NULL || !strcasecmp ( enable, "true" ) ) Start_librairie( lib );
+                if ( !strcasecmp( prompt, "http" ) || !strcasecmp ( enable, "true" ) ) Start_librairie( lib );
                 else { Info_new( Config.log, Config.log_msrv, LOG_INFO,
                                  "%s: Librairie '%s' is not enabled : Loaded but not started", __func__, prompt );
                      }
