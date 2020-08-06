@@ -988,6 +988,8 @@
     module->nbr_request_par_sec = 0;
     module->delai = 0;
 
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s' Started", __func__, module->modbus.tech_id );
+
     if (Dls_auto_create_plugin( module->modbus.tech_id, "Gestion du Wago" ) == FALSE)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->modbus.tech_id ); }
     Mnemo_auto_create_DI ( module->modbus.tech_id, "COMM", "Statut de la communication avec le wago" );
@@ -1060,6 +1062,7 @@
            }
        }
      }
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s' Exited", __func__, module->modbus.tech_id );
     pthread_exit(GINT_TO_POINTER(0));
   }
 /******************************************************************************************************************************/
