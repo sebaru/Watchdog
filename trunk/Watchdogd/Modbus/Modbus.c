@@ -680,7 +680,7 @@
     else while ( Recuperer_mnemos_AI_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *map_tag = db->row[2], *libelle = db->row[3];
        gint num;
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Match found '%s' '%s:%s' - %s",
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Map found '%s' '%s:%s' - %s",
                  __func__, module->modbus.tech_id, map_tag, tech_id, acro, libelle );
        if ( sscanf ( map_tag, "AI%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_ana)
@@ -701,7 +701,7 @@
     else while ( Recuperer_mnemos_DI_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *map_tag = db->row[2];
        gint num;
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Match found '%s' '%s:%s' - %s",
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Map found '%s' '%s:%s' - %s",
                  __func__, module->modbus.tech_id, map_tag, tech_id, acro, libelle );
        if ( sscanf ( map_tag, "DI%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_tor)
@@ -715,14 +715,14 @@
                       __func__, module->modbus.tech_id, map_tag );
      }
 /*********************************** Recherche des events DO a raccrocher aux bits internes ***********************************/
-    if ( ! Recuperer_mnemos_DO_by_tag ( &db, NOM_THREAD, "DO%%" ) )
+    if ( ! Recuperer_mnemos_DO_by_tag ( &db, module->modbus.tech_id, "DO%%" ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
                  __func__, module->modbus.tech_id, critere );
      }
     else while ( Recuperer_mnemos_DO_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *map_tag = db->row[2];
        gint num;
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Match found '%s' '%s:%s' - %s",
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Map found '%s' '%s:%s' - %s",
                  __func__, module->modbus.tech_id, map_tag, tech_id, acro, libelle );
        if ( sscanf ( map_tag, "DO%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
         { if (num<module->nbr_sortie_tor)
