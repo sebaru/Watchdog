@@ -48,7 +48,6 @@
     struct DB *db;
 
     Cfg_teleinfo.lib->Thread_debug = FALSE;                                                    /* Settings default parameters */
-    Cfg_teleinfo.enable            = FALSE;
     g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port),
                "%s", DEFAUT_PORT_TELEINFO );
 
@@ -65,8 +64,6 @@
         { g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
         { g_snprintf( Cfg_teleinfo.tech_id, sizeof(Cfg_teleinfo.tech_id), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_teleinfo.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_teleinfo.lib->Thread_debug = TRUE;  }
        else
@@ -178,12 +175,6 @@ reload:
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), NOM_THREAD );
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage TELEINFOEDF sensors" );
 
-    if (!Cfg_teleinfo.enable)
-     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
-                "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       goto end;
-     }
-
     Cfg_teleinfo.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
@@ -276,7 +267,6 @@ reload:
     close(Cfg_teleinfo.fd);                                                                   /* Fermeture de la connexion FD */
     Close_zmq ( Cfg_teleinfo.zmq_to_master );
 
-end:
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     if (lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

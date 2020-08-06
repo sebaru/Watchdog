@@ -38,7 +38,6 @@
  struct AUDIO_CONFIG
   { struct LIBRAIRIE *lib;
     gint last_audio;                                                                   /* Date de la derniere emission sonore */
-    gboolean enable;                                                                      /* Is this thread enabled at boot ? */
     gchar language[80];                                             /* Language de restitution vocal, au format google_speech */
     gchar device[32];
     guint nbr_diffusion_wav;

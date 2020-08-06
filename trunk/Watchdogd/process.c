@@ -219,21 +219,21 @@
        liste = liste->next;
      }
 
-    while(Partage->com_msrv.Librairies)                                                     /* Liberation mÃémoire des modules */
+    while(Partage->com_msrv.Librairies)                                                     /* Liberation mémoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
        Decharger_librairie_par_prompt (lib->admin_prompt);
      }
   }
 /******************************************************************************************************************************/
 /* Charger_librairies: Ouverture de toutes les librairies possibles pour Watchdog                                             */
-/* EntrÃ©e: Rien                                                                                                               */
+/* Entrée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_librairies ( void )
   { struct dirent *fichier;
     DIR *repertoire;
 
-    repertoire = opendir ( Config.librairie_dir );                                  /* Ouverture du rÃépertoire des librairies */
+    repertoire = opendir ( Config.librairie_dir );                                  /* Ouverture du répertoire des librairies */
     if (!repertoire)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Directory %s Unknown", __func__, Config.librairie_dir );
        return;
@@ -242,14 +242,20 @@
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Loading Directory %s in progress", __func__, Config.librairie_dir );
      }
 
-    while( (fichier = readdir( repertoire )) )                                      /* Pour chacun des fichiers du rÃ©pertoire */
+    while( (fichier = readdir( repertoire )) )                                      /* Pour chacun des fichiers du répertoire */
      { gchar prompt[64];
        if (!strncmp( fichier->d_name, "libwatchdog-server-", 19 ))                     /* Chargement unitaire d'une librairie */
         { if ( ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
            { struct LIBRAIRIE *lib;
              g_snprintf( prompt, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
              lib = Charger_librairie_par_prompt( prompt );
-             if (lib) { Start_librairie( lib ); }
+             if (lib)
+              { gchar *enable = Recuperer_configDB_by_nom ( prompt, "enable" );
+                if ( enable==NULL || !strcasecmp ( enable, "true" ) ) Start_librairie( lib );
+                else { Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                                 "%s: Librairie '%s' is not enabled : Loaded but not started", __func__, prompt );
+                     }
+              }
            }
         }
      }

@@ -54,7 +54,6 @@
     xmpp_conn_t *conn;
     gchar username[80];
     gchar password[80];
-    gboolean enable;
     gboolean signed_off;
   };
 /*********************************************** Déclarations des prototypes **************************************************/

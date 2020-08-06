@@ -49,7 +49,6 @@
     struct DB *db;
 
     Cfg_ups.lib->Thread_debug = FALSE;                                                         /* Settings default parameters */
-    Cfg_ups.enable            = FALSE;
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
@@ -60,9 +59,7 @@
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,                                             /* Print Config */
                 "Ups_Lire_config: '%s' = %s", nom, valeur );
-            if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_ups.enable = TRUE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+            if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_ups.lib->Thread_debug = TRUE;  }
        else
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
@@ -550,12 +547,6 @@ reload:
     Cfg_ups.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
     Thread_init ( "W-UPS", lib, NOM_THREAD, "Manage UPS Module" );
     Ups_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
-
-    if (!Cfg_ups.enable)
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-                "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       goto end;
-     }
 
     if (Config.instance_is_master==FALSE)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,

@@ -41,7 +41,6 @@
     struct DB *db;
 
     Cfg_imsgs.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Cfg_imsgs.enable            = FALSE;
     g_snprintf( Cfg_imsgs.tech_id,  sizeof(Cfg_imsgs.tech_id ), NOM_THREAD );
     g_snprintf( Cfg_imsgs.username, sizeof(Cfg_imsgs.username), IMSGS_DEFAUT_USERNAME );
     g_snprintf( Cfg_imsgs.password, sizeof(Cfg_imsgs.password), IMSGS_DEFAUT_PASSWORD );
@@ -61,8 +60,6 @@
         { g_snprintf( Cfg_imsgs.password, sizeof(Cfg_imsgs.password), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
         { g_snprintf( Cfg_imsgs.tech_id,  sizeof(Cfg_imsgs.tech_id),  "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_imsgs.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_imsgs.lib->Thread_debug = TRUE;  }
        else
@@ -403,12 +400,6 @@ reload:
     Thread_init ( "W-IMSGS", lib, NOM_THREAD, "Manage Instant Messaging system (libstrophe)" );
     Imsgs_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
-    if (!Cfg_imsgs.enable)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE,
-                "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       goto end;
-     }
-
     Cfg_imsgs.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
     zmq_msg = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 reconnect:
@@ -472,7 +463,6 @@ reconnect:
 
     Close_zmq ( zmq_msg );
 
-end:
     if (lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;

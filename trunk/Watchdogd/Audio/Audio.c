@@ -46,7 +46,6 @@
     struct DB *db;
 
     Cfg_audio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Cfg_audio.enable            = FALSE;
     Cfg_audio.diffusion_enabled = TRUE;
     g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", AUDIO_DEFAUT_LANGUAGE );
     g_snprintf( Cfg_audio.device,   sizeof(Cfg_audio.device), "plughw" );
@@ -59,9 +58,7 @@
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur ); /* Print Config */
-            if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.enable = TRUE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+            if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.lib->Thread_debug = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "device" ) )
         { g_snprintf( Cfg_audio.device, sizeof(Cfg_audio.device), "%s", valeur ); }
@@ -179,13 +176,6 @@ reload:
     g_snprintf( Cfg_audio.lib->admin_prompt, sizeof(Cfg_audio.lib->admin_prompt), "audio" );
     g_snprintf( Cfg_audio.lib->admin_help,   sizeof(Cfg_audio.lib->admin_help),   "Manage Audio system" );
 
-    if (!Cfg_audio.enable)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: Thread is not enabled in config. Shutting Down %p",
-                 pthread_self() );
-       goto end;
-     }
-
     if (Config.instance_is_master)
      { if (Dls_auto_create_plugin( "AUDIO", "Gestion de l'audio diffusion" ) == FALSE)
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR, "%s: DLS Create 'SONO' ERROR\n", __func__ ); }
@@ -266,7 +256,7 @@ reload:
      }
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_from_bus );
-end:
+
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     if (lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

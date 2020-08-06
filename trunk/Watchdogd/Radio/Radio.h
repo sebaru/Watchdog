@@ -34,7 +34,6 @@
 
  struct RADIO_CONFIG
   { struct LIBRAIRIE *lib;
-    gboolean enable;                                                                      /* Is this thread enabled at boot ? */
     guint nbr_diffusion;
     gchar radio_en_cours;
     gint  radio_pid;

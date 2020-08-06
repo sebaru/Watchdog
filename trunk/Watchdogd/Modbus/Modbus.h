@@ -64,7 +64,6 @@
  struct MODBUS_CONFIG                                                                 /* Communication entre DLS et la MODBUS */
   { struct LIBRAIRIE *lib;
     GSList *Modules_MODBUS;
-    gboolean enable;                                                                               /* Thread enable at boot ? */
     gint nbr_request_par_sec;
   };
 

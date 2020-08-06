@@ -51,7 +51,6 @@
     struct DB *db;
 
     Cfg_dmx.lib->Thread_debug = FALSE;                                                         /* Settings default parameters */
-    Cfg_dmx.enable            = FALSE;
     g_snprintf( Cfg_dmx.tech_id, sizeof(Cfg_dmx.tech_id), "DMX01" );
     g_snprintf( Cfg_dmx.device, sizeof(Cfg_dmx.device), "/dev/ttyUSB0" );
 
@@ -63,9 +62,7 @@
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur );   /* Print Config */
-       if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_dmx.enable = TRUE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+            if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_dmx.lib->Thread_debug = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
         { g_snprintf( Cfg_dmx.tech_id, sizeof(Cfg_dmx.tech_id), "%s", valeur ); }
@@ -207,12 +204,6 @@ reload:
     Cfg_dmx.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Dmx_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
-    if (!Cfg_dmx.enable)
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE,
-                "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       goto end;
-     }
-
     if (Dls_auto_create_plugin( Cfg_dmx.tech_id, "Gestion du DMX" ) == FALSE)
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", Cfg_dmx.tech_id ); }
 
@@ -292,7 +283,6 @@ reload:
     Close_zmq ( Cfg_dmx.zmq_to_master );
     Close_zmq ( zmq_from_bus );
 
-end:
     if (lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;

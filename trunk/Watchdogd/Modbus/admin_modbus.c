@@ -100,6 +100,8 @@
        return;
      }
 
+    Json_add_int ( builder, "nbr_request_par_sec", Cfg_modbus.nbr_request_par_sec );
+
     pthread_mutex_lock( &Cfg_modbus.lib->synchro );
     liste_modules = Cfg_modbus.Modules_MODBUS;
     while ( liste_modules )

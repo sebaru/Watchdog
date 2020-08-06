@@ -65,7 +65,6 @@
   { struct LIBRAIRIE *lib;
     gchar tech_id[32];                                                                               /* Tech_id du module DMX */
     gchar device[128];                                                              /* Nom du device USB associé au canal DMX */
-    gboolean enable;                                                                               /* Thread enable at boot ? */
     gint nbr_request;                                                                        /* Nombre de requete par seconde */
     gint fd;                                                                       /* File Descriptor d'accès au port USB DMX */
     gboolean comm_status;

@@ -54,7 +54,6 @@
     struct DB *db;
 
     Cfg_modbus.lib->Thread_debug = FALSE;                                                      /* Settings default parameters */
-    Cfg_modbus.enable            = FALSE;
     Cfg_modbus.nbr_request_par_sec      = 50;
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
@@ -65,9 +64,7 @@
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur );
-            if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_modbus.enable = TRUE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+            if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_modbus.lib->Thread_debug = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "nbr_request_par_sec" ) )
         { Cfg_modbus.nbr_request_par_sec = atoi(valeur);  }
@@ -1141,12 +1138,6 @@ reload:
     Thread_init ( "W-MODBUS", lib, "modbus", "Manage Modbus System" );
     Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
 
-    if (!Cfg_modbus.enable)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
-                "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       goto end;
-     }
-
     Cfg_modbus.Modules_MODBUS = NULL;                                                         /* Init des variables du thread */
 
     if ( Charger_tous_MODBUS() == FALSE )                                                    /* Chargement des modules modbus */
@@ -1158,7 +1149,7 @@ reload:
      { usleep(100000);
      }
     Decharger_tous_MODBUS();
-end:
+
     if (lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
