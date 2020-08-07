@@ -230,7 +230,7 @@ end:
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT nom,valeur"
                 " FROM %s"
-                " WHERE instance_id = '%s' AND nom_thread='%s' ORDER BY nom,valeur",
+                " WHERE instance_id = '%s' AND nom_thread LIKE '%s' ORDER BY nom,valeur",
                 NOM_TABLE_CONFIG, g_get_host_name(), nom_thread
               );
 
@@ -257,13 +257,13 @@ end:
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT valeur FROM %s"
-                " WHERE instance_id = '%s' AND nom_thread='%s' AND nom='%s' ORDER BY nom,valeur",
+                " WHERE instance_id = '%s' AND nom_thread LIKE '%s' AND nom LIKE '%s' ORDER BY nom,valeur",
                 NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom_param
               );
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_configDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
 

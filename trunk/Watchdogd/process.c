@@ -250,11 +250,14 @@
              g_snprintf( prompt, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
              lib = Charger_librairie_par_prompt( prompt );
              if (lib)
-              { gchar *enable = Recuperer_configDB_by_nom ( prompt, "enable" );
-                if ( !strcasecmp( prompt, "http" ) || !strcasecmp ( enable, "true" ) ) Start_librairie( lib );
-                else { Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                                 "%s: Librairie '%s' is not enabled : Loaded but not started", __func__, prompt );
-                     }
+              { if ( !strcasecmp( prompt, "http" ) ) Start_librairie( lib );
+                else
+                 { gchar *enable = Recuperer_configDB_by_nom ( prompt, "enable" );
+                   if ( enable && !strcasecmp ( enable, "true" ) ) { Start_librairie( lib ); g_free(enable); }
+                   else { Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                                   "%s: Librairie '%s' is not enabled : Loaded but not started", __func__, prompt );
+                        }
+                 }
               }
            }
         }
