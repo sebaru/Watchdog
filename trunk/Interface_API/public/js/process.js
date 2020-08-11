@@ -1,10 +1,15 @@
  document.addEventListener('DOMContentLoaded', Load_process, false);
 
 /********************************************* Reload Process *****************************************************************/
- function Process_clic_reload ( thread )
+ function Process_clic_reload ( thread, hard )
   { var xhr = new XMLHttpRequest;
-    xhr.open('PUT', "/api/process/reload/"+thread);
-    /*xhr.setRequestHeader('Content-type', 'application/json');*/
+    xhr.open('PUT', "/api/process/reload");
+    xhr.setRequestHeader('Content-type', 'application/json');
+    var json_request = JSON.stringify(
+       { thread : thread,
+         hard   : hard,
+       }
+     );
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status == 200)
@@ -14,15 +19,18 @@
         }
        else { Show_Error( xhr.statusText ); }
      };
-    xhr.send();
+    xhr.send(json_request);
   }
 /********************************************* Reload Process *****************************************************************/
- function Process_clic_debug ( thread )
+ function Process_clic_debug ( thread, enable )
   { var xhr = new XMLHttpRequest;
-    button = $('#idButtonDebug_'+thread);
-    if (button.attr("debug") == "true") mode = "undebug";
-    else mode = "debug";
-    xhr.open('PUT', "/api/process/"+mode+"/"+thread);
+    xhr.open('PUT', "/api/process/debug");
+    xhr.setRequestHeader('Content-type', 'application/json');
+    var json_request = JSON.stringify(
+       { thread : thread,
+         status : enable,
+       }
+     );
     xhr.onreadystatechange = function( )
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status == 200)
@@ -32,26 +40,29 @@
        else { Show_Error( xhr.statusText ); }
 
      };
-    xhr.send();
+    xhr.send(json_request);
   }
 /********************************************* Reload Process *****************************************************************/
- function Process_clic_started ( thread )
+ function Process_clic_started ( thread, enable )
   { var xhr = new XMLHttpRequest;
-    button = $('#idButtonStarted_'+thread);
-    if (button.attr("started") == "true") mode = "stop";
-    else mode = "start";
-    xhr.open('PUT', "/api/process/"+mode+"/"+thread);
+    xhr.open('PUT', "/api/process/start");
+    xhr.setRequestHeader('Content-type', 'application/json');
+    var json_request = JSON.stringify(
+       { thread : thread,
+         status : enable,
+       }
+     );
     xhr.onreadystatechange = function( )
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status == 200)
-        { var Response = JSON.parse(xhr.responseText);
+        { //var Response = JSON.parse(xhr.responseText);
           $('#idTableProcess').DataTable().ajax.reload();
           $('#idToastStatus').toast('show');
         }
        else { Show_Error( xhr.statusText ); }
 
      };
-    xhr.send();
+    xhr.send(json_request);
   }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Load_process ()
@@ -65,63 +76,51 @@
                },
          columns:
           [ { "data": "thread", "title":"Thread", "className": "text-center" },
-            { "data": null,
+            { "data": null, "title":"Started",
               "render": function (item)
                 { if (item.started==true)
-                   { return("<button id='idButtonStarted_"+item.thread+"' "+
-                            "class='btn btn-success btn-block btn-sm' "+
-                            "data-toggle='tooltip' title='Désactiver le process' "+
-                            "onclick=Process_clic_started('"+item.thread+"') started='true'>"+
-                            "Actif</button>" );
+                   { return( Bouton ( "success", "Désactiver le process",
+                                      "Process_clic_start", item.thread+",false", "Actif" ) );
                    }
                   else
-                   { return("<button id='idButtonStarted_"+item.thread+"' "+
-                            "class='btn btn-outline-secondary btn-block btn-sm "+
-                            "data-toggle='tooltip' title='Activer le process'"+
-                            "onclick=Process_clic_started('"+item.thread+"') started='false'>"+
-                            "Inactif</button>" );
+                   { return( Bouton ( "outline-secondary", "Activer le process",
+                                      "Process_clic_start", item.thread+",true", "Inactif" ) );
                    }
                 },
-              "title":"Started",
             },
-            { "data": null,
+            { "data": null, "title":"Debug", "className": "hidden-xs",
               "render": function (item)
                 { if (item.debug==true)
-                   { return("<button id='idButtonDebug_"+item.thread+"' "+
-                            "class='btn btn-warning btn-block btn-sm' "+
-                            "data-toggle='tooltip' title='Désactiver le debug' "+
-                            "onclick=Process_clic_debug('"+item.thread+"') debug='true'>"+
-                            "Oui</button>" );
+                   { return( Bouton ( "warning", "Désactiver le debug",
+                                      "Process_clic_debug", item.thread+",false", "Oui" ) );
                    }
                   else
-                   { return("<button id='idButtonDebug_"+item.thread+"' "+
-                            "class='btn btn-outline-secondary btn-block btn-sm "+
-                            "data-toggle='tooltip' title='Activer le debug'"+
-                            "onclick=Process_clic_debug('"+item.thread+"') debug='false'>"+
-                            "Non</button>" );
+                   { return( Bouton ( "outline-secondary", "Activer le debug",
+                                      "Process_clic_debug", item.thread+",true", "Non" ) );
                    }
-                },
-              "title":"Debug", "className": "hidden-xs"
+                }
             },
+            { "data": "version", "title":"Version", "className": "text-center hidden-xs" },
             { "data": "objet", "title":"Description", "className": "hidden-xs" },
             { "data": "fichier", "title":"Fichier", "className": "hidden-xs" },
-            { "data": null,
+            { "data": null, "title":"Documentation", "className": "hidden-xs",
               "render": function (item)
                 { return("<a href='https://wiki.abls-habitat.fr/index.php?title=WatchdogServer_"+item.thread.toUpperCase()+"_Thread'>"+
                          "<span class='label label-info'>Voir le wiki "+item.thread.toUpperCase()+"</span></a>" );
                 },
-              "title":"Documentation", "className": "hidden-xs"
+              
             },
-            { "data": null,
+            { "data": null, "title":"Actions", "orderable": false, "className":"text-right",
               "render": function (item)
-                { return("<button class='btn btn-outline-info btn-block btn-sm' data-toggle='tooltip' title='Recharger le process' "+
-                         "onclick=Process_clic_reload('"+item.thread+"')>"+
-                         "Reload</button>")
+                { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "outline-info", "Recharger le thread", "Process_clic_reload", item.thread+",false", "redo", "Soft Reload" );
+                  boutons += Bouton_actions_add ( "outline-danger", "Decharger/Recharger le thread", "Process_clic_reload", item.thread+",true", "redo", "Hard Reload" );
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
                 },
-              "title":"Actions", "orderable": false, "className":"text-right"
             }
           ],
-         order: [ [0, "desc"] ],
+         //order: [ [0, "desc"] ],
          responsive: true,
        }
      );

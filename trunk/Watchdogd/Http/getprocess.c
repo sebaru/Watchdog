@@ -169,7 +169,7 @@
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
 
     if ( ! (request && Json_has_member ( request, "instance" ) && Json_has_member ( request, "thread" ) &&
-                       Json_has_member ( request, "debug" ) ) )
+                       Json_has_member ( request, "status" ) ) )
      { if (request) json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
@@ -231,7 +231,7 @@
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
 
     if ( ! (request && Json_has_member ( request, "instance" ) && Json_has_member ( request, "thread" ) &&
-                       Json_has_member ( request, "debug" ) ) )
+                       Json_has_member ( request, "status" ) ) )
      { if (request) json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
@@ -256,7 +256,7 @@
        else Demarrer_dls();                                                                               /* Démarrage D.L.S. */
      }
     if ( ! strcasecmp ( thread, "db"  ) )
-     { status=TRUE;                                                                       /* Le thread DB ne peut etre arreté */
+     {                                                                                    /* Le thread DB ne peut etre arreté */
      }
     else
      { GSList *liste;
@@ -266,7 +266,7 @@
           lib = (struct LIBRAIRIE *)liste->data;
           if ( ! strcasecmp( lib->admin_prompt, thread ) )
            { if (status) Start_librairie(lib); else Stop_librairie(lib);
-             Modifier_configDB ( lib->admin_prompt, "enable", (status ? "TRUE" : "FALSE") );
+             Modifier_configDB ( lib->admin_prompt, "status", (status ? "TRUE" : "FALSE") );
            }
           liste = liste->next;
         }
