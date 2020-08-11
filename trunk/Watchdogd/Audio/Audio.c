@@ -165,7 +165,7 @@
 reload:
     memset( &Cfg_audio, 0, sizeof(Cfg_audio) );                                     /* Mise a zero de la structure de travail */
     Cfg_audio.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-AUDIO", lib, "audio", "Manage Audio System" );
+    Thread_init ( "W-AUDIO", lib, VERSION, "audio", "Manage Audio System" );
     Audio_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
     if (Config.instance_is_master)

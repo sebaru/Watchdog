@@ -1135,7 +1135,7 @@
 reload:
     memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );                                   /* Mise a zero de la structure de travail */
     Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-MODBUS", lib, "modbus", "Manage Modbus System" );
+    Thread_init ( "W-MODBUS", lib, VERSION, "modbus", "Manage Modbus System" );
     Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
 
     Cfg_modbus.Modules_MODBUS = NULL;                                                         /* Init des variables du thread */

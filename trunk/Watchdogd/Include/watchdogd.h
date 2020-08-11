@@ -64,6 +64,7 @@
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
+    gchar version[32];
     gchar nom_fichier[128];                                                                 /* Nom de fichier de la librairie */
     gchar admin_prompt[32];                                                            /* Prompt auquel va répondre le thread */
     gchar admin_help[64];                                                              /* Designation de l'activité du thread */
@@ -159,7 +160,7 @@
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
  extern struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_fichier );
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
- extern void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *prompt, gchar *description );
+ extern void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *version, gchar *prompt, gchar *description );
  extern void Thread_end ( struct LIBRAIRIE *lib );
 
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */

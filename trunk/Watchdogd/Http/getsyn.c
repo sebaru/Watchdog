@@ -311,7 +311,8 @@
 
     if ( ! (Json_has_member ( request, "libelle" ) && Json_has_member ( request, "page" ) &&
             Json_has_member ( request, "ppage" ) && Json_has_member ( request, "access_level" ) ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 

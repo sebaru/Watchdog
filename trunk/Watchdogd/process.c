@@ -49,10 +49,11 @@
 /* Entrée: Le nom du thread, son niveau de log                                                                                */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *prompt, gchar *description )
+ void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *version, gchar *prompt, gchar *description )
   { prctl(PR_SET_NAME, pr_name, 0, 0, 0 );
     lib->TID = pthread_self();                                                              /* Sauvegarde du TID pour le pere */
     lib->Thread_run = TRUE;                                                                             /* Le thread tourne ! */
+    g_snprintf( lib->version,      sizeof(lib->version),      version );
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), prompt );
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   description );
     Modifier_configDB ( prompt, "thread_version", VERSION );

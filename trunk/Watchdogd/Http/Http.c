@@ -418,7 +418,7 @@
 reload:
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-HTTP", lib, NOM_THREAD, "Manage Web Services with external Devices" );
+    Thread_init ( "W-HTTP", lib, VERSION, NOM_THREAD, "Manage Web Services with external Devices" );
     Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
     SoupServer *socket = soup_server_new("server-header", "Watchdogd HTTP Server", NULL);
@@ -449,6 +449,9 @@ reload:
     soup_server_add_handler ( socket, "/syn/clic/",      Http_traiter_syn_clic, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/update_motifs", Http_traiter_syn_update_motifs, NULL, NULL );
     soup_server_add_handler ( socket, "/archive/get/",   Http_traiter_archive_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/process/start",  Http_traiter_process_start, NULL, NULL );
+    soup_server_add_handler ( socket, "/process/debug",  Http_traiter_process_debug, NULL, NULL );
+    soup_server_add_handler ( socket, "/process/list",   Http_traiter_process_list, NULL, NULL );
     soup_server_add_handler ( socket, "/process",        Http_traiter_process, NULL, NULL );
     soup_server_add_handler ( socket, "/instance/list",  Http_traiter_instance_list, NULL, NULL );
     soup_server_add_handler ( socket, "/status",         Http_traiter_status, NULL, NULL );

@@ -545,7 +545,7 @@
 reload:
     memset( &Cfg_ups, 0, sizeof(Cfg_ups) );                                         /* Mise a zero de la structure de travail */
     Cfg_ups.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-UPS", lib, NOM_THREAD, "Manage UPS Module" );
+    Thread_init ( "W-UPS", lib, VERSION, NOM_THREAD, "Manage UPS Module" );
     Ups_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
     if (Config.instance_is_master==FALSE)
