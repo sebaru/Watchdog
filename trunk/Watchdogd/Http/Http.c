@@ -168,6 +168,12 @@
  struct HTTP_CLIENT_SESSION *Http_rechercher_session_by_msg ( SoupMessage *msg )
   { struct HTTP_CLIENT_SESSION *result = NULL;
     GSList *cookies, *liste;
+
+    if ( Config.instance_is_master == FALSE )
+     { static struct HTTP_CLIENT_SESSION Slave_session = { "system_user", "no_sid", 9, 0 };
+       return(&Slave_session);
+     }
+
     cookies = soup_cookies_from_request(msg);
     liste = cookies;
     while ( liste )
