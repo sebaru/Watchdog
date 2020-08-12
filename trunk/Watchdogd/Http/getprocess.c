@@ -69,8 +69,9 @@
 
     
     if ( strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Pas encore implémenté");
+     { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
+       //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+       json_node_unref(request);
        return;
      }
 
@@ -176,8 +177,9 @@
      }
 
     if ( strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Pas encore implémenté");
+     { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
+       //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+       json_node_unref(request);
        return;
      }
 
@@ -238,8 +240,9 @@
      }
 
     if ( strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Pas encore implémenté");
+     { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
+       //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+       json_node_unref(request);
        return;
      }
 
@@ -309,8 +312,9 @@
      }
 
     if ( strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Pas encore implémenté");
+     { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
+       //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+       json_node_unref(request);
        return;
      }
      

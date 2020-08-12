@@ -140,6 +140,21 @@
     /*soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, "LogLevel set", 18 );*/
   }
 /******************************************************************************************************************************/
+/* Http_redirect_to_slave: Proxifie une requete vers un slave                                                                 */
+/* Entrée : le message source, le nom de l'instance cible                                                                     */
+/* Sortie : le contenu de la reponse du slave                                                                                 */
+/******************************************************************************************************************************/
+ void Http_redirect_to_slave ( SoupMessage *msg, gchar *target )
+  { SoupSession *session;
+    session = soup_session_new();
+    //g_signal_connect( client->connexion, "authenticate", G_CALLBACK(Send_credentials_CB), client );
+    
+    SoupURI *URI = soup_message_get_uri (msg);
+    soup_uri_set_host ( URI, target );
+    soup_session_send_message ( session, msg );
+    g_object_unref( session );
+  }
+/******************************************************************************************************************************/
 /* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */
 /* Entrées: une structure util, un code confidentiel                                                                          */
 /* Sortie: FALSE si erreur                                                                                                    */

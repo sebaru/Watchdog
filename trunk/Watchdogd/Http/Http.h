@@ -144,5 +144,6 @@
                                         SoupClientContext *client, gpointer user_data);
  extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern void Http_Envoyer_les_cadrans ( void );
+ extern void Http_redirect_to_slave ( SoupMessage *msg, gchar *target );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
