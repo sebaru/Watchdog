@@ -580,7 +580,6 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT hostname,
   `description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',
   `watchdog` int(11) NOT NULL,
-  `bit` int(11) NOT NULL,
   `map_E` int(11) NOT NULL DEFAULT '0',
   `max_nbr_E` int(11) NOT NULL DEFAULT '0',
   `map_EA` int(11) NOT NULL DEFAULT '0',

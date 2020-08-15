@@ -39,9 +39,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_process_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                   SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille;
-    JsonBuilder *builder;
+  { JsonBuilder *builder;
     gsize taille_buf;
     GSList *liste;
     gchar *buf;
@@ -58,28 +56,23 @@
        return;
      }
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
-    if ( ! (request && Json_has_member ( request, "instance" ) ) )
-     { if (request) json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+    gpointer instance = g_hash_table_lookup ( query, "instance" );
+    if (!instance)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    
-    if ( strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
-     { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
+    if ( strcasecmp ( instance, "MASTER" ) && strcasecmp ( instance, g_get_host_name() ) )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s : Redirecting /process/list vers %s", __func__, instance );
+       Http_redirect_to_slave ( msg, instance );
        //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-       json_node_unref(request);
        return;
      }
 
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
     if (builder == NULL)
-     { json_node_unref(request);
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -91,6 +84,7 @@
     Json_add_bool   ( builder, "debug",   Config.log_msrv );
     Json_add_bool   ( builder, "started", Partage->com_msrv.Thread_run );
     Json_add_string ( builder, "version", VERSION );
+    Json_add_int    ( builder, "start_time", Partage->start_time );
     Json_add_string ( builder, "objet",   "Local Master Server" );
     Json_add_string ( builder, "fichier", "built-in" );
     Json_end_object ( builder );                                                                              /* End Document */
@@ -100,6 +94,7 @@
     Json_add_bool   ( builder, "debug",   Partage->com_dls.Thread_debug );
     Json_add_bool   ( builder, "started", Partage->com_dls.Thread_run );
     Json_add_string ( builder, "version", VERSION );
+    Json_add_int    ( builder, "start_time", Partage->start_time );
     Json_add_string ( builder, "objet",   "D.L.S" );
     Json_add_string ( builder, "fichier", "built-in" );
     Json_end_object ( builder );                                                                              /* End Document */
@@ -109,6 +104,7 @@
     Json_add_bool   ( builder, "debug",   Config.log_arch );
     Json_add_bool   ( builder, "started", Partage->com_arch.Thread_run );
     Json_add_string ( builder, "version", VERSION );
+    Json_add_int    ( builder, "start_time", Partage->start_time );
     Json_add_string ( builder, "objet",   "Archivage" );
     Json_add_string ( builder, "fichier", "built-in" );
     Json_end_object ( builder );                                                                              /* End Document */
@@ -118,6 +114,7 @@
     Json_add_bool   ( builder, "debug",   Config.log_db );
     Json_add_bool   ( builder, "started", TRUE );
     Json_add_string ( builder, "version", VERSION );
+    Json_add_int    ( builder, "start_time", Partage->start_time );
     Json_add_string ( builder, "objet",   "Database Access" );
     Json_add_string ( builder, "fichier", "built-in" );
     Json_end_object ( builder );                                                                              /* End Document */
@@ -130,6 +127,7 @@
        Json_add_bool   ( builder, "debug",   lib->Thread_debug );
        Json_add_bool   ( builder, "started", lib->Thread_run );
        Json_add_string ( builder, "version", lib->version );
+       Json_add_int    ( builder, "start_time", lib->start_time );
        Json_add_string ( builder, "objet",   lib->admin_help );
        Json_add_string ( builder, "fichier", lib->nom_fichier );
        Json_end_object ( builder );                                                                           /* End Document */
@@ -142,7 +140,6 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-    json_node_unref(request);
    }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess_debug: Active ou non le debug d'un process                                                 */
@@ -176,7 +173,8 @@
        return;
      }
 
-    if ( strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
+    if ( strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+         strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
      { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
        //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
        json_node_unref(request);
@@ -185,7 +183,7 @@
 
 
     gchar   *thread = Json_get_string ( request,"thread" );
-    gboolean status = Json_get_bool ( request, "status" ); 
+    gboolean status = Json_get_bool ( request, "status" );
 
          if ( ! strcasecmp ( thread, "arch" ) ) { Config.log_arch = status; }
     else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
@@ -239,16 +237,17 @@
        return;
      }
 
-    if ( strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
+    if ( strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+         strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
      { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
        //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
        json_node_unref(request);
        return;
      }
 
-     
+
     gchar   *thread = Json_get_string ( request,"thread" );
-    gboolean status = Json_get_bool ( request, "status" ); 
+    gboolean status = Json_get_bool ( request, "status" );
 
     if ( ! strcasecmp ( thread, "arch" ) )
      { if (status==FALSE) { Partage->com_arch.Thread_run = FALSE; }
@@ -311,13 +310,14 @@
        return;
      }
 
-    if ( strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
+    if ( strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+         strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
      { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
        //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
        json_node_unref(request);
        return;
      }
-     
+
     gchar   *thread = Json_get_string ( request,"thread" );
     gboolean   hard = (Json_has_member ( request, "hard" ) && Json_get_bool ( request, "hard" ) );
 

@@ -49,14 +49,14 @@
 /* Entrée: Le nom du thread, son niveau de log                                                                                */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *version, gchar *prompt, gchar *description )
+ void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *version, gchar *description )
   { prctl(PR_SET_NAME, pr_name, 0, 0, 0 );
     lib->TID = pthread_self();                                                              /* Sauvegarde du TID pour le pere */
     lib->Thread_run = TRUE;                                                                             /* Le thread tourne ! */
+    time ( &lib->start_time );
     g_snprintf( lib->version,      sizeof(lib->version),      version );
-    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), prompt );
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   description );
-    Modifier_configDB ( prompt, "thread_version", VERSION );
+    Modifier_configDB ( lib->admin_prompt, "thread_version", lib->version );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Démarrage . . . TID = %p", lib->admin_prompt, pthread_self() );
   }
 /******************************************************************************************************************************/
@@ -162,9 +162,9 @@
        return(NULL);
      }
 
-    lib->Admin_json    = dlsym( lib->dl_handle, "Admin_json" );                                   /* Recherche de la fonction */
-
-    g_snprintf( lib->nom_fichier, sizeof(lib->nom_fichier), "%s", nom_absolu );
+    lib->Admin_json = dlsym( lib->dl_handle, "Admin_json" );                                      /* Recherche de la fonction */
+    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "%s", nom_prompt );
+    g_snprintf( lib->nom_fichier,  sizeof(lib->nom_fichier),  "%s", nom_absolu );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: %s loaded", __func__, nom_absolu );
 
     pthread_mutexattr_init( &attr );                                                          /* Creation du mutex de synchro */

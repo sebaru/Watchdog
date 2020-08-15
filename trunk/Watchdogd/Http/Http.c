@@ -148,7 +148,7 @@
   { SoupSession *session;
     session = soup_session_new();
     //g_signal_connect( client->connexion, "authenticate", G_CALLBACK(Send_credentials_CB), client );
-    
+
     SoupURI *URI = soup_message_get_uri (msg);
     soup_uri_set_host ( URI, target );
     soup_session_send_message ( session, msg );
@@ -439,7 +439,7 @@
 reload:
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-HTTP", lib, VERSION, NOM_THREAD, "Manage Web Services with external Devices" );
+    Thread_init ( "W-HTTP", lib, VERSION, "Manage Web Services with external Devices" );
     Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
     SoupServer *socket = soup_server_new("server-header", "Watchdogd HTTP Server", NULL);
@@ -470,6 +470,7 @@ reload:
     soup_server_add_handler ( socket, "/syn/clic/",      Http_traiter_syn_clic, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/update_motifs", Http_traiter_syn_update_motifs, NULL, NULL );
     soup_server_add_handler ( socket, "/archive/get/",   Http_traiter_archive_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/process/reload", Http_traiter_process_reload, NULL, NULL );
     soup_server_add_handler ( socket, "/process/start",  Http_traiter_process_start, NULL, NULL );
     soup_server_add_handler ( socket, "/process/debug",  Http_traiter_process_debug, NULL, NULL );
     soup_server_add_handler ( socket, "/process/list",   Http_traiter_process_list, NULL, NULL );

@@ -1,13 +1,15 @@
- document.addEventListener('DOMContentLoaded', Load_process, false);
+ document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /********************************************* Reload Process *****************************************************************/
- function Process_clic_reload ( thread, hard )
-  { var xhr = new XMLHttpRequest;
+ function Process_clic_reload ( params )
+  { parametres = params.split(':');
+    var xhr = new XMLHttpRequest;
     xhr.open('PUT', "/api/process/reload");
     xhr.setRequestHeader('Content-type', 'application/json');
     var json_request = JSON.stringify(
-       { thread : thread,
-         hard   : hard,
+       { instance: parametres[0],
+         thread  : parametres[1],
+         hard    : (parametres[2] === "true" ? true : false),
        }
      );
     xhr.onreadystatechange = function()
@@ -22,13 +24,15 @@
     xhr.send(json_request);
   }
 /********************************************* Reload Process *****************************************************************/
- function Process_clic_debug ( thread, enable )
-  { var xhr = new XMLHttpRequest;
+ function Process_clic_debug ( params )
+  { parametres = params.split(':');
+    var xhr = new XMLHttpRequest;
     xhr.open('PUT', "/api/process/debug");
     xhr.setRequestHeader('Content-type', 'application/json');
     var json_request = JSON.stringify(
-       { thread : thread,
-         status : enable,
+       { instance: parametres[0],
+         thread  : parametres[1],
+         status  : (parametres[2] === "true" ? true : false),
        }
      );
     xhr.onreadystatechange = function( )
@@ -43,13 +47,15 @@
     xhr.send(json_request);
   }
 /********************************************* Reload Process *****************************************************************/
- function Process_clic_started ( thread, enable )
-  { var xhr = new XMLHttpRequest;
+ function Process_clic_start ( params )
+  { parametres = params.split(':');
+    var xhr = new XMLHttpRequest;
     xhr.open('PUT', "/api/process/start");
     xhr.setRequestHeader('Content-type', 'application/json');
     var json_request = JSON.stringify(
-       { thread : thread,
-         status : enable,
+       { instance: parametres[0],
+         thread  : parametres[1],
+         status : (parametres[2] === "true" ? true : false),
        }
      );
     xhr.onreadystatechange = function( )
@@ -65,13 +71,30 @@
     xhr.send(json_request);
   }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
- function Load_process ()
+ function Load_page ()
   { console.log ("in load process !");
 
-    $('#idTableProcess').DataTable(
+    Load_process ( "MASTER" )
+    var xhr = new XMLHttpRequest;
+    xhr.open('GET', "/api/instance/list", true);
+    xhr.onreadystatechange = function()
+     { if ( xhr.readyState != 4 ) return;
+       if (xhr.status != 200)
+        { Show_Error ( xhr.statusText );
+          return;
+        }
+       var Response = JSON.parse(xhr.responseText);
+       Instance = Response.instance;
+     };
+    xhr.send();
+
+  }
+ function Load_process ( instance )
+  { $('#idTableProcess').DataTable(
        { pageLength : 25,
          fixedHeader: true,
          ajax: {	url : "/api/process/list",	type : "GET", dataSrc: "Process",
+                 data: { "instance": instance },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
@@ -80,11 +103,11 @@
               "render": function (item)
                 { if (item.started==true)
                    { return( Bouton ( "success", "Désactiver le process",
-                                      "Process_clic_start", item.thread+",false", "Actif" ) );
+                                      "Process_clic_start", instance+":"+item.thread+":false", "Actif" ) );
                    }
                   else
                    { return( Bouton ( "outline-secondary", "Activer le process",
-                                      "Process_clic_start", item.thread+",true", "Inactif" ) );
+                                      "Process_clic_start", instance+":"+item.thread+":true", "Inactif" ) );
                    }
                 },
             },
@@ -92,15 +115,16 @@
               "render": function (item)
                 { if (item.debug==true)
                    { return( Bouton ( "warning", "Désactiver le debug",
-                                      "Process_clic_debug", item.thread+",false", "Oui" ) );
+                                      "Process_clic_debug", instance+":"+item.thread+":false", "Oui" ) );
                    }
                   else
                    { return( Bouton ( "outline-secondary", "Activer le debug",
-                                      "Process_clic_debug", item.thread+",true", "Non" ) );
+                                      "Process_clic_debug", instance+":"+item.thread+":true", "Non" ) );
                    }
                 }
             },
             { "data": "version", "title":"Version", "className": "text-center hidden-xs" },
+            { "data": "start_time", "title":"Start Time", "className": "text-center hidden-xs" },
             { "data": "objet", "title":"Description", "className": "hidden-xs" },
             { "data": "fichier", "title":"Fichier", "className": "hidden-xs" },
             { "data": null, "title":"Documentation", "className": "hidden-xs",
@@ -108,13 +132,13 @@
                 { return("<a href='https://wiki.abls-habitat.fr/index.php?title=WatchdogServer_"+item.thread.toUpperCase()+"_Thread'>"+
                          "<span class='label label-info'>Voir le wiki "+item.thread.toUpperCase()+"</span></a>" );
                 },
-              
+
             },
             { "data": null, "title":"Actions", "orderable": false, "className":"text-right",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-info", "Recharger le thread", "Process_clic_reload", item.thread+",false", "redo", "Soft Reload" );
-                  boutons += Bouton_actions_add ( "outline-danger", "Decharger/Recharger le thread", "Process_clic_reload", item.thread+",true", "redo", "Hard Reload" );
+                  boutons += Bouton_actions_add ( "outline-info", "Recharger le thread", "Process_clic_reload", instance+":"+item.thread+":false", "redo", "Soft Reload" );
+                  boutons += Bouton_actions_add ( "outline-danger", "Decharger/Recharger le thread", "Process_clic_reload", instance+":"+item.thread+":true", "redo", "Hard Reload" );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },
