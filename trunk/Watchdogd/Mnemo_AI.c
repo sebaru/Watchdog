@@ -303,6 +303,7 @@
     Json_add_double ( builder, "valeur_min",   bit->min );
     Json_add_double ( builder, "valeur_max",   bit->max );
     Json_add_double ( builder, "valeur",       bit->val_ech );
+    Json_add_string ( builder, "unite",        bit->unite );
     Json_add_int    ( builder, "type",         bit->type );
     Json_add_int    ( builder, "in_range",     bit->inrange );
     Json_add_int    ( builder, "last_arch",    bit->last_arch );
