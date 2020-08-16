@@ -56,7 +56,7 @@
          columns:
           [ { "data": "ppage", "title":"PPage", "className": "align-middle hidden-xs text-center" },
             { "data": "page", "title":"Page", "className": "align-middle hidden-xs text-center" },
-            { "data": null, "className": "align-middle hidden-xs text-center",
+            { "data": null, "title":"Started", "className": "align-middle hidden-xs text-center",
               "render": function (item)
                 { if (item.actif==true)
                    { return( Bouton ( "success", "Désactiver le plugin",
@@ -66,41 +66,36 @@
                    { return( Bouton ( "outline-secondary", "Activer le plugin",
                                       "Dls_enable_plugin", item.tech_id, "Désactivé" ) );
                    }
-                },
-              "title":"Started", "orderable": true
+                }
             },
-            { "data": null, "className": "align-middle hidden-xs text-center",
+            { "data": null, "title":"TechID", "className": "align-middle text-center",
               "render": function (item)
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) );
-                },
-              "title":"tech_id", "orderable": true
+                }
             },
             { "data": "package", "title":"Package", "className": "align-middle hidden-xs" },
-            { "data": null, "className": "align-middle hidden-xs",
+            { "data": null, "title":"Nom court", "className": "align-middle",
               "render": function (item)
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.shortname ) );
-                },
-              "title":"Nom court", "orderable": true
+                }
             },
-            { "data": null, "className": "align-middle hidden-xs",
+            { "data": null, "title":"Libellé", "className": "align-middle hidden-xs",
               "render": function (item)
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.name ) );
-                },
-              "title":"Libellé", "orderable": true
+                }
             },
-            { "data": null, "className": "align-middle hidden-xs",
+            { "data": null, "title":"Compil", "className": "align-middle hidden-xs",
               "render": function (item)
                 { return( Bouton ( compil_status[item.compil_status][1],
                                   "Statut de la compilation", null, null,
-                                  compil_status[item.compil_status][0]
+                                   compil_status[item.compil_status][0]
                                 )
                         );
-                },
-              "title":"Compil", "orderable": true
+                }
             },
             { "data": "nbr_compil", "title":"Nbr Compil", "className": "align-middle text-center hidden-xs" },
             { "data": "nbr_ligne", "title":"Nbr Lignes", "className": "align-middle text-center hidden-xs" },
-            { "data": null,
+            { "data": null, "title":"Actions", "orderable": false,
               "render": function (item)
                 { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
                          "<button class='btn btn-outline-primary btn-sm' data-toggle='tooltip' title='Voir le code' "+
@@ -117,8 +112,7 @@
                          "<i class='fas fa-trash'></i></button>"+
                          "</div>"
                         )
-                },
-              "title":"Actions", "orderable": false
+                }
             }
           ],
          /*order: [ [0, "desc"] ],*/

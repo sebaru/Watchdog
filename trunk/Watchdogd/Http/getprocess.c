@@ -324,6 +324,7 @@
     else if ( hard )
      { Decharger_librairie_par_prompt ( thread );
        Charger_librairie_par_prompt ( thread );
+       sleep(1);                                                                           /* lui laisse le temps de demarrer */
      }
     else
      { GSList *liste;
@@ -338,8 +339,9 @@
               }
              else
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                         "%s: reloading %s -> Library found. Sending Reload.", __func__, thread );
+                         "%s: reloading '%s' -> Library found. Sending Reload.", __func__, thread );
                 lib->Thread_reload = TRUE;
+                sleep(1);                                                                  /* lui laisse le temps de demarrer */
               }
            }
           liste = g_slist_next(liste);
