@@ -120,7 +120,7 @@
                        { "data": "map_thread", "title":"map_thread", "className": "hidden-xs" },
                        { "data": "map_tech_id","title":"map_tech_id","className": "hidden-xs" },
                        { "data": "map_tag",    "title":"map_tag",    "className": "hidden-xs" },
-                       { "data": "map_param1", "title":"map_param1", "className": "hidden-xs" },
+                       { "data": "dst_param1", "title":"map_param1", "className": "hidden-xs" },
                        { "data": null, "title":"Actions", "orderable": false, "className":"text-center",
                          "render": function (item)
                           { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+

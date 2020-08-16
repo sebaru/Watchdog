@@ -42,7 +42,6 @@
  static GSList *Alias=NULL;                                                  /* Liste des alias identifiés dans le source DLS */
  static GSList *Liste_Actions_bit    = NULL;                              /* Liste des actions rencontrées dans le source DLS */
  static GSList *Liste_Actions_num    = NULL;                              /* Liste des actions rencontrées dans le source DLS */
- static GSList *Liste_Actions_msg    = NULL;                              /* Liste des actions rencontrées dans le source DLS */
  static GSList *Liste_edge_up_bi     = NULL;                               /* Liste des bits B utilisés avec l'option EDGE_UP */
  static GSList *Liste_edge_up_entree = NULL;                               /* Liste des bits E utilisés avec l'option EDGE_UP */
  static gchar *Buffer=NULL;
@@ -985,7 +984,8 @@
        retour = TRAD_DLS_SYNTAX_ERROR;
      }
     else
-     { gint fd;
+     { gchar chaine[4096], date[64];
+       gint fd;
        Emettre_erreur_new( "No error found" );                      /* Pas d'erreur rencontré (mais peut etre des warnings !) */
        retour = TRAD_DLS_OK;
 
@@ -1002,7 +1002,6 @@
                             "  {\n"
                             "    Update_edge_up_value();\n";
           gchar *End_Go =   "  }\n";
-          gchar chaine[4096], date[64];
           struct tm *temps;
           time_t ltime;
 
@@ -1095,20 +1094,16 @@
 
           g_snprintf(chaine, sizeof(chaine), "    if (vars->starting)\n     {\n" );
           write( fd, chaine, strlen(chaine) );                                                     /* Ecriture de de l'entete */
-          liste = Liste_Actions_msg;                               /* Initialise les fonctions de gestion des fronts montants */
-          while(liste)
-           { gchar chaine[128];
-             g_snprintf(chaine, sizeof(chaine), "       MSG(%d,0);\n", GPOINTER_TO_INT(liste->data) );
-             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
-             liste = liste->next;
-           }
-          g_snprintf(chaine, sizeof(chaine), "     }\n" );
-          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
           write( fd, End_Go, strlen(End_Go) );
           close(fd);
         }
+
+       g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE tech_id='%s'", tech_id );
+       SQL_Write ( chaine );
+       g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_TEMPO WHERE tech_id='%s'", tech_id );
+       SQL_Write ( chaine );
 
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)
