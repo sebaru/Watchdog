@@ -47,9 +47,9 @@
             columns: [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
                        { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
                        { "data": "libelle",    "title":"Libellé",    "className": "" },
-                       { "data": "src_host",   "title":"src_host",   "className": "hidden-xs" },
-                       { "data": "src_thread", "title":"src_thread", "className": "hidden-xs" },
-                       { "data": "src_text",   "title":"src_text",   "className": "hidden-xs" },
+                       { "data": "map_host",   "title":"map_host",   "className": "hidden-xs" },
+                       { "data": "map_thread", "title":"map_thread", "className": "hidden-xs" },
+                       { "data": "map_text",   "title":"map_text",   "className": "hidden-xs" },
                        { "data": null,
                          "render": function (item)
                           { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
@@ -116,10 +116,10 @@
             columns: [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
                        { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
                        { "data": "libelle",    "title":"Libellé",    "className": "" },
-                       { "data": "dst_host",   "title":"dst_host",   "className": "hidden-xs" },
-                       { "data": "dst_thread", "title":"dst_thread", "className": "hidden-xs" },
-                       { "data": "dst_tag",    "title":"dst_tag",    "className": "hidden-xs" },
-                       { "data": "dst_param1", "title":"dst_param1", "className": "hidden-xs" },
+                       { "data": "map_host",   "title":"map_host",   "className": "hidden-xs" },
+                       { "data": "map_thread", "title":"map_thread", "className": "hidden-xs" },
+                       { "data": "map_tag",    "title":"map_tag",    "className": "hidden-xs" },
+                       { "data": "map_param1", "title":"map_param1", "className": "hidden-xs" },
                        { "data": null,
                          "render": function (item)
                           { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
@@ -147,12 +147,12 @@
             fixedHeader: true,
             data: Response.AO,
             rowId: "id",
-            columns: [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
-                       { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                       { "data": "libelle",    "title":"Libellé",    "className": "" },
-                       { "data": "type",   "title":"Type",   "className": "hidden-xs" },
-                       { "data": "min", "title":"min", "className": "hidden-xs" },
-                       { "data": "max", "title":"max", "className": "hidden-xs" },
+            columns: [ { "data": "tech_id",  "title":"TechId",     "className": "text-center hidden-xs" },
+                       { "data": "acronyme", "title":"Acronyme",   "className": "text-center" },
+                       { "data": "libelle",  "title":"Libellé",    "className": "" },
+                       { "data": "type",     "title":"Type",   "className": "hidden-xs" },
+                       { "data": "min",      "title":"min", "className": "hidden-xs" },
+                       { "data": "max",      "title":"max", "className": "hidden-xs" },
                        { "data": null,
                          "render": function (item)
                           { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
@@ -205,6 +205,39 @@
           }
         );
 
+       $('#idTableCptImp').DataTable(
+          { pageLength : 50,
+            fixedHeader: true,
+            data: Response.CI,
+            rowId: "id",
+            columns:
+              [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
+                { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
+                { "data": "libelle",    "title":"Libellé",    "className": "hidden-xs" },
+                { "data": null, "title":"Etat", "className": "",
+                  "render": function (item)
+                    { if (item.etat==true) { return( Bouton ( "outline-success", "Activé", null, null, "Actif" ) );        }
+                                      else { return( Bouton ( "outline-secondary", "Désactivé", null, null, "Inactif" ) ); }
+                    },
+                },
+                { "data": "valeur",     "title":"Valeur en base",   "className": "text-center" },
+                { "data": "multi",      "title":"Multi.",   "className": "text-center hidden-xs" },
+                { "data": "unite",      "title":"Unité",    "className": "text-center hidden-xs" },
+                { "data": null, "title":"Archivage", "className": "hidden-xs",
+                  "render": function (item)
+                    { if (item.archivage==true)
+                       { return( Bouton ( "success", "Archivage activé", null, null, "Actif" ) );
+                       }
+                      else
+                       { return( Bouton ( "outline-secondary", "Archivage désactivé", null, null, "Inactif" ) );
+                       }
+                    }
+                }
+              ],
+            /*order: [ [0, "desc"] ],*/
+            responsive: true,
+          }
+        );
 
      };
     xhr.send();

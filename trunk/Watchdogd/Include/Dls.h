@@ -147,6 +147,7 @@
     gint    valeurs[60];                                                                              /* 60 dernieres valeurs */
     gchar   unite[32];
     gboolean etat;
+    gboolean archivage;
   };
 
  struct DLS_CH

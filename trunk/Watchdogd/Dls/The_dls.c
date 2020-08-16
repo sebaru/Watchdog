@@ -1003,7 +1003,7 @@
        cpt_imp->imp_par_minute = cpt_imp->valeur - cpt_imp->valeurs[0];
      }
 
-    if (need_arch == TRUE)
+    if (cpt_imp->archivage && need_arch == TRUE)
      { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 ); }  /* Archivage si besoin */
   }
 /******************************************************************************************************************************/
