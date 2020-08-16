@@ -396,8 +396,13 @@
         { case MSG_SMS_YES:
                if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
                 { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                            "%s: Error sending with GSM. Falling back to SMSBOX", __func__ );
-                  Envoi_sms_smsbox( msg, sms->user_phone );
+                            "%s: First Error sending with GSM. Trying another one in 5 sec", __func__ );
+                  sleep(5);
+                  if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
+                   { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
+                               "%s: Second Error sending with GSM. Falling back to SMSBOX", __func__ );
+                     Envoi_sms_smsbox( msg, sms->user_phone );
+                   }
                 }
                break;
           case MSG_SMS_GSM_ONLY:
