@@ -123,7 +123,7 @@
 /* EntrÃée: Le nom de fichier correspondant                                                                                    */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_prompt )
+ struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *prompt )
   { pthread_mutexattr_t attr;                                                          /* Initialisation des mutex de synchro */
     struct LIBRAIRIE *lib;
     gchar nom_absolu[128];
@@ -133,8 +133,8 @@
     while (liste)
      { struct LIBRAIRIE *lib;
        lib = (struct LIBRAIRIE *)liste->data;
-       if ( ! strcmp( lib->admin_prompt, nom_prompt ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Librairie %s already loaded", __func__, nom_prompt );
+       if ( ! strcmp( lib->admin_prompt, prompt ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Librairie %s already loaded", __func__, prompt );
           return(NULL);
         }
        liste=liste->next;
@@ -145,7 +145,7 @@
                 return(NULL);
               }
 
-    g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/libwatchdog-server-%s.so", Config.librairie_dir, nom_prompt );
+    g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/libwatchdog-server-%s.so", Config.librairie_dir, prompt );
 
     lib->dl_handle = dlopen( nom_absolu, RTLD_GLOBAL | RTLD_NOW );
     if (!lib->dl_handle)
@@ -163,13 +163,22 @@
      }
 
     lib->Admin_json = dlsym( lib->dl_handle, "Admin_json" );                                      /* Recherche de la fonction */
-    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "%s", nom_prompt );
+    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "%s", prompt );
     g_snprintf( lib->nom_fichier,  sizeof(lib->nom_fichier),  "%s", nom_absolu );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: %s loaded", __func__, nom_absolu );
 
     pthread_mutexattr_init( &attr );                                                          /* Creation du mutex de synchro */
     pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
     pthread_mutex_init( &lib->synchro, &attr );
+
+    if ( !strcasecmp( prompt, "http" ) ) Start_librairie( lib );
+    else
+     { gchar *enable = Recuperer_configDB_by_nom ( prompt, "enable" );
+       if ( enable && !strcasecmp ( enable, "true" ) ) { Start_librairie( lib ); g_free(enable); }
+       else { Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                        "%s: Librairie '%s' is not enabled : Loaded but not started", __func__, prompt );
+            }
+     }
 
     Partage->com_msrv.Librairies = g_slist_prepend( Partage->com_msrv.Librairies, lib );
     return(lib);
@@ -247,19 +256,8 @@
      { gchar prompt[64];
        if (!strncmp( fichier->d_name, "libwatchdog-server-", 19 ))                     /* Chargement unitaire d'une librairie */
         { if ( ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
-           { struct LIBRAIRIE *lib;
-             g_snprintf( prompt, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
-             lib = Charger_librairie_par_prompt( prompt );
-             if (lib)
-              { if ( !strcasecmp( prompt, "http" ) ) Start_librairie( lib );
-                else
-                 { gchar *enable = Recuperer_configDB_by_nom ( prompt, "enable" );
-                   if ( enable && !strcasecmp ( enable, "true" ) ) { Start_librairie( lib ); g_free(enable); }
-                   else { Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                                   "%s: Librairie '%s' is not enabled : Loaded but not started", __func__, prompt );
-                        }
-                 }
-              }
+           { g_snprintf( prompt, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
+             Charger_librairie_par_prompt( prompt );
            }
         }
      }

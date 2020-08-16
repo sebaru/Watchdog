@@ -15,8 +15,7 @@
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status == 200)
-        { /*var Response = JSON.parse(xhr.responseText);
-          console.debug(Response);*/
+        { $('#idTableProcess').DataTable().ajax.reload();
           $('#idToastStatus').toast('show');
         }
        else { Show_Error( xhr.statusText ); }
@@ -124,9 +123,15 @@
                 }
             },
             { "data": "version", "title":"Version", "className": "text-center hidden-xs" },
-            { "data": "start_time", "title":"Start Time", "className": "text-center hidden-xs" },
+            { "data": null, "title":"Start Time", "className": "text-center hidden-xs",
+              "render": function (item)
+                { if(item.start_time == 0) return("--");
+                  var myDate = new Date( item.start_time *1000 );
+                  return(myDate.toLocaleString());
+                },
+
+            },
             { "data": "objet", "title":"Description", "className": "hidden-xs" },
-            { "data": "fichier", "title":"Fichier", "className": "hidden-xs" },
             { "data": null, "title":"Documentation", "className": "hidden-xs",
               "render": function (item)
                 { return("<a href='https://wiki.abls-habitat.fr/index.php?title=WatchdogServer_"+item.thread.toUpperCase()+"_Thread'>"+

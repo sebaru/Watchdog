@@ -86,7 +86,6 @@
     Json_add_string ( builder, "version", VERSION );
     Json_add_int    ( builder, "start_time", Partage->start_time );
     Json_add_string ( builder, "objet",   "Local Master Server" );
-    Json_add_string ( builder, "fichier", "built-in" );
     Json_end_object ( builder );                                                                              /* End Document */
 
     Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
@@ -96,7 +95,6 @@
     Json_add_string ( builder, "version", VERSION );
     Json_add_int    ( builder, "start_time", Partage->start_time );
     Json_add_string ( builder, "objet",   "D.L.S" );
-    Json_add_string ( builder, "fichier", "built-in" );
     Json_end_object ( builder );                                                                              /* End Document */
 
     Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
@@ -106,7 +104,6 @@
     Json_add_string ( builder, "version", VERSION );
     Json_add_int    ( builder, "start_time", Partage->start_time );
     Json_add_string ( builder, "objet",   "Archivage" );
-    Json_add_string ( builder, "fichier", "built-in" );
     Json_end_object ( builder );                                                                              /* End Document */
 
     Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
@@ -116,7 +113,6 @@
     Json_add_string ( builder, "version", VERSION );
     Json_add_int    ( builder, "start_time", Partage->start_time );
     Json_add_string ( builder, "objet",   "Database Access" );
-    Json_add_string ( builder, "fichier", "built-in" );
     Json_end_object ( builder );                                                                              /* End Document */
 
     liste = Partage->com_msrv.Librairies;                                                /* Parcours de toutes les librairies */
@@ -129,7 +125,6 @@
        Json_add_string ( builder, "version", lib->version );
        Json_add_int    ( builder, "start_time", lib->start_time );
        Json_add_string ( builder, "objet",   lib->admin_help );
-       Json_add_string ( builder, "fichier", lib->nom_fichier );
        Json_end_object ( builder );                                                                           /* End Document */
 
        liste = liste->next;
@@ -184,6 +179,7 @@
 
     gchar   *thread = Json_get_string ( request,"thread" );
     gboolean status = Json_get_bool ( request, "status" );
+    Modifier_configDB ( thread, "debug", (status ? "TRUE" : "FALSE") );
 
          if ( ! strcasecmp ( thread, "arch" ) ) { Config.log_arch = status; }
     else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
@@ -248,6 +244,7 @@
 
     gchar   *thread = Json_get_string ( request,"thread" );
     gboolean status = Json_get_bool ( request, "status" );
+    Modifier_configDB ( thread, "enable", (status ? "TRUE" : "FALSE") );
 
     if ( ! strcasecmp ( thread, "arch" ) )
      { if (status==FALSE) { Partage->com_arch.Thread_run = FALSE; }
@@ -268,7 +265,6 @@
           lib = (struct LIBRAIRIE *)liste->data;
           if ( ! strcasecmp( lib->admin_prompt, thread ) )
            { if (status) Start_librairie(lib); else Stop_librairie(lib);
-             Modifier_configDB ( lib->admin_prompt, "status", (status ? "TRUE" : "FALSE") );
            }
           liste = liste->next;
         }
@@ -322,7 +318,7 @@
     gboolean   hard = (Json_has_member ( request, "hard" ) && Json_get_bool ( request, "hard" ) );
 
 /*************************************************** WS Reload library ********************************************************/
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading start for %s", __func__, thread );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading start for '%s' (hard=%d)", __func__, thread, hard );
          if ( ! strcasecmp( thread, "dls" ) )  { Partage->com_dls.Thread_reload = TRUE; }
     else if ( ! strcasecmp( thread, "arch" ) ) { Partage->com_arch.Thread_reload = TRUE; }
     else if ( hard )
@@ -336,7 +332,7 @@
         { struct LIBRAIRIE *lib = liste->data;
           if ( ! strcasecmp( thread, lib->admin_prompt ) )
            { if (lib->Thread_run == FALSE)
-              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                          "%s: reloading '%s' -> Library found but not started. Please Start '%s' before reload",
                          __func__, thread, thread );
               }
