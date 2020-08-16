@@ -33,8 +33,8 @@
               [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
                 { "data": null, "title":"Etat", "className": "",
                   "render": function (item)
-                    { if (item.etat==true) { return( Bouton ( "success", "Activé", null, null, "Actif" ) );        }
-                                      else { return( Bouton ( "outline-secondary", "Désactivé", null, null, "Inactif" ) ); }
+                    { if (item.etat==true) { return( Bouton ( "success", "Activée", null, null, "Active" ) );        }
+                                      else { return( Bouton ( "outline-secondary", "Désactivée", null, null, "Inactive" ) ); }
                     },
                 },
               ],
@@ -73,8 +73,8 @@
               [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
                 { "data": null, "title":"Etat", "className": "",
                   "render": function (item)
-                    { if (item.etat==true) { return( Bouton ( "success", "Activé", null, null, "Actif" ) );        }
-                                      else { return( Bouton ( "outline-secondary", "Désactivé", null, null, "Inactif" ) ); }
+                    { if (item.etat==true) { return( Bouton ( "success", "Activée", null, null, "Active" ) );        }
+                                      else { return( Bouton ( "outline-secondary", "Désactivée", null, null, "Inactive" ) ); }
                     },
                 },
               ],
@@ -103,7 +103,12 @@
             rowId: "id",
             columns:
               [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center align-middle" },
-                { "data": "etat",       "title":"Etat", "className": "text-center align-middle" },
+                { "data": null, "title":"Etat", "className": "",
+                  "render": function (item)
+                    { if (item.etat==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
+                                      else { return( Bouton ( "outline-secondary", "Le bit est a 0", null, null, "0" ) ); }
+                    },
+                },
                 { "data": "valeur",     "title":"Valeur",     "className": "text-center align-middle" },
                 { "data": "multi",      "title":"Multiplicateur", "className": "text-center align-middle hidden-xs" },
                 { "data": "unite",      "title":"Unité", "className": "text-center align-middle hidden-xs" },
@@ -120,7 +125,7 @@
             rowId: "id",
             columns:
               [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                { "data": "valeur",     "title":"Valeur en base",   "className": "hidden-xs" },
+                { "data": "valeur",     "title":"Valeur",   "className": "hidden-xs" },
                 { "data": "unite",      "title":"Unité",    "className": "hidden-xs" },
               ],
             /*order: [ [0, "desc"] ],*/
@@ -179,10 +184,9 @@
             rowId: "id",
             columns:
               [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                { "data": "mode",       "title":"Mode",     "className": "" },
-                { "data": "color",      "title":"Couleur",     "className": "" },
-                { "data": "cligno",     "title":"Cligno",     "className": "" },
-                { "data": null, "title":"Etat", "className": "",
+                { "data": "mode",       "title":"Mode",     "className": "text-center" },
+                { "data": "color",      "title":"Couleur",     "className": "text-center" },
+                { "data": null, "title":"cligno", "className": "",
                   "render": function (item)
                     { if (item.cligno==true) { return( Bouton ( "outline-success", "Le visuel clignote", null, null, "Oui" ) );          }
                                         else { return( Bouton ( "outline-secondary", "Le visuel ne clignote pas", null, null, "Non" ) ); }
