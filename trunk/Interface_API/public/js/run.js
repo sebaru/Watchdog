@@ -51,6 +51,7 @@
             columns:
               [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
                 { "data": "valeur", "title":"Valeur", "className": "text-center hidden-xs" },
+                { "data": "unite", "title":"Unité", "className": "text-center hidden-xs" },
                 { "data": null, "title":"in_range", "className": "",
                   "render": function (item)
                     { if (item.in_range==true) { return( Bouton ( "outline-success", "Dans les clous !", null, null, "Oui" ) );        }
