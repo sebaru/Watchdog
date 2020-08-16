@@ -1872,7 +1872,7 @@
      }
 
     if (database_version < 4908)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_CI ADD `archivage` BOOLEAN NOT NULL DEFAULT '0'");
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_CI ADD `archivage` BOOLEAN NOT NULL DEFAULT '1'");
        Lancer_requete_SQL ( db, requete );
      }
 
