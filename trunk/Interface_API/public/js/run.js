@@ -187,7 +187,7 @@
               [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
                 { "data": "mode",       "title":"Mode",     "className": "text-center" },
                 { "data": "color",      "title":"Couleur",     "className": "text-center" },
-                { "data": null, "title":"cligno", "className": "",
+                { "data": null, "title":"Cligno", "className": "",
                   "render": function (item)
                     { if (item.cligno==true) { return( Bouton ( "outline-success", "Le visuel clignote", null, null, "Oui" ) );          }
                                         else { return( Bouton ( "outline-secondary", "Le visuel ne clignote pas", null, null, "Non" ) ); }
@@ -208,8 +208,8 @@
               [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
                 { "data": null, "title":"Etat", "className": "",
                   "render": function (item)
-                    { if (item.etat==true) { return( Bouton ( "success", "Le message est a 1", null, null, "1" ) );        }
-                                      else { return( Bouton ( "outline-secondary", "Le message est a 0", null, null, "0" ) ); }
+                    { if (item.etat==true) { return( Bouton ( "success", "Le message est a 1", null, null, "Actif" ) );        }
+                                      else { return( Bouton ( "outline-secondary", "Le message est a 0", null, null, "Inactif" ) ); }
                     },
                 },
               ],

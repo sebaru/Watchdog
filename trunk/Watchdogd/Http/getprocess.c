@@ -195,7 +195,7 @@
           liste = liste->next;
         }
      }
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' debug to '%d'", __func__,
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' debug to '%s'", __func__,
               thread, (status ? "TRUE" : "FALSE" ) );
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);

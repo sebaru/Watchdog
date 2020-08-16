@@ -1,20 +1,21 @@
  document.addEventListener('DOMContentLoaded', Load_common, false);
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
- function Send_to_API ( method, URL, fonction )
+ function Send_to_API ( method, URL, parametre, fonction )
   { var xhr = new XMLHttpRequest;
     xhr.open(method, URL, true);
+    if (method=="POST") { xhr.setRequestHeader('Content-type', 'application/json'); }
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status == 200)
-        { /*var Response = JSON.parse(xhr.responseText);
-          console.debug(Response);*/
+        { try { var Response = JSON.parse(xhr.responseText); }
+          catch (error) { Response=undefined; }
           $('#idToastStatus').toast('show');
-          fonction();
+          fonction(Response);
         }
        else { Show_Error( xhr.statusText ); }
      }
-    xhr.send();
+    xhr.send(parametre);
   }
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/

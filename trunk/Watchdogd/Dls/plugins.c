@@ -359,11 +359,14 @@
  static void Dls_start_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
-     { plugin->plugindb.on = TRUE;
+     { gchar chaine[80];
+       plugin->plugindb.on = TRUE;
        plugin->conso = 0.0;
        plugin->start_date = time(NULL);
        plugin->vars.starting = 1;
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' started (%s)", __func__, plugin->plugindb.tech_id, plugin->plugindb.nom );
+       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET actif='1' WHERE tech_id = '%s'", plugin->plugindb.tech_id );
+       SQL_Write ( chaine );
      }
   }
 /******************************************************************************************************************************/
@@ -374,11 +377,14 @@
  static void Dls_stop_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
-     { plugin->plugindb.on = FALSE;
+     { gchar chaine[80];
+       plugin->plugindb.on = FALSE;
        plugin->start_date = 0;
        plugin->conso = 0.0;
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' stopped (%s)", __func__,
                  plugin->plugindb.tech_id, plugin->plugindb.nom );
+       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET actif='0' WHERE tech_id = '%s'", plugin->plugindb.tech_id );
+       SQL_Write ( chaine );
      }
   }
 /******************************************************************************************************************************/
