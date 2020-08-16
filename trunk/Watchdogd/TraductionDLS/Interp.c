@@ -1092,9 +1092,6 @@
 
           write( fd, Start_Go, strlen(Start_Go) );                                                 /* Ecriture de de l'entete */
 
-          g_snprintf(chaine, sizeof(chaine), "    if (vars->starting)\n     {\n" );
-          write( fd, chaine, strlen(chaine) );                                                     /* Ecriture de de l'entete */
-
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
           write( fd, End_Go, strlen(End_Go) );
           close(fd);
@@ -1102,7 +1099,7 @@
 
        g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE tech_id='%s'", tech_id );
        SQL_Write ( chaine );
-       g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_TEMPO WHERE tech_id='%s'", tech_id );
+       g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_Tempo WHERE tech_id='%s'", tech_id );
        SQL_Write ( chaine );
 
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
