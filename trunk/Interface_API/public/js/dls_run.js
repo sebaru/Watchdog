@@ -12,6 +12,9 @@
  function Dls_undebug_plugin ( tech_id )
   { Send_to_API ( 'PUT', "/api/dls/undebug/"+tech_id, function () { $('#idTableRunDLS').DataTable().ajax.reload(); } ); }
 
+ function Dls_acquitter_plugin ( tech_id )
+  { Send_to_API ( 'PUT', "/api/dls/acquitter/"+tech_id, function () { $('#idTableRunDLS').DataTable().ajax.reload(); } ); }
+
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { console.log ("in load page !");
@@ -108,6 +111,9 @@
                { return( Bouton ( "warning", "Dérangement Fixe", null, null, "Fixe" ) ); }
               else { return( Bouton ( "danger", "Dérangement !", null, null, "OUI" ) ); }
             }
+          },
+          { "data": null, title:"Acquitter",  "className": "text-center align-middle", "render": function (item)
+            { return( Bouton ( "outline-info", "Acquitter le module", "Dls_acquitter_plugin", item.tech_id, "Acquitter" ) ); }
           },
         ],
       /*order: [ [0, "desc"] ],*/
