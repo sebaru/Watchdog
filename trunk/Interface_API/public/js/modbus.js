@@ -5,7 +5,23 @@
   }
  function Go_to_modbus_map ()
   { Redirect ( "/tech/modbus_map" );
-  }/************************************ Envoi les infos de modifications synoptique *********************************************/
+  }
+
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Modbus_enable_module ( tech_id )
+  { var json_request = JSON.stringify( { tech_id : tech_id } );
+    Send_to_API ( 'POST', "/api/process/modbus/start", json_request, function ()
+     { $('#idTableModbus').DataTable().ajax.reload(null, false);
+     });
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Modbus_disable_module ( tech_id )
+  { var json_request = JSON.stringify( { tech_id : tech_id } );
+    Send_to_API ( 'POST', "/api/process/modbus/stop", json_request, function ()
+     { $('#idTableModbus').DataTable().ajax.reload(null, false);
+     });
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Modbus_Del ( tech_id )
   { var json_request = JSON.stringify( { tech_id : tech_id } );
     Send_to_API ( 'DELETE', "/api/process/modbus/del", json_request, function ()
@@ -89,7 +105,7 @@
          columns:
           [ { "data": "tech_id", "title":"TechID", "className": "align-middle text-center" },
             { "data": "hostname", "title":"Hostname", "className": "align-middle text-center hidden-xs" },
-            { "data": null, "title":"Started", "className": "align-middle text-center",
+            { "data": null, "title":"Enabled", "className": "align-middle text-center",
               "render": function (item)
                 { if (item.enable==true)
                    { return( Bouton ( "success", "Désactiver le WAGO",

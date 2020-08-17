@@ -252,7 +252,7 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/process/modbus/map/DI",	type : "GET", dataSrc: "mappings",
+         ajax: {	url : "/api/process/modbus/map/list",	type : "GET", dataSrc: "mappings", data: { "classe": "DI" },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
@@ -286,7 +286,7 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/process/modbus/map/DO",	type : "GET", dataSrc: "mappings",
+         ajax: {	url : "/api/process/modbus/map/list",	type : "GET", dataSrc: "mappings", data: { "classe": "DO" },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
@@ -320,7 +320,7 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/process/modbus/map/AI",	type : "GET", dataSrc: "mappings",
+         ajax: {	url : "/api/process/modbus/map/list",	type : "GET", dataSrc: "mappings", data: { "classe": "AI" },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
@@ -357,7 +357,7 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/process/modbus/map/AO",	type : "GET", dataSrc: "mappings",
+         ajax: {	url : "/api/process/modbus/map/list",	type : "GET", dataSrc: "mappings", data: { "classe": "AO" },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:

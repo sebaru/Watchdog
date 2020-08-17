@@ -250,6 +250,44 @@
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
   }
 /******************************************************************************************************************************/
+/* Admin_json_modbus_set: Met à jour une entrée WAGO                                                                          */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Admin_json_modbus_start ( struct LIBRAIRIE *Lib, SoupMessage *msg, gboolean start )
+  { GBytes *request_brute;
+    gchar requete[256];
+    gsize taille;
+
+    if ( msg->method != SOUP_METHOD_POST )
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
+       return;
+     }
+
+    if ( ! (Json_has_member ( request, "tech_id" ) ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       json_node_unref(request);
+       return;
+     }
+
+    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    json_node_unref(request);
+
+    g_snprintf( requete, sizeof(requete), "UPDATE modbus_modules SET enable='%d' WHERE tech_id='%s'", (start ? 1 : 0), tech_id );
+    if (SQL_Write (requete))
+     { soup_message_set_status (msg, SOUP_STATUS_OK);
+       Lib->Thread_reload = TRUE;
+     }
+    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+  }
+/******************************************************************************************************************************/
 /* Admin_json_modbus_set: Ajoute un composant WAGO dans système                                                               */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
@@ -302,7 +340,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Admin_json_map_list ( struct LIBRAIRIE *Lib, SoupMessage *msg, GHashTable *query )
+ static void Admin_json_modbus_map_list ( struct LIBRAIRIE *Lib, SoupMessage *msg, GHashTable *query )
   { JsonBuilder *builder;
     gchar *buf, chaine[512], *target;
     gsize taille_buf;
@@ -351,7 +389,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Admin_json_map_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_modbus_map_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   { gchar requete[256], *target;
     GBytes *request_brute;
     gsize taille;
@@ -403,7 +441,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Admin_json_map_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_modbus_map_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   { GBytes *request_brute;
     gsize taille;
     gchar requete[512];
@@ -480,9 +518,11 @@
     else if (!strcasecmp(path, "/del"))      { Admin_json_modbus_del ( lib, msg ); }
     else if (!strcasecmp(path, "/set"))      { Admin_json_modbus_set ( lib, msg ); }
     else if (!strcasecmp(path, "/add"))      { Admin_json_modbus_add ( lib, msg ); }
-    else if (!strcasecmp(path, "/map/del"))  { Admin_json_map_del ( lib, msg ); }
-    else if (!strcasecmp(path, "/map/set"))  { Admin_json_map_set ( lib, msg ); }
-    else if (!strcasecmp(path, "/map/list")) { Admin_json_map_list ( lib, msg, query ); }
+    else if (!strcasecmp(path, "/start"))    { Admin_json_modbus_start ( lib, msg, TRUE ); }
+    else if (!strcasecmp(path, "/stop"))     { Admin_json_modbus_start ( lib, msg, FALSE ); }
+    else if (!strcasecmp(path, "/map/del"))  { Admin_json_modbus_map_del ( lib, msg ); }
+    else if (!strcasecmp(path, "/map/set"))  { Admin_json_modbus_map_set ( lib, msg ); }
+    else if (!strcasecmp(path, "/map/list")) { Admin_json_modbus_map_list ( lib, msg, query ); }
     else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
     return;
   }
