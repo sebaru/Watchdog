@@ -83,7 +83,7 @@
 						     <div class="input-group-prepend">
 							     <span class="input-group-text">Target Tech_ID</span>
 						     </div>
-						     <input id="idModalEditTechID" oninput="Modal_Edit_Input_Changed()" type="text" class="form-control" placeholder="Tech_id du bit cible">
+						     <input id="idModalEditTechID" oninput="Modal_Edit_Input_Changed('idModalEditDI')" type="text" class="form-control" placeholder="Tech_id du bit cible">
      					</div>
           <small id="idModalEditTechIDPropose"></small>
    					</div>
@@ -93,7 +93,56 @@
 						     <div class="input-group-prepend">
 							     <span class="input-group-text">Target Acronyme</span>
 						     </div>
-						     <input id="idModalEditAcronyme" oninput="Modal_Edit_Input_Changed()" type="text" class="form-control" placeholder="Acronyme cible">
+						     <input id="idModalEditAcronyme" oninput="Modal_Edit_Input_Changed('idModalEditDI')" type="text" class="form-control" placeholder="Acronyme cible">
+     					</div>
+          <small id="idModalEditAcronymePropose"></small>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
+        <button id="idModalEditValider" type="button" class="btn btn-primary"><i class="fas fa-save"></i> Valider</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="idModalEditDO" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content ">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalEditTitre"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div class="form-group">
+					     <div class="input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text">Wago References</span>
+						     </div>
+						     <input id="idModalEditWagoRef" type="text" class="form-control" placeholder="Reference WAGO">
+     					</div>
+   					</div>
+
+        <div class="form-group">
+					     <div class="input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text">Target Tech_ID</span>
+						     </div>
+						     <input id="idModalEditTechID" oninput="Modal_Edit_Input_Changed('idModalEditDO')" type="text" class="form-control" placeholder="Tech_id du bit cible">
+     					</div>
+          <small id="idModalEditTechIDPropose"></small>
+   					</div>
+
+        <div class="form-group">
+					     <div class="input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text">Target Acronyme</span>
+						     </div>
+						     <input id="idModalEditAcronyme" oninput="Modal_Edit_Input_Changed('idModalEditDO')" type="text" class="form-control" placeholder="Acronyme cible">
      					</div>
           <small id="idModalEditAcronymePropose"></small>
         </div>

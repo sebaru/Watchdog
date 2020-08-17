@@ -72,11 +72,11 @@
      }
   }
 /******************************************************************************************************************************/
-/* Admin_json_list : fonction appelée pour lister les modules modbus                                                          */
+/* Admin_json_modbus_list : fonction appelée pour lister les modules modbus                                                          */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_run ( SoupMessage *msg, gchar *username, gint access_level )
+ static void Admin_json_modbus_run ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   { GSList *liste_modules;
     JsonBuilder *builder;
     gsize taille_buf;
@@ -86,23 +86,17 @@
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
-
-    if (access_level < 6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
-
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
     if (builder == NULL)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
     Json_add_int ( builder, "nbr_request_par_sec", Cfg_modbus.nbr_request_par_sec );
 
-    pthread_mutex_lock( &Cfg_modbus.lib->synchro );
+    pthread_mutex_lock( &Lib->synchro );
     liste_modules = Cfg_modbus.Modules_MODBUS;
     while ( liste_modules )
      { struct MODULE_MODBUS *module = liste_modules->data;
@@ -126,7 +120,7 @@
 
        liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
      }
-    pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
+    pthread_mutex_unlock( &Lib->synchro );
     Json_end_array (builder);                                                                                 /* End Document */
 
     buf = Json_get_buf ( builder, &taille_buf );
@@ -139,7 +133,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Admin_json_list ( SoupMessage *msg, gchar *username, gint access_level )
+ static void Admin_json_modbus_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   { JsonBuilder *builder;
     gchar *buf, chaine[512];
     gsize taille_buf;
@@ -149,14 +143,10 @@
 		     return;
      }
 
-    if (access_level < 6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
     if (builder == NULL)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -176,36 +166,48 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Admin_json_del ( SoupMessage *msg, gchar *username, gint access_level, gchar *tech_id_src )
-  { gchar chaine[256];
+ static void Admin_json_modbus_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { GBytes *request_brute;
+    gsize taille;
+    gchar chaine[256];
     if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    if (access_level < 6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
        return;
      }
 
-    gchar *tech_id = Normaliser_chaine ( tech_id_src );
-    if (!tech_id)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Normalized failed");
+    if ( ! (Json_has_member ( request, "tech_id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
+
+    gchar *tech_id = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
+    if (!tech_id)
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Normalized failed");
+       return;
+     }
+    json_node_unref(request);
 
     g_snprintf( chaine, sizeof(chaine), "DELETE FROM modbus_modules WHERE tech_id='%s'", tech_id );
     g_free(tech_id);
     SQL_Write ( chaine );
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    Cfg_modbus.lib->Thread_reload = TRUE;
+    Lib->Thread_reload = TRUE;
   }
 /******************************************************************************************************************************/
-/* Admin_json_set: Met à jour une entrée WAGO                                                                                 */
+/* Admin_json_modbus_set: Met à jour une entrée WAGO                                                                          */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_set ( SoupMessage *msg, gchar *username, gint access_level )
+ static void Admin_json_modbus_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   { GBytes *request_brute;
     gchar requete[256];
     gsize taille;
@@ -217,6 +219,10 @@
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
+       return;
+     }
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "hostname" ) &&
             Json_has_member ( request, "description" ) && Json_has_member ( request, "watchdog" ) ) )
@@ -229,6 +235,7 @@
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
     gint  watchdog     = Json_get_int ( request, "watchdog" );
+    json_node_unref(request);
 
     g_snprintf( requete, sizeof(requete),
                "UPDATE modbus_modules SET description='%s', hostname='%s', watchdog='%d' WHERE tech_id='%s'",
@@ -238,17 +245,16 @@
     g_free(hostname);
     if (SQL_Write (requete))
      { soup_message_set_status (msg, SOUP_STATUS_OK);
-       Cfg_modbus.lib->Thread_reload = TRUE;
+       Lib->Thread_reload = TRUE;
      }
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-    json_node_unref(request);
   }
 /******************************************************************************************************************************/
-/* Admin_json_set: Met à jour une entrée WAGO                                                                                 */
+/* Admin_json_modbus_set: Ajoute un composant WAGO dans système                                                               */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_add ( SoupMessage *msg, gchar *username, gint access_level )
+ static void Admin_json_modbus_add ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   { GBytes *request_brute;
     gchar requete[256];
     gsize taille;
@@ -260,6 +266,10 @@
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
+       return;
+     }
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "hostname" ) &&
             Json_has_member ( request, "description" ) && Json_has_member ( request, "watchdog" ) ) )
@@ -272,9 +282,10 @@
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
     gint  watchdog     = Json_get_int ( request, "watchdog" );
+    json_node_unref(request);
 
     g_snprintf( requete, sizeof(requete),
-               "INSERT INTO modbus_modules SET tech_id=UPPER('%s'), description='%s', hostname='%s', watchdog='%d', "
+               "INSERT INTO modbus_modules SET tech_id='%s', description='%s', hostname='%s', watchdog='%d', "
                "enable=0, date_create=NOW()",
                 tech_id, description, hostname, watchdog );
     g_free(tech_id);
@@ -282,17 +293,16 @@
     g_free(hostname);
     if (SQL_Write (requete))
      { soup_message_set_status (msg, SOUP_STATUS_OK);
-       Cfg_modbus.lib->Thread_reload = TRUE;
+       Lib->Thread_reload = TRUE;
      }
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-    json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Admin_json_map_list ( SoupMessage *msg, gchar *username, gint access_level, gchar *commande )
+ static void Admin_json_map_list ( struct LIBRAIRIE *Lib, SoupMessage *msg, GHashTable *query )
   { JsonBuilder *builder;
     gchar *buf, chaine[512], *target;
     gsize taille_buf;
@@ -302,23 +312,24 @@
 		     return;
      }
 
-    if (access_level < 6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+    gpointer classe = g_hash_table_lookup ( query, "classe" );
+    if (!classe)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-         if (! strcasecmp( commande, "DI" ) ) target = "mnemos_DI";
-    else if (! strcasecmp( commande, "DO" ) ) target = "mnemos_DO";
-    else if (! strcasecmp( commande, "AI" ) ) target = "mnemos_AI";
-    else if (! strcasecmp( commande, "AO" ) ) target = "mnemos_AO";
+         if (! strcasecmp( classe, "DI" ) ) target = "mnemos_DI";
+    else if (! strcasecmp( classe, "DO" ) ) target = "mnemos_DO";
+    else if (! strcasecmp( classe, "AI" ) ) target = "mnemos_AI";
+    else if (! strcasecmp( classe, "AO" ) ) target = "mnemos_AO";
     else
-     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Wrong URI" );
+     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Wrong class" );
 		     return;
      }
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
     if (builder == NULL)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -340,7 +351,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Admin_json_map_del ( SoupMessage *msg, gchar *username, gint access_level )
+ static void Admin_json_map_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   { gchar requete[256], *target;
     GBytes *request_brute;
     gsize taille;
@@ -350,32 +361,32 @@
 		     return;
      }
 
-    if (access_level < 6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
        return;
      }
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
-    if ( ! (Json_has_member ( request, "type" ) && Json_has_member ( request, "map_tech_id" ) &&
+    if ( ! (Json_has_member ( request, "classe" ) && Json_has_member ( request, "map_tech_id" ) &&
             Json_has_member ( request, "map_tag" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        json_node_unref(request);
        return;
      }
 
-         if (! strcasecmp( Json_get_string( request, "type" ), "DI" ) ) target = "mnemos_DI";
-    else if (! strcasecmp( Json_get_string( request, "type" ), "DO" ) ) target = "mnemos_DO";
-    else if (! strcasecmp( Json_get_string( request, "type" ), "AI" ) ) target = "mnemos_AI";
-    else if (! strcasecmp( Json_get_string( request, "type" ), "AO" ) ) target = "mnemos_AO";
+         if (! strcasecmp( Json_get_string( request, "classe" ), "DI" ) ) target = "mnemos_DI";
+    else if (! strcasecmp( Json_get_string( request, "classe" ), "DO" ) ) target = "mnemos_DO";
+    else if (! strcasecmp( Json_get_string( request, "classe" ), "AI" ) ) target = "mnemos_AI";
+    else if (! strcasecmp( Json_get_string( request, "classe" ), "AO" ) ) target = "mnemos_AO";
     else
-     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais type");
+     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvaise classe");
 		     return;
      }
 
     gchar *tech_id = Normaliser_chaine ( Json_get_string( request, "map_tech_id" ) );
     gchar *tag     = Normaliser_chaine ( Json_get_string( request, "map_tag" ) );
+    json_node_unref(request);
     g_snprintf( requete, sizeof(requete), "UPDATE %s SET map_thread = NULL, map_tech_id = NULL, map_tag = NULL "
                                           "WHERE map_tech_id='%s' AND map_tag='%s'", target, tech_id, tag );
     g_free(tech_id);
@@ -383,17 +394,16 @@
 
     if (SQL_Write (requete))
      { soup_message_set_status (msg, SOUP_STATUS_OK);
-       Cfg_modbus.lib->Thread_reload = TRUE;
+       Lib->Thread_reload = TRUE;
      }
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-    json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Admin_json_map_set ( SoupMessage *msg, gchar *username, gint access_level )
+ static void Admin_json_map_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   { GBytes *request_brute;
     gsize taille;
     gchar requete[512];
@@ -403,13 +413,12 @@
 		     return;
      }
 
-    if (access_level < 6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
-
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
+       return;
+     }
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
             Json_has_member ( request, "map_tag" ) && Json_has_member ( request, "type" ) ) )
@@ -423,7 +432,7 @@
     gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
     gchar *acronyme    = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
 
-    if (! strcasecmp( Json_get_string( request, "type" ), "DI" ) )
+    if (! strcasecmp( Json_get_string( request, "classe" ), "DI" ) )
      {
        g_snprintf( requete, sizeof(requete),
                    "UPDATE mnemos_DI SET map_thread=NULL, map_tech_id=NULL, map_tag=NULL "
@@ -432,12 +441,12 @@
        SQL_Write (requete);
 
        g_snprintf( requete, sizeof(requete),
-                   "UPDATE mnemos_DI SET map_thread='MODBUS', map_tech_id=UPPER('%s'), map_tag=UPPER('%s') "
+                   "UPDATE mnemos_DI SET map_thread='MODBUS', map_tech_id='%s', map_tag='%s' "
                    "  WHERE tech_id='%s' AND acronyme='%s';", map_tech_id, map_tag, tech_id, acronyme );
 
        if (SQL_Write (requete))
         { soup_message_set_status (msg, SOUP_STATUS_OK);
-          Cfg_modbus.lib->Thread_reload = TRUE;
+          Lib->Thread_reload = TRUE;
         }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
 
@@ -461,15 +470,19 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( SoupMessage *msg, gchar *username, gint access_level, gchar *commande )
-  {      if (!strcasecmp(commande, "/list")) { Admin_json_list ( msg, username, access_level ); }
-    else if (!strcasecmp(commande, "/run"))  { Admin_json_run ( msg, username, access_level ); }
-    else if (g_str_has_prefix(commande, "/del/")) { Admin_json_del ( msg, username, access_level, commande+strlen("/del/") ); }
-    else if (!strcasecmp(commande, "/set")) { Admin_json_set ( msg, username, access_level ); }
-    else if (!strcasecmp(commande, "/add")) { Admin_json_add ( msg, username, access_level ); }
-    else if (!strcasecmp(commande, "/map/del")) { Admin_json_map_del ( msg, username, access_level ); }
-    else if (!strcasecmp(commande, "/map/set")) { Admin_json_map_set ( msg, username, access_level ); }
-    else if (g_str_has_prefix(commande, "/map/")) { Admin_json_map_list ( msg, username, access_level, commande+strlen("/map/") ); }
+ void Admin_json ( struct LIBRAIRIE *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
+  { if (access_level < 6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+       return;
+     }
+         if (!strcasecmp(path, "/list"))     { Admin_json_modbus_list ( lib, msg ); }
+    else if (!strcasecmp(path, "/run"))      { Admin_json_modbus_run ( lib, msg ); }
+    else if (!strcasecmp(path, "/del"))      { Admin_json_modbus_del ( lib, msg ); }
+    else if (!strcasecmp(path, "/set"))      { Admin_json_modbus_set ( lib, msg ); }
+    else if (!strcasecmp(path, "/add"))      { Admin_json_modbus_add ( lib, msg ); }
+    else if (!strcasecmp(path, "/map/del"))  { Admin_json_map_del ( lib, msg ); }
+    else if (!strcasecmp(path, "/map/set"))  { Admin_json_map_set ( lib, msg ); }
+    else if (!strcasecmp(path, "/map/list")) { Admin_json_map_list ( lib, msg, query ); }
     else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
     return;
   }

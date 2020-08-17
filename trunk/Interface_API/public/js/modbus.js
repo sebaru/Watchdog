@@ -7,17 +7,10 @@
   { Redirect ( "/tech/modbus_map" );
   }/************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Modbus_Del ( tech_id )
-  { var xhr = new XMLHttpRequest;
-    xhr.open('DELETE', "/api/process/modbus/del/"+tech_id );
-    xhr.onreadystatechange = function( )
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status == 200)
-        { $('#idTableModbus').DataTable().ajax.reload(null, false);
-          $('#idToastStatus').toast('show');
-        }
-       else { Show_Error( xhr.statusText ); }
-     };
-    xhr.send();
+  { var json_request = JSON.stringify( { tech_id : tech_id } );
+    Send_to_API ( 'DELETE', "/api/process/modbus/del", json_request, function ()
+     { $('#idTableModbus').DataTable().ajax.reload(null, false);
+     });
   }
 
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -35,25 +28,16 @@
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Modbus_Edit ( tech_id )
-  { var xhr = new XMLHttpRequest;
-    xhr.open('POST', "/api/process/modbus/set" );
-    xhr.setRequestHeader('Content-type', 'application/json');
-    var json_request = JSON.stringify(
+  { var json_request = JSON.stringify(
        { tech_id : $('#idModalModbusEditTechID').val(),
          hostname: $('#idModalModbusEditHostname').val(),
          description: $('#idModalModbusEditDescription').val(),
          watchdog: $('#idModalModbusEditWatchdog').val(),
        }
      );
-    xhr.onreadystatechange = function( )
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status == 200)
-        { $('#idTableModbus').DataTable().ajax.reload(null, false);
-          $('#idToastStatus').toast('show');
-        }
-       else { Show_Error( xhr.statusText ); }
-     };
-    xhr.send(json_request);
+    Send_to_API ( 'POST', "/api/process/modbus/set", json_request, function ()
+     { $('#idTableModbus').DataTable().ajax.reload(null, false);
+     });
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Modbus_Edit ( tech_id )
@@ -70,25 +54,17 @@
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Modbus_Add ( )
-  { var xhr = new XMLHttpRequest;
-    xhr.open('POST', "/api/process/modbus/add" );
-    xhr.setRequestHeader('Content-type', 'application/json');
-    var json_request = JSON.stringify(
-       { tech_id :    $('#idModalModbusEditTechID').val(),
+  { var json_request = JSON.stringify(
+       { tech_id :    $('#idModalModbusEditTechID').val().toUpperCase(),
          hostname:    $('#idModalModbusEditHostname').val(),
          description: $('#idModalModbusEditDescription').val(),
          watchdog:    $('#idModalModbusEditWatchdog').val(),
        }
      );
-    xhr.onreadystatechange = function( )
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status == 200)
-        { $('#idTableModbus').DataTable().ajax.reload(null, false);
-          $('#idToastStatus').toast('show');
-        }
-       else { Show_Error( xhr.statusText ); }
-     };
-    xhr.send(json_request);
+
+    Send_to_API ( 'POST', "/api/process/modbus/add", json_request, function ()
+     { $('#idTableModbus').DataTable().ajax.reload(null, false);
+     });
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Modbus_Add ()

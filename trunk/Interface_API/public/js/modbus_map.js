@@ -70,56 +70,66 @@
     $('#idModalEditDI').modal("hide");
     table = $('#idTableModbusMapDI').DataTable();
     selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-    var xhr = new XMLHttpRequest;
-    xhr.open('POST', "/api/process/modbus/map/set" );
-    xhr.setRequestHeader('Content-type', 'application/json');
     var json_request = JSON.stringify(
        { type       : 'DI',
-         tech_id    : $('#idModalEditTechID').val().toUpperCase(),
-         acronyme   : $('#idModalEditAcronyme').val().toUpperCase(),
+         tech_id    : $('#idModalEditDI #idModalEditTechID').val().toUpperCase(),
+         acronyme   : $('#idModalEditDI #idModalEditAcronyme').val().toUpperCase(),
          map_tech_id: selection.map_tech_id,
          map_tag    : selection.map_tag,
        }
      );
-    xhr.onreadystatechange = function( )
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status == 200)
-        { $('#idTableModbusMapDI').DataTable().ajax.reload(null, false);
-          $('#idToastStatus').toast('show');
-        }
-       else { Show_Error( xhr.statusText ); }
-     };
-    xhr.send(json_request);
+    var json_request = JSON.stringify( { tech_id : tech_id } );
+    Send_to_API ( 'POST', "/api/process/modbus/map/set", json_request, function ()
+     { $('#idTableModbusMapDI').DataTable().ajax.reload(null, false);
+     });
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function Modal_Edit_Input_Changed (  )
+ function Valider_Edit_DO ( id )
+  { if ($('#idModalEditDO #idModalEditValider').hasClass("disabled")) return;
+    $('#idModalEditDO').modal("hide");
+    table = $('#idTableModbusMapDO').DataTable();
+    selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
+    var json_request = JSON.stringify(
+       { type       : 'DI',
+         tech_id    : $('#idModalEditDO #idModalEditTechID').val().toUpperCase(),
+         acronyme   : $('#idModalEditDO #idModalEditAcronyme').val().toUpperCase(),
+         map_tech_id: selection.map_tech_id,
+         map_tag    : selection.map_tag,
+       }
+     );
+    var json_request = JSON.stringify( { tech_id : tech_id } );
+    Send_to_API ( 'POST', "/api/process/modbus/map/set", json_request, function ()
+     { $('#idTableModbusMapDO').DataTable().ajax.reload(null, false);
+     });
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Modal_Edit_Input_Changed ( target )
   { const Ascii_charset = RegExp(/^[a-zA-Z0-9][a-zA-Z0-9_]*$/);
 
-
-    if ($('#idModalEditTechID').val().length==0)
-     { $('#idModalEditDI #idModalEditTechID').removeClass("bg-danger bg-warning").addClass("bg-warning");
-       $('#idModalEditTechIDPropose').text("Aucun match");
-       $('#idModalEditDI #idModalEditAcronyme').removeClass("bg-danger bg-warning").addClass("bg-warning");
-       $('#idModalEditDI #idModalEditAcronyme').prop("disabled", true);
-       $('#idModalEditAcronyme').val("");
-       $('#idModalEditAcronymePropose').text("Aucun match");
+    if ($('#'+target+' #idModalEditTechID').val().length==0)
+     { $('#'+target+' #idModalEditTechID').removeClass("bg-danger bg-warning").addClass("bg-warning");
+       $('#'+target+' #idModalEditTechIDPropose').text("Aucun match");
+       $('#'+target+' #idModalEditAcronyme').removeClass("bg-danger bg-warning").addClass("bg-warning");
+       $('#'+target+' #idModalEditAcronyme').prop("disabled", true);
+       $('#'+target+' #idModalEditAcronyme').val("");
+       $('#'+target+' #idModalEditAcronymePropose').text("Aucun match");
        return;
      }
 
-    if (!Ascii_charset.test($('#idModalEditTechID').val()))
-     { $('#idModalEditDI #idModalEditTechID').removeClass("bg-danger bg-warning").addClass("bg-danger");
-       $('#idModalEditTechIDPropose').text("Caractères autorisés : A-Z, 0-9 et _ (sauf au début)");
+    if (!Ascii_charset.test($('#'+target+' #idModalEditTechID').val()))
+     { $('#'+target+' #idModalEditTechID').removeClass("bg-danger bg-warning").addClass("bg-danger");
+       $('#'+target+' #idModalEditTechIDPropose').text("Caractères autorisés : A-Z, 0-9 et _ (sauf au début)");
        return;
      }
 
-    if ($('#idModalEditAcronyme').val().length && !Ascii_charset.test($('#idModalEditAcronyme').val()))
-     { $('#idModalEditDI #idModalEditAcronyme').removeClass("bg-danger bg-warning").addClass("bg-danger");
-       $('#idModalEditAcronymePropose').text("Caractères autorisés : A-Z, 0-9 et _ (sauf au début)");
+    if ($('#'+target+' #idModalEditAcronyme').val().length && !Ascii_charset.test($('#'+target+' #idModalEditAcronyme').val()))
+     { $('#'+target+' #idModalEditAcronyme').removeClass("bg-danger bg-warning").addClass("bg-danger");
+       $('#'+target+' #idModalEditAcronymePropose').text("Caractères autorisés : A-Z, 0-9 et _ (sauf au début)");
        return;
      }
 
     var xhr = new XMLHttpRequest;
-    xhr.open('GET', "/api/mnemos/validate/" + $('#idModalEditTechID').val() + "/" + $('#idModalEditAcronyme').val() );
+    xhr.open('GET', "/api/mnemos/validate/" + $('#'+target+' #idModalEditTechID').val() + "/" + $('#'+target+' #idModalEditAcronyme').val() );
     xhr.onreadystatechange = function( )
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status == 200)
@@ -129,37 +139,37 @@
 
           for (var i = 0; i < Response.nbr_tech_ids_found; i++)
            { tech_id_propose=tech_id_propose + Response.tech_ids_found[i].tech_id+" ";
-             if (Response.tech_ids_found[i].tech_id == $('#idModalEditDI #idModalEditTechID').val().toUpperCase()) tech_id_found=true;
+             if (Response.tech_ids_found[i].tech_id == $('#'+target+' #idModalEditTechID').val().toUpperCase()) tech_id_found=true;
            }
           if (tech_id_found==true)
-           { $('#idModalEditDI #idModalEditTechID').removeClass("bg-danger bg-warning");
-             $('#idModalEditTechIDPropose').text("Match !");
-             $('#idModalEditDI #idModalEditAcronyme').prop("disabled", false);
+           { $('#'+target+' #idModalEditTechID').removeClass("bg-danger bg-warning");
+             $('#'+target+' #idModalEditTechIDPropose').text("Match !");
+             $('#'+target+' #idModalEditAcronyme').prop("disabled", false);
            }
           else
-           { $('#idModalEditDI #idModalEditTechID').removeClass("bg-danger bg-warning").addClass("bg-warning");
-             $('#idModalEditTechIDPropose').text("Choix: " + tech_id_propose);
-             $('#idModalEditDI #idModalEditAcronyme').prop("disabled", true);
-             $('#idModalEditAcronyme').val("");
+           { $('#'+target+' #idModalEditTechID').removeClass("bg-danger bg-warning").addClass("bg-warning");
+             $('#'+target+' #idModalEditTechIDPropose').text("Choix: " + tech_id_propose);
+             $('#'+target+' #idModalEditAcronyme').prop("disabled", true);
+             $('#'+target+' #idModalEditAcronyme').val("");
            }
 
           for (var i = 0; i < Response.acronymes_found.length; i++)
            { acronyme_propose=acronyme_propose + Response.acronymes_found[i].acronyme+" ";
-             if (Response.acronymes_found[i].acronyme == $('#idModalEditDI #idModalEditAcronyme').val().toUpperCase()) acronyme_found=true;
+             if (Response.acronymes_found[i].acronyme == $('#'+target+' #idModalEditAcronyme').val().toUpperCase()) acronyme_found=true;
            }
           if (acronyme_found==true)
-           { $('#idModalEditDI #idModalEditAcronyme').removeClass("bg-danger bg-warning");
-             $('#idModalEditAcronymePropose').text("Match !");
+           { $('#'+target+' #idModalEditAcronyme').removeClass("bg-danger bg-warning");
+             $('#'+target+' #idModalEditAcronymePropose').text("Match !");
            }
           else
-           { $('#idModalEditDI #idModalEditAcronyme').removeClass("bg-danger bg-warning").addClass("bg-warning");
-             $('#idModalEditAcronymePropose').text("Choix: " + acronyme_propose);
+           { $('#'+target+' #idModalEditAcronyme').removeClass("bg-danger bg-warning").addClass("bg-warning");
+             $('#'+target+' #idModalEditAcronymePropose').text("Choix: " + acronyme_propose);
            }
 
           if (tech_id_found==true && acronyme_found==true)
-           { $('#idModalEditDI #idModalEditValider').removeClass("disabled"); }
+           { $('#'+target+' #idModalEditValider').removeClass("disabled"); }
           else
-           { $('#idModalEditDI #idModalEditValider').addClass("disabled");    }
+           { $('#'+target+' #idModalEditValider').addClass("disabled");    }
         }
        else { Show_Error( xhr.statusText ); }
      };
@@ -169,7 +179,7 @@
  function Show_Modal_Map_Edit_DI ( id )
   { table = $('#idTableModbusMapDI').DataTable();
     selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-    $('#idModalEditDI #idModalEditTitre').text ( "Editer MAP - " + selection.map_tech_id + ":" + selection.map_tag );
+    $('#idModalEditDI #idModalEditTitre').text ( "Editer MAP DI - " + selection.map_tech_id + ":" + selection.map_tag );
     $('#idModalEditDI #idModalEditTechID').val ( selection.tech_id );
     $('#idModalEditDI #idModalEditAcronyme').val ( selection.acronyme );
     $('#idModalEditDI #idModalEditWagoRef').val  ( selection.map_tech_id + ":" + selection.map_tag );
@@ -178,21 +188,27 @@
     $('#idModalEditDI').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Map_Edit_DO ( map )
+ function Show_Modal_Map_Edit_DO ( id )
   { table = $('#idTableModbusMapDO').DataTable();
-    selection = table.ajax.json().mappings.filter( function(item) { return (item.map_tag==map) } )[0];
-    Show_Modal_Map_Del ( "DO", selection )
+    selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
+    $('#idModalEditDO #idModalEditTitre').text ( "Editer MAP DO - " + selection.map_tech_id + ":" + selection.map_tag );
+    $('#idModalEditDO #idModalEditTechID').val ( selection.tech_id );
+    $('#idModalEditDO #idModalEditAcronyme').val ( selection.acronyme );
+    $('#idModalEditDO #idModalEditWagoRef').val  ( selection.map_tech_id + ":" + selection.map_tag );
+    $('#idModalEditDO #idModalEditWagoRef').attr ( "readonly", true );
+    $('#idModalEditDO #idModalEditValider').attr( "onclick", "Valider_Edit_DO('"+id+"')" );
+    $('#idModalEditDO').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Map_Edit_AI ( map )
+ function Show_Modal_Map_Edit_AI ( id )
   { table = $('#idTableModbusMapAI').DataTable();
-    selection = table.ajax.json().mappings.filter( function(item) { return (item.map_tag==map) } )[0];
+    selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
     Show_Modal_Map_Del ( "AI", selection )
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Map_Edit_AO ( map )
+ function Show_Modal_Map_Edit_AO ( id )
   { table = $('#idTableModbusMapAO').DataTable();
-    selection = table.ajax.json().mappings.filter( function(item) { return (item.map_tag==map) } )[0];
+    selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
     Show_Modal_Map_Del ( "AO", selection )
   }
 
@@ -360,7 +376,7 @@
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-primary", "Editer le module", "Show_Modal_Map_Edit_AO", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer le module", "Show_Modal_Map_Del_AI", item.id, "trash", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer le module", "Show_Modal_Map_Del_AO", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },

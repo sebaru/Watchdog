@@ -37,6 +37,7 @@
  #define HTTP_DEFAUT_FILE_KEY          "http_serveurkey.pem"
  #define HTTP_DEFAUT_TCP_PORT          5560
  #define HTTP_FORBIDDEN_ERROR          "Session inexistante ou droits insuffisants"
+
  struct WS_CLIENT_SESSION
   { SoupWebsocketConnection *connexion;
     SoupClientContext *context;

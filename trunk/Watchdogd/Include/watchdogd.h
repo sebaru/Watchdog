@@ -76,7 +76,7 @@
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
                                                                                  /* Fonction de gestion des commandes d'admin */
-    void *(*Admin_json)( gpointer msg, gchar *username, gint access_level, gchar *commande );
+    void *(*Admin_json)( struct LIBRAIRIE *lib, gpointer msg, const char *path, GHashTable *query, gint access_level );
   };
 
  struct COM_DB                                                                 /* Interfaçage avec le code de gestion des BDD */

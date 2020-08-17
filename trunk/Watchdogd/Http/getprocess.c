@@ -379,17 +379,19 @@
            { if (!lib->Admin_json)
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                           "%s: library %s do not have Admin_json.", __func__, lib->admin_prompt );
+                soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Missing function admin_json" );
+                return;
               }
              else
-              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Admin_json call for %s%s.", __func__,
-                          lib->admin_prompt, path+strlen(lib->admin_prompt) );
-                lib->Admin_json ( msg, session->username, session->access_level, path+strlen(lib->admin_prompt) );
+              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Admin_json called by '%s' for %s.",
+                          __func__, session->username, path );
+                lib->Admin_json ( lib, msg, path+strlen(lib->admin_prompt), query, session->access_level );
                 return;
               }
             }
            liste = g_slist_next(liste);
         }
-       soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Unknown Thread" );
        return;
      }
   }
