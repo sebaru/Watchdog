@@ -109,7 +109,7 @@
           { "data": null, title:"Veille",  "className": "text-center align-middle", "render": function (item)
             { if (item.bit_veille==true)
                { return( Bouton ( "outline-success", "En veille", null, null, "OK" ) ); }
-              else { return( Bouton ( "danger", "Pas en veille !", null, null, "Non" ) ); }
+              else { return( Bouton ( "warning", "Pas en veille !", null, null, "Non" ) ); }
             }
           },
           { "data": null, title:"Danger",  "className": "text-center align-middle", "render": function (item)
