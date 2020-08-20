@@ -10,7 +10,7 @@
   { var xhr = new XMLHttpRequest;
     xhr.open('DELETE', "/api/process/modbus/map/del" );
     var json_request = JSON.stringify(
-       { type       : type,
+       { classe     : type,
          map_tech_id: map_tech_id,
          map_tag    : map_tag
        }
@@ -65,20 +65,17 @@
   }
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function Valider_Edit_DI ( id )
+ function Valider_Edit_DI ( )
   { if ($('#idModalEditDI #idModalEditValider').hasClass("disabled")) return;
     $('#idModalEditDI').modal("hide");
-    table = $('#idTableModbusMapDI').DataTable();
-    selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
     var json_request = JSON.stringify(
-       { type       : 'DI',
+       { classe     : 'DI',
          tech_id    : $('#idModalEditDI #idModalEditTechID').val().toUpperCase(),
          acronyme   : $('#idModalEditDI #idModalEditAcronyme').val().toUpperCase(),
-         map_tech_id: selection.map_tech_id,
-         map_tag    : selection.map_tag,
+         map_tech_id: $('#idModalEditDI #idModalEditWagoTechID').val().toUpperCase(),
+         map_tag    : $('#idModalEditDI #idModalEditWagoTag').val().toUpperCase(),
        }
      );
-    var json_request = JSON.stringify( { tech_id : tech_id } );
     Send_to_API ( 'POST', "/api/process/modbus/map/set", json_request, function ()
      { $('#idTableModbusMapDI').DataTable().ajax.reload(null, false);
      });
@@ -90,7 +87,7 @@
     table = $('#idTableModbusMapDO').DataTable();
     selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
     var json_request = JSON.stringify(
-       { type       : 'DI',
+       { classe     : 'DI',
          tech_id    : $('#idModalEditDO #idModalEditTechID').val().toUpperCase(),
          acronyme   : $('#idModalEditDO #idModalEditAcronyme').val().toUpperCase(),
          map_tech_id: selection.map_tech_id,
@@ -100,6 +97,28 @@
     var json_request = JSON.stringify( { tech_id : tech_id } );
     Send_to_API ( 'POST', "/api/process/modbus/map/set", json_request, function ()
      { $('#idTableModbusMapDO').DataTable().ajax.reload(null, false);
+     });
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Valider_Edit_AI ( )
+  { if ($('#idModalEditAI #idModalEditValider').hasClass("disabled")) return;
+    $('#idModalEditAI').modal("hide");
+    var json_request = JSON.stringify(
+       { classe     : 'AI',
+         tech_id    : $('#idModalEditAI #idModalEditTechID').val().toUpperCase(),
+         acronyme   : $('#idModalEditAI #idModalEditAcronyme').val().toUpperCase(),
+         map_tech_id: $('#idModalEditAI #idModalEditWagoTechID').val().toUpperCase(),
+         map_tag    : $('#idModalEditAI #idModalEditWagoTag').val().toUpperCase(),
+         type       : $('#idModalEditAI #idModalEditType').val(),
+         min        : $('#idModalEditAI #idModalEditMin').val(),
+         max        : $('#idModalEditAI #idModalEditMax').val(),
+         unite      : $('#idModalEditAI #idModalEditUnite').val(),
+         map_question_vocale: $('#idModalEditAI #idModalEditMapQuestionVoc').val(),
+         map_reponse_vocale : $('#idModalEditAI #idModalEditMapReponseVoc').val(),
+       }
+     );
+    Send_to_API ( 'POST', "/api/process/modbus/map/set", json_request, function ()
+     { $('#idTableModbusMapAI').DataTable().ajax.reload(null, false);
      });
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -113,78 +132,88 @@
        $('#'+target+' #idModalEditAcronyme').prop("disabled", true);
        $('#'+target+' #idModalEditAcronyme').val("");
        $('#'+target+' #idModalEditAcronymePropose').text("Aucun match");
+       $('#'+target+' #idModalEditValider').addClass("disabled");
        return;
      }
 
     if (!Ascii_charset.test($('#'+target+' #idModalEditTechID').val()))
      { $('#'+target+' #idModalEditTechID').removeClass("bg-danger bg-warning").addClass("bg-danger");
        $('#'+target+' #idModalEditTechIDPropose').text("Caractères autorisés : A-Z, 0-9 et _ (sauf au début)");
+       $('#'+target+' #idModalEditValider').addClass("disabled");
        return;
      }
 
     if ($('#'+target+' #idModalEditAcronyme').val().length && !Ascii_charset.test($('#'+target+' #idModalEditAcronyme').val()))
      { $('#'+target+' #idModalEditAcronyme').removeClass("bg-danger bg-warning").addClass("bg-danger");
        $('#'+target+' #idModalEditAcronymePropose').text("Caractères autorisés : A-Z, 0-9 et _ (sauf au début)");
+       $('#'+target+' #idModalEditValider').addClass("disabled");
        return;
      }
 
-    var xhr = new XMLHttpRequest;
-    xhr.open('GET', "/api/mnemos/validate/" + $('#'+target+' #idModalEditTechID').val() + "/" + $('#'+target+' #idModalEditAcronyme').val() );
-    xhr.onreadystatechange = function( )
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status == 200)
-        { var Response = JSON.parse(xhr.responseText);
-          var tech_id_found=false, tech_id_propose="";
-          var acronyme_found=false, acronyme_propose="";
+    Send_to_API ( "GET", "/api/mnemos/validate/" + $('#'+target+' #idModalEditTechID').val() +
+                                             "/" + $('#'+target+' #idModalEditAcronyme').val(), null, function (Response)
+     { var tech_id_found=false, tech_id_propose="";
+       var acronyme_found=false, acronyme_propose="";
 
-          for (var i = 0; i < Response.nbr_tech_ids_found; i++)
-           { tech_id_propose=tech_id_propose + Response.tech_ids_found[i].tech_id+" ";
-             if (Response.tech_ids_found[i].tech_id == $('#'+target+' #idModalEditTechID').val().toUpperCase()) tech_id_found=true;
-           }
-          if (tech_id_found==true)
-           { $('#'+target+' #idModalEditTechID').removeClass("bg-danger bg-warning");
-             $('#'+target+' #idModalEditTechIDPropose').text("Match !");
-             $('#'+target+' #idModalEditAcronyme').prop("disabled", false);
-           }
-          else
-           { $('#'+target+' #idModalEditTechID').removeClass("bg-danger bg-warning").addClass("bg-warning");
-             $('#'+target+' #idModalEditTechIDPropose').text("Choix: " + tech_id_propose);
-             $('#'+target+' #idModalEditAcronyme').prop("disabled", true);
-             $('#'+target+' #idModalEditAcronyme').val("");
-           }
-
-          for (var i = 0; i < Response.acronymes_found.length; i++)
-           { acronyme_propose=acronyme_propose + Response.acronymes_found[i].acronyme+" ";
-             if (Response.acronymes_found[i].acronyme == $('#'+target+' #idModalEditAcronyme').val().toUpperCase()) acronyme_found=true;
-           }
-          if (acronyme_found==true)
-           { $('#'+target+' #idModalEditAcronyme').removeClass("bg-danger bg-warning");
-             $('#'+target+' #idModalEditAcronymePropose').text("Match !");
-           }
-          else
-           { $('#'+target+' #idModalEditAcronyme').removeClass("bg-danger bg-warning").addClass("bg-warning");
-             $('#'+target+' #idModalEditAcronymePropose').text("Choix: " + acronyme_propose);
-           }
-
-          if (tech_id_found==true && acronyme_found==true)
-           { $('#'+target+' #idModalEditValider').removeClass("disabled"); }
-          else
-           { $('#'+target+' #idModalEditValider').addClass("disabled");    }
+       for (var i = 0; i < Response.nbr_tech_ids_found; i++)
+        { tech_id_propose=tech_id_propose + Response.tech_ids_found[i].tech_id+" ";
+          if (Response.tech_ids_found[i].tech_id == $('#'+target+' #idModalEditTechID').val().toUpperCase()) tech_id_found=true;
         }
-       else { Show_Error( xhr.statusText ); }
-     };
-    xhr.send();
+       if (tech_id_found==true)
+        { $('#'+target+' #idModalEditTechID').removeClass("bg-danger bg-warning");
+          $('#'+target+' #idModalEditTechIDPropose').text("Match !");
+          $('#'+target+' #idModalEditAcronyme').prop("disabled", false);
+        }
+       else
+        { $('#'+target+' #idModalEditTechID').removeClass("bg-danger bg-warning").addClass("bg-warning");
+          $('#'+target+' #idModalEditTechIDPropose').text("Choix: " + tech_id_propose);
+          $('#'+target+' #idModalEditAcronyme').prop("disabled", true);
+          $('#'+target+' #idModalEditAcronyme').val("");
+        }
+
+       for (var i = 0; i < Response.acronymes_found.length; i++)
+        { acronyme_propose=acronyme_propose + Response.acronymes_found[i].acronyme+" ";
+          if (Response.acronymes_found[i].acronyme == $('#'+target+' #idModalEditAcronyme').val().toUpperCase()) acronyme_found=true;
+        }
+       if (acronyme_found==true)
+        { $('#'+target+' #idModalEditAcronyme').removeClass("bg-danger bg-warning");
+          $('#'+target+' #idModalEditAcronymePropose').text("Match !");
+        }
+       else
+        { $('#'+target+' #idModalEditAcronyme').removeClass("bg-danger bg-warning").addClass("bg-warning");
+          $('#'+target+' #idModalEditAcronymePropose').text("Choix: " + acronyme_propose);
+        }
+       if (tech_id_found==true && acronyme_found==true)
+        { $('#'+target+' #idModalEditValider').removeClass("disabled"); }
+       else
+        { $('#'+target+' #idModalEditValider').addClass("disabled");    }
+     });
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Edit_DI ( id )
-  { table = $('#idTableModbusMapDI').DataTable();
-    selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-    $('#idModalEditDI #idModalEditTitre').text ( "Editer MAP DI - " + selection.map_tech_id + ":" + selection.map_tag );
-    $('#idModalEditDI #idModalEditTechID').val ( selection.tech_id );
-    $('#idModalEditDI #idModalEditAcronyme').val ( selection.acronyme );
-    $('#idModalEditDI #idModalEditWagoRef').val  ( selection.map_tech_id + ":" + selection.map_tag );
-    $('#idModalEditDI #idModalEditWagoRef').attr ( "readonly", true );
-    $('#idModalEditDI #idModalEditValider').attr( "onclick", "Valider_Edit_DI('"+id+"')" );
+  { if (id>0)
+     { table = $('#idTableModbusMapDI').DataTable();
+       selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
+       $('#idModalEditDI #idModalEditTitre').text ( "Editer MAP DI - " + selection.map_tech_id + ":" + selection.map_tag );
+       $('#idModalEditDI #idModalEditTechID').val ( selection.tech_id );
+       $('#idModalEditDI #idModalEditAcronyme').val ( selection.acronyme );
+       $('#idModalEditDI #idModalEditWagoTechID').val  ( selection.map_tech_id );
+       $('#idModalEditDI #idModalEditWagoTechID').attr ( "readonly", true );
+       $('#idModalEditDI #idModalEditWagoTag').val     ( selection.map_tag );
+       $('#idModalEditDI #idModalEditWagoTag').attr ( "readonly", true );
+       $('#idModalEditDI #idModalEditValider').attr( "onclick", "Valider_Edit_DI()" );
+     }
+    else
+     { $('#idModalEditDI #idModalEditTitre').text ( "Ajouter un mapping DI" );
+       $('#idModalEditDI #idModalEditTechID').val ( '' );
+       $('#idModalEditDI #idModalEditAcronyme').val ( '' );
+       $('#idModalEditDI #idModalEditWagoTechID').val  ( '' );
+       $('#idModalEditDI #idModalEditWagoTechID').attr ( "readonly", false );
+       $('#idModalEditDI #idModalEditWagoTag').val     ( '' );
+       $('#idModalEditDI #idModalEditWagoTag').attr ( "readonly", false );
+       $('#idModalEditDI #idModalEditValider').attr( "onclick", "Valider_Edit_DI()" );
+     }
+    Modal_Edit_Input_Changed('idModalEditDI');
     $('#idModalEditDI').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -201,9 +230,38 @@
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Edit_AI ( id )
-  { table = $('#idTableModbusMapAI').DataTable();
-    selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-    Show_Modal_Map_Del ( "AI", selection )
+  { if (id>0)
+     { table = $('#idTableModbusMapAI').DataTable();
+       selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
+       $('#idModalEditAI #idModalEditTitre').text ( "Editer MAP AI - " + selection.map_tech_id + ":" + selection.map_tag );
+       $('#idModalEditAI #idModalEditTechID').val ( selection.tech_id );
+       $('#idModalEditAI #idModalEditAcronyme').val ( selection.acronyme );
+       $('#idModalEditAI #idModalEditWagoTechID').val  ( selection.map_tech_id );
+       $('#idModalEditAI #idModalEditWagoTechID').attr ( "readonly", true );
+       $('#idModalEditAI #idModalEditWagoTag').val     ( selection.map_tag );
+       $('#idModalEditAI #idModalEditWagoTag').attr ( "readonly", true );
+       $('#idModalEditAI #idModalEditType').val ( selection.type );
+       $('#idModalEditAI #idModalEditMin').val ( selection.min );
+       $('#idModalEditAI #idModalEditMax').val ( selection.max );
+       $('#idModalEditAI #idModalEditMapQuestionVoc').val ( selection.map_question_vocale );
+       $('#idModalEditAI #idModalEditMapReponseVoc').val ( selection.map_reponse_vocale );
+       $('#idModalEditAI #idModalEditValider').attr( "onclick", "Valider_Edit_AI()" );
+     }
+    else
+     { $('#idModalEditAI #idModalEditTitre').text ( "Ajouter un MAP AI" );
+       $('#idModalEditAI #idModalEditTechID').val ( '' );
+       $('#idModalEditAI #idModalEditAcronyme').val ( '' );
+       $('#idModalEditAI #idModalEditWagoTechID').val  ( '' );
+       $('#idModalEditAI #idModalEditWagoTechID').attr ( "readonly", false );
+       $('#idModalEditAI #idModalEditWagoTag').val     ( '' );
+       $('#idModalEditAI #idModalEditWagoTag').attr ( "readonly", false );
+       $('#idModalEditAI #idModalEditType').val ( 0 );
+       $('#idModalEditAI #idModalEditMapQuestionVoc').val ( '' );
+       $('#idModalEditAI #idModalEditMapReponseVoc').val ( '' );
+       $('#idModalEditAI #idModalEditValider').attr( "onclick", "Valider_Edit_AI()" );
+     }
+    Modal_Edit_Input_Changed('idModalEditAI');
+    $('#idModalEditAI').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Edit_AO ( id )
@@ -339,6 +397,10 @@
                 { return( Lien ( "/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir le graphe", item.acronyme ) ); }
             },
             { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
+            { "data": null, "title":"Echange vocaux", "className": "align-left text-center",
+              "render": function (item)
+                { return( "Question : "+item.map_question_vocale+"<br>Réponse:"+item.map_reponse_vocale ); }
+            },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-primary", "Editer le module", "Show_Modal_Map_Edit_AI", item.id, "pen", null );
