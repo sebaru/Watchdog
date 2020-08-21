@@ -27,8 +27,13 @@
     </table>
 <!----------------------------------------------------------------------------------------------------------------------------->
  <hr>
-      <h4><img style="width: 30px" data-toggle="tooltip" title="Sorties TOR"
-                       src="https://icons.abls-habitat.fr/assets/gif/Sortie.png" />Sorties TOR</h4>
+ <div class="row m-2">
+    <h4><img style="width: 30px" data-toggle="tooltip" title="Sorties TOR"
+             src="https://icons.abls-habitat.fr/assets/gif/Sortie.png" />Sorties TOR</h4>
+   <div class ="ml-auto btn-group">
+        <button type="button" onclick="Show_Modal_Map_Edit_DO('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping DO</button>
+   </div>
+ </div>
 
     <table id="idTableModbusMapDO" class="table table-striped table-bordered table-hover">
       <thead class="thead-dark">
@@ -67,6 +72,7 @@
 <!-- Container -->
 </div>
 
+<!------------------------------------------------- Modal Edit Digital Input -------------------------------------------------->
 <div id="idModalEditDI" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
@@ -93,7 +99,7 @@
 						     <div class="input-group-prepend">
 							     <span class="input-group-text">Wago AI</span>
 						     </div>
-						     <input id="idModalEditWagoTag" type="text" class="form-control" placeholder="AIxx">
+						     <input id="idModalEditWagoTag" type="text" class="form-control" placeholder="DIxx">
      					</div>
    					</div>
   					</div>
@@ -129,8 +135,9 @@
   </div>
 </div>
 
+<!------------------------------------------------- Modal Edit Digital Output ------------------------------------------------->
 <div id="idModalEditDO" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered" role="document">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
         <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalEditTitre"></span></h5>
@@ -140,16 +147,28 @@
       </div>
       <div class="modal-body">
 
-        <div class="form-group">
+       <div class="row">
+        <div class="col form-group">
 					     <div class="input-group">
 						     <div class="input-group-prepend">
-							     <span class="input-group-text">Wago References</span>
+							     <span class="input-group-text">Wago Tech_ID</span>
 						     </div>
-						     <input id="idModalEditWagoRef" type="text" class="form-control" placeholder="Reference WAGO">
+						     <input id="idModalEditWagoTechID" type="text" class="form-control" placeholder="Module WAGO">
      					</div>
    					</div>
 
-        <div class="form-group">
+        <div class="col form-group">
+					     <div class="input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text">Wago AI</span>
+						     </div>
+						     <input id="idModalEditWagoTag" type="text" class="form-control" placeholder="DOxx">
+     					</div>
+   					</div>
+  					</div>
+
+       <div class="row">
+        <div class="col form-group">
 					     <div class="input-group">
 						     <div class="input-group-prepend">
 							     <span class="input-group-text">Target Tech_ID</span>
@@ -159,7 +178,7 @@
           <small id="idModalEditTechIDPropose"></small>
    					</div>
 
-        <div class="form-group">
+        <div class="col form-group">
 					     <div class="input-group">
 						     <div class="input-group-prepend">
 							     <span class="input-group-text">Target Acronyme</span>
@@ -168,6 +187,7 @@
      					</div>
           <small id="idModalEditAcronymePropose"></small>
         </div>
+  					</div>
 
       </div>
       <div class="modal-footer">
@@ -178,6 +198,7 @@
   </div>
 </div>
 
+<!------------------------------------------------- Modal Edit Analog Input --------------------------------------------------->
 <div id="idModalEditAI" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
@@ -302,6 +323,7 @@
   </div>
 </div>
 
+<!------------------------------------------------- Modal Delete Mapping ------------------------------------------------------>
 <div id="idModalModbusDel" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content ">

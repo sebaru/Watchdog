@@ -526,8 +526,25 @@
         }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
-/*    else if (! strcasecmp( classe, "DO" ) )
-    else if (! strcasecmp( classe, "AO" ) )*/
+    else if (! strcasecmp( classe, "DO" ) )
+     { g_snprintf( requete, sizeof(requete),
+                   "UPDATE mnemos_DO SET map_thread=NULL, map_tech_id=NULL, map_tag=NULL "
+                   " WHERE map_tech_id='%s' AND map_tag='%s';", map_tech_id, map_tag );
+
+       SQL_Write (requete);
+
+       g_snprintf( requete, sizeof(requete),
+                   "UPDATE mnemos_DO SET map_thread='MODBUS', map_tech_id='%s', map_tag='%s' "
+                   " WHERE tech_id='%s' AND acronyme='%s';", map_tech_id, map_tag, tech_id, acronyme );
+
+       if (SQL_Write (requete))
+        { soup_message_set_status (msg, SOUP_STATUS_OK);
+          Lib->Thread_reload = TRUE;
+        }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+
+     }
+/*  else if (! strcasecmp( classe, "AO" ) )*/
     else
      {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");
 		     return;

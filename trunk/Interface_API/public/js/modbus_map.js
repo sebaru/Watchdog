@@ -81,20 +81,18 @@
      });
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function Valider_Edit_DO ( id )
+ function Valider_Edit_DO ( )
   { if ($('#idModalEditDO #idModalEditValider').hasClass("disabled")) return;
     $('#idModalEditDO').modal("hide");
     table = $('#idTableModbusMapDO').DataTable();
-    selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
     var json_request = JSON.stringify(
-       { classe     : 'DI',
+       { classe     : 'DO',
          tech_id    : $('#idModalEditDO #idModalEditTechID').val().toUpperCase(),
          acronyme   : $('#idModalEditDO #idModalEditAcronyme').val().toUpperCase(),
-         map_tech_id: selection.map_tech_id,
-         map_tag    : selection.map_tag,
+         map_tech_id: $('#idModalEditDO #idModalEditWagoTechID').val().toUpperCase(),
+         map_tag    : $('#idModalEditDO #idModalEditWagoTag').val().toUpperCase(),
        }
      );
-    var json_request = JSON.stringify( { tech_id : tech_id } );
     Send_to_API ( 'POST', "/api/process/modbus/map/set", json_request, function ()
      { $('#idTableModbusMapDO').DataTable().ajax.reload(null, false);
      });
@@ -218,14 +216,29 @@
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Edit_DO ( id )
-  { table = $('#idTableModbusMapDO').DataTable();
-    selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-    $('#idModalEditDO #idModalEditTitre').text ( "Editer MAP DO - " + selection.map_tech_id + ":" + selection.map_tag );
-    $('#idModalEditDO #idModalEditTechID').val ( selection.tech_id );
-    $('#idModalEditDO #idModalEditAcronyme').val ( selection.acronyme );
-    $('#idModalEditDO #idModalEditWagoRef').val  ( selection.map_tech_id + ":" + selection.map_tag );
-    $('#idModalEditDO #idModalEditWagoRef').attr ( "readonly", true );
-    $('#idModalEditDO #idModalEditValider').attr( "onclick", "Valider_Edit_DO('"+id+"')" );
+  { if (id>0)
+     { table = $('#idTableModbusMapDO').DataTable();
+       selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
+       $('#idModalEditDO #idModalEditTitre').text ( "Editer MAP DO - " + selection.map_tech_id + ":" + selection.map_tag );
+       $('#idModalEditDO #idModalEditTechID').val ( selection.tech_id );
+       $('#idModalEditDO #idModalEditAcronyme').val ( selection.acronyme );
+       $('#idModalEditDO #idModalEditWagoTechID').val  ( selection.map_tech_id );
+       $('#idModalEditDO #idModalEditWagoTechID').attr ( "readonly", true );
+       $('#idModalEditDO #idModalEditWagoTag').val     ( selection.map_tag );
+       $('#idModalEditDO #idModalEditWagoTag').attr ( "readonly", true );
+       $('#idModalEditDO #idModalEditValider').attr( "onclick", "Valider_Edit_DO()" );
+     }
+    else
+     { $('#idModalEditDO #idModalEditTitre').text ( "Ajouter un mapping DO" );
+       $('#idModalEditDO #idModalEditTechID').val ( '' );
+       $('#idModalEditDO #idModalEditAcronyme').val ( '' );
+       $('#idModalEditDO #idModalEditWagoTechID').val  ( '' );
+       $('#idModalEditDO #idModalEditWagoTechID').attr ( "readonly", false );
+       $('#idModalEditDO #idModalEditWagoTag').val     ( '' );
+       $('#idModalEditDO #idModalEditWagoTag').attr ( "readonly", false );
+       $('#idModalEditDO #idModalEditValider').attr( "onclick", "Valider_Edit_DO()" );
+     }
+    Modal_Edit_Input_Changed('idModalEditDO');
     $('#idModalEditDO').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
