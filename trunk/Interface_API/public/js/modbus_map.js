@@ -256,6 +256,7 @@
        $('#idModalEditAI #idModalEditType').val ( selection.type );
        $('#idModalEditAI #idModalEditMin').val ( selection.min );
        $('#idModalEditAI #idModalEditMax').val ( selection.max );
+       $('#idModalEditAI #idModalEditUnite').val ( selection.unite );
        $('#idModalEditAI #idModalEditMapQuestionVoc').val ( selection.map_question_vocale );
        $('#idModalEditAI #idModalEditMapReponseVoc').val ( selection.map_reponse_vocale );
        $('#idModalEditAI #idModalEditValider').attr( "onclick", "Valider_Edit_AI()" );
