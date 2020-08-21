@@ -76,7 +76,7 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_modbus_run ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_modbus_run_thread ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   { GSList *liste_modules;
     JsonBuilder *builder;
     gsize taille_buf;
@@ -94,33 +94,67 @@
        return;
      }
 
-    Json_add_int ( builder, "nbr_request_par_sec", Cfg_modbus.nbr_request_par_sec );
+    Json_add_bool ( builder, "thread_is_running", Lib->Thread_run );
+    if (Lib->Thread_run)                                    /* Warning : Cfg_modbus does not exist if thread is not running ! */
+     { Json_add_int ( builder, "nbr_request_par_sec", Cfg_modbus.nbr_request_par_sec ); }
 
-    pthread_mutex_lock( &Lib->synchro );
-    liste_modules = Cfg_modbus.Modules_MODBUS;
-    while ( liste_modules )
-     { struct MODULE_MODBUS *module = liste_modules->data;
+    buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Admin_json_modbus_list : fonction appelée pour lister les modules modbus                                                          */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/******************************************************************************************************************************/
+ static void Admin_json_modbus_run_modules ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { GSList *liste_modules;
+    JsonBuilder *builder;
+    gsize taille_buf;
+    gchar *buf;
 
-       Json_add_object ( builder, module->modbus.tech_id );
-       Json_add_string ( builder, "mode", Modbus_mode_to_string(module) );
-       Json_add_bool   ( builder, "started", module->started );
-       Json_add_int    ( builder, "nbr_entree_tor", module->nbr_entree_tor );
-       Json_add_int    ( builder, "nbr_sortie_tor", module->nbr_sortie_tor );
-       Json_add_int    ( builder, "nbr_entree_ana", module->nbr_entree_ana );
-       Json_add_int    ( builder, "nbr_sortie_ana", module->nbr_sortie_ana );
-       Json_add_bool   ( builder, "comm", Dls_data_get_bool( NULL, NULL, &module->bit_comm) );
-       Json_add_int    ( builder, "transaction_id", module->transaction_id );
-       Json_add_int    ( builder, "nbr_request_par_sec", module->nbr_request_par_sec );
-       Json_add_int    ( builder, "delai", module->delai );
-       Json_add_int    ( builder, "nbr_deconnect", module->nbr_deconnect );
-       Json_add_int    ( builder, "last_reponse", (Partage->top - module->date_last_reponse)/10 );
-       Json_add_int    ( builder, "date_next_eana", (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1) );
-       Json_add_int    ( builder, "date_retente", (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1) );
-       Json_end_object ( builder );                                                                       /* End Module Array */
-
-       liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
      }
-    pthread_mutex_unlock( &Lib->synchro );
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    Json_add_array ( builder, "modules" );
+    if (Lib->Thread_run)                                    /* Warning : Cfg_modbus does not exist if thread is not running ! */
+     { pthread_mutex_lock( &Lib->synchro );
+       liste_modules = Cfg_modbus.Modules_MODBUS;
+       while ( liste_modules )
+        { struct MODULE_MODBUS *module = liste_modules->data;
+
+          Json_add_object ( builder, NULL );
+          Json_add_string ( builder, "tech_id", module->modbus.tech_id );
+          Json_add_string ( builder, "mode", Modbus_mode_to_string(module) );
+          Json_add_bool   ( builder, "started", module->started );
+          Json_add_int    ( builder, "nbr_entree_tor", module->nbr_entree_tor );
+          Json_add_int    ( builder, "nbr_sortie_tor", module->nbr_sortie_tor );
+          Json_add_int    ( builder, "nbr_entree_ana", module->nbr_entree_ana );
+          Json_add_int    ( builder, "nbr_sortie_ana", module->nbr_sortie_ana );
+          Json_add_bool   ( builder, "comm", Dls_data_get_bool( NULL, NULL, &module->bit_comm) );
+          Json_add_int    ( builder, "transaction_id", module->transaction_id );
+          Json_add_int    ( builder, "nbr_request_par_sec", module->nbr_request_par_sec );
+          Json_add_int    ( builder, "delai", module->delai );
+          Json_add_int    ( builder, "nbr_deconnect", module->nbr_deconnect );
+          Json_add_int    ( builder, "last_reponse", (Partage->top - module->date_last_reponse)/10 );
+          Json_add_int    ( builder, "date_next_eana", (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1) );
+          Json_add_int    ( builder, "date_retente", (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1) );
+          Json_end_object ( builder );                                                                       /* End Module Array */
+
+          liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
+        }
+       pthread_mutex_unlock( &Lib->synchro );
+     }
     Json_end_array (builder);                                                                                 /* End Document */
 
     buf = Json_get_buf ( builder, &taille_buf );
@@ -150,6 +184,7 @@
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
+    Json_add_bool ( builder, "thread_is_running", Lib->Thread_run );
     g_snprintf(chaine, sizeof(chaine), "SELECT * FROM modbus_modules" );
     if (SQL_Select_to_JSON ( builder, "modules", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
@@ -567,7 +602,8 @@ end:
        return;
      }
          if (!strcasecmp(path, "/list"))     { Admin_json_modbus_list ( lib, msg ); }
-    else if (!strcasecmp(path, "/run"))      { Admin_json_modbus_run ( lib, msg ); }
+    else if (!strcasecmp(path, "/run/modules")) { Admin_json_modbus_run_modules ( lib, msg ); }
+    else if (!strcasecmp(path, "/run/thread"))  { Admin_json_modbus_run_thread ( lib, msg ); }
     else if (!strcasecmp(path, "/del"))      { Admin_json_modbus_del ( lib, msg ); }
     else if (!strcasecmp(path, "/set"))      { Admin_json_modbus_set ( lib, msg ); }
     else if (!strcasecmp(path, "/add"))      { Admin_json_modbus_add ( lib, msg ); }

@@ -389,28 +389,19 @@
  void Update_database_schema ( void )
   { gchar chaine[32], requete[4096];
     gint database_version;
-    gchar *nom, *valeur;
     struct DB *db;
 
     if (Config.instance_is_master != TRUE)                                                  /* Do not update DB if not master */
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "Update_database_schema: Instance is not master. Don't update schema." );
+                "%s: Instance is not master. Don't update schema.", __func__ );
        return;
      }
 
-    database_version = 0;                                                                                /* valeur par défaut */
-    if ( ! Recuperer_configDB( &db, "msrv" ) )                                              /* Connexion a la base de données */
-     { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "Update_database_schema: Database connexion failed" );
-       return;
-     }
-
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Config.log_db, LOG_INFO,                                                         /* Print Config */
-                "Update_database_schema: found MSRV param '%s' = %s in DB", nom, valeur );
-       if ( ! g_ascii_strcasecmp ( nom, "database_version" ) )
-        { database_version = atoi( valeur ); }
-     }
+    gchar *database_version_string = Recuperer_configDB_by_nom( "msrv", "database_version" );/* Récupération d'une config dans la DB */
+    if (database_version_string)
+     { database_version = atoi( database_version_string );
+       g_free(database_version_string);
+     } else database_version=0;
 
     Info_new( Config.log, Config.log_db, LOG_NOTICE,
              "%s: Actual Database_Version detected = %05d. Please wait while upgrading.", __func__, database_version );
@@ -419,7 +410,7 @@
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "Update_database_schema: DB connexion failed" );
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB connexion failed", __func__ );
        return;
      }
 

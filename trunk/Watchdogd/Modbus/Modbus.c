@@ -49,7 +49,7 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Modbus_Lire_config ( void )
+ static gboolean Modbus_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 
@@ -76,6 +76,48 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Modbus_Creer_DB ( void )
+  { gint database_version;
+
+    gchar *database_version_string = Recuperer_configDB_by_nom( "modbus", "database_version" );
+    if (database_version_string)
+     { database_version = atoi( database_version_string );
+       g_free(database_version_string);
+     } else database_version=0;
+
+    Info_new( Config.log, Config.log_db, LOG_NOTICE,
+             "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, VERSION );
+
+    if (database_version==0)
+     { SQL_Write ( "CREATE TABLE IF NOT EXISTS `modbus_modules` ("
+                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                   "`date_create` datetime NOT NULL DEFAULT NOW(),"
+                   "`enable` tinyint(1) NOT NULL,"
+                   "`hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                   "`tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT hostname,"
+                   "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                   "`watchdog` int(11) NOT NULL,"
+                   "PRIMARY KEY (`id`)"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
+     }
+
+    if (database_version < 4920)
+     { SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_EA`" );
+       SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_E`" );
+       SQL_Write ( "ALTER TABLE `modbus_modules` DROP `max_nbr_E`" );
+       SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_A`" );
+       SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_AA`" );
+     }
+
+    Modifier_configDB ( "modbus", "database_version", VERSION );
+
+  }
+
+/******************************************************************************************************************************/
 /* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                                  */
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
@@ -84,7 +126,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,date_create,enable,hostname,tech_id,watchdog,description,map_E,map_EA,map_A,map_AA,max_nbr_E "
+                "SELECT id,date_create,enable,hostname,tech_id,watchdog,description "
                 " FROM %s ORDER BY description",
                 NOM_TABLE_MODULE_MODBUS );
 
@@ -115,9 +157,6 @@
        modbus->id       = atoi(db->row[0]);
        modbus->enable   = atoi(db->row[2]);
        modbus->watchdog = atoi(db->row[5]);
-       modbus->map_E    = atoi(db->row[7]);
-       modbus->map_AA   = atoi(db->row[10]);
-       modbus->max_nbr_E= atoi(db->row[11]);
      }
     return(modbus);
   }
@@ -614,7 +653,7 @@
 /******************************************************************************************************************************/
  static void Interroger_sortie_ana( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
-    gint cpt_a, cpt_byte, cpt, taille;
+    gint cpt_byte, cpt, taille;
 
     memset(&requete, 0, sizeof(requete) );                                               /* Mise a zero globale de la requete */
     module->transaction_id++;
@@ -627,12 +666,11 @@
     requete.adresse        = 0x00;
     requete.nbr            = htons( module->nbr_sortie_ana );                                                    /* bit count */
     requete.data[2]        = (module->nbr_sortie_ana*2);                                                        /* Byte count */
-    cpt_a = module->modbus.map_AA;
     for ( cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_ana; cpt++)
       { /* Attention, parser selon le type de sortie ! (12 bits ? 10 bits ? conversion ??? */
         requete.data [cpt_byte  ] = 0x30; /*Partage->aa[cpt_a].val_int>>5;*/
         requete.data [cpt_byte+1] = 0x00; /*(Partage->aa[cpt_a].val_int & 0x1F)<<3;*/
-        cpt_a++; cpt_byte += 2;
+        cpt_byte += 2;
       }
 
     if ( write ( module->connexion, &requete, taille+6 ) != taille+6 )               /* Envoi de la requete (taille + header )*/
@@ -752,7 +790,7 @@
        Deconnecter_module( module );
      }
     else
-     { int cpt_e, cpt_byte, cpt_poid, cpt;
+     { int cpt_byte, cpt_poid, cpt;
        module->date_last_reponse = Partage->top;                                                   /* Estampillage de la date */
        Dls_data_set_bool ( NULL, module->modbus.tech_id, "COMM", &module->bit_comm, TRUE );
        if (ntohs(module->response.transaction_id) != module->transaction_id)                              /* Mauvaise reponse */
@@ -768,11 +806,8 @@
         }
        else switch (module->mode)
         { case MODBUS_GET_DI:
-               cpt_e = module->modbus.map_E;
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
-                { if(!module->DI[cpt]) SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
-                  else Dls_data_set_DI ( NULL, NULL, NULL, (gpointer)&module->DI[cpt], (module->response.data[ cpt_byte ] & cpt_poid) );
-                  cpt_e++;
+                { Dls_data_set_DI ( NULL, NULL, NULL, (gpointer)&module->DI[cpt], (module->response.data[ cpt_byte ] & cpt_poid) );
                   cpt_poid = cpt_poid << 1;
                   if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
                 }
@@ -888,16 +923,9 @@
           case MODBUS_GET_NBR_DI:
                 { gint nbr;
                   nbr = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) );
-                  if (module->modbus.max_nbr_E>0) module->nbr_entree_tor = module->modbus.max_nbr_E;
-                                             else module->nbr_entree_tor = nbr;
-                  if (module->modbus.max_nbr_E>0)
-                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get number Entree TOR = %d (forced)",
-                               __func__, module->modbus.tech_id, module->modbus.id, module->nbr_entree_tor );
-                   }
-                  else
-                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get number Entree TOR = %d",
-                               __func__, module->modbus.tech_id, module->modbus.id, module->nbr_entree_tor );
-                   }
+                  module->nbr_entree_tor = nbr;
+                  Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get number Entree TOR = %d",
+                            __func__, module->modbus.tech_id, module->modbus.id, module->nbr_entree_tor );
                   module->mode = MODBUS_GET_NBR_DO;
                 }
                break;
@@ -1137,6 +1165,7 @@ reload:
     Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
     Thread_init ( "W-MODBUS", lib, VERSION, "Manage Modbus System" );
     Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
+    Modbus_Creer_DB();
 
     Cfg_modbus.Modules_MODBUS = NULL;                                                         /* Init des variables du thread */
 

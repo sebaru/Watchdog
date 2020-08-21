@@ -4,9 +4,8 @@
  <h3>Mapping des I/O Wago sur Modbus</h3>
 
    <div class ="ml-auto btn-group">
-        <button type="button" onclick="Show_Modal_ModbusMap_Add()"class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
-        <button type="button" onclick="Go_to_modbus_run()"class="btn btn-info"><i class="fas fa-eye"></i> RUN</button>
-        <button type="button" onclick="window.location='/tech/modbus'" class="btn btn-secondary"><i class="fas fa-list"></i> Retour</button>
+        <button type="button" onclick="window.location='/tech/modbus_run'" class="btn btn-info"><i class="fas fa-eye"></i> RUN</button>
+        <button type="button" onclick="window.location='/tech/modbus'" class="btn btn-secondary"><i class="fas fa-list"></i> Retour Liste</button>
         <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>

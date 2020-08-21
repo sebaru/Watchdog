@@ -570,29 +570,6 @@ CREATE TABLE IF NOT EXISTS `syns_rectangles` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `modbus_modules`
---
-
-CREATE TABLE IF NOT EXISTS `modbus_modules` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `date_create` datetime NOT NULL DEFAULT NOW(),
-  `enable` tinyint(1) NOT NULL,
-  `hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT hostname,
-  `description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',
-  `watchdog` int(11) NOT NULL,
-  `map_E` int(11) NOT NULL DEFAULT '0',
-  `max_nbr_E` int(11) NOT NULL DEFAULT '0',
-  `map_EA` int(11) NOT NULL DEFAULT '0',
-  `map_A` int(11) NOT NULL DEFAULT '0',
-  `map_AA` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `msgs`
 --
 

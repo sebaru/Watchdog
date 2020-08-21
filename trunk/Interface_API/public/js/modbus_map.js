@@ -1,11 +1,6 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
- function Go_to_modbus_run ()
-  { Redirect ( "/tech/modbus_run" );
-  }
- function Go_to_modbus_map ()
-  { Redirect ( "/tech/modbus_map" );
-  }/************************************ Envoi les infos de modifications synoptique *********************************************/
+/************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Modbus_Del ( type, map_tech_id, map_tag )
   { var xhr = new XMLHttpRequest;
     xhr.open('DELETE', "/api/process/modbus/map/del" );

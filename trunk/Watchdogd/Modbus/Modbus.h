@@ -99,11 +99,6 @@
     gchar hostname[32];                                                                       /* Adresses IP du module MODBUS */
     gchar tech_id[32];                                                                            /* Tech_id du module MODBUS */
     gchar description[128];                                                                              /* Libelle du modbus */
-    guint map_E;
-    guint max_nbr_E;
-    guint map_A;
-    guint map_AA;
-    gboolean mode_old_static;
   };
 
  struct MODULE_MODBUS
@@ -137,6 +132,6 @@
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/
- extern gboolean Modbus_Lire_config ( void );
+
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

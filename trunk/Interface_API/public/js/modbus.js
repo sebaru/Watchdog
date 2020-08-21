@@ -1,12 +1,5 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
- function Go_to_modbus_run ()
-  { Redirect ( "/tech/modbus_run" );
-  }
- function Go_to_modbus_map ()
-  { Redirect ( "/tech/modbus_map" );
-  }
-
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Modbus_enable_module ( tech_id )
   { var json_request = JSON.stringify( { tech_id : tech_id } );
