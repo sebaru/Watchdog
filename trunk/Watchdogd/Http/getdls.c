@@ -667,13 +667,14 @@
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
 
-    if ( ! (Json_has_member ( request, "tech_id" ) &&
-            Json_has_member ( request, "sourcecode" ) ) )
+    if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-    gchar *sourcecode = Json_get_string( request, "sourcecode" );
-    Save_source_dls_to_DB ( Json_get_string( request, "tech_id" ), sourcecode, strlen(sourcecode) );
+    if (Json_has_member ( request, "sourcecode" ))
+     { gchar *sourcecode = Json_get_string( request, "sourcecode" );
+       Save_source_dls_to_DB ( Json_get_string( request, "tech_id" ), sourcecode, strlen(sourcecode) );
+     }
 
     gint retour = Compiler_source_dls ( TRUE, Json_get_string( request, "tech_id" ), log_buffer, sizeof(log_buffer) );
 

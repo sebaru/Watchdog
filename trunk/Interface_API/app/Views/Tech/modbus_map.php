@@ -96,7 +96,7 @@
         <div class="col form-group">
 					     <div class="input-group">
 						     <div class="input-group-prepend">
-							     <span class="input-group-text">Wago AI</span>
+							     <span class="input-group-text">Wago DI</span>
 						     </div>
 						     <input id="idModalEditWagoTag" type="text" class="form-control" placeholder="DIxx">
      					</div>
@@ -159,7 +159,7 @@
         <div class="col form-group">
 					     <div class="input-group">
 						     <div class="input-group-prepend">
-							     <span class="input-group-text">Wago AI</span>
+							     <span class="input-group-text">Wago DO</span>
 						     </div>
 						     <input id="idModalEditWagoTag" type="text" class="form-control" placeholder="DOxx">
      					</div>

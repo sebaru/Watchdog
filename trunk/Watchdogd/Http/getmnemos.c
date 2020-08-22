@@ -99,7 +99,7 @@
     g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_HORLOGE AS m WHERE m.tech_id='%s'", tech_id );
     SQL_Select_to_JSON ( builder, "HORLOGE", chaine );
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_TEMPO AS m WHERE m.tech_id='%s'", tech_id );
+    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_Tempo AS m WHERE m.tech_id='%s'", tech_id );
     SQL_Select_to_JSON ( builder, "TEMPO", chaine );
 
     g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_BOOL AS m WHERE m.tech_id='%s'", tech_id );

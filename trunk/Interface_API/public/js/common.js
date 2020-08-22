@@ -10,7 +10,7 @@
        if (xhr.status == 200)
         { try { var Response = JSON.parse(xhr.responseText); }
           catch (error) { Response=undefined; }
-          $('#idToastStatus').toast('show');
+          if (method!="GET") $('#idToastStatus').toast('show');
           fonction(Response);
         }
        else { Show_Error( xhr.statusText ); }

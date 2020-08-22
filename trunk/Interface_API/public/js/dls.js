@@ -37,7 +37,7 @@
  function Valider_Dls_Del ( tech_id )
   { var json_request = JSON.stringify( { tech_id : tech_id } );
     Send_to_API ( 'DELETE', "/api/dls/del", json_request, function ()
-     { $('#idTableDLS').DataTable().ajax.reload();
+     { $('#idTableDLS').DataTable().ajax.reload(null, false);
        $('#idToastStatus').toast('show');
      }
     );
@@ -54,7 +54,15 @@
     $('#idModalDLSDelValider').attr( "onclick", "Valider_Dls_Del("+tech_id+")" );
     $('#idModalDLSDel').modal("show");
   }
-
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function Dls_compiler ( tech_id )
+  { var json_request = JSON.stringify(
+     { tech_id : tech_id,
+     });
+    Send_to_API ( "POST", "/api/dls/compil/", json_request, function ()
+     { $('#idTableDLS').DataTable().ajax.reload(null, false);
+     });
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTableDLS').DataTable(
@@ -111,6 +119,7 @@
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-primary", "Voir le code", "Redirect", "/tech/dls_source/"+item.tech_id, "code", null );
                   boutons += Bouton_actions_add ( "outline-primary", "Voir les mnemos", "Redirect", "/tech/mnemos/"+item.tech_id, "book", null );
+                  boutons += Bouton_actions_add ( "outline-success", "Compiler le module", "Dls_compiler", item.tech_id, "coffee", null );
                   boutons += Bouton_actions_add ( "outline-primary", "Voir les RUN", "Redirect", "/tech/run/"+item.tech_id, "eye", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer le plugin", "Show_Modal_Dls_Del", item.tech_id, "trash", null );
                   boutons += Bouton_actions_end ();
