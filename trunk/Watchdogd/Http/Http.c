@@ -480,6 +480,7 @@ reload:
     soup_server_add_handler ( socket, "/log/get",        Http_traiter_log_get, NULL, NULL );
     soup_server_add_handler ( socket, "/log",            Http_traiter_log, NULL, NULL );
     soup_server_add_handler ( socket, "/bus",            Http_traiter_bus, NULL, NULL );
+    soup_server_add_handler ( socket, "/tech",           Http_traiter_tech, NULL, NULL );
     soup_server_add_handler ( socket, "/users/list",     Http_traiter_users_list, NULL, NULL );
     soup_server_add_handler ( socket, "/users/kill",     Http_traiter_users_kill, NULL, NULL );
     soup_server_add_handler ( socket, "/users/sessions", Http_traiter_users_sessions, NULL, NULL );
