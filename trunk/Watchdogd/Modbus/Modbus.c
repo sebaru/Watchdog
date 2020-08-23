@@ -719,8 +719,8 @@
                  __func__, module->modbus.tech_id, map_tag, tech_id, acro, libelle );
        if ( sscanf ( map_tag, "AI%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_ana)
-           { Dls_data_get_AI ( tech_id, acro, &module->AI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
-             if(module->AI[num] == NULL) Dls_data_set_AI ( tech_id, acro, &module->AI[num], 0.0, FALSE );/* Sinon, on le crée */
+           { Charger_confDB_AI ( tech_id, acro );
+             Dls_data_get_AI ( tech_id, acro, &module->AI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
                          __func__, module->modbus.tech_id, map_tag, num, module->nbr_entree_ana );

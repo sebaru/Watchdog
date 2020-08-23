@@ -224,9 +224,9 @@
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
- void Charger_confDB_AI ( void )
-  { struct DLS_AI *ai;
-    gchar requete[512];
+ void Charger_confDB_AI ( gchar *tech_id, gchar *acronyme )
+  { gchar requete[512];
+    struct DLS_AI *ai;
     struct DB *db;
 
     db = Init_DB_SQL();
@@ -239,6 +239,11 @@
                 "SELECT a.tech_id, a.acronyme, a.valeur, a.min, a.max, a.type, a.unite"
                 " FROM mnemos_AI as a"
               );
+    if (tech_id && acronyme)
+     { gchar critere[128];
+       g_snprintf( critere, sizeof(critere), " WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme );
+       g_strlcat ( requete, critere, sizeof(requete) );
+     }
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);
