@@ -432,7 +432,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding DLS_BOOL '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding DLS_BOOL '%s:%s'", __func__, tech_id, acronyme );
         }
        if (bool_p) *bool_p = (gpointer)bool;                                        /* Sauvegarde pour acceleration si besoin */
       }
@@ -546,7 +546,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_DI = g_slist_prepend ( Partage->Dls_data_DI, di );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding DLS_DI '%s:%s'=%d", __func__, tech_id, acronyme, valeur );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding DLS_DI '%s:%s'=%d", __func__, tech_id, acronyme, valeur );
         }
        if (di_p) *di_p = (gpointer)di;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -684,7 +684,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_DO = g_slist_prepend ( Partage->Dls_data_DO, dout );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding DLS_DO '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding DLS_DO '%s:%s'", __func__, tech_id, acronyme );
         }
        if (dout_p) *dout_p = (gpointer)dout;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -778,7 +778,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding AI '%s:%s'", __func__, tech_id, acronyme );
         }
        if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -870,7 +870,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AO = g_slist_prepend ( Partage->Dls_data_AO, ao );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding AO '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding AO '%s:%s'", __func__, tech_id, acronyme );
         }
        if (ao_p) *ao_p = (gpointer)ao;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -966,7 +966,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_CI = g_slist_prepend ( Partage->Dls_data_CI, cpt_imp );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding CI '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding CI '%s:%s'", __func__, tech_id, acronyme );
           Charger_conf_CI ( cpt_imp );                                     /* Chargement des valeurs en base pour ce compteur */
         }
        if (cpt_imp_p) *cpt_imp_p = (gpointer)cpt_imp;                   /* Sauvegarde pour acceleration si besoin */
@@ -1059,7 +1059,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_CH = g_slist_prepend ( Partage->Dls_data_CH, cpt_h );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding CH '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding CH '%s:%s'", __func__, tech_id, acronyme );
           Charger_conf_CH ( cpt_h );                                       /* Chargement des valeurs en base pour ce compteur */
         }
        if (cpt_h_p) *cpt_h_p = (gpointer)cpt_h;                                     /* Sauvegarde pour acceleration si besoin */
@@ -1211,7 +1211,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_TEMPO = g_slist_prepend ( Partage->Dls_data_TEMPO, tempo );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding TEMPO '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding TEMPO '%s:%s'", __func__, tech_id, acronyme );
         }
        if (tempo_p) *tempo_p = (gpointer)tempo;                                     /* Sauvegarde pour acceleration si besoin */
       }
@@ -1295,7 +1295,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_MSG = g_slist_prepend ( Partage->Dls_data_MSG, msg );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding MSG '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding MSG '%s:%s'", __func__, tech_id, acronyme );
         }
        if (msg_p) *msg_p = (gpointer)msg;                                           /* Sauvegarde pour acceleration si besoin */
       }
@@ -1418,7 +1418,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_VISUEL = g_slist_prepend ( Partage->Dls_data_VISUEL, visu );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding VISUEL '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding VISUEL '%s:%s'", __func__, tech_id, acronyme );
         }
        if (visu_p) *visu_p = (gpointer)visu;                                        /* Sauvegarde pour acceleration si besoin */
       }
@@ -1503,7 +1503,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_REGISTRE = g_slist_prepend ( Partage->Dls_data_REGISTRE, reg );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
                     "%s : adding DLS_REGISTRE '%s:%s'", __func__, tech_id, acronyme );
         }
        if (r_p) *r_p = (gpointer)reg;                                               /* Sauvegarde pour acceleration si besoin */
