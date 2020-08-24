@@ -49,7 +49,7 @@
      {                               /* Si erreur, c'est peut etre parce que la table n'existe pas, on tente donc de la créer */
        g_snprintf( table, sizeof(table),                                                                       /* Requete SQL */
                    "CREATE TABLE `%s_%s_%s`("
-                   "`date_time` datetime(1) DEFAULT NULL,"
+                   "`date_time` datetime(2) DEFAULT NULL,"
                    "`valeur` float NOT NULL DEFAULT '0',"
                    "UNIQUE `index_unique` (`date_time`, `valeur`),"
                    "KEY `index_date` (`date_time`)"
