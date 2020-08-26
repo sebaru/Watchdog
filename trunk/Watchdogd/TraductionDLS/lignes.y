@@ -484,25 +484,6 @@ unite:          modulateur ENTIER HEURE ENTIER
                 {{ if ($1) $$ = g_strdup("!vars->bit_secupers_ok");
                       else $$ = g_strdup("vars->bit_secupers_ok");
                 }}
-                | barre T_BI ENTIER
-                {{ int taille;
-                   taille = 10;
-                   $$ = New_chaine( taille );
-                   if ($1) { g_snprintf( $$, taille, "!B(%d)", $3 ); }
-                   else    { g_snprintf( $$, taille, "B(%d)", $3 ); }
-                }}
-               | T_REGISTRE ENTIER ordre VALF
-                {{ int taille;
-                   taille = 40;
-                   $$ = New_chaine( taille );
-                   switch( $3 )
-                    { case INF        : g_snprintf( $$, taille, "R(%d)<%f", $2, $4 ); break;
-                      case SUP        : g_snprintf( $$, taille, "R(%d)>%f", $2, $4 ); break;
-                      case INF_OU_EGAL: g_snprintf( $$, taille, "R(%d)<=%f", $2, $4 ); break;
-                      case SUP_OU_EGAL: g_snprintf( $$, taille, "R(%d)>=%f", $2, $4 ); break;
-                      case T_EGAL     : g_snprintf( $$, taille, "R(%d)==%f", $2, $4 ); break;
-                    }
-                }}
                 | barre T_ACT_COMOUT
                   {{ $$=New_condition_vars( $1, "vars->bit_comm_out"); }}
                 | barre T_ACT_DEF

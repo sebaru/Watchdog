@@ -1730,8 +1730,6 @@
         { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: update library error" ); }
      }
     Charger_plugins();                                                                          /* Chargement des modules dls */
-    SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
-    SB_SYS(2, 1);                                                                                      /* B2 est toujours à 1 */
     Mnemo_auto_create_AI ( "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
     Mnemo_auto_create_AI ( "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
     Mnemo_auto_create_AI ( "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
@@ -1740,6 +1738,7 @@
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1SEC", "Impulsion toutes les secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
 
     sleep(30);                    /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
 
@@ -1748,6 +1747,7 @@
     last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
      { gpointer dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
+       gpointer dls_flipflop_1sec=NULL;
 
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
@@ -1763,6 +1763,8 @@
         }
        if (Partage->top-last_top_1sec>=10)                                                              /* Toutes les secondes */
         { Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
+          Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec,
+                              !Dls_data_get_bool ( "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec) );
           last_top_1sec = Partage->top;
         }
        if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
@@ -1781,13 +1783,11 @@
 
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
 
-       SB_SYS(0, !B(0));                                                            /* Change d'etat tous les tours programme */
        SI(1, 1, 255, 0, 0, 0 );                                                                   /* Icone toujours à 1:rouge */
 
        pthread_mutex_lock( &Partage->com_dls.synchro );
        Dls_run_dls_tree( Partage->com_dls.Dls_tree );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
-       SB_SYS(3, 1);                                                  /* B3 est toujours à un apres le premier tour programme */
        Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, FALSE );
