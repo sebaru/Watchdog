@@ -441,7 +441,7 @@
     if (valeur == TRUE && bool->etat==FALSE) { bool->edge_up = TRUE; } else { bool->edge_up = FALSE; }
     if (valeur == FALSE && bool->etat==TRUE) { bool->edge_down = TRUE; } else { bool->edge_down = FALSE; }
     if (bool->etat != valeur)
-     { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
+     { Info_new( Config.log, vars->debug, LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
                  __func__, bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
      }
     bool->etat = valeur;
@@ -555,7 +555,7 @@
     if (valeur == TRUE && di->etat==FALSE) { di->edge_up = TRUE; } else { di->edge_up = FALSE; }
     if (valeur == FALSE && di->etat==TRUE) { di->edge_down = TRUE; } else { di->edge_down = FALSE; }
     if (di->etat != valeur)
-     { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_DI '%s:%s'=%d up %d down %d",
+     { Info_new( Config.log, vars->debug, LOG_DEBUG, "%s : Changing DLS_DI '%s:%s'=%d up %d down %d",
                  __func__, di->tech_id, di->acronyme, valeur, di->edge_up, di->edge_down );
      }
     di->etat = valeur;
@@ -691,7 +691,7 @@
     else dout = (struct DLS_DO *)*dout_p;
 
     if (dout->etat != etat)
-     { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_DO '%s:%s'=%d ",
+     { Info_new( Config.log, vars->debug, LOG_DEBUG, "%s : Changing DLS_DO '%s:%s'=%d ",
                  __func__, dout->tech_id, dout->acronyme );
        if (etat)
         { pthread_mutex_lock( &Partage->com_msrv.synchro );
@@ -926,7 +926,7 @@
        pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
        Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_AO '%s:%s'=%f/%f",
+       Info_new( Config.log, vars->debug, LOG_DEBUG, "%s : Changing DLS_AO '%s:%s'=%f/%f",
                  __func__, ao->tech_id, ao->acronyme, ao->val_avant_ech, ao->val_ech );
      }
     else if ( ao->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
@@ -989,7 +989,7 @@
            { cpt_imp->valeur++;
              cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
              need_arch = TRUE;
-             Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_CI '%s:%s'=%d",
+             Info_new( Config.log, vars->debug, LOG_DEBUG, "%s : Changing DLS_CI '%s:%s'=%d",
                        __func__, cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
            }
         }
@@ -1084,7 +1084,7 @@
           if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
            { cpt_h->valeur++;
              cpt_h->old_top = new_top;
-             Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_CH '%s:%s'=%d",
+             Info_new( Config.log, vars->debug, LOG_DEBUG, "%s : Changing DLS_CH '%s:%s'=%d",
                        __func__, cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
            }
           if (cpt_h->last_arch + 600 < Partage->top)
@@ -1357,7 +1357,7 @@
              pthread_mutex_unlock( &Partage->com_msrv.synchro );
            }
 
-          Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_MSG '%s:%s'=%d",
+          Info_new( Config.log, vars->debug, LOG_DEBUG, "%s : Changing DLS_MSG '%s:%s'=%d",
                     __func__, msg->tech_id, msg->acronyme, msg->etat );
           msg->changes++;
           msg->last_change = Partage->top;
@@ -1443,7 +1443,7 @@
           pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
           Partage->com_msrv.liste_new_i = g_slist_append( Partage->com_msrv.liste_new_i, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d",
+          Info_new( Config.log, vars->debug, LOG_DEBUG, "%s : Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d",
                     __func__, visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno );
         }
        visu->changes++;                                                                                /* Un change de plus ! */
@@ -1516,7 +1516,7 @@
         { Ajouter_arch_by_nom( reg->acronyme, reg->tech_id, reg->valeur );                             /* Archivage si besoin */
           reg->last_arch = Partage->top;
         }
-       Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_REGISTRE '%s:%s'=%f",
+       Info_new( Config.log, vars->debug, LOG_DEBUG, "%s : Changing DLS_REGISTRE '%s:%s'=%f",
                  __func__, reg->tech_id, reg->acronyme, reg->valeur );
      }
   }
