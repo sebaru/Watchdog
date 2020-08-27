@@ -50,104 +50,6 @@
  struct PARTAGE *Partage;                                                        /* Accès aux données partagées des processes */
 
 /******************************************************************************************************************************/
-/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                                    */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- static void Exporter ( void )
-  { int fd;
-    unlink ( FICHIER_EXPORT );
-    Partage->taille_partage = sizeof(struct PARTAGE);
-    g_snprintf( Partage->version, sizeof(Partage->version), "%s", VERSION );
-    fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-
-    if ( fd < 0 )                                                                                   /* Traitement des erreurs */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "Exporter: Open Error on %s. Could not export (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-       return;
-     }
-
-    if ( write (fd, Partage->version, sizeof(Partage->version)) != sizeof(Partage->version) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Version Export to %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
-    if ( write (fd, &Partage->top, sizeof(Partage->top)) != sizeof(Partage->top) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Top Export to %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
-    if ( write (fd, Partage->m, sizeof(Partage->m)) != sizeof(Partage->m) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Monostable Export to %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
-    if ( write (fd, Partage->b, sizeof(Partage->b)) != sizeof(Partage->b) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Bistable Export to %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
-    if ( write (fd, Partage->i, sizeof(Partage->i)) != sizeof(Partage->i) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Icones Export to %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
-    if ( write (fd, Partage->e, sizeof(Partage->e)) != sizeof(Partage->e) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Input Export to %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
-    close (fd);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Exporter: Export successfull" );
-  }
-/******************************************************************************************************************************/
-/* Importe : Tente d'importer les données de base Watchdog juste apres le reload                                              */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- static gboolean Importer ( void )
-  { int fd;
-
-    fd = open( FICHIER_EXPORT, O_RDONLY );                                                            /* Ouverture du fichier */
-    if ( fd <= 0 )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "Importer : Open Error %s (%s).", FICHIER_EXPORT, strerror(errno) );
-       return(FALSE);
-     }
-
-    if ( read (fd, Partage->version, sizeof(Partage->version)) != sizeof(Partage->version) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Version Import from %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-       close(fd);
-       return(FALSE);
-     }
-
-    if ( strncmp (Partage->version, VERSION, sizeof(Partage->version)) )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Importer : version number mismatch on %s (Import Version %s but Watchdog v%s)",
-                 FICHIER_EXPORT, Partage->version, VERSION );
-     }
-
-    if ( read (fd, &Partage->top, sizeof(Partage->top)) != sizeof(Partage->top) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Top Import from %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
-    if ( read (fd, Partage->m, sizeof(Partage->m)) != sizeof(Partage->m) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Monostable Import from %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
-    if ( read (fd, Partage->b, sizeof(Partage->b)) != sizeof(Partage->b) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Bistable Import from %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
-    if ( read (fd, Partage->i, sizeof(Partage->i)) != sizeof(Partage->i) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Icones Import from %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
-    if ( read (fd, Partage->e, sizeof(Partage->e)) != sizeof(Partage->e) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Input Import from %s failed (%s)",
-                 FICHIER_EXPORT, strerror(errno) );
-     }
-    close(fd);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Importer: Size OK, import OK" );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                                             */
 /* Entrée: numero du signal à gerer                                                                                           */
 /******************************************************************************************************************************/
@@ -160,13 +62,8 @@
 
        if (!Partage->top)                                             /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Timer: Partage->top = 0 !!", __func__ ); }
-       if (!(Partage->top%5))                                                              /* Cligno toutes les demi-secondes */
-        { SB_SYS(5, !B(5)); }
-       if (!(Partage->top%3))                                                                 /* Cligno toutes les 3 dixièmes */
-        { SB_SYS(6, !B(6)); }
        if (!(Partage->top%10))                                                                  /* Cligno toutes les secondes */
-        { SB_SYS(4, !B(4));
-          Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
+        { Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;                                                               /* historique */
           Dls_data_set_AI ( "SYS", "DLS_BIT_PER_SEC", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold, TRUE );
@@ -454,7 +351,6 @@
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
         { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "ping", NULL, 0 );
           Save_dls_data_to_DB();
-          Exporter();
           cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
 
@@ -753,7 +649,6 @@ end:
      { pthread_mutexattr_t attr;                                                       /* Initialisation des mutex de synchro */
        gint nbr_essai_db = 0;
        memset( Partage, 0, sizeof(struct PARTAGE) );                                                 /* RAZ des bits internes */
-       Importer();                                                      /* Tente d'importer les données juste après un reload */
        time ( &Partage->start_time );
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
@@ -884,11 +779,6 @@ end:
        pthread_mutex_destroy( &Partage->com_arch.synchro );
        pthread_mutex_destroy( &Partage->com_db.synchro );
      }
-
-    if (Partage->com_msrv.Thread_clear_reboot == FALSE) Exporter();                           /* Tente d'exporter les données */
-    else { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "CLEAR-REBOOT : Erasing export file %s", FICHIER_EXPORT );
-           unlink ( FICHIER_EXPORT );
-         }
 
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );

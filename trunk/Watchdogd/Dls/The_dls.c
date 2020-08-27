@@ -98,110 +98,6 @@
   { if (!(avant && apres)) return(0.0);
     else return( apres->tv_sec - avant->tv_sec + (apres->tv_usec - avant->tv_usec)/1000000.0 );
   }
-
-/******************************************************************************************************************************/
-/* Renvoie la valeur d'une entre TOR                                                                                          */
-/******************************************************************************************************************************/
- int E( int num )
-  { if ( (num>=0) && (num<NBR_ENTRE_TOR) ) return ( (Partage->e[ num ].etat ? 1 : 0) );
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "E : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/******************************************************************************************************************************/
-/* SE : Met à jour la valeur de l'entrée en parametre.                                                                        */
-/* Utilisé directement par les threads locaux, via Envoyer_entree_furtive_dls pour les evenements                             */
-/******************************************************************************************************************************/
- void SE( int num, int etat )
-  { if ( (num>=0) && (num<NBR_ENTRE_TOR) && ((E(num) && !etat) || (!E(num) && etat)) )
-     { /*Ajouter_arch( MNEMO_ENTREE, num, 1.0*E(num) );                       /* Archivage etat n-1 pour les courbes historique */
-       /*Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );                                            /* Archivage de l'etat courant */
-       Partage->e[num].etat = etat;                                                          /* Changement d'etat de l'entrée */
-     }
-  }
-/**********************************************************************************************************/
-/* Renvoie la valeur d'un bistable                                                                        */
-/**********************************************************************************************************/
- int B( int num )
-  { if (num>=0 && num<NBR_BIT_BISTABLE) return( ((Partage->b[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "B : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/**********************************************************************************************************/
-/* Renvoie la valeur d'un monostable                                                                      */
-/**********************************************************************************************************/
- int M( int num )
-  { if (num>=0 && num<NBR_BIT_MONOSTABLE) return( ((Partage->m[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "M : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/******************************************************************************************************************************/
-/* SB_SYS: Positionnement d'un bistable DLS sans controle sur le range reserved                                               */
-/* Entrée: numero, etat                                                                                                       */
-/* Sortie: Neant                                                                                                              */
-/******************************************************************************************************************************/
- void SB_SYS( int num, int etat )
-  { gint numero, bit;
-    if (num<0 || num>=NBR_BIT_BISTABLE)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SB : num %d out of range", num ); }
-       return;
-     }
-    numero = num>>3;
-    bit = 1<<(num & 0x07);
-    if (etat)                                                                                           /* Mise a jour du bit */
-     { Partage->b[numero] |= bit;
-       Partage->audit_bit_interne_per_sec++;
-     }
-    else
-     { Partage->b[numero] &= ~bit;
-       Partage->audit_bit_interne_per_sec++;
-     }
-  }
-/******************************************************************************************************************************/
-/* SB: Positionnement d'un bistable DLS avec controle sur le range reserved                                                   */
-/* Entrée: numero, etat                                                                                                       */
-/* Sortie: Neant                                                                                                              */
-/******************************************************************************************************************************/
- void SB( int num, int etat )
-  { if (num<=NBR_BIT_BISTABLE_RESERVED || num>=NBR_BIT_BISTABLE)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SB : num %d out of range", num ); }
-       return;
-     }
-    SB_SYS( num, etat );
-  }
-/**********************************************************************************************************/
-/* SM: Positionnement d'un monostable DLS                                                                 */
-/* Entrée: numero, etat                                                                                   */
-/* Sortie: Neant                                                                                          */
-/**********************************************************************************************************/
- void SM( int num, int etat )
-  { gint numero, bit;
-    if (num<0 || num>=NBR_BIT_MONOSTABLE)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SM : num %d out of range", num ); }
-       return;
-     }
-    numero = num>>3;
-    bit = 1<<(num & 0x07);
-    if (etat)                                                                       /* Mise a jour du bit */
-     { Partage->m[numero] |= bit;
-       Partage->audit_bit_interne_per_sec++;
-     }
-    else
-     { Partage->m[numero] &= ~bit;
-       Partage->audit_bit_interne_per_sec++;
-     }
-  }
 /**********************************************************************************************************/
 /* SI: Positionnement d'un motif TOR                                                                      */
 /* Entrée: numero, etat                                                                                   */
@@ -333,15 +229,6 @@
      { tempo->status = DLS_TEMPO_NOT_COUNTING; }
   }
 /******************************************************************************************************************************/
-/* Envoyer_commande_dls: Gestion des envois de commande DLS                                                                   */
-/* Entrée/Sortie: rien                                                                                                        */
-/******************************************************************************************************************************/
- void Envoyer_commande_dls ( int num )
-  { pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Set_M = g_slist_append ( Partage->com_dls.Set_M, GINT_TO_POINTER(num) );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
-  }
-/******************************************************************************************************************************/
 /* Envoyer_commande_dls_data: Gestion des envois de commande DLS via dls_data                                                 */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
@@ -361,15 +248,7 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Set_cde_exterieure ( void )
-  { gint num;
-    pthread_mutex_lock( &Partage->com_dls.synchro );
-    while( Partage->com_dls.Set_M )                                                      /* A-t-on un monostable a allumer ?? */
-     { num = GPOINTER_TO_INT( Partage->com_dls.Set_M->data );
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a un du bit M%03d", __func__, num );
-       Partage->com_dls.Set_M   = g_slist_remove ( Partage->com_dls.Set_M,   GINT_TO_POINTER(num) );
-       Partage->com_dls.Reset_M = g_slist_append ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
-       SM( num, 1 );                                                                           /* Mise a un du bit monostable */
-     }
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
     while( Partage->com_dls.Set_Dls_Data )                                                  /* A-t-on une entrée a allumer ?? */
      { struct DLS_DI *di = Partage->com_dls.Set_Dls_Data->data;
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a 1 du bit DI %s:%s",
@@ -386,14 +265,7 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Reset_cde_exterieure ( void )
-  { gint num;
-    pthread_mutex_lock( &Partage->com_dls.synchro );
-    while( Partage->com_dls.Reset_M )                                                                /* Reset des monostables */
-     { num = GPOINTER_TO_INT(Partage->com_dls.Reset_M->data);
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a zero du bit M%03d", __func__, num );
-       Partage->com_dls.Reset_M = g_slist_remove ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
-       SM( num, 0 );
-     }
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
     while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
      { struct DLS_DI *di = Partage->com_dls.Reset_Dls_Data->data;
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a 0 du bit DI %s:%s",

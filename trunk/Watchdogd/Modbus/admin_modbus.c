@@ -77,8 +77,7 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_modbus_run_thread ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { GSList *liste_modules;
-    JsonBuilder *builder;
+  { JsonBuilder *builder;
     gsize taille_buf;
     gchar *buf;
 

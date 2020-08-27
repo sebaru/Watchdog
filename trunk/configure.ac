@@ -100,8 +100,6 @@ Watchdogd/Smsg/Makefile \
 Watchdogd/Audio/Makefile \
 Watchdogd/Modbus/Makefile \
 Watchdogd/Archive/Makefile \
-Watchdogd/Rfxcom/Makefile \
-Watchdogd/Enocean/Makefile \
 Watchdogd/Imsgs/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Http/Makefile \

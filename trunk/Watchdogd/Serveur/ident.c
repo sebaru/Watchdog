@@ -118,7 +118,6 @@
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
              "%s: Autorisation sent for %s(id=%d)", __func__, client->util->username, client->util->id );
                                                                                /* Le client est connecté, on en informe D.L.S */
-    if (client->util->ssrv_bit_presence) SB(client->util->ssrv_bit_presence, 1);
     Client_mode (client, VALIDE);
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CLI_VALIDE, NULL, 0 );                     /* Nous prévenons le client */
     return(TRUE);

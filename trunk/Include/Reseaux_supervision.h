@@ -48,7 +48,6 @@
 
  struct CMD_SET_BIT_INTERNE
   { guint type;
-    gint num;
     gfloat valeur;
     gchar   tech_id[32];                                                                         /* Visuel Acronyme du cadran */
     gchar   acronyme[64];                                                                        /* Visuel Acronyme du cadran */

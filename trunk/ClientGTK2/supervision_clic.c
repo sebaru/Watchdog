@@ -57,16 +57,8 @@
  static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
   { struct CMD_SET_BIT_INTERNE bit;
     bit.type = MNEMO_MONOSTABLE;
-    if (trame_motif->motif->bit_clic != -1)
-     { if (trame_motif->motif->type_gestion == TYPE_BOUTON)
-        { bit.num = trame_motif->motif->bit_clic + (trame_motif->num_image / 3); }
-       else
-        { bit.num = trame_motif->motif->bit_clic; }
-       printf("Envoi M%d = 1 au serveur \n", bit.num );
-     }
     if(strlen(trame_motif->motif->clic_tech_id)>0)
-     { bit.num = -1;
-       bit.type= MNEMO_MONOSTABLE;
+     { bit.type= MNEMO_MONOSTABLE;
        g_snprintf( bit.tech_id, sizeof(bit.tech_id), "%s", trame_motif->motif->clic_tech_id );
        g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", trame_motif->motif->clic_acronyme );
        printf("Envoi _M %s:%s = 1 au serveur \n", bit.tech_id, bit.acronyme );
@@ -229,7 +221,7 @@
  static gboolean CB_Cadran_Set_registre ( GtkDialog *dialog, gint reponse, gint regnum )
   { struct CMD_SET_BIT_INTERNE Set_bit;
     Set_bit.type = MNEMO_REGISTRE;
-    Set_bit.num = regnum;
+    /*Set_bit.num = regnum;*/
     Set_bit.valeur = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_valeur) );
 
     switch(reponse)

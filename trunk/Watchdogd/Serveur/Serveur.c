@@ -199,7 +199,6 @@
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
     client->mode = DECONNECTE;
                                                                         /* Le client n'est plus connecté, on en informe D.L.S */
-    if (client->util && client->util->ssrv_bit_presence) SB(client->util->ssrv_bit_presence, 0);
     Unref_client( client );
   }
 /******************************************************************************************************************************/

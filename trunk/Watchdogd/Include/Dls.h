@@ -94,10 +94,6 @@
     guint   last_arch;                                                                         /* Date de la derniere archive */
   };
 
- struct DIGITAL_INPUT
-  { gboolean etat;
-  };
-
  struct ANALOG_INPUT
   { struct CMD_TYPE_MNEMO_AI confDB;
     gfloat  val_ech;
@@ -215,8 +211,6 @@
     struct DLS_TREE *Dls_tree;                                                                       /* Arbre d'execution DLS */
     pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
     struct ZMQUEUE *zmq_to_master;
-    GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
-    GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */
     GSList *Set_Dls_Data;                                                       /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_Data;                                               /* liste des Mxxx a désactiver à la fin du tour prg */
 
@@ -251,9 +245,6 @@
  extern void Reseter_un_plugin ( gchar *tech_id );
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
- extern int EA_inrange( int num );
- extern void SB_SYS( int num, int etat );
- extern void SE( int num, int etat );
  extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech, gboolean in_range );
  extern void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur );
  extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p );
@@ -261,7 +252,6 @@
  extern gboolean Dls_data_get_DO_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_DO_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gint Dls_data_get_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p );
- extern void Envoyer_commande_dls ( int num );
  extern void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme );
  extern void Dls_foreach ( void *user_data,
                            void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
