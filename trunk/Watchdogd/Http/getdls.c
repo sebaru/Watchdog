@@ -668,7 +668,8 @@
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
     if (Json_has_member ( request, "sourcecode" ))
@@ -680,7 +681,8 @@
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Json Memory Error");
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Json Memory Error");
        return;
      }
 

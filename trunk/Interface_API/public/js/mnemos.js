@@ -1,15 +1,21 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
  var Instances;
 
- function Go_to_source ()
-  { vars = window.location.pathname.split('/');
-    Redirect ( "/tech/dls_source/"+vars[3] );
+ function Mnemos_CI_disable_archivage ( tech_id )
+  { var json_request = JSON.stringify(
+       { classe   : "CI",
+         tech_id  : tech_id,
+         archivage: false
+       }
+     );
+
+    Send_to_API ( 'POST', "/api/mnemos/set", json_request, function ()
+     { /*table = $('#idTableModbusMapAI').DataTable();
+       selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
+       /*$('#idTableModbus').DataTable().ajax.reload(null, false);*/
+     });
   }
 
- function Go_to_run ()
-  { vars = window.location.pathname.split('/');
-    Redirect ( "/tech/run/"+vars[3] );
-  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { vars = window.location.pathname.split('/');
@@ -226,10 +232,10 @@
                 { "data": null, "title":"Archivage", "className": "hidden-xs",
                   "render": function (item)
                     { if (item.archivage==true)
-                       { return( Bouton ( "success", "Archivage activé", null, null, "Actif" ) );
+                       { return( Bouton ( "success", "Cliquez pour désactiver", "Mnemos_CI_disable_archivage", item.tech_id, "Actif" ) );
                        }
                       else
-                       { return( Bouton ( "outline-secondary", "Archivage désactivé", null, null, "Inactif" ) );
+                       { return( Bouton ( "outline-secondary", "Cliquez pour activer", "Mnemos_CI_enable_archivage", item.tech_id, "Inactif" ) );
                        }
                     }
                 }

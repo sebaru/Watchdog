@@ -99,8 +99,8 @@ if [ "$web" = "oui" ]
     if [ "$SOCLE" = "fedora" ]
      then sudo dnf -y install httpd php-json php php-mysqlnd
      sudo chown apache.apache -R $targetdir
-     sudo -u apache svn co https://svn.abls-habitat.fr/repo/Watchdog/trunk/Interface_WEB $targetdir
-     sudo cp Interface_WEB/watchdogd-httpd.conf /etc/httpd/conf.d/
+     sudo -u apache svn co https://svn.abls-habitat.fr/repo/Watchdog/trunk/Interface_API $targetdir
+     sudo cp watchdogd-httpd.conf /etc/httpd/conf.d/
      sudo /sbin/restorecon -rv $targetdir
      sudo systemctl restart httpd
     fi
