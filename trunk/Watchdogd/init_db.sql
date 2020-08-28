@@ -490,7 +490,6 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`, `acronyme`, `auto_create`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------

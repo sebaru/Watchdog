@@ -209,7 +209,7 @@
                 "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
                 "dialog,gestion,rouge,vert,bleu,rafraich,layer,"
                 "sm.clic_tech_id, sm.clic_acronyme"
-                " FROM syns_motifs AS sm LEFT JOIN mnemos AS m ON sm.mnemo_id = m.id"
+                " FROM syns_motifs AS sm"
                 " WHERE syn_id='%d' ORDER BY layer", id_syn );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
@@ -308,7 +308,7 @@
                 "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
                 "dialog,gestion,rouge,vert,bleu,rafraich,layer,"
                 "sm.clic_tech_id, sm.clic_acronyme"
-                " FROM syns_motifs AS sm LEFT JOIN mnemos AS m ON sm.mnemo_id = m.id"
+                " FROM syns_motifs AS sm"
                 " WHERE sm.id=%d", id );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
