@@ -1584,7 +1584,7 @@
 /* Main: Fonction principale du DLS                                                                                           */
 /******************************************************************************************************************************/
  void Run_dls ( void )
-  { gint last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min;
+  { gint last_top_10sec, last_top_5sec, last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min;
     gint Update_heure=0;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
@@ -1608,6 +1608,8 @@
     Mnemo_auto_create_AI ( "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1MIN", "Impulsion toutes les minutes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1SEC", "Impulsion toutes les secondes" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_5SEC", "Impulsion toutes les 5 secondes" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_10SEC", "Impulsion toutes les 10 secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
@@ -1618,7 +1620,7 @@
 
     last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
-     { gpointer dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
+     { gpointer dls_top_10sec=NULL, dls_top_5sec=NULL, dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
        gpointer dls_flipflop_1sec=NULL;
 
        if (Partage->com_dls.Thread_reload)
@@ -1633,11 +1635,19 @@
         { Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
           last_top_1min = Partage->top;
         }
-       if (Partage->top-last_top_1sec>=10)                                                              /* Toutes les secondes */
+       if (Partage->top-last_top_1sec>=10)                                                             /* Toutes les secondes */
         { Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
           Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec,
                               !Dls_data_get_bool ( "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec) );
           last_top_1sec = Partage->top;
+        }
+       if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
+        { Dls_data_set_bool ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, TRUE );
+          last_top_5sec = Partage->top;
+        }
+       if (Partage->top-last_top_10sec>=100)                                                              /* Toutes les secondes */
+        { Dls_data_set_bool ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, TRUE );
+          last_top_10sec = Partage->top;
         }
        if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
         { Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
@@ -1661,6 +1671,8 @@
        Dls_run_dls_tree( Partage->com_dls.Dls_tree );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
        Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, FALSE );
+       Dls_data_set_bool ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, FALSE );
+       Dls_data_set_bool ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, FALSE );
