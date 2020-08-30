@@ -83,27 +83,30 @@
             }
           },
           { "data": null, title:"Défaut",  "className": "text-center align-middle", "render": function (item)
-            { if (item.bit_defaut==false)
-               { return( Bouton ( "outline-secondary", "Pas de défaut", null, null, "Non" ) ); }
-              else if (item.bit_defaut_fixe==true)
+            { if (item.bit_defaut_fixe==true)
+               { return( Bouton ( "danger", "Défaut !", null, null, "OUI" ) ); }
+              else if (item.bit_defaut==true)
                { return( Bouton ( "warning", "Défaut Fixe", null, null, "Fixe" ) ); }
-              else { return( Bouton ( "danger", "Défaut !", null, null, "OUI" ) ); }
+              else
+               { return( Bouton ( "outline-secondary", "Pas de défaut", null, null, "Non" ) ); }
             }
           },
           { "data": null, title:"Alarme",  "className": "text-center align-middle", "render": function (item)
-            { if (item.bit_alarme==false)
-               { return( Bouton ( "outline-secondary", "Pas d'alarme", null, null, "Non" ) ); }
+            { if (item.bit_alarme==true)
+               { return( Bouton ( "danger", "Alarme !", null, null, "OUI" ) ); }
               else if (item.bit_alarme_fixe==true)
                { return( Bouton ( "warning", "Alarme Fixe", null, null, "Fixe" ) ); }
-              else { return( Bouton ( "danger", "Alarme !", null, null, "OUI" ) ); }
+              else
+               { return( Bouton ( "outline-secondary", "Pas d'alarme", null, null, "Non" ) ); }
             }
           },
           { "data": null, title:"Alerte",  "className": "text-center align-middle", "render": function (item)
-            { if (item.bit_alerte==false)
-               { return( Bouton ( "outline-secondary", "Pas d'alerte", null, null, "Non" ) ); }
-              else if (item.bit_alerte_fixe==true)
+            { if (item.bit_alerte_fixe==true)
+               { return( Bouton ( "danger", "Alerte !", null, null, "OUI" ) ); }
+              else if (item.bit_alerte==true)
                { return( Bouton ( "warning", "Alerte Fixe", null, null, "Fixe" ) ); }
-              else { return( Bouton ( "danger", "Alerte !", null, null, "OUI" ) ); }
+              else
+               { return( Bouton ( "outline-secondary", "Pas d'alerte", null, null, "Non" ) ); }
             }
           },
           { "data": null, title:"Veille",  "className": "text-center align-middle", "render": function (item)
@@ -113,19 +116,21 @@
             }
           },
           { "data": null, title:"Danger",  "className": "text-center align-middle", "render": function (item)
-            { if (item.bit_danger==false)
-               { return( Bouton ( "outline-secondary", "Pas de danger", null, null, "Non" ) ); }
+            { if (item.bit_danger==true)
+               { return( Bouton ( "danger", "Danger !", null, null, "OUI" ) ); }
               else if (item.bit_danger_fixe==true)
                { return( Bouton ( "warning", "Danger Fixe", null, null, "Fixe" ) ); }
-              else { return( Bouton ( "danger", "Danger !", null, null, "OUI" ) ); }
+              else
+               { return( Bouton ( "outline-secondary", "Pas de danger", null, null, "Non" ) ); }
             }
           },
           { "data": null, title:"Dérang.",  "className": "text-center align-middle", "render": function (item)
-            { if (item.bit_derangement==false)
-               { return( Bouton ( "outline-secondary", "Pas de dérangement", null, null, "Non" ) ); }
+            { if (item.bit_derangement==true)
+               { return( Bouton ( "danger", "Dérangement !", null, null, "OUI" ) ); }
               else if (item.bit_derangement_fixe==true)
                { return( Bouton ( "warning", "Dérangement Fixe", null, null, "Fixe" ) ); }
-              else { return( Bouton ( "danger", "Dérangement !", null, null, "OUI" ) ); }
+              else
+               { return( Bouton ( "outline-secondary", "Pas de dérangement", null, null, "Non" ) ); }
             }
           },
           { "data": null, title:"Acquitter",  "className": "text-center align-middle", "render": function (item)

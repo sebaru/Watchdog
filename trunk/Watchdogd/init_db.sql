@@ -481,7 +481,6 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `vert` int(11) NOT NULL DEFAULT '0',
   `bleu` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
-  `mnemo_id` int(11) NOT NULL DEFAULT '0',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `def_color` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT "#c0c0c0",
