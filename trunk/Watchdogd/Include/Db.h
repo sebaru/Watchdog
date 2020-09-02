@@ -48,6 +48,7 @@
   };
 /************************************* Prototypes de fonctions ********************************************/
  extern gchar *Normaliser_chaine( gchar *pre_comment );
+ extern gchar *Normaliser_as_tech_id( gchar *tech_id );
  extern struct DB *Init_DB_SQL ( void );
  extern struct DB *Init_ArchDB_SQL ( void );
  extern void Libere_DB_SQL( struct DB **adr_db );

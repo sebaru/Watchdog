@@ -67,6 +67,15 @@
     return(comment);
   }
 /******************************************************************************************************************************/
+/* Normaliser_as_tech_id: S'assure que la chaine en parametre respecte les caracteres d'un tech_id                            */
+/* Entrées: une chaine de caractere                                                                                           */
+/* Sortie: la meme chaine, avec les caracteres interdits remplacés ar '_'                                                     */
+/******************************************************************************************************************************/
+ gchar *Normaliser_as_tech_id( gchar *tech_id )
+  { if (!tech_id) return(NULL);
+    return ( g_strcanon ( tech_id, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", '_' ) );
+  }
+/******************************************************************************************************************************/
 /* Init_DB_SQL: essai de connexion à la DataBase db                                                                           */
 /* Entrée: toutes les infos necessaires a la connexion                                                                        */
 /* Sortie: une structure DB de référence                                                                                      */

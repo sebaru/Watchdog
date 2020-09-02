@@ -461,7 +461,7 @@ reload:
     soup_server_add_handler ( socket, "/dls/acquitter",  Http_traiter_dls_acquitter, NULL, NULL );
     soup_server_add_handler ( socket, "/dls/compil/" ,   Http_traiter_dls_compil, NULL, NULL );
     soup_server_add_handler ( socket, "/mnemos/validate/", Http_traiter_mnemos_validate, NULL, NULL );
-    soup_server_add_handler ( socket, "/mnemos/list/",   Http_traiter_mnemos_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/mnemos/list",    Http_traiter_mnemos_list, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/list",       Http_traiter_syn_list, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/show/",      Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/del/",       Http_traiter_syn_del, NULL, NULL );

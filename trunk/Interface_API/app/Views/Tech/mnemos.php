@@ -39,7 +39,7 @@
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabHorloge">
                   <img style="width: 30px" data-toggle="tooltip" title="Horloge"
                        src="https://icons.abls-habitat.fr/assets/gif/Calendar.png" />Horloges</a></li>
-            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabMessages">
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabMessage">
                   <img style="width: 30px" data-toggle="tooltip" title="Messages"
                        src="https://icons.abls-habitat.fr/assets/gif/Message.png" />Messages</a></li>
           </ul>

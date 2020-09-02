@@ -35,14 +35,6 @@
 /* Entrée : le module_modbus                                                                                                  */
 /* Sortie : char *mode_char                                                                                                   */
 /******************************************************************************************************************************/
- static gchar *Canonize_string ( gchar *string )
-  { return ( Normaliser_chaine ( g_strcanon( string, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", '_' ) ) ); }
-
-/******************************************************************************************************************************/
-/* Modbus_mode_to_string: Convertit le mode modbus (int) en sa version chaine de caractere                                    */
-/* Entrée : le module_modbus                                                                                                  */
-/* Sortie : char *mode_char                                                                                                   */
-/******************************************************************************************************************************/
  static gchar *Modbus_mode_to_string ( struct MODULE_MODBUS *module )
   { static gchar chaine[32];
     if (!module)                     return("Wrong Module   ");
@@ -350,7 +342,7 @@
        return;
      }
 
-    gchar *tech_id     = Canonize_string   ( Json_get_string( request, "tech_id" ) );
+    gchar *tech_id     = Normaliser_as_tech_id ( Json_get_string( request, "tech_id" ) );
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
     gint  watchdog     = Json_get_int ( request, "watchdog" );
@@ -360,7 +352,6 @@
                "INSERT INTO modbus_modules SET tech_id='%s', description='%s', hostname='%s', watchdog='%d', "
                "enable=0, date_create=NOW()",
                 tech_id, description, hostname, watchdog );
-    g_free(tech_id);
     g_free(description);
     g_free(hostname);
     if (SQL_Write (requete))
@@ -500,10 +491,10 @@
        return;
      }
 
-    gchar *map_tech_id = Canonize_string   ( Json_get_string( request, "map_tech_id" ) );
-    gchar *map_tag     = Canonize_string   ( Json_get_string( request, "map_tag" ) );
-    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
-    gchar *acronyme    = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
+    gchar *map_tech_id = Normaliser_as_tech_id ( Json_get_string( request, "map_tech_id" ) );
+    gchar *map_tag     = Normaliser_as_tech_id ( Json_get_string( request, "map_tag" ) );
+    gchar *tech_id     = Normaliser_as_tech_id ( Json_get_string( request, "tech_id" ) );
+    gchar *acronyme    = Normaliser_as_tech_id ( Json_get_string( request, "acronyme" ) );
     gchar *classe      = Json_get_string( request, "classe" );
 
     if (! strcasecmp( classe, "DI" ) )
@@ -584,10 +575,6 @@
 		     return;
      }
 end:
-    g_free(map_tech_id);
-    g_free(map_tag);
-    g_free(tech_id);
-    g_free(acronyme);
     json_node_unref(request);
   }
 /******************************************************************************************************************************/

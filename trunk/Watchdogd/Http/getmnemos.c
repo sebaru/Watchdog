@@ -53,62 +53,49 @@
        return;
      }
 
-    gchar *prefix = "/mnemos/list/";
-    if ( ! g_str_has_prefix ( path, prefix ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
-       return;
-     }
-    if (!strlen (path+strlen(prefix)))
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
-       return;
-     }
-    gchar *tech_id = Normaliser_chaine ( path+strlen(prefix) );
+    gpointer tech_id = g_hash_table_lookup ( query, "tech_id" );
     if (!tech_id)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres tech_id");
+       return;
+     }
+    Normaliser_as_tech_id ( tech_id );
+
+    gpointer classe = g_hash_table_lookup ( query, "classe" );
+    if (!classe)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres classe");
        return;
      }
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
-     { g_free(tech_id);
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_DI AS m WHERE m.tech_id='%s'", tech_id );
-    SQL_Select_to_JSON ( builder, "DI", chaine );
+    if (!strcasecmp ( classe, "DI" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_DI AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "DO" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_DO AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "AI" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_AI AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "AO" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_AO AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "R" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_R AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "CI" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_CI AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "CH" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_CH AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "HORLOGE" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_HORLOGE AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "TEMPO" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_Tempo AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "BOOL" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_BOOL AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "MSG" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from msgs AS m WHERE m.tech_id='%s'", tech_id ); }
+    SQL_Select_to_JSON ( builder, classe, chaine );
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_DO AS m WHERE m.tech_id='%s'", tech_id );
-    SQL_Select_to_JSON ( builder, "DO", chaine );
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_AI AS m WHERE m.tech_id='%s'", tech_id );
-    SQL_Select_to_JSON ( builder, "AI", chaine );
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_AO AS m WHERE m.tech_id='%s'", tech_id );
-    SQL_Select_to_JSON ( builder, "AO", chaine );
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_R AS m WHERE m.tech_id='%s'", tech_id );
-    SQL_Select_to_JSON ( builder, "REGISTRE", chaine );
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_CI AS m WHERE m.tech_id='%s'", tech_id );
-    SQL_Select_to_JSON ( builder, "CI", chaine );
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_CH AS m WHERE m.tech_id='%s'", tech_id );
-    SQL_Select_to_JSON ( builder, "CH", chaine );
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_HORLOGE AS m WHERE m.tech_id='%s'", tech_id );
-    SQL_Select_to_JSON ( builder, "HORLOGE", chaine );
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_Tempo AS m WHERE m.tech_id='%s'", tech_id );
-    SQL_Select_to_JSON ( builder, "TEMPO", chaine );
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_BOOL AS m WHERE m.tech_id='%s'", tech_id );
-    SQL_Select_to_JSON ( builder, "BOOL", chaine );
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT m.* from msgs AS m WHERE m.tech_id='%s'", tech_id );
-    SQL_Select_to_JSON ( builder, "MSG", chaine );
-
-    g_free(tech_id);
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
