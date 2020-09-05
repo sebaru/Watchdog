@@ -1,8 +1,17 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl define([gittag], esyscmd([sh -c "git describe --always  | tr -d '\n'"]))
-define([SVNVERSION], esyscmd([sh -c "svnversion -n | sed s/M//g"]))
-AC_INIT([Watchdog], [3.4.SVNVERSION], [sebastien.lefevre@abls-habitat.fr], [Watchdog], [https://wiki.abls-habitat.fr] )
+define([MAJOR_VERSION], [3])
+define([MINOR_VERSION], [5])
+define([SVN_VERSION],   esyscmd([sh -c "svnversion -n | sed s/M//g"]))
+
+AC_INIT([Watchdog], [MAJOR_VERSION.MINOR_VERSION.SVN_VERSION],
+        [sebastien.lefevre@abls-habitat.fr], [Watchdog], [https://wiki.abls-habitat.fr] )
+
+AC_DEFINE([WTD_MAJOR_VERSION], [MAJOR_VERSION], [Numéro de version majeure])
+AC_DEFINE([WTD_MINOR_VERSION], [MINOR_VERSION], [Numéro de version mineure])
+AC_DEFINE([WTD_SVN_VERSION],   [SVN_VERSION],   [Numéro de revision SVN])
+AC_DEFINE([WTD_VERSION], ["WTD_MAJOR_VERSION.WTD_MINOR_VERSION.WTD_SVN_VERSION"], [Numero de version])
+
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
 AM_INIT_AUTOMAKE

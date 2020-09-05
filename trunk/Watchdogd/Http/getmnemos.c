@@ -53,14 +53,14 @@
        return;
      }
 
-    gpointer tech_id = g_hash_table_lookup ( query, "tech_id" );
+    gchar *tech_id = g_hash_table_lookup ( query, "tech_id" );
     if (!tech_id)
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres tech_id");
        return;
      }
     Normaliser_as_tech_id ( tech_id );
 
-    gpointer classe = g_hash_table_lookup ( query, "classe" );
+    gchar *classe = g_hash_table_lookup ( query, "classe" );
     if (!classe)
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres classe");
        return;
@@ -100,6 +100,52 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_mnemos_set: Modifie la config d'un mnemonique                                                                 */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : HTTP Response code                                                                                                */
+/******************************************************************************************************************************/
+ void Http_traiter_mnemos_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                SoupClientContext *client, gpointer user_data )
+  { GBytes *request_brute;
+    gsize taille;
+
+    if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+
+    if ( ! (session && session->access_level >= 6) )
+     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges" );
+       return;
+     }
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( ! (request && Json_has_member ( request, "classe" ) && Json_has_member ( request, "tech_id" ) &&
+                       Json_has_member ( request, "acronyme" ) ) )
+     { if (request) json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    gchar   *tech_id  = Normaliser_as_tech_id ( Json_get_string ( request,"tech_id" ) );
+    gchar   *acronyme = Normaliser_as_tech_id ( Json_get_string ( request,"acronyme" ) );
+    gchar   *classe   = Normaliser_as_tech_id ( Json_get_string ( request,"classe" ) );
+
+         if ( ! strcasecmp ( classe, "CI" ) )
+     {
+     }
+    /*else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
+    else if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
+    else if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }*/
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_mnemos_validate: Valide la presence ou non d'un tech_id/acronyme dans le dico                                 */

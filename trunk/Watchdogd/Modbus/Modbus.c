@@ -90,7 +90,7 @@
      } else database_version=0;
 
     Info_new( Config.log, Config.log_db, LOG_NOTICE,
-             "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, VERSION );
+             "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, WTD_VERSION );
 
     if (database_version==0)
      { SQL_Write ( "CREATE TABLE IF NOT EXISTS `modbus_modules` ("
@@ -113,10 +113,8 @@
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_AA`" );
      }
 
-    Modifier_configDB ( "modbus", "database_version", VERSION );
-
+    Modifier_configDB ( "modbus", "database_version", WTD_SVN_VERSION );
   }
-
 /******************************************************************************************************************************/
 /* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                                  */
 /* Entrée: un log et une database                                                                                             */
@@ -1163,7 +1161,7 @@
 reload:
     memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );                                   /* Mise a zero de la structure de travail */
     Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-MODBUS", lib, VERSION, "Manage Modbus System" );
+    Thread_init ( "W-MODBUS", lib, WTD_VERSION, "Manage Modbus System" );
     Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
     Modbus_Creer_DB();
 

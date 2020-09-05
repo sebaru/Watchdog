@@ -1048,7 +1048,7 @@
           g_snprintf(chaine, sizeof(chaine),
                     "/*******************************************************/\n"
                     " gchar *version (void)\n"
-                    "  { return(\"V%s - %s\"); \n  }\n", VERSION, date );
+                    "  { return(\"V%s - %s\"); \n  }\n", WTD_VERSION, date );
           write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
 
           g_snprintf(chaine, sizeof(chaine),

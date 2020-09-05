@@ -412,7 +412,7 @@
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_add_bool   ( builder, "connected", TRUE );
-    Json_add_string ( builder, "version",  VERSION );
+    Json_add_string ( builder, "version",  WTD_VERSION );
     Json_add_string ( builder, "username", soup_client_context_get_auth_user(client) );
     Json_add_string ( builder, "instance", g_get_host_name() );
     Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
@@ -439,7 +439,7 @@
 reload:
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-HTTP", lib, VERSION, "Manage Web Services with external Devices" );
+    Thread_init ( "W-HTTP", lib, WTD_VERSION, "Manage Web Services with external Devices" );
     Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
     SoupServer *socket = soup_server_new("server-header", "Watchdogd HTTP Server", NULL);
@@ -462,6 +462,7 @@ reload:
     soup_server_add_handler ( socket, "/dls/compil/" ,   Http_traiter_dls_compil, NULL, NULL );
     soup_server_add_handler ( socket, "/mnemos/validate/", Http_traiter_mnemos_validate, NULL, NULL );
     soup_server_add_handler ( socket, "/mnemos/list",    Http_traiter_mnemos_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/mnemos/set",     Http_traiter_mnemos_set, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/list",       Http_traiter_syn_list, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/show/",      Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/del/",       Http_traiter_syn_del, NULL, NULL );

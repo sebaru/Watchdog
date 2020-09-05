@@ -74,18 +74,11 @@
   { console.log ("in load process !");
 
     Load_process ( "MASTER" )
-    var xhr = new XMLHttpRequest;
-    xhr.open('GET', "/api/instance/list", true);
-    xhr.onreadystatechange = function()
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status != 200)
-        { Show_Error ( xhr.statusText );
-          return;
-        }
-       var Response = JSON.parse(xhr.responseText);
-       Instance = Response.instance;
-     };
-    xhr.send();
+    Send_to_API ( "GET", "/api/instance/list", null, function (Response)
+     { $('#idSelectInstance').empty();
+       $.each ( Response.instances, function ( i, instance )
+        { $('#idSelectInstance').append("<option value='"+instance.instance_id+"'>"+instance.instance_id+"</option>"); } );
+     });
 
   }
  function Load_process ( instance )

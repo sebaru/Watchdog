@@ -61,7 +61,7 @@
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    Json_add_string ( builder, "version",  VERSION );
+    Json_add_string ( builder, "version",  WTD_VERSION );
     Json_add_string ( builder, "instance", g_get_host_name() );
     Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
     Json_add_string ( builder, "run_as", Config.run_as );

@@ -281,7 +281,6 @@
     struct ZMQUEUE *zmq_from_slave, *zmq_from_bus;
 
     prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
-    Modifier_configDB ( "msrv", "thread_version", VERSION );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
@@ -388,7 +387,7 @@
     struct ZMQUEUE *zmq_from_master, *zmq_from_bus;
 
     prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
-    Modifier_configDB ( "msrv", "thread_version", VERSION );
+    Modifier_configDB ( "msrv", "thread_version", WTD_VERSION );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
@@ -537,7 +536,7 @@ end:
     poptFreeContext( context );                                                                         /* Liberation memoire */
 
     if (version)                                                                            /* Affichage du numéro de version */
-     { printf(" Watchdogd - Version %s\n", VERSION );
+     { printf(" Watchdogd - Version %s\n", WTD_VERSION );
        exit(EXIT_OK);
      }
 
@@ -635,7 +634,7 @@ end:
 
     Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
 
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start v%s", VERSION );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start v%s", WTD_VERSION );
     Print_config();
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
@@ -690,7 +689,8 @@ end:
 
        Update_database_schema();                                                    /* Update du schéma de Database si besoin */
        Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */
-       Modifier_configDB ( "msrv", "instance_version", VERSION );                        /* Update du champs instance_version */
+       Modifier_configDB ( "msrv", "thread_version", WTD_VERSION );                          /* Update du champs instance_version */
+       Modifier_configDB ( "msrv", "instance_is_master", (Config.instance_is_master  ? "TRUE" : "FALSE") );
 
        Partage->zmq_ctx = zmq_ctx_new ();                                          /* Initialisation du context d'echange ZMQ */
        if (!Partage->zmq_ctx)

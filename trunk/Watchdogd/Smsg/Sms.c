@@ -331,7 +331,7 @@
                   CURLFORM_END);
     curl_formadd( &formpost, &lastptr,                              /* Pas de SMS les 2 premières minutes de vie du processus */
                   CURLFORM_COPYNAME,     "origine",                                 /* 'debugvar' pour lancer en mode semonce */
-                  CURLFORM_COPYCONTENTS, VERSION,
+                  CURLFORM_COPYCONTENTS, WTD_VERSION,
 /*                     CURLFORM_COPYCONTENTS, "debugvar",*/
                   CURLFORM_END);
 
@@ -640,7 +640,7 @@
 reload:
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-SMSG", lib, VERSION, "Manage SMS system (libgammu)" );
+    Thread_init ( "W-SMSG", lib, WTD_VERSION, "Manage SMS system (libgammu)" );
     Smsg_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
     if (Dls_auto_create_plugin( Cfg_smsg.tech_id, "Gestion du GSM" ) == FALSE)

@@ -83,7 +83,7 @@
     Json_add_string ( builder, "thread",  "msrv" );
     Json_add_bool   ( builder, "debug",   Config.log_msrv );
     Json_add_bool   ( builder, "started", Partage->com_msrv.Thread_run );
-    Json_add_string ( builder, "version", VERSION );
+    Json_add_string ( builder, "version", WTD_VERSION );
     Json_add_int    ( builder, "start_time", Partage->start_time );
     Json_add_string ( builder, "objet",   "Local Master Server" );
     Json_end_object ( builder );                                                                              /* End Document */
@@ -92,7 +92,7 @@
     Json_add_string ( builder, "thread",  "dls" );
     Json_add_bool   ( builder, "debug",   Partage->com_dls.Thread_debug );
     Json_add_bool   ( builder, "started", Partage->com_dls.Thread_run );
-    Json_add_string ( builder, "version", VERSION );
+    Json_add_string ( builder, "version", WTD_VERSION );
     Json_add_int    ( builder, "start_time", Partage->start_time );
     Json_add_string ( builder, "objet",   "D.L.S" );
     Json_end_object ( builder );                                                                              /* End Document */
@@ -101,7 +101,7 @@
     Json_add_string ( builder, "thread",  "arch" );
     Json_add_bool   ( builder, "debug",   Config.log_arch );
     Json_add_bool   ( builder, "started", Partage->com_arch.Thread_run );
-    Json_add_string ( builder, "version", VERSION );
+    Json_add_string ( builder, "version", WTD_VERSION );
     Json_add_int    ( builder, "start_time", Partage->start_time );
     Json_add_string ( builder, "objet",   "Archivage" );
     Json_end_object ( builder );                                                                              /* End Document */
@@ -110,7 +110,7 @@
     Json_add_string ( builder, "thread",  "db" );
     Json_add_bool   ( builder, "debug",   Config.log_db );
     Json_add_bool   ( builder, "started", TRUE );
-    Json_add_string ( builder, "version", VERSION );
+    Json_add_string ( builder, "version", WTD_VERSION );
     Json_add_int    ( builder, "start_time", Partage->start_time );
     Json_add_string ( builder, "objet",   "Database Access" );
     Json_end_object ( builder );                                                                              /* End Document */
