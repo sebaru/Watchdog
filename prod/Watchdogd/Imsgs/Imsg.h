@@ -49,11 +49,11 @@
 
  struct IMSGS_CONFIG
   { struct LIBRAIRIE *lib;
+    gchar tech_id[32];
     xmpp_ctx_t *ctx;
     xmpp_conn_t *conn;
     gchar username[80];
     gchar password[80];
-    gboolean enable;
     gboolean signed_off;
   };
 /*********************************************** Déclarations des prototypes **************************************************/

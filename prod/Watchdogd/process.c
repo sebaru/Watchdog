@@ -49,13 +49,14 @@
 /* Entrée: Le nom du thread, son niveau de log                                                                                */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *prompt, gchar *description )
+ void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *version, gchar *description )
   { prctl(PR_SET_NAME, pr_name, 0, 0, 0 );
     lib->TID = pthread_self();                                                              /* Sauvegarde du TID pour le pere */
     lib->Thread_run = TRUE;                                                                             /* Le thread tourne ! */
-    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), prompt );
+    time ( &lib->start_time );
+    g_snprintf( lib->version,      sizeof(lib->version),      version );
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   description );
-    Modifier_configDB ( prompt, "thread_version", VERSION );
+    Modifier_configDB ( lib->admin_prompt, "thread_version", lib->version );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Démarrage . . . TID = %p", lib->admin_prompt, pthread_self() );
   }
 /******************************************************************************************************************************/
@@ -122,7 +123,7 @@
 /* EntrÃée: Le nom de fichier correspondant                                                                                    */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_prompt )
+ struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *prompt )
   { pthread_mutexattr_t attr;                                                          /* Initialisation des mutex de synchro */
     struct LIBRAIRIE *lib;
     gchar nom_absolu[128];
@@ -132,8 +133,8 @@
     while (liste)
      { struct LIBRAIRIE *lib;
        lib = (struct LIBRAIRIE *)liste->data;
-       if ( ! strcmp( lib->admin_prompt, nom_prompt ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Librairie %s already loaded", __func__, nom_prompt );
+       if ( ! strcmp( lib->admin_prompt, prompt ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Librairie %s already loaded", __func__, prompt );
           return(NULL);
         }
        liste=liste->next;
@@ -144,7 +145,7 @@
                 return(NULL);
               }
 
-    g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/libwatchdog-server-%s.so", Config.librairie_dir, nom_prompt );
+    g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/libwatchdog-server-%s.so", Config.librairie_dir, prompt );
 
     lib->dl_handle = dlopen( nom_absolu, RTLD_GLOBAL | RTLD_NOW );
     if (!lib->dl_handle)
@@ -161,14 +162,23 @@
        return(NULL);
      }
 
-    lib->Admin_json    = dlsym( lib->dl_handle, "Admin_json" );                                   /* Recherche de la fonction */
-
-    g_snprintf( lib->nom_fichier, sizeof(lib->nom_fichier), "%s", nom_absolu );
+    lib->Admin_json = dlsym( lib->dl_handle, "Admin_json" );                                      /* Recherche de la fonction */
+    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "%s", prompt );
+    g_snprintf( lib->nom_fichier,  sizeof(lib->nom_fichier),  "%s", nom_absolu );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: %s loaded", __func__, nom_absolu );
 
     pthread_mutexattr_init( &attr );                                                          /* Creation du mutex de synchro */
     pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
     pthread_mutex_init( &lib->synchro, &attr );
+
+    if ( !strcasecmp( prompt, "http" ) ) Start_librairie( lib );
+    else
+     { gchar *enable = Recuperer_configDB_by_nom ( prompt, "enable" );
+       if ( enable && !strcasecmp ( enable, "true" ) ) { Start_librairie( lib ); g_free(enable); }
+       else { Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                        "%s: Librairie '%s' is not enabled : Loaded but not started", __func__, prompt );
+            }
+     }
 
     Partage->com_msrv.Librairies = g_slist_prepend( Partage->com_msrv.Librairies, lib );
     return(lib);
@@ -219,21 +229,21 @@
        liste = liste->next;
      }
 
-    while(Partage->com_msrv.Librairies)                                                     /* Liberation mÃémoire des modules */
+    while(Partage->com_msrv.Librairies)                                                     /* Liberation mémoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
        Decharger_librairie_par_prompt (lib->admin_prompt);
      }
   }
 /******************************************************************************************************************************/
 /* Charger_librairies: Ouverture de toutes les librairies possibles pour Watchdog                                             */
-/* EntrÃ©e: Rien                                                                                                               */
+/* Entrée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_librairies ( void )
   { struct dirent *fichier;
     DIR *repertoire;
 
-    repertoire = opendir ( Config.librairie_dir );                                  /* Ouverture du rÃépertoire des librairies */
+    repertoire = opendir ( Config.librairie_dir );                                  /* Ouverture du répertoire des librairies */
     if (!repertoire)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Directory %s Unknown", __func__, Config.librairie_dir );
        return;
@@ -242,14 +252,12 @@
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Loading Directory %s in progress", __func__, Config.librairie_dir );
      }
 
-    while( (fichier = readdir( repertoire )) )                                      /* Pour chacun des fichiers du rÃ©pertoire */
+    while( (fichier = readdir( repertoire )) )                                      /* Pour chacun des fichiers du répertoire */
      { gchar prompt[64];
        if (!strncmp( fichier->d_name, "libwatchdog-server-", 19 ))                     /* Chargement unitaire d'une librairie */
         { if ( ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
-           { struct LIBRAIRIE *lib;
-             g_snprintf( prompt, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
-             lib = Charger_librairie_par_prompt( prompt );
-             if (lib) { Start_librairie( lib ); }
+           { g_snprintf( prompt, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
+             Charger_librairie_par_prompt( prompt );
            }
         }
      }

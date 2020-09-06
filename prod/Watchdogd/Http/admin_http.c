@@ -31,8 +31,8 @@
  extern struct HTTP_CONFIG Cfg_http;
 /******************************************************************************************************************************/
 /* Admin_http_status: Print le statut du thread HTTP                                                                          */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* EntrÃ©e : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_Http_status ( JsonBuilder *builder )
   { Json_add_int    ( builder, "tcp_port",                 Cfg_http.tcp_port );
@@ -44,12 +44,12 @@
     Json_add_int    ( builder, "nbr_sessions",             g_slist_length (Cfg_http.liste_http_clients ) );
   }
 /******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_json : fonction appelÃ© par le thread http lors d'une requete /run/                                                   */
+/* EntrÃ©e : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                           */
 /******************************************************************************************************************************/
  void Admin_json ( gchar *commande, gchar **buffer_p, gsize *taille_p )
-{ JsonBuilder *builder;
+  { JsonBuilder *builder;
     *buffer_p = NULL;
     *taille_p = 0;
 
@@ -58,11 +58,11 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
      }
-/************************************************ Préparation du buffer JSON **************************************************/
+/************************************************ PrÃ©paration du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/status")) { Admin_Http_status ( builder ); }
 
-/************************************************ Génération du JSON **********************************************************/
+/************************************************ GÃ©nÃ©ration du JSON **********************************************************/
     *buffer_p = Json_get_buf (builder, taille_p);
     return;
   }

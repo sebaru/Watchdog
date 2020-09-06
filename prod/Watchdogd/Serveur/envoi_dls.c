@@ -46,7 +46,7 @@
 /******************************************************************************************************************************/
  void Proto_effacer_source_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls )
   { gchar chaine[80];
-    g_snprintf( chaine, sizeof(chaine), "Dls/%d.dls.new", edit_dls->id );
+    g_snprintf( chaine, sizeof(chaine), "Dls/%s.dls.new", edit_dls->tech_id );
     unlink ( chaine );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Proto_effacer_fichier_plugin_dls : Zeroing... %s", chaine );
     client->Source_DLS_new = NULL;                             /* On prépare les tampons a la reception du nouveau source DLS */
@@ -82,7 +82,7 @@
  void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { struct CMD_TYPE_PLUGIN_DLS *dls;
 
-    dls = Rechercher_plugin_dlsDB( rezo_dls->id );
+    dls = Rechercher_plugin_dlsDB( rezo_dls->tech_id );
 
     if (dls)
      { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_EDIT_PLUGIN_DLS_OK,
@@ -114,7 +114,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_plugin_dlsDB( rezo_dls->id );
+    else { result = Rechercher_plugin_dlsDB( rezo_dls->tech_id );
            if (result)
             { Partage->com_dls.Thread_reload = TRUE;
               Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,
@@ -140,7 +140,7 @@
     gint taille_source, taille_sent, taille_max_write;
     gchar *buffer_all, *Source, *buffer_write;
 
-    if ( Get_source_dls_from_DB ( rezo_dls->id, &Source, &taille_source ) == FALSE )
+    if ( Get_source_dls_from_DB ( rezo_dls->tech_id, &Source, &taille_source ) == FALSE )
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                 "%s: Cannot get Source DLS for id '%d'", __func__, rezo_dls->id );
        return;
@@ -162,6 +162,7 @@
                                                                      /* Utilisation du debut du buffer pour stocker structure */
     source_dls = (struct CMD_TYPE_SOURCE_DLS *)buffer_all;
     source_dls->id = rezo_dls->id;
+    g_snprintf(source_dls->tech_id, sizeof(source_dls->tech_id), "%s", rezo_dls->tech_id );
     buffer_write = buffer_all + sizeof(struct CMD_TYPE_SOURCE_DLS);                          /* Index data dans le buffer_all */
     taille_max_write = Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_SOURCE_DLS);
     taille_sent = 0;
@@ -197,8 +198,8 @@
     memcpy ( client->Source_DLS_new + client->taille_Source_DLS_new, buffer, edit_dls->taille ); /* Recopie du bout de buffer */
     client->taille_Source_DLS_new = new_taille;
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Proto_valider_source_dls: %d bytes received for plugin id=%d. New length=%d bytes",
-              edit_dls->taille, edit_dls->id, client->taille_Source_DLS_new );
+             "Proto_valider_source_dls: %d bytes received for plugin '%s'. New length=%d bytes",
+              edit_dls->taille, edit_dls->tech_id, client->taille_Source_DLS_new );
   }
 /******************************************************************************************************************************/
 /* Proto_compiler_source_dls: Compilation de la source DLS                                                                    */
@@ -209,20 +210,20 @@
   { struct CMD_TYPE_PLUGIN_DLS *result;
     struct CMD_GTK_MESSAGE erreur;
     /*prctl(PR_SET_NAME, "W-Trad.DLS", 0, 0, 0 );*/
-    switch ( Compiler_source_dls ( TRUE, client->dls.id, erreur.message, sizeof(erreur.message) ) )
+    switch ( Compiler_source_dls ( TRUE, client->dls.tech_id, erreur.message, sizeof(erreur.message) ) )
      { case DLS_COMPIL_ERROR_LOAD_SOURCE:
             g_snprintf( erreur.message, sizeof(erreur.message),
-                       "Unable to open file for compilation ID %d", client->dls.id );
+                       "Unable to open file for compilation '%s'", client->dls.tech_id );
             break;
        case DLS_COMPIL_ERROR_LOAD_LOG:
             g_snprintf( erreur.message, sizeof(erreur.message),
-                       "Unable to open log file for DLS %d", client->dls.id );
+                       "Unable to open log file for '%s'", client->dls.tech_id );
             break;
        case DLS_COMPIL_OK_WITH_WARNINGS:
             Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_WARNING,
                            (gchar *)&erreur, sizeof(erreur) );
             break;
-       case DLS_COMPIL_ERROR_TRAD:
+       case DLS_COMPIL_SYNTAX_ERROR:
             Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_ERREUR,
                            (gchar *)&erreur, sizeof(erreur) );
             break;
@@ -237,7 +238,7 @@
      }
     Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_DLS_COMPIL_STATUS, (gchar *)&erreur, sizeof(erreur) );
 
-    result = Rechercher_plugin_dlsDB( client->dls.id );                     /* Mise a jour de l'onglet "plugin" en temps reel */
+    result = Rechercher_plugin_dlsDB( client->dls.tech_id );                /* Mise a jour de l'onglet "plugin" en temps reel */
     if (result)
      { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,
                      (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
@@ -264,7 +265,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_plugin_dlsDB( id );
+    else { result = Rechercher_plugin_dlsDB( rezo_dls->tech_id );
            if (!result)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),

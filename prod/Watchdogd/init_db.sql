@@ -182,11 +182,12 @@ CREATE TABLE IF NOT EXISTS `mnemos_DI` (
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
-  `src_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
-  `src_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
-  `src_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `map_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
+  UNIQUE (`map_tech_id`,`map_tag`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
@@ -201,12 +202,13 @@ CREATE TABLE IF NOT EXISTS `mnemos_DO` (
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
-  `dst_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
-  `dst_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
-  `dst_tag` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `map_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `map_tag` VARCHAR(40) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `dst_param1` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
+  UNIQUE (`map_tech_id`,`map_tag`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
@@ -226,13 +228,14 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `max` float NOT NULL DEFAULT '0',
   `valeur` float NOT NULL DEFAULT '0',
   `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
-  `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
-  `map_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `map_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `map_question_vocale` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `map_reponse_vocale` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
+  UNIQUE (`map_tech_id`,`map_tag`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
@@ -251,11 +254,12 @@ CREATE TABLE IF NOT EXISTS `mnemos_AO` (
   `min` float NOT NULL DEFAULT '0',
   `max` float NOT NULL DEFAULT '0',
   `valeur` float NOT NULL DEFAULT '0',
-  `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
-  `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
-  `map_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `map_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
+  UNIQUE (`map_tech_id`,`map_tag`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
@@ -274,6 +278,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_CI` (
   `valeur` INT(11) NOT NULL DEFAULT '0',
   `multi` float NOT NULL DEFAULT '1',
   `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'fois',
+  `archivage` BOOLEAN NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -348,22 +353,6 @@ CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE_ticks` (
   PRIMARY KEY (`id`),
   FOREIGN KEY (`horloge_id`) REFERENCES `mnemos_HORLOGE` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `mnemos_AnalogInput`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
-  `id_mnemo` int(11) NOT NULL,
-  `type` int(11) NOT NULL,
-  `min` float NOT NULL DEFAULT '0',
-  `max` float NOT NULL DEFAULT '0',
-  `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id_mnemo`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -476,7 +465,6 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `vert` int(11) NOT NULL DEFAULT '0',
   `bleu` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
-  `mnemo_id` int(11) NOT NULL DEFAULT '0',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `def_color` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT "#c0c0c0",
@@ -484,8 +472,7 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `clic_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`, `acronyme`, `auto_create`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -561,30 +548,6 @@ CREATE TABLE IF NOT EXISTS `syns_rectangles` (
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `modbus_modules`
---
-
-CREATE TABLE IF NOT EXISTS `modbus_modules` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `date_create` datetime NOT NULL DEFAULT NOW(),
-  `enable` tinyint(1) NOT NULL,
-  `hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT hostname,
-  `description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',
-  `watchdog` int(11) NOT NULL,
-  `bit` int(11) NOT NULL,
-  `map_E` int(11) NOT NULL,
-  `max_nbr_E` int(11) NOT NULL,
-  `map_EA` int(11) NOT NULL,
-  `map_A` int(11) NOT NULL,
-  `map_AA` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
 
 -- --------------------------------------------------------
 

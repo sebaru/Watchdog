@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -40,7 +40,7 @@
  static GtkWidget *Entry_compil_status;                                                /* Retour d'état de la compilation DLS */
 
  extern GtkWidget *Notebook;                                                             /* Le Notebook de controle du client */
- extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */  
+ extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */
  extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
  extern struct CLIENT Client;                                                                         /* Structure de travail */
@@ -66,7 +66,7 @@
 
     page = Page_actuelle();
     infos = (struct TYPE_INFO_SOURCE_DLS *)page->infos;
-    
+
     text_buffer = GTK_TEXT_BUFFER( infos->text );
     gtk_text_buffer_get_end_iter( text_buffer, &iter );
     gtk_text_buffer_insert_at_cursor( text_buffer, chaine, strlen(chaine) );
@@ -212,7 +212,7 @@
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
                 "%s: Wrong Response code for %s", __func__, url );
      }
-    else                                                                  
+    else
      {                                                                          /* Recopie du tampon dans le sourcecode D.L.S */
        gtk_text_buffer_set_text ( GTK_TEXT_BUFFER( infos->text ), Package_received_buffer, Package_received_size );
        g_free(Package_received_buffer);                                                           /* On libere le tampon reçu */
@@ -276,7 +276,7 @@
     struct CMD_TYPE_SOURCE_DLS *edit_dls;
     gchar *Source, *Source_fin, *source, *buffer_envoi;
     gint taille_max, taille_source, taille_sent, nb_car;
-    
+
     text_buffer = GTK_TEXT_BUFFER( ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->text );               /* Recup du TextBuffer */
     gtk_text_buffer_get_start_iter( text_buffer, &start );                        /* Recup des iter de debut et fin de buffer */
     gtk_text_buffer_get_end_iter( text_buffer, &end );
@@ -305,7 +305,7 @@
     progress = gtk_progress_bar_new();
     gtk_progress_bar_set_text( GTK_PROGRESS_BAR(progress), "Ready to send" );
     gtk_box_pack_start( GTK_BOX(vboite), progress, FALSE, FALSE, 0 );
-    
+
     Entry_compil_status = gtk_label_new("");
     gtk_box_pack_start( GTK_BOX(vboite), Entry_compil_status, TRUE, TRUE, 0 );
 
@@ -322,6 +322,7 @@
     buffer_envoi     = (gchar *)edit_dls + sizeof(struct CMD_TYPE_SOURCE_DLS);
     taille_max       = Client.connexion->taille_bloc - sizeof(struct CMD_TYPE_SOURCE_DLS);
     edit_dls->id     = ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->rezo_dls.id;
+    g_snprintf(edit_dls->tech_id, sizeof(edit_dls->tech_id), "%s", ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->rezo_dls.tech_id );
     edit_dls->taille = 0;
                                                                               /* Demande de suppression du fichier source DLS */
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_DEB,
@@ -337,7 +338,7 @@
        gint taille;
        taille = Source_fin-source;                                                                     /* Combien il reste ?? */
        if (taille>taille_max) taille = taille_max;                                   /* Borne supérieure lié au paquet reseau */
-       memcpy( buffer_envoi, source, taille );                                                             /* Recopie mémoire */  
+       memcpy( buffer_envoi, source, taille );                                                             /* Recopie mémoire */
        edit_dls->taille = taille;
        if (!Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS,
                            (gchar *)edit_dls, taille + sizeof(struct CMD_TYPE_SOURCE_DLS) ))
@@ -427,7 +428,7 @@
        gtk_text_buffer_get_start_iter( text_buffer, &start );
        gtk_text_buffer_get_end_iter( text_buffer, &end );
 
-       Source = gtk_text_buffer_get_text ( text_buffer, &start, &end, FALSE);       
+       Source = gtk_text_buffer_get_text ( text_buffer, &start, &end, FALSE);
        gtk_text_buffer_set_modified ( text_buffer, FALSE);
 
        filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
@@ -470,7 +471,7 @@
     page->infos = (struct TYPE_INFO_SOURCE_DLS *)g_try_malloc0( sizeof(struct TYPE_INFO_SOURCE_DLS) );
     if (!page->infos) { g_free(page); return; }
     infos = (struct TYPE_INFO_SOURCE_DLS *)page->infos;
-    
+
     page->type = TYPE_PAGE_SOURCE_DLS;
     memcpy ( &infos->rezo_dls, rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     Liste_pages = g_list_append( Liste_pages, page );
@@ -478,7 +479,7 @@
     hboite = gtk_hbox_new( FALSE, 6 );                                               /* Initialisation des parametres de page */
     page->child = hboite;                                                               /* Sauvegarde pour destruction future */
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
-    
+
 /************************************************** La liste des plugin_dls ***************************************************/
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );

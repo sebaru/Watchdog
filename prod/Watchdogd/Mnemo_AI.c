@@ -138,24 +138,22 @@
 /* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
 /* Sortie: la struct DB                                                                                                       */
 /******************************************************************************************************************************/
- gboolean Recuperer_mnemos_AI_by_text ( struct DB **db_retour, gchar *thread, gchar *text )
+ gboolean Recuperer_mnemos_AI_by_tag ( struct DB **db_retour, gchar *tech_id, gchar *tag )
   { gchar requete[1024];
     gchar *commande;
     gboolean retour;
     struct DB *db;
 
-    commande = Normaliser_chaine ( text );
+    commande = Normaliser_chaine ( tag );
     if (!commande)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible commande", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible tag", __func__ );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),
-               "SELECT m.tech_id, m.acronyme, m.map_text, m.libelle "
+               "SELECT m.tech_id, m.acronyme, m.map_tag, m.libelle "
                "FROM mnemos_AI as m "
-               " WHERE (m.map_host='*' OR m.map_host LIKE '%s') AND (m.map_thread='*' OR m.map_thread LIKE '%s')"
-               " AND m.map_text LIKE '%s'", g_get_host_name(), thread, commande );
-
+               " WHERE m.map_tech_id='%s' AND m.map_tag LIKE '%s'", tech_id, commande );
     g_free(commande);
 
     db = Init_DB_SQL();
@@ -226,9 +224,9 @@
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
- void Charger_confDB_AI ( void )
-  { struct DLS_AI *ai;
-    gchar requete[512];
+ void Charger_confDB_AI ( gchar *tech_id, gchar *acronyme )
+  { gchar requete[512];
+    struct DLS_AI *ai;
     struct DB *db;
 
     db = Init_DB_SQL();
@@ -241,6 +239,11 @@
                 "SELECT a.tech_id, a.acronyme, a.valeur, a.min, a.max, a.type, a.unite"
                 " FROM mnemos_AI as a"
               );
+    if (tech_id && acronyme)
+     { gchar critere[128];
+       g_snprintf( critere, sizeof(critere), " WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme );
+       g_strlcat ( requete, critere, sizeof(requete) );
+     }
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);
@@ -305,6 +308,7 @@
     Json_add_double ( builder, "valeur_min",   bit->min );
     Json_add_double ( builder, "valeur_max",   bit->max );
     Json_add_double ( builder, "valeur",       bit->val_ech );
+    Json_add_string ( builder, "unite",        bit->unite );
     Json_add_int    ( builder, "type",         bit->type );
     Json_add_int    ( builder, "in_range",     bit->inrange );
     Json_add_int    ( builder, "last_arch",    bit->last_arch );

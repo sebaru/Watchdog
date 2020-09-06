@@ -48,7 +48,6 @@
     gint  date_next_retry;                                                 /* Date de la prochaine connexion au port teleinfo */
     gchar tech_id[32];
     gchar port[80];
-    gboolean enable;                                                                                      /* Enable at boot ? */
     gint  fd;                                                               /* File Descriptor d'acces au module Teleinfo USB */
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
     gchar buffer[TAILLE_BUFFER_TELEINFO];

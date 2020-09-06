@@ -37,6 +37,7 @@
  #define HTTP_DEFAUT_FILE_KEY          "http_serveurkey.pem"
  #define HTTP_DEFAUT_TCP_PORT          5560
  #define HTTP_FORBIDDEN_ERROR          "Session inexistante ou droits insuffisants"
+
  struct WS_CLIENT_SESSION
   { SoupWebsocketConnection *connexion;
     SoupClientContext *context;
@@ -88,16 +89,30 @@
                                     SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_dls_source ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                        SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_dls     ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                    SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_dls_compil ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                       SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_dls_acquitter ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                          SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_process ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_process_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                         SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_process_start ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                          SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_process_debug ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                          SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_process_reload ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                           SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_instance_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                           SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_bus     ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_mnemos_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                         SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_mnemos_set  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                        SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_mnemos_validate ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                            SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_syn_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                      SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_syn_show ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
@@ -130,7 +145,11 @@
                                       SoupClientContext *client, gpointer user_data);
  extern void Http_traiter_histo_alive ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                         SoupClientContext *client, gpointer user_data);
+ extern void Http_traiter_tech ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                 SoupClientContext *client, gpointer user_data );
+
  extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern void Http_Envoyer_les_cadrans ( void );
+ extern void Http_redirect_to_slave ( SoupMessage *msg, gchar *target );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

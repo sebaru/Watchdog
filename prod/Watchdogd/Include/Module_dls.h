@@ -80,14 +80,7 @@
  extern gchar *Dls_dyn_string ( gchar *format, gint type_bit, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p );
  extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *visuel_p, gint mode,
                                    gchar *color, gboolean cligno );
- extern int E( int num );
- extern int B( int num );
- extern int M( int num );
  extern void SI( int num, int etat, int rouge, int vert, int bleu, int cligno );
- extern void SB( int num, int etat );
- extern void SM( int num, int etat );
- extern void SA( int num, int etat );
- extern void MSG( int num, int etat );
 
  extern int Heure( int heure, int minute );                                                        /* Tester l'heure actuelle */
  extern int Heure_avant( int heure, int minute );

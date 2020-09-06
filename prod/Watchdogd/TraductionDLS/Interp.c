@@ -42,7 +42,6 @@
  static GSList *Alias=NULL;                                                  /* Liste des alias identifiés dans le source DLS */
  static GSList *Liste_Actions_bit    = NULL;                              /* Liste des actions rencontrées dans le source DLS */
  static GSList *Liste_Actions_num    = NULL;                              /* Liste des actions rencontrées dans le source DLS */
- static GSList *Liste_Actions_msg    = NULL;                              /* Liste des actions rencontrées dans le source DLS */
  static GSList *Liste_edge_up_bi     = NULL;                               /* Liste des bits B utilisés avec l'option EDGE_UP */
  static GSList *Liste_edge_up_entree = NULL;                               /* Liste des bits E utilisés avec l'option EDGE_UP */
  static gchar *Buffer=NULL;
@@ -501,31 +500,12 @@
     return(FALSE);
   }
 /******************************************************************************************************************************/
-/* New_action_sortie: Prepare une struct action avec une commande SA                                                          */
-/* Entrées: numero de la sortie, sa logique                                                                                   */
-/* Sortie: la structure action                                                                                                */
-/******************************************************************************************************************************/
- static struct ACTION *New_action_sortie_old( int num, int barre )
-  { struct ACTION *action;
-    int taille;
-
-    taille = 20;
-    Add_bit_to_list(MNEMO_SORTIE, num);
-    action = New_action();
-    action->alors = New_chaine( taille );
-    g_snprintf( action->alors, taille, "SA(%d,%d);", num, !barre );
-    return(action);
-  }
-/******************************************************************************************************************************/
 /* New_action_sortie: Prepare la structure ACTION associée à l'alias en paramètre                                             */
 /* Entrées: l'alias, le complement si besoin, les options                                                                     */
 /* Sortie: la structure ACTION associée                                                                                       */
 /******************************************************************************************************************************/
  struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options )
-  { if (alias->num != -1) /* Alias par numéro ? */
-     { return(New_action_sortie_old( alias->num, barre )); }
-    /* Alias par nom */
-    struct ACTION *action = New_action();
+  { struct ACTION *action = New_action();
     gint taille = 128;
     action->alors = New_chaine( taille );
     if ( (!barre && !alias->barre) || (barre && alias->barre) )
@@ -946,7 +926,7 @@
 /* Entrée: l'id du modul                                                                                                      */
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */
 /******************************************************************************************************************************/
- gint Traduire_DLS( int id )
+ gint Traduire_DLS( gchar *tech_id )
   { gchar source[80], cible[80], log[80];
     struct CMD_TYPE_PLUGIN_DLS *plugin;
     struct ALIAS *alias;
@@ -954,28 +934,32 @@
     gint retour, nb_car;
     FILE *rc;
 
-    plugin = Rechercher_plugin_dlsDB ( id );
-    if (!plugin) return (TRAD_DLS_ERROR);
+    plugin = Rechercher_plugin_dlsDB ( tech_id );
+    if (!plugin)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: plugin '%s' not found.", __func__, tech_id );
+       return (TRAD_DLS_ERROR_NO_FILE);
+     }
     memcpy ( &Dls_plugin, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     g_free(plugin);
 
     Buffer_taille = 1024;
     Buffer = g_try_malloc0( Buffer_taille );                                             /* Initialisation du buffer resultat */
-    if (!Buffer) return ( TRAD_DLS_ERROR );
+    if (!Buffer) return ( TRAD_DLS_ERROR_NO_FILE );
     Buffer_used = 0;
 
-    g_snprintf( source, sizeof(source), "Dls/%06d.dls", id );
-    g_snprintf( log,    sizeof(log),    "Dls/%06d.log", id );
-    g_snprintf( cible,  sizeof(cible),  "Dls/%06d.c", id );
+    g_snprintf( source, sizeof(source), "Dls/%s.dls", tech_id );
+    g_snprintf( log,    sizeof(log),    "Dls/%s.log", tech_id );
+    g_snprintf( cible,  sizeof(cible),  "Dls/%s.c", tech_id );
     unlink ( log );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: id=%d, source=%s, log=%s", __func__, id, source, log );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: tech_id='%s', source='%s', log='%s'", __func__,
+              tech_id, source, log );
 
     Id_log = open( log, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_log<0)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                 "%s: Log creation failed %s (%s)", __func__, log, strerror(errno) );
        close(Id_log);
-       return(TRAD_DLS_ERROR_FILE);
+       return(TRAD_DLS_ERROR_NO_FILE);
      }
 
     pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
@@ -987,7 +971,7 @@
     DlsScanner_set_lineno(1);                                                                     /* Reset du numéro de ligne */
     nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
     rc = fopen( source, "r" );
-    if (!rc) retour = TRAD_DLS_ERROR;
+    if (!rc) retour = TRAD_DLS_ERROR_NO_FILE;
     else
      { setlocale(LC_ALL, "C");
        DlsScanner_restart(rc);
@@ -997,11 +981,12 @@
 
     if (nbr_erreur)
      { Emettre_erreur_new( "%d error%s found", nbr_erreur, (nbr_erreur>1 ? "s" : "") );
-       retour = TRAD_DLS_ERROR;
+       retour = TRAD_DLS_SYNTAX_ERROR;
      }
     else
-     { gint fd;
-       Emettre_erreur_new( "No error found" );                        /* Pas d'erreur rencontré (mais peu etre des warning !) */
+     { gchar chaine[4096], date[64];
+       gint fd;
+       Emettre_erreur_new( "No error found" );                      /* Pas d'erreur rencontré (mais peut etre des warnings !) */
        retour = TRAD_DLS_OK;
 
        unlink ( cible );
@@ -1009,7 +994,7 @@
        if (fd<0)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                    "%s: Target creation failed %s (%s)", __func__, cible, strerror(errno) );
-          retour = TRAD_DLS_ERROR_FILE;
+          retour = TRAD_DLS_ERROR_NO_FILE;
         }
        else
         { gchar *include = " #include <Module_dls.h>\n";
@@ -1017,7 +1002,6 @@
                             "  {\n"
                             "    Update_edge_up_value();\n";
           gchar *End_Go =   "  }\n";
-          gchar chaine[4096], date[64];
           struct tm *temps;
           time_t ltime;
 
@@ -1064,7 +1048,7 @@
           g_snprintf(chaine, sizeof(chaine),
                     "/*******************************************************/\n"
                     " gchar *version (void)\n"
-                    "  { return(\"V%s - %s - ID%d\"); \n  }\n", VERSION, date, id );
+                    "  { return(\"V%s - %s\"); \n  }\n", WTD_VERSION, date );
           write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
 
           g_snprintf(chaine, sizeof(chaine),
@@ -1108,22 +1092,15 @@
 
           write( fd, Start_Go, strlen(Start_Go) );                                                 /* Ecriture de de l'entete */
 
-          g_snprintf(chaine, sizeof(chaine), "    if (vars->starting)\n     {\n" );
-          write( fd, chaine, strlen(chaine) );                                                     /* Ecriture de de l'entete */
-          liste = Liste_Actions_msg;                               /* Initialise les fonctions de gestion des fronts montants */
-          while(liste)
-           { gchar chaine[128];
-             g_snprintf(chaine, sizeof(chaine), "       MSG(%d,0);\n", GPOINTER_TO_INT(liste->data) );
-             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
-             liste = liste->next;
-           }
-          g_snprintf(chaine, sizeof(chaine), "     }\n" );
-          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
-
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
           write( fd, End_Go, strlen(End_Go) );
           close(fd);
         }
+
+       g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE tech_id='%s'", tech_id );
+       SQL_Write ( chaine );
+       g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_Tempo WHERE tech_id='%s'", tech_id );
+       SQL_Write ( chaine );
 
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)

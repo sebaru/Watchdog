@@ -98,6 +98,7 @@
     else if (!strcasecmp(period, "WEEK"))  periode = 3600;
     else if (!strcasecmp(period, "MONTH")) periode = 43200;
     else if (!strcasecmp(period, "YEAR"))  periode = 86400;
+    else if (!strcasecmp(period, "ALL"))   periode = 7*86400;
     g_snprintf( requete, sizeof(requete),
                "SELECT FROM_UNIXTIME((UNIX_TIMESTAMP(date_time) DIV %d)*%d) AS date, COALESCE(ROUND(AVG(valeur),3),0) AS moyenne "
                "FROM histo_bit_%s_%s", periode, periode, tech_id, acronyme );
@@ -106,6 +107,7 @@
     if (!strcasecmp(period, "WEEK"))  g_strlcat ( requete, " WHERE date_time>=NOW() - INTERVAL 2 WEEK", sizeof(requete) );
     if (!strcasecmp(period, "MONTH")) g_strlcat ( requete, " WHERE date_time>=NOW() - INTERVAL 9 WEEK", sizeof(requete) );
     if (!strcasecmp(period, "YEAR"))  g_strlcat ( requete, " WHERE date_time>=NOW() - INTERVAL 13 MONTH", sizeof(requete) );
+    if (!strcasecmp(period, "ALL"))   g_strlcat ( requete, "", sizeof(requete) );
 
     g_strlcat ( requete, " GROUP BY date ORDER BY date", sizeof(requete) );
 

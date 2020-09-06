@@ -33,8 +33,8 @@
 
  enum { TRAD_DLS_OK,                                                                   /* Retour de la fonction Traduire DLS. */
         TRAD_DLS_WARNING,
-        TRAD_DLS_ERROR,
-        TRAD_DLS_ERROR_FILE
+        TRAD_DLS_SYNTAX_ERROR,
+        TRAD_DLS_ERROR_NO_FILE
       };
 
  struct ACTION
@@ -75,7 +75,7 @@
   };
 
 /****************************************************** Prototypes ************************************************************/
- extern gint Traduire_DLS( gint id );                                                                        /* Dans Interp.c */
+ extern gint Traduire_DLS( gchar *tech_id );                                                                 /* Dans Interp.c */
  extern void Trad_dls_set_debug ( gboolean actif );
  extern char *New_chaine( int longueur );
  extern void Emettre( char *chaine );

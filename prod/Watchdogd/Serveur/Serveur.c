@@ -199,7 +199,6 @@
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
     client->mode = DECONNECTE;
                                                                         /* Le client n'est plus connecté, on en informe D.L.S */
-    if (client->util && client->util->ssrv_bit_presence) SB(client->util->ssrv_bit_presence, 0);
     Unref_client( client );
   }
 /******************************************************************************************************************************/
@@ -265,7 +264,7 @@
                                                                       /* Initialisation de la zone interne et comm du serveur */
     memset( &Cfg_ssrv, 0, sizeof(Cfg_ssrv) );                                       /* Mise a zero de la structure de travail */
     Cfg_ssrv.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-SSRV-LISTEN", lib, NOM_THREAD, "Manage SSRV Module" );
+    Thread_init ( "W-SSRV-LISTEN", lib, WTD_VERSION, "Manage SSRV Module" );
     Ssrv_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
     if (Cfg_ssrv.ssl_needed)

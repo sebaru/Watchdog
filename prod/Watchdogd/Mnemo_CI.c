@@ -128,7 +128,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT cpt.valeur, cpt.etat, cpt.unite, cpt.multi"
+                "SELECT cpt.valeur, cpt.etat, cpt.unite, cpt.multi, cpt.archivage"
                 " FROM mnemos_CI as cpt"
                 " WHERE cpt.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
                 cpt_imp->tech_id, cpt_imp->acronyme
@@ -141,8 +141,9 @@
 
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( db->row )
-     { cpt_imp->valeur = atoi(db->row[0]);
-       cpt_imp->etat   = atoi(db->row[1]);
+     { cpt_imp->valeur    = atoi(db->row[0]);
+       cpt_imp->etat      = atoi(db->row[1]);
+       cpt_imp->archivage = atoi(db->row[4]);
        g_snprintf( cpt_imp->unite, sizeof(cpt_imp->unite), "%s", db->row[2] );
        cpt_imp->multi  = atof(db->row[3]);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CI '%s:%s'=%d %s (%d) loaded", __func__,
@@ -190,12 +191,13 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_CI_to_json ( JsonBuilder *builder, struct DLS_CI *bit )
-  { Json_add_string ( builder, "tech_id",  bit->tech_id );
-    Json_add_string ( builder, "acronyme", bit->acronyme );
-    Json_add_int    ( builder, "valeur",   bit->valeur );
+  { Json_add_string ( builder, "tech_id",   bit->tech_id );
+    Json_add_string ( builder, "acronyme",  bit->acronyme );
+    Json_add_int    ( builder, "valeur",    bit->valeur );
     Json_add_int    ( builder, "imp_par_minute", bit->imp_par_minute );
-    Json_add_double ( builder, "multi",    bit->multi );
-    Json_add_string ( builder, "unite",    bit->unite );
-    Json_add_bool   ( builder, "etat",     bit->etat );
+    Json_add_double ( builder, "multi",     bit->multi );
+    Json_add_string ( builder, "unite",     bit->unite );
+    Json_add_bool   ( builder, "etat",      bit->etat );
+    Json_add_bool   ( builder, "archivage", bit->archivage );
   };
 /*----------------------------------------------------------------------------------------------------------------------------*/

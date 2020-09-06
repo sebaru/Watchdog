@@ -116,24 +116,23 @@
 /* Entrée: un pointeur vers une nouvelle connexion de base de données, le critere de recherche                                */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Recuperer_mnemos_DI_by_text ( struct DB **db_retour, gchar *thread, gchar *text )
+ gboolean Recuperer_mnemos_DI_by_tag ( struct DB **db_retour, gchar *tech_id, gchar *tag )
   { gchar requete[1024];
     gchar *commande;
     gboolean retour;
     struct DB *db;
 
-    commande = Normaliser_chaine ( text );
+    commande = Normaliser_chaine ( tag );
     if (!commande)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible commande", __func__ );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),
-               "SELECT m.tech_id, m.acronyme, m.src_text, m.libelle "
+               "SELECT m.tech_id, m.acronyme, m.map_tag, m.libelle "
                "FROM mnemos_DI as m "
-               " WHERE (m.src_host='*' OR m.src_host LIKE '%s') AND (m.src_thread='*' OR m.src_thread LIKE '%s')"
-               " AND m.src_text LIKE '%s'",
-               g_get_host_name(), thread, commande );
+               " WHERE m.map_tech_id='%s' AND m.map_tag LIKE '%s'",
+               tech_id, commande );
     g_free(commande);
     db = Init_DB_SQL();
     if (!db)

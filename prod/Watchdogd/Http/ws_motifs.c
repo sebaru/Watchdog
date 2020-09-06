@@ -266,8 +266,7 @@
     else if(!strcmp(msg_type,"SET_CDE"))
      { gchar *tech_id  = Json_get_string ( response, "tech_id" );
        gchar *acronyme = Json_get_string ( response, "acronyme" );
-       if (Json_has_member ( response, "bit_clic" ) ) Envoyer_commande_dls ( Json_get_int ( response, "bit_clic" ) );
-       else if (tech_id && acronyme) Envoyer_commande_dls_data ( tech_id, acronyme );
+       if (tech_id && acronyme) Envoyer_commande_dls_data ( tech_id, acronyme );
      }
     json_node_unref(response);
   }

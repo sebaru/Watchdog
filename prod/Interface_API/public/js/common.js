@@ -1,20 +1,21 @@
  document.addEventListener('DOMContentLoaded', Load_common, false);
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
- function Send_to_API ( method, URL, fonction )
+ function Send_to_API ( method, URL, parametre, fonction )
   { var xhr = new XMLHttpRequest;
     xhr.open(method, URL, true);
+    if (method=="POST") { xhr.setRequestHeader('Content-type', 'application/json'); }
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
        if (xhr.status == 200)
-        { /*var Response = JSON.parse(xhr.responseText);
-          console.debug(Response);*/
-          $('#idToastStatus').toast('show');
-          fonction();
+        { try { var Response = JSON.parse(xhr.responseText); }
+          catch (error) { Response=undefined; }
+          if (method!="GET") $('#idToastStatus').toast('show');
+          fonction(Response);
         }
        else { Show_Error( xhr.statusText ); }
      }
-    xhr.send();
+    xhr.send(parametre);
   }
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
@@ -36,6 +37,23 @@
   { window.location = url;
   }
 
+/********************************************* Barre de boutons ***************************************************************/
+ function Bouton_actions_start ( )
+  { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"); }
+
+ function Bouton_actions_add ( color, tooltip, clic_func, key, icone, texte )
+  { return( "<button "+
+            "class='btn btn-"+color+" btn-sm' "+
+            "data-toggle='tooltip' title='"+tooltip+"' "+
+            "onclick="+clic_func+"('"+key+"')>"+
+            (icone!==null ? "<i class='fas fa-"+icone+"'></i> " : "") +
+            (texte!==null ? texte : "") +
+            "</button>");
+  }
+ function Bouton_actions_end ( )
+  { return ("</div>"); }
+
+/********************************************** Bouton unitaire ***************************************************************/
  function Bouton ( color, tooltip, clic_func, key, texte )
   { if (clic_func !== null)
      { result = "<button "+

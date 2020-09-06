@@ -74,8 +74,9 @@
     gchar *tech_id  = Normaliser_chaine ( params[0] );
     gchar *acronyme = Normaliser_chaine ( params[1] );
     g_strfreev( params );
-
     Envoyer_commande_dls_data ( tech_id, acronyme );
+    g_free(tech_id);
+    g_free(acronyme);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
@@ -310,7 +311,8 @@
 
     if ( ! (Json_has_member ( request, "libelle" ) && Json_has_member ( request, "page" ) &&
             Json_has_member ( request, "ppage" ) && Json_has_member ( request, "access_level" ) ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 

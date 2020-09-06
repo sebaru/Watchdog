@@ -41,7 +41,7 @@
     struct DB *db;
 
     Cfg_imsgs.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Cfg_imsgs.enable            = FALSE;
+    g_snprintf( Cfg_imsgs.tech_id,  sizeof(Cfg_imsgs.tech_id ), NOM_THREAD );
     g_snprintf( Cfg_imsgs.username, sizeof(Cfg_imsgs.username), IMSGS_DEFAUT_USERNAME );
     g_snprintf( Cfg_imsgs.password, sizeof(Cfg_imsgs.password), IMSGS_DEFAUT_PASSWORD );
 
@@ -58,8 +58,8 @@
         { g_snprintf( Cfg_imsgs.username, sizeof(Cfg_imsgs.username), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "password" ) )
         { g_snprintf( Cfg_imsgs.password, sizeof(Cfg_imsgs.password), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_imsgs.enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
+        { g_snprintf( Cfg_imsgs.tech_id,  sizeof(Cfg_imsgs.tech_id),  "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_imsgs.lib->Thread_debug = TRUE;  }
        else
@@ -237,7 +237,7 @@
        goto end;
      }
 
-    if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, message ) )
+    if ( ! Recuperer_mnemos_DI_by_tag ( &db, Cfg_imsgs.tech_id, message ) )
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, message );
        Imsgs_Envoi_message_to( from, "Error searching Database .. Sorry .." );
        goto end;
@@ -397,14 +397,8 @@ end:
 reload:
     memset( &Cfg_imsgs, 0, sizeof(Cfg_imsgs) );                                     /* Mise a zero de la structure de travail */
     Cfg_imsgs.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-IMSGS", lib, NOM_THREAD, "Manage Instant Messaging system (libstrophe)" );
+    Thread_init ( "W-IMSGS", lib, WTD_VERSION, "Manage Instant Messaging system (libstrophe)" );
     Imsgs_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
-
-    if (!Cfg_imsgs.enable)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE,
-                "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       goto end;
-     }
 
     Cfg_imsgs.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
     zmq_msg = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
@@ -437,10 +431,6 @@ reconnect:
        sched_yield();
 
        xmpp_run_once ( Cfg_imsgs.ctx, 500 ); /* En milliseconde */
-       if (Cfg_imsgs.lib->Thread_reload == TRUE)
-        { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: recu signal RELOAD", __func__ );
-          break;
-        }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
         { histo = &histo_buf;
@@ -469,8 +459,7 @@ reconnect:
 
     Close_zmq ( zmq_msg );
 
-end:
-    if (lib->Thread_reload == TRUE)
+    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;

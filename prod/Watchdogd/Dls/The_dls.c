@@ -98,121 +98,6 @@
   { if (!(avant && apres)) return(0.0);
     else return( apres->tv_sec - avant->tv_sec + (apres->tv_usec - avant->tv_usec)/1000000.0 );
   }
-
-/******************************************************************************************************************************/
-/* Renvoie la valeur d'une entre TOR                                                                                          */
-/******************************************************************************************************************************/
- int E( int num )
-  { if ( (num>=0) && (num<NBR_ENTRE_TOR) ) return ( (Partage->e[ num ].etat ? 1 : 0) );
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "E : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/******************************************************************************************************************************/
-/* SE : Met à jour la valeur de l'entrée en parametre.                                                                        */
-/* Utilisé directement par les threads locaux, via Envoyer_entree_furtive_dls pour les evenements                             */
-/******************************************************************************************************************************/
- void SE( int num, int etat )
-  { if ( (num>=0) && (num<NBR_ENTRE_TOR) && ((E(num) && !etat) || (!E(num) && etat)) )
-     { /*Ajouter_arch( MNEMO_ENTREE, num, 1.0*E(num) );                       /* Archivage etat n-1 pour les courbes historique */
-       /*Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );                                            /* Archivage de l'etat courant */
-       Partage->e[num].etat = etat;                                                          /* Changement d'etat de l'entrée */
-     }
-  }
-/**********************************************************************************************************/
-/* Renvoie la valeur d'une entre TOR                                                                      */
-/**********************************************************************************************************/
- int A( int num )
-  { if ( num>=0 && num<NBR_SORTIE_TOR ) return ( Partage->a[ num ].etat );
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "A : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/**********************************************************************************************************/
-/* Renvoie la valeur d'un bistable                                                                        */
-/**********************************************************************************************************/
- int B( int num )
-  { if (num>=0 && num<NBR_BIT_BISTABLE) return( ((Partage->b[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "B : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/**********************************************************************************************************/
-/* Renvoie la valeur d'un monostable                                                                      */
-/**********************************************************************************************************/
- int M( int num )
-  { if (num>=0 && num<NBR_BIT_MONOSTABLE) return( ((Partage->m[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "M : num %d out of range", num ); }
-     }
-    return(0);
-  }
-/******************************************************************************************************************************/
-/* SB_SYS: Positionnement d'un bistable DLS sans controle sur le range reserved                                               */
-/* Entrée: numero, etat                                                                                                       */
-/* Sortie: Neant                                                                                                              */
-/******************************************************************************************************************************/
- void SB_SYS( int num, int etat )
-  { gint numero, bit;
-    if (num<0 || num>=NBR_BIT_BISTABLE)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SB : num %d out of range", num ); }
-       return;
-     }
-    numero = num>>3;
-    bit = 1<<(num & 0x07);
-    if (etat)                                                                                           /* Mise a jour du bit */
-     { Partage->b[numero] |= bit;
-       Partage->audit_bit_interne_per_sec++;
-     }
-    else
-     { Partage->b[numero] &= ~bit;
-       Partage->audit_bit_interne_per_sec++;
-     }
-  }
-/******************************************************************************************************************************/
-/* SB: Positionnement d'un bistable DLS avec controle sur le range reserved                                                   */
-/* Entrée: numero, etat                                                                                                       */
-/* Sortie: Neant                                                                                                              */
-/******************************************************************************************************************************/
- void SB( int num, int etat )
-  { if (num<=NBR_BIT_BISTABLE_RESERVED || num>=NBR_BIT_BISTABLE)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SB : num %d out of range", num ); }
-       return;
-     }
-    SB_SYS( num, etat );
-  }
-/**********************************************************************************************************/
-/* SM: Positionnement d'un monostable DLS                                                                 */
-/* Entrée: numero, etat                                                                                   */
-/* Sortie: Neant                                                                                          */
-/**********************************************************************************************************/
- void SM( int num, int etat )
-  { gint numero, bit;
-    if (num<0 || num>=NBR_BIT_MONOSTABLE)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SM : num %d out of range", num ); }
-       return;
-     }
-    numero = num>>3;
-    bit = 1<<(num & 0x07);
-    if (etat)                                                                       /* Mise a jour du bit */
-     { Partage->m[numero] |= bit;
-       Partage->audit_bit_interne_per_sec++;
-     }
-    else
-     { Partage->m[numero] &= ~bit;
-       Partage->audit_bit_interne_per_sec++;
-     }
-  }
 /**********************************************************************************************************/
 /* SI: Positionnement d'un motif TOR                                                                      */
 /* Entrée: numero, etat                                                                                   */
@@ -344,41 +229,6 @@
      { tempo->status = DLS_TEMPO_NOT_COUNTING; }
   }
 /******************************************************************************************************************************/
-/* SA: Positionnement d'un actionneur DLS                                                                                     */
-/* Entrée: numero, etat                                                                                                       */
-/* Sortie: Neant                                                                                                              */
-/******************************************************************************************************************************/
- void SA( int num, int etat )
-  { if (num<0 || num>=NBR_SORTIE_TOR)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SA : num %d out of range", num ); }
-       return;
-     }
-
-    if ( Partage->a[num].etat != etat )
-     { Partage->a[num].etat = etat;
-
-       if ( Partage->top <= Partage->a[num].last_change + 3 )        /* Si changement en moins de 3 dizieme depuis le dernier */
-        { if ( ! (Partage->top % 50 ))                                         /* Si persistence on prévient toutes les 5 sec */
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: last_change trop tot pour A%d !", __func__, num ); }
-        }
-       else
-        { /*Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );                                              /* Sauvegarde de l'etat n */
-        }
-       Partage->a[num].last_change = Partage->top;
-       Partage->audit_bit_interne_per_sec++;
-     }
-  }
-/******************************************************************************************************************************/
-/* Envoyer_commande_dls: Gestion des envois de commande DLS                                                                   */
-/* Entrée/Sortie: rien                                                                                                        */
-/******************************************************************************************************************************/
- void Envoyer_commande_dls ( int num )
-  { pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Set_M = g_slist_append ( Partage->com_dls.Set_M, GINT_TO_POINTER(num) );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
-  }
-/******************************************************************************************************************************/
 /* Envoyer_commande_dls_data: Gestion des envois de commande DLS via dls_data                                                 */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
@@ -398,15 +248,7 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Set_cde_exterieure ( void )
-  { gint num;
-    pthread_mutex_lock( &Partage->com_dls.synchro );
-    while( Partage->com_dls.Set_M )                                                      /* A-t-on un monostable a allumer ?? */
-     { num = GPOINTER_TO_INT( Partage->com_dls.Set_M->data );
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a un du bit M%03d", __func__, num );
-       Partage->com_dls.Set_M   = g_slist_remove ( Partage->com_dls.Set_M,   GINT_TO_POINTER(num) );
-       Partage->com_dls.Reset_M = g_slist_append ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
-       SM( num, 1 );                                                                           /* Mise a un du bit monostable */
-     }
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
     while( Partage->com_dls.Set_Dls_Data )                                                  /* A-t-on une entrée a allumer ?? */
      { struct DLS_DI *di = Partage->com_dls.Set_Dls_Data->data;
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a 1 du bit DI %s:%s",
@@ -423,14 +265,7 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Reset_cde_exterieure ( void )
-  { gint num;
-    pthread_mutex_lock( &Partage->com_dls.synchro );
-    while( Partage->com_dls.Reset_M )                                                                /* Reset des monostables */
-     { num = GPOINTER_TO_INT(Partage->com_dls.Reset_M->data);
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a zero du bit M%03d", __func__, num );
-       Partage->com_dls.Reset_M = g_slist_remove ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
-       SM( num, 0 );
-     }
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
     while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
      { struct DLS_DI *di = Partage->com_dls.Reset_Dls_Data->data;
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a 0 du bit DI %s:%s",
@@ -469,7 +304,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding DLS_BOOL '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding DLS_BOOL '%s:%s'", __func__, tech_id, acronyme );
         }
        if (bool_p) *bool_p = (gpointer)bool;                                        /* Sauvegarde pour acceleration si besoin */
       }
@@ -583,7 +418,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_DI = g_slist_prepend ( Partage->Dls_data_DI, di );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding DLS_DI '%s:%s'=%d", __func__, tech_id, acronyme, valeur );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding DLS_DI '%s:%s'=%d", __func__, tech_id, acronyme, valeur );
         }
        if (di_p) *di_p = (gpointer)di;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -721,7 +556,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_DO = g_slist_prepend ( Partage->Dls_data_DO, dout );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding DLS_DO '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding DLS_DO '%s:%s'", __func__, tech_id, acronyme );
         }
        if (dout_p) *dout_p = (gpointer)dout;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -815,7 +650,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding AI '%s:%s'", __func__, tech_id, acronyme );
         }
        if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -907,7 +742,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AO = g_slist_prepend ( Partage->Dls_data_AO, ao );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding AO '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding AO '%s:%s'", __func__, tech_id, acronyme );
         }
        if (ao_p) *ao_p = (gpointer)ao;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -1003,7 +838,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_CI = g_slist_prepend ( Partage->Dls_data_CI, cpt_imp );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding CI '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding CI '%s:%s'", __func__, tech_id, acronyme );
           Charger_conf_CI ( cpt_imp );                                     /* Chargement des valeurs en base pour ce compteur */
         }
        if (cpt_imp_p) *cpt_imp_p = (gpointer)cpt_imp;                   /* Sauvegarde pour acceleration si besoin */
@@ -1040,7 +875,7 @@
        cpt_imp->imp_par_minute = cpt_imp->valeur - cpt_imp->valeurs[0];
      }
 
-    if (need_arch == TRUE)
+    if (cpt_imp->archivage && need_arch == TRUE)
      { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 ); }  /* Archivage si besoin */
   }
 /******************************************************************************************************************************/
@@ -1096,7 +931,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_CH = g_slist_prepend ( Partage->Dls_data_CH, cpt_h );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding CH '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding CH '%s:%s'", __func__, tech_id, acronyme );
           Charger_conf_CH ( cpt_h );                                       /* Chargement des valeurs en base pour ce compteur */
         }
        if (cpt_h_p) *cpt_h_p = (gpointer)cpt_h;                                     /* Sauvegarde pour acceleration si besoin */
@@ -1248,7 +1083,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_TEMPO = g_slist_prepend ( Partage->Dls_data_TEMPO, tempo );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding TEMPO '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding TEMPO '%s:%s'", __func__, tech_id, acronyme );
         }
        if (tempo_p) *tempo_p = (gpointer)tempo;                                     /* Sauvegarde pour acceleration si besoin */
       }
@@ -1332,7 +1167,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_MSG = g_slist_prepend ( Partage->Dls_data_MSG, msg );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding MSG '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding MSG '%s:%s'", __func__, tech_id, acronyme );
         }
        if (msg_p) *msg_p = (gpointer)msg;                                           /* Sauvegarde pour acceleration si besoin */
       }
@@ -1455,7 +1290,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_VISUEL = g_slist_prepend ( Partage->Dls_data_VISUEL, visu );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding VISUEL '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding VISUEL '%s:%s'", __func__, tech_id, acronyme );
         }
        if (visu_p) *visu_p = (gpointer)visu;                                        /* Sauvegarde pour acceleration si besoin */
       }
@@ -1540,7 +1375,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_REGISTRE = g_slist_prepend ( Partage->Dls_data_REGISTRE, reg );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
                     "%s : adding DLS_REGISTRE '%s:%s'", __func__, tech_id, acronyme );
         }
        if (r_p) *r_p = (gpointer)reg;                                               /* Sauvegarde pour acceleration si besoin */
@@ -1749,7 +1584,7 @@
 /* Main: Fonction principale du DLS                                                                                           */
 /******************************************************************************************************************************/
  void Run_dls ( void )
-  { gint last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min;
+  { gint last_top_10sec, last_top_5sec, last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min;
     gint Update_heure=0;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
@@ -1767,16 +1602,18 @@
         { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: update library error" ); }
      }
     Charger_plugins();                                                                          /* Chargement des modules dls */
-    SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
-    SB_SYS(2, 1);                                                                                      /* B2 est toujours à 1 */
     Mnemo_auto_create_AI ( "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
     Mnemo_auto_create_AI ( "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
     Mnemo_auto_create_AI ( "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
     Mnemo_auto_create_AI ( "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1MIN", "Impulsion toutes les minutes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1SEC", "Impulsion toutes les secondes" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_5SEC", "Impulsion toutes les 5 secondes" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_10SEC", "Impulsion toutes les 10 secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde" );
 
     sleep(30);                    /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
 
@@ -1784,7 +1621,8 @@
 
     last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
-     { gpointer dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
+     { gpointer dls_top_10sec=NULL, dls_top_5sec=NULL, dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
+       gpointer dls_flipflop_1sec=NULL, dls_flipflop_2hz=NULL;
 
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
@@ -1798,12 +1636,24 @@
         { Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
           last_top_1min = Partage->top;
         }
-       if (Partage->top-last_top_1sec>=10)                                                              /* Toutes les secondes */
+       if (Partage->top-last_top_1sec>=10)                                                             /* Toutes les secondes */
         { Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
+          Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec,
+                              !Dls_data_get_bool ( "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec) );
           last_top_1sec = Partage->top;
+        }
+       if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
+        { Dls_data_set_bool ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, TRUE );
+          last_top_5sec = Partage->top;
+        }
+       if (Partage->top-last_top_10sec>=100)                                                              /* Toutes les secondes */
+        { Dls_data_set_bool ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, TRUE );
+          last_top_10sec = Partage->top;
         }
        if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
         { Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
+          Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz,
+                              !Dls_data_get_bool ( "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz) );
           last_top_2hz = Partage->top;
         }
        if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
@@ -1818,14 +1668,14 @@
 
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
 
-       SB_SYS(0, !B(0));                                                            /* Change d'etat tous les tours programme */
        SI(1, 1, 255, 0, 0, 0 );                                                                   /* Icone toujours à 1:rouge */
 
        pthread_mutex_lock( &Partage->com_dls.synchro );
        Dls_run_dls_tree( Partage->com_dls.Dls_tree );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
-       SB_SYS(3, 1);                                                  /* B3 est toujours à un apres le premier tour programme */
        Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, FALSE );
+       Dls_data_set_bool ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, FALSE );
+       Dls_data_set_bool ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, FALSE );

@@ -51,7 +51,6 @@
     struct DB *db;
 
     Cfg_smsg.lib->Thread_debug = FALSE;                                                        /* Settings default parameters */
-    Cfg_smsg.enable            = FALSE;
     g_snprintf( Cfg_smsg.smsbox_apikey, sizeof(Cfg_smsg.smsbox_apikey), "%s", DEFAUT_SMSBOX_APIKEY );
     g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "GSM01" );
 
@@ -68,8 +67,6 @@
         { g_snprintf( Cfg_smsg.smsbox_apikey, sizeof(Cfg_smsg.smsbox_apikey), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
         { g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_smsg.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_smsg.lib->Thread_debug = TRUE;  }
        else
@@ -334,7 +331,7 @@
                   CURLFORM_END);
     curl_formadd( &formpost, &lastptr,                              /* Pas de SMS les 2 premières minutes de vie du processus */
                   CURLFORM_COPYNAME,     "origine",                                 /* 'debugvar' pour lancer en mode semonce */
-                  CURLFORM_COPYCONTENTS, VERSION,
+                  CURLFORM_COPYCONTENTS, WTD_VERSION,
 /*                     CURLFORM_COPYCONTENTS, "debugvar",*/
                   CURLFORM_END);
 
@@ -399,8 +396,13 @@
         { case MSG_SMS_YES:
                if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
                 { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                            "%s: Error sending with GSM. Falling back to SMSBOX", __func__ );
-                  Envoi_sms_smsbox( msg, sms->user_phone );
+                            "%s: First Error sending with GSM. Trying another one in 5 sec", __func__ );
+                  sleep(5);
+                  if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
+                   { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
+                               "%s: Second Error sending with GSM. Falling back to SMSBOX", __func__ );
+                     Envoi_sms_smsbox( msg, sms->user_phone );
+                   }
                 }
                break;
           case MSG_SMS_GSM_ONLY:
@@ -485,7 +487,7 @@
        return;
      }
 
-    if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, texte ) )
+    if ( ! Recuperer_mnemos_DI_by_tag ( &db, Cfg_smsg.tech_id, texte ) )
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
     else while ( Recuperer_mnemos_DI_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
@@ -638,14 +640,8 @@
 reload:
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-SMSG", lib, NOM_THREAD, "Manage SMS system (libgammu)" );
+    Thread_init ( "W-SMSG", lib, WTD_VERSION, "Manage SMS system (libgammu)" );
     Smsg_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
-
-    if (!Cfg_smsg.enable)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
-                "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       goto end;
-     }
 
     if (Dls_auto_create_plugin( Cfg_smsg.tech_id, "Gestion du GSM" ) == FALSE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_smsg.tech_id ); }
@@ -701,8 +697,7 @@ reload:
     Close_zmq ( zmq_from_bus );
     Close_zmq ( Cfg_smsg.zmq_to_master );
 
-end:
-    if (lib->Thread_reload == TRUE)
+    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;

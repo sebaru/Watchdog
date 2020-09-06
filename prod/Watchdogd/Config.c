@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Config/Config.c        Lecture du fichier de configuration Watchdog                                              */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                         mer. 15 déc. 2010 13:30:12 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                         mer. 15 dÃ©c. 2010 13:30:12 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -35,9 +35,9 @@
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
 
 /******************************************************************************************************************************/
-/* Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                        */
-/* Entrée: le nom de fichier à lire                                                                                           */
-/* Sortie: La structure mémoire est à jour                                                                                    */
+/* Lire_config : Lit la config Watchdog et rempli la structure mÃ©moire                                                        */
+/* EntrÃ©e: le nom de fichier Ã  lire                                                                                           */
+/* Sortie: La structure mÃ©moire est Ã  jour                                                                                    */
 /******************************************************************************************************************************/
  void Lire_config ( char *fichier_config )
   { GError *error = NULL;
@@ -146,7 +146,7 @@ end:
   }
 /******************************************************************************************************************************/
 /* Print_config: Affichage (enfin log) la config actuelle en parametre                                                        */
-/* Entrée: une config !! -> le champ log doit etre initialisé via la librairie Erreur                                         */
+/* EntrÃ©e: une config !! -> le champ log doit etre initialisÃ© via la librairie Erreur                                         */
 /******************************************************************************************************************************/
  void Print_config ( void )
   {
@@ -169,7 +169,7 @@ end:
   }
 /******************************************************************************************************************************/
 /* Retirer_configDB: Elimination d'un parametre de configuration                                                              */
-/* Entrée: un log et une database                                                                                             */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Retirer_configDB ( gchar *nom_thread, gchar *nom )
@@ -193,7 +193,7 @@ end:
   }
 /******************************************************************************************************************************/
 /* Ajouter_configDB: Ajout ou edition d'un message                                                                            */
-/* Entrée: le thread, le nom du parametre, sa valeur                                                                          */
+/* EntrÃ©e: le thread, le nom du parametre, sa valeur                                                                          */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
@@ -218,8 +218,8 @@ end:
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée                                   */
-/* Entrée: une database de retour et le nom de l'instance_id                                                                  */
+/* Recuperer_configDB : RÃ©cupration de la configuration en base pour une instance_id donnÃ©e                                   */
+/* EntrÃ©e: une database de retour et le nom de l'instance_id                                                                  */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread )
@@ -230,7 +230,7 @@ end:
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT nom,valeur"
                 " FROM %s"
-                " WHERE instance_id = '%s' AND nom_thread='%s' ORDER BY nom,valeur",
+                " WHERE instance_id = '%s' AND nom_thread LIKE '%s' ORDER BY nom,valeur",
                 NOM_TABLE_CONFIG, g_get_host_name(), nom_thread
               );
 
@@ -246,14 +246,48 @@ end:
     return ( retour );
   }
 /******************************************************************************************************************************/
-/* Recuperer_configDB_suite: Continue la récupération des paramètres de configuration dans la base                            */
-/* Entrée: une database                                                                                                       */
+/* Recuperer_configDB : RÃ©cupration de la configuration en base pour une instance_id donnÃ©e                                   */
+/* EntrÃ©e: une database de retour et le nom de l'instance_id                                                                  */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gchar *Recuperer_configDB_by_nom ( gchar *nom_thread, gchar *nom_param )
+  { gchar requete[512], *valeur = NULL;
+    gboolean retour;
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT valeur FROM %s"
+                " WHERE instance_id = '%s' AND nom_thread LIKE '%s' AND nom LIKE '%s' ORDER BY nom,valeur",
+                NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom_param
+              );
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(NULL);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE)
+     { Libere_DB_SQL (&db);
+       return(NULL);
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if (db->row) { valeur = g_strdup ( db->row[0] ); }
+    Liberer_resultat_SQL (db);
+    Libere_DB_SQL( &db );
+    return(valeur);
+  }
+/******************************************************************************************************************************/
+/* Recuperer_configDB_suite: Continue la rÃ©cupÃ©ration des paramÃ¨tres de configuration dans la base                            */
+/* EntrÃ©e: une database                                                                                                       */
 /* Sortie: FALSE si plus d'enregistrement                                                                                     */
 /******************************************************************************************************************************/
  gboolean Recuperer_configDB_suite( struct DB **db_orig, gchar **nom, gchar **valeur )
   { struct DB *db;
 
-    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
+    db = *db_orig;                                          /* RÃ©cupÃ©ration du pointeur initialisÃ© par la fonction prÃ©cÃ©dente */
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);

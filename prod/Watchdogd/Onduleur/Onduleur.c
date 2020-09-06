@@ -49,7 +49,6 @@
     struct DB *db;
 
     Cfg_ups.lib->Thread_debug = FALSE;                                                         /* Settings default parameters */
-    Cfg_ups.enable            = FALSE;
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
@@ -60,9 +59,7 @@
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,                                             /* Print Config */
                 "Ups_Lire_config: '%s' = %s", nom, valeur );
-            if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_ups.enable = TRUE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+            if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_ups.lib->Thread_debug = TRUE;  }
        else
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
@@ -548,14 +545,8 @@
 reload:
     memset( &Cfg_ups, 0, sizeof(Cfg_ups) );                                         /* Mise a zero de la structure de travail */
     Cfg_ups.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-UPS", lib, NOM_THREAD, "Manage UPS Module" );
+    Thread_init ( "W-UPS", lib, WTD_VERSION, "Manage UPS Module" );
     Ups_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
-
-    if (!Cfg_ups.enable)
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-                "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       goto end;
-     }
 
     if (Config.instance_is_master==FALSE)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
@@ -573,14 +564,9 @@ reload:
      }
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
-    while(lib->Thread_run == TRUE)                                                        /* On tourne tant que l'on a besoin */
+    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { usleep(10000);
        sched_yield();
-
-       if (lib->Thread_reload == TRUE)
-        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
-          break;
-        }
 
        Envoyer_sortie_aux_ups();
 
@@ -622,9 +608,7 @@ reload:
     Close_zmq ( Cfg_ups.zmq_from_bus );
 
 end:
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
-
-    if (lib->Thread_reload == TRUE)
+    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;

@@ -16,34 +16,53 @@
  function Go_to_dls_run ()
   { Redirect ( "/tech/dls_run" );
   }
-/************************************ Envoi les infos de modifications synoptique *********************************************/
- function Valider_Dls_Del ( dls_id )
-  { var xhr = new XMLHttpRequest;
-    xhr.open('DELETE', "/api/dls/del/"+dls_id );
-    xhr.onreadystatechange = function( )
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status == 200)
-        { $('#idTableDLS').DataTable().ajax.reload(null, false);
-          $('#idToastStatus').toast('show');
-        }
-       else { Show_Error( xhr.statusText ); }
-     };
-    xhr.send();
-  }
 
+ function Dls_start_plugin ( tech_id )
+  { var json_request = JSON.stringify( { tech_id : tech_id } );
+    Send_to_API ( 'POST', "/api/dls/start", json_request, function ()
+     { $('#idTableDLS').DataTable().ajax.reload();
+       $('#idToastStatus').toast('show');
+     }
+    );
+  }
+ function Dls_stop_plugin ( tech_id )
+  { var json_request = JSON.stringify( { tech_id : tech_id } );
+    Send_to_API ( 'POST', "/api/dls/stop", json_request, function ()
+     { $('#idTableDLS').DataTable().ajax.reload();
+       $('#idToastStatus').toast('show');
+     }
+    );
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Valider_Dls_Del ( tech_id )
+  { var json_request = JSON.stringify( { tech_id : tech_id } );
+    Send_to_API ( 'DELETE', "/api/dls/del", json_request, function ()
+     { $('#idTableDLS').DataTable().ajax.reload(null, false);
+       $('#idToastStatus').toast('show');
+     }
+    );
+  }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Dls_Del ( dls_id )
+ function Show_Modal_Dls_Del ( tech_id )
   { table = $('#idTableDLS').DataTable();
-    selection = table.ajax.json().plugins.filter( function(item) { return item.id==dls_id } )[0];
+    selection = table.ajax.json().plugins.filter( function(item) { return item.tech_id==tech_id } )[0];
     $('#idModalDLSDelTitre').text ( "Détruire le module ?" );
     $('#idModalDLSDelMessage').html("Etes-vous sur de vouloir supprimer le module DLS "+
                                     "et toutes ses dépendances (Mnémoniques, ...) ?<hr>"+
                                     "<strong>"+selection.tech_id + " - " + selection.shortname + "</strong>" + "<br>" + selection.name
                                    );
-    $('#idModalDLSDelValider').attr( "onclick", "Valider_Dls_Del("+dls_id+")" );
+    $('#idModalDLSDelValider').attr( "onclick", "Valider_Dls_Del("+tech_id+")" );
     $('#idModalDLSDel').modal("show");
   }
-
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function Dls_compiler ( tech_id )
+  { var json_request = JSON.stringify(
+     { tech_id : tech_id,
+     });
+    Send_to_API ( "POST", "/api/dls/compil/", json_request, function ()
+     { $('#idTableDLS').DataTable().ajax.reload(null, false);
+     });
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTableDLS').DataTable(
@@ -56,69 +75,56 @@
          columns:
           [ { "data": "ppage", "title":"PPage", "className": "align-middle hidden-xs text-center" },
             { "data": "page", "title":"Page", "className": "align-middle hidden-xs text-center" },
-            { "data": null, "className": "align-middle hidden-xs text-center",
+            { "data": null, "title":"Started", "className": "align-middle hidden-xs text-center",
               "render": function (item)
                 { if (item.actif==true)
                    { return( Bouton ( "success", "Désactiver le plugin",
-                                      "Dls_disable_plugin", item.tech_id, "Actif" ) );
+                                      "Dls_stop_plugin", item.tech_id, "Actif" ) );
                    }
                   else
                    { return( Bouton ( "outline-secondary", "Activer le plugin",
-                                      "Dls_enable_plugin", item.tech_id, "Désactivé" ) );
+                                      "Dls_start_plugin", item.tech_id, "Désactivé" ) );
                    }
-                },
-              "title":"Started", "orderable": true
+                }
             },
-            { "data": null, "className": "align-middle hidden-xs text-center",
+            { "data": null, "title":"TechID", "className": "align-middle text-center",
               "render": function (item)
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) );
-                },
-              "title":"tech_id", "orderable": true
+                }
             },
             { "data": "package", "title":"Package", "className": "align-middle hidden-xs" },
-            { "data": null, "className": "align-middle hidden-xs",
+            { "data": null, "title":"Nom court", "className": "align-middle",
               "render": function (item)
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.shortname ) );
-                },
-              "title":"Nom court", "orderable": true
+                }
             },
-            { "data": null, "className": "align-middle hidden-xs",
+            { "data": null, "title":"Libellé", "className": "align-middle hidden-xs",
               "render": function (item)
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.name ) );
-                },
-              "title":"Libellé", "orderable": true
+                }
             },
-            { "data": null, "className": "align-middle hidden-xs",
+            { "data": null, "title":"Compil", "className": "align-middle hidden-xs",
               "render": function (item)
                 { return( Bouton ( compil_status[item.compil_status][1],
                                   "Statut de la compilation", null, null,
-                                  compil_status[item.compil_status][0]
+                                   compil_status[item.compil_status][0]
                                 )
                         );
-                },
-              "title":"Compil", "orderable": true
+                }
             },
             { "data": "nbr_compil", "title":"Nbr Compil", "className": "align-middle text-center hidden-xs" },
             { "data": "nbr_ligne", "title":"Nbr Lignes", "className": "align-middle text-center hidden-xs" },
-            { "data": null,
+            { "data": null, "title":"Actions", "orderable": false,
               "render": function (item)
-                { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
-                         "<button class='btn btn-outline-primary btn-sm' data-toggle='tooltip' title='Voir le code' "+
-                         "onclick=Redirect('/tech/dls_source/"+item.tech_id+"')>"+
-                         "<i class='fas fa-code'></i></button>"+
-                         "<button class='btn btn-outline-primary btn-sm' data-toggle='tooltip' title='Voir les mnemos' "+
-                         "onclick=Redirect('/tech/mnemos/"+item.tech_id+"')>"+
-                         "<i class='fas fa-book'></i></button>"+
-                         "<button class='btn btn-outline-primary btn-sm' data-toggle='tooltip' title='Voir le RUN' "+
-                         "onclick=Redirect('/tech/run/"+item.tech_id+"')>"+
-                         "<i class='fas fa-eye'></i></button>"+
-                         "<button class='btn btn-danger btn-block btn-sm' data-toggle='tooltip' title='Supprimer le plugin' "+
-                         "onclick=Show_Modal_Dls_Del('"+item.id+"')>"+
-                         "<i class='fas fa-trash'></i></button>"+
-                         "</div>"
-                        )
-                },
-              "title":"Actions", "orderable": false
+                { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "outline-primary", "Voir le code", "Redirect", "/tech/dls_source/"+item.tech_id, "code", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Voir les mnemos", "Redirect", "/tech/mnemos/"+item.tech_id, "book", null );
+                  boutons += Bouton_actions_add ( "outline-success", "Compiler le module", "Dls_compiler", item.tech_id, "coffee", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Voir les RUN", "Redirect", "/tech/run/"+item.tech_id, "eye", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer le plugin", "Show_Modal_Dls_Del", item.tech_id, "trash", null );
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
+                }
             }
           ],
          /*order: [ [0, "desc"] ],*/

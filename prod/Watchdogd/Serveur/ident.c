@@ -38,7 +38,7 @@
 /******************************************************************************************************************************/
  static void Autoriser_client ( struct CLIENT *client )
   { struct REZO_SRV_IDENT ident;
-    g_snprintf( ident.comment, sizeof(ident.comment), "Serveur Watchdog v%s", VERSION );
+    g_snprintf( ident.comment, sizeof(ident.comment), "Serveur Watchdog v%s", WTD_VERSION );
     if ( Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_AUTORISE,
                        (gchar *)&ident, sizeof(struct REZO_SRV_IDENT) ) )
      { return; }
@@ -60,11 +60,11 @@
 
                                                                                             /* Vérification du MAJOR et MINOR */
     sscanf ( ident->version, "%d.%d.%d", &client_major, &client_minor, &client_micro );
-    sscanf ( VERSION,        "%d.%d.%d", &server_major, &server_minor, &server_micro );
+    sscanf ( WTD_VERSION,        "%d.%d.%d", &server_major, &server_minor, &server_micro );
 
     if ( ! (client_major == server_major && client_minor == server_minor) )
      { g_snprintf( gtkmessage.message, sizeof(gtkmessage.message),
-                   "Wrong version number (%s/%s)", ident->version, VERSION );
+                   "Wrong version number (%s/%s)", ident->version, WTD_VERSION );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                     (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, gtkmessage.message );
@@ -118,7 +118,6 @@
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
              "%s: Autorisation sent for %s(id=%d)", __func__, client->util->username, client->util->id );
                                                                                /* Le client est connecté, on en informe D.L.S */
-    if (client->util->ssrv_bit_presence) SB(client->util->ssrv_bit_presence, 1);
     Client_mode (client, VALIDE);
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CLI_VALIDE, NULL, 0 );                     /* Nous prévenons le client */
     return(TRUE);

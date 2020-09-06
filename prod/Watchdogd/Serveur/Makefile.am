@@ -7,7 +7,6 @@
 lib_LTLIBRARIES     = libwatchdog-server-ssrv.la
 libwatchdog_server_ssrv_la_SOURCES    = Serveur.c protocole.c ident.c envoi.c Utilisateur.c \
                         protocole_dls.c \
-                        protocole_admin.c \
                         protocole_mnemonique.c protocole_supervision.c protocole_atelier.c \
                         protocole_histo.c \
                         protocole_synoptique.c protocole_lowlevel.c \
@@ -18,7 +17,7 @@ libwatchdog_server_ssrv_la_SOURCES    = Serveur.c protocole.c ident.c envoi.c Ut
                         envoi_mnemonique.c \
                         accept.c \
                         cadran.c ecoute.c ssl.c handle_client.c \
-                        Sous_serveur.h Utilisateur_DB.h Client.h admin_serveur.c
+                        Sous_serveur.h Utilisateur_DB.h Client.h 
 
 libwatchdog_server_ssrv_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0` \
                                       `mysql_config --libs` \

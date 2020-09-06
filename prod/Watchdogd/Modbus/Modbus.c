@@ -49,12 +49,11 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Modbus_Lire_config ( void )
+ static gboolean Modbus_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 
     Cfg_modbus.lib->Thread_debug = FALSE;                                                      /* Settings default parameters */
-    Cfg_modbus.enable            = FALSE;
     Cfg_modbus.nbr_request_par_sec      = 50;
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
@@ -65,9 +64,7 @@
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur );
-            if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_modbus.enable = TRUE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+            if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_modbus.lib->Thread_debug = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "nbr_request_par_sec" ) )
         { Cfg_modbus.nbr_request_par_sec = atoi(valeur);  }
@@ -79,6 +76,46 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Modbus_Creer_DB ( void )
+  { gint database_version;
+
+    gchar *database_version_string = Recuperer_configDB_by_nom( "modbus", "database_version" );
+    if (database_version_string)
+     { database_version = atoi( database_version_string );
+       g_free(database_version_string);
+     } else database_version=0;
+
+    Info_new( Config.log, Config.log_db, LOG_NOTICE,
+             "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, WTD_VERSION );
+
+    if (database_version==0)
+     { SQL_Write ( "CREATE TABLE IF NOT EXISTS `modbus_modules` ("
+                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                   "`date_create` datetime NOT NULL DEFAULT NOW(),"
+                   "`enable` tinyint(1) NOT NULL,"
+                   "`hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                   "`tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT hostname,"
+                   "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                   "`watchdog` int(11) NOT NULL,"
+                   "PRIMARY KEY (`id`)"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
+     }
+
+    if (database_version < 4920)
+     { SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_EA`" );
+       SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_E`" );
+       SQL_Write ( "ALTER TABLE `modbus_modules` DROP `max_nbr_E`" );
+       SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_A`" );
+       SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_AA`" );
+     }
+
+    Modifier_configDB ( "modbus", "database_version", WTD_DB_VERSION );
+  }
+/******************************************************************************************************************************/
 /* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                                  */
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
@@ -87,7 +124,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,date_create,enable,hostname,tech_id,watchdog,description,map_E,map_EA,map_A,map_AA,max_nbr_E "
+                "SELECT id,date_create,enable,hostname,tech_id,watchdog,description "
                 " FROM %s ORDER BY description",
                 NOM_TABLE_MODULE_MODBUS );
 
@@ -118,10 +155,6 @@
        modbus->id       = atoi(db->row[0]);
        modbus->enable   = atoi(db->row[2]);
        modbus->watchdog = atoi(db->row[5]);
-       modbus->map_E    = atoi(db->row[7]);
-       modbus->map_A    = atoi(db->row[9]);
-       modbus->map_AA   = atoi(db->row[10]);
-       modbus->max_nbr_E= atoi(db->row[11]);
      }
     return(modbus);
   }
@@ -583,7 +616,7 @@
 /******************************************************************************************************************************/
  static void Interroger_sortie_tor( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
-    gint cpt_a, cpt_poid, cpt_byte, cpt, taille, nbr_data;
+    gint cpt_poid, cpt_byte, cpt, taille, nbr_data;
 
     memset(&requete, 0, sizeof(requete) );                                               /* Mise a zero globale de la requete */
     nbr_data = ((module->nbr_sortie_tor-1)/8)+1;
@@ -597,14 +630,15 @@
     requete.adresse        = 0x00;
     requete.nbr            = htons( module->nbr_sortie_tor );                                                    /* bit count */
     requete.data[2]        = nbr_data;                                                                          /* Byte count */
-    cpt_a = module->modbus.map_A;
-    for ( cpt_poid = 1, cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_tor; cpt++, cpt_a++)
-      { if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
-        if ( module->DO && module->DO[cpt] )
-         { if (Dls_data_get_DO( NULL, NULL, &module->DO[cpt] ) ) { requete.data[cpt_byte] |= cpt_poid; } }
-        else if (A(cpt_a)) requete.data[cpt_byte] |= cpt_poid;
-        cpt_poid = cpt_poid << 1;
-      }
+
+    if (module->DO)
+     { for ( cpt_poid = 1, cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_tor; cpt++ )
+        { if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
+          if ( module->DO[cpt] )
+           { if (Dls_data_get_DO( NULL, NULL, &module->DO[cpt] ) ) { requete.data[cpt_byte] |= cpt_poid; } }
+          cpt_poid = cpt_poid << 1;
+        }
+     }
 
     if ( write ( module->connexion, &requete, taille+6 ) != taille+6 )               /* Envoi de la requete (taille + header )*/
      { Deconnecter_module( module ); }
@@ -617,7 +651,7 @@
 /******************************************************************************************************************************/
  static void Interroger_sortie_ana( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
-    gint cpt_a, cpt_byte, cpt, taille;
+    gint cpt_byte, cpt, taille;
 
     memset(&requete, 0, sizeof(requete) );                                               /* Mise a zero globale de la requete */
     module->transaction_id++;
@@ -630,12 +664,11 @@
     requete.adresse        = 0x00;
     requete.nbr            = htons( module->nbr_sortie_ana );                                                    /* bit count */
     requete.data[2]        = (module->nbr_sortie_ana*2);                                                        /* Byte count */
-    cpt_a = module->modbus.map_AA;
     for ( cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_ana; cpt++)
       { /* Attention, parser selon le type de sortie ! (12 bits ? 10 bits ? conversion ??? */
         requete.data [cpt_byte  ] = 0x30; /*Partage->aa[cpt_a].val_int>>5;*/
         requete.data [cpt_byte+1] = 0x00; /*(Partage->aa[cpt_a].val_int & 0x1F)<<3;*/
-        cpt_a++; cpt_byte += 2;
+        cpt_byte += 2;
       }
 
     if ( write ( module->connexion, &requete, taille+6 ) != taille+6 )               /* Envoi de la requete (taille + header )*/
@@ -673,73 +706,67 @@
                       "%s: '%s': Allocated %d DO", __func__, module->modbus.tech_id, module->nbr_sortie_tor );
 
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:AI%%", module->modbus.tech_id );
-    if ( ! Recuperer_mnemos_AI_by_text ( &db, NOM_THREAD, critere ) )
+    if ( ! Recuperer_mnemos_AI_by_tag ( &db, module->modbus.tech_id, "AI%%" ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
                  __func__, module->modbus.tech_id, critere );
      }
     else while ( Recuperer_mnemos_AI_suite( &db ) )
-     { gchar *tech_id = db->row[0], *acro = db->row[1], *map_text = db->row[2], *libelle = db->row[3];
-       gchar debut[80];
+     { gchar *tech_id = db->row[0], *acro = db->row[1], *map_tag = db->row[2], *libelle = db->row[3];
        gint num;
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Match found '%s' '%s:%s' - %s",
-                 __func__, module->modbus.tech_id, map_text, tech_id, acro, libelle );
-       if ( sscanf ( map_text, "%[^:]:AI%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Map found '%s' '%s:%s' - %s",
+                 __func__, module->modbus.tech_id, map_tag, tech_id, acro, libelle );
+       if ( sscanf ( map_tag, "AI%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_ana)
-           { Dls_data_get_AI ( tech_id, acro, &module->AI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
-             if(module->AI[num] == NULL) Dls_data_set_AI ( tech_id, acro, &module->AI[num], 0.0, FALSE );/* Sinon, on le crée */
+           { Charger_confDB_AI ( tech_id, acro );
+             Dls_data_get_AI ( tech_id, acro, &module->AI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
-                         __func__, module->modbus.tech_id, map_text, num, module->nbr_entree_ana );
+                         __func__, module->modbus.tech_id, map_tag, num, module->nbr_entree_ana );
         }
        else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
-                      __func__, module->modbus.tech_id, map_text );
+                      __func__, module->modbus.tech_id, map_tag );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:DI%%", module->modbus.tech_id );
-    if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, critere ) )
+    if ( ! Recuperer_mnemos_DI_by_tag ( &db, module->modbus.tech_id, "DI%%" ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
                  __func__, module->modbus.tech_id, critere );
      }
     else while ( Recuperer_mnemos_DI_suite( &db ) )
-     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
-       char debut[80];
+     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *map_tag = db->row[2];
        gint num;
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Match found '%s' '%s:%s' - %s",
-                 __func__, module->modbus.tech_id, src_text, tech_id, acro, libelle );
-       if ( sscanf ( src_text, "%[^:]:DI%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Map found '%s' '%s:%s' - %s",
+                 __func__, module->modbus.tech_id, map_tag, tech_id, acro, libelle );
+       if ( sscanf ( map_tag, "DI%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_tor)
            { Dls_data_get_DI ( tech_id, acro, &module->DI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
-             if(module->DI[num] == NULL) Dls_data_set_DI ( NULL, tech_id, acro, &module->DI[num], FALSE );     /* Sinon, on le crée */
+             if(module->DI[num] == NULL) Dls_data_set_DI ( NULL, tech_id, acro, &module->DI[num], FALSE );/* Sinon, on le crée */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
-                         __func__, module->modbus.tech_id, src_text, num, module->nbr_entree_tor );
+                         __func__, module->modbus.tech_id, map_tag, num, module->nbr_entree_tor );
         }
        else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
-                      __func__, module->modbus.tech_id, src_text );
+                      __func__, module->modbus.tech_id, map_tag );
      }
 /*********************************** Recherche des events DO a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:DO%%", module->modbus.tech_id );
-    if ( ! Recuperer_mnemos_DO_by_tag ( &db, NOM_THREAD, critere ) )
+    if ( ! Recuperer_mnemos_DO_by_tag ( &db, module->modbus.tech_id, "DO%%" ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
                  __func__, module->modbus.tech_id, critere );
      }
     else while ( Recuperer_mnemos_DO_suite( &db ) )
-     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *dst_tag = db->row[2];
-       char debut[80];
+     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *map_tag = db->row[2];
        gint num;
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Match found '%s' '%s:%s' - %s",
-                 __func__, module->modbus.tech_id, dst_tag, tech_id, acro, libelle );
-       if ( sscanf ( dst_tag, "%[^:]:DO%d", debut, &num ) == 2 )                             /* Découpage de la ligne ev_text */
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Map found '%s' '%s:%s' - %s",
+                 __func__, module->modbus.tech_id, map_tag, tech_id, acro, libelle );
+       if ( sscanf ( map_tag, "DO%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
         { if (num<module->nbr_sortie_tor)
            { Dls_data_get_DO ( tech_id, acro, &module->DO[num] );        /* bit déjà existant deja dans la structure DLS DATA */
              if(module->DO[num] == NULL) Dls_data_set_DO ( NULL, tech_id, acro, &module->DO[num], FALSE );     /* Sinon, on le crée */
            }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
-                         __func__, module->modbus.tech_id, dst_tag, num, module->nbr_entree_tor );
+                         __func__, module->modbus.tech_id, map_tag, num, module->nbr_sortie_tor );
         }
        else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
-                      __func__, module->modbus.tech_id, dst_tag );
+                      __func__, module->modbus.tech_id, map_tag );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     Dls_data_set_bool ( NULL, module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
@@ -761,7 +788,7 @@
        Deconnecter_module( module );
      }
     else
-     { int cpt_e, cpt_byte, cpt_poid, cpt;
+     { int cpt_byte, cpt_poid, cpt;
        module->date_last_reponse = Partage->top;                                                   /* Estampillage de la date */
        Dls_data_set_bool ( NULL, module->modbus.tech_id, "COMM", &module->bit_comm, TRUE );
        if (ntohs(module->response.transaction_id) != module->transaction_id)                              /* Mauvaise reponse */
@@ -777,11 +804,8 @@
         }
        else switch (module->mode)
         { case MODBUS_GET_DI:
-               cpt_e = module->modbus.map_E;
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
-                { if(!module->DI[cpt]) SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
-                  else Dls_data_set_DI ( NULL, NULL, NULL, (gpointer)&module->DI[cpt], (module->response.data[ cpt_byte ] & cpt_poid) );
-                  cpt_e++;
+                { Dls_data_set_DI ( NULL, NULL, NULL, (gpointer)&module->DI[cpt], (module->response.data[ cpt_byte ] & cpt_poid) );
                   cpt_poid = cpt_poid << 1;
                   if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
                 }
@@ -897,16 +921,9 @@
           case MODBUS_GET_NBR_DI:
                 { gint nbr;
                   nbr = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) );
-                  if (module->modbus.max_nbr_E>0) module->nbr_entree_tor = module->modbus.max_nbr_E;
-                                             else module->nbr_entree_tor = nbr;
-                  if (module->modbus.max_nbr_E>0)
-                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get number Entree TOR = %d (forced)",
-                               __func__, module->modbus.tech_id, module->modbus.id, module->nbr_entree_tor );
-                   }
-                  else
-                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get number Entree TOR = %d",
-                               __func__, module->modbus.tech_id, module->modbus.id, module->nbr_entree_tor );
-                   }
+                  module->nbr_entree_tor = nbr;
+                  Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module %d Get number Entree TOR = %d",
+                            __func__, module->modbus.tech_id, module->modbus.id, module->nbr_entree_tor );
                   module->mode = MODBUS_GET_NBR_DO;
                 }
                break;
@@ -994,6 +1011,8 @@
     module->nbr_request_par_sec = 0;
     module->delai = 0;
 
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s' Started", __func__, module->modbus.tech_id );
+
     if (Dls_auto_create_plugin( module->modbus.tech_id, "Gestion du Wago" ) == FALSE)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->modbus.tech_id ); }
     Mnemo_auto_create_DI ( module->modbus.tech_id, "COMM", "Statut de la communication avec le wago" );
@@ -1066,6 +1085,7 @@
            }
        }
      }
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s' Exited", __func__, module->modbus.tech_id );
     pthread_exit(GINT_TO_POINTER(0));
   }
 /******************************************************************************************************************************/
@@ -1141,14 +1161,9 @@
 reload:
     memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );                                   /* Mise a zero de la structure de travail */
     Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-MODBUS", lib, "modbus", "Manage Modbus System" );
+    Thread_init ( "W-MODBUS", lib, WTD_VERSION, "Manage Modbus System" );
     Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
-
-    if (!Cfg_modbus.enable)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
-                "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       goto end;
-     }
+    Modbus_Creer_DB();
 
     Cfg_modbus.Modules_MODBUS = NULL;                                                         /* Init des variables du thread */
 
@@ -1161,8 +1176,8 @@ reload:
      { usleep(100000);
      }
     Decharger_tous_MODBUS();
-end:
-    if (lib->Thread_reload == TRUE)
+
+    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;

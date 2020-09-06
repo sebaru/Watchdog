@@ -10,7 +10,7 @@
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
 </div>
-
+<hr>
 <!----------------------------------------------------------------------------------------------------------------------------->
       <h4><img style="width: 30px" data-toggle="tooltip" title="Entrées TOR"
                        src="https://icons.abls-habitat.fr/assets/gif/Entree.png" />Entrées TOR</h4>
@@ -45,8 +45,8 @@
       <hr>
 
 <!----------------------------------------------------------------------------------------------------------------------------->
-      <h4><img style="width: 30px" data-toggle="tooltip" title="Sories ANA"
-                       src="https://icons.abls-habitat.fr/assets/gif/Sortie_Analogique.png" />Sories ANA</h4>
+      <h4><img style="width: 30px" data-toggle="tooltip" title="Sorties ANA"
+                       src="https://icons.abls-habitat.fr/assets/gif/Sortie_Analogique.png" />Sorties ANA</h4>
       <table id="idTableSortieANA" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
         </thead>

@@ -140,6 +140,21 @@
     /*soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, "LogLevel set", 18 );*/
   }
 /******************************************************************************************************************************/
+/* Http_redirect_to_slave: Proxifie une requete vers un slave                                                                 */
+/* Entrée : le message source, le nom de l'instance cible                                                                     */
+/* Sortie : le contenu de la reponse du slave                                                                                 */
+/******************************************************************************************************************************/
+ void Http_redirect_to_slave ( SoupMessage *msg, gchar *target )
+  { SoupSession *session;
+    session = soup_session_new();
+    //g_signal_connect( client->connexion, "authenticate", G_CALLBACK(Send_credentials_CB), client );
+
+    SoupURI *URI = soup_message_get_uri (msg);
+    soup_uri_set_host ( URI, target );
+    soup_session_send_message ( session, msg );
+    g_object_unref( session );
+  }
+/******************************************************************************************************************************/
 /* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */
 /* Entrées: une structure util, un code confidentiel                                                                          */
 /* Sortie: FALSE si erreur                                                                                                    */
@@ -168,6 +183,12 @@
  struct HTTP_CLIENT_SESSION *Http_rechercher_session_by_msg ( SoupMessage *msg )
   { struct HTTP_CLIENT_SESSION *result = NULL;
     GSList *cookies, *liste;
+
+    if ( Config.instance_is_master == FALSE )
+     { static struct HTTP_CLIENT_SESSION Slave_session = { "system_user", "no_sid", 9, 0 };
+       return(&Slave_session);
+     }
+
     cookies = soup_cookies_from_request(msg);
     liste = cookies;
     while ( liste )
@@ -391,7 +412,7 @@
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_add_bool   ( builder, "connected", TRUE );
-    Json_add_string ( builder, "version",  VERSION );
+    Json_add_string ( builder, "version",  WTD_VERSION );
     Json_add_string ( builder, "username", soup_client_context_get_auth_user(client) );
     Json_add_string ( builder, "instance", g_get_host_name() );
     Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
@@ -418,7 +439,7 @@
 reload:
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-HTTP", lib, NOM_THREAD, "Manage Web Services with external Devices" );
+    Thread_init ( "W-HTTP", lib, WTD_VERSION, "Manage Web Services with external Devices" );
     Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
     SoupServer *socket = soup_server_new("server-header", "Watchdogd HTTP Server", NULL);
@@ -433,12 +454,15 @@ reload:
     soup_server_add_handler ( socket, "/dls/del/",       Http_traiter_dls_del, NULL, NULL );
     soup_server_add_handler ( socket, "/dls/run/" ,      Http_traiter_dls_run, NULL, NULL );
     soup_server_add_handler ( socket, "/dls/run" ,       Http_traiter_dls_run_all, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/debug/" ,    Http_traiter_dls_debug, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/undebug/" ,  Http_traiter_dls_undebug, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/start/" ,    Http_traiter_dls_start, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/stop/" ,     Http_traiter_dls_stop, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls",            Http_traiter_dls, NULL, NULL );
-    soup_server_add_handler ( socket, "/mnemos/list/",   Http_traiter_mnemos_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/debug" ,     Http_traiter_dls_debug, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/undebug",    Http_traiter_dls_undebug, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/start" ,     Http_traiter_dls_start, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/stop" ,      Http_traiter_dls_stop, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/acquitter",  Http_traiter_dls_acquitter, NULL, NULL );
+    soup_server_add_handler ( socket, "/dls/compil/" ,   Http_traiter_dls_compil, NULL, NULL );
+    soup_server_add_handler ( socket, "/mnemos/validate/", Http_traiter_mnemos_validate, NULL, NULL );
+    soup_server_add_handler ( socket, "/mnemos/list",    Http_traiter_mnemos_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/mnemos/set",     Http_traiter_mnemos_set, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/list",       Http_traiter_syn_list, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/show/",      Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/del/",       Http_traiter_syn_del, NULL, NULL );
@@ -447,12 +471,17 @@ reload:
     soup_server_add_handler ( socket, "/syn/clic/",      Http_traiter_syn_clic, NULL, NULL );
     soup_server_add_handler ( socket, "/syn/update_motifs", Http_traiter_syn_update_motifs, NULL, NULL );
     soup_server_add_handler ( socket, "/archive/get/",   Http_traiter_archive_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/process/reload", Http_traiter_process_reload, NULL, NULL );
+    soup_server_add_handler ( socket, "/process/start",  Http_traiter_process_start, NULL, NULL );
+    soup_server_add_handler ( socket, "/process/debug",  Http_traiter_process_debug, NULL, NULL );
+    soup_server_add_handler ( socket, "/process/list",   Http_traiter_process_list, NULL, NULL );
     soup_server_add_handler ( socket, "/process",        Http_traiter_process, NULL, NULL );
     soup_server_add_handler ( socket, "/instance/list",  Http_traiter_instance_list, NULL, NULL );
     soup_server_add_handler ( socket, "/status",         Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/log/get",        Http_traiter_log_get, NULL, NULL );
     soup_server_add_handler ( socket, "/log",            Http_traiter_log, NULL, NULL );
     soup_server_add_handler ( socket, "/bus",            Http_traiter_bus, NULL, NULL );
+    soup_server_add_handler ( socket, "/tech",           Http_traiter_tech, NULL, NULL );
     soup_server_add_handler ( socket, "/users/list",     Http_traiter_users_list, NULL, NULL );
     soup_server_add_handler ( socket, "/users/kill",     Http_traiter_users_kill, NULL, NULL );
     soup_server_add_handler ( socket, "/users/sessions", Http_traiter_users_sessions, NULL, NULL );
@@ -602,8 +631,7 @@ reload:
     Cfg_http.liste_ws_msgs_clients = NULL;
 
 end:
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
-    if (lib->Thread_reload == TRUE)
+    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;

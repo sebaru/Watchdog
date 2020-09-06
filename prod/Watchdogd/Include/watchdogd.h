@@ -41,7 +41,6 @@
  #include "Dls.h"
  #include "Config.h"
  #include "Archive.h"
- #include "Admin.h"
  #include "Message_DB.h"
  #include "Camera_DB.h"
  #include "Histo_DB.h"
@@ -64,6 +63,8 @@
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
+    time_t start_time;
+    gchar version[32];
     gchar nom_fichier[128];                                                                 /* Nom de fichier de la librairie */
     gchar admin_prompt[32];                                                            /* Prompt auquel va répondre le thread */
     gchar admin_help[64];                                                              /* Designation de l'activité du thread */
@@ -74,7 +75,7 @@
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
                                                                                  /* Fonction de gestion des commandes d'admin */
-    void *(*Admin_json)( gchar *commande, gchar **buffer, gint *taille_buf );
+    void *(*Admin_json)( struct LIBRAIRIE *lib, gpointer msg, const char *path, GHashTable *query, gint access_level );
   };
 
  struct COM_DB                                                                 /* Interfaçage avec le code de gestion des BDD */
@@ -123,10 +124,6 @@
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                                      /* Com avec le thread ARCH */
 
-    guchar m [ (NBR_BIT_MONOSTABLE>>3) + 1 ];                                      /* Monostables du DLS (DLS=rw, Sserveur=r) */
-    struct DIGITAL_INPUT e [ NBR_ENTRE_TOR ];
-    struct SORTIE_TOR a [ NBR_SORTIE_TOR ];
-    guchar b [ (NBR_BIT_BISTABLE>>3) + 1 ];                                                                      /* Bistables */
     struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                                               /* DLS=rw, Sserveur=r */
     GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */
     GSList *Dls_data_BOOL;                                                              /* Liste des bistables et monostables */
@@ -160,7 +157,7 @@
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
  extern struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_fichier );
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
- extern void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *prompt, gchar *description );
+ extern void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *version, gchar *description );
  extern void Thread_end ( struct LIBRAIRIE *lib );
 
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */

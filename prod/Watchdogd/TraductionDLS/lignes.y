@@ -114,11 +114,11 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                       case MNEMO_MSG:
                       case MNEMO_REGISTRE :
                       case MNEMO_ENTREE_ANA:
-                                 Emettre_erreur_new( "Use of #static is obsolete. Migrate to #define." );
-                                 break;
                       case MNEMO_SORTIE:
                       case MNEMO_BISTABLE:
                       case MNEMO_MONOSTABLE  :
+                                 Emettre_erreur_new( "Use of #static is obsolete. Migrate to #define." );
+                                 break;
                       case MNEMO_MOTIF:
                                  if ($4==1)                                                                   /* Barre = 1 ?? */
                                   { Emettre_erreur_new( "Use of '/%s' is forbidden",  $2 ); }
@@ -483,25 +483,6 @@ unite:          modulateur ENTIER HEURE ENTIER
                 | barre T_SPERS_OK
                 {{ if ($1) $$ = g_strdup("!vars->bit_secupers_ok");
                       else $$ = g_strdup("vars->bit_secupers_ok");
-                }}
-                | barre T_BI ENTIER
-                {{ int taille;
-                   taille = 10;
-                   $$ = New_chaine( taille );
-                   if ($1) { g_snprintf( $$, taille, "!B(%d)", $3 ); }
-                   else    { g_snprintf( $$, taille, "B(%d)", $3 ); }
-                }}
-               | T_REGISTRE ENTIER ordre VALF
-                {{ int taille;
-                   taille = 40;
-                   $$ = New_chaine( taille );
-                   switch( $3 )
-                    { case INF        : g_snprintf( $$, taille, "R(%d)<%f", $2, $4 ); break;
-                      case SUP        : g_snprintf( $$, taille, "R(%d)>%f", $2, $4 ); break;
-                      case INF_OU_EGAL: g_snprintf( $$, taille, "R(%d)<=%f", $2, $4 ); break;
-                      case SUP_OU_EGAL: g_snprintf( $$, taille, "R(%d)>=%f", $2, $4 ); break;
-                      case T_EGAL     : g_snprintf( $$, taille, "R(%d)==%f", $2, $4 ); break;
-                    }
                 }}
                 | barre T_ACT_COMOUT
                   {{ $$=New_condition_vars( $1, "vars->bit_comm_out"); }}
