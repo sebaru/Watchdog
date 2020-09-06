@@ -113,7 +113,7 @@
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_AA`" );
      }
 
-    Modifier_configDB ( "modbus", "database_version", WTD_SVN_VERSION );
+    Modifier_configDB ( "modbus", "database_version", WTD_DB_VERSION );
   }
 /******************************************************************************************************************************/
 /* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                                  */
