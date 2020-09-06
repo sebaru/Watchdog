@@ -1613,6 +1613,7 @@
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
+    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde" );
 
     sleep(30);                    /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
 
@@ -1621,7 +1622,7 @@
     last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
      { gpointer dls_top_10sec=NULL, dls_top_5sec=NULL, dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
-       gpointer dls_flipflop_1sec=NULL;
+       gpointer dls_flipflop_1sec=NULL, dls_flipflop_2hz=NULL;
 
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
@@ -1651,6 +1652,8 @@
         }
        if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
         { Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
+          Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz,
+                              !Dls_data_get_bool ( "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz) );
           last_top_2hz = Partage->top;
         }
        if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
