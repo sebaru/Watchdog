@@ -513,7 +513,6 @@
           Lib->Thread_reload = TRUE;
         }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-
      }
     else if (! strcasecmp( classe, "AI" ) )
      { if ( ! (Json_has_member ( request, "type" ) && Json_has_member ( request, "min" ) &&
@@ -523,7 +522,6 @@
         { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
           goto end;
         }
-
 
        g_snprintf( requete, sizeof(requete),
                    "UPDATE mnemos_AI SET map_thread=NULL, map_tech_id=NULL, map_tag=NULL "
@@ -567,13 +565,44 @@
           Lib->Thread_reload = TRUE;
         }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+     }
+    else if (! strcasecmp( classe, "AO" ) )
+     { if ( ! (Json_has_member ( request, "type" ) && Json_has_member ( request, "min" ) &&
+               Json_has_member ( request, "max" ) && Json_has_member ( request, "unite" ) &&
+               Json_has_member ( request, "map_question_vocale" ) && Json_has_member ( request, "map_reponse_vocale" )
+          ) )
+        { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+          goto end;
+        }
 
+       g_snprintf( requete, sizeof(requete),
+                   "UPDATE mnemos_AO SET map_thread=NULL, map_tech_id=NULL, map_tag=NULL "
+                   " WHERE map_tech_id='%s' AND map_tag='%s';", map_tech_id, map_tag );
+
+       SQL_Write (requete);
+
+       gchar *unite               = Normaliser_chaine( Json_get_string ( request, "unite" ) );
+       gchar *map_question_vocale = Normaliser_chaine( Json_get_string ( request, "map_question_vocale" ) );
+       gchar *map_reponse_vocale  = Normaliser_chaine( Json_get_string ( request, "map_reponse_vocale" ) );
+       g_snprintf( requete, sizeof(requete),
+                   "UPDATE mnemos_AO SET map_thread='MODBUS', map_tech_id='%s', map_tag='%s',"
+                   " type='%d', min='%d', max='%d', unite='%s', map_question_vocale='%s', map_reponse_vocale='%s'"
+                   " WHERE tech_id='%s' AND acronyme='%s';",
+                   map_tech_id, map_tag, Json_get_int ( request, "type" ),
+                   Json_get_int ( request, "min" ), Json_get_int ( request, "max" ),
+                   unite, map_question_vocale, map_reponse_vocale,
+                   tech_id, acronyme );
+       g_free(unite);
+       g_free(map_question_vocale);
+       g_free(map_reponse_vocale);
+       if (SQL_Write (requete))
+        { soup_message_set_status (msg, SOUP_STATUS_OK);
+          Lib->Thread_reload = TRUE;
+        }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
-/*  else if (! strcasecmp( classe, "AO" ) )*/
     else
-     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");
-		     return;
-     }
+     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
 end:
     json_node_unref(request);
   }

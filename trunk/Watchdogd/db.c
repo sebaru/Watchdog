@@ -396,8 +396,8 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Update_database_schema ( void )
-  { gchar chaine[32], requete[4096];
-    gint database_version;
+  { gint database_version;
+    gchar requete[4096];
     struct DB *db;
 
     if (Config.instance_is_master != TRUE)                                                  /* Do not update DB if not master */
