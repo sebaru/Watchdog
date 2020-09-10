@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Http/gettech.c       Gestion des requests sur l'URI /tech du webservice                                          */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    12.08.2020 12:11:19 */
+/* Watchdogd/Http/getfile.c       Gestion des requests sur des ressources fichiers                                            */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                                    10.09.2020 08:31:51 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * gettech.c
+ * getfile.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre
@@ -41,35 +41,19 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_tech ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ void Http_traiter_file ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                           SoupClientContext *client, gpointer user_data )
   { struct stat stat_buf;
+    gchar fichier[80];
     gint fd;
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!session)
-     { soup_message_set_redirect ( msg, 301, "/home/login" );
-       return;
-     }
+    /*struct HTTP_CLIENT_SESSION *session = */Http_print_request ( server, msg, path, client );
 
-    gchar *prefix = "/tech/";
-    if ( (!strcasecmp ( path, "/tech" )) || (!strcasecmp( path, prefix ) ) )
-     { soup_message_set_redirect ( msg, 301, "/tech/dashboard" );
-       return;
-     }
-
-    gchar fichier[80];
-    g_snprintf ( fichier, sizeof(fichier), "IHM/tech/%s", g_strcanon ( path + strlen(prefix), "abcdefghijklmnopqrstuvwxyz", '_' ) );
-
-    if (stat ("IHM/tech/header.php", &stat_buf)==-1)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Error Stat" );
-       return;
-     }
-    gint taille_header = stat_buf.st_size;
+    g_snprintf ( fichier, sizeof(fichier), "IHM%s", g_strcanon ( path, "abcdefghijklmnopqrstuvwxyz_", '_' ) );
 
     if (stat (fichier, &stat_buf)==-1)
      { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Error Stat" );
@@ -77,26 +61,11 @@
      }
     gint taille_fichier = stat_buf.st_size;
 
-    if (stat ("IHM/tech/footer.php", &stat_buf)==-1)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Error Stat" );
-       return;
-     }
-    gint taille_footer = stat_buf.st_size;
-    gint taille_result = taille_header + taille_fichier + taille_footer;
-    gchar *result = g_try_malloc0 ( taille_result );
+    gchar *result = g_try_malloc0 ( taille_fichier );
     if (!result)
      { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
        return;
      }
-
-    fd = open ("IHM/tech/header.php", O_RDONLY );
-    if (fd==-1)
-     { g_free(result);
-       soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Header Open Error" );
-       return;
-     }
-    read ( fd, &result,taille_header );
-    close(fd);
 
     fd = open (fichier, O_RDONLY );
     if (fd==-1)
@@ -104,20 +73,14 @@
        soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "File Open Error" );
        return;
      }
-    read ( fd, &result + taille_header ,taille_fichier );
-    close(fd);
-
-    fd = open (fichier, O_RDONLY );
-    if (fd==-1)
-     { g_free(result);
-       soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Footer Open Error" );
-       return;
-     }
-    read ( fd, &result + taille_header + taille_footer ,taille_footer );
+    read ( fd, &result, taille_fichier );
     close(fd);
 
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "text/html; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result );
+    if ( !strncasecmp (path, "/js/", strlen("/js/") ) )
+     { soup_message_set_response ( msg, "text/javascript; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_fichier ); }
+    else if ( !strncasecmp (path, "/svg/", strlen("/svg/") ) )
+     { soup_message_set_response ( msg, "image/svg+xml; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_fichier ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

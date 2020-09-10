@@ -137,8 +137,16 @@
     gchar   *acronyme = Normaliser_as_tech_id ( Json_get_string ( request,"acronyme" ) );
     gchar   *classe   = Normaliser_as_tech_id ( Json_get_string ( request,"classe" ) );
 
-         if ( ! strcasecmp ( classe, "CI" ) )
-     {
+    if ( ! strcasecmp ( classe, "CI" ) )
+     { struct DLS_CI *ci=NULL;
+       gchar chaine[128];
+       Dls_data_get_CI ( tech_id, acronyme, (gpointer)&ci );
+       if ( Json_has_member ( request, "archivage" ) )
+        { if (ci) { ci->archivage = Json_get_bool ( request, "archivage" ); }/* Si le bit existe, on change sa running config */
+          g_snprintf(chaine, sizeof(chaine), "UPDATE mnemos_CI SET archivage=%d WHERE tech_id='%s' AND acronyme='%s'",
+                     ci->archivage, tech_id, acronyme );
+          SQL_Write ( chaine );                                                      /* Qu'il existe ou non, ou met a jour la DB */
+        }
      }
     /*else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
     else if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }

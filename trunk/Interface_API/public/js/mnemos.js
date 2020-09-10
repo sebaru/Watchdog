@@ -1,13 +1,30 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
  var Instances;
 
- function Mnemos_set_CI ( tech_id )
+ function Mnemos_CI_enable_archivage ( acronyme )
   { table = $('#idTableCptImp').DataTable();
-    selection = table.ajax.json().mappings.filter( function(item) { return (item.tech_id==tech_id) } )[0];
+    selection = table.ajax.json().CI.filter( function(item) { return (item.acronyme==acronyme) } )[0];
     var json_request = JSON.stringify(
        { classe   : "CI",
-         tech_id  : tech_id,
-         archivage: selection.archivage
+         tech_id  : selection.tech_id,
+         acronyme : selection.acronyme,
+         archivage: true
+       }
+     );
+
+    Send_to_API ( 'POST', "/api/mnemos/set", json_request, function ()
+     { $('#idTableCptImp').DataTable().ajax.reload(null, false);
+     });
+  }
+
+ function Mnemos_CI_disable_archivage ( acronyme )
+  { table = $('#idTableCptImp').DataTable();
+    selection = table.ajax.json().CI.filter( function(item) { return (item.acronyme==acronyme) } )[0];
+    var json_request = JSON.stringify(
+       { classe   : "CI",
+         tech_id  : selection.tech_id,
+         acronyme : selection.acronyme,
+         archivage: false
        }
      );
 
@@ -222,10 +239,10 @@
              { "data": null, "title":"Archivage", "className": "hidden-xs",
                "render": function (item)
                  { if (item.archivage==true)
-                    { return( Bouton ( "success", "Cliquez pour désactiver", "Mnemos_set_CI", item.tech_id, "Actif" ) );
+                    { return( Bouton ( "success", "Cliquez pour désactiver", "Mnemos_CI_disable_archivage", item.acronyme, "Actif" ) );
                     }
                    else
-                    { return( Bouton ( "outline-secondary", "Cliquez pour activer", "Mnemos_set_CI", item.tech_id, "Inactif" ) );
+                    { return( Bouton ( "outline-secondary", "Cliquez pour activer", "Mnemos_CI_enable_archivage", item.acronyme, "Inactif" ) );
                     }
                  }
              }
