@@ -6,7 +6,7 @@
 		<div class="card">
 			<div class="card-header">
      <div class="row">
-       <img class="col-4" src="<?php echo base_url('/logo.svg')?>" alt="Watchdog Logo">
+       <img class="col-4" src="<?php echo base_url('/svg/logo.svg')?>" alt="Watchdog Logo">
        <h4 class="col-8 align-self-center text-center wtd_title">Connexion</h4>
      </div>
 			</div>
