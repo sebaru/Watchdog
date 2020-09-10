@@ -59,7 +59,7 @@
        return;
      }
 
-    SQL_Select_to_JSON ( builder, "instances", "SELECT DISTINCT(instance_id),instance_id_master FROM config" );
+    SQL_Select_to_JSON ( builder, "instances", "SELECT DISTINCT(instance_id),valeur AS instance_is_master FROM config WHERE nom='instance_is_master'" );
 
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
