@@ -38,17 +38,6 @@
  #define NOM_TABLE_MNEMO_REGISTRE "mnemos_Registre"
 
 /***************************************************** Définitions des prototypes *********************************************/
- extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
- extern gboolean Recuperer_mnemo_baseDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length );
-
- extern struct CMD_TYPE_MNEMO_BASE *Recuperer_mnemo_baseDB_suite( struct DB **db );
- extern gint Ajouter_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo );
- extern gboolean Retirer_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo );
- extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB_by_acronyme ( gchar *tech_id, gchar *acronyme );
- extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB_type_num ( struct CMD_TYPE_NUM_MNEMONIQUE *critere );
- extern struct CMD_TYPE_MNEMO_FULL *Rechercher_mnemo_fullDB ( guint id );
- extern struct CMD_TYPE_MNEMO_FULL *Rechercher_mnemo_fullDB_by_acronyme ( gchar*tech_id, gchar *acronyme );
- extern gboolean Modifier_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
  extern gint Rechercher_type_bit ( gchar *tech_id, gchar *acronyme );
 
  extern void Charger_confDB_AI ( gchar *tech_id, gchar *acronyme );                                       /* Dans Mnemos_AI.c */
