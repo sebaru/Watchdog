@@ -387,8 +387,8 @@
             { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer le mapping", "Show_Modal_Map_Edit_DI", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer le mapping", "Show_Modal_Map_Del_DI", item.id, "trash", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer l'objet", "Show_Modal_Map_Edit_DI", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer l'objet", "Show_Modal_Map_Del_DI", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },
@@ -421,8 +421,8 @@
             { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer le module", "Show_Modal_Map_Edit_DO", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer le module", "Show_Modal_Map_Del_DO", item.id, "trash", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer l'objet", "Show_Modal_Map_Edit_DO", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer l'objet", "Show_Modal_Map_Del_DO", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },
@@ -462,8 +462,8 @@
             },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer le module", "Show_Modal_Map_Edit_AI", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer le module", "Show_Modal_Map_Del_AI", item.id, "trash", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer l'objet", "Show_Modal_Map_Edit_AI", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer l'objet", "Show_Modal_Map_Del_AI", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },
@@ -496,8 +496,8 @@
             { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer le module", "Show_Modal_Map_Edit_AO", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer le module", "Show_Modal_Map_Del_AO", item.id, "trash", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer l'objet", "Show_Modal_Map_Edit_AO", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer l'objet", "Show_Modal_Map_Del_AO", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },

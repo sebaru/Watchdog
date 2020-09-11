@@ -1,6 +1,17 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
  var Instances;
 
+
+ function Go_to_source ()
+  { vars = window.location.pathname.split('/');
+    Redirect ( "/tech/dls_source/"+vars[3] );
+  }
+
+ function Go_to_run ()
+  { vars = window.location.pathname.split('/');
+    Redirect ( "/tech/run/"+vars[3] );
+  }
+
  function Mnemos_CI_enable_archivage ( acronyme )
   { table = $('#idTableCptImp').DataTable();
     selection = table.ajax.json().CI.filter( function(item) { return (item.acronyme==acronyme) } )[0];

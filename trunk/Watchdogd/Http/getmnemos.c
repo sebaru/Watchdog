@@ -193,10 +193,10 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) FROM dictionnaire WHERE tech_id LIKE '%%%s%%'", tech_id );
+    g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) FROM dictionnaire WHERE tech_id LIKE '%%%s%%' LIMIT 20", tech_id );
     SQL_Select_to_JSON ( builder, "tech_ids_found", chaine );
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT acronyme FROM dictionnaire WHERE tech_id='%s' AND acronyme LIKE '%%%s%%'",
+    g_snprintf(chaine, sizeof(chaine), "SELECT acronyme FROM dictionnaire WHERE tech_id='%s' AND acronyme LIKE '%%%s%%' LIMIT 20",
                tech_id, acronyme );
     SQL_Select_to_JSON ( builder, "acronymes_found", chaine );
 
