@@ -9,7 +9,7 @@
         <button type="button" onclick="window.location='/tech/dls'" class="btn btn-secondary"><i class="fas fa-list"></i> Retour</button>
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
-</div>
+ </div>
 
           <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#idTabEntreeTor">
