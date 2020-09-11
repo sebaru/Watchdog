@@ -1876,6 +1876,14 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4952)
+     { g_snprintf( requete, sizeof(requete), "UPDATE syns_cadrans SET tech_id='SYS' WHERE tech_id=''");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD "
+                                             "FOREIGN KEY (`tech_id`) REFERENCES `dls`(`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
                                           "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "
@@ -1910,7 +1918,6 @@
         MNEMO_TEMPO, MNEMO_REGISTRE, -1
       );
     Lancer_requete_SQL ( db, requete );
-
 
     Libere_DB_SQL(&db);
 fin:

@@ -360,8 +360,8 @@
 							     <span class="input-group-text">Type de Borne</span>
 						     </div>
 						     <select id="idModalEditType" class="custom-select">
-             <option value="3">4/20 mA 750455</option>
-             <option value="4">Pt-100 750461</option>
+             <option value="3">750455 - 4/20 mA</option>
+             <option value="4">750461 - Pt-100</option>
            </select>
      					</div>
    					</div>
