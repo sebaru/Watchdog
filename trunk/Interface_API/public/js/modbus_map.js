@@ -165,8 +165,12 @@
        return;
      }
 
-    Send_to_API ( "GET", "/api/mnemos/validate/" + $('#'+target+' #idModalEditTechID').val() +
-                                             "/" + $('#'+target+' #idModalEditAcronyme').val(), null, function (Response)
+    var json_request = JSON.stringify(
+       { tech_id    : $('#'+target+' #idModalEditTechID').val().toUpperCase(),
+         acronyme   : $('#'+target+' #idModalEditAcronyme').val().toUpperCase(),
+       }
+     );
+    Send_to_API ( "POST", "/api/mnemos/validate", json_request, function (Response)
      { var tech_id_found=false, tech_id_propose="";
        var acronyme_found=false, acronyme_propose="";
 

@@ -163,9 +163,11 @@
 /******************************************************************************************************************************/
  void Http_traiter_mnemos_validate ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                      SoupClientContext *client, gpointer user_data )
-  { gchar *buf, chaine[256], tech_id[32], acronyme[64];
-    gsize taille_buf;
-    if (msg->method != SOUP_METHOD_GET)
+  { GBytes *request_brute;
+    gsize taille, taille_buf;
+    gchar *buf, chaine[256];
+
+    if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -176,29 +178,34 @@
        return;
      }
 
-    gchar **params = g_strsplit ( path, "/", -1 );
-    if( ! (params && params[1] && params[2] && params[3]) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
-       g_strfreev( params );
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( ! (request && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
+     { if (request) json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    g_snprintf( tech_id, sizeof(tech_id), "%s", params[3] );
-    g_snprintf( acronyme, sizeof(acronyme), "%s", (params[4] ? params[4] : "") );
-    g_strfreev( params );
+    gchar   *tech_id  = Normaliser_as_tech_id ( Json_get_string ( request,"tech_id" ) );
+    gchar   *acronyme = Normaliser_as_tech_id ( Json_get_string ( request,"acronyme" ) );
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) FROM dictionnaire WHERE tech_id LIKE '%%%s%%' LIMIT 20", tech_id );
+    g_snprintf(chaine, sizeof(chaine),
+              "SELECT DISTINCT(tech_id) FROM dictionnaire WHERE tech_id LIKE '%%%s%%' ORDER BY tech_id LIMIT 10", tech_id );
     SQL_Select_to_JSON ( builder, "tech_ids_found", chaine );
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT acronyme FROM dictionnaire WHERE tech_id='%s' AND acronyme LIKE '%%%s%%' LIMIT 20",
+    g_snprintf(chaine, sizeof(chaine),
+              "SELECT acronyme FROM dictionnaire WHERE tech_id='%s' AND acronyme LIKE '%%%s%%' ORDER BY acronyme LIMIT 10",
                tech_id, acronyme );
     SQL_Select_to_JSON ( builder, "acronymes_found", chaine );
+    json_node_unref(request);
 
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
