@@ -64,7 +64,7 @@
      }
   }
 /******************************************************************************************************************************/
-/* Admin_json_modbus_list : fonction appelée pour lister les modules modbus                                                          */
+/* Admin_json_modbus_list : fonction appelée pour lister les modules modbus                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
@@ -95,7 +95,7 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /******************************************************************************************************************************/
-/* Admin_json_modbus_list : fonction appelée pour lister les modules modbus                                                          */
+/* Admin_json_modbus_list : fonction appelée pour lister les modules modbus                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/

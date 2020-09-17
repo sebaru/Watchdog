@@ -110,7 +110,6 @@ Watchdogd/Onduleur/Makefile \
 Watchdogd/Smsg/Makefile \
 Watchdogd/Audio/Makefile \
 Watchdogd/Modbus/Makefile \
-Watchdogd/Archive/Makefile \
 Watchdogd/Imsgs/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Http/Makefile \

@@ -39,7 +39,7 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Arch_Lire_config ( void )
+ static gboolean Arch_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 

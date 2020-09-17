@@ -83,7 +83,7 @@
        case SSTAG_CLIENT_WANT_SOURCE_DLS:
              { struct CMD_TYPE_PLUGIN_DLS *dls;
                dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
-               Proto_editer_source_dls( client, dls );
+               /*Proto_editer_source_dls( client, dls );*/
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_DEB:
@@ -127,7 +127,7 @@
        case SSTAG_CLIENT_WANT_TYPE_NUM_MNEMO:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               Proto_envoyer_type_num_mnemo_tag( TAG_DLS, SSTAG_SERVEUR_TYPE_NUM_MNEMO, client, mnemo );
+               /*Proto_envoyer_type_num_mnemo_tag( TAG_DLS, SSTAG_SERVEUR_TYPE_NUM_MNEMO, client, mnemo );*/
              }
             break;
      }

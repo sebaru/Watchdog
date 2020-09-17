@@ -98,7 +98,7 @@
     Json_end_object ( builder );                                                                              /* End Document */
 
     Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
-    Json_add_string ( builder, "thread",  "arch" );
+    Json_add_string ( builder, "thread",  "archive" );
     Json_add_bool   ( builder, "debug",   Config.log_arch );
     Json_add_bool   ( builder, "started", Partage->com_arch.Thread_run );
     Json_add_string ( builder, "version", WTD_VERSION );
@@ -181,7 +181,7 @@
     gboolean status = Json_get_bool ( request, "status" );
     Modifier_configDB ( thread, "debug", (status ? "TRUE" : "FALSE") );
 
-         if ( ! strcasecmp ( thread, "arch" ) ) { Config.log_arch = status; }
+         if ( ! strcasecmp ( thread, "archive" ) ) { Config.log_arch = status; }
     else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
     else if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
     else if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }
@@ -246,7 +246,7 @@
     gboolean status = Json_get_bool ( request, "status" );
     Modifier_configDB ( thread, "enable", (status ? "TRUE" : "FALSE") );
 
-    if ( ! strcasecmp ( thread, "arch" ) )
+    if ( ! strcasecmp ( thread, "archive" ) )
      { if (status==FALSE) { Partage->com_arch.Thread_run = FALSE; }
        else Demarrer_arch();                                                                   /* Demarrage gestion Archivage */
      } else
@@ -320,7 +320,7 @@
 /*************************************************** WS Reload library ********************************************************/
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading start for '%s' (hard=%d)", __func__, thread, hard );
          if ( ! strcasecmp( thread, "dls" ) )  { Partage->com_dls.Thread_reload  = TRUE; }
-    else if ( ! strcasecmp( thread, "arch" ) ) { Partage->com_arch.Thread_reload = TRUE; }
+    else if ( ! strcasecmp( thread, "archive" ) ) { Partage->com_arch.Thread_reload = TRUE; }
     else if ( ! strcasecmp( thread, "http" ) ) { Cfg_http.lib->Thread_reload     = TRUE; }
     else if ( hard )
      { Decharger_librairie_par_prompt ( thread );
@@ -366,12 +366,14 @@
      { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
        return;
      }
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Searching for CLI commande %s", __func__, path );
+    path = path + strlen("/process/");
 
 /****************************************** WS get Running config library *****************************************************/
+    if (!strncasecmp ( path, "archive/", strlen("archive/")))
+     { Admin_arch_json ( msg, path+strlen("archive/"), query, session->access_level ); }
     else
      { GSList *liste;
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Searching for CLI commande %s", __func__, path );
-       path=path+9;
        liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
        while(liste)
         { struct LIBRAIRIE *lib = liste->data;

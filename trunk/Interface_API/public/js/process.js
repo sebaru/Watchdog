@@ -90,7 +90,10 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "thread", "title":"Thread", "className": "text-center" },
+          [ { "data": null, "title":"Thread", "className": "text-center",
+              "render": function (item)
+                { return( Lien ( "/tech/process/"+item.thread+"?instance="+instance, "Voir la conf du thread "+item.thread, item.thread ) ); }
+            },
             { "data": null, "title":"Started",
               "render": function (item)
                 { if (item.started==true)

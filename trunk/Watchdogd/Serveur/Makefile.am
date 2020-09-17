@@ -18,12 +18,12 @@ libwatchdog_server_ssrv_la_SOURCES    = Serveur.c protocole.c ident.c envoi.c Ut
                         cadran.c ecoute.c ssl.c handle_client.c \
                         Sous_serveur.h Utilisateur_DB.h Client.h 
 
-libwatchdog_server_ssrv_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0` \
+libwatchdog_server_ssrv_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4` \
                                       `mysql_config --libs` \
                                       -rdynamic \
                                       -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
 
-libwatchdog_server_ssrv_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 json-glib-1.0` \
+libwatchdog_server_ssrv_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4` \
                                      `mysql_config --cflags`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \

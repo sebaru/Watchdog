@@ -1615,7 +1615,9 @@
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
     Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde" );
 
-    sleep(30);                    /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
+    gint wait=30;
+    while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
+     { sleep(1); wait--; }        /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
 
     Partage->com_dls.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 

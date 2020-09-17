@@ -249,6 +249,28 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
+/* Entrée: La DB, la requete                                                                                                  */
+/* Sortie: TRUE si pas de souci                                                                                               */
+/******************************************************************************************************************************/
+ gboolean SQL_Arch_Write ( gchar *requete )
+  { struct DB *db = Init_ArchDB_SQL ();
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Init DB FAILED for '%s'", __func__, requete );
+       return(FALSE);
+     }
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
+       Libere_DB_SQL ( &db );
+       return(FALSE);
+     }
+    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
+
+    Libere_DB_SQL ( &db );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                                           */
 /* Entrée: La DB                                                                                                              */
 /******************************************************************************************************************************/

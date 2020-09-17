@@ -50,12 +50,13 @@ class Tech extends BaseController
 
    }
 /******************************************************************************************************************************/
- public function process()
+ public function process( $thread=NULL )
    { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
      if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
 
     echo view('Tech/header');
-    echo view('Tech/process');
+    if (!$thread) echo view('Tech/process');
+             else echo view('Tech/conf_'.$thread);
     echo view('Tech/footer');
 
    }
