@@ -4,13 +4,15 @@
  <h3>Mapping des I/O Wago sur Modbus</h3>
 
    <div class ="ml-auto btn-group">
-        <button type="button" onclick="window.location='/tech/modbus_run'" class="btn btn-info"><i class="fas fa-eye"></i> RUN</button>
         <button type="button" onclick="window.location='/tech/modbus'" class="btn btn-secondary"><i class="fas fa-list"></i> Retour Liste</button>
         <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>
 
-
+   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
+     <h4 class="alert-heading">Warning !</h4>
+         Thread "Modbus" is not running !
+   </div>
 
           <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#idTabEntreeTor">
@@ -26,9 +28,6 @@
                   <img style="width: 30px" data-toggle="tooltip" title="Sorties ANA"
                        src="https://icons.abls-habitat.fr/assets/gif/Sortie_Analogique.png" />Sorties ANA</a></li>
           </ul>
-
-
-
 
 <div class="tab-content">
 

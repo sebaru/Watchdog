@@ -137,10 +137,4 @@ class Tech extends BaseController
     echo view('Tech/modbus_map');
     echo view('Tech/footer');
   }
-/******************************************************************************************************************************/
- public function modbus_run()
-  {  echo view('Tech/header');
-    echo view('Tech/modbus_run');
-    echo view('Tech/footer');
-  }
 }
