@@ -1906,6 +1906,13 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4968)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE config DROP CONSTRAINT PRIMARY KEY;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE config ADD `id` int(11) NOT NULL AUTO_INCREMENT");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
                                           "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "

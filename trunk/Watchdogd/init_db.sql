@@ -28,12 +28,13 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 
 CREATE TABLE IF NOT EXISTS `config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `instance_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `nom_thread` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `nom` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `valeur` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
   UNIQUE (`instance_id`,`nom_thread`,`nom`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
 
@@ -46,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `cameras` (
   `location` varchar(600) NOT NULL,
   `libelle` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
 

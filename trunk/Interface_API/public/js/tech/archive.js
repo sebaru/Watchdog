@@ -41,7 +41,16 @@
     $('#idModalDelValider').attr( "onclick", "Valider_Archive_Del('"+table_name+"')" );
     $('#idModalDel').modal("show");
   }
-
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Set_param ( id )
+  { table = $('#idTableConfArchive').DataTable();
+    selection = table.ajax.json().parametres.filter( function(item) { return item.id==id } )[0];
+    var json_request = JSON.stringify(
+     { id: id,
+       valeur: $('#conf-'+id).val()
+     });
+    Send_to_API ( 'POST', "/api/config/set", json_request, null );
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { Send_to_API ( "GET", "/api/process/archive/thread_status", null, function ( Response )
@@ -60,13 +69,13 @@
           [ { "data": "instance_id", "title":"Instance", "className": "align-middle text-center" },
             { "data": "nom", "title":"Parametre", "className": "align-middle text-center" },
             { "data": null, "title":"Valeur", "render": function (item)
-              { return("<input type='text' class='form-control' placeholder='Valeur du paramètre' "+
+              { return("<input id='conf-"+item.id+"'type='text' class='form-control' placeholder='Valeur du paramètre' "+
                        "value='"+item.valeur+"'>");
               }
             },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "primary", "Positionner le parametre", "Show_Modal_Param_Set", item.id, "save", null );
+                  boutons += Bouton_actions_add ( "primary", "Positionner le parametre", "Set_param", item.id, "save", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },
