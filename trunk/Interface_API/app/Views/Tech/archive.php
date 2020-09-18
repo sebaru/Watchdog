@@ -15,6 +15,16 @@
          Thread "Archive" is not running !
    </div>
 
+   <table id="idTableConfArchive" class="table table-striped table-bordered table-hover">
+      <thead class="thead-dark">
+				  </thead>
+			   <tbody>
+      </tbody>
+    </table>
+
+<hr>
+ <h3>Gestion des tables d'archivage</h3>
+
     <table id="idTableArchive" class="table table-striped table-bordered table-hover">
       <thead class="thead-dark">
 				  </thead>
@@ -23,26 +33,6 @@
     </table>
 
 <!-- Container -->
-</div>
-
-<div id="idModalDel" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content ">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title text-justify"><i class="fas fa-trash"></i> <span id="idModalDelTitre"></span></h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <p id="idModalDelMessage"></p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
-        <button id="idModalDelValider" type="button" class="btn btn-danger" data-dismiss="modal"><i class="fas fa-trash"></i> Valider</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script src="<?php echo base_url('js/tech/archive.js')?>" type="text/javascript"></script>

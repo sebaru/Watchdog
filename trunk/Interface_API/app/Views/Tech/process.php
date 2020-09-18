@@ -22,6 +22,6 @@
   </table>
 </div>
 
-<script src="<?php echo base_url('js/process.js')?>" type="text/javascript"></script>
+<script src="<?php echo base_url('js/tech/process.js')?>" type="text/javascript"></script>
 <!-- Container -->
 </div>
