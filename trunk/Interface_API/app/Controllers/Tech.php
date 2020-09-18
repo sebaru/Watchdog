@@ -56,7 +56,7 @@ class Tech extends BaseController
 
     echo view('Tech/header');
     if (!$thread) echo view('Tech/process');
-             else echo view('Tech/conf_'.$thread);
+             else echo view('Tech/'.$thread);
     echo view('Tech/footer');
 
    }

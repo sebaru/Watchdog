@@ -2,7 +2,7 @@
 
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { Send_to_API ( "GET", "/api/process/modbus/run/thread", null, function(Response)
+  { Send_to_API ( "GET", "/api/process/modbus/thread_status", null, function(Response)
      { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
                                   else { $('#idAlertThreadNotRunning').show(); }
      });
@@ -10,7 +10,7 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id",
-         ajax: {	url : "/api/process/modbus/run/modules",	type : "GET", dataSrc: "modules",
+         ajax: {	url : "/api/process/modbus/modules_status",	type : "GET", dataSrc: "modules",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:

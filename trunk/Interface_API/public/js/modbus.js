@@ -88,7 +88,11 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { $('#idTableModbus').DataTable(
+  { Send_to_API ( "GET", "/api/process/modbus/thread_status", null, function(Response)
+     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
+                                  else { $('#idAlertThreadNotRunning').show(); }
+     });
+    $('#idTableModbus').DataTable(
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id",

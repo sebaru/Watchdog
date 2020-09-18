@@ -11,9 +11,10 @@
    </div>
  </div>
 
-   <!--<div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
-     <p>Warning : Thread is not running !</p>
-   </div>-->
+   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
+     <h4 class="alert-heading">Warning !</h4>
+         Thread "Modbus" is not running !
+   </div>
 
     <table id="idTableModbus" class="table table-striped table-bordered table-hover">
       <thead class="thead-dark">

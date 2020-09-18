@@ -80,6 +80,25 @@
   </div>
 </div>
 
+<div id="idModalInfo" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info">
+        <h5 class="modal-title text-justify"><i class="fas fa-info-circle"></i>Information</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="idModalInfoDetail">Une information est disponible</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <header>
 	<nav class="navbar navbar-dark  navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
   <a class="navbar-brand" href="<?php echo base_url('/');?>"><img src="<?php echo base_url('/svg/logo.svg')?>" alt="Watchdog Logo" width=50></a>
