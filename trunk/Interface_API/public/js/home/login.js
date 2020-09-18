@@ -6,7 +6,7 @@
        password : document.getElementById("password").value
      });
 
-    Send_to_API ( 'POST', "/api/connect", json_request, function ()
+    Send_to_API ( 'POST', "/api/connect", json_request, function (Response)
      { localStorage.setItem("username", Response.username );
        localStorage.setItem("access_level", Response.access_level );
        document.cookie = "wtd_session="+Response.wtd_session+"; path=/";

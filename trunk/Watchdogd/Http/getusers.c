@@ -92,7 +92,7 @@
     while(liste)
      { struct HTTP_CLIENT_SESSION *target = liste->data;
        if ( !strcmp(target->wtd_session, target_sid) )
-        { if ( session->access_level > target->access_level)
+        { if ( session->access_level > target->access_level || !strcmp(session->username,target->username))
            { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, target );
              g_free(target);
              soup_message_set_status (msg, SOUP_STATUS_OK );

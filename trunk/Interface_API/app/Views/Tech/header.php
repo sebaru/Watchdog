@@ -160,7 +160,7 @@
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUSER">
           <a class="dropdown-item" id="idHrefUsername" href="#"><i class="fas fa-user text-info"></i> <span id="idUsername">-</span></a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="<?php echo base_url('tech/users'); ?>"><i class="fas fa-users-cog text-info"></i> <span>Gestion des utilisateurs</span></a>
+          <a class="dropdown-item" href="<?php echo base_url('tech/users_list'); ?>"><i class="fas fa-users-cog text-info"></i> <span>Gestion des utilisateurs</span></a>
           <a class="dropdown-item" href="<?php echo base_url('tech/users_sessions'); ?>"><i class="fas fa-list text-info"></i> <span>Gestion des sessions</span></a>
           <a class="dropdown-item" href="<?php echo base_url('tech/log'); ?>"><i class="fas fa-database text-warning"></i> <span>Audit Log</span></a>
           <div class="dropdown-divider"></div>

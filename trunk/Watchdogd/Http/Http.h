@@ -48,7 +48,7 @@
   { gchar username[32];
     gchar wtd_session[42];
     gint  access_level;
-    gint  last_request;
+    time_t last_request;
   };
 
  struct HTTP_CONFIG

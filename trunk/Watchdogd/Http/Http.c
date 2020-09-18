@@ -241,6 +241,7 @@
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Not high enough");
        return(FALSE);
      }
+    time(&session->last_request);
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -370,7 +371,7 @@
     Liberer_resultat_SQL (db);
     Libere_DB_SQL( &db );
 
-    session->last_request = Partage->top;
+    time(&session->last_request);
     uuid_t uuid_hex;
     uuid_generate(uuid_hex);
     uuid_unparse_lower(uuid_hex, session->wtd_session);
