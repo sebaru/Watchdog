@@ -213,76 +213,6 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* Http_test_session_CB: Test si une requete doit etre authentifiée, ou si elle l'est déjà au travers de cookie de session    */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: TRUE si la requete DOIT etre authentifiée                                                                          */
-/******************************************************************************************************************************/
- static gboolean Http_test_session_CB (SoupAuthDomain *domain, SoupMessage *msg, gpointer user_data)
-  { if (Http_rechercher_session_by_msg ( msg )) return(FALSE);
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static gboolean Http_authenticate_CB ( SoupAuthDomain *domain, SoupMessage *msg, const char *username, const char *password,
-                                        gpointer user_data )
-  { gchar requete[256], *name;
-
-    name = Normaliser_chaine ( username );                                                   /* Formatage correct des chaines */
-    if (!name)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Normalisation impossible", __func__ );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT username,comment,enable,hash "
-                "FROM users WHERE username='%s' LIMIT 1", name );
-    g_free(name);
-
-    struct DB *db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: DB connexion failed for user '%s'", __func__, username );
-       return(FALSE);
-     }
-
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: DB request failed for user '%s'", __func__, username );
-       return(FALSE);
-     }
-
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: User '%s' not found in DB", __func__, username );
-       return(FALSE);
-     }
-
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: User '%s' (%s) found in database.",
-              __func__, db->row[0], db->row[1] );
-
-/*********************************************************** Compte du client *************************************************/
-    if (atoi(db->row[2]) != 1)                                                 /* Est-ce que son compte est toujours actif ?? */
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: User '%s' not enabled", __func__, username );
-       return(FALSE);
-     }
-/*********************************************** Authentification du client par login mot de passe ****************************/
-    if ( Http_check_utilisateur_password( db->row[3], password ) == FALSE )                          /* Comparaison des codes */
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Password error for '%s'(id=%d)", __func__, username );
-       return(FALSE);
-     }
-    Liberer_resultat_SQL (db);
-    Libere_DB_SQL( &db );
-
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Http_print_request: affiche les données relatives à une requete                                                            */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
@@ -297,20 +227,38 @@
     return(session);
   }
 /******************************************************************************************************************************/
+/* Http_print_request: affiche les données relatives à une requete                                                            */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION * session, gint min_access_level )
+  { if (!session)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Not Connected");
+       return(FALSE);
+     }
+
+    if (session->access_level<min_access_level)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Not high enough");
+       return(FALSE);
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Http_traiter_disconnect: Répond aux requetes sur l'URI disconnect                                                          */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Http_traiter_disconnect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                        SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (session)
      { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Session '%s' disconnected", __func__, session->wtd_session );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: sid '%s' ('%s', level %d) disconnected", __func__,
+                 session->wtd_session, session->username, session->access_level );
        g_free(session);
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                  "%s: '%d' session left", __func__, g_slist_length(Cfg_http.liste_http_clients) );
@@ -325,37 +273,50 @@
  static void Http_traiter_connect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data )
   { gchar requete[256], *name;
+    GBytes *request_brute;
     JsonBuilder *builder;
     gsize taille_buf;
+    gsize taille;
     gchar *buf;
 
-    if (msg->method != SOUP_METHOD_GET)
+    if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     Http_print_request ( server, msg, path, client );
 
-    name = Normaliser_chaine ( soup_client_context_get_auth_user(client) );                  /* Formatage correct des chaines */
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( ! (request && Json_has_member ( request, "username" ) && Json_has_member ( request, "password" ) ) )
+     { if (request) json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    name = Normaliser_chaine ( Json_get_string ( request, "username" ) );                    /* Formatage correct des chaines */
     if (!name)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+       json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT username,comment,access_level FROM users WHERE username='%s' LIMIT 1", name );
+                "SELECT username,comment,access_level,enable,hash FROM users WHERE username='%s' LIMIT 1", name );
     g_free(name);
 
     struct DB *db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: DB connexion failed for user '%s'", __func__, soup_client_context_get_auth_user(client) );
+                "%s: DB connexion failed for user '%s'", __func__, Json_get_string ( request, "username" ) );
        return;
      }
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: DB request failed for user '%s'",__func__, soup_client_context_get_auth_user(client) );
+                "%s: DB request failed for user '%s'",__func__, Json_get_string ( request, "username" ) );
        return;
      }
 
@@ -363,23 +324,48 @@
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                "%s: User '%s' not found in DB", __func__, soup_client_context_get_auth_user(client) );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                "%s: User '%s' not found in DB", __func__, Json_get_string ( request, "username" ) );
+       json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Accès interdit !");
        return;
      }
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: User '%s' (%s) found in database.",
               __func__, db->row[0], db->row[1] );
 
+/*********************************************************** Compte du client *************************************************/
+    if (atoi(db->row[3]) != 1)                                                 /* Est-ce que son compte est toujours actif ?? */
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: User '%s' not enabled",
+                 __func__, db->row[0] );
+       json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Accès interdit !");
+       return;
+     }
+/*********************************************** Authentification du client par login mot de passe ****************************/
+    if ( Http_check_utilisateur_password( db->row[4], Json_get_string ( request, "password" ) ) == FALSE ) /* Comparaison MDP */
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Password error for '%s' (%s)",
+                 __func__, db->row[0], db->row[1] );
+       json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Accès interdit !");
+       return;
+     }
+
     struct HTTP_CLIENT_SESSION *session = g_try_malloc0( sizeof(struct HTTP_CLIENT_SESSION) );
     if (!session)
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Session creation Error", __func__ );
+       json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    g_snprintf( session->username, sizeof(session->username), "%s", soup_client_context_get_auth_user(client) );
+    g_snprintf( session->username, sizeof(session->username), "%s", db->row[0] );
     session->access_level = atoi(db->row[2]);
     Liberer_resultat_SQL (db);
     Libere_DB_SQL( &db );
@@ -391,16 +377,18 @@
     if (strlen(session->wtd_session) != 36)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SID Parse Error (%d)", __func__, strlen(session->wtd_session) );
        g_free(session);
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "UUID Error");
        return;
      }
     Cfg_http.liste_http_clients = g_slist_append ( Cfg_http.liste_http_clients, session );
 
-    SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", session->wtd_session, NULL, "/", 86400 );
+    SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", session->wtd_session, NULL, "/", Cfg_http.wtd_session_expiry );
     soup_cookie_set_http_only ( wtd_session, TRUE );
     if (Cfg_http.ssl_enable) soup_cookie_set_secure ( wtd_session, TRUE );
     GSList *liste = g_slist_append ( NULL, wtd_session );
     soup_cookies_to_response ( liste, msg );
     g_slist_free(liste);
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: User '%s' connected", __func__, session->username );
 
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
@@ -413,7 +401,7 @@
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_add_bool   ( builder, "connected", TRUE );
     Json_add_string ( builder, "version",  WTD_VERSION );
-    Json_add_string ( builder, "username", soup_client_context_get_auth_user(client) );
+    Json_add_string ( builder, "username", session->username );
     Json_add_string ( builder, "instance", g_get_host_name() );
     Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
     Json_add_bool   ( builder, "ssl", soup_server_is_https (server) );
@@ -433,7 +421,6 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { void *zmq_motifs, *zmq_msgs;
-    SoupAuthDomain *domain;
     gint last_pulse = 0;
 
 reload:
@@ -492,26 +479,6 @@ reload:
     gchar *protocols[] = { "live-motifs", "live-msgs" };
     soup_server_add_websocket_handler ( socket, "/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
     soup_server_add_websocket_handler ( socket, "/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
-
-    domain = soup_auth_domain_basic_new ( SOUP_AUTH_DOMAIN_REALM, "WatchdogServer",
-                                          SOUP_AUTH_DOMAIN_BASIC_AUTH_CALLBACK, Http_authenticate_CB,
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/archive",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/connect",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/disconnect",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/dls",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/syn",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/process",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/instance",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/log",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/histo",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/mnemos",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/bus",
-                                          SOUP_AUTH_DOMAIN_ADD_PATH, "/users",
-                                          NULL );
-    soup_auth_domain_set_filter ( domain, Http_test_session_CB, NULL, NULL );
-    soup_server_add_auth_domain(socket, domain);
-    g_object_unref (domain);
-
 
     if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
      { struct stat sbuf;

@@ -26,11 +26,18 @@
      }
     $("body").tooltip({ selector: '[data-toggle=tooltip]' });
   }
+/********************************************* Chargement du synoptique 1 au démrrage *****************************************/
+ function Logout ()
+  { Send_to_API ( "PUT", "/api/disconnect", null, function() { localStorage.clear(); Redirect("/"); });
+  }
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Show_Error ( message )
-  { $('#idModalDetail').html( "Une erreur s'est produite: "+message );
-    $('#idModalError').modal("show");
+  { if (message == "Not Connected") { Logout(); }
+    else
+     { $('#idModalDetail').html( "Une erreur s'est produite: "+message );
+       $('#idModalError').modal("show");
+     }
   }
 
 /********************************************* Redirige la page ***************************************************************/

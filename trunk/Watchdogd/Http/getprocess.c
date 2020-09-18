@@ -50,11 +50,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges" );
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     gpointer instance = g_hash_table_lookup ( query, "instance" );
     if (!instance)
@@ -152,11 +148,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges" );
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -217,11 +209,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges" );
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -291,11 +279,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges" );
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -361,11 +345,8 @@
                              SoupClientContext *client, gpointer user_data )
   {
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
 
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
-       return;
-     }
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Searching for CLI commande %s", __func__, path );
     path = path + strlen("/process/");
 

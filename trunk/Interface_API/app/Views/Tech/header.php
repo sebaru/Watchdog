@@ -166,7 +166,7 @@
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="/home/synmobile/1"><i class="fas fa-home text-primary"></i> <span>Mode Client</span> </a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
+          <a class="dropdown-item" onclick="Logout()"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
         </div>
       </li>
     </ul>

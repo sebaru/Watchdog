@@ -48,10 +48,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!session)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
+    if (!Http_check_session( msg, session, 0 )) return;
 
     JsonBuilder *builder = Json_create ();
     if (!builder)

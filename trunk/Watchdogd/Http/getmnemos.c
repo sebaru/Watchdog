@@ -48,10 +48,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!session)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     gchar *tech_id = g_hash_table_lookup ( query, "tech_id" );
     if (!tech_id)
@@ -117,11 +114,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges" );
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -173,10 +166,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!session)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -212,5 +202,4 @@
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
-
 /*----------------------------------------------------------------------------------------------------------------------------*/

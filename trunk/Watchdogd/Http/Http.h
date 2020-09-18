@@ -36,7 +36,6 @@
  #define HTTP_DEFAUT_FILE_CERT         "http_serveursigne.pem"
  #define HTTP_DEFAUT_FILE_KEY          "http_serveurkey.pem"
  #define HTTP_DEFAUT_TCP_PORT          5560
- #define HTTP_FORBIDDEN_ERROR          "Session inexistante ou droits insuffisants"
 
  struct WS_CLIENT_SESSION
   { SoupWebsocketConnection *connexion;
@@ -153,6 +152,7 @@
                                  SoupClientContext *client, gpointer user_data );
 
  extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
+ extern gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION * session, gint min_access_level );
  extern void Http_Envoyer_les_cadrans ( void );
  extern void Http_redirect_to_slave ( SoupMessage *msg, gchar *target );
  #endif

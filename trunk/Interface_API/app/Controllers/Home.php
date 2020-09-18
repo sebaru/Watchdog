@@ -2,16 +2,24 @@
 
 class Home extends BaseController
 {
+/******************************************************************************************************************************/
 	public function index()
-	 {	if ( session()->get('user') === NULL )         { return redirect()->to('/auth/login'); }
-    if ( session()->get('user')->access_level>=6 ) { return redirect()->to('/tech/dashboard'); }
-    return redirect()->to('/home/synmobile/1');
+	 {	echo view('Home/index');
 	 }
 
 /******************************************************************************************************************************/
- public function archive()
-  { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
+	public function login()
+	 {	echo view('Home/login');
+	 }
 
+/******************************************************************************************************************************/
+ public function logout()
+  { return redirect()->to('/home/login');
+  }
+
+/******************************************************************************************************************************/
+ public function archive()
+  {
     echo view('Home/header');
     echo view('Home/archive');
     echo view('Home/footer');
@@ -20,13 +28,11 @@ class Home extends BaseController
 
 /******************************************************************************************************************************/
  public function synmobile()
-  { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-
+  {
     echo view('Home/header');
     echo view('Home/synmobile');
     echo view('Home/footer');
 
    }
-	//--------------------------------------------------------------------
-
 }
+/*----------------------------------------------------------------------------------------------------------------------------*/

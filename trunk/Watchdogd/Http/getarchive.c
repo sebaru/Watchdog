@@ -48,11 +48,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( !session )
-     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
-       return;
-     }
+    if (!Http_check_session( msg, session, 0)) return;
 
     gchar *prefix = "/archive/get/";
     if ( ! g_str_has_prefix ( path, prefix ) )
