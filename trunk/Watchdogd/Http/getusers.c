@@ -173,6 +173,7 @@
      { struct HTTP_CLIENT_SESSION *sess = liste->data;
        Json_add_object ( builder, NULL );
        Json_add_string ( builder, "username", sess->username );
+       Json_add_string ( builder, "host", sess->host );
        Json_add_string ( builder, "wtd_session", sess->wtd_session );
        Json_add_int    ( builder, "access_level", sess->access_level );
        Json_add_int    ( builder, "last_request", sess->last_request );

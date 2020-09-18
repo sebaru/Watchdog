@@ -46,6 +46,7 @@
 
  struct HTTP_CLIENT_SESSION
   { gchar username[32];
+    gchar host[32];
     gchar wtd_session[42];
     gint  access_level;
     time_t last_request;

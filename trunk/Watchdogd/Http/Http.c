@@ -185,7 +185,7 @@
     GSList *cookies, *liste;
 
     if ( Config.instance_is_master == FALSE )
-     { static struct HTTP_CLIENT_SESSION Slave_session = { "system_user", "no_sid", 9, 0 };
+     { static struct HTTP_CLIENT_SESSION Slave_session = { "system_user", "none", "no_sid", 9, 0 };
        return(&Slave_session);
      }
 
@@ -221,7 +221,7 @@
   { struct HTTP_CLIENT_SESSION *session = Http_rechercher_session_by_msg ( msg );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: sid '%s' (%s@%s, Level %d) : '%s'", __func__,
               (session ? session->wtd_session : "none"),
-              (session ? session->username : soup_client_context_get_auth_user (client)), soup_client_context_get_host(client),
+              (session ? session->username : "none"), soup_client_context_get_host(client),
               (session ? session->access_level : -1), path
                );
     return(session);
@@ -367,6 +367,7 @@
      }
 
     g_snprintf( session->username, sizeof(session->username), "%s", db->row[0] );
+    g_snprintf( session->host, sizeof(session->host), "%s", soup_client_context_get_host(client) );
     session->access_level = atoi(db->row[2]);
     Liberer_resultat_SQL (db);
     Libere_DB_SQL( &db );
@@ -389,7 +390,8 @@
     GSList *liste = g_slist_append ( NULL, wtd_session );
     soup_cookies_to_response ( liste, msg );
     g_slist_free(liste);
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: User '%s' connected", __func__, session->username );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: User '%s:%s' connected", __func__,
+              session->username, session->host );
 
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();

@@ -32,6 +32,7 @@
                },
          columns:
           [ { "data": "username", "title":"Username", "className": "text-center" },
+            { "data": "host", "title":"Host", "className": "text-center" },
             { "data": "access_level", "title":"Level", "className": "hidden-xs" },
             { "data": "wtd_session", "title":"Wtd_session", "className": "hidden-xs" },
             { "data": null, "title":"Dernier accès", "className": "hidden-xs",
