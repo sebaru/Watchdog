@@ -367,7 +367,7 @@
      }
 
     g_snprintf( session->username, sizeof(session->username), "%s", db->row[0] );
-    gchar *temp = g_inet_address_to_string ( g_inet_socket_address_get_address ( G_INET_SOCKET_ADDRESS(soup_client_context_get_local_address (client) )) );
+    gchar *temp = g_inet_address_to_string ( g_inet_socket_address_get_address ( G_INET_SOCKET_ADDRESS(soup_client_context_get_remote_address (client) )) );
     g_snprintf( session->host, sizeof(session->host), "%s", temp );
     g_free(temp);
     session->access_level = atoi(db->row[2]);
