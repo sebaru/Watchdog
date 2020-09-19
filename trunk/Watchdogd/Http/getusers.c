@@ -94,6 +94,7 @@
        if ( !strcmp(target->wtd_session, target_sid) )
         { if ( session->access_level > target->access_level || !strcmp(session->username,target->username))
            { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, target );
+             Audit_log ( session, "Session of '%s' killed", target->username );
              g_free(target);
              soup_message_set_status (msg, SOUP_STATUS_OK );
            }

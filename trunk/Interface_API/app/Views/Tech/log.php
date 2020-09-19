@@ -8,6 +8,6 @@
     </tbody>
   </table>
 </div>
-<script src="<?php echo base_url('js/log.js')?>" type="text/javascript"></script>
+<script src="<?php echo base_url('js/tech/log.js')?>" type="text/javascript"></script>
 <!-- Container -->
 </div>

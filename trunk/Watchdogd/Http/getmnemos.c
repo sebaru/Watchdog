@@ -146,6 +146,7 @@
     else if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
     else if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }*/
 /*************************************************** Envoi au client **********************************************************/
+    Audit_log ( session, "Mnemos %s:%s changed", tech_id, acronyme );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     json_node_unref(request);
   }

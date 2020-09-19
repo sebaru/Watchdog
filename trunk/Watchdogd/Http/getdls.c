@@ -395,6 +395,7 @@
      }
 
     Activer_plugin ( target, TRUE );
+    Audit_log ( session, "DLS '%s' started", target );
     g_free(target);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -438,6 +439,7 @@
      }
 
     Activer_plugin ( target, FALSE );
+    Audit_log ( session, "DLS '%s' stopped", target );
     g_free(target);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -482,6 +484,7 @@
      }
 
     Debug_plugin ( target, TRUE );
+    Audit_log ( session, "DLS '%s' debug enabled", target );
     g_free(target);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -525,6 +528,7 @@
      }
 
     Debug_plugin ( target, FALSE );
+    Audit_log ( session, "DLS '%s' debug disabled", target );
     g_free(target);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -609,13 +613,13 @@
        return;
      }
 
+    Audit_log ( session, "DLS '%s' supprimé", target );
     g_snprintf(chaine, sizeof(chaine),  "DELETE FROM dls WHERE tech_id='%s'", target );
     g_free(target);
     if (SQL_Write (chaine)==FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
        return;
      }
-
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
@@ -700,9 +704,10 @@
             Json_add_string ( builder, "result", "error" );
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Unknown Error" );
      }
+    Audit_log ( session, "DLS '%s' compilé", Json_get_string ( request, "tech_id" ) );
+    json_node_unref(request);
     gchar *buf = Json_get_buf (builder, &taille_buf);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-    json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
@@ -748,7 +753,8 @@
      }
 
     Dls_foreach ( Json_get_string ( request, "tech_id" ), Http_dls_acquitter_plugin, NULL );
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    Audit_log ( session, "DLS '%s' acquitté", Json_get_string ( request, "tech_id" ) );
     json_node_unref(request);
+    soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

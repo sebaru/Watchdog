@@ -190,6 +190,7 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' debug to '%s'", __func__,
               thread, (status ? "TRUE" : "FALSE" ) );
 /*************************************************** Envoi au client **********************************************************/
+    Audit_log ( session, "Processus '%s' debug set to %s", thread, (status ? "TRUE" : "FALSE" ) );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     json_node_unref(request);
   }
@@ -229,7 +230,6 @@
        return;
      }
 
-
     gchar   *thread = Json_get_string ( request,"thread" );
     gboolean status = Json_get_bool ( request, "status" );
     Modifier_configDB ( thread, "enable", (status ? "TRUE" : "FALSE") );
@@ -260,6 +260,7 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' to '%s'",
               __func__, thread, (status ? "START" : "STOP") );
 /*************************************************** Envoi au client **********************************************************/
+    Audit_log ( session, "Processus '%s' enable set to %s", thread, (status ? "TRUE" : "FALSE" ) );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     json_node_unref(request);
   }
@@ -333,6 +334,7 @@
         }
      }
 /*************************************************** Envoi au client **********************************************************/
+    Audit_log ( session, "Processus '%s' %s Reloaded", thread, (hard ? "Hard" : "Soft") );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     json_node_unref(request);
   }
