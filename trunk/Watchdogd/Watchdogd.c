@@ -614,7 +614,6 @@ end:
 
        setsid();                                                                                 /* Indépendance du processus */
      }
-
                                                                                       /* Verification de l'unicité du process */
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );
     if (fd_lock<0)
@@ -682,6 +681,7 @@ end:
           Info_new( Config.log, Config.log_msrv, LOG_ERR,
                     "%s: Connection to DB failed (test %d). Retrying in 5s.", __func__, nbr_essai_db );
           sleep(5);
+          Lire_config(NULL);                                                    /* Lecture sur le fichier /etc/watchdogd.conf */
         }
 
        sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
@@ -689,7 +689,7 @@ end:
 
        Update_database_schema();                                                    /* Update du schéma de Database si besoin */
        Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */
-       Modifier_configDB ( "msrv", "thread_version", WTD_VERSION );                          /* Update du champs instance_version */
+       Modifier_configDB ( "msrv", "thread_version", WTD_VERSION );                      /* Update du champs instance_version */
        Modifier_configDB ( "msrv", "instance_is_master", (Config.instance_is_master  ? "TRUE" : "FALSE") );
 
        Partage->zmq_ctx = zmq_ctx_new ();                                          /* Initialisation du context d'echange ZMQ */

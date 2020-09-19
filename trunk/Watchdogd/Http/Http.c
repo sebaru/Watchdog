@@ -107,14 +107,20 @@
 /* Sortie : le contenu de la reponse du slave                                                                                 */
 /******************************************************************************************************************************/
  void Http_redirect_to_slave ( SoupMessage *msg, gchar *target )
-  { SoupSession *session;
-    session = soup_session_new();
-    //g_signal_connect( client->connexion, "authenticate", G_CALLBACK(Send_credentials_CB), client );
-
-    SoupURI *URI = soup_message_get_uri (msg);
+  { SoupSession *connexion;
+    connexion = soup_session_new();
+    SoupURI *URI = soup_uri_copy (soup_message_get_uri (msg));
     soup_uri_set_host ( URI, target );
-    soup_session_send_message ( session, msg );
-    g_object_unref( session );
+    SoupMessage *new_msg = soup_message_new_from_uri ( msg->method, URI );
+    soup_uri_free(URI);
+    soup_message_set_request ( new_msg, "application/json; charset=UTF-8",
+                               SOUP_MEMORY_COPY, msg->request_body->data, msg->request_body->length );
+    soup_session_send_message ( connexion, new_msg );
+    soup_message_set_status  ( msg, new_msg->status_code );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8",
+                                SOUP_MEMORY_COPY, new_msg->response_body->data, new_msg->response_body->length );
+    g_object_unref ( new_msg );
+    g_object_unref( connexion );
   }
 /******************************************************************************************************************************/
 /* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */

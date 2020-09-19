@@ -61,7 +61,6 @@
     if ( strcasecmp ( instance, "MASTER" ) && strcasecmp ( instance, g_get_host_name() ) )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s : Redirecting /process/list vers %s", __func__, instance );
        Http_redirect_to_slave ( msg, instance );
-       //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
        return;
      }
 
