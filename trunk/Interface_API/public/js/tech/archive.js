@@ -51,6 +51,17 @@
      });
     Send_to_API ( 'POST', "/api/config/set", json_request, null );
   }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Del_param ( id )
+  { table = $('#idTableConfArchive').DataTable();
+    selection = table.ajax.json().parametres.filter( function(item) { return item.id==id } )[0];
+    var json_request = JSON.stringify(
+     { id: id,
+     });
+    Send_to_API ( 'DELETE', "/api/config/del", json_request, function ()
+     { $('#idTableConfArchive').DataTable().ajax.reload(null, false);
+     });
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { Send_to_API ( "GET", "/api/process/archive/thread_status", null, function ( Response )
@@ -62,7 +73,7 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id",
-         ajax: {	url : "/api/process/archive/thread_config",	type : "GET", dataSrc: "parametres",
+         ajax: {	url : "/api/config/get",	type : "GET", dataSrc: "parametres", data: { "process": "arch" },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
@@ -75,7 +86,8 @@
             },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "primary", "Positionner le parametre", "Set_param", item.id, "save", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Positionner le parametre", "Set_param", item.id, "save", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer le parametre", "Del_param", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },

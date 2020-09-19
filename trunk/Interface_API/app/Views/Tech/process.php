@@ -1,15 +1,8 @@
 <div class="container-fluid">
 
  <div class="row m-2">
- <h3>Liste des Processus</h3>
-   <div class ="ml-auto form-group">
-					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Choix de l'instance</span>
-						     </div>
-           <select id="idSelectInstance" class="custom-select"></select>
-     					</div>
-   </div>
+ <h3>Liste des Processus sur <strong id='idTitleProcessus'></strong></h3>
+
  </div>
 
 

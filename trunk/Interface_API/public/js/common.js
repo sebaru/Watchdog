@@ -11,7 +11,7 @@
         { try { var Response = JSON.parse(xhr.responseText); }
           catch (error) { Response=undefined; }
           if (method=="DELETE" || method=="POST") $('#idToastStatus').toast('show');
-          fonction(Response);
+          if (fonction != null) fonction(Response);
         }
        else { Show_Error( xhr.statusText ); }
      }
@@ -133,3 +133,4 @@
     else if (period=="DAY")  setInterval( function() { window.location.reload(); }, 300000);
     else setInterval( function() { window.location.reload(); }, 600000);
 	 }
+

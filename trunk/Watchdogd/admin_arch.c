@@ -237,36 +237,6 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_instance_list: Fourni une list JSON des instances Watchdog dans le domaine                                    */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_arch_thread_config ( SoupMessage *msg )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-/************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    SQL_Select_to_JSON ( builder, "parametres", "SELECT * FROM config WHERE nom_thread='arch'" );
-
-    buf = Json_get_buf ( builder, &taille_buf );
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-  }
-/******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
@@ -277,7 +247,6 @@
        return;
      }
          if (!strcasecmp(path, "thread_status")) { Admin_arch_thread_status ( msg ); }
-    else if (!strcasecmp(path, "thread_config")) { Admin_arch_thread_config ( msg ); }
     else if (!strcasecmp(path, "table_status"))  { Admin_arch_table_status ( msg ); }
     else if (!strcasecmp(path, "del"))    { Admin_arch_del    ( msg ); }
     else if (!strcasecmp(path, "clear"))  { Admin_arch_clear  ( msg ); }

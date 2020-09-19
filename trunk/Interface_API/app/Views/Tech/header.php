@@ -169,14 +169,23 @@
     </ul>
 
     <ul class="navbar-nav">
-    <form class="form-inline ml-2">
-      <input class="form-control mr-sm-2" type="search" placeholder="Rechercher" aria-label="Rechercher">
-      <button class="btn btn-success rounded my-1 my-sm-0" type="submit">Search</button> <!--btn-outline-success-->
-    </form>
+      <form class="form-inline ml-2">
+        <input class="form-control mr-sm-2" type="search" placeholder="Rechercher" aria-label="Rechercher">
+        <button class="btn btn-success rounded my-1 my-sm-0" type="submit">Search</button> <!--btn-outline-success-->
+      </form>
+
+      <div class ="nav-item ml-2">
+        <div class="input-group">
+  		      <select onchange="Change_selected_instance()" id="idSelectedInstance" class="custom-select text-info"></select>
+					   </div>
+      </div>
+
       <li class="nav-item dropdown">
         <a class="nav-link rounded dropdown-toggle ml-2" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-user"></i>
         </a>
+
+
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUSER">
           <a class="dropdown-item" id="idHrefUsername" href="#"><i class="fas fa-user text-info"></i> <span id="idUsername">-</span></a>
           <div class="dropdown-divider"></div>
