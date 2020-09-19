@@ -243,6 +243,32 @@ end:
     return(retour);
   }
 /******************************************************************************************************************************/
+/* Ajouter_configDB: Ajout ou edition d'un message                                                                            */
+/* Entrée: le thread, le nom du parametre, sa valeur                                                                          */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gboolean Modifier_configDB_int ( gchar *nom_thread, gchar *nom, gint valeur )
+  { gchar requete[2048];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+               "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
+               "('%s','%s','%s','%d') ON DUPLICATE KEY UPDATE valeur='%d';",
+               NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom, valeur, valeur
+              );
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
+  }
+/******************************************************************************************************************************/
 /* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée                                   */
 /* Entrée: une database de retour et le nom de l'instance_id                                                                  */
 /* Sortie: FALSE si erreur                                                                                                    */

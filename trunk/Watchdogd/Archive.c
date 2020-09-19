@@ -43,16 +43,16 @@
   { gchar *nom, *valeur, valeur_defaut[80];
     struct DB *db;
 
-    Creer_configDB ( "arch", "database", Config.db_database );
-    Creer_configDB ( "arch", "username", Config.db_username );
-    Creer_configDB ( "arch", "password", Config.db_password );
-    Creer_configDB ( "arch", "host", Config.db_host );
+    Creer_configDB ( "archive", "database", Config.db_database );
+    Creer_configDB ( "archive", "username", Config.db_username );
+    Creer_configDB ( "archive", "password", Config.db_password );
+    Creer_configDB ( "archive", "hostname", Config.db_host );
     g_snprintf( valeur_defaut, sizeof(valeur_defaut), "%d", ARCHIVE_DEFAUT_BUFFER_SIZE );
-    Creer_configDB ( "arch", "max_buffer_size", valeur_defaut );
+    Creer_configDB ( "archive", "buffer_size", valeur_defaut );
     g_snprintf( valeur_defaut, sizeof(valeur_defaut), "%d", ARCHIVE_DEFAUT_RETENTION );
-    Creer_configDB ( "arch", "days", valeur_defaut );
+    Creer_configDB ( "archive", "retention", valeur_defaut );
 
-    if ( ! Recuperer_configDB( &db, "arch" ) )                                              /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, "archive" ) )                                           /* Connexion a la base de données */
      { Info_new( Config.log, Config.log_arch, LOG_WARNING,
                 "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
@@ -65,14 +65,14 @@
         { g_snprintf( Partage->com_arch.archdb_username, sizeof(Partage->com_arch.archdb_username), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "password" ) )
         { g_snprintf( Partage->com_arch.archdb_password, sizeof(Partage->com_arch.archdb_password), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "host" ) )
-        { g_snprintf( Partage->com_arch.archdb_host, sizeof(Partage->com_arch.archdb_host), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "hostname" ) )
+        { g_snprintf( Partage->com_arch.archdb_hostname, sizeof(Partage->com_arch.archdb_hostname), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { Partage->com_arch.archdb_port = atoi(valeur);  }
-       else if ( ! g_ascii_strcasecmp ( nom, "max_buffer_size" ) )
-        { Partage->com_arch.max_buffer_size = atoi(valeur);  }
-       else if ( ! g_ascii_strcasecmp ( nom, "days" ) )
-        { Partage->com_arch.duree_retention = atoi(valeur);  }
+       else if ( ! g_ascii_strcasecmp ( nom, "buffer_size" ) )
+        { Partage->com_arch.buffer_size = atoi(valeur);  }
+       else if ( ! g_ascii_strcasecmp ( nom, "retention" ) )
+        { Partage->com_arch.retention = atoi(valeur);  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Config.log_arch = TRUE;  }
 
@@ -130,10 +130,10 @@
   { static gint last_log = 0;
 
     if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
-    else if (Partage->com_arch.taille_arch > Partage->com_arch.max_buffer_size)
+    else if (Partage->com_arch.taille_arch > Partage->com_arch.buffer_size)
      { if ( last_log + 600 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "%s: DROP arch (taille>%d) '%s:%s'", __func__, Partage->com_arch.max_buffer_size, tech_id, nom );
+                   "%s: DROP arch (taille>%d) '%s:%s'", __func__, Partage->com_arch.buffer_size, tech_id, nom );
           last_log = Partage->top;
         }
        return;
@@ -166,22 +166,13 @@
     Partage->com_arch.taille_arch = 0;
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
-    Mnemo_auto_create_AI ( "SYS", "ARCH_REQUEST_NUMBER", "Nb enregistrement dans le tampon d'archivage", "enreg." );
+    Mnemo_auto_create_AI ( "SYS", "ARCH_REQUEST_NUMBER", "Nb enregistrements dans le tampon d'archivage", "enreg." );
     Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 0.0, TRUE );
 
     last_delete = Partage->top;
-    while(Partage->com_arch.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
+reload:
+    while(Partage->com_arch.Thread_run == TRUE && Partage->com_arch.Thread_reload == FALSE)  /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
-
-       if (Partage->com_arch.Thread_reload)                                                          /* On a recu reload ?? */
-        { Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: RELOAD" );
-          pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
-          Info_new( Config.log, Config.log_arch, LOG_INFO, "Run_arch: Reste %03d a traiter",
-                    g_slist_length(Partage->com_arch.liste_arch) );
-          pthread_mutex_unlock( &Partage->com_arch.synchro );
-          Partage->com_arch.Thread_reload = FALSE;
-          Arch_Lire_config();
-        }
 
        if ( (Partage->top - last_delete) >= 864000 )                                                     /* Une fois par jour */
         { pthread_t tid;
@@ -201,7 +192,7 @@
        db = Init_ArchDB_SQL();
        if (!db)
         { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Unable to open database %s/%s/%s. Restarting in 10s.", __func__,
-                    Partage->com_arch.archdb_host, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
+                    Partage->com_arch.archdb_hostname, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
           sleep(10);
           continue;
         }
@@ -210,7 +201,8 @@
        top = Partage->top;
        nb_enreg = 0;                                                       /* Au début aucun enregistrement est passé a la DB */
        gboolean retour = TRUE;
-       while (Partage->com_arch.liste_arch && Partage->com_arch.Thread_run == TRUE && nb_enreg<1000 && retour==TRUE)
+       while (Partage->com_arch.liste_arch && Partage->com_arch.Thread_run == TRUE &&
+              Partage->com_arch.Thread_reload == FALSE && nb_enreg<1000 && retour==TRUE)
         { pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
           arch = Partage->com_arch.liste_arch->data;                                                  /* Recuperation du arch */
           Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
@@ -225,6 +217,18 @@
        Libere_DB_SQL( &db );                                                                               /* pour historique */
        Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 1.0*Partage->com_arch.taille_arch, TRUE );
      }
+
+    if (Partage->com_arch.Thread_reload)                                                          /* On a recu reload ?? */
+     { Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: RELOAD", __func__ );
+       pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
+       Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Reste %05d a traiter", __func__,
+                 g_slist_length(Partage->com_arch.liste_arch) );
+       pthread_mutex_unlock( &Partage->com_arch.synchro );
+       Partage->com_arch.Thread_reload = FALSE;
+       Arch_Lire_config();
+       goto reload;
+     }
+
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Cleaning Arch List before stop", __func__);
     Arch_Clear_list();                                              /* Suppression des enregistrements restants dans la liste */

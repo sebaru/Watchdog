@@ -714,5 +714,6 @@ CREATE TABLE IF NOT EXISTS `audit_log` (
   `access_level` int(11) NOT NULL DEFAULT '0',
   `message` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `date` DATETIME NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY (`date`),
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;

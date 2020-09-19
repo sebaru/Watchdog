@@ -97,7 +97,7 @@
     Json_add_string ( builder, "db_database", Config.db_database );
 
     Json_add_string ( builder, "archdb_username", Partage->com_arch.archdb_username );
-    Json_add_string ( builder, "archdb_hostname", Partage->com_arch.archdb_host );
+    Json_add_string ( builder, "archdb_hostname", Partage->com_arch.archdb_hostname );
     Json_add_int    ( builder, "archdb_port", Partage->com_arch.archdb_port );
     Json_add_string ( builder, "archdb_database", Partage->com_arch.archdb_database );
 

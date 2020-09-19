@@ -54,7 +54,7 @@
 
     db = Init_ArchDB_SQL();
     g_snprintf( chaine, sizeof(chaine), "Connection '%s' (Host='%s':%d, User='%s' DB='%s')", (db ? "OK" : "Failed"),
-                Partage->com_arch.archdb_host, Partage->com_arch.archdb_port, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
+                Partage->com_arch.archdb_hostname, Partage->com_arch.archdb_port, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
     Json_add_bool   ( builder, "result", (db ? TRUE : FALSE) );
     Json_add_string ( builder, "details", chaine );
     Libere_DB_SQL ( &db );
@@ -178,6 +178,65 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
+ static void Admin_arch_thread_set ( SoupMessage *msg )
+  { GBytes *request_brute;
+    gsize taille;
+
+    if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
+       return;
+     }
+
+    if ( Json_has_member ( request, "hostname" ) )
+     { g_snprintf ( Partage->com_arch.archdb_hostname, sizeof(Partage->com_arch.archdb_hostname), "%s", Json_get_string(request, "hostname"));
+       Modifier_configDB ( "archive", "hostname", Partage->com_arch.archdb_hostname );
+     }
+
+    if ( Json_has_member ( request, "port" ) )
+     { Partage->com_arch.archdb_port = Json_get_int(request,"port");
+       Modifier_configDB_int ( "archive", "port", Partage->com_arch.archdb_port );
+     }
+
+    if ( Json_has_member ( request, "username" ) )
+     { g_snprintf ( Partage->com_arch.archdb_username, sizeof(Partage->com_arch.archdb_username), "%s", Json_get_string(request, "username"));
+       Modifier_configDB ( "archive", "username", Partage->com_arch.archdb_username );
+     }
+
+    if ( Json_has_member ( request, "password" ) )
+     { g_snprintf ( Partage->com_arch.archdb_password, sizeof(Partage->com_arch.archdb_password), "%s", Json_get_string(request, "password"));
+       Modifier_configDB ( "archive", "password", Partage->com_arch.archdb_password );
+     }
+
+    if ( Json_has_member ( request, "database" ) )
+     { g_snprintf ( Partage->com_arch.archdb_database, sizeof(Partage->com_arch.archdb_database), "%s", Json_get_string(request, "database"));
+       Modifier_configDB ( "archive", "database", Partage->com_arch.archdb_database );
+     }
+
+    if ( Json_has_member ( request, "buffer_size" ) )
+     { Partage->com_arch.buffer_size = Json_get_int(request,"buffer_size");
+       Modifier_configDB_int ( "archive", "buffer_size", Partage->com_arch.buffer_size );
+     }
+
+    if ( Json_has_member ( request, "retention" ) )
+     { Partage->com_arch.retention = Json_get_int(request,"retention");
+       Modifier_configDB_int ( "archive", "retention", Partage->com_arch.retention );
+     }
+
+    json_node_unref(request);
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_instance_list: Fourni une list JSON des instances Watchdog dans le domaine                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
  static void Admin_arch_thread_status ( SoupMessage *msg )
   { JsonBuilder *builder;
     gsize taille_buf;
@@ -197,6 +256,12 @@
      }
 
     Json_add_bool   ( builder, "thread_is_running", Partage->com_arch.Thread_run );
+    Json_add_string ( builder, "hostname",    Partage->com_arch.archdb_hostname);
+    Json_add_int    ( builder, "port",        Partage->com_arch.archdb_port);
+    Json_add_string ( builder, "database",    Partage->com_arch.archdb_database);
+    Json_add_string ( builder, "username",    Partage->com_arch.archdb_username);
+    Json_add_int    ( builder, "buffer_size", Partage->com_arch.buffer_size);
+    Json_add_int    ( builder, "retention",   Partage->com_arch.retention);
 
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
@@ -247,6 +312,7 @@
        return;
      }
          if (!strcasecmp(path, "thread_status")) { Admin_arch_thread_status ( msg ); }
+    else if (!strcasecmp(path, "thread_set"))    { Admin_arch_thread_set   ( msg ); }
     else if (!strcasecmp(path, "table_status"))  { Admin_arch_table_status ( msg ); }
     else if (!strcasecmp(path, "del"))    { Admin_arch_del    ( msg ); }
     else if (!strcasecmp(path, "clear"))  { Admin_arch_clear  ( msg ); }

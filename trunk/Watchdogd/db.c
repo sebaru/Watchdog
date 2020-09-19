@@ -136,7 +136,7 @@
 /* Sortie: une structure DB de référence                                                                                      */
 /******************************************************************************************************************************/
  struct DB *Init_ArchDB_SQL ( void )
-  { return( Init_DB_SQL_with ( Partage->com_arch.archdb_host, Partage->com_arch.archdb_username,
+  { return( Init_DB_SQL_with ( Partage->com_arch.archdb_hostname, Partage->com_arch.archdb_username,
                                Partage->com_arch.archdb_password, Partage->com_arch.archdb_database, Partage->com_arch.archdb_port ) );
   }
 /******************************************************************************************************************************/
