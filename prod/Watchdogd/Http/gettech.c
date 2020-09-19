@@ -52,7 +52,7 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!session)
-     { soup_message_set_redirect ( msg, 301, "/auth/login" );
+     { soup_message_set_redirect ( msg, 301, "/home/login" );
        return;
      }
 
@@ -97,7 +97,7 @@
      }
     read ( fd, &result,taille_header );
     close(fd);
-     
+
     fd = open (fichier, O_RDONLY );
     if (fd==-1)
      { g_free(result);

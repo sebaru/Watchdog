@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Http/getinstance.c       Gestion des request getinstance pour le thread HTTP de watchdog                         */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    26.07.2020 21:23:28 */
+/* Watchdogd/Http/getfile.c       Gestion des requests sur des ressources fichiers                                            */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                                    10.09.2020 08:31:51 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * getinstance.c
+ * getfile.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre
@@ -25,8 +25,11 @@
  * Boston, MA  02110-1301  USA
  */
 
+ #include <sys/types.h>
+ #include <sys/stat.h>
  #include <string.h>
  #include <unistd.h>
+ #include <fcntl.h>
 
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
@@ -34,33 +37,50 @@
  extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
-/* Http_Traiter_instance_list: Fourni une list JSON des instances Watchdog dans le domaine                                    */
+/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_instance_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                   SoupClientContext *client, gpointer user_data )
-  { gchar *buf;
-    gsize taille_buf;
+ void Http_traiter_file ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                          SoupClientContext *client, gpointer user_data )
+  { struct stat stat_buf;
+    gchar fichier[80];
+    gint fd;
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 0 )) return;
+    /*struct HTTP_CLIENT_SESSION *session = */Http_print_request ( server, msg, path, client );
 
-    JsonBuilder *builder = Json_create ();
-    if (!builder)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+    g_snprintf ( fichier, sizeof(fichier), "IHM%s", g_strcanon ( path, "abcdefghijklmnopqrstuvwxyz_", '_' ) );
+
+    if (stat (fichier, &stat_buf)==-1)
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Error Stat" );
+       return;
+     }
+    gint taille_fichier = stat_buf.st_size;
+
+    gchar *result = g_try_malloc0 ( taille_fichier );
+    if (!result)
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
        return;
      }
 
-    SQL_Select_to_JSON ( builder, "instances", "SELECT DISTINCT(instance_id),valeur AS instance_is_master FROM config WHERE nom='instance_is_master'" );
+    fd = open (fichier, O_RDONLY );
+    if (fd==-1)
+     { g_free(result);
+       soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "File Open Error" );
+       return;
+     }
+    read ( fd, &result, taille_fichier );
+    close(fd);
 
-    buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    if ( !strncasecmp (path, "/js/", strlen("/js/") ) )
+     { soup_message_set_response ( msg, "text/javascript; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_fichier ); }
+    else if ( !strncasecmp (path, "/svg/", strlen("/svg/") ) )
+     { soup_message_set_response ( msg, "image/svg+xml; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_fichier ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

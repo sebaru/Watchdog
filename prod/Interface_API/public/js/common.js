@@ -10,8 +10,8 @@
        if (xhr.status == 200)
         { try { var Response = JSON.parse(xhr.responseText); }
           catch (error) { Response=undefined; }
-          if (method!="GET") $('#idToastStatus').toast('show');
-          fonction(Response);
+          if (method=="DELETE" || method=="POST") $('#idToastStatus').toast('show');
+          if (fonction != null) fonction(Response);
         }
        else { Show_Error( xhr.statusText ); }
      }
@@ -24,12 +24,20 @@
      { document.getElementById("idUsername").innerHTML = localStorage.getItem("username");
        document.getElementById("idHrefUsername").href = "/tech/user/"+localStorage.getItem("username");
      }
+    $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+  }
+/********************************************* Chargement du synoptique 1 au démrrage *****************************************/
+ function Logout ()
+  { Send_to_API ( "PUT", "/api/disconnect", null, function() { localStorage.clear(); Redirect("/"); });
   }
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Show_Error ( message )
-  { $('#idModalDetail').html( "Une erreur s'est produite: "+message );
-    $('#idModalError').modal("show");
+  { if (message == "Not Connected") { Logout(); }
+    else
+     { $('#idModalDetail').html( "Une erreur s'est produite: "+message );
+       $('#idModalError').modal("show");
+     }
   }
 
 /********************************************* Redirige la page ***************************************************************/
@@ -125,3 +133,4 @@
     else if (period=="DAY")  setInterval( function() { window.location.reload(); }, 300000);
     else setInterval( function() { window.location.reload(); }, 600000);
 	 }
+

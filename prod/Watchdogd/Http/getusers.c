@@ -52,11 +52,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 1) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, HTTP_FORBIDDEN_ERROR );
-       return;
-     }
+    if (!Http_check_session( msg, session, 1 )) return;
 
     g_object_get ( msg, "request-body-data", &request, NULL );
     if (!request)
@@ -96,8 +92,9 @@
     while(liste)
      { struct HTTP_CLIENT_SESSION *target = liste->data;
        if ( !strcmp(target->wtd_session, target_sid) )
-        { if ( session->access_level > target->access_level)
+        { if ( session->access_level > target->access_level || !strcmp(session->username,target->username))
            { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, target );
+             Audit_log ( session, "Session of '%s' killed", target->username );
              g_free(target);
              soup_message_set_status (msg, SOUP_STATUS_OK );
            }
@@ -127,11 +124,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 1) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, HTTP_FORBIDDEN_ERROR );
-       return;
-     }
+    if (!Http_check_session( msg, session, 1 )) return;
 
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
@@ -165,11 +158,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, HTTP_FORBIDDEN_ERROR );
-       return;
-     }
+    if (!Http_check_session( msg, session, 1 )) return;
 
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
@@ -185,6 +174,7 @@
      { struct HTTP_CLIENT_SESSION *sess = liste->data;
        Json_add_object ( builder, NULL );
        Json_add_string ( builder, "username", sess->username );
+       Json_add_string ( builder, "host", sess->host );
        Json_add_string ( builder, "wtd_session", sess->wtd_session );
        Json_add_int    ( builder, "access_level", sess->access_level );
        Json_add_int    ( builder, "last_request", sess->last_request );

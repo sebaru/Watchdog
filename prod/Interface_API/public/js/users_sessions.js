@@ -32,16 +32,21 @@
                },
          columns:
           [ { "data": "username", "title":"Username", "className": "text-center" },
+            { "data": "host", "title":"Host", "className": "text-center" },
             { "data": "access_level", "title":"Level", "className": "hidden-xs" },
             { "data": "wtd_session", "title":"Wtd_session", "className": "hidden-xs" },
-            { "data": "last_request", "title":"Dernier accès", "className": "hidden-xs" },
-            { "data": null,
+            { "data": null, "title":"Dernier accès", "className": "hidden-xs",
+              "render": function (item)
+                { dateObj = new Date(item.last_request*1000);
+                  return(dateObj.toLocaleString());
+                }
+            },
+            { "data": null, "title":"Actions", "orderable": false,
               "render": function (item)
                 { return("<button class='btn btn-danger btn-block btn-sm' data-toggle='tooltip' title='Supprime la session' "+
                          "onclick=Users_sessions_clic_kill('"+item.wtd_session+"')>"+
                          "<i class='fas fa-skull'></i> Kill</button>")
                 },
-              "title":"Actions", "orderable": false
             }
           ],
          order: [ [0, "desc"] ],

@@ -161,8 +161,8 @@
  extern void Proto_valider_editer_cadran_atelier ( struct CLIENT *client, struct CMD_TYPE_CADRAN *rezo_cadran );
 
  extern void *Envoyer_mnemoniques_thread ( struct CLIENT *client );                                /* Dans envoi_mnemonique.c */
- extern void Proto_envoyer_type_num_mnemo_tag( int tag, int ss_tag, struct CLIENT *client,
-                                               struct CMD_TYPE_NUM_MNEMONIQUE *critere );
+/* extern void Proto_envoyer_type_num_mnemo_tag( int tag, int ss_tag, struct CLIENT *client,
+                                               struct CMD_TYPE_NUM_MNEMONIQUE *critere );*/
  extern void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemo );
  extern void Proto_valider_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemo );
  extern void Proto_effacer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemo );

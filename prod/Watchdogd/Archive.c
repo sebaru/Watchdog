@@ -39,17 +39,18 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Arch_Lire_config ( void )
-  { gchar *nom, *valeur;
+ static gboolean Arch_Lire_config ( void )
+  { gchar *nom, *valeur, valeur_defaut[80];
     struct DB *db;
 
-    g_snprintf( Partage->com_arch.archdb_database, sizeof(Partage->com_arch.archdb_database), "%s", Config.db_database );
-    g_snprintf( Partage->com_arch.archdb_username, sizeof(Partage->com_arch.archdb_username), "%s", Config.db_username );
-    g_snprintf( Partage->com_arch.archdb_password, sizeof(Partage->com_arch.archdb_password), "%s", Config.db_password );
-    g_snprintf( Partage->com_arch.archdb_host, sizeof(Partage->com_arch.archdb_host), "%s", Config.db_host );
-    Partage->com_arch.archdb_port = Config.db_port;
-    Partage->com_arch.max_buffer_size = ARCHIVE_DEFAULT_BUFFER_SIZE;
-    Partage->com_arch.duree_retention = ARCHIVE_DEFAUT_RETENTION;
+    Creer_configDB ( "arch", "database", Config.db_database );
+    Creer_configDB ( "arch", "username", Config.db_username );
+    Creer_configDB ( "arch", "password", Config.db_password );
+    Creer_configDB ( "arch", "host", Config.db_host );
+    g_snprintf( valeur_defaut, sizeof(valeur_defaut), "%d", ARCHIVE_DEFAUT_BUFFER_SIZE );
+    Creer_configDB ( "arch", "max_buffer_size", valeur_defaut );
+    g_snprintf( valeur_defaut, sizeof(valeur_defaut), "%d", ARCHIVE_DEFAUT_RETENTION );
+    Creer_configDB ( "arch", "days", valeur_defaut );
 
     if ( ! Recuperer_configDB( &db, "arch" ) )                                              /* Connexion a la base de données */
      { Info_new( Config.log, Config.log_arch, LOG_WARNING,
@@ -74,10 +75,7 @@
         { Partage->com_arch.duree_retention = atoi(valeur);  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Config.log_arch = TRUE;  }
-       else
-        { Info_new( Config.log, Config.log_arch, LOG_NOTICE,
-                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
-        }
+
      }
     return(TRUE);
   }

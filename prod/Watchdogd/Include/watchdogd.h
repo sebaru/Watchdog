@@ -32,6 +32,7 @@
  #include <pthread.h>
  #include <string.h>
  #include <errno.h>
+ #include <libsoup/soup.h>
 
  #include "Reseaux.h"
  #include "Zmq.h"

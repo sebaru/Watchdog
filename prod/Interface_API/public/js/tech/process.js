@@ -73,24 +73,20 @@
  function Load_page ()
   { console.log ("in load process !");
 
-    Load_process ( "MASTER" )
-    Send_to_API ( "GET", "/api/instance/list", null, function (Response)
-     { $('#idSelectInstance').empty();
-       $.each ( Response.instances, function ( i, instance )
-        { $('#idSelectInstance').append("<option value='"+instance.instance_id+"'>"+instance.instance_id+"</option>"); } );
-     });
+    $('#idTitleProcessus').text(Get_locale_instance());
 
-  }
- function Load_process ( instance )
-  { $('#idTableProcess').DataTable(
+    $('#idTableProcess').DataTable(
        { pageLength : 25,
          fixedHeader: true,
          ajax: {	url : "/api/process/list",	type : "GET", dataSrc: "Process",
-                 data: { "instance": instance },
+                 data: { "instance": Get_locale_instance() },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "thread", "title":"Thread", "className": "text-center" },
+          [ { "data": null, "title":"Thread", "className": "text-center",
+              "render": function (item)
+                { return( Lien ( "/tech/process/"+item.thread, "Voir la conf du thread "+item.thread, item.thread ) ); }
+            },
             { "data": null, "title":"Started",
               "render": function (item)
                 { if (item.started==true)

@@ -19,8 +19,7 @@ class Tech extends BaseController
 
 /******************************************************************************************************************************/
  public function dashboard()
-   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+   {
 
     $data['title'] = "Chez moi !";
     echo view('Tech/header', $data);
@@ -31,8 +30,7 @@ class Tech extends BaseController
 
 /******************************************************************************************************************************/
  public function log()
-   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+   {
 
     echo view('Tech/header');
     echo view('Tech/log');
@@ -41,8 +39,7 @@ class Tech extends BaseController
   }
 /******************************************************************************************************************************/
  public function synoptiques()
-   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+   {
 
     echo view('Tech/header');
     echo view('Tech/synoptiques');
@@ -50,20 +47,18 @@ class Tech extends BaseController
 
    }
 /******************************************************************************************************************************/
- public function process()
-   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+ public function process( $thread=NULL )
+   {
 
     echo view('Tech/header');
-    echo view('Tech/process');
+    if (!$thread) echo view('Tech/process');
+    else echo view('Tech/'.$thread);
     echo view('Tech/footer');
 
    }
 /******************************************************************************************************************************/
  public function atelier()
-   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
-
+   {
     echo view('Tech/header');
     echo view('Tech/atelier');
     echo view('Tech/footer');
@@ -71,8 +66,7 @@ class Tech extends BaseController
    }
 /******************************************************************************************************************************/
  public function atelier_list()
-   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+   {
 
     echo view('Tech/header');
     echo view('Tech/atelier_list');
@@ -81,8 +75,7 @@ class Tech extends BaseController
    }
 /******************************************************************************************************************************/
  public function users_sessions()
-   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+   {
 
     echo view('Tech/header');
     echo view('Tech/users_sessions');
@@ -90,8 +83,7 @@ class Tech extends BaseController
    }
 /******************************************************************************************************************************/
  public function users_list()
-   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+   {
 
     echo view('Tech/header');
     echo view('Tech/users_list');
@@ -99,8 +91,7 @@ class Tech extends BaseController
    }
 /******************************************************************************************************************************/
  public function mnemos()
-   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+   {
 
     echo view('Tech/header');
     echo view('Tech/mnemos');
@@ -108,8 +99,7 @@ class Tech extends BaseController
    }
 /******************************************************************************************************************************/
  public function dls()
-   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+   {
 
     echo view('Tech/header');
     echo view('Tech/dls');
@@ -117,8 +107,7 @@ class Tech extends BaseController
    }
 /******************************************************************************************************************************/
  public function dls_source()
-   { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-     if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
+   {
 
     echo view('Tech/header');
     echo view('Tech/dls_source');
@@ -126,47 +115,26 @@ class Tech extends BaseController
    }
 /******************************************************************************************************************************/
  public function run()
-  { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-    if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
-
-    echo view('Tech/header');
+  { echo view('Tech/header');
     echo view('Tech/run');
     echo view('Tech/footer');
   }
 /******************************************************************************************************************************/
  public function dls_run()
-  { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-    if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
-
-    echo view('Tech/header');
+  { echo view('Tech/header');
     echo view('Tech/dls_run');
     echo view('Tech/footer');
   }
 /******************************************************************************************************************************/
  public function modbus()
-  { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-    if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
-
-    echo view('Tech/header');
+  { echo view('Tech/header');
     echo view('Tech/modbus');
     echo view('Tech/footer');
   }
 /******************************************************************************************************************************/
  public function modbus_map()
-  { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-    if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
-
-    echo view('Tech/header');
+  { echo view('Tech/header');
     echo view('Tech/modbus_map');
-    echo view('Tech/footer');
-  }
-/******************************************************************************************************************************/
- public function modbus_run()
-  { if ( session()->get('user') === NULL )        { return redirect()->to('/auth/login'); }
-    if ( session()->get('user')->access_level<6 ) { return redirect()->to('/auth/login'); }
-
-    echo view('Tech/header');
-    echo view('Tech/modbus_run');
     echo view('Tech/footer');
   }
 }

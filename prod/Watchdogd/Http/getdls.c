@@ -92,10 +92,8 @@
     gsize taille_buf;
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!session)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
+
 
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
@@ -131,10 +129,8 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!session)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
+
 
     gchar *prefix = "/dls/run/";
     if ( ! g_str_has_prefix ( path, prefix ) )
@@ -326,10 +322,8 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!session)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
+
 
     gchar *prefix = "/dls/source/";
     if ( ! g_str_has_prefix ( path, prefix ) )
@@ -378,10 +372,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!session)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -404,6 +395,7 @@
      }
 
     Activer_plugin ( target, TRUE );
+    Audit_log ( session, "DLS '%s' started", target );
     g_free(target);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -424,10 +416,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!session)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -450,6 +439,7 @@
      }
 
     Activer_plugin ( target, FALSE );
+    Audit_log ( session, "DLS '%s' stopped", target );
     g_free(target);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -471,10 +461,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!session)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -497,6 +484,7 @@
      }
 
     Debug_plugin ( target, TRUE );
+    Audit_log ( session, "DLS '%s' debug enabled", target );
     g_free(target);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -517,10 +505,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!session)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -543,6 +528,7 @@
      }
 
     Debug_plugin ( target, FALSE );
+    Audit_log ( session, "DLS '%s' debug disabled", target );
     g_free(target);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -564,10 +550,8 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!session)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
+
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = Json_create ();
     if (builder == NULL)
@@ -607,11 +591,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -633,13 +613,13 @@
        return;
      }
 
+    Audit_log ( session, "DLS '%s' supprimé", target );
     g_snprintf(chaine, sizeof(chaine),  "DELETE FROM dls WHERE tech_id='%s'", target );
     g_free(target);
     if (SQL_Write (chaine)==FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
        return;
      }
-
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
@@ -658,11 +638,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -685,7 +661,6 @@
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Json Memory Error");
        return;
      }
-
 
     switch(retour)
      { case DLS_COMPIL_ERROR_LOAD_SOURCE:
@@ -729,9 +704,10 @@
             Json_add_string ( builder, "result", "error" );
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Unknown Error" );
      }
+    Audit_log ( session, "DLS '%s' compilé", Json_get_string ( request, "tech_id" ) );
+    json_node_unref(request);
     gchar *buf = Json_get_buf (builder, &taille_buf);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-    json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
@@ -761,11 +737,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -781,28 +753,8 @@
      }
 
     Dls_foreach ( Json_get_string ( request, "tech_id" ), Http_dls_acquitter_plugin, NULL );
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    Audit_log ( session, "DLS '%s' acquitté", Json_get_string ( request, "tech_id" ) );
     json_node_unref(request);
+    soup_message_set_status (msg, SOUP_STATUS_OK);
   }
-#ifdef bouh
-/******************************************************************************************************************************/
-/* Http_Traiter_request_getprocess: Traite une requete sur l'URI process                                                      */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : FALSE si pb                                                                                                       */
-/******************************************************************************************************************************/
- void Http_traiter_dls ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                         SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    Http_print_request ( server, msg, path, client );
-
-         if ( ! strcasecmp( path, "/dls/debug_trad_on" ) )  { Trad_dls_set_debug ( TRUE ); }
-    else if ( ! strcasecmp( path, "/dls/debug_trad_off" ) ) { Trad_dls_set_debug ( FALSE ); }
-     }
-    else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
-  }
-#endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

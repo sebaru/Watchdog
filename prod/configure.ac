@@ -74,7 +74,7 @@ LEXLIB=
 AC_SUBST(LEXLIB)
 
 dnl parametres par defaut
-CFLAGS="-Wall -Wno-unused-result -Wno-comment -Wno-pointer-sign -Wno-discarded-qualifiers -pipe -g -ggdb -D_GNU_SOURCE"
+CFLAGS="-Wall -Wno-unused-result -Wno-comment -Wno-pointer-sign -Wno-discarded-qualifiers -pipe -g -ggdb -D_GNU_SOURCE -fdiagnostics-color"
 
 LIBW_MAJOR_VERSION=6
 LIBW_MINOR_VERSION=0
@@ -110,7 +110,6 @@ Watchdogd/Onduleur/Makefile \
 Watchdogd/Smsg/Makefile \
 Watchdogd/Audio/Makefile \
 Watchdogd/Modbus/Makefile \
-Watchdogd/Archive/Makefile \
 Watchdogd/Imsgs/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Http/Makefile \

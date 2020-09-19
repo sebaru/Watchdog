@@ -1,0 +1,124 @@
+ document.addEventListener('DOMContentLoaded', Load_page, false);
+
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Archive_purge ( )
+  { Send_to_API ( 'PUT', "/api/process/archive/purge", null, function (Response)
+     { $('#idModalInfoDetail').html("Execution du thread de purge: <strong>"+Response.exec_purge_thread+"</strong>" );
+       $('#idModalInfo').modal("show");
+     });
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Archive_clear (  )
+  { Send_to_API ( 'PUT', "/api/process/archive/clear", null, function (Response)
+     { $('#idModalInfoDetail').html("Nombre d'enregistrements droppés: <strong>"+Response.nbr_archive_deleted+"</strong>" );
+       $('#idModalInfo').modal("show");
+     });
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Archive_testdb (  )
+  { Send_to_API ( 'PUT', "/api/process/archive/testdb", null, function (Response)
+     { $('#idModalInfoDetail').html("Etat du test de connexion: <strong>"+Response.result+"<br>" + Response.details + "</strong>" );
+       $('#idModalInfo').modal("show");
+     });
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Valider_Archive_Del ( table_name )
+  { var json_request = JSON.stringify( { table_name : table_name } );
+    Send_to_API ( 'DELETE', "/api/process/archive/del", json_request, function ()
+     { $('#idTableArchive').DataTable().ajax.reload(null, false);
+     });
+  }
+
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function Show_Modal_Archive_Del ( table_name )
+  { table = $('#idTableArchive').DataTable();
+    selection = table.ajax.json().tables.filter( function(item) { return item.table_name==table_name } )[0];
+    $('#idModalDelTitre').text ( "Détruire la table ?" );
+    $('#idModalDelMessage').html("Etes-vous sur de vouloir supprimer cette table et ses enregistrements ?"+
+                                 "<hr>"+
+                                 "<strong>"+table_name + "<br>"+selection.table_rows+" enregistrements</strong>"
+                                );
+    $('#idModalDelValider').attr( "onclick", "Valider_Archive_Del('"+table_name+"')" );
+    $('#idModalDel').modal("show");
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Set_param ( id )
+  { table = $('#idTableConfArchive').DataTable();
+    selection = table.ajax.json().parametres.filter( function(item) { return item.id==id } )[0];
+    var json_request = JSON.stringify(
+     { id: id,
+       valeur: $('#conf-'+id).val()
+     });
+    Send_to_API ( 'POST', "/api/config/set", json_request, null );
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Del_param ( id )
+  { table = $('#idTableConfArchive').DataTable();
+    selection = table.ajax.json().parametres.filter( function(item) { return item.id==id } )[0];
+    var json_request = JSON.stringify(
+     { id: id,
+     });
+    Send_to_API ( 'DELETE', "/api/config/del", json_request, function ()
+     { $('#idTableConfArchive').DataTable().ajax.reload(null, false);
+     });
+  }
+/********************************************* Appelé au chargement de la page ************************************************/
+ function Load_page ()
+  { Send_to_API ( "GET", "/api/process/archive/thread_status", null, function ( Response )
+     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
+                                  else { $('#idAlertThreadNotRunning').show(); }
+     });
+
+    $('#idTableConfArchive').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         rowId: "id",
+         ajax: {	url : "/api/config/get",	type : "GET", dataSrc: "parametres", data: { "process": "arch" },
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
+         columns:
+          [ { "data": "instance_id", "title":"Instance", "className": "align-middle text-center" },
+            { "data": "nom", "title":"Parametre", "className": "align-middle text-center" },
+            { "data": null, "title":"Valeur", "render": function (item)
+              { return("<input id='conf-"+item.id+"'type='text' class='form-control' placeholder='Valeur du paramètre' "+
+                       "value='"+item.valeur+"'>");
+              }
+            },
+            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
+                { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "outline-primary", "Positionner le parametre", "Set_param", item.id, "save", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer le parametre", "Del_param", item.id, "trash", null );
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
+                },
+            }
+          ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
+
+    $('#idTableArchive').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         rowId: "id",
+         ajax: {	url : "/api/process/archive/table_status",	type : "GET", dataSrc: "tables",
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
+         columns:
+          [ { "data": "table_name", "title":"Nom de la table", "className": "align-middle text-center" },
+            { "data": "table_rows", "title":"Nombre d'enregistrements", "className": "align-middle text-center" },
+            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
+                { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "danger", "Supprimer la table", "Show_Modal_Archive_Del", item.table_name, "trash", null );
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
+                },
+            }
+          ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
+
+  }

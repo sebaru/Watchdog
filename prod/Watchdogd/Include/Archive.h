@@ -31,14 +31,13 @@
  #define ARCHIVE_EA_TEMPS_SI_CONSTANT   600                                    /* Si constant, archivage toutes les 1 minutes */
  #define ARCHIVE_EA_TEMPS_SI_VARIABLE    50                                   /* Si variable, archivage toutes les 5 secondes */
  #define ARCHIVE_DEFAUT_RETENTION       400                              /* Nom de jours par défaut de retention des archives */
- #define ARCHIVE_DEFAULT_BUFFER_SIZE 500000
+ #define ARCHIVE_DEFAUT_BUFFER_SIZE  500000
 
  #define NOM_TABLE_ARCH    "histo_bit"
 
  struct ARCHDB
   { guint  date_sec;                                                                                      /* Date de la photo */
     guint  date_usec;                                                                                     /* Date de la photo */
-/*    guint  type;                                                                                 /* Type de bit: E ? B ? EA ? */
     gchar  nom[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar  tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gfloat valeur;                                                                           /* Valeur de l'entrée analogique */
@@ -62,11 +61,10 @@
 
 /******************************************* Définitions des prototypes *******************************************************/
  extern void Run_arch ( void );                                                                             /* Dans Archive.c */
- extern gboolean Arch_Lire_config ( void );
  extern gint Arch_Clear_list ( void );
  extern void Ajouter_arch_by_nom( gchar *nom, gchar *tech_id, gfloat valeur );
  extern gboolean Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );
- extern void Admin_arch_json ( gchar *commande, gchar **buffer_p, gint *taille_p );
+ extern void Admin_arch_json ( SoupMessage *msg, const char *path, GHashTable *query, gint access_level );
  extern void Arch_Update_SQL_Partitions_thread ( void );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

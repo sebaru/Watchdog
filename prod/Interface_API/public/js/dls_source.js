@@ -17,7 +17,7 @@
  function Compiler ()
   { vars = window.location.pathname.split('/');
     var xhr = new XMLHttpRequest;
-    xhr.open('POST', "/api/dls/compil/", true);
+    xhr.open('POST', "/api/dls/compil", true);
     xhr.setRequestHeader('Content-type', 'application/json');
     var json_request = JSON.stringify(
        { tech_id : vars[3],

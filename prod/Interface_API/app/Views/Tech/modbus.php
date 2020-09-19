@@ -5,17 +5,27 @@
 
    <div class ="ml-auto btn-group">
         <button type="button" onclick="Show_Modal_Modbus_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
-        <button type="button" onclick="window.location='/tech/modbus_run'" class="btn btn-info"><i class="fas fa-eye"></i> RUN</button>
         <button type="button" onclick="window.location='/tech/modbus_map'" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>
 
-   <!--<div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
-     <p>Warning : Thread is not running !</p>
-   </div>-->
+   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
+     <h4 class="alert-heading">Warning !</h4>
+         Thread "Modbus" is not running !
+   </div>
 
     <table id="idTableModbus" class="table table-striped table-bordered table-hover">
+      <thead class="thead-dark">
+				  </thead>
+			   <tbody>
+      </tbody>
+    </table>
+
+<hr>
+ <h3>Détails des Modules WAGO sur Modbus (RUN)</h3>
+
+    <table id="idTableModbusRun" class="table table-striped table-bordered table-hover">
       <thead class="thead-dark">
 				  </thead>
 			   <tbody>

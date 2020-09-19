@@ -249,6 +249,28 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
+/* Entrée: La DB, la requete                                                                                                  */
+/* Sortie: TRUE si pas de souci                                                                                               */
+/******************************************************************************************************************************/
+ gboolean SQL_Arch_Write ( gchar *requete )
+  { struct DB *db = Init_ArchDB_SQL ();
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Init DB FAILED for '%s'", __func__, requete );
+       return(FALSE);
+     }
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
+       Libere_DB_SQL ( &db );
+       return(FALSE);
+     }
+    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
+
+    Libere_DB_SQL ( &db );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                                           */
 /* Entrée: La DB                                                                                                              */
 /******************************************************************************************************************************/
@@ -396,8 +418,8 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Update_database_schema ( void )
-  { gchar chaine[32], requete[4096];
-    gint database_version;
+  { gint database_version;
+    gchar requete[4096];
     struct DB *db;
 
     if (Config.instance_is_master != TRUE)                                                  /* Do not update DB if not master */
@@ -1876,6 +1898,21 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4952)
+     { g_snprintf( requete, sizeof(requete), "UPDATE syns_cadrans SET tech_id='SYS' WHERE tech_id=''");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD "
+                                             "FOREIGN KEY (`tech_id`) REFERENCES `dls`(`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 4968)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE config DROP CONSTRAINT PRIMARY KEY;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE config ADD `id` int(11) NOT NULL AUTO_INCREMENT");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
                                           "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "
@@ -1910,7 +1947,6 @@
         MNEMO_TEMPO, MNEMO_REGISTRE, -1
       );
     Lancer_requete_SQL ( db, requete );
-
 
     Libere_DB_SQL(&db);
 fin:

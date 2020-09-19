@@ -50,11 +50,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges" );
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     gpointer instance = g_hash_table_lookup ( query, "instance" );
     if (!instance)
@@ -98,7 +94,7 @@
     Json_end_object ( builder );                                                                              /* End Document */
 
     Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
-    Json_add_string ( builder, "thread",  "arch" );
+    Json_add_string ( builder, "thread",  "archive" );
     Json_add_bool   ( builder, "debug",   Config.log_arch );
     Json_add_bool   ( builder, "started", Partage->com_arch.Thread_run );
     Json_add_string ( builder, "version", WTD_VERSION );
@@ -152,11 +148,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges" );
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -181,7 +173,7 @@
     gboolean status = Json_get_bool ( request, "status" );
     Modifier_configDB ( thread, "debug", (status ? "TRUE" : "FALSE") );
 
-         if ( ! strcasecmp ( thread, "arch" ) ) { Config.log_arch = status; }
+         if ( ! strcasecmp ( thread, "archive" ) ) { Config.log_arch = status; }
     else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
     else if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
     else if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }
@@ -198,6 +190,7 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' debug to '%s'", __func__,
               thread, (status ? "TRUE" : "FALSE" ) );
 /*************************************************** Envoi au client **********************************************************/
+    Audit_log ( session, "Processus '%s' debug set to %s", thread, (status ? "TRUE" : "FALSE" ) );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     json_node_unref(request);
   }
@@ -217,11 +210,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges" );
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -241,12 +230,11 @@
        return;
      }
 
-
     gchar   *thread = Json_get_string ( request,"thread" );
     gboolean status = Json_get_bool ( request, "status" );
     Modifier_configDB ( thread, "enable", (status ? "TRUE" : "FALSE") );
 
-    if ( ! strcasecmp ( thread, "arch" ) )
+    if ( ! strcasecmp ( thread, "archive" ) )
      { if (status==FALSE) { Partage->com_arch.Thread_run = FALSE; }
        else Demarrer_arch();                                                                   /* Demarrage gestion Archivage */
      } else
@@ -272,6 +260,7 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' to '%s'",
               __func__, thread, (status ? "START" : "STOP") );
 /*************************************************** Envoi au client **********************************************************/
+    Audit_log ( session, "Processus '%s' enable set to %s", thread, (status ? "TRUE" : "FALSE" ) );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     json_node_unref(request);
   }
@@ -291,11 +280,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privilèges" );
-       return;
-     }
+    if (!Http_check_session( msg, session, 6 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -320,7 +305,7 @@
 /*************************************************** WS Reload library ********************************************************/
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading start for '%s' (hard=%d)", __func__, thread, hard );
          if ( ! strcasecmp( thread, "dls" ) )  { Partage->com_dls.Thread_reload  = TRUE; }
-    else if ( ! strcasecmp( thread, "arch" ) ) { Partage->com_arch.Thread_reload = TRUE; }
+    else if ( ! strcasecmp( thread, "archive" ) ) { Partage->com_arch.Thread_reload = TRUE; }
     else if ( ! strcasecmp( thread, "http" ) ) { Cfg_http.lib->Thread_reload     = TRUE; }
     else if ( hard )
      { Decharger_librairie_par_prompt ( thread );
@@ -349,6 +334,7 @@
         }
      }
 /*************************************************** Envoi au client **********************************************************/
+    Audit_log ( session, "Processus '%s' %s Reloaded", thread, (hard ? "Hard" : "Soft") );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     json_node_unref(request);
   }
@@ -361,17 +347,16 @@
                              SoupClientContext *client, gpointer user_data )
   {
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
 
-    if ( ! (session && session->access_level >= 6) )
-     { soup_message_set_status (msg, SOUP_STATUS_FORBIDDEN);
-       return;
-     }
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Searching for CLI commande %s", __func__, path );
+    path = path + strlen("/process/");
 
 /****************************************** WS get Running config library *****************************************************/
+    if (!strncasecmp ( path, "archive/", strlen("archive/")))
+     { Admin_arch_json ( msg, path+strlen("archive/"), query, session->access_level ); }
     else
      { GSList *liste;
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Searching for CLI commande %s", __func__, path );
-       path=path+9;
        liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
        while(liste)
         { struct LIBRAIRIE *lib = liste->data;

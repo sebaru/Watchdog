@@ -927,7 +927,7 @@
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */
 /******************************************************************************************************************************/
  gint Traduire_DLS( gchar *tech_id )
-  { gchar source[80], cible[80], log[80];
+  { gchar source[80], cible[80], log[80], *requete;
     struct CMD_TYPE_PLUGIN_DLS *plugin;
     struct ALIAS *alias;
     GSList *liste;
@@ -1097,11 +1097,8 @@
           close(fd);
         }
 
-       g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE tech_id='%s'", tech_id );
-       SQL_Write ( chaine );
-       g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_Tempo WHERE tech_id='%s'", tech_id );
-       SQL_Write ( chaine );
-
+       gchar *Liste_acronyme = NULL;
+       gchar *old_Liste_acronyme = NULL;
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)
         { alias = (struct ALIAS *)liste->data;
@@ -1113,6 +1110,14 @@
           if (alias->type == ALIAS_TYPE_DYNAMIC && !strcmp(alias->tech_id, Dls_plugin.tech_id) && alias->external == FALSE )
            { gchar *libelle = Get_option_chaine( alias->options, T_LIBELLE );
              if (!libelle) libelle="no libelle";
+
+             if (!Liste_acronyme) Liste_acronyme = g_strconcat( "'", alias->acronyme, "'", NULL );
+             else
+              { old_Liste_acronyme = Liste_acronyme;
+                Liste_acronyme = g_strconcat ( Liste_acronyme, ", '", alias->acronyme, "'", NULL );
+                g_free(old_Liste_acronyme);
+              }
+
              switch(alias->type_bit)
               { case MNEMO_BUS:
                    break;
@@ -1180,6 +1185,40 @@
               }
            }
           liste = liste->next;
+        }
+
+       if (Liste_acronyme)
+        { g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
+          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
+          SQL_Write ( requete );
+          g_free(requete);
+
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_Tempo WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
+          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
+          SQL_Write ( requete );
+          g_free(requete);
+
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_CI WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
+          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
+          SQL_Write ( requete );
+          g_free(requete);
+
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_CH WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
+          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
+          SQL_Write ( requete );
+          g_free(requete);
+
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM msgs WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
+          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
+          SQL_Write ( requete );
+          g_free(requete);
+
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_HORLOGE WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
+          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
+          SQL_Write ( requete );
+          g_free(requete);
+
+          g_free(Liste_acronyme);
         }
      }
     close(Id_log);

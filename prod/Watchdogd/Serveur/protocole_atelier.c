@@ -143,8 +143,8 @@
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire le mnemonique %d %d", mnemo->type, mnemo->num );
-               Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC,
-                                                 client, mnemo );
+               /*Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC,
+                                                 client, mnemo );*/
              }
             break;
        case SSTAG_CLIENT_TYPE_NUM_MNEMO_CLIC2:
@@ -152,8 +152,8 @@
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire le mnemonique %d %d", mnemo->type, mnemo->num );
-               Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC2,
-                                                 client, mnemo );
+               /*Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC2,
+                                                 client, mnemo );*/
              }
             break;
        case SSTAG_CLIENT_TYPE_NUM_MNEMO_CTRL:
@@ -161,8 +161,8 @@
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire le mnemonique %d %d", mnemo->type, mnemo->num );
-               Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMO_CTRL,
-                                                 client, mnemo );
+               /*Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMO_CTRL,
+                                                 client, mnemo );*/
              }
             break;
        case SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_EA:
@@ -170,8 +170,8 @@
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire le mnemonique %d %d", mnemo->type, mnemo->num );
-               Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_EA,
-                                                 client, mnemo );
+               /*Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_EA,
+                                                 client, mnemo );*/
              }
             break;
 /************************************************* Gestion des commentaires synoptiques ***************************************/
