@@ -4,6 +4,8 @@ After=syslog.target network.target auditd.service
 [Service]
 ExecStart=/usr/local/bin/Watchdogd -f
 ExecReload=/bin/kill -USR2 $MAINPID
+Restart=on-success
+RestartSec=1
 [Install]
 WantedBy=multi-user.target
 
