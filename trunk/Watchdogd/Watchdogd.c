@@ -105,11 +105,9 @@
        case SIGPIPE: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGPIPE" ); break;
        case SIGBUS:  Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGBUS" ); break;
        case SIGIO:   Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGIO" ); break;
-       case SIGUSR1: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR1: dumping infos" );
-                     Partage->com_msrv.Thread_reload = TRUE;
+       case SIGUSR1: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR1" );
                      break;
-       case SIGUSR2: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
-                     Partage->com_msrv.Thread_reload = TRUE;
+       case SIGUSR2: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR2" );
                      break;
        default: Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Recu signal %d", num ); break;
      }
@@ -281,7 +279,6 @@
     struct ZMQUEUE *zmq_from_slave, *zmq_from_bus;
 
     prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
-
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
 /************************************************* Socket ZMQ interne *********************************************************/
@@ -295,17 +292,22 @@
     zmq_from_slave = Bind_zmq ( ZMQ_SUB, "listen-to-slave", "tcp", "*", 5556 );
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
-    if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
-     { if (!Demarrer_arch())                                                                   /* Demarrage gestion Archivage */
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb ARCH", __func__ ); }
-
-       if (!Demarrer_dls())                                                                               /* Démarrage D.L.S. */
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb DLS", __func__ ); }
-
-       Charger_librairies();                                                  /* Chargement de toutes les librairies Watchdog */
-     }
-    else
+    if (Config.single)                                                                             /* Si demarrage des thread */
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: NOT starting threads (single mode=true)", __func__ ); }
+    else
+     { if (Config.installed)
+        { if (!Demarrer_arch())                                                                /* Demarrage gestion Archivage */
+           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb ARCH", __func__ ); }
+
+          if (!Demarrer_dls())                                                                            /* Démarrage D.L.S. */
+           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb DLS", __func__ ); }
+          Charger_librairies();                                               /* Chargement de toutes les librairies Watchdog */
+        }
+       else
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
+     }
+
+    if (!Config.installed) Charger_librairie_par_prompt ("http");/* Charge uniquement le module HTTP si instance pas installée*/
 
 /***************************************** Debut de la boucle sans fin ********************************************************/
     cpt_5_minutes = Partage->top + 3000;
@@ -333,18 +335,6 @@
            { Send_zmq ( Partage->com_msrv.zmq_to_bus, buffer, byte );                           /* Sinon on envoi aux threads */
              Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte );                           /* Sinon on envoi aux slave */
            }
-        }
-
-       if (Partage->com_msrv.Thread_reload)                                                               /* On a recu RELOAD */
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: RELOAD", __func__ );
-          Partage->com_dls.Thread_reload       = TRUE;
-          Partage->com_arch.Thread_reload      = TRUE;
-
-          Lire_config( NULL );                                                  /* Lecture sur le fichier /etc/watchdogd.conf */
-          Print_config();
-          Info_change_log_level ( Config.log, Config.log_level );
-          Charger_config_bit_interne();                                             /* Rechargement des configs bits internes */
-          Partage->com_msrv.Thread_reload      = FALSE;                                                 /* signal traité. RAZ */
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
@@ -450,14 +440,6 @@
           Send_zmq ( Partage->com_msrv.zmq_to_master, buffer, byte );
         }
 
-       if (Partage->com_msrv.Thread_reload)                                                               /* On a recu RELOAD */
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: RELOAD", __func__ );
-          Lire_config( NULL );                                                  /* Lecture sur le fichier /etc/watchdogd.conf */
-          Print_config();
-          Info_change_log_level ( Config.log, Config.log_level );
-          Partage->com_msrv.Thread_reload = FALSE;                                                      /* signal traité. RAZ */
-        }
-
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
         { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, NULL, "msrv", Config.master_host, "msrv", "ping", NULL, 0 );
           cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
@@ -484,7 +466,6 @@ end:
     Close_zmq( zmq_from_master );
 
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
-
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );
   }
@@ -495,8 +476,6 @@ end:
 /******************************************************************************************************************************/
  static gboolean Lire_ligne_commande( int argc, char *argv[] )
   { gint help = 0, log_level = -1, fg = 0, single = 0, version = 0;
-    gchar *home = NULL, *file= NULL, *run_as = NULL;
-    struct passwd *pwd, *old;
     struct poptOption Options[]=
      { { "foreground", 'f', POPT_ARG_NONE,
          &fg,               0, "Run in foreground", NULL },
@@ -504,12 +483,6 @@ end:
          &version,          0, "Display Version Number", NULL },
        { "debug",      'd', POPT_ARG_INT,
          &log_level,      0, "Debug level", "LEVEL" },
-       { "home",       'H', POPT_ARG_STRING,
-         &home,             0, "Home directory", "HOME" },
-       { "run_as",     'u', POPT_ARG_STRING,
-         &run_as,           0, "Run as user", "USER" },
-       { "conffile",   'c', POPT_ARG_STRING,
-         &file,             0, "Configuration file", "FILE" },
        { "help",       'h', POPT_ARG_NONE,
          &help,             0, "Help", NULL },
        { "single",     's', POPT_ARG_NONE,
@@ -540,16 +513,22 @@ end:
        exit(EXIT_OK);
      }
 
-    Lire_config( file );                                                        /* Lecture sur le fichier /etc/watchdogd.conf */
-
     if (single)          Config.single      = TRUE;                                            /* Demarrage en mode single ?? */
     if (log_level!=-1)   Config.log_level   = log_level;
-    if (home)            g_snprintf( Config.home,   sizeof(Config.home),   "%s", home );
-    if (run_as)          g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", run_as );
+    fflush(0);
+    return(fg);
+  }
+/******************************************************************************************************************************/
+/* Drop_privileges: Passe sous un autre user que root                                                                         */
+/* Entrée: néant                                                                                                              */
+/* Sortie: EXIT si erreur                                                                                                     */
+/******************************************************************************************************************************/
+ static void Drop_privileges( void )
+  { struct passwd *pwd, *old;
 
     pwd = getpwnam ( Config.run_as );
     if (!pwd)
-     { printf("Error, user '%s' not found in /etc/passwd (%s).. Could not set run_as user\n", Config.run_as, strerror(errno) );
+     { printf("Error, target user '%s' not found in /etc/passwd (%s).. Could not set run_as user\n", Config.run_as, strerror(errno) );
        exit(EXIT_ERREUR);
      }
     else printf("User '%s' (uid %d) found.\n", Config.run_as, pwd->pw_uid);
@@ -577,14 +556,11 @@ end:
           exit(EXIT_ERREUR);
         }
      }
-
-    if (!Config.home_is_set) g_snprintf(Config.home, sizeof(Config.home), "%s", pwd->pw_dir );
+    g_snprintf(Config.home, sizeof(Config.home), "%s", pwd->pw_dir );
     if (chdir(Config.home))                                                             /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
     else
      { printf( "Chdir %s successfull. PID=%d\n", Config.home, getpid() ); }
-    fflush(0);
-    return(fg);
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du serveur watchdog                                                                              */
@@ -600,6 +576,11 @@ end:
     gboolean fg;
 
     umask(022);                                                                              /* Masque de creation de fichier */
+
+    Config.installed = Lire_config();                                      /* Lecture sur le fichier /etc/watchdogd.abls.conf */
+    if (Config.installed)
+     { Drop_privileges(); }
+
     fg = Lire_ligne_commande( argc, argv );                                       /* Lecture du fichier conf et des arguments */
 
     if (fg == FALSE)                                                                       /* On tourne en tant que daemon ?? */
@@ -645,7 +626,6 @@ end:
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Shared memory failed to allocate" ); }
     else
      { pthread_mutexattr_t attr;                                                       /* Initialisation des mutex de synchro */
-       gint nbr_essai_db = 0;
        memset( Partage, 0, sizeof(struct PARTAGE) );                                                 /* RAZ des bits internes */
        time ( &Partage->start_time );
        pthread_mutexattr_init( &attr );
@@ -656,6 +636,36 @@ end:
        pthread_mutex_init( &Partage->com_dls.synchro_data, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_db.synchro, &attr );
+
+/************************************************** Check Database Access *****************************************************/
+       if (Config.installed)
+        { struct DB *db = Init_DB_SQL();
+          if (db)
+           { Libere_DB_SQL ( &db );
+             Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connection to DB OK.", __func__ );
+           }
+          else
+           { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                       "%s: Connection to DB failed. Wait 5 sec and stopping.", __func__ );
+             sleep(5);
+             _exit(EXIT_FAILURE);
+           }
+        }
+
+       gchar *use_subdir = Recuperer_configDB_by_nom ( "msrv", "use_subdir" );
+       if (use_subdir)
+        { if (!strcasecmp(use_subdir,"true"))
+           { g_strlcat (Config.home, "/.watchdog", sizeof(Config.home));
+             chdir(Config.home);
+           }
+          g_free(use_subdir);
+        }
+
+       gchar *is_master = Recuperer_configDB_by_nom ( "msrv", "instance_is_master" );
+       if (is_master)
+        { if (!strcasecmp(is_master,"true")) { Config.instance_is_master = TRUE; }
+          g_free(is_master);
+        }
 
 /************************************* Création des zones de bits internes dynamiques *****************************************/
        Partage->Dls_data_DI     = NULL;
@@ -670,27 +680,12 @@ end:
        Partage->Dls_data_TEMPO  = NULL;
        Partage->Dls_data_VISUEL = NULL;
 
-       while (TRUE)                                                               /* Test itératif de connexion a la database */
-        { struct DB *db = Init_DB_SQL();
-          if (db)
-           { Libere_DB_SQL ( &db );
-             Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connection to DB OK.", __func__ );
-             break;
-           }
-          nbr_essai_db++;
-          Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                    "%s: Connection to DB failed (test %d). Retrying in 5s.", __func__, nbr_essai_db );
-          sleep(5);
-          Lire_config(NULL);                                                    /* Lecture sur le fichier /etc/watchdogd.conf */
-        }
-
        sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
        Update_database_schema();                                                    /* Update du schéma de Database si besoin */
        Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */
        Modifier_configDB ( "msrv", "thread_version", WTD_VERSION );                      /* Update du champs instance_version */
-       Modifier_configDB ( "msrv", "instance_is_master", (Config.instance_is_master  ? "TRUE" : "FALSE") );
 
        Partage->zmq_ctx = zmq_ctx_new ();                                          /* Initialisation du context d'echange ZMQ */
        if (!Partage->zmq_ctx)
@@ -785,19 +780,6 @@ end:
     curl_global_cleanup();
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
-    if (Partage->com_msrv.Thread_reboot == TRUE)                                         /* Devons-nous rebooter le process ? */
-     { gint pid;
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Rebooting in progress cmd = %s", argv[0] );
-       pid = fork();
-       if (pid<0) { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Fork Failed on reboot" );
-                    printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                                           /* On daemonize */
-       if (pid==0)
-        { sleep(5);
-          execvp ( argv[0], argv );
-          Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Rebooting ERROR (%s) !", strerror(errno) );
-          exit(EXIT_ERREUR);
-        }
-     }
     Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
 
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Stopped", __func__ );

@@ -80,7 +80,7 @@
 /* Entrée: toutes les infos necessaires a la connexion                                                                        */
 /* Sortie: une structure DB de référence                                                                                      */
 /******************************************************************************************************************************/
- static struct DB *Init_DB_SQL_with ( gchar *host, gchar *username, gchar *password, gchar *database, guint port )
+ struct DB *Init_DB_SQL_with ( gchar *host, gchar *username, gchar *password, gchar *database, guint port )
   { static gint id = 1, taille;
     struct DB *db;
     my_bool reconnect;
@@ -127,7 +127,7 @@
 /* Sortie: une structure DB de référence                                                                                      */
 /******************************************************************************************************************************/
  struct DB *Init_DB_SQL ( void )
-  { return( Init_DB_SQL_with ( Config.db_host, Config.db_username,
+  { return( Init_DB_SQL_with ( Config.db_hostname, Config.db_username,
                                Config.db_password, Config.db_database, Config.db_port ) );
   }
 /******************************************************************************************************************************/

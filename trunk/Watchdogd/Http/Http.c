@@ -213,6 +213,38 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_traiter_ping ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                 SoupClientContext *client, gpointer user_data )
+  { JsonBuilder *builder;
+    gsize taille_buf;
+    gchar *buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+                                                                      /* Lancement de la requete de recuperation des messages */
+/*------------------------------------------------------- Dumping status -----------------------------------------------------*/
+    Json_add_bool   ( builder, "installed", Config.installed );
+
+    buf = Json_get_buf (builder, &taille_buf);
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
 /* Http_traiter_disconnect: Répond aux requetes sur l'URI disconnect                                                          */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
@@ -250,6 +282,12 @@
 
     if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    if (!Config.installed)
+     {	Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Redirecting to /tech/install", __func__ );
+       soup_message_set_redirect (msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/tech/install" );
 		     return;
      }
 
@@ -443,7 +481,9 @@ reload:
     soup_server_add_handler ( socket, "/status",         Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/log/get",        Http_traiter_log_get, NULL, NULL );
     soup_server_add_handler ( socket, "/log",            Http_traiter_log, NULL, NULL );
+    soup_server_add_handler ( socket, "/install",        Http_traiter_install, NULL, NULL );
     soup_server_add_handler ( socket, "/bus",            Http_traiter_bus, NULL, NULL );
+    soup_server_add_handler ( socket, "/ping",           Http_traiter_ping, NULL, NULL );
     soup_server_add_handler ( socket, "/tech",           Http_traiter_tech, NULL, NULL );
     soup_server_add_handler ( socket, "/js",             Http_traiter_file, NULL, NULL );
     soup_server_add_handler ( socket, "/svg",            Http_traiter_file, NULL, NULL );

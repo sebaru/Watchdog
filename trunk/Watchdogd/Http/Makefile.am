@@ -6,7 +6,7 @@
 SUBDIRS=
 
 lib_LTLIBRARIES                      = libwatchdog-server-http.la
-libwatchdog_server_http_la_SOURCES    = Http.c Http.h admin_http.c getstatus.c bus.c getconfig.c audit_log.c \
+libwatchdog_server_http_la_SOURCES    = Http.c Http.h install.c admin_http.c getstatus.c bus.c getconfig.c audit_log.c \
                                         ws_motifs.c ws_histo_msgs.c getprocess.c getdls.c getsyn.c \
                                         getarchive.c getusers.c getmnemos.c getinstance.c gettech.c getfile.c
 

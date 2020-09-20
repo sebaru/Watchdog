@@ -51,6 +51,7 @@
  extern gchar *Normaliser_as_tech_id( gchar *tech_id );
  extern struct DB *Init_DB_SQL ( void );
  extern struct DB *Init_ArchDB_SQL ( void );
+ extern struct DB *Init_DB_SQL_with ( gchar *host, gchar *username, gchar *password, gchar *database, guint port );
  extern void Libere_DB_SQL( struct DB **adr_db );
  extern gboolean Lancer_requete_SQL ( struct DB *db, gchar *requete );
  extern MYSQL_ROW Recuperer_ligne_SQL ( struct DB *db );

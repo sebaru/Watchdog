@@ -46,7 +46,7 @@
     Creer_configDB ( "archive", "database", Config.db_database );
     Creer_configDB ( "archive", "username", Config.db_username );
     Creer_configDB ( "archive", "password", Config.db_password );
-    Creer_configDB ( "archive", "hostname", Config.db_host );
+    Creer_configDB ( "archive", "hostname", Config.db_hostname );
     g_snprintf( valeur_defaut, sizeof(valeur_defaut), "%d", ARCHIVE_DEFAUT_BUFFER_SIZE );
     Creer_configDB ( "archive", "buffer_size", valeur_defaut );
     g_snprintf( valeur_defaut, sizeof(valeur_defaut), "%d", ARCHIVE_DEFAUT_RETENTION );
