@@ -35,13 +35,12 @@
  #define TAILLE_DB_PASSWORD       48
  #define TAILLE_DB_DATABASE       20
 
- #define NUM_EA_SYS_DBREQUEST_SIMULT   127      /* Numéro de l'EA de reference n° requete SQL simultanées */
-
  struct DB
   { MYSQL *mysql;
     MYSQL_RES *result;
     gint nbr_result;
-    gboolean free;                                                    /* Le resultat est-il free ou non ? */
+    gboolean free;                                                                        /* Le resultat est-il free ou non ? */
+    gboolean multi_statement;                                                             /* Le resultat est-il free ou non ? */
     MYSQL_ROW row;
     gint id;
     gchar requete[256];
@@ -51,7 +50,7 @@
  extern gchar *Normaliser_as_tech_id( gchar *tech_id );
  extern struct DB *Init_DB_SQL ( void );
  extern struct DB *Init_ArchDB_SQL ( void );
- extern struct DB *Init_DB_SQL_with ( gchar *host, gchar *username, gchar *password, gchar *database, guint port );
+ extern struct DB *Init_DB_SQL_with ( gchar *host, gchar *username, gchar *password, gchar *database, guint port, gboolean multi_statements );
  extern void Libere_DB_SQL( struct DB **adr_db );
  extern gboolean Lancer_requete_SQL ( struct DB *db, gchar *requete );
  extern MYSQL_ROW Recuperer_ligne_SQL ( struct DB *db );
@@ -61,6 +60,7 @@
  extern void Update_database_schema ( void );
  extern gboolean SQL_Select_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete );
  extern gboolean SQL_Write ( gchar *requete );
+ extern gboolean SQL_Writes ( gchar *requete );
  extern gboolean SQL_Arch_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete );
  extern gboolean SQL_Arch_Write ( gchar *requete );
  #endif

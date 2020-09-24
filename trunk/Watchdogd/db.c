@@ -80,7 +80,7 @@
 /* Entrée: toutes les infos necessaires a la connexion                                                                        */
 /* Sortie: une structure DB de référence                                                                                      */
 /******************************************************************************************************************************/
- struct DB *Init_DB_SQL_with ( gchar *host, gchar *username, gchar *password, gchar *database, guint port )
+ struct DB *Init_DB_SQL_with ( gchar *host, gchar *username, gchar *password, gchar *database, guint port, gboolean multi_statements )
   { static gint id = 1, taille;
     struct DB *db;
     my_bool reconnect;
@@ -102,7 +102,7 @@
     reconnect = 1;
     mysql_options( db->mysql, MYSQL_OPT_RECONNECT, &reconnect );
     mysql_options( db->mysql, MYSQL_SET_CHARSET_NAME, (void *)"utf8" );
-    if ( ! mysql_real_connect( db->mysql, host, username, password, database, port, NULL, 0 ) )
+    if ( ! mysql_real_connect( db->mysql, host, username, password, database, port, NULL, (multi_statements ? CLIENT_MULTI_STATEMENTS : 0) ) )
      { Info_new( Config.log, Config.log_db, LOG_ERR,
                  "%s: mysql_real_connect failed (%s)", __func__,
                  (char *) mysql_error(db->mysql)  );
@@ -111,6 +111,7 @@
        return (NULL);
      }
     db->free = TRUE;
+    db->multi_statement = multi_statements;
     pthread_mutex_lock ( &Partage->com_db.synchro );
     db->id = id++;
     Partage->com_db.Liste = g_slist_prepend ( Partage->com_db.Liste, db );
@@ -128,7 +129,7 @@
 /******************************************************************************************************************************/
  struct DB *Init_DB_SQL ( void )
   { return( Init_DB_SQL_with ( Config.db_hostname, Config.db_username,
-                               Config.db_password, Config.db_database, Config.db_port ) );
+                               Config.db_password, Config.db_database, Config.db_port, FALSE ) );
   }
 /******************************************************************************************************************************/
 /* Init_DB_SQL: essai de connexion à la DataBase db                                                                           */
@@ -137,7 +138,7 @@
 /******************************************************************************************************************************/
  struct DB *Init_ArchDB_SQL ( void )
   { return( Init_DB_SQL_with ( Partage->com_arch.archdb_hostname, Partage->com_arch.archdb_username,
-                               Partage->com_arch.archdb_password, Partage->com_arch.archdb_database, Partage->com_arch.archdb_port ) );
+                               Partage->com_arch.archdb_password, Partage->com_arch.archdb_database, Partage->com_arch.archdb_port, FALSE ) );
   }
 /******************************************************************************************************************************/
 /* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
@@ -253,6 +254,29 @@
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
+ gboolean SQL_Writes ( gchar *requete )
+  { struct DB *db = Init_DB_SQL_with ( Config.db_hostname, Config.db_username,
+                                       Config.db_password, Config.db_database, Config.db_port, TRUE );
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Init DB FAILED for '%s'", __func__, requete );
+       return(FALSE);
+     }
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
+       Libere_DB_SQL ( &db );
+       return(FALSE);
+     }
+    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
+
+    Libere_DB_SQL ( &db );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
+/* Entrée: La DB, la requete                                                                                                  */
+/* Sortie: TRUE si pas de souci                                                                                               */
+/******************************************************************************************************************************/
  gboolean SQL_Arch_Write ( gchar *requete )
   { struct DB *db = Init_ArchDB_SQL ();
     if (!db)
@@ -333,8 +357,7 @@
     top = Partage->top;
     if ( mysql_query ( db->mysql, requete ) )
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "Lancer_requete_SQL (DB%07d): FAILED (%s) for '%s'",
-                 db->id, (char *)mysql_error(db->mysql), requete );
+                "%s: (DB%07d): FAILED (%s) for '%s'", __func__, db->id, (char *)mysql_error(db->mysql), requete );
        return(FALSE);
      }
 
@@ -343,8 +366,7 @@
        db->free = FALSE;
        if ( ! db->result )
         { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                   "Lancer_requete_SQL (DB%07d): store_result failed (%s)",
-                    db->id, (char *) mysql_error(db->mysql) );
+                   "%s: (DB%07d): store_result failed (%s)", __func__, db->id, (char *) mysql_error(db->mysql) );
           db->nbr_result = 0;
         }
        else
@@ -362,13 +384,19 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Liberer_resultat_SQL ( struct DB *db )
-  { if (db)
-     { while( db->row ) Recuperer_ligne_SQL ( db );
-       mysql_free_result( db->result );
-       db->result = NULL;
-       db->free = TRUE;
-      /*Info( Config.log, DEBUG_DB, "Liberer_resultat_SQL: free OK" );*/
+  { if (!db) return;
+encore:
+    while( db->row ) Recuperer_ligne_SQL ( db );
+    mysql_free_result( db->result );
+    if (db->multi_statement)
+     { if (mysql_next_result(db->mysql)==0)
+        { db->result = mysql_store_result(db->mysql);
+          Recuperer_ligne_SQL ( db );
+          goto encore;
+        }
      }
+    db->result = NULL;
+    db->free = TRUE;
   }
 /******************************************************************************************************************************/
 /* Recuperer_ligne_SQL: Renvoie les lignes resultat, une par une                                                              */
