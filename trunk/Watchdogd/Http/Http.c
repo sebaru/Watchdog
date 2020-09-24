@@ -318,12 +318,14 @@
     if (!db)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "%s: DB connexion failed for user '%s'", __func__, Json_get_string ( request, "username" ) );
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
        return;
      }
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "%s: DB request failed for user '%s'",__func__, Json_get_string ( request, "username" ) );
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
        return;
      }
 

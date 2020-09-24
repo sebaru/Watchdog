@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `config` (
   `nom_thread` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `nom` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `valeur` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
   UNIQUE (`instance_id`,`nom_thread`,`nom`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
 
@@ -620,31 +621,6 @@ CREATE TABLE IF NOT EXISTS `ups` (
 
 
 -- --------------------------------------------------------
---
--- Structure de la table ``
---
-
-CREATE TABLE IF NOT EXISTS `rs485` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `host` text NOT NULL,
-  `date_ajout` DATETIME NOT NULL,
-  `num` int(11) NOT NULL DEFAULT '0',
-  `enable` tinyint(1) NOT NULL DEFAULT '0',
-  `ea_min` int(11) NOT NULL DEFAULT '-1',
-  `ea_max` int(11) NOT NULL DEFAULT '-1',
-  `e_min` int(11) NOT NULL DEFAULT '-1',
-  `forced_e_min` int(11) NOT NULL DEFAULT '0',
-  `e_max` int(11) NOT NULL DEFAULT '-1',
-  `s_min` int(11) NOT NULL DEFAULT '-1',
-  `s_max` int(11) NOT NULL DEFAULT '-1',
-  `sa_min` int(11) NOT NULL DEFAULT '-1',
-  `sa_max` int(11) NOT NULL DEFAULT '-1',
-  `bit_comm` int(11) NOT NULL DEFAULT '0',
-  `libelle` text NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
 
 --
 -- Structure de la table `rfxcom`
@@ -715,5 +691,5 @@ CREATE TABLE IF NOT EXISTS `audit_log` (
   `message` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `date` DATETIME NOT NULL DEFAULT NOW(),
   PRIMARY KEY (`id`),
-  KEY (`date`),
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
+  KEY (`date`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;

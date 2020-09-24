@@ -38,7 +38,7 @@
  extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
-/* Http_Traiter_request_install_debug: Active ou non le debug d'un process                                                 */
+/* Http_Traiter_install: Traite l'installation du système                                                                     */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
@@ -58,7 +58,7 @@
      }
 
     g_snprintf ( fichier, sizeof(fichier), "/etc/watchdogd.abls.conf" );
-    if (stat (fichier, &stat_buf)==-1)
+    if (stat (fichier, &stat_buf)!=-1)                   /* Si pas d'erreur et fichier présent, c'est que c'est deja installé */
      { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Already Installed" );
        return;
      }
@@ -101,13 +101,13 @@
      }
 
 /******************************************* Test accès Database **************************************************************/
-    gchar *DB_SCHEMA = "/usr/local/share/Watchdog/init_db_sql";
+    gchar *DB_SCHEMA = "/usr/local/share/Watchdog/init_db.sql";
     if (stat ( DB_SCHEMA, &stat_buf)==-1)
      { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Stat DB Schema Error" );
        return;
      }
 
-    gchar *db_schema = g_try_malloc ( stat_buf.st_size );
+    gchar *db_schema = g_try_malloc0 ( stat_buf.st_size+1 );
     if (!db_schema)
      { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Memory DB Schema Error" );
        return;
@@ -119,7 +119,7 @@
        g_free(db_schema);
        return;
      }
-    if (read ( fd, &db_schema, stat_buf.st_size ) != stat_buf.st_size)
+    if (read ( fd, db_schema, stat_buf.st_size ) != stat_buf.st_size)
      { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Read DB Schema Error" );
        g_free(db_schema);
        return;
@@ -135,9 +135,9 @@
        g_free(db_schema);
        return;
      }
-
     Lancer_requete_SQL ( db, db_schema );                                                               /* Création du schéma */
     g_free(db_schema);
+    Liberer_resultat_SQL ( db );
 
     g_snprintf( chaine, sizeof(chaine),
                "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
@@ -167,7 +167,7 @@
 
     g_snprintf(chaine, sizeof(chaine), "\n[GLOBAL]\n" );
     write (fd, chaine, strlen(chaine) );
-    g_snprintf(chaine, sizeof(chaine), "run_as = %s\n", Json_get_string(request, "db_username") );
+    g_snprintf(chaine, sizeof(chaine), "run_as = %s\n", Json_get_string(request, "run_as") );
     write (fd, chaine, strlen(chaine) );
 
     g_snprintf(chaine, sizeof(chaine), "\n[DATABASE]\n" );

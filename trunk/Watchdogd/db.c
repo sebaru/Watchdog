@@ -465,13 +465,14 @@ encore:
     Info_new( Config.log, Config.log_db, LOG_NOTICE,
              "%s: Actual Database_Version detected = %05d. Please wait while upgrading.", __func__, database_version );
 
-    if (database_version==0) goto fin;
 
     db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB connexion failed", __func__ );
        return;
      }
+
+    if (database_version==0) goto fin;
 
     if (database_version < 2500)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE users DROP `imsg_bit_presence`" );
@@ -1941,6 +1942,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
+fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
                                           "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "
@@ -1975,9 +1977,8 @@ encore:
         MNEMO_TEMPO, MNEMO_REGISTRE, -1
       );
     Lancer_requete_SQL ( db, requete );
-
     Libere_DB_SQL(&db);
-fin:
+
     if (Modifier_configDB ( "msrv", "database_version", WTD_DB_VERSION ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, WTD_DB_VERSION ); }
     else
