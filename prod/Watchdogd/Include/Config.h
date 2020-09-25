@@ -39,21 +39,20 @@
     gchar run_as [ 40 ];                                        /* Nom du user sur lequel tourne Watchdog */
 
     gint  db_port;
-    gchar db_host    [ TAILLE_DB_HOST+1 ];                            /* Nom du host de la base de donnes */
+    gchar db_hostname[ TAILLE_DB_HOST+1 ];                            /* Nom du host de la base de donnes */
     gchar db_username[ TAILLE_DB_USERNAME+1 ];            /* Nom de l'administrateur de la base de données*/
     gchar db_database[ TAILLE_DB_DATABASE+1 ];                          /* Chemin d'acces aux DB watchdog */
     gchar db_password[ TAILLE_DB_PASSWORD+1 ];                          /* Mot de passe de connexion ODBC */
 
-    gboolean home_is_set;                                                               /* TRUE si home is set dans la config */
+    gboolean installed;                                                                    /* TRUE si la config a pu etre lue */
     gchar home [ TAILLE_HOME+1 ];                                                              /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];                                   /* Repertoire de stockage des libraires watchdog */
     gboolean instance_is_master;                                               /* TRUE si l'instance est l'instance maitresse */
     gchar master_host[ TAILLE_DB_HOST+1 ];
-    guint log_level;                                                      /* Niveau de debug du programme */
-    gboolean log_msrv;                                                            /* TRUE si log_override */
-    gboolean log_arch;                                                            /* TRUE si log_override */
-    gboolean log_db;                                                          /* TRUE si log des acces DB */
-    guint max_login_attempts;   /* a virer */                            /* Nombre maximum d'echec de login */
+    guint    log_level;                                                                       /* Niveau de debug du programme */
+    gboolean log_msrv;                                                                                /* TRUE si log_override */
+    gboolean log_arch;                                                                                /* TRUE si log_override */
+    gboolean log_db;                                                                              /* TRUE si log des acces DB */
     struct LOG *log;                                                         /* Pour l'affichage des logs */
     gint single;                                                                /* Demarrage des thread ? */
   };
@@ -66,10 +65,11 @@
  #define DEFAUT_LIBRAIRIE_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
 
 /******************************************* Prototypes de fonctions **************************************/
- extern void Lire_config ( char *fichier_config );
+ extern gboolean Lire_config ( void );
  extern void Print_config ( void );
  extern gboolean Retirer_configDB ( gchar *nom_thread, gchar *nom );
  extern gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
+ extern gboolean Modifier_configDB_int ( gchar *nom_thread, gchar *nom, gint valeur );
  extern gboolean Creer_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
  extern gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread );
  extern gboolean Recuperer_configDB_suite( struct DB **db_orig, gchar **nom, gchar **valeur );

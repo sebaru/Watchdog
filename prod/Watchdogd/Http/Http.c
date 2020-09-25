@@ -107,14 +107,20 @@
 /* Sortie : le contenu de la reponse du slave                                                                                 */
 /******************************************************************************************************************************/
  void Http_redirect_to_slave ( SoupMessage *msg, gchar *target )
-  { SoupSession *session;
-    session = soup_session_new();
-    //g_signal_connect( client->connexion, "authenticate", G_CALLBACK(Send_credentials_CB), client );
-
-    SoupURI *URI = soup_message_get_uri (msg);
+  { SoupSession *connexion;
+    connexion = soup_session_new();
+    SoupURI *URI = soup_uri_copy (soup_message_get_uri (msg));
     soup_uri_set_host ( URI, target );
-    soup_session_send_message ( session, msg );
-    g_object_unref( session );
+    SoupMessage *new_msg = soup_message_new_from_uri ( msg->method, URI );
+    soup_uri_free(URI);
+    soup_message_set_request ( new_msg, "application/json; charset=UTF-8",
+                               SOUP_MEMORY_COPY, msg->request_body->data, msg->request_body->length );
+    soup_session_send_message ( connexion, new_msg );
+    soup_message_set_status  ( msg, new_msg->status_code );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8",
+                                SOUP_MEMORY_COPY, new_msg->response_body->data, new_msg->response_body->length );
+    g_object_unref ( new_msg );
+    g_object_unref( connexion );
   }
 /******************************************************************************************************************************/
 /* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */
@@ -207,6 +213,38 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_traiter_ping ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                 SoupClientContext *client, gpointer user_data )
+  { JsonBuilder *builder;
+    gsize taille_buf;
+    gchar *buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+                                                                      /* Lancement de la requete de recuperation des messages */
+/*------------------------------------------------------- Dumping status -----------------------------------------------------*/
+    Json_add_bool   ( builder, "installed", Config.installed );
+
+    buf = Json_get_buf (builder, &taille_buf);
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
 /* Http_traiter_disconnect: Répond aux requetes sur l'URI disconnect                                                          */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
@@ -247,6 +285,12 @@
 		     return;
      }
 
+    if (!Config.installed)
+     {	Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Redirecting to /tech/install", __func__ );
+       soup_message_set_redirect (msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/tech/install" );
+		     return;
+     }
+
     Http_print_request ( server, msg, path, client );
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
@@ -274,12 +318,14 @@
     if (!db)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "%s: DB connexion failed for user '%s'", __func__, Json_get_string ( request, "username" ) );
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
        return;
      }
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "%s: DB request failed for user '%s'",__func__, Json_get_string ( request, "username" ) );
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
        return;
      }
 
@@ -437,7 +483,9 @@ reload:
     soup_server_add_handler ( socket, "/status",         Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/log/get",        Http_traiter_log_get, NULL, NULL );
     soup_server_add_handler ( socket, "/log",            Http_traiter_log, NULL, NULL );
+    soup_server_add_handler ( socket, "/install",        Http_traiter_install, NULL, NULL );
     soup_server_add_handler ( socket, "/bus",            Http_traiter_bus, NULL, NULL );
+    soup_server_add_handler ( socket, "/ping",           Http_traiter_ping, NULL, NULL );
     soup_server_add_handler ( socket, "/tech",           Http_traiter_tech, NULL, NULL );
     soup_server_add_handler ( socket, "/js",             Http_traiter_file, NULL, NULL );
     soup_server_add_handler ( socket, "/svg",            Http_traiter_file, NULL, NULL );

@@ -61,7 +61,6 @@
     if ( strcasecmp ( instance, "MASTER" ) && strcasecmp ( instance, g_get_host_name() ) )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s : Redirecting /process/list vers %s", __func__, instance );
        Http_redirect_to_slave ( msg, instance );
-       //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
        return;
      }
 
@@ -354,7 +353,9 @@
 
 /****************************************** WS get Running config library *****************************************************/
     if (!strncasecmp ( path, "archive/", strlen("archive/")))
-     { Admin_arch_json ( msg, path+strlen("archive/"), query, session->access_level ); }
+     { Admin_arch_json ( msg, path+strlen("archive/"), query, session->access_level );
+       Audit_log ( session, "Processus 'Archive': %s", path );
+     }
     else
      { GSList *liste;
        liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
@@ -371,6 +372,7 @@
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Admin_json called by '%s' for %s.",
                           __func__, session->username, path );
                 lib->Admin_json ( lib, msg, path+strlen(lib->admin_prompt), query, session->access_level );
+                Audit_log ( session, "Processus '%s': %s", lib->admin_prompt, path );
                 return;
               }
             }

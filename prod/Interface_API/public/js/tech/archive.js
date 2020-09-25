@@ -42,14 +42,17 @@
     $('#idModalDel').modal("show");
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function Set_param ( id )
-  { table = $('#idTableConfArchive').DataTable();
-    selection = table.ajax.json().parametres.filter( function(item) { return item.id==id } )[0];
-    var json_request = JSON.stringify(
-     { id: id,
-       valeur: $('#conf-'+id).val()
-     });
-    Send_to_API ( 'POST', "/api/config/set", json_request, null );
+ function Archive_sauver_parametre ( )
+  { var json_request =
+     { hostname:    $('#idArchiveDBHostname').val(),
+       port:        $('#idArchiveDBPort').val(),
+       username:    $('#idArchiveDBUsername').val(),
+       database:    $('#idArchiveDBDatabase').val(),
+       retention:   $('#idArchiveDBRetention').val(),
+       buffer_size: $('#idArchiveDBBufferSize').val(),
+     };
+    if ($('#idArchiveDBPassword').val().length > 0) { json_request.password = $('#idArchiveDBPassword').val(); }
+    Send_to_API ( 'POST', "/api/process/archive/thread_set", JSON.stringify(json_request), null );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Del_param ( id )
@@ -67,36 +70,13 @@
   { Send_to_API ( "GET", "/api/process/archive/thread_status", null, function ( Response )
      { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
                                   else { $('#idAlertThreadNotRunning').show(); }
+       $('#idArchiveDBHostname').val(Response.hostname);
+       $('#idArchiveDBPort').val(Response.port);
+       $('#idArchiveDBUsername').val(Response.username);
+       $('#idArchiveDBDatabase').val(Response.database);
+       $('#idArchiveDBRetention').val(Response.retention);
+       $('#idArchiveDBBufferSize').val(Response.buffer_size);
      });
-
-    $('#idTableConfArchive').DataTable(
-       { pageLength : 50,
-         fixedHeader: true,
-         rowId: "id",
-         ajax: {	url : "/api/config/get",	type : "GET", dataSrc: "parametres", data: { "process": "arch" },
-                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
-               },
-         columns:
-          [ { "data": "instance_id", "title":"Instance", "className": "align-middle text-center" },
-            { "data": "nom", "title":"Parametre", "className": "align-middle text-center" },
-            { "data": null, "title":"Valeur", "render": function (item)
-              { return("<input id='conf-"+item.id+"'type='text' class='form-control' placeholder='Valeur du paramètre' "+
-                       "value='"+item.valeur+"'>");
-              }
-            },
-            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
-                { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Positionner le parametre", "Set_param", item.id, "save", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer le parametre", "Del_param", item.id, "trash", null );
-                  boutons += Bouton_actions_end ();
-                  return(boutons);
-                },
-            }
-          ],
-         /*order: [ [0, "desc"] ],*/
-         responsive: true,
-       }
-     );
 
     $('#idTableArchive').DataTable(
        { pageLength : 50,

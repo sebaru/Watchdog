@@ -72,9 +72,6 @@
   </div>
 </div>
 
-					<!--<img src="<?=base_url()?>/assets/img/logo_b.png" width=160>-->
-
-
 <div class="container">
 	<div class="d-flex justify-content-center h-100">
 		<div class="card">
@@ -111,22 +108,6 @@
 			</div>
 		</div>
 	</div>
-
-
-<!-- <div id="toast-error" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="position: absolute; top: 0; center: 0;">
-   <div class="toast-header">
-     <i class="fas exclamation-circle"></i>
-     <strong class="mr-auto">Bootstrap</strong>
-     <small>11 mins ago</small>
-     <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-       <span aria-hidden="true">&times;</span>
-     </button>
-   </div>
-   <div class="toast-body">
-     Hello, world! This is a toast message.
-   </div>
- </div>
--->
 
 </div>
 

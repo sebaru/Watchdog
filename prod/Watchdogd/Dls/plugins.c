@@ -92,18 +92,9 @@
     dls->handle = dlopen( nom_fichier_absolu, RTLD_LOCAL | RTLD_NOW );                      /* Ouverture du fichier librairie */
     if (!dls->handle)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                   "%s: Candidat '%s' failed (%s). Trying with ID", __func__, dls->plugindb.tech_id, dlerror() );
-
-       g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%06d.so", dls->plugindb.id );
-       strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );              /* Init des variables communes */
-
-       dls->handle = dlopen( nom_fichier_absolu, RTLD_LOCAL | RTLD_NOW );                   /* Ouverture du fichier librairie */
-       if (!dls->handle)
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                   "%s: Candidat %06d failed (%s)", __func__, dls->plugindb.id, dlerror() );
-          Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
-          return(FALSE);
-        }
+                   "%s: Candidat '%s' dlopen failed (%s)", __func__, dls->plugindb.tech_id, dlerror() );
+       Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
+       return(FALSE);
      }
 
     dls->go = dlsym( dls->handle, "Go" );                                                    /* Recherche de la fonction 'Go' */

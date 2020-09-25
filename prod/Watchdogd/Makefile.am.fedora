@@ -29,7 +29,8 @@ Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl openssl lib
                    `libgcrypt-config --cflags` \
                    `mysql_config --cflags`
 
-sysconf_DATA = watchdogd.conf.sample Watchdogd.service.master Watchdogd.service.slave
+sysconf_DATA = watchdogd.conf.sample Watchdogd.service
+dist_systemdsystemunit_DATA = Watchdogd.service
 pkgdata_DATA = init_db.sql
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \

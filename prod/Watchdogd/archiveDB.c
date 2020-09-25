@@ -91,7 +91,7 @@
      }
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Starting Update SQL Partition on %s with days=%d", __func__,
-              Partage->com_arch.archdb_database, Partage->com_arch.duree_retention );
+              Partage->com_arch.archdb_database, Partage->com_arch.retention );
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT table_name FROM information_schema.tables WHERE table_schema='%s' "
                 "AND table_name like 'histo_bit_%%'", Partage->com_arch.archdb_database );
@@ -118,7 +118,7 @@
 	      Liste_tables = g_slist_remove ( Liste_tables, table );
        Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Starting Update SQL Partition table %s", __func__, table );
 	      g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                  "DELETE FROM %s WHERE date_time < NOW() - INTERVAL %d DAY", table, Partage->com_arch.duree_retention );
+                  "DELETE FROM %s WHERE date_time < NOW() - INTERVAL %d DAY", table, Partage->com_arch.retention );
        top = Partage->top;
        if (Lancer_requete_SQL ( db, requete )==FALSE)                                          /* Execution de la requete SQL */
         { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Unable to delete from table '%s'", __func__, table );
