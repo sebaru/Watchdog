@@ -63,7 +63,7 @@
 <hr>
 
  <div class="row m-2">
-   <h4>Entrez les paramètres de connexion à la base de données</h4>
+   <h4>Entrez les paramètres de configuration de votre instance</h4>
 
    <div class ="ml-auto btn-group">
         <button type="button" onclick="Installer()" class="btn btn-primary">
