@@ -1942,7 +1942,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4983)
+    if (database_version < 4984)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`;");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DO ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`;");
