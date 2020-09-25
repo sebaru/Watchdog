@@ -130,9 +130,8 @@
     Json_add_string ( builder, "msg_type", "SET_CDE" );
     Json_add_string ( builder, "tech_id", trame_motif->motif->tech_id );
     Json_add_string ( builder, "acronyme", trame_motif->motif->acronyme );
-    if (trame_motif->motif->bit_clic!=-1) Json_add_int ( builder, "bit_clic", trame_motif->motif->bit_clic );
-    printf("%s: envoi SET_CDE '%s':'%s' (bit_clic %d)\n", __func__,
-           trame_motif->motif->tech_id, trame_motif->motif->acronyme, trame_motif->motif->bit_clic );
+    printf("%s: envoi SET_CDE '%s':'%s'\n", __func__,
+           trame_motif->motif->tech_id, trame_motif->motif->acronyme );
     gchar *buf = Json_get_buf (builder, &taille_buf);
     GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
     struct TYPE_INFO_SUPERVISION *infos = trame_motif->page->infos;

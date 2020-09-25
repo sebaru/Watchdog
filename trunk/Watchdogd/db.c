@@ -1955,6 +1955,11 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4987)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs DROP `bitclic`;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

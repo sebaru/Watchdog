@@ -75,7 +75,6 @@
     g_snprintf( motif->libelle,       sizeof(motif->libelle),       "%s", Json_get_string( element, "libelle" ) );
     motif->access_level = Json_get_int ( element, "access_level" );
     motif->bit_controle = Json_get_int ( element, "bitctrl" );
-    motif->bit_clic     = Json_get_int ( element, "bitclic" );
     motif->rafraich     = Json_get_int ( element, "rafraich" );
 
     if (page->type == TYPE_PAGE_SUPERVISION)
@@ -351,7 +350,6 @@
                                  add_motif.syn_id = infos->syn.id;
                                  add_motif.access_level = 0;     /* Nom du groupe d'appartenance du motif */
                                  add_motif.bit_controle = 0;                                /* Ixxx, Cxxx */
-                                 add_motif.bit_clic = 0;        /* Bit à activer quand clic gauche souris */
                                  add_motif.angle = 0.0; /*infos->Adj_angle->value;*/
                                  add_motif.type_dialog = 0;               /* Type de la boite de dialogue */
                                  add_motif.type_gestion = 0;
