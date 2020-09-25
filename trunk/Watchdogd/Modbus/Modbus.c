@@ -1015,7 +1015,7 @@
 
     if (Dls_auto_create_plugin( module->modbus.tech_id, "Gestion du Wago" ) == FALSE)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->modbus.tech_id ); }
-    Mnemo_auto_create_DI ( module->modbus.tech_id, "COMM", "Statut de la communication avec le wago" );
+    Mnemo_auto_create_DI ( FALSE, module->modbus.tech_id, "COMM", "Statut de la communication avec le wago" );
 
     while(Cfg_modbus.lib->Thread_run == TRUE && Cfg_modbus.lib->Thread_reload == FALSE)      /* On tourne tant que necessaire */
      { sched_yield();

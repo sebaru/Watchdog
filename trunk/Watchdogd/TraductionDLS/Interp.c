@@ -1123,23 +1123,27 @@
                    break;
                 case MNEMO_BISTABLE:
                 case MNEMO_MONOSTABLE:
-                 { Mnemo_auto_create_BOOL ( alias->type_bit, Dls_plugin.tech_id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_BOOL ( TRUE, alias->type_bit, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   break;
+                 }
+                case MNEMO_ENTREE:
+                 { Mnemo_auto_create_DI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_SORTIE:
-                 { Mnemo_auto_create_DO ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_DO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_SORTIE_ANA:
-                 { Mnemo_auto_create_AO ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_AO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   break;
+                 }
+                case MNEMO_ENTREE_ANA:
+                 { Mnemo_auto_create_AI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, NULL );
                    break;
                  }
                 case MNEMO_TEMPO:
                  { Mnemo_auto_create_TEMPO ( Dls_plugin.tech_id, alias->acronyme, libelle );
-                   break;
-                 }
-                case MNEMO_ENTREE:
-                 { Mnemo_auto_create_DI ( Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_HORLOGE:
@@ -1155,11 +1159,6 @@
                  { gchar *forme = Get_option_chaine( alias->options, T_FORME );
                    if (!forme) forme="none";
                    Synoptique_auto_create_VISUEL ( Dls_plugin.tech_id, alias->acronyme, libelle, forme );
-                   break;
-                 }
-                case MNEMO_ENTREE_ANA:
-                 { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
-                   Mnemo_auto_create_AI ( Dls_plugin.tech_id, alias->acronyme, libelle, unite );
                    break;
                  }
                 case MNEMO_CPT_IMP:
@@ -1188,7 +1187,27 @@
         }
 
        if (Liste_acronyme)
-        { g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
+        { g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_AI WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
+          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
+          SQL_Write ( requete );
+          g_free(requete);
+
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_AO WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
+          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
+          SQL_Write ( requete );
+          g_free(requete);
+
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_DI WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
+          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
+          SQL_Write ( requete );
+          g_free(requete);
+
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_DO WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
+          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
+          SQL_Write ( requete );
+          g_free(requete);
+
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
           requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
           SQL_Write ( requete );
           g_free(requete);

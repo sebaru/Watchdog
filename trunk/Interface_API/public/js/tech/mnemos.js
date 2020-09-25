@@ -64,21 +64,14 @@
                     { "data": "map_thread", "title":"map_thread", "className": "hidden-xs" },
                     { "data": "map_tech_id","title":"map_tech_id","className": "hidden-xs" },
                     { "data": "map_tag",    "title":"map_tag",   "className": "hidden-xs" },
-                    { "data": null, "title":"Actions", "orderable": false, "className":"text-center",
+                    /*{ "data": null, "title":"Actions", "orderable": false, "className":"text-center",
                       "render": function (item)
-                       { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
-                                "    <button class='btn btn-outline-primary btn-sm' "+
-                                            "onclick=window.location.href='atelier/"+item.id+"' "+
-                                            "data-toggle='tooltip' title='Ouvrir Atelier'>"+
-                                            "<i class='fas fa-image'></i></button>"+
-                                "    <button class='btn btn-danger btn-sm' "+
-                                            "onclick=Show_Modal_Del("+item.acronyme+") "+
-                                            "data-toggle='tooltip' title='Supprimer le mnémonique'>"+
-                                            "<i class='fas fa-trash'></i></button>"+
-                                "</div>"
-                               )
-                       }
-                    }
+                        { boutons = Bouton_actions_start ();
+                          boutons += Bouton_actions_add ( "danger", "Supprimer le mnémonique", "Show_Modal_Del_DI", item.acronyme, "trash", null );
+                          boutons += Bouton_actions_end ();
+                          return(boutons);
+                        },
+                    }*/
                   ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -98,27 +91,13 @@
                        { return( Lien ( "/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir la courbe", item.acronyme ) ); }
                     },
                     { "data": "libelle",    "title":"Libellé",    "className": "" },
+                    { "data": "unite",   "title":"Unité",   "className": "hidden-xs" },
                     { "data": "type",   "title":"Type",   "className": "hidden-xs" },
                     { "data": "min", "title":"min", "className": "hidden-xs" },
                     { "data": "max", "title":"max", "className": "hidden-xs" },
                     { "data": "map_thread", "title":"map_thread", "className": "hidden-xs" },
                     { "data": "map_tech_id","title":"map_tech_id","className": "hidden-xs" },
                     { "data": "map_tag",    "title":"map_tag",   "className": "hidden-xs" },
-                    { "data": null, "title":"Actions", "orderable": false, "className":"text-center",
-                      "render": function (item)
-                       { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
-                                "    <button class='btn btn-outline-primary btn-sm' "+
-                                            "onclick=window.location.href='atelier/"+item.id+"' "+
-                                            "data-toggle='tooltip' title='Ouvrir Atelier'>"+
-                                            "<i class='fas fa-image'></i></button>"+
-                                "    <button class='btn btn-danger btn-sm' "+
-                                            "onclick=Show_Modal_Del("+item.acronyme+") "+
-                                            "data-toggle='tooltip' title='Supprimer le mnémonique'>"+
-                                            "<i class='fas fa-trash'></i></button>"+
-                                "</div>"
-                               )
-                       }
-                    }
                   ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -139,21 +118,6 @@
                     { "data": "map_tech_id","title":"map_tech_id","className": "hidden-xs" },
                     { "data": "map_tag",    "title":"map_tag",    "className": "hidden-xs" },
                     { "data": "dst_param1", "title":"dst_param1", "className": "hidden-xs" },
-                    { "data": null, "title":"Actions", "orderable": false, "className":"text-center",
-                      "render": function (item)
-                       { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
-                                "    <button class='btn btn-outline-primary btn-sm' "+
-                                            "onclick=window.location.href='atelier/"+item.id+"' "+
-                                            "data-toggle='tooltip' title='Ouvrir Atelier'>"+
-                                            "<i class='fas fa-image'></i></button>"+
-                                "    <button class='btn btn-danger btn-sm' "+
-                                            "onclick=Show_Modal_Del("+item.acronyme+") "+
-                                            "data-toggle='tooltip' title='Supprimer le mnémonique'>"+
-                                            "<i class='fas fa-trash'></i></button>"+
-                                "</div>"
-                               )
-                       }
-                    }
                   ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -176,21 +140,6 @@
                     { "data": "map_thread", "title":"map_thread", "className": "hidden-xs" },
                     { "data": "map_tech_id","title":"map_tech_id","className": "hidden-xs" },
                     { "data": "map_tag",    "title":"map_tag",    "className": "hidden-xs" },
-                    { "data": null, "title":"Actions", "orderable": false, "className":"text-center",
-                      "render": function (item)
-                       { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
-                                "    <button class='btn btn-outline-primary btn-sm' "+
-                                            "onclick=window.location.href='atelier/"+item.id+"' "+
-                                            "data-toggle='tooltip' title='Ouvrir Atelier'>"+
-                                            "<i class='fas fa-image'></i></button>"+
-                                "    <button class='btn btn-danger btn-sm' "+
-                                            "onclick=Show_Modal_Del("+item.acronyme+") "+
-                                            "data-toggle='tooltip' title='Supprimer le mnémonique'>"+
-                                            "<i class='fas fa-trash'></i></button>"+
-                                "</div>"
-                               )
-                       }
-                    }
                   ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -221,7 +170,7 @@
                  },
              },
              { "data": "map_question_vocale",   "title":"Question Vocale",   "className": "hidden-xs" },
-             { "data": "map_reponse_vocale",    "title":"Reponse Vocale",    "className": "hidden-xs" }
+             { "data": "map_reponse_vocale",    "title":"Reponse Vocale",    "className": "hidden-xs" },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -256,7 +205,7 @@
                     { return( Bouton ( "outline-secondary", "Cliquez pour activer", "Mnemos_CI_enable_archivage", item.acronyme, "Inactif" ) );
                     }
                  }
-             }
+             },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -281,24 +230,6 @@
              { "data": "profil_audio", "title":"Profil Audio",    "className": "hidden-xs" },
              { "data": "enable", "title":"Enable",    "className": "hidden-xs" },
              { "data": "etat", "title":"Etat",    "className": "hidden-xs" },
-/*             { "data": null, "title":"Etat", "className": "",
-               "render": function (item)
-                 { if (item.etat==true) { return( Bouton ( "success", "Activé", null, null, "Actif" ) );        }
-                                   else { return( Bouton ( "outline-secondary", "Désactivé", null, null, "Inactif" ) ); }
-                 },
-             },
-             { "data": "multi",      "title":"Multi.",   "className": "text-center hidden-xs" },
-             { "data": "unite",      "title":"Unité",    "className": "text-center hidden-xs" },
-             { "data": null, "title":"Archivage", "className": "hidden-xs",
-               "render": function (item)
-                 { if (item.archivage==true)
-                    { return( Bouton ( "success", "Cliquez pour désactiver", "Mnemos_set_CI", item.tech_id, "Actif" ) );
-                    }
-                   else
-                    { return( Bouton ( "outline-secondary", "Cliquez pour activer", "Mnemos_set_CI", item.tech_id, "Inactif" ) );
-                    }
-                 }
-             }*/
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,

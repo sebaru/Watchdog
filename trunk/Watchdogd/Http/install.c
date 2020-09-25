@@ -158,7 +158,7 @@
 /******************************************* Création fichier de config *******************************************************/
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Creating config file '%s'", __func__, fichier );
 
-    fd = creat ( fichier, S_IRUSR );
+    fd = creat ( fichier, S_IRUSR | S_IWUSR );
     if (fd==-1)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "File Create Error");
        return;

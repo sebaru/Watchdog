@@ -255,54 +255,54 @@
        if (Dls_auto_create_plugin( module->tech_id, "Gestion de l'onduleur" ) == FALSE)
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->tech_id ); }
 
-       Mnemo_auto_create_DI ( module->tech_id, "COMM", "Statut de la communication avec l'onduleur" );
-       Mnemo_auto_create_DI ( module->tech_id, "OUTLET_1_STATUS", "Statut de la prise n°1" );
-       Mnemo_auto_create_DI ( module->tech_id, "OUTLET_2_STATUS", "Statut de la prise n°2" );
-       Mnemo_auto_create_DI ( module->tech_id, "UPS_ONLINE", "UPS Online" );
-       Mnemo_auto_create_DI ( module->tech_id, "UPS_CHARGING", "UPS en charge" );
-       Mnemo_auto_create_DI ( module->tech_id, "UPS_ON_BATT",  "UPS sur batterie" );
-       Mnemo_auto_create_DI ( module->tech_id, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
-       Mnemo_auto_create_DI ( module->tech_id, "UPS_ALARM",  "UPS en alarme !" );
+       Mnemo_auto_create_DI ( FALSE, module->tech_id, "COMM", "Statut de la communication avec l'onduleur" );
+       Mnemo_auto_create_DI ( FALSE, module->tech_id, "OUTLET_1_STATUS", "Statut de la prise n°1" );
+       Mnemo_auto_create_DI ( FALSE, module->tech_id, "OUTLET_2_STATUS", "Statut de la prise n°2" );
+       Mnemo_auto_create_DI ( FALSE, module->tech_id, "UPS_ONLINE", "UPS Online" );
+       Mnemo_auto_create_DI ( FALSE, module->tech_id, "UPS_CHARGING", "UPS en charge" );
+       Mnemo_auto_create_DI ( FALSE, module->tech_id, "UPS_ON_BATT",  "UPS sur batterie" );
+       Mnemo_auto_create_DI ( FALSE, module->tech_id, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
+       Mnemo_auto_create_DI ( FALSE, module->tech_id, "UPS_ALARM",  "UPS en alarme !" );
 
-       Mnemo_auto_create_AI ( module->tech_id, "LOAD", "Charge onduleur", "%" );
+       Mnemo_auto_create_AI ( FALSE, module->tech_id, "LOAD", "Charge onduleur", "%" );
        Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "LOAD", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( module->tech_id, "REALPOWER", "Charge onduleur", "W" );
+       Mnemo_auto_create_AI ( FALSE, module->tech_id, "REALPOWER", "Charge onduleur", "W" );
        Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "REALPOWER", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( module->tech_id, "BATTERY_CHARGE", "Charge batterie", "%" );
+       Mnemo_auto_create_AI ( FALSE, module->tech_id, "BATTERY_CHARGE", "Charge batterie", "%" );
        Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_CHARGE", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( module->tech_id, "INPUT_VOLTAGE", "Tension d'entrée", "V" );
+       Mnemo_auto_create_AI ( FALSE, module->tech_id, "INPUT_VOLTAGE", "Tension d'entrée", "V" );
        Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "INPUT_VOLTAGE", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( module->tech_id, "BATTERY_RUNTIME", "Durée de batterie restante", "s" );
+       Mnemo_auto_create_AI ( FALSE, module->tech_id, "BATTERY_RUNTIME", "Durée de batterie restante", "s" );
        Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_RUNTIME", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( module->tech_id, "BATTERY_VOLTAGE", "Tension batterie", "V" );
+       Mnemo_auto_create_AI ( FALSE, module->tech_id, "BATTERY_VOLTAGE", "Tension batterie", "V" );
        Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_VOLTAGE", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( module->tech_id, "INPUT_HZ", "Fréquence d'entrée", "HZ" );
+       Mnemo_auto_create_AI ( FALSE, module->tech_id, "INPUT_HZ", "Fréquence d'entrée", "HZ" );
        Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "INPUT_HZ", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( module->tech_id, "OUTPUT_CURRENT", "Courant de sortie", "A" );
+       Mnemo_auto_create_AI ( FALSE, module->tech_id, "OUTPUT_CURRENT", "Courant de sortie", "A" );
        Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_CURRENT", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( module->tech_id, "OUTPUT_HZ", "Fréquence de sortie", "HZ" );
+       Mnemo_auto_create_AI ( FALSE, module->tech_id, "OUTPUT_HZ", "Fréquence de sortie", "HZ" );
        Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_HZ", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( module->tech_id, "OUTPUT_VOLTAGE", "Tension de sortie", "V" );
+       Mnemo_auto_create_AI ( FALSE, module->tech_id, "OUTPUT_VOLTAGE", "Tension de sortie", "V" );
        Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_VOLTAGE", 0.0, FALSE );
 
-       Mnemo_auto_create_DO ( module->tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
-       Mnemo_auto_create_DO ( module->tech_id, "LOAD_ON", "Active la sortie ondulée" );
-       Mnemo_auto_create_DO ( module->tech_id, "OUTLET_1_OFF", "Désactive la prise n°1" );
-       Mnemo_auto_create_DO ( module->tech_id, "OUTLET_1_ON", "Active la prise n°1" );
-       Mnemo_auto_create_DO ( module->tech_id, "OUTLET_2_OFF", "Désactive la prise n°2" );
-       Mnemo_auto_create_DO ( module->tech_id, "OUTLET_2_ON", "Active la prise n°2" );
-       Mnemo_auto_create_DO ( module->tech_id, "START_DEEP_BAT", "Active un test de decharge profond" );
-       Mnemo_auto_create_DO ( module->tech_id, "START_QUICK_BAT", "Active un test de decharge léger" );
-       Mnemo_auto_create_DO ( module->tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
+       Mnemo_auto_create_DO ( FALSE, module->tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
+       Mnemo_auto_create_DO ( FALSE, module->tech_id, "LOAD_ON", "Active la sortie ondulée" );
+       Mnemo_auto_create_DO ( FALSE, module->tech_id, "OUTLET_1_OFF", "Désactive la prise n°1" );
+       Mnemo_auto_create_DO ( FALSE, module->tech_id, "OUTLET_1_ON", "Active la prise n°1" );
+       Mnemo_auto_create_DO ( FALSE, module->tech_id, "OUTLET_2_OFF", "Désactive la prise n°2" );
+       Mnemo_auto_create_DO ( FALSE, module->tech_id, "OUTLET_2_ON", "Active la prise n°2" );
+       Mnemo_auto_create_DO ( FALSE, module->tech_id, "START_DEEP_BAT", "Active un test de decharge profond" );
+       Mnemo_auto_create_DO ( FALSE, module->tech_id, "START_QUICK_BAT", "Active un test de decharge léger" );
+       Mnemo_auto_create_DO ( FALSE, module->tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
      }
 
     module->date_next_connexion = 0;

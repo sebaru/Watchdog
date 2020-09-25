@@ -41,7 +41,7 @@
 /* Entrée: le tech_id, l'acronyme, le libelle et l'unite                                                                      */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_AI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src )
+ gboolean Mnemo_auto_create_AI ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src )
   { gchar *acro, *libelle, *unite;
     gchar requete[1024];
     gboolean retour;
@@ -75,8 +75,8 @@
      } else unite = NULL;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_AI SET tech_id='%s',acronyme='%s',libelle='%s' ",
-                tech_id, acro, libelle );
+                "INSERT INTO mnemos_AI SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s' ",
+                deletable, tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);
 

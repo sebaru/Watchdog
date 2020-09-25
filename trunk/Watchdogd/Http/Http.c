@@ -336,7 +336,7 @@
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
                 "%s: User '%s' not found in DB", __func__, Json_get_string ( request, "username" ) );
        json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Accès interdit !");
+       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
      }
 
@@ -350,7 +350,7 @@
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: User '%s' not enabled",
                  __func__, db->row[0] );
        json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Accès interdit !");
+       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
      }
 /*********************************************** Authentification du client par login mot de passe ****************************/
@@ -360,7 +360,7 @@
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Password error for '%s' (%s)",
                  __func__, db->row[0], db->row[1] );
        json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Accès interdit !");
+       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
      }
 

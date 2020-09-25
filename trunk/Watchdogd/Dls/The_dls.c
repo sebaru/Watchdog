@@ -1602,18 +1602,18 @@
         { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: update library error" ); }
      }
     Charger_plugins();                                                                          /* Chargement des modules dls */
-    Mnemo_auto_create_AI ( "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
-    Mnemo_auto_create_AI ( "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
-    Mnemo_auto_create_AI ( "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
-    Mnemo_auto_create_AI ( "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
-    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1MIN", "Impulsion toutes les minutes" );
-    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_1SEC", "Impulsion toutes les secondes" );
-    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_5SEC", "Impulsion toutes les 5 secondes" );
-    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_10SEC", "Impulsion toutes les 10 secondes" );
-    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
-    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
-    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
-    Mnemo_auto_create_BOOL ( MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde" );
+    Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
+    Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
+    Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
+    Mnemo_auto_create_AI ( FALSE, "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_1MIN", "Impulsion toutes les minutes" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_1SEC", "Impulsion toutes les secondes" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_5SEC", "Impulsion toutes les 5 secondes" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_10SEC", "Impulsion toutes les 10 secondes" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde" );
 
     gint wait=30;
     while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */

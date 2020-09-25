@@ -1942,6 +1942,19 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4983)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DO ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AO ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_BOOL ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

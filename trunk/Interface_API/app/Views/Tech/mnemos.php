@@ -217,4 +217,5 @@
   </div>
 </div>
 
-<script src="<?php echo base_url('js/mnemos.js')?>" type="text/javascript"></script>
+<script src="<?php echo base_url('js/tech/common_tech.js')?>" type="text/javascript"></script>
+<script src="<?php echo base_url('js/tech/mnemos.js')?>" type="text/javascript"></script>
