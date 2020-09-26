@@ -44,7 +44,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_install ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { gchar fichier[80], chaine[256], *welcome =
+  { gchar fichier[80], home[128], chaine[256], *welcome =
           "#Welcome, your instance is now installed !\n"
           "#Sébastien Lefèvre - Abls-Habitat.fr\n";
     GBytes *request_brute;
@@ -88,18 +88,33 @@
        return;
      }
 
+    if (!g_str_is_ascii (Json_get_string(request, "run_as")))
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Wrong Run_AS");
+       return;
+     }
+
+    g_snprintf( chaine, sizeof(chaine), "useradd -m -c 'WatchdogServer' %s", Json_get_string(request, "run_as") );
+    system(chaine);
+    g_snprintf( chaine, sizeof(chaine), "usermod -a -G audio,dialout %s", Json_get_string(request, "run_as") );
+    system(chaine);
+
     pwd = getpwnam ( Json_get_string(request, "run_as" ) );
     if (!pwd)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Wrong Run_AS");
        return;
      }
 
-    if (Json_get_int(request, "use_subdir"))
-     { g_snprintf(chaine, sizeof(chaine), "%s/.watchdog", pwd->pw_dir );
-       mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
-       chown ( chaine, pwd->pw_uid, pwd->pw_gid );
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created '%s' directory'", __func__, chaine );
-     }
+    g_snprintf( home, sizeof(home), "%s", pwd->pw_dir );
+    if (Json_get_int(request, "use_subdir")) { g_strlcat( home, "/.watchdog", sizeof(home) ); }
+
+    mkdir ( home, S_IRUSR | S_IWUSR | S_IXUSR );
+    chown ( home, pwd->pw_uid, pwd->pw_gid );
+    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Home '%s' directory'", __func__, home );
+
+    g_snprintf( chaine, sizeof(chaine), "%s/Dls", home );
+    mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
+    chown ( chaine, pwd->pw_uid, pwd->pw_gid );
+    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Dls '%s' directory'", __func__, chaine );
 
 /******************************************* Test accès Database **************************************************************/
     gchar *DB_SCHEMA = "/usr/local/share/Watchdog/init_db.sql";

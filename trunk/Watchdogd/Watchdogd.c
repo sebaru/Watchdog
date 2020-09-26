@@ -528,39 +528,46 @@ end:
 
     pwd = getpwnam ( Config.run_as );
     if (!pwd)
-     { printf("Error, target user '%s' not found in /etc/passwd (%s).. Could not set run_as user\n", Config.run_as, strerror(errno) );
+     { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
+                "%s: Error, target user '%s' not found in /etc/passwd (%s).. Could not set run_as user\n", __func__, Config.run_as, strerror(errno) );
        exit(EXIT_ERREUR);
      }
-    else printf("User '%s' (uid %d) found.\n", Config.run_as, pwd->pw_uid);
+    else Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: User '%s' (uid %d) found.\n", __func__, Config.run_as, pwd->pw_uid);
 
     old = getpwuid ( getuid() );
     if (!old)
-     { printf("Error, actual user '%d' not found in /etc/passwd (%s).. Could not set run_as user\n", getuid(), strerror(errno) );
+     { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
+                "%s: Error, actual user '%d' not found in /etc/passwd (%s).. Could not set run_as user\n", __func__, getuid(), strerror(errno) );
        exit(EXIT_ERREUR);
      }
 
     if (old->pw_uid != pwd->pw_uid)                                                      /* Besoin de changer d'utilisateur ? */
-     { printf("Dropping privileges '%s' (%d) -> '%s' (%d).\n", old->pw_name, old->pw_uid, pwd->pw_name, pwd->pw_uid );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                "%s: From '%s' (%d) To '%s' (%d).\n", __func__, old->pw_name, old->pw_uid, pwd->pw_name, pwd->pw_uid );
+
        if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                                           /* On drop les privilèges */
-        { printf("Error, cannot Initgroups for user '%s' (%s)\n", Config.run_as, strerror(errno) );
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot Initgroups for user '%s' (%s)\n",
+                    __func__, Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
 
        if (setgid ( pwd->pw_gid )==-1)                                                              /* On drop les privilèges */
-        { printf("Error, cannot setGID for user '%s' (%s)\n", Config.run_as, strerror(errno) );
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setGID for user '%s' (%s)\n",
+                    __func__, Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
 
        if (setuid ( pwd->pw_uid )==-1)                                                              /* On drop les privilèges */
-        { printf("Error, cannot setUID for user '%s' (%s)\n", Config.run_as, strerror(errno) );
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setUID for user '%s' (%s)\n",
+                    __func__, Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
      }
     g_snprintf(Config.home, sizeof(Config.home), "%s", pwd->pw_dir );
     if (chdir(Config.home))                                                             /* Positionnement à la racine du home */
-     { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
+     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Chdir %s failed\n", __func__, Config.home ); exit(EXIT_ERREUR); }
     else
-     { printf( "Chdir %s successfull. PID=%d\n", Config.home, getpid() ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Chdir %s successfull. PID=%d\n", __func__, Config.home, getpid() ); }
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du serveur watchdog                                                                              */
@@ -578,8 +585,10 @@ end:
     umask(022);                                                                              /* Masque de creation de fichier */
 
     Config.installed = Lire_config();                                      /* Lecture sur le fichier /etc/watchdogd.abls.conf */
-    if (Config.installed)
-     { Drop_privileges(); }
+    Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start v%s", WTD_VERSION );
+
+    if (Config.installed) { Drop_privileges(); }
 
     fg = Lire_ligne_commande( argc, argv );                                       /* Lecture du fichier conf et des arguments */
 
@@ -612,9 +621,6 @@ end:
     if (write( fd_lock, strpid, strlen(strpid) )<0)
      { printf( "Cannot write PID on %s/%s (%s)\n", Config.home, VERROU_SERVEUR, strerror(errno) ); }
 
-    Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
-
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start v%s", WTD_VERSION );
     Print_config();
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
