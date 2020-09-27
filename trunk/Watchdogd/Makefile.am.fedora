@@ -29,12 +29,21 @@ Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl openssl lib
                    `libgcrypt-config --cflags` \
                    `mysql_config --cflags`
 
-sysconf_DATA = watchdogd.conf.sample Watchdogd.service
-dist_systemdsystemunit_DATA = Watchdogd.service
-pkgdata_DATA = init_db.sql
-
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include
 
-EXTRA_DIST = Watchdogd.service watchdogd.conf init_db.sql
+sysconf_DATA = watchdogd.abls.conf.sample Watchdogd.service
+dist_systemdsystemunit_DATA = Watchdogd.service
+
+MY_PKGDATA_SRC = IHM
+MY_PKGDATA_TAR = watchdog_pkgdata.tar
+dist_pkgdata_DATA = init_db.sql $(MY_PKGDATA_TAR)
+
+$(MY_PKGDATA_TAR):
+	      tar cvzf $(MY_PKGDATA_TAR) $(MY_PKGDATA_SRC)
+
+install-data-hook:
+							tar xvzf $(MY_PKGDATA_TAR) -C $(pkgdatadir)/
+
+EXTRA_DIST = Watchdogd.service watchdogd.abls.conf init_db.sql $(MY_PKGDATA_TAR)
 MAINTAINERCLEANFILES = Makefile.in

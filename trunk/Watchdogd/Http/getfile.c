@@ -78,7 +78,7 @@
 
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    if ( !strncasecmp (path, "/js/", strlen("/js/") ) )
+         if ( !strncasecmp (path, "/js/", strlen("/js/") ) )
      { soup_message_set_response ( msg, "text/javascript; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_fichier ); }
     else if ( !strncasecmp (path, "/svg/", strlen("/svg/") ) )
      { soup_message_set_response ( msg, "image/svg+xml; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_fichier ); }
