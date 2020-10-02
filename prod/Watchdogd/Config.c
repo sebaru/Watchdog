@@ -59,7 +59,7 @@
     g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", DEFAUT_DB_PASSWORD  );
     g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME  );
 
-    Config.log_level = LOG_NOTICE;
+    Config.log_level = LOG_INFO;
     Config.log_msrv  = FALSE;
     Config.log_arch  = FALSE;
 

@@ -105,16 +105,16 @@
        if (Dls_auto_create_plugin( Cfg_teleinfo.tech_id, "Gestion du compteur EDF" ) == FALSE)
         { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_teleinfo.tech_id ); }
 
-       Mnemo_auto_create_DI ( Cfg_teleinfo.tech_id, "COMM", "Statut de la communication avec le copteur EDF" );
+       Mnemo_auto_create_DI ( FALSE, Cfg_teleinfo.tech_id, "COMM", "Statut de la communication avec le copteur EDF" );
 
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ADCO",  "N° d’identification du compteur", "numéro" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "ISOUS", "Intensité EDF souscrite ", "A" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "BASE",  "Index option BASE", "Wh" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "HCHC",  "Index heures creuses", "Wh" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "HCHP",  "Index heures pleines", "Wh" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IINST", "Intensité EDF instantanée", "A" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "IMAX",  "Intensité EDF maximale", "A" );
-       Mnemo_auto_create_AI ( Cfg_teleinfo.tech_id, "PAPP",  "Puissance apparente EDF consommée", "VA" );
+       Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "ADCO",  "N° d’identification du compteur", "numéro" );
+       Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "ISOUS", "Intensité EDF souscrite ", "A" );
+       Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "BASE",  "Index option BASE", "Wh" );
+       Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "HCHC",  "Index heures creuses", "Wh" );
+       Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "HCHP",  "Index heures pleines", "Wh" );
+       Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "IINST", "Intensité EDF instantanée", "A" );
+       Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "IMAX",  "Intensité EDF maximale", "A" );
+       Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "PAPP",  "Puissance apparente EDF consommée", "VA" );
      }
     Send_zmq_DI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", TRUE );
     Cfg_teleinfo.comm_status = TRUE;

@@ -103,6 +103,7 @@
                    "`watchdog` int(11) NOT NULL,"
                    "PRIMARY KEY (`id`)"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
+       goto end;
      }
 
     if (database_version < 4920)
@@ -112,7 +113,7 @@
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_A`" );
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_AA`" );
      }
-
+end:
     Modifier_configDB ( "modbus", "database_version", WTD_DB_VERSION );
   }
 /******************************************************************************************************************************/
@@ -1015,7 +1016,7 @@
 
     if (Dls_auto_create_plugin( module->modbus.tech_id, "Gestion du Wago" ) == FALSE)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->modbus.tech_id ); }
-    Mnemo_auto_create_DI ( module->modbus.tech_id, "COMM", "Statut de la communication avec le wago" );
+    Mnemo_auto_create_DI ( FALSE, module->modbus.tech_id, "COMM", "Statut de la communication avec le wago" );
 
     while(Cfg_modbus.lib->Thread_run == TRUE && Cfg_modbus.lib->Thread_reload == FALSE)      /* On tourne tant que necessaire */
      { sched_yield();

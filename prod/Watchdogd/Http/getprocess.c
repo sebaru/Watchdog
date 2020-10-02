@@ -349,7 +349,7 @@
     if (!Http_check_session( msg, session, 6 )) return;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Searching for CLI commande %s", __func__, path );
-    path = path + strlen("/process/");
+    path = path + strlen("/api/process/");
 
 /****************************************** WS get Running config library *****************************************************/
     if (!strncasecmp ( path, "archive/", strlen("archive/")))

@@ -83,7 +83,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT IGNORE INTO %s SET "
                 "syn_id=(SELECT syns.id FROM dls INNER JOIN syns ON dls.syn_id = syns.id WHERE dls.tech_id='%s'), "
-                "tech_id='%s', acronyme='%s', forme='%s', icone='-1', libelle='%s', access_level=0, bitctrl='-1', bitclic='-1', "
+                "tech_id='%s', acronyme='%s', forme='%s', icone='-1', libelle='%s', access_level=0, bitctrl='-1', "
                 "posx='150', posy='150', larg='-1', haut='-1', angle='0', auto_create=1 ",
                 NOM_TABLE_MOTIF, tech_id, tech_id, acro, forme, libelle );
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
@@ -159,13 +159,13 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s SET icone='%d',syn_id='%d',libelle='%s',access_level='%d',bitctrl='%d',bitclic='%d',"
+                "INSERT INTO %s SET icone='%d',syn_id='%d',libelle='%s',access_level='%d',bitctrl='%d',"
                 "posx='%d',posy='%d',larg='%d',haut='%d',angle='%d',"
                 "dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',rafraich='%d',layer='%d',"
                 "clic_tech_id='%s',clic_acronyme='%s'",
                 NOM_TABLE_MOTIF,
                 motif->icone_id, motif->syn_id, libelle, motif->access_level,
-                motif->bit_controle, motif->bit_clic,
+                motif->bit_controle,
                 motif->position_x, motif->position_y, motif->largeur, motif->hauteur, motif->angle,
                 motif->type_dialog, motif->type_gestion,
                 motif->rouge0, motif->vert0, motif->bleu0, motif->rafraich,
@@ -206,7 +206,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
+                "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,posx,posy,larg,haut,angle,"
                 "dialog,gestion,rouge,vert,bleu,rafraich,layer,"
                 "sm.clic_tech_id, sm.clic_acronyme"
                 " FROM syns_motifs AS sm"
@@ -270,21 +270,20 @@
        motif->syn_id       = atoi(db->row[3]);
        motif->access_level = atoi(db->row[4]);                                       /* Nom du groupe d'appartenance du motif */
        motif->bit_controle = atoi(db->row[5]);                                                                  /* Ixxx, Cxxx */
-       motif->bit_clic     = atoi(db->row[6]);                    /* Bit à activer quand on clic avec le bouton gauche souris */
-       motif->position_x   = atoi(db->row[7]);                                                   /* en abscisses et ordonnées */
-       motif->position_y   = atoi(db->row[8]);
-       motif->largeur      = atoi(db->row[9]);                                         /* Taille de l'image sur le synoptique */
-       motif->hauteur      = atoi(db->row[10]);
-       motif->angle        = atoi(db->row[11]);
-       motif->type_dialog  = atoi(db->row[12]);                      /* Type de la boite de dialogue pour le clic de commande */
-       motif->type_gestion = atoi(db->row[13]);
-       motif->rouge0       = atoi(db->row[14]);
-       motif->vert0        = atoi(db->row[15]);
-       motif->bleu0        = atoi(db->row[16]);
-       motif->rafraich     = atoi(db->row[17]);
-       motif->layer        = atoi(db->row[18]);
-       g_snprintf ( motif->clic_tech_id, sizeof(motif->clic_tech_id), "%s", db->row[19] );       /* Recopie dans la structure */
-       g_snprintf ( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", db->row[20] );     /* Recopie dans la structure */
+       motif->position_x   = atoi(db->row[6]);                                                   /* en abscisses et ordonnées */
+       motif->position_y   = atoi(db->row[7]);
+       motif->largeur      = atoi(db->row[8]);                                         /* Taille de l'image sur le synoptique */
+       motif->hauteur      = atoi(db->row[9]);
+       motif->angle        = atoi(db->row[10]);
+       motif->type_dialog  = atoi(db->row[11]);                      /* Type de la boite de dialogue pour le clic de commande */
+       motif->type_gestion = atoi(db->row[12]);
+       motif->rouge0       = atoi(db->row[13]);
+       motif->vert0        = atoi(db->row[14]);
+       motif->bleu0        = atoi(db->row[15]);
+       motif->rafraich     = atoi(db->row[16]);
+       motif->layer        = atoi(db->row[17]);
+       g_snprintf ( motif->clic_tech_id, sizeof(motif->clic_tech_id), "%s", db->row[18] );       /* Recopie dans la structure */
+       g_snprintf ( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", db->row[19] );     /* Recopie dans la structure */
      }
     return(motif);
   }
@@ -305,7 +304,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
+                "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,posx,posy,larg,haut,angle,"
                 "dialog,gestion,rouge,vert,bleu,rafraich,layer,"
                 "sm.clic_tech_id, sm.clic_acronyme"
                 " FROM syns_motifs AS sm"
@@ -333,21 +332,20 @@
        motif->syn_id       = atoi(db->row[3]);
        motif->access_level = atoi(db->row[4]);                                       /* Nom du groupe d'appartenance du motif */
        motif->bit_controle = atoi(db->row[5]);                                                                  /* Ixxx, Cxxx */
-       motif->bit_clic     = atoi(db->row[6]);                    /* Bit à activer quand on clic avec le bouton gauche souris */
-       motif->position_x   = atoi(db->row[7]);                                                   /* en abscisses et ordonnées */
-       motif->position_y   = atoi(db->row[8]);
-       motif->largeur      = atoi(db->row[9]);                                         /* Taille de l'image sur le synoptique */
-       motif->hauteur      = atoi(db->row[10]);
-       motif->angle        = atoi(db->row[11]);
-       motif->type_dialog  = atoi(db->row[12]);                      /* Type de la boite de dialogue pour le clic de commande */
-       motif->type_gestion = atoi(db->row[13]);
-       motif->rouge0       = atoi(db->row[14]);
-       motif->vert0        = atoi(db->row[15]);
-       motif->bleu0        = atoi(db->row[16]);
-       motif->rafraich     = atoi(db->row[17]);
-       motif->layer        = atoi(db->row[18]);
-       g_snprintf ( motif->clic_tech_id, sizeof(motif->clic_tech_id), "%s", db->row[19] );       /* Recopie dans la structure */
-       g_snprintf ( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", db->row[20] );     /* Recopie dans la structure */
+       motif->position_x   = atoi(db->row[6]);                                                   /* en abscisses et ordonnées */
+       motif->position_y   = atoi(db->row[7]);
+       motif->largeur      = atoi(db->row[8]);                                         /* Taille de l'image sur le synoptique */
+       motif->hauteur      = atoi(db->row[9]);
+       motif->angle        = atoi(db->row[10]);
+       motif->type_dialog  = atoi(db->row[11]);                      /* Type de la boite de dialogue pour le clic de commande */
+       motif->type_gestion = atoi(db->row[12]);
+       motif->rouge0       = atoi(db->row[13]);
+       motif->vert0        = atoi(db->row[14]);
+       motif->bleu0        = atoi(db->row[15]);
+       motif->rafraich     = atoi(db->row[16]);
+       motif->layer        = atoi(db->row[17]);
+       g_snprintf ( motif->clic_tech_id, sizeof(motif->clic_tech_id), "%s", db->row[18] );       /* Recopie dans la structure */
+       g_snprintf ( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", db->row[19] );     /* Recopie dans la structure */
      }
     Libere_DB_SQL( &db );
     return(motif);
@@ -387,12 +385,12 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "
-                "libelle='%s',access_level='%d',bitctrl='%d',bitclic='%d',posx='%d',posy='%d',larg='%d',"
+                "libelle='%s',access_level='%d',bitctrl='%d',posx='%d',posy='%d',larg='%d',"
                 "haut='%d',angle='%d',dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',"
                 "rafraich='%d',layer='%d',clic_tech_id='%s',clic_acronyme='%s'"
                 " WHERE id=%d;", NOM_TABLE_MOTIF,
                 libelle, motif->access_level,
-                motif->bit_controle, motif->bit_clic,
+                motif->bit_controle,
                 motif->position_x, motif->position_y, motif->largeur, motif->hauteur, motif->angle,
                 motif->type_dialog, motif->type_gestion,
                 motif->rouge0, motif->vert0, motif->bleu0, motif->rafraich,

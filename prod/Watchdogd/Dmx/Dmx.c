@@ -207,7 +207,7 @@ reload:
     if (Dls_auto_create_plugin( Cfg_dmx.tech_id, "Gestion du DMX" ) == FALSE)
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", Cfg_dmx.tech_id ); }
 
-    Mnemo_auto_create_DI ( Cfg_dmx.tech_id, "COMM", "Statut de la communication avec le token DMX" );
+    Mnemo_auto_create_DI ( FALSE, Cfg_dmx.tech_id, "COMM", "Statut de la communication avec le token DMX" );
 
     Dmx_init();
     Envoyer_trame_dmx_request();

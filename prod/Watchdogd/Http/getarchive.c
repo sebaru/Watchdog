@@ -40,9 +40,11 @@
 /******************************************************************************************************************************/
  void Http_traiter_archive_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
-  { gchar *buf, requete[256];
-    gsize taille_buf;
-    if (msg->method != SOUP_METHOD_GET)
+  { GBytes *request_brute;
+    gsize taille, taille_buf;
+    gchar *buf, requete[256];
+
+    if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -50,35 +52,34 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 0)) return;
 
-    gchar *prefix = "/archive/get/";
-    if ( ! g_str_has_prefix ( path, prefix ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( !request )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
        return;
      }
 
-    if (!strlen (path+strlen(prefix)))
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+            Json_has_member ( request, "period" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
+
+    gchar *tech_id  = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
+    gchar *acronyme = Normaliser_chaine ( Json_get_string ( request, "acronyme" ) );
+    gchar *period   = Normaliser_chaine ( Json_get_string ( request, "period" ) );
+    json_node_unref(request);
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       g_free(tech_id);
+       g_free(acronyme);
+       g_free(period);
        return;
      }
-    gchar *temp = g_utf8_strup( path+strlen(prefix), -1 );
-    gchar **params = g_strsplit ( temp, "/", 3 );
-    g_free(temp);
-    if( ! (params && params[0] && params[1]) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
-       g_strfreev( params );
-       return;
-     }
-    if (params[2]==NULL) params[2]=g_strdup("DAY");
-    gchar *tech_id  = Normaliser_chaine ( params[0] );
-    gchar *acronyme = Normaliser_chaine ( params[1] );
-    gchar *period   = Normaliser_chaine ( params[2] );
-    g_strfreev( params );
 
     g_snprintf(requete, sizeof(requete), "SELECT * FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme );
     if (SQL_Select_to_JSON ( builder, NULL, requete ) == FALSE)

@@ -73,8 +73,6 @@
  static GtkWidget *Spin_rafraich;                                        /* Frequence de refraichissement d'un motif cyclique */
  static GtkWidget *Couleur_inactive;                                                           /* Parametres visuels du motif */
  static GtkWidget *Entry_libelle;                                                      /* Libelle du motif en cours d'edition */
- static GtkWidget *Spin_bit_clic;                                                             /* Numero du bit de clic gauche */
- static GtkWidget *Entry_bit_clic;                                                               /* Mnemonique du bit de clic */
  static GtkWidget *Entry_clic_tech_id;                                            /* tech_id dls a positionner si clic gauche */
  static GtkWidget *Entry_clic_acronyme;                                          /* acronyme dls a positionner si clic gauche */
  static GtkWidget *Spin_bit_ctrl;                                                          /* Bit de controle (Ixxx) du motif */
@@ -199,21 +197,15 @@
      }
 
     switch( Trame_motif->motif->type_dialog )
-     { case ACTION_SANS      : gtk_widget_set_sensitive( Spin_bit_clic, FALSE );
-                               gtk_widget_set_sensitive( Entry_bit_clic, FALSE );
-                               gtk_widget_set_sensitive( Entry_clic_tech_id, FALSE );
+     { case ACTION_SANS      : gtk_widget_set_sensitive( Entry_clic_tech_id, FALSE );
                                gtk_widget_set_sensitive( Entry_clic_acronyme, FALSE );
                                gtk_widget_set_sensitive( Spin_access_level, FALSE );
                                break;
-       case ACTION_IMMEDIATE : gtk_widget_set_sensitive( Spin_bit_clic, TRUE );
-                               gtk_widget_set_sensitive( Entry_bit_clic, TRUE );
-                               gtk_widget_set_sensitive( Entry_clic_tech_id, TRUE );
+       case ACTION_IMMEDIATE : gtk_widget_set_sensitive( Entry_clic_tech_id, TRUE );
                                gtk_widget_set_sensitive( Entry_clic_acronyme, TRUE );
                                gtk_widget_set_sensitive( Spin_access_level, TRUE );
                                break;
-       case ACTION_CONFIRME  : gtk_widget_set_sensitive( Spin_bit_clic, TRUE );
-                               gtk_widget_set_sensitive( Entry_bit_clic, TRUE );
-                               gtk_widget_set_sensitive( Entry_clic_tech_id, TRUE );
+       case ACTION_CONFIRME  : gtk_widget_set_sensitive( Entry_clic_tech_id, TRUE );
                                gtk_widget_set_sensitive( Entry_clic_acronyme, TRUE );
                                gtk_widget_set_sensitive( Spin_access_level, TRUE );
                                break;
@@ -349,14 +341,11 @@ printf("Changer_couleur %p\n", data);
 
     gtk_entry_set_text( GTK_ENTRY(Entry_libelle), motif->libelle );
 
-    printf("Rafraichir_proprietes1:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_ctrl), motif->bit_controle );
-    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_clic), motif->bit_clic );
     gtk_entry_set_text( GTK_ENTRY(Entry_clic_tech_id), motif->clic_tech_id );
     gtk_entry_set_text( GTK_ENTRY(Entry_clic_acronyme), motif->clic_acronyme );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_rafraich), motif->rafraich );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_access_level), motif->access_level );
-    printf("Rafraichir_proprietes2:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
 
     g_signal_handlers_block_by_func( G_OBJECT( GTK_COMBO_BOX(Combo_gestion) ),
                                      G_CALLBACK( Changer_gestion_motif ), NULL );
@@ -365,7 +354,6 @@ printf("Changer_couleur %p\n", data);
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_INERTE   ) );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_FOND     ) );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_STATIQUE ) );
-    printf("Rafraichir_proprietes3:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
 
     if (trame_motif->nbr_images >= 2)                                    /* Sensibilite des boutons radio */
      { gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_DYNAMIQUE   ) );
@@ -384,7 +372,6 @@ printf("Changer_couleur %p\n", data);
     gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_gestion), motif->type_gestion );
 
     gtk_option_menu_set_history( GTK_OPTION_MENU(Option_dialog_cde), motif->type_dialog );
-    printf("Rafraichir_proprietes8:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
 
     Rafraichir_sensibilite();  /* test 18/01/2006 */
     printf("rafraichir_propriete Oktimer = %d\n", ok_timer );
@@ -400,27 +387,11 @@ printf("Changer_couleur %p\n", data);
               Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );             /* Formatage */
     switch (tag)
      { case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC:
-            gtk_entry_set_text( GTK_ENTRY(Entry_bit_clic), chaine );
             break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CTRL:
             gtk_entry_set_text( GTK_ENTRY(Entry_bit_ctrl), chaine );
             break;
      }
-  }
-/**********************************************************************************************************/
-/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
-/* Entre: widget, data.                                                                                   */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
- static void Afficher_mnemo_clic ( void )
-  { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
-
-    mnemo.type = MNEMO_MONOSTABLE;
-    mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_bit_clic) );
-    Trame_motif->motif->bit_clic = mnemo.num;
-
-    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_TYPE_NUM_MNEMO_CLIC,
-                   (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
 /**********************************************************************************************************/
 /* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
@@ -582,15 +553,6 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
 
     texte = gtk_label_new( _("Action bit (M)") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 4, 5 );
-
-    Spin_bit_clic = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    g_signal_connect( G_OBJECT(Spin_bit_clic), "value-changed",
-                      G_CALLBACK(Afficher_mnemo_clic), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_clic, 1, 2, 4, 5 );
-
-    Entry_bit_clic = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_bit_clic), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_clic, 2, 4, 4, 5 );
 
     texte = gtk_label_new( _("Tech_ID/Acronyme (M)") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 5, 6 );

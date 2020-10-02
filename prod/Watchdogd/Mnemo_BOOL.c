@@ -40,7 +40,7 @@
 /* Entrée: le tech_id, l'acronyme, le libelle                                                                                 */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_BOOL ( gint type, gchar *tech_id, gchar *acronyme, gchar *libelle_src )
+ gboolean Mnemo_auto_create_BOOL ( gboolean deletable, gint type, gchar *tech_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;
     gchar requete[1024];
     gboolean retour;
@@ -63,9 +63,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_BOOL SET type='%d',tech_id='%s',acronyme='%s',libelle='%s' "
+                "INSERT INTO mnemos_BOOL SET deletable='%d', type='%d',tech_id='%s',acronyme='%s',libelle='%s' "
                 "ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), type=VALUES(type)",
-                type, tech_id, acro, libelle );
+                deletable, type, tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);
 

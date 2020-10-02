@@ -162,6 +162,7 @@ CREATE TABLE IF NOT EXISTS `courbes` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_BOOL` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deletable` tinyint(1) NOT NULL DEFAULT '1',
   `type` int(11) NOT NULL DEFAULT 0,
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
@@ -181,6 +182,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_BOOL` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_DI` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deletable` tinyint(1) NOT NULL DEFAULT '1',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
@@ -201,6 +203,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_DI` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_DO` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deletable` tinyint(1) NOT NULL DEFAULT '1',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
@@ -222,6 +225,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_DO` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deletable` tinyint(1) NOT NULL DEFAULT '1',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
@@ -249,6 +253,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_AO` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deletable` tinyint(1) NOT NULL DEFAULT '1',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
@@ -454,7 +459,6 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT '0',
   `bitctrl` int(11) NOT NULL DEFAULT '0',
-  `bitclic` int(11) NOT NULL DEFAULT '0',
   `rafraich` int(11) NOT NULL DEFAULT '0',
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',

@@ -166,7 +166,7 @@
     Partage->com_arch.taille_arch = 0;
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
-    Mnemo_auto_create_AI ( "SYS", "ARCH_REQUEST_NUMBER", "Nb enregistrements dans le tampon d'archivage", "enreg." );
+    Mnemo_auto_create_AI ( FALSE, "SYS", "ARCH_REQUEST_NUMBER", "Nb enregistrements dans le tampon d'archivage", "enreg." );
     Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 0.0, TRUE );
 
     last_delete = Partage->top;

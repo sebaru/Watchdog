@@ -646,7 +646,7 @@ reload:
     if (Dls_auto_create_plugin( Cfg_smsg.tech_id, "Gestion du GSM" ) == FALSE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_smsg.tech_id ); }
 
-    Mnemo_auto_create_DI ( Cfg_smsg.tech_id, "COMM", "Statut de la communication avec le GSM" );
+    Mnemo_auto_create_DI ( FALSE, Cfg_smsg.tech_id, "COMM", "Statut de la communication avec le GSM" );
 
     zmq_msg                = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
     zmq_from_bus           = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );

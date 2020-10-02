@@ -41,7 +41,6 @@
     gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                                 /* "Vanne gaz chaudière" */
     guint   access_level;                                                            /* Nom du groupe d'appartenance du motif */
     gint    bit_controle;                                                                                       /* Ixxx, Cxxx */
-    gint    bit_clic;                                             /* Bit à activer quand on clic avec le bouton gauche souris */
     gchar   clic_tech_id[32];                                                  /* tech id du dls a positionner si clic gauche */
     gchar   clic_acronyme[64];                                                /* acronyme du dls a positionner si clic gauche */
     gint    rafraich;                                                         /* Temps de rafraichissement du motif à l'ecran */
