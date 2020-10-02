@@ -621,7 +621,6 @@ end:
     if (write( fd_lock, strpid, strlen(strpid) )<0)
      { printf( "Cannot write PID on %s/%s (%s)\n", Config.home, VERROU_SERVEUR, strerror(errno) ); }
 
-    Print_config();
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     gcry_check_version(NULL);                                                        /* Initialisation de la librairie GCRYPT */
@@ -670,9 +669,11 @@ end:
        gchar *is_master = Recuperer_configDB_by_nom ( "msrv", "instance_is_master" );
        if (is_master)
         { if (!strcasecmp(is_master,"true")) { Config.instance_is_master = TRUE; }
+                                       else  { Config.instance_is_master = FALSE; }
           g_free(is_master);
         }
 
+       Print_config();
 /************************************* Création des zones de bits internes dynamiques *****************************************/
        Partage->Dls_data_DI     = NULL;
        Partage->Dls_data_DO     = NULL;

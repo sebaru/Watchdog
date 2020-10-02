@@ -74,10 +74,6 @@
 /******************************************************* Partie GLOBAL ********************************************************/
     printf("Using config file %s.\n", Config.config_file );
 
-    chaine = g_key_file_get_string ( gkf, "GLOBAL", "master_host", NULL );
-    if (chaine)
-     { g_snprintf( Config.master_host, sizeof(Config.master_host), "%s", chaine ); g_free(chaine); }
-
     chaine = g_key_file_get_string ( gkf, "GLOBAL", "run_as", NULL );
     if (chaine)
      { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", chaine ); g_free(chaine); }
