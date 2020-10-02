@@ -41,4 +41,4 @@ EXTRA_DIST = Watchdogd.service watchdogd.abls.conf init_db.sql
 MAINTAINERCLEANFILES = Makefile.in
 
 install-data-local:
-	cp -rv IHM $(pkgdatadir)/;	chown -R root.root $(pkgdatadir)/IHM
+	mkdir -p $(pkgdatadir)/IHM; cp -rv IHM/* $(pkgdatadir)/IHM/;	chown -R root.root $(pkgdatadir)/IHM
