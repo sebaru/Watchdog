@@ -345,20 +345,20 @@
 
 /*********************************************************** Compte du client *************************************************/
     if (atoi(db->row[3]) != 1)                                                 /* Est-ce que son compte est toujours actif ?? */
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: User '%s' not enabled",
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: User '%s' not enabled",
                  __func__, db->row[0] );
+       Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
      }
 /*********************************************** Authentification du client par login mot de passe ****************************/
     if ( Http_check_utilisateur_password( db->row[4], Json_get_string ( request, "password" ) ) == FALSE ) /* Comparaison MDP */
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Password error for '%s' (%s)",
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Password error for '%s' (%s)",
                  __func__, db->row[0], db->row[1] );
+       Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
@@ -447,56 +447,54 @@ reload:
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer new Failed !", __func__ );
        goto end;
      }
-    soup_server_add_handler ( socket, "/connect",        Http_traiter_connect, NULL, NULL );
-    soup_server_add_handler ( socket, "/disconnect",     Http_traiter_disconnect, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/list",       Http_traiter_dls_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/source/",    Http_traiter_dls_source, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/del/",       Http_traiter_dls_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/run/" ,      Http_traiter_dls_run, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/run" ,       Http_traiter_dls_run_all, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/debug" ,     Http_traiter_dls_debug, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/undebug",    Http_traiter_dls_undebug, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/start" ,     Http_traiter_dls_start, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/stop" ,      Http_traiter_dls_stop, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/acquitter",  Http_traiter_dls_acquitter, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/compil" ,    Http_traiter_dls_compil, NULL, NULL );
-    soup_server_add_handler ( socket, "/mnemos/validate",Http_traiter_mnemos_validate, NULL, NULL );
-    soup_server_add_handler ( socket, "/mnemos/list",    Http_traiter_mnemos_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/mnemos/set",     Http_traiter_mnemos_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/list",       Http_traiter_syn_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/show/",      Http_traiter_syn_show, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/del/",       Http_traiter_syn_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/get/",       Http_traiter_syn_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/set",        Http_traiter_syn_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/clic/",      Http_traiter_syn_clic, NULL, NULL );
-    soup_server_add_handler ( socket, "/syn/update_motifs", Http_traiter_syn_update_motifs, NULL, NULL );
-    soup_server_add_handler ( socket, "/archive/get/",   Http_traiter_archive_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/process/reload", Http_traiter_process_reload, NULL, NULL );
-    soup_server_add_handler ( socket, "/process/start",  Http_traiter_process_start, NULL, NULL );
-    soup_server_add_handler ( socket, "/process/debug",  Http_traiter_process_debug, NULL, NULL );
-    soup_server_add_handler ( socket, "/process/list",   Http_traiter_process_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/process",        Http_traiter_process, NULL, NULL );
-    soup_server_add_handler ( socket, "/config/get",     Http_traiter_config_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/config/set",     Http_traiter_config_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/config/del",     Http_traiter_config_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/instance/list",  Http_traiter_instance_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/status",         Http_traiter_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/log/get",        Http_traiter_log_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/log",            Http_traiter_log, NULL, NULL );
-    soup_server_add_handler ( socket, "/install",        Http_traiter_install, NULL, NULL );
-    soup_server_add_handler ( socket, "/bus",            Http_traiter_bus, NULL, NULL );
-    soup_server_add_handler ( socket, "/ping",           Http_traiter_ping, NULL, NULL );
-    soup_server_add_handler ( socket, "/tech",           Http_traiter_tech, NULL, NULL );
-    soup_server_add_handler ( socket, "/js",             Http_traiter_file, NULL, NULL );
-    soup_server_add_handler ( socket, "/svg",            Http_traiter_file, NULL, NULL );
-    soup_server_add_handler ( socket, "/users/list",     Http_traiter_users_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/users/kill",     Http_traiter_users_kill, NULL, NULL );
-    soup_server_add_handler ( socket, "/users/sessions", Http_traiter_users_sessions, NULL, NULL );
-    soup_server_add_handler ( socket, "/histo/alive",    Http_traiter_histo_alive, NULL, NULL );
-    soup_server_add_handler ( socket, "/histo/ack",      Http_traiter_histo_ack, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/connect",        Http_traiter_connect, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/disconnect",     Http_traiter_disconnect, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/list",       Http_traiter_dls_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/source/",    Http_traiter_dls_source, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/del/",       Http_traiter_dls_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/run/" ,      Http_traiter_dls_run, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/run" ,       Http_traiter_dls_run_all, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/debug" ,     Http_traiter_dls_debug, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/undebug",    Http_traiter_dls_undebug, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/start" ,     Http_traiter_dls_start, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/stop" ,      Http_traiter_dls_stop, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/acquitter",  Http_traiter_dls_acquitter, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/compil" ,    Http_traiter_dls_compil, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/mnemos/validate",Http_traiter_mnemos_validate, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/mnemos/list",    Http_traiter_mnemos_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/mnemos/set",     Http_traiter_mnemos_set, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/list",       Http_traiter_syn_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/show/",      Http_traiter_syn_show, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/del/",       Http_traiter_syn_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/get/",       Http_traiter_syn_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/set",        Http_traiter_syn_set, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/clic/",      Http_traiter_syn_clic, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/update_motifs", Http_traiter_syn_update_motifs, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/archive/get",    Http_traiter_archive_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/process/reload", Http_traiter_process_reload, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/process/start",  Http_traiter_process_start, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/process/debug",  Http_traiter_process_debug, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/process/list",   Http_traiter_process_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/process",        Http_traiter_process, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/config/get",     Http_traiter_config_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/config/set",     Http_traiter_config_set, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/config/del",     Http_traiter_config_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/instance/list",  Http_traiter_instance_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/log/get",        Http_traiter_log_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/log",            Http_traiter_log, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/install",        Http_traiter_install, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/bus",            Http_traiter_bus, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/ping",           Http_traiter_ping, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/users/list",     Http_traiter_users_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/users/kill",     Http_traiter_users_kill, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/users/sessions", Http_traiter_users_sessions, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/histo/alive",    Http_traiter_histo_alive, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/histo/ack",      Http_traiter_histo_ack, NULL, NULL );
+    soup_server_add_handler ( socket, "/",                   Http_traiter_file, NULL, NULL );
     gchar *protocols[] = { "live-motifs", "live-msgs" };
-    soup_server_add_websocket_handler ( socket, "/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
-    soup_server_add_websocket_handler ( socket, "/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
+    soup_server_add_websocket_handler ( socket, "/api/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
+    soup_server_add_websocket_handler ( socket, "/api/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
 
     if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
      { struct stat sbuf;

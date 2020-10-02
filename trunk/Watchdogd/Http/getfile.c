@@ -43,44 +43,163 @@
 /******************************************************************************************************************************/
  void Http_traiter_file ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                           SoupClientContext *client, gpointer user_data )
-  { struct stat stat_buf;
-    gchar fichier[80];
-    gint fd;
+  { gint fd, taille_header, taille_fichier, taille_footer, taille_result;
+    struct stat stat_buf;
+    gchar fichier[80], header[80], footer[80], *result, *new_result;
+    gboolean has_template;
+
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    /*struct HTTP_CLIENT_SESSION *session = */Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
 
-    g_snprintf ( fichier, sizeof(fichier), "IHM%s", g_strcanon ( path, "abcdefghijklmnopqrstuvwxyz_", '_' ) );
+    g_strcanon ( path, "ABCDEFGIHJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz._/", '_' );
+    gchar *path_to_lower = g_utf8_strdown ( path, -1 );
+    gchar **URI = g_strsplit ( path_to_lower, "/", -1 );
+    g_free(path_to_lower);
 
+    if (!URI)
+     { soup_message_set_redirect ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "URI Split Failed" );
+       return;
+     }
+
+    taille_result = taille_header = taille_footer = 0;
+    result = NULL;
+    has_template = FALSE;
+
+    if (!strcmp(URI[1], "tech"))
+     { g_snprintf ( header, sizeof(header), "%s/IHM/Tech/header.php", WTD_PKGDATADIR );
+       g_snprintf ( footer, sizeof(footer), "%s/IHM/Tech/footer.php", WTD_PKGDATADIR );
+       has_template = TRUE;
+       g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Tech/%s.php", WTD_PKGDATADIR, (URI[2] ? URI[2] : "dashboard") );
+       if (!Config.installed)
+        { g_strfreev(URI);
+          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
+          return;
+        }
+       if (!Http_check_session( msg, session, 6 ))
+        { g_strfreev(URI);
+          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
+          return;
+        }
+     }
+    else if (!strcmp(URI[1], "home" ))
+     { g_snprintf ( header, sizeof(header), "%s/IHM/Home/header.php", WTD_PKGDATADIR );
+       g_snprintf ( footer, sizeof(footer), "%s/IHM/Home/footer.php", WTD_PKGDATADIR );
+       has_template = TRUE;
+       g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Home/%s.php", WTD_PKGDATADIR, URI[2] );
+       if (!Config.installed)
+        { g_strfreev(URI);
+          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
+          return;
+        }
+       if ( !Http_check_session( msg, session, 0 ))
+        { g_strfreev(URI);
+          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
+          return;
+        }
+     }
+    else if (!strcasecmp( URI[1], "install"))
+     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/install.php", WTD_PKGDATADIR ); }
+    else if (!strcasecmp( URI[1], "login"))
+     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/login.php", WTD_PKGDATADIR ); }
+    else if (!strcasecmp( URI[1], "js"))
+     { if (URI[3]) g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s/%s", WTD_PKGDATADIR, URI[2], URI[3] );
+              else g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s", WTD_PKGDATADIR, URI[2] );
+     }
+    else if (!strcasecmp( URI[1], "svg"))
+     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/svg/%s", WTD_PKGDATADIR, URI[2] ); }
+    else
+     { g_strfreev(URI);
+       soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/home/login" );
+       return;
+     }
+    g_strfreev(URI);
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s : Serving file %s", __func__, fichier );
+
+/*--------------------------------------------------- LEcture header ---------------------------------------------------------*/
+    if (has_template)
+     { if (stat (header, &stat_buf)==-1)
+        { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Header Error Stat" );
+          return;
+        }
+       taille_header = stat_buf.st_size;
+       taille_result += stat_buf.st_size;
+       new_result = g_try_realloc ( result, taille_result );
+       if (!new_result)
+        { g_free(result);
+          soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Header Memory Error" );
+          return;
+        } else result = new_result;
+       fd = open ( header, O_RDONLY );
+       if (fd==-1)
+        { g_free(result);
+          soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Header File Open Error" );
+          return;
+        }
+       read ( fd, result, taille_header );
+       close(fd);
+     }
+
+/*--------------------------------------------------- Lecture fichier --------------------------------------------------------*/
     if (stat (fichier, &stat_buf)==-1)
      { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Error Stat" );
-       return;
-     }
-    gint taille_fichier = stat_buf.st_size;
-
-    gchar *result = g_try_malloc0 ( taille_fichier );
-    if (!result)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
+       g_free(result);
        return;
      }
 
-    fd = open (fichier, O_RDONLY );
+    taille_fichier = stat_buf.st_size;
+    taille_result += stat_buf.st_size;
+    new_result = g_try_realloc ( result, taille_result );
+    if (!new_result)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : File '%s' Realloc error", __func__, fichier );
+       g_free(result);
+       soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
+       return;
+     } else result = new_result;
+
+   fd = open ( fichier, O_RDONLY );
     if (fd==-1)
-     { g_free(result);
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : File '%s' open error '%s'", __func__, fichier, strerror(errno) );
+       g_free(result);
        soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "File Open Error" );
        return;
      }
-    read ( fd, &result, taille_fichier );
+    read ( fd, result + taille_header, taille_fichier );
     close(fd);
 
+/*--------------------------------------------------- LEcture footer ---------------------------------------------------------*/
+    if (has_template)
+     { if (stat (footer, &stat_buf)==-1)
+        { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Footer Error Stat" );
+          return;
+        }
+       taille_footer = stat_buf.st_size;
+       taille_result += stat_buf.st_size;
+       new_result = g_try_realloc ( result, taille_result );
+       if (!new_result)
+        { g_free(result);
+          soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Footer Memory Error" );
+          return;
+        } else result = new_result;
+       fd = open ( footer, O_RDONLY );
+       if (fd==-1)
+        { g_free(result);
+          soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Footer File Open Error" );
+          return;
+        }
+       read ( fd, result + taille_header + taille_fichier, taille_footer );
+       close(fd);
+     }
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
          if ( !strncasecmp (path, "/js/", strlen("/js/") ) )
-     { soup_message_set_response ( msg, "text/javascript; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_fichier ); }
+     { soup_message_set_response ( msg, "text/javascript; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
     else if ( !strncasecmp (path, "/svg/", strlen("/svg/") ) )
-     { soup_message_set_response ( msg, "image/svg+xml; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_fichier ); }
+     { soup_message_set_response ( msg, "image/svg+xml; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
+    else
+     { soup_message_set_response ( msg, "text/html; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

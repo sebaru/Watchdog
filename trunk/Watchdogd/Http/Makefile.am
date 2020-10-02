@@ -19,4 +19,5 @@ libwatchdog_server_http_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 js
                                           `mysql_config --cflags`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
-            -I$(top_srcdir)/Watchdogd/Include
+            -I$(top_srcdir)/Watchdogd/Include \
+            -DWTD_PKGDATADIR=\"$(pkgdatadir)\"

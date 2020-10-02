@@ -103,6 +103,7 @@
                    "`watchdog` int(11) NOT NULL,"
                    "PRIMARY KEY (`id`)"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
+       goto end;
      }
 
     if (database_version < 4920)
@@ -112,7 +113,7 @@
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_A`" );
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_AA`" );
      }
-
+end:
     Modifier_configDB ( "modbus", "database_version", WTD_DB_VERSION );
   }
 /******************************************************************************************************************************/
