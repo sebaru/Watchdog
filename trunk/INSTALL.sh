@@ -38,6 +38,19 @@ if [ "$SOCLE" = "debian" ]
   apt install -y libgtk-3-dev libsoup2.4-dev libgoocanvas-2.0-dev
 fi
 
+    if [ "$SOCLE" = "fedora" ]
+     then dnf -y install mariadb-server
+    fi
+    if [ "$SOCLE" = "debian" ]
+     then apt -y install mariadb-server
+	   mysql_install_db
+    fi
+    systemctl restart mariadb
+
+    NEWPASSWORD=`openssl rand -base64 32`
+    /usr/bin/mysqladmin -u root create WatchdogDB
+    echo "CREATE USER 'watchdog' IDENTIFIED BY '$NEWPASSWORD'; GRANT ALL PRIVILEGES ON WatchdogDB.* TO watchdog; FLUSH PRIVILEGES; " | mysql -u root WatchdogDB
+
 svn co https://svn.abls-habitat.fr/repo/Watchdog/prod watchdogabls
 cd watchdogabls
 echo "Compiling and installing"
@@ -47,6 +60,8 @@ cd ..
 rm -rf watchdogabls
 systemctl daemon-reload
 
+    echo "La base de données 'WatchdogDB' a été crée, ainsi que l'utilisateur 'watchdog'."
+    echo "Son mot de passe est "$NEWPASSWORD
     echo "Le point d'accès pour poursuivre l'installation est http://"`hostname`":5560/install"
 
 systemctl restart Watchdogd
