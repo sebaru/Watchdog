@@ -113,7 +113,7 @@
      { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/svg/%s", WTD_PKGDATADIR, URI[2] ); }
     else
      { g_strfreev(URI);
-       soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/home/login" );
+       soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
        return;
      }
     g_strfreev(URI);
