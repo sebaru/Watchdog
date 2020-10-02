@@ -3,9 +3,11 @@
 SOCLE=`grep "^ID" /etc/os-release | cut -f 2 -d '='`
 USER=`whoami`
 
+
 if [ "$SOCLE" = "fedora" ]
  then
   echo "Installing Fedora dependencies"
+  dnf update
   dnf install -y subversion libtool automake autoconf gcc gcc-c++ redhat-rpm-config
   dnf install -y glib2-devel bison flex readline-devel giflib-devel libgcrypt-devel
   dnf install -y libcurl-devel nut-devel mariadb-devel zeromq-devel libuuid-devel
