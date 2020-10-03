@@ -109,12 +109,8 @@
      { if (URI[3]) g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s/%s", WTD_PKGDATADIR, URI[2], URI[3] );
               else g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s", WTD_PKGDATADIR, URI[2] );
      }
-    else if (!strcasecmp( URI[1], "svg"))
-     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/svg/%s", WTD_PKGDATADIR, URI[2] ); }
-    else if (!strcasecmp( URI[1], "jpg"))
-     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/jpg/%s", WTD_PKGDATADIR, URI[2] ); }
-    else if (!strcasecmp( URI[1], "webp"))
-     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/webp/%s", WTD_PKGDATADIR, URI[2] ); }
+    else if (!strcasecmp( URI[1], "img"))
+     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/img/%s", WTD_PKGDATADIR, URI[2] ); }
     else
      { g_strfreev(URI);
        soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
@@ -199,13 +195,13 @@
      }
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
-         if ( !strncasecmp (path, "/js/", strlen("/js/") ) )
+         if ( g_str_has_suffix (path, ".js") )
      { soup_message_set_response ( msg, "text/javascript; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
-    else if ( !strncasecmp (path, "/svg/", strlen("/svg/") ) )
+    else if ( g_str_has_suffix (path, ".svg") )
      { soup_message_set_response ( msg, "image/svg+xml; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
-    else if ( !strncasecmp (path, "/jpg/", strlen("/jpg/") ) )
+    else if ( g_str_has_suffix (path, ".jpg") )
      { soup_message_set_response ( msg, "image/jpeg; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
-    else if ( !strncasecmp (path, "/webp/", strlen("/webp/") ) )
+    else if ( g_str_has_suffix (path, ".webp") )
      { soup_message_set_response ( msg, "image/webp; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
     else
      { soup_message_set_response ( msg, "text/html; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }

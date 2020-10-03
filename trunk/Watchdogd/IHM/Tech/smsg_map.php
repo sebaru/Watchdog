@@ -1,13 +1,16 @@
 <div class="container-fluid">
 
  <div class="row m-2">
- <h3>Mapping des Entrées SMS via GSM</h3>
+   <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Mapping des Entrées SMS via GSM</h3>
 
-   <div class ="ml-auto btn-group">
+   <div class ="ml-auto btn-group align-items-start">
+        <button type="button" onclick="Show_Modal_Map_Edit_DI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping GSM</button>
         <button type="button" onclick="Redirect('/tech/smsg')" class="btn btn-primary"><i class="fas fa-list"></i> Liste GSM</button>
         <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
    </div>
  </div>
+
+<hr>
 
    <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
      <h4 class="alert-heading">Warning !</h4>
@@ -15,12 +18,6 @@
    </div>
 
 <!----------------------------------------------------------------------------------------------------------------------------->
-
- <div class="row m-2">
-   <div class ="ml-auto btn-group">
-        <button type="button" onclick="Show_Modal_Map_Edit_DI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping GSM</button>
-   </div>
- </div>
 
     <table id="idTableGSM" class="table table-striped table-bordered table-hover">
       <thead class="thead-dark">

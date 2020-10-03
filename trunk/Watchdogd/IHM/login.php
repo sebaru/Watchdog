@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="google" content="notranslate">
         <meta name="robots" content="noindex, nofollow">
-        <link rel="icon" href="/svg/logo.svg">
+        <link rel="icon" href="/img/logo.svg">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
         <script src="https://kit.fontawesome.com/1ca1f7ba56.js" crossorigin="anonymous"></script>
         <style>
@@ -77,7 +77,7 @@
 		<div class="card">
 			<div class="card-header">
      <div class="row">
-       <img class="col-4" src="/svg/logo.svg" alt="Watchdog Logo">
+       <img class="col-4" src="/img/logo.svg" alt="Watchdog Logo">
        <h4 class="col-8 align-self-center text-center wtd_title">Connexion</h4>
      </div>
 			</div>

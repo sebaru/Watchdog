@@ -1,14 +1,16 @@
 <div class="container-fluid">
 
  <div class="row m-2">
- <h3>Mapping des I/O Wago sur Modbus</h3>
+   <h3><img src="/img/wago_750342.webp" style="width:80px" alt="Wago 750-342">Mapping des I/O Wago sur Modbus</h3>
 
-   <div class ="ml-auto btn-group">
+   <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Redirect('/tech/modbus')" class="btn btn-primary"><i class="fas fa-list"></i> Liste WAGO</button>
         <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
         <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>
+
+<hr>
 
    <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
      <h4 class="alert-heading">Warning !</h4>

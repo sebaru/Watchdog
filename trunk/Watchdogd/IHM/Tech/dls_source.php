@@ -1,9 +1,9 @@
 <div class="container-fluid">
 
  <div class="row m-2">
-   <h3>Edition du module D.L.S - '<strong id="idSourceTitle"></strong>'</h3>
+   <h3><i class="fas fa-code text-primary"></i> Edition du module D.L.S - '<strong id="idSourceTitle"></strong>'</h3>
 
-   <div class ="ml-auto btn-group">
+   <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Compiler()" class="btn btn-outline-success"><i class="fas fa-coffee"></i> Compiler</button>
         <button type="button" onclick="Go_to_run()"class="btn btn-info"><i class="fas fa-eye"></i> RUN</button>
         <button type="button" onclick="Go_to_mnemos()" class="btn btn-primary"><i class="fas fa-book"></i> Mnemos</button>
@@ -12,6 +12,7 @@
    </div>
  </div>
 
+<hr>
      <div class="row m-1">
        <div id="idErrorLog" class="col-12 alert alert-info" role="alert">
          <!--<h6 class="text-center">Résultat de compilation</h6>-->

@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="google" content="notranslate">
         <meta name="robots" content="noindex, nofollow">
-        <link rel="icon" href="/svg/logo.svg">
+        <link rel="icon" href="/img/logo.svg">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.21/fh-3.1.7/r-2.2.5/datatables.min.css"/>
         <style>
@@ -81,7 +81,7 @@
 
 <header>
 	<nav class="navbar navbar-dark  navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
-  <a class="navbar-brand" href="/"><img src="/svg/logo.svg" alt="Watchdog Logo" width=50></a>
+  <a class="navbar-brand" href="/"><img src="/img/logo.svg" alt="Watchdog Logo" width=50></a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
