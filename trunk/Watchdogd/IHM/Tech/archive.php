@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container">
 
  <div class="row m-2">
    <h3><i class="fas fa-database text-secondary"></i> Paramétrage des Archives</h3>
@@ -75,14 +75,20 @@
   					</div>
 
 <hr>
+
  <h3>Gestion des tables d'archivage</h3>
 
-    <table id="idTableArchive" class="table table-striped table-bordered table-hover">
+    <table id="idTableArchive" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
 				  </thead>
 			   <tbody>
       </tbody>
     </table>
+
+<hr>
+  <div class="row m-1">
+    <canvas id="idCourbeNbArchive" class="col m-1 border border-info"></canvas>
+  </div>
 
 <!-- Container -->
 </div>

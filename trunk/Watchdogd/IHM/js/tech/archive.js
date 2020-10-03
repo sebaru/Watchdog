@@ -101,4 +101,6 @@
        }
      );
 
+    Charger_une_courbe ( "idCourbeNbArchive", "SYS", "ARCH_REQUEST_NUMBER", "HOUR" );
+
   }

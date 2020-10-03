@@ -180,7 +180,7 @@
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="/tech/users_list"><i class="fas fa-users-cog text-info"></i> <span>Gestion des utilisateurs</span></a>
           <a class="dropdown-item" href="/tech/users_sessions"><i class="fas fa-list text-info"></i> <span>Gestion des sessions</span></a>
-          <a class="dropdown-item" href="/tech/log"><i class="fas fa-database text-warning"></i> <span>Audit Log</span></a>
+          <a class="dropdown-item" href="/tech/log"><i class="fas fa-binoculars text-warning"></i> <span>Audit Log</span></a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="/home/synmobile/1"><i class="fas fa-home text-primary"></i> <span>Mode Client</span> </a>
           <div class="dropdown-divider"></div>

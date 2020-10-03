@@ -2,11 +2,12 @@
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Load_log ()
-  { console.log ("in load log !");
-    $('#idTableLog').DataTable(
+  { $('#idTableLog').DataTable(
        { pageLength : 25,
          fixedHeader: true,
-         ajax: {	url : "/api/log/get",	type : "GET", dataSrc: "logs" },
+         ajax: {	url : "/api/log/get",	type : "GET", dataSrc: "logs",
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
          columns: [ { "data": "date", "title":"Date" },
                     { "data": "access_level", "title": "Level" },
                     { "data": "username", "title": "Username" },
