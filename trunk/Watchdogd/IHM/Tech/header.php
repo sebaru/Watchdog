@@ -152,20 +152,9 @@
         </div>
       </li>
 
-      <a class="nav-link rounded" href="https://icons.abls-habitat.fr/admin/icons"><i class="fas fa-file-photo-o"></i> <span>Gestion des Icones</span></a>
+        <a class="nav-link rounded" href="https://icons.abls-habitat.fr/admin/icons"><i class="fas fa-file-photo-o"></i> <span>Gestion des Icones</span></a>
+        <a class="nav-link rounded" href="/tech/io_config"><i class="fas fa-cogs"></i> <span>Entrées/Sorties</span></a>
 
-      <li class="nav-item dropdown">
-        <a class="nav-link rounded dropdown-toggle" href="#" id="navbarIO" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fas fa-cogs"></i> IO Threads
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarIO">
-          <a class="dropdown-item" href="/tech/modbus"> <i class="fas fa-plug text-info"></i> <span>Modules Wago/Modbus</span> </a>
-          <a class="dropdown-item" href="/tech/modbus_map"> <i class="fas fa-directions text-info"></i> <span>Mappings Wago/Modbus</span> </a>
-          <a class="dropdown-item" href="/tech/ups"> <i class="fas fa-battery-half text-success"></i> <span>Onduleurs</span> </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Something else here</a>
-        </div>
-      </li>
     </ul>
 
     <ul class="navbar-nav">

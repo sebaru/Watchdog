@@ -4,7 +4,8 @@
  <h3>Mapping des I/O Wago sur Modbus</h3>
 
    <div class ="ml-auto btn-group">
-        <button type="button" onclick="window.location='/tech/modbus'" class="btn btn-secondary"><i class="fas fa-list"></i> Retour Liste</button>
+        <button type="button" onclick="window.location='/tech/modbus'" class="btn btn-primary"><i class="fas fa-list"></i> Liste WAGO</button>
+        <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
         <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>
