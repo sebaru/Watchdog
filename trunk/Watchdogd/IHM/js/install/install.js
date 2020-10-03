@@ -18,5 +18,10 @@
 
     Send_to_API ( 'POST', "/api/install", JSON.stringify(json_request), function()
      { setTimeout ( function () { window.location = "/"; }, 5000 );
+     }, function()
+     { setTimeout ( function ()
+        { $('#idSpinner').hide();
+          $('#idAction').text("Installer !")
+        }, 2000 );
      });
 	 }

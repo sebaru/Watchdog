@@ -85,7 +85,7 @@
          columns:
           [ { "data": null, "title":"Thread", "className": "text-center",
               "render": function (item)
-                { return( Lien ( "/tech/process/"+item.thread, "Voir la conf du thread "+item.thread, item.thread ) ); }
+                { return( Lien ( "/tech/"+item.thread, "Voir la conf du thread "+item.thread, item.thread ) ); }
             },
             { "data": null, "title":"Started",
               "render": function (item)

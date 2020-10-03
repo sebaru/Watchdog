@@ -145,7 +145,7 @@
 
 /*--------------------------------------------------- Lecture fichier --------------------------------------------------------*/
     if (stat (fichier, &stat_buf)==-1)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Error Stat" );
+     { soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/tech/dashboard" );
        g_free(result);
        return;
      }
