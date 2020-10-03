@@ -174,11 +174,11 @@
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_instance_list: Fourni une list JSON des instances Watchdog dans le domaine                                    */
+/* Admin_arch_set: Configure le thread d'archivage                                                                            */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_arch_thread_set ( SoupMessage *msg )
+ static void Admin_arch_set ( SoupMessage *msg )
   { GBytes *request_brute;
     gsize taille;
 
@@ -233,11 +233,11 @@
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_instance_list: Fourni une list JSON des instances Watchdog dans le domaine                                    */
+/* Admin_arch_status: Fourni le statut du thread d'archivage                                                                  */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_arch_thread_status ( SoupMessage *msg )
+ static void Admin_arch_status ( SoupMessage *msg )
   { JsonBuilder *builder;
     gsize taille_buf;
     gchar *buf;
@@ -311,8 +311,8 @@
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
-         if (!strcasecmp(path, "thread_status")) { Admin_arch_thread_status ( msg ); }
-    else if (!strcasecmp(path, "thread_set"))    { Admin_arch_thread_set   ( msg ); }
+         if (!strcasecmp(path, "status")) { Admin_arch_status ( msg ); }
+    else if (!strcasecmp(path, "set"))    { Admin_arch_set   ( msg ); }
     else if (!strcasecmp(path, "table_status"))  { Admin_arch_table_status ( msg ); }
     else if (!strcasecmp(path, "del"))    { Admin_arch_del    ( msg ); }
     else if (!strcasecmp(path, "clear"))  { Admin_arch_clear  ( msg ); }

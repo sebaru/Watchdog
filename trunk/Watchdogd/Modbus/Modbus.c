@@ -68,10 +68,6 @@
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_modbus.lib->Thread_debug = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "nbr_request_par_sec" ) )
         { Cfg_modbus.nbr_request_par_sec = atoi(valeur);  }
-       else
-        { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
-                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
-        }
      }
     return(TRUE);
   }

@@ -68,7 +68,7 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_modbus_thread_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_modbus_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   { JsonBuilder *builder;
     gsize taille_buf;
     gchar *buf;
@@ -618,7 +618,7 @@ end:
      }
          if (!strcasecmp(path, "/list"))     { Admin_json_modbus_list ( lib, msg ); }
     else if (!strcasecmp(path, "/modules_status")) { Admin_json_modbus_modules_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/thread_status")) { Admin_json_modbus_thread_status ( lib, msg ); }
+    else if (!strcasecmp(path, "/status"))   { Admin_json_modbus_status ( lib, msg ); }
     else if (!strcasecmp(path, "/del"))      { Admin_json_modbus_del ( lib, msg ); }
     else if (!strcasecmp(path, "/set"))      { Admin_json_modbus_set ( lib, msg ); }
     else if (!strcasecmp(path, "/add"))      { Admin_json_modbus_add ( lib, msg ); }

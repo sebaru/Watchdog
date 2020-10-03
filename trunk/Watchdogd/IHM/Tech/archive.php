@@ -8,7 +8,7 @@
         <button type="button" onclick="Archive_testdb()" class="btn btn-outline-info"><i class="fas fa-question"></i> TestDB</button>
         <button type="button" onclick="Archive_purge()" class="btn btn-outline-warning"><i class="fas fa-history"></i> Purge</button>
         <button type="button" onclick="Archive_clear()" class="btn btn-outline-danger"><i class="fas fa-eraser"></i> Clear</button>
-        <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-list"></i> Retour Liste</button>
+        <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-list"></i> Liste Processus</button>
    </div>
  </div>
 

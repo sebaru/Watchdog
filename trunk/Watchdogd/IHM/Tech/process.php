@@ -1,7 +1,7 @@
 <div class="container-fluid">
 
  <div class="row m-2">
- <h3>Liste des Processus sur <strong id='idTitleProcessus'></strong></h3>
+ <h3>Liste des Processus sur <strong id='idTitleInstance'></strong></h3>
 
  </div>
 

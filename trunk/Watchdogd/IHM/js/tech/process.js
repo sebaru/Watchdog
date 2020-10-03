@@ -73,7 +73,7 @@
  function Load_page ()
   { console.log ("in load process !");
 
-    $('#idTitleProcessus').text(Get_locale_instance());
+    $('#idTitleInstance').text(Get_locale_instance());
 
     $('#idTableProcess').DataTable(
        { pageLength : 25,

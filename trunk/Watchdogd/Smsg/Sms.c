@@ -50,30 +50,27 @@
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_smsg.lib->Thread_debug = FALSE;                                                        /* Settings default parameters */
-    g_snprintf( Cfg_smsg.smsbox_apikey, sizeof(Cfg_smsg.smsbox_apikey), "%s", DEFAUT_SMSBOX_APIKEY );
-    g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "GSM01" );
+    Creer_configDB ( NOM_THREAD, "tech_id",       "GSM01" );
+    Creer_configDB ( NOM_THREAD, "smsbox_apikey", "changeme" );
+    Creer_configDB ( NOM_THREAD, "description",   "Ou est le téléphone ?" );
+    Creer_configDB ( NOM_THREAD, "debug",         "false" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
-                "%s: Database connexion failed. Using Default Parameters", __func__ );
+     { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Database connexion failed.", __func__ );
        return(FALSE);
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,                                            /* Print Config */
-                "%s: '%s' = %s", __func__, nom, valeur );
-            if ( ! g_ascii_strcasecmp ( nom, "smsbox_apikey" ) )
+     {      if ( ! g_ascii_strcasecmp ( nom, "smsbox_apikey" ) )
         { g_snprintf( Cfg_smsg.smsbox_apikey, sizeof(Cfg_smsg.smsbox_apikey), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
         { g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "description" ) )
+        { g_snprintf( Cfg_smsg.description, sizeof(Cfg_smsg.description), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_smsg.lib->Thread_debug = TRUE;  }
-       else
-        { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
-                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
-        }
      }
+
     return(TRUE);
   }
 /******************************************************************************************************************************/
