@@ -31,7 +31,7 @@
 
 <!------------------------------------------------- Modal Edit Digital Input -------------------------------------------------->
 <div id="idModalEditDI" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+  <div class="modal-dialog modal-dialog-centered " role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
         <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalEditTitre"></span></h5>
@@ -47,16 +47,18 @@
 						     <div class="input-group-prepend">
 							     <span class="input-group-text">GSM Tech_ID</span>
 						     </div>
-						     <input id="idModalEditGSMTechID" type="text" class="form-control" placeholder="GSM Tech_id">
+						     <select id="idModalEditGSMTechID" class="custom-select"></select>
      					</div>
    					</div>
+  					</div>
 
+       <div class="row">
         <div class="col form-group">
 					     <div class="input-group">
 						     <div class="input-group-prepend">
-							     <span class="input-group-text">SMS</span>
+							     <span class="input-group-text">Commande SMS</span>
 						     </div>
-						     <input id="idModalEditGSMTag" type="text" class="form-control" placeholder="commande SMS">
+						     <input id="idModalEditGSMTag" type="text" class="form-control" placeholder="Commande SMS">
      					</div>
    					</div>
   					</div>
@@ -71,7 +73,9 @@
      					</div>
           <small id="idModalEditTechIDPropose"></small>
    					</div>
+  					</div>
 
+       <div class="row">
         <div class="col form-group">
 					     <div class="input-group">
 						     <div class="input-group-prepend">

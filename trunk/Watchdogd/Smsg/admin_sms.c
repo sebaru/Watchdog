@@ -211,7 +211,7 @@
      }
 
     gchar *map_tech_id = Normaliser_as_tech_id ( Json_get_string( request, "map_tech_id" ) );
-    gchar *map_tag     = Normaliser_as_tech_id ( Json_get_string( request, "map_tag" ) );
+    gchar *map_tag     = Normaliser_chaine     ( Json_get_string( request, "map_tag" ) );
     gchar *tech_id     = Normaliser_as_tech_id ( Json_get_string( request, "tech_id" ) );
     gchar *acronyme    = Normaliser_as_tech_id ( Json_get_string( request, "acronyme" ) );
 
@@ -225,6 +225,7 @@
     g_snprintf( requete, sizeof(requete),
                 "UPDATE mnemos_DI SET map_thread='SMSG', map_tech_id='%s', map_tag='%s' "
                 " WHERE tech_id='%s' AND acronyme='%s';", map_tech_id, map_tag, tech_id, acronyme );
+    g_free(map_tag);
 
     if (SQL_Write (requete))
      { soup_message_set_status (msg, SOUP_STATUS_OK);

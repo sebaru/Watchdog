@@ -141,7 +141,7 @@
   { GBytes *request_brute;
     gsize taille;
 
-    if (msg->method != SOUP_METHOD_PUT)
+    if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -203,7 +203,7 @@
   { GBytes *request_brute;
     gsize taille;
 
-    if (msg->method != SOUP_METHOD_PUT)
+    if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -273,7 +273,7 @@
   { GBytes *request_brute;
     gsize taille;
 
-    if (msg->method != SOUP_METHOD_PUT)
+    if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }

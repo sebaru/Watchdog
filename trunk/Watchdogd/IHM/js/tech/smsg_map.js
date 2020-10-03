@@ -42,7 +42,7 @@
          tech_id    : $('#idModalEditDI #idModalEditTechID').val().toUpperCase(),
          acronyme   : $('#idModalEditDI #idModalEditAcronyme').val().toUpperCase(),
          map_tech_id: $('#idModalEditDI #idModalEditGSMTechID').val().toUpperCase(),
-         map_tag    : $('#idModalEditDI #idModalEditGSMTag').val().toUpperCase(),
+         map_tag    : $('#idModalEditDI #idModalEditGSMTag').val(),
        }
      );
     Send_to_API ( 'POST', "/api/process/smsg/map/set", json_request, function ()
@@ -126,28 +126,37 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Edit_DI ( id )
   { if (id>0)
-     { table = $('#idTableGSMMapDI').DataTable();
+     { table = $('#idTableGSM').DataTable();
        selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-       $('#idModalEditDI #idModalEditTitre').text ( "Editer MAP DI - " + selection.map_tech_id + ":" + selection.map_tag );
+       $('#idModalEditDI #idModalEditTitre').text ( "Editer MAP GSM" );
        $('#idModalEditDI #idModalEditTechID').val ( selection.tech_id );
        $('#idModalEditDI #idModalEditAcronyme').val ( selection.acronyme );
-       $('#idModalEditDI #idModalEditGSMTechID').val  ( selection.map_tech_id );
-       $('#idModalEditDI #idModalEditGSMTechID').attr ( "readonly", true );
        $('#idModalEditDI #idModalEditGSMTag').val     ( selection.map_tag );
-       $('#idModalEditDI #idModalEditGSMTag').attr ( "readonly", true );
+       $('#idModalEditDI #idModalEditGSMTag').attr ( "readonly", false );
        $('#idModalEditDI #idModalEditValider').attr( "onclick", "Valider_Edit_DI()" );
+       Send_to_API ( "GET", "/api/process/smsg/list", null, function (Response)
+        { $('#idModalEditGSMTechID').empty();
+          $.each ( Response.gsms, function ( i, gsm )
+           { $('#idModalEditGSMTechID').append("<option value='"+gsm.map_tech_id+"'"+
+                                                (gsm.map_tech_id == selection.map_tech_id ? "selected" : "")+">"+
+                                                 gsm.map_tech_id+"</option>"); } );
+        });
      }
     else
      { $('#idModalEditDI #idModalEditTitre').text ( "Ajouter un mapping DI" );
        $('#idModalEditDI #idModalEditTechID').val ( '' );
        $('#idModalEditDI #idModalEditAcronyme').val ( '' );
-       $('#idModalEditDI #idModalEditGSMTechID').val  ( '' );
-       $('#idModalEditDI #idModalEditGSMTechID').attr ( "readonly", false );
        $('#idModalEditDI #idModalEditGSMTag').val     ( '' );
        $('#idModalEditDI #idModalEditGSMTag').attr ( "readonly", false );
        $('#idModalEditDI #idModalEditValider').attr( "onclick", "Valider_Edit_DI()" );
+       Send_to_API ( "GET", "/api/process/smsg/list", null, function (Response)
+        { $('#idModalEditGSMTechID').empty();
+          $.each ( Response.gsms, function ( i, gsm )
+           { $('#idModalEditGSMTechID').append("<option value='"+gsm.map_tech_id+"'>"+gsm.map_tech_id+"</option>"); } );
+        });
      }
     Modal_Edit_Input_Changed('idModalEditDI');
+
     $('#idModalEditDI').modal("show");
   }
 /********************************************* Appelé au chargement de la page ************************************************/

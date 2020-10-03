@@ -28,7 +28,7 @@
      { document.getElementById("idUsername").innerHTML = localStorage.getItem("username");
        document.getElementById("idHrefUsername").href = "/tech/user/"+localStorage.getItem("username");
      }
-    $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+    /*$("body").tooltip({ selector: '[data-toggle=tooltip]' });*/
   }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Logout ()
