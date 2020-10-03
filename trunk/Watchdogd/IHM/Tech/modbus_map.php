@@ -493,4 +493,4 @@
   </div>
 </div>
 
-<script src="/js/modbus_map.js" type="text/javascript"></script>
+<script src="/js/tech/modbus_map.js" type="text/javascript"></script>
