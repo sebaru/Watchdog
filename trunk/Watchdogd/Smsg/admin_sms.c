@@ -66,6 +66,42 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /******************************************************************************************************************************/
+/* Admin_json_smsg_map_list: Liste tous les mappings SMS/GSM                                                                  */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ static void Admin_json_smsg_map_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { JsonBuilder *builder;
+    gchar *buf, chaine[512];
+    gsize taille_buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM mnemos_DI WHERE map_thread='SMSG'" );
+    if (SQL_Select_to_JSON ( builder, "mappings", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
+
+    buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+
+/******************************************************************************************************************************/
 /* Admin_json_smsg_set: Configure le thread SMSG                                                                              */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
@@ -110,6 +146,95 @@
     Lib->Thread_reload = TRUE;
   }
 /******************************************************************************************************************************/
+/* Admin_json_smsg_list: Liste les GSM disponibles                                                                            */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Admin_json_smsg_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { JsonBuilder *builder;
+    gchar *buf, chaine[512];
+    gsize taille_buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(m.map_tech_id) FROM mnemos_DI AS m WHERE map_thread='SMSG'" );
+    if (SQL_Select_to_JSON ( builder, "gsms", chaine ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       g_object_unref(builder);
+       return;
+     }
+
+    buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Admin_json_smsg_map_set: Ajoute un mapping SMS sur un bit interne                                                          */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ static void Admin_json_smsg_map_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { GBytes *request_brute;
+    gsize taille;
+    gchar requete[512];
+
+    if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
+       return;
+     }
+
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+            Json_has_member ( request, "map_tech_id" ) && Json_has_member ( request, "map_tag" )
+           ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       json_node_unref(request);
+       return;
+     }
+
+    gchar *map_tech_id = Normaliser_as_tech_id ( Json_get_string( request, "map_tech_id" ) );
+    gchar *map_tag     = Normaliser_as_tech_id ( Json_get_string( request, "map_tag" ) );
+    gchar *tech_id     = Normaliser_as_tech_id ( Json_get_string( request, "tech_id" ) );
+    gchar *acronyme    = Normaliser_as_tech_id ( Json_get_string( request, "acronyme" ) );
+
+
+    g_snprintf( requete, sizeof(requete),
+                "UPDATE mnemos_DI SET map_thread=NULL, map_tech_id=NULL, map_tag=NULL "
+                " WHERE map_tech_id='%s' AND map_tag='%s';", map_tech_id, map_tag );
+
+    SQL_Write (requete);
+
+    g_snprintf( requete, sizeof(requete),
+                "UPDATE mnemos_DI SET map_thread='SMSG', map_tech_id='%s', map_tag='%s' "
+                " WHERE tech_id='%s' AND acronyme='%s';", map_tech_id, map_tag, tech_id, acronyme );
+
+    if (SQL_Write (requete))
+     { soup_message_set_status (msg, SOUP_STATUS_OK);
+       Lib->Thread_reload = TRUE;
+     }
+    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+
+    json_node_unref(request);
+  }
+/******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
@@ -119,7 +244,10 @@
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
-         if (!strcasecmp(path, "/status")) { Admin_json_smsg_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/set"))    { Admin_json_smsg_set ( lib, msg ); }
+         if (!strcasecmp(path, "/status"))   { Admin_json_smsg_status ( lib, msg ); }
+    else if (!strcasecmp(path, "/set"))      { Admin_json_smsg_set ( lib, msg ); }
+    else if (!strcasecmp(path, "/map/list")) { Admin_json_smsg_map_list ( lib, msg ); }
+    else if (!strcasecmp(path, "/map/set"))  { Admin_json_smsg_map_set ( lib, msg ); }
+    else if (!strcasecmp(path, "/list"))     { Admin_json_smsg_list ( lib, msg ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

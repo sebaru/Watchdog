@@ -170,7 +170,7 @@
          acronyme   : $('#'+target+' #idModalEditAcronyme').val().toUpperCase(),
        }
      );
-    Send_to_API ( "POST", "/api/mnemos/validate", json_request, function (Response)
+    Send_to_API ( "PUT", "/api/mnemos/validate", json_request, function (Response)
      { var tech_id_found=false, tech_id_propose="";
        var acronyme_found=false, acronyme_propose="";
 

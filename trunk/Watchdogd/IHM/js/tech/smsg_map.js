@@ -2,23 +2,15 @@
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_GSM_Del ( type, map_tech_id, map_tag )
-  { var xhr = new XMLHttpRequest;
-    xhr.open('DELETE', "/api/process/modbus/map/del" );
-    var json_request = JSON.stringify(
+  { var json_request = JSON.stringify(
        { classe     : type,
          map_tech_id: map_tech_id,
          map_tag    : map_tag
        }
      );
-    xhr.onreadystatechange = function( )
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status == 200)
-        { $('#idTableGSMMap'+type).DataTable().ajax.reload(null, false);
-          $('#idToastStatus').toast('show');
-        }
-       else { Show_Error( xhr.statusText ); }
-     };
-    xhr.send(json_request);
+    Send_to_API ( "DELETE", "/api/process/smsg/map/del", function(Response)
+     { $('#idTableGSM'+type).DataTable().ajax.reload(null, false);
+     }, null );
   }
 
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -36,7 +28,7 @@
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Del_DI ( id )
-  { table = $('#idTableGSMMapDI').DataTable();
+  { table = $('#idTableGSM').DataTable();
     selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
     Show_Modal_Map_Del ( "DI", selection )
   }
@@ -54,7 +46,7 @@
        }
      );
     Send_to_API ( 'POST', "/api/process/smsg/map/set", json_request, function ()
-     { $('#idTableGSMMapDI').DataTable().ajax.reload(null, false);
+     { $('#idTableGSM').DataTable().ajax.reload(null, false);
      });
   }
 
@@ -90,9 +82,10 @@
     var json_request = JSON.stringify(
        { tech_id    : $('#'+target+' #idModalEditTechID').val().toUpperCase(),
          acronyme   : $('#'+target+' #idModalEditAcronyme').val().toUpperCase(),
+         clase      : "DI",
        }
      );
-    Send_to_API ( "POST", "/api/mnemos/validate", json_request, function (Response)
+    Send_to_API ( "PUT", "/api/mnemos/validate", json_request, function (Response)
      { var tech_id_found=false, tech_id_propose="";
        var acronyme_found=false, acronyme_propose="";
 
@@ -163,41 +156,43 @@
 
     $('#idTitleInstance').text(Get_locale_instance());
 
-    Send_to_API ( "GET", "/api/process/smsg/thread_status", null, function(Response)
+    Send_to_API ( "GET", "/api/process/smsg/status", null, function(Response)
      { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
                                   else { $('#idAlertThreadNotRunning').show(); }
+     }, null );
 
-       $('#idTableGSM').DataTable(
-          { pageLength : 50,
-            fixedHeader: true,
-            rowId: "id", paging: false,
-            data: Response,
-            columns:
-             [ { "data": "map_tech_id", "title":"GSM TechID", "className": "align-middle text-center" },
-               { "data": "map_tag", "title":"GSM Tag", "className": "align-middle text-center" },
-               { "data": null, "title":"Map", "className": "align-middle text-center",
-                 "render": function (item)
-                   { return( "<->" ); }
+    $('#idTableGSM').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         rowId: "id", paging: false,
+         ajax: {	url : "/api/process/smsg/map/list",	type : "GET", dataSrc: "mappings", /*data: { "classe": "DI" },*/
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
-               { "data": null, "title":"BIT Tech_id", "className": "align-middle text-center",
-                 "render": function (item)
-                   { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
-               },
-               { "data": "acronyme", "title":"BIT Acronyme", "className": "align-middle text-center" },
-               { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
-               { "data": null, "title":"Actions", "orderable": false, "render": function (item)
-                   { boutons = Bouton_actions_start ();
-                     boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "Show_Modal_Map_Edit_DI", item.id, "pen", null );
-                     boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_DI", item.id, "trash", null );
-                     boutons += Bouton_actions_end ();
-                     return(boutons);
-                   },
-               },
-             ],
-            /*order: [ [0, "desc"] ],*/
-            responsive: true,
-          }
-        );
+         columns:
+          [ { "data": "map_tech_id", "title":"GSM TechID", "className": "align-middle text-center" },
+            { "data": "map_tag", "title":"GSM Tag", "className": "align-middle text-center" },
+            { "data": null, "title":"Map", "className": "align-middle text-center",
+              "render": function (item)
+                { return( "<->" ); }
+            },
+            { "data": null, "title":"BIT Tech_id", "className": "align-middle text-center",
+              "render": function (item)
+                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+            },
+            { "data": "acronyme", "title":"BIT Acronyme", "className": "align-middle text-center" },
+            { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
+            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
+                { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "Show_Modal_Map_Edit_DI", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_DI", item.id, "trash", null );
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
+                },
+            },
+          ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
 
-     });
   }

@@ -1,12 +1,11 @@
 <div class="container-fluid">
 
  <div class="row m-2">
- <h3>Statut du GSM sur <strong id='idTitleInstance'></strong></h3>
+ <h3>Mapping des Entrées SMS via GSM</h3>
 
    <div class ="ml-auto btn-group">
-        <button type="button" onclick="window.location='/tech/smsg_map'" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
+        <button type="button" onclick="Redirect('/tech/smsg')" class="btn btn-primary"><i class="fas fa-list"></i> Liste GSM</button>
         <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
-        <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>
 
@@ -16,20 +15,19 @@
    </div>
 
 <!----------------------------------------------------------------------------------------------------------------------------->
-<div id="idTabEntreeGSM" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
 
  <div class="row m-2">
    <div class ="ml-auto btn-group">
         <button type="button" onclick="Show_Modal_Map_Edit_DI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping GSM</button>
    </div>
  </div>
-    <table id="idTableGSMMapDI" class="table table-striped table-bordered table-hover">
+
+    <table id="idTableGSM" class="table table-striped table-bordered table-hover">
       <thead class="thead-dark">
 				  </thead>
 			   <tbody>
       </tbody>
     </table>
-</div>
 
 <!-- Container -->
 </div>
@@ -52,16 +50,16 @@
 						     <div class="input-group-prepend">
 							     <span class="input-group-text">GSM Tech_ID</span>
 						     </div>
-						     <input id="idModalEditGSMTechID" type="text" class="form-control" placeholder="Le tech_id du téléphone">
+						     <input id="idModalEditGSMTechID" type="text" class="form-control" placeholder="GSM Tech_id">
      					</div>
    					</div>
 
         <div class="col form-group">
 					     <div class="input-group">
 						     <div class="input-group-prepend">
-							     <span class="input-group-text">GSM DI</span>
+							     <span class="input-group-text">SMS</span>
 						     </div>
-						     <input id="idModalEditGSMTag" type="text" class="form-control" placeholder="DIxx">
+						     <input id="idModalEditGSMTag" type="text" class="form-control" placeholder="commande SMS">
      					</div>
    					</div>
   					</div>
@@ -98,4 +96,4 @@
 </div>
 
 
-<script src="/js/tech/smsg.js" type="text/javascript"></script>
+<script src="/js/tech/smsg_map.js" type="text/javascript"></script>
