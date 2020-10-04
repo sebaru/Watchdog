@@ -1,12 +1,12 @@
 <div class="container-fluid">
 
  <div class="row m-2">
- <h3>Etat des bits pour le module - '<strong id="idTitle"></strong>'</h3>
+   <h3><i class="fas fa-eye text-primary"></i> Etat des bits pour le module - '<strong id="idTitle"></strong>'</h3>
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Go_to_mnemos()" class="btn btn-primary"><i class="fas fa-book"></i> Mnemos</button>
         <button type="button" onclick="Go_to_dls_source()" class="btn btn-primary"><i class="fas fa-code"></i> Source</button>
-        <button type="button" onclick="Redirect('/tech/dls')" class="btn btn-secondary"><i class="fas fa-list"></i> Retour</button>
+        <button type="button" onclick="Redirect('/tech/dls')" class="btn btn-secondary"><i class="fas fa-list"></i> Liste DLS</button>
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
 </div>

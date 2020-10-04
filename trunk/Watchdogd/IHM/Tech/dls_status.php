@@ -4,7 +4,7 @@
    <h3><i class="fas fa-code text-primary"></i> Etat des modules D.L.S</h3>
 
    <div class ="ml-auto btn-group align-items-start">
-        <button type="button" onclick="window.location='/tech/dls'" class="btn btn-secondary"><i class="fas fa-list"></i> Retour</button>
+        <button type="button" onclick="Redirect('/tech/dls')" class="btn btn-secondary"><i class="fas fa-list"></i> Liste DLS</button>
    </div>
 </div>
 

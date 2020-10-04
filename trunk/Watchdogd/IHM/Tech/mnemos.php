@@ -1,7 +1,7 @@
 <div class="container-fluid">
 
  <div class="row m-2">
- <h3>Liste des Mnémoniques - '<strong id="idTitle"></strong>'</h3>
+   <h3><i class="fas fa-book text-primary"></i> Liste des Mnémoniques - '<strong id="idTitle"></strong>'</h3>
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Go_to_dls_run()"class="btn btn-info"><i class="fas fa-eye"></i> RUN</button>
