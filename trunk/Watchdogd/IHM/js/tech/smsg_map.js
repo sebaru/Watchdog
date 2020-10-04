@@ -1,15 +1,15 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function Valider_GSM_Del ( type, map_tech_id, map_tag )
+ function Valider_GSM_Del ( map_tech_id, map_tag )
   { var json_request = JSON.stringify(
        { classe     : type,
          map_tech_id: map_tech_id,
          map_tag    : map_tag
        }
      );
-    Send_to_API ( "DELETE", "/api/process/smsg/map/del", function(Response)
-     { $('#idTableGSM'+type).DataTable().ajax.reload(null, false);
+    Send_to_API ( "DELETE", "/api/map/del", json_request, function(Response)
+     { $('#idTableGSM').DataTable().ajax.reload(null, false);
      }, null );
   }
 
@@ -23,7 +23,7 @@
                                  "<br>" + selection.libelle
                                 );
     $('#idModalDelValider').attr( "onclick",
-                                  "Valider_GSM_Del('"+type+"','"+selection.map_tech_id+"','"+selection.map_tag+"')" );
+                                  "Valider_GSM_Del('"+selection.map_tech_id+"','"+selection.map_tag+"')" );
     $('#idModalDel').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -39,15 +39,16 @@
     $('#idModalEditDI').modal("hide");
     var json_request = JSON.stringify(
        { classe     : 'DI',
+         thread     : 'SMSG',
          tech_id    : $('#idModalEditDI #idModalEditTechID').val().toUpperCase(),
          acronyme   : $('#idModalEditDI #idModalEditAcronyme').val().toUpperCase(),
          map_tech_id: $('#idModalEditDI #idModalEditGSMTechID').val().toUpperCase(),
          map_tag    : $('#idModalEditDI #idModalEditGSMTag').val(),
        }
      );
-    Send_to_API ( 'POST', "/api/process/smsg/map/set", json_request, function ()
+    Send_to_API ( 'POST', "/api/map/set", json_request, function ()
      { $('#idTableGSM').DataTable().ajax.reload(null, false);
-     });
+     }, null);
   }
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -134,12 +135,12 @@
        $('#idModalEditDI #idModalEditGSMTag').val     ( selection.map_tag );
        $('#idModalEditDI #idModalEditGSMTag').attr ( "readonly", false );
        $('#idModalEditDI #idModalEditValider').attr( "onclick", "Valider_Edit_DI()" );
-       Send_to_API ( "GET", "/api/process/smsg/list", null, function (Response)
+       Send_to_API ( "GET", "/api/config/get?thread=SMSG&param=tech_id", null, function (Response)
         { $('#idModalEditGSMTechID').empty();
-          $.each ( Response.gsms, function ( i, gsm )
-           { $('#idModalEditGSMTechID').append("<option value='"+gsm.map_tech_id+"'"+
-                                                (gsm.map_tech_id == selection.map_tech_id ? "selected" : "")+">"+
-                                                 gsm.map_tech_id+"</option>"); } );
+          $.each ( Response.configs, function ( i, config )
+           { $('#idModalEditGSMTechID').append("<option value='"+config.valeur+"'"+
+                                                (config.valeur == selection.tech_id ? "selected" : "")+">"+
+                                                 config.valeur+"</option>"); } );
         });
      }
     else
@@ -149,10 +150,10 @@
        $('#idModalEditDI #idModalEditGSMTag').val     ( '' );
        $('#idModalEditDI #idModalEditGSMTag').attr ( "readonly", false );
        $('#idModalEditDI #idModalEditValider').attr( "onclick", "Valider_Edit_DI()" );
-       Send_to_API ( "GET", "/api/process/smsg/list", null, function (Response)
+       Send_to_API ( "GET", "/api/config/get?thread=SMSG&param=tech_id", null, function (Response)
         { $('#idModalEditGSMTechID').empty();
-          $.each ( Response.gsms, function ( i, gsm )
-           { $('#idModalEditGSMTechID').append("<option value='"+gsm.map_tech_id+"'>"+gsm.map_tech_id+"</option>"); } );
+          $.each ( Response.configs, function ( i, config )
+           { $('#idModalEditGSMTechID').append("<option value='"+config.valeur+"'>"+config.valeur+"</option>"); } );
         });
      }
     Modal_Edit_Input_Changed('idModalEditDI');
@@ -163,26 +164,19 @@
  function Load_page ()
   {
 
-    $('#idTitleInstance').text(Get_locale_instance());
-
-    Send_to_API ( "GET", "/api/process/smsg/status", null, function(Response)
-     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
-                                  else { $('#idAlertThreadNotRunning').show(); }
-     }, null );
-
     $('#idTableGSM').DataTable(
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/process/smsg/map/list",	type : "GET", dataSrc: "mappings", /*data: { "classe": "DI" },*/
+         ajax: {	url : "/api/map/list",	type : "GET", dataSrc: "mappings", data: { "thread": "SMSG", "classe": "DI" },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
           [ { "data": "map_tech_id", "title":"GSM TechID", "className": "align-middle text-center" },
-            { "data": "map_tag", "title":"GSM Tag", "className": "align-middle text-center" },
+            { "data": "map_tag", "title":"Texte SMS", "className": "align-middle text-center" },
             { "data": null, "title":"Map", "className": "align-middle text-center",
               "render": function (item)
-                { return( "<->" ); }
+                { return( "->" ); }
             },
             { "data": null, "title":"BIT Tech_id", "className": "align-middle text-center",
               "render": function (item)

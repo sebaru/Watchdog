@@ -67,13 +67,13 @@
     return(comment);
   }
 /******************************************************************************************************************************/
-/* Normaliser_as_tech_id: S'assure que la chaine en parametre respecte les caracteres d'un tech_id                            */
+/* Normaliser_as_ascii: S'assure que la chaine en parametre respecte les caracteres d'un tech_id                              */
 /* Entrées: une chaine de caractere                                                                                           */
 /* Sortie: la meme chaine, avec les caracteres interdits remplacés ar '_'                                                     */
 /******************************************************************************************************************************/
- gchar *Normaliser_as_tech_id( gchar *tech_id )
-  { if (!tech_id) return(NULL);
-    return ( g_strcanon ( tech_id, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", '_' ) );
+ gchar *Normaliser_as_ascii( gchar *chaine )
+  { if (!chaine) return(NULL);
+    return ( g_strcanon ( chaine, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_", '_' ) );
   }
 /******************************************************************************************************************************/
 /* Init_DB_SQL: essai de connexion à la DataBase db                                                                           */
