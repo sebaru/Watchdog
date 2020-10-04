@@ -1,6 +1,6 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
- function Go_to_source ()
+ function Go_to_dls_source ()
   { vars = window.location.pathname.split('/');
     Redirect ( "/tech/dls_source/"+vars[3] );
   }
@@ -14,17 +14,11 @@
   { vars = window.location.pathname.split('/');
     console.log ("in load page !");
     $('#idTitle').html(vars[3]);
-
-    var xhr = new XMLHttpRequest;
-    xhr.open('GET', "/api/dls/run/"+vars[3], true);
-    xhr.onreadystatechange = function()
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status != 200)
-        { Show_Error ( xhr.statusText );
-          return;
-        }
-       var Response = JSON.parse(xhr.responseText);
-       $('#idTableEntreeTOR').DataTable(
+    var json_request = JSON.stringify(
+     { tech_id : vars[3],
+     });
+    Send_to_API ( "PUT", "/api/dls/run", json_request, function(Response)
+     { $('#idTableEntreeTOR').DataTable(
           { pageLength : 50,
             fixedHeader: true, paging: false, ordering: false, searching: false,
             data: Response.DI,
@@ -218,8 +212,8 @@
           }
         );
 
-     };
-    xhr.send();
+     }, null);
+
     $('#idTabEntreeTor').tab('show');
 
   }

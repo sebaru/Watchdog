@@ -53,8 +53,7 @@
     Creer_configDB ( "archive", "retention", valeur_defaut );
 
     if ( ! Recuperer_configDB( &db, "archive" ) )                                           /* Connexion a la base de données */
-     { Info_new( Config.log, Config.log_arch, LOG_WARNING,
-                "%s: Database connexion failed. Using Default Parameters", __func__ );
+     { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Database connexion failed.", __func__ );
        return(FALSE);
      }
 

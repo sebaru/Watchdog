@@ -141,7 +141,7 @@
   { GBytes *request_brute;
     gsize taille;
 
-    if (msg->method != SOUP_METHOD_PUT)
+    if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -203,7 +203,7 @@
   { GBytes *request_brute;
     gsize taille;
 
-    if (msg->method != SOUP_METHOD_PUT)
+    if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -273,7 +273,7 @@
   { GBytes *request_brute;
     gsize taille;
 
-    if (msg->method != SOUP_METHOD_PUT)
+    if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -284,8 +284,13 @@
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
 
-    if ( ! (request && Json_has_member ( request, "instance" ) && Json_has_member ( request, "thread" ) ) )
-     { if (request) json_node_unref(request);
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
+       return;
+     }
+
+    if ( ! (Json_has_member ( request, "instance" ) && Json_has_member ( request, "thread" ) ) )
+     { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }

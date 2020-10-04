@@ -170,7 +170,7 @@
          acronyme   : $('#'+target+' #idModalEditAcronyme').val().toUpperCase(),
        }
      );
-    Send_to_API ( "POST", "/api/mnemos/validate", json_request, function (Response)
+    Send_to_API ( "PUT", "/api/mnemos/validate", json_request, function (Response)
      { var tech_id_found=false, tech_id_propose="";
        var acronyme_found=false, acronyme_propose="";
 
@@ -369,7 +369,7 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { Send_to_API ( "GET", "/api/process/modbus/thread_status", null, function(Response)
+  { Send_to_API ( "GET", "/api/process/modbus/status", null, function(Response)
      { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
                                   else { $('#idAlertThreadNotRunning').show(); }
      });

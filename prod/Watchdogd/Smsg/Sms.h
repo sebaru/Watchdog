@@ -31,14 +31,12 @@
  #define NOM_THREAD                    "smsg"
 
  #define TOP_MIN_ENVOI_SMS              1200                                      /* 2 minutes sans envoi de SMS au démarrage */
- #define TAILLE_SMSBOX_APIKEY           128                                    /* Nombre de caractere dans la clef API SMSBOX */
- #define DEFAUT_SMSBOX_APIKEY           "changeme"
 
  struct SMS_CONFIG
   { struct LIBRAIRIE *lib;
-    gchar smsbox_apikey[TAILLE_SMSBOX_APIKEY+1];                                                           /* Clef API SMSBOX */
+    gchar description[80];                                         /* Une description du téléphone ou sa position par exemple */
+    gchar smsbox_apikey[129];                                                                              /* Clef API SMSBOX */
     gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];                                                       /* Tech_id du téléphone */
-    gpointer bit_comm;                                                            /* Pointer de raccourci pour le bit de comm */
     gboolean comm_status;
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
     guint nbr_sms;
@@ -55,7 +53,6 @@
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/
- extern gchar *Smsg_Admin_response ( gchar *ligne );
  extern gboolean Smsg_Recuperer_smsDB ( struct DB *db );
  extern struct SMSDB *Smsg_Recuperer_smsDB_suite( struct DB *db );
  extern void Envoyer_smsg_smsbox_text ( gchar *texte );

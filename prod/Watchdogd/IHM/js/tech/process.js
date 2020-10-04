@@ -3,77 +3,47 @@
 /********************************************* Reload Process *****************************************************************/
  function Process_clic_reload ( params )
   { parametres = params.split(':');
-    var xhr = new XMLHttpRequest;
-    xhr.open('PUT', "/api/process/reload");
-    xhr.setRequestHeader('Content-type', 'application/json');
     var json_request = JSON.stringify(
        { instance: parametres[0],
          thread  : parametres[1],
          hard    : (parametres[2] === "true" ? true : false),
        }
      );
-    xhr.onreadystatechange = function()
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status == 200)
-        { $('#idTableProcess').DataTable().ajax.reload();
-          $('#idToastStatus').toast('show');
-        }
-       else { Show_Error( xhr.statusText ); }
-     };
-    xhr.send(json_request);
+    Send_to_API ( "POST", "/api/process/reload", json_request, function(Response)
+     { $('#idTableProcess').DataTable().ajax.reload();
+     }, null);
   }
 /********************************************* Reload Process *****************************************************************/
  function Process_clic_debug ( params )
   { parametres = params.split(':');
-    var xhr = new XMLHttpRequest;
-    xhr.open('PUT', "/api/process/debug");
-    xhr.setRequestHeader('Content-type', 'application/json');
     var json_request = JSON.stringify(
        { instance: parametres[0],
          thread  : parametres[1],
          status  : (parametres[2] === "true" ? true : false),
        }
      );
-    xhr.onreadystatechange = function( )
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status == 200)
-        { $('#idTableProcess').DataTable().ajax.reload();
-          $('#idToastStatus').toast('show');
-        }
-       else { Show_Error( xhr.statusText ); }
-
-     };
-    xhr.send(json_request);
+    Send_to_API ( "POST", "/api/process/debug", json_request, function(Response)
+     { $('#idTableProcess').DataTable().ajax.reload();
+     }, null);
   }
 /********************************************* Reload Process *****************************************************************/
  function Process_clic_start ( params )
   { parametres = params.split(':');
-    var xhr = new XMLHttpRequest;
-    xhr.open('PUT', "/api/process/start");
-    xhr.setRequestHeader('Content-type', 'application/json');
     var json_request = JSON.stringify(
        { instance: parametres[0],
          thread  : parametres[1],
          status : (parametres[2] === "true" ? true : false),
        }
      );
-    xhr.onreadystatechange = function( )
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status == 200)
-        { //var Response = JSON.parse(xhr.responseText);
-          $('#idTableProcess').DataTable().ajax.reload();
-          $('#idToastStatus').toast('show');
-        }
-       else { Show_Error( xhr.statusText ); }
-
-     };
-    xhr.send(json_request);
+    Send_to_API ( "POST", "/api/process/start", json_request, function(Response)
+     { $('#idTableProcess').DataTable().ajax.reload();
+     }, null);
   }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Load_page ()
   { console.log ("in load process !");
 
-    $('#idTitleProcessus').text(Get_locale_instance());
+    $('#idTitleInstance').text(Get_locale_instance());
 
     $('#idTableProcess').DataTable(
        { pageLength : 25,
@@ -85,7 +55,7 @@
          columns:
           [ { "data": null, "title":"Thread", "className": "text-center",
               "render": function (item)
-                { return( Lien ( "/tech/process/"+item.thread, "Voir la conf du thread "+item.thread, item.thread ) ); }
+                { return( Lien ( "/tech/"+item.thread, "Voir la conf du thread "+item.thread, item.thread ) ); }
             },
             { "data": null, "title":"Started",
               "render": function (item)

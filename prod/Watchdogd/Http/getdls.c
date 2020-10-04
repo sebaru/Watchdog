@@ -85,8 +85,8 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- void Http_traiter_dls_run_all ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                 SoupClientContext *client, gpointer user_data )
+ void Http_traiter_dls_status ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                SoupClientContext *client, gpointer user_data )
   { JsonBuilder *builder;
     gchar *buf;
     gsize taille_buf;
@@ -119,10 +119,13 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_run ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { gsize taille_buf;
+  { GBytes *request_brute;
     GSList *liste;
+    gsize taille_buf;
+    gsize taille;
     gchar *buf;
-    if (msg->method != SOUP_METHOD_GET)
+
+    if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -130,25 +133,31 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
 
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
 
-    gchar *prefix = "/dls/run/";
-    if ( ! g_str_has_prefix ( path, prefix ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
        return;
      }
-    if (!strlen (path+strlen(prefix)))
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+
+    if ( ! (Json_has_member ( request, "tech_id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-    gchar *tech_id = Normaliser_chaine ( path+strlen(prefix) );
+
+    gchar *tech_id = Normaliser_as_tech_id ( Json_get_string ( request, "tech_id" ) );
     if (!tech_id)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
        return;
      }
+
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
-     { g_free(tech_id);
+     { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -300,7 +309,7 @@
      }
     Json_end_array( builder );
 /*------------------------------------------------------- fin ----------------------------------------------------------------*/
-    g_free(tech_id);
+    json_node_unref(request);
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -315,7 +324,10 @@
                                 SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
     gsize taille_buf;
-    if (msg->method != SOUP_METHOD_GET)
+    GBytes *request_brute;
+    gsize taille;
+
+    if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -323,32 +335,37 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
 
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
 
-    gchar *prefix = "/dls/source/";
-    if ( ! g_str_has_prefix ( path, prefix ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
        return;
      }
-    if (!strlen (path+strlen(prefix)))
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+
+    if ( ! (Json_has_member ( request, "tech_id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-    gchar *tech_id = Normaliser_chaine ( path+strlen(prefix) );
+
+    gchar *tech_id = Normaliser_as_tech_id ( Json_get_string ( request, "tech_id" ) );
     if (!tech_id)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
        return;
      }
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
-     { g_free(tech_id);
+     { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
     g_snprintf( chaine, sizeof(chaine),
                "SELECT d.* FROM dls as d INNER JOIN syns as s ON d.syn_id=s.id "
                "WHERE tech_id='%s' AND s.access_level<'%d'", tech_id, session->access_level );
-    g_free(tech_id);
+    json_node_unref(request);
     SQL_Select_to_JSON ( builder, NULL, chaine );
 
     buf = Json_get_buf (builder, &taille_buf);

@@ -13,8 +13,8 @@
                        [ "Error", "outline-danger" ]
                      ];
 
- function Go_to_dls_run ()
-  { Redirect ( "/tech/dls_run" );
+ function Go_to_dls_status ()
+  { Redirect ( "/tech/dls_status" );
   }
 
  function Dls_start_plugin ( tech_id )
@@ -59,9 +59,9 @@
   { var json_request = JSON.stringify(
      { tech_id : tech_id,
      });
-    Send_to_API ( "POST", "/api/dls/compil/", json_request, function ()
+    Send_to_API ( "POST", "/api/dls/compil", json_request, function ()
      { $('#idTableDLS').DataTable().ajax.reload(null, false);
-     });
+     }, null);
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
@@ -120,7 +120,7 @@
                   boutons += Bouton_actions_add ( "outline-primary", "Voir le code", "Redirect", "/tech/dls_source/"+item.tech_id, "code", null );
                   boutons += Bouton_actions_add ( "outline-primary", "Voir les mnemos", "Redirect", "/tech/mnemos/"+item.tech_id, "book", null );
                   boutons += Bouton_actions_add ( "outline-success", "Compiler le module", "Dls_compiler", item.tech_id, "coffee", null );
-                  boutons += Bouton_actions_add ( "outline-primary", "Voir les RUN", "Redirect", "/tech/run/"+item.tech_id, "eye", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Voir les RUN", "Redirect", "/tech/dls_run/"+item.tech_id, "eye", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer le plugin", "Show_Modal_Dls_Del", item.tech_id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);

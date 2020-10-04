@@ -1,7 +1,7 @@
  document.addEventListener('DOMContentLoaded', Load_common, false);
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
- function Send_to_API ( method, URL, parametre, fonction )
+ function Send_to_API ( method, URL, parametre, fonction_ok, fonction_nok )
   { var xhr = new XMLHttpRequest;
     xhr.open(method, URL, true);
     if (method=="POST") { xhr.setRequestHeader('Content-type', 'application/json'); }
@@ -11,9 +11,13 @@
         { try { var Response = JSON.parse(xhr.responseText); }
           catch (error) { Response=undefined; }
           if (method=="DELETE" || method=="POST") $('#idToastStatus').toast('show');
-          if (fonction != null) fonction(Response);
+          if (fonction_ok != null) fonction_ok(Response);
         }
-       else { Show_Error( xhr.statusText ); }
+       else { Show_Error( xhr.statusText );
+              try { var Response = JSON.parse(xhr.responseText); }
+              catch (error) { Response=undefined; }
+              if (fonction_nok != null) fonction_nok(Response);
+            }
      }
     xhr.send(parametre);
   }
@@ -24,7 +28,7 @@
      { document.getElementById("idUsername").innerHTML = localStorage.getItem("username");
        document.getElementById("idHrefUsername").href = "/tech/user/"+localStorage.getItem("username");
      }
-    $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+    /*$("body").tooltip({ selector: '[data-toggle=tooltip]' });*/
   }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Logout ()
@@ -99,7 +103,7 @@
        acronyme : acronyme,
        period   : period
      });
-console.log (json_request);
+
     Send_to_API ( "PUT", "/api/archive/get", json_request, function(json)
      { var dates;
        if (period=="HOUR") dates = json.enregs.map( function(item) { return item.date.split(' ')[1]; } );

@@ -2,14 +2,14 @@
  var Instances;
 
 
- function Go_to_source ()
+ function Go_to_dls_source ()
   { vars = window.location.pathname.split('/');
     Redirect ( "/tech/dls_source/"+vars[3] );
   }
 
- function Go_to_run ()
+ function Go_to_dls_run ()
   { vars = window.location.pathname.split('/');
-    Redirect ( "/tech/run/"+vars[3] );
+    Redirect ( "/tech/dls_run/"+vars[3] );
   }
 
  function Mnemos_CI_enable_archivage ( acronyme )

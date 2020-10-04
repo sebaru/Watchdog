@@ -67,7 +67,7 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { Send_to_API ( "GET", "/api/process/archive/thread_status", null, function ( Response )
+  { Send_to_API ( "GET", "/api/process/archive/status", null, function ( Response )
      { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
                                   else { $('#idAlertThreadNotRunning').show(); }
        $('#idArchiveDBHostname').val(Response.hostname);
@@ -100,5 +100,7 @@
          responsive: true,
        }
      );
+
+    Charger_une_courbe ( "idCourbeNbArchive", "SYS", "ARCH_REQUEST_NUMBER", "HOUR" );
 
   }

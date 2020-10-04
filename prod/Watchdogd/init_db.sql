@@ -690,10 +690,11 @@ CREATE TABLE IF NOT EXISTS `users_sessions` (
 
 CREATE TABLE IF NOT EXISTS `audit_log` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
+  `username` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT '0',
   `message` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `date` DATETIME NOT NULL DEFAULT NOW(),
   PRIMARY KEY (`id`),
-  KEY (`date`)
+  KEY (`date`),
+  KEY (`username`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;

@@ -73,9 +73,9 @@
                                     SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_dls_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                      SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_dls_run ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                    SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_dls_run_all ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ extern void Http_traiter_dls_status ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                       SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_dls_run    ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                         SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_dls_start ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                       SoupClientContext *client, gpointer user_data );

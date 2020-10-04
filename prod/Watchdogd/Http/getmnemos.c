@@ -161,7 +161,7 @@
     gsize taille, taille_buf;
     gchar *buf, chaine[256];
 
-    if (msg->method != SOUP_METHOD_POST)
+    if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -180,6 +180,7 @@
 
     gchar   *tech_id  = Normaliser_as_tech_id ( Json_get_string ( request,"tech_id" ) );
     gchar   *acronyme = Normaliser_as_tech_id ( Json_get_string ( request,"acronyme" ) );
+    gchar   *classe   = Normaliser_as_tech_id ( Json_get_string ( request,"classe" ) );
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
@@ -189,12 +190,24 @@
      }
 
     g_snprintf(chaine, sizeof(chaine),
-              "SELECT DISTINCT(tech_id) FROM dictionnaire WHERE tech_id LIKE '%%%s%%' ORDER BY tech_id LIMIT 10", tech_id );
+              "SELECT DISTINCT(tech_id) FROM dictionnaire WHERE tech_id LIKE '%%%s%%'", tech_id);
+    if (classe)
+     { g_strlcat ( chaine,  " AND classe='", sizeof(chaine) );
+       g_strlcat ( chaine, classe, sizeof(chaine) );
+       g_strlcat ( chaine, "' ", sizeof(chaine) );
+     }
+    g_strlcat ( chaine, " ORDER BY tech_id LIMIT 10", sizeof(chaine) );
     SQL_Select_to_JSON ( builder, "tech_ids_found", chaine );
 
     g_snprintf(chaine, sizeof(chaine),
-              "SELECT acronyme FROM dictionnaire WHERE tech_id='%s' AND acronyme LIKE '%%%s%%' ORDER BY acronyme LIMIT 10",
+              "SELECT acronyme FROM dictionnaire WHERE tech_id='%s' AND acronyme LIKE '%%%s%%'",
                tech_id, acronyme );
+    if (classe)
+     { g_strlcat ( chaine, "AND classe='", sizeof(chaine) );
+       g_strlcat ( chaine, classe, sizeof(chaine) );
+       g_strlcat ( chaine, "' ", sizeof(chaine) );
+     }
+    g_strlcat ( chaine, " ORDER BY acronyme LIMIT 10", sizeof(chaine) );
     SQL_Select_to_JSON ( builder, "acronymes_found", chaine );
     json_node_unref(request);
 

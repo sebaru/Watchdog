@@ -450,10 +450,10 @@ reload:
     soup_server_add_handler ( socket, "/api/connect",        Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/api/disconnect",     Http_traiter_disconnect, NULL, NULL );
     soup_server_add_handler ( socket, "/api/dls/list",       Http_traiter_dls_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/source/",    Http_traiter_dls_source, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/del/",       Http_traiter_dls_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/run/" ,      Http_traiter_dls_run, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/run" ,       Http_traiter_dls_run_all, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/source",     Http_traiter_dls_source, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/del",        Http_traiter_dls_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/status" ,    Http_traiter_dls_status, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/run" ,       Http_traiter_dls_run, NULL, NULL );
     soup_server_add_handler ( socket, "/api/dls/debug" ,     Http_traiter_dls_debug, NULL, NULL );
     soup_server_add_handler ( socket, "/api/dls/undebug",    Http_traiter_dls_undebug, NULL, NULL );
     soup_server_add_handler ( socket, "/api/dls/start" ,     Http_traiter_dls_start, NULL, NULL );

@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="google" content="notranslate">
         <meta name="robots" content="noindex, nofollow">
-        <link rel="icon" href="/svg/logo.svg">
+        <link rel="icon" href="/img/logo.svg">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.21/fh-3.1.7/r-2.2.5/datatables.min.css"/>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/codemirror.min.css">
@@ -121,7 +121,7 @@
 
 <header>
 	<nav class="navbar navbar-dark  navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
-  <a class="navbar-brand" href="/"><img src="/svg/logo.svg" alt="Watchdog Logo" width=50></a>
+  <a class="navbar-brand" href="/"><img src="/img/logo.svg" alt="Watchdog Logo" width=50></a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -152,20 +152,9 @@
         </div>
       </li>
 
-      <a class="nav-link rounded" href="https://icons.abls-habitat.fr/admin/icons"><i class="fas fa-file-photo-o"></i> <span>Gestion des Icones</span></a>
+        <a class="nav-link rounded" href="https://icons.abls-habitat.fr/admin/icons"><i class="fas fa-file-photo-o"></i> <span>Gestion des Icones</span></a>
+        <a class="nav-link rounded" href="/tech/io_config"><i class="fas fa-cogs"></i> <span>Entrées/Sorties</span></a>
 
-      <li class="nav-item dropdown">
-        <a class="nav-link rounded dropdown-toggle" href="#" id="navbarIO" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fas fa-cogs"></i> IO Threads
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarIO">
-          <a class="dropdown-item" href="/tech/modbus"> <i class="fas fa-plug text-info"></i> <span>Modules Wago/Modbus</span> </a>
-          <a class="dropdown-item" href="/tech/modbus_map"> <i class="fas fa-directions text-info"></i> <span>Mappings Wago/Modbus</span> </a>
-          <a class="dropdown-item" href="/tech/ups"> <i class="fas fa-battery-half text-success"></i> <span>Onduleurs</span> </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Something else here</a>
-        </div>
-      </li>
     </ul>
 
     <ul class="navbar-nav">
@@ -191,7 +180,7 @@
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="/tech/users_list"><i class="fas fa-users-cog text-info"></i> <span>Gestion des utilisateurs</span></a>
           <a class="dropdown-item" href="/tech/users_sessions"><i class="fas fa-list text-info"></i> <span>Gestion des sessions</span></a>
-          <a class="dropdown-item" href="/tech/log"><i class="fas fa-database text-warning"></i> <span>Audit Log</span></a>
+          <a class="dropdown-item" href="/tech/log"><i class="fas fa-binoculars text-warning"></i> <span>Audit Log</span></a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="/home/synmobile/1"><i class="fas fa-home text-primary"></i> <span>Mode Client</span> </a>
           <div class="dropdown-divider"></div>

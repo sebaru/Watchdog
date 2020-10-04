@@ -1,13 +1,15 @@
 <div class="container-fluid">
 
  <div class="row m-2">
- <h3>Liste des Modules D.L.S</h3>
+   <h3><i class="fas fa-code text-primary"></i> Liste des Modules D.L.S</h3>
 
-   <div class ="ml-auto btn-group">
-        <button type="button" onclick="Go_to_dls_run()"class="btn btn-info"><i class="fas fa-eye"></i> RUN</button>
+   <div class ="ml-auto btn-group align-items-start">
+        <button type="button" onclick="Go_to_dls_status()"class="btn btn-info"><i class="fas fa-eye"></i> Statut Global</button>
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>
+
+<hr>
 
     <table id="idTableDLS" class="table table-striped table-bordered table-hover">
       <thead class="thead-dark">
@@ -18,7 +20,6 @@
 
 <!-- Container -->
 </div>
-
 
 <div id="idModalSynEdit" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -96,4 +97,4 @@
   </div>
 </div>
 
-<script src="/js/dls.js" type="text/javascript"></script>
+<script src="/js/tech/dls.js" type="text/javascript"></script>
