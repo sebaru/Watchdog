@@ -10,6 +10,13 @@
      });
     Send_to_API ( 'POST', "/api/process/smsg/set", json_request, null );
   }
+/************************************ Demande l'envoi d'un SMS de test ********************************************************/
+ function GSM_test ( )
+  { var json_request = JSON.stringify(
+     { instance:      Get_locale_instance(),
+     });
+    Send_to_API ( 'PUT', "/api/process/smsg/send", json_request, null );
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   {

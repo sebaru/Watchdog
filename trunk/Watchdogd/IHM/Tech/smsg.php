@@ -5,6 +5,7 @@
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="GSM_Sauver_parametre()" class="btn btn-outline-success"><i class="fas fa-save"></i> Sauvegarder</button>
+        <button type="button" onclick="GSM_test()" class="btn btn-outline-info"><i class="fas fa-question"></i> Test d'envoi</button>
         <button type="button" onclick="Redirect('/tech/smsg_map')" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
         <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
         <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
