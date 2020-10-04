@@ -13,8 +13,8 @@
                        [ "Error", "outline-danger" ]
                      ];
 
- function Go_to_dls_run ()
-  { Redirect ( "/tech/dls_run" );
+ function Go_to_dls_status ()
+  { Redirect ( "/tech/dls_status" );
   }
 
  function Dls_start_plugin ( tech_id )
@@ -59,9 +59,9 @@
   { var json_request = JSON.stringify(
      { tech_id : tech_id,
      });
-    Send_to_API ( "POST", "/api/dls/compil/", json_request, function ()
+    Send_to_API ( "POST", "/api/dls/compil", json_request, function ()
      { $('#idTableDLS').DataTable().ajax.reload(null, false);
-     });
+     }, null);
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()

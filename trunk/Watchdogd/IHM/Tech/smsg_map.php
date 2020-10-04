@@ -31,7 +31,7 @@
 
 <!------------------------------------------------- Modal Edit Digital Input -------------------------------------------------->
 <div id="idModalEditDI" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered " role="document">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
         <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalEditTitre"></span></h5>

@@ -4,7 +4,7 @@
    <h3><i class="fas fa-code text-primary"></i> Liste des Modules D.L.S</h3>
 
    <div class ="ml-auto btn-group align-items-start">
-        <button type="button" onclick="Go_to_dls_run()"class="btn btn-info"><i class="fas fa-eye"></i> RUN</button>
+        <button type="button" onclick="Go_to_dls_status()"class="btn btn-info"><i class="fas fa-eye"></i> Statut Global</button>
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>
@@ -97,4 +97,4 @@
   </div>
 </div>
 
-<script src="/js/dls.js" type="text/javascript"></script>
+<script src="/js/tech/dls.js" type="text/javascript"></script>
