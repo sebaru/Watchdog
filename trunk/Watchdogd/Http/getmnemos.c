@@ -185,7 +185,9 @@
 
     gchar   *tech_id  = Normaliser_as_ascii ( Json_get_string ( request,"tech_id" ) );
     gchar   *acronyme = Normaliser_as_ascii ( Json_get_string ( request,"acronyme" ) );
-    gchar   *classe   = Normaliser_as_ascii ( Json_get_string ( request,"classe" ) );
+
+    gchar   *classe = NULL;
+    if (Json_has_member ( request, "classe" )) { classe = Normaliser_as_ascii ( Json_get_string ( request,"classe" ) ); }
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
@@ -194,8 +196,7 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine),
-              "SELECT DISTINCT(tech_id) FROM dictionnaire WHERE tech_id LIKE '%%%s%%'", tech_id);
+    g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) FROM dictionnaire WHERE tech_id LIKE '%%%s%%'", tech_id);
     if (classe)
      { g_strlcat ( chaine,  " AND classe='", sizeof(chaine) );
        g_strlcat ( chaine, classe, sizeof(chaine) );

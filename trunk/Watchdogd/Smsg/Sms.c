@@ -659,6 +659,11 @@ reload:
 /****************************************************** Lecture de SMS ********************************************************/
        Lire_sms_gsm();
 
+/****************************************************** SMS de test ! *********************************************************/
+       if (Cfg_smsg.send_test)
+        { Envoyer_smsg_gsm_text ( "Test OK !" );
+          Cfg_smsg.send_test = FALSE;
+        }
 /********************************************************* Envoi de SMS *******************************************************/
        if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
         { if ( !strcmp( event->tag, "send_smsbox" ) )   { Envoyer_smsg_smsbox_text ( payload ); }

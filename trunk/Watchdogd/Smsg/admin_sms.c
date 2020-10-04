@@ -122,7 +122,7 @@
          if (!strcasecmp(path, "/status"))   { Admin_json_smsg_status ( lib, msg ); }
     else if (!strcasecmp(path, "/set"))      { Admin_json_smsg_set ( lib, msg ); }
     else if (!strcasecmp(path, "/send") && lib->Thread_run)
-     { Envoyer_smsg_gsm_text ( "Test GSM OK" );
+     { Cfg_smsg.send_test = TRUE;
        soup_message_set_status (msg, SOUP_STATUS_OK);
      }
   }
