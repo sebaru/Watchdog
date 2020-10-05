@@ -53,12 +53,7 @@
     if (!Http_check_session( msg, session, 6 )) return;
 
     gpointer instance = g_hash_table_lookup ( query, "instance" );
-    if (!instance)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    if ( strcasecmp ( instance, "MASTER" ) && strcasecmp ( instance, g_get_host_name() ) )
+    if ( instance && strcasecmp ( instance, "MASTER" ) && strcasecmp ( instance, g_get_host_name() ) )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s : Redirecting /process/list vers %s", __func__, instance );
        Http_redirect_to_slave ( msg, instance );
        return;
@@ -152,21 +147,24 @@
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
 
-    if ( ! (request && Json_has_member ( request, "instance" ) && Json_has_member ( request, "thread" ) &&
-                       Json_has_member ( request, "status" ) ) )
-     { if (request) json_node_unref(request);
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
+       return;
+     }
+
+    if ( !(Json_has_member ( request, "thread" ) && Json_has_member ( request, "status" ) ) )
+     { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    if ( strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+    if ( Json_has_member ( request, "instance" ) && strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
          strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
      { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
        //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
        json_node_unref(request);
        return;
      }
-
 
     gchar   *thread = Json_get_string ( request,"thread" );
     gboolean status = Json_get_bool ( request, "status" );
@@ -214,14 +212,18 @@
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
 
-    if ( ! (request && Json_has_member ( request, "instance" ) && Json_has_member ( request, "thread" ) &&
-                       Json_has_member ( request, "status" ) ) )
-     { if (request) json_node_unref(request);
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
+       return;
+     }
+
+    if ( ! (Json_has_member ( request, "thread" ) && Json_has_member ( request, "status" ) ) )
+     { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    if ( strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+    if ( Json_has_member ( request, "instance" ) && strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
          strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
      { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
        //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
@@ -289,13 +291,13 @@
        return;
      }
 
-    if ( ! (Json_has_member ( request, "instance" ) && Json_has_member ( request, "thread" ) ) )
+    if ( ! Json_has_member ( request, "thread" ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    if ( strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+    if ( Json_has_member ( request, "instance" ) && strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
          strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
      { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
        //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
@@ -353,6 +355,7 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
 
+
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Searching for CLI commande %s", __func__, path );
     path = path + strlen("/api/process/");
 
@@ -363,6 +366,34 @@
      }
     else
      { GSList *liste;
+       if (msg->method == SOUP_METHOD_GET)                                               /* Test si Slave redirect necessaire */
+        { gpointer instance = g_hash_table_lookup ( query, "instance" );
+          if ( instance && strcasecmp ( instance, "MASTER" ) && strcasecmp ( instance, g_get_host_name() ) )
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s : Redirecting %s vers %s", __func__, path, instance );
+             Http_redirect_to_slave ( msg, instance );
+             return;
+           }
+        }
+       else if (msg->method == SOUP_METHOD_PUT || msg->method == SOUP_METHOD_POST || msg->method == SOUP_METHOD_DELETE)
+        { GBytes *request_brute;
+          gsize taille;
+          g_object_get ( msg, "request-body-data", &request_brute, NULL );
+          JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+          if ( !request)
+           { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
+             return;
+           }
+
+          if ( Json_has_member ( request, "instance" ) && strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+               strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                       "%s : Redirecting %s vers %s", __func__, path, Json_get_string(request,"instance") );
+             Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
+             //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+             json_node_unref(request);
+             return;
+           }
+        }
        liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
        while(liste)
         { struct LIBRAIRIE *lib = liste->data;

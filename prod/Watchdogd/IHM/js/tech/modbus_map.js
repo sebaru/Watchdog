@@ -2,23 +2,16 @@
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Modbus_Del ( type, map_tech_id, map_tag )
-  { var xhr = new XMLHttpRequest;
-    xhr.open('DELETE', "/api/process/modbus/map/del" );
-    var json_request = JSON.stringify(
+  { var json_request = JSON.stringify(
        { classe     : type,
          map_tech_id: map_tech_id,
          map_tag    : map_tag
        }
      );
-    xhr.onreadystatechange = function( )
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status == 200)
-        { $('#idTableModbusMap'+type).DataTable().ajax.reload(null, false);
-          $('#idToastStatus').toast('show');
-        }
-       else { Show_Error( xhr.statusText ); }
-     };
-    xhr.send(json_request);
+    Send_to_API ( 'DELETE', "/api/map/del", json_request, function()
+     { $('#idTableModbusMap'+type).DataTable().ajax.reload(null, false);
+       $('#idToastStatus').toast('show');
+     }, null );
   }
 
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -65,13 +58,14 @@
     $('#idModalEditDI').modal("hide");
     var json_request = JSON.stringify(
        { classe     : 'DI',
+         thread     : 'MODBUS',
          tech_id    : $('#idModalEditDI #idModalEditTechID').val().toUpperCase(),
          acronyme   : $('#idModalEditDI #idModalEditAcronyme').val().toUpperCase(),
          map_tech_id: $('#idModalEditDI #idModalEditWagoTechID').val().toUpperCase(),
          map_tag    : $('#idModalEditDI #idModalEditWagoTag').val().toUpperCase(),
        }
      );
-    Send_to_API ( 'POST', "/api/process/modbus/map/set", json_request, function ()
+    Send_to_API ( 'POST', "/api/map/set", json_request, function ()
      { $('#idTableModbusMapDI').DataTable().ajax.reload(null, false);
      });
   }
@@ -82,13 +76,14 @@
     table = $('#idTableModbusMapDO').DataTable();
     var json_request = JSON.stringify(
        { classe     : 'DO',
+         thread     : 'MODBUS',
          tech_id    : $('#idModalEditDO #idModalEditTechID').val().toUpperCase(),
          acronyme   : $('#idModalEditDO #idModalEditAcronyme').val().toUpperCase(),
          map_tech_id: $('#idModalEditDO #idModalEditWagoTechID').val().toUpperCase(),
          map_tag    : $('#idModalEditDO #idModalEditWagoTag').val().toUpperCase(),
        }
      );
-    Send_to_API ( 'POST', "/api/process/modbus/map/set", json_request, function ()
+    Send_to_API ( 'POST', "/api/map/set", json_request, function ()
      { $('#idTableModbusMapDO').DataTable().ajax.reload(null, false);
      });
   }
@@ -98,6 +93,7 @@
     $('#idModalEditAI').modal("hide");
     var json_request = JSON.stringify(
        { classe     : 'AI',
+         thread     : 'MODBUS',
          tech_id    : $('#idModalEditAI #idModalEditTechID').val().toUpperCase(),
          acronyme   : $('#idModalEditAI #idModalEditAcronyme').val().toUpperCase(),
          map_tech_id: $('#idModalEditAI #idModalEditWagoTechID').val().toUpperCase(),
@@ -110,7 +106,7 @@
          map_reponse_vocale : $('#idModalEditAI #idModalEditMapReponseVoc').val(),
        }
      );
-    Send_to_API ( 'POST', "/api/process/modbus/map/set", json_request, function ()
+    Send_to_API ( 'POST', "/api/map/set", json_request, function ()
      { $('#idTableModbusMapAI').DataTable().ajax.reload(null, false);
      });
   }
@@ -120,6 +116,7 @@
     $('#idModalEditAI').modal("hide");
     var json_request = JSON.stringify(
        { classe     : 'AO',
+         thread     : 'MODBUS',
          tech_id    : $('#idModalEditAO #idModalEditTechID').val().toUpperCase(),
          acronyme   : $('#idModalEditAO #idModalEditAcronyme').val().toUpperCase(),
          map_tech_id: $('#idModalEditAO #idModalEditWagoTechID').val().toUpperCase(),
@@ -132,7 +129,7 @@
          map_reponse_vocale : $('#idModalEditAO #idModalEditMapReponseVoc').val(),
        }
      );
-    Send_to_API ( 'POST', "/api/process/modbus/map/set", json_request, function ()
+    Send_to_API ( 'POST', "/api/map/set", json_request, function ()
      { $('#idTableModbusMapAI').DataTable().ajax.reload(null, false);
      });
   }
@@ -377,7 +374,7 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/process/modbus/map/list",	type : "GET", dataSrc: "mappings", data: { "classe": "DI" },
+         ajax: {	url : "/api/map/list",	type : "GET", dataSrc: "mappings", data: { "thread": "MODBUS", "classe": "DI" },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
@@ -411,7 +408,7 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/process/modbus/map/list",	type : "GET", dataSrc: "mappings", data: { "classe": "DO" },
+         ajax: {	url : "/api/map/list",	type : "GET", dataSrc: "mappings", data: { "thread": "MODBUS", "classe": "DO" },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
@@ -445,7 +442,7 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/process/modbus/map/list",	type : "GET", dataSrc: "mappings", data: { "classe": "AI" },
+         ajax: {	url : "/api/map/list",	type : "GET", dataSrc: "mappings", data: { "thread": "MODBUS", "classe": "AI" },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
@@ -486,7 +483,7 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/process/modbus/map/list",	type : "GET", dataSrc: "mappings", data: { "classe": "AO" },
+         ajax: {	url : "/api/map/list",	type : "GET", dataSrc: "mappings", data: { "thread": "MODBUS", "classe": "AO" },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:

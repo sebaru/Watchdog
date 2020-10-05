@@ -147,7 +147,7 @@
        return;
      }
 
-    gchar *tech_id = Normaliser_as_tech_id ( Json_get_string ( request, "tech_id" ) );
+    gchar *tech_id = Normaliser_as_ascii ( Json_get_string ( request, "tech_id" ) );
     if (!tech_id)
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
@@ -349,7 +349,7 @@
        return;
      }
 
-    gchar *tech_id = Normaliser_as_tech_id ( Json_get_string ( request, "tech_id" ) );
+    gchar *tech_id = Normaliser_as_ascii ( Json_get_string ( request, "tech_id" ) );
     if (!tech_id)
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");

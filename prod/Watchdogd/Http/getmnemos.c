@@ -55,7 +55,7 @@
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres tech_id");
        return;
      }
-    Normaliser_as_tech_id ( tech_id );
+    Normaliser_as_ascii ( tech_id );
 
     gchar *classe = g_hash_table_lookup ( query, "classe" );
     if (!classe)
@@ -126,9 +126,9 @@
        return;
      }
 
-    gchar   *tech_id  = Normaliser_as_tech_id ( Json_get_string ( request,"tech_id" ) );
-    gchar   *acronyme = Normaliser_as_tech_id ( Json_get_string ( request,"acronyme" ) );
-    gchar   *classe   = Normaliser_as_tech_id ( Json_get_string ( request,"classe" ) );
+    gchar   *tech_id  = Normaliser_as_ascii ( Json_get_string ( request,"tech_id" ) );
+    gchar   *acronyme = Normaliser_as_ascii ( Json_get_string ( request,"acronyme" ) );
+    gchar   *classe   = Normaliser_as_ascii ( Json_get_string ( request,"classe" ) );
 
     if ( ! strcasecmp ( classe, "CI" ) )
      { struct DLS_CI *ci=NULL;
@@ -172,15 +172,22 @@
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
 
-    if ( ! (request && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
-     { if (request) json_node_unref(request);
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
+       return;
+     }
+
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
+     { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    gchar   *tech_id  = Normaliser_as_tech_id ( Json_get_string ( request,"tech_id" ) );
-    gchar   *acronyme = Normaliser_as_tech_id ( Json_get_string ( request,"acronyme" ) );
-    gchar   *classe   = Normaliser_as_tech_id ( Json_get_string ( request,"classe" ) );
+    gchar   *tech_id  = Normaliser_as_ascii ( Json_get_string ( request,"tech_id" ) );
+    gchar   *acronyme = Normaliser_as_ascii ( Json_get_string ( request,"acronyme" ) );
+
+    gchar   *classe = NULL;
+    if (Json_has_member ( request, "classe" )) { classe = Normaliser_as_ascii ( Json_get_string ( request,"classe" ) ); }
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
@@ -189,8 +196,7 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine),
-              "SELECT DISTINCT(tech_id) FROM dictionnaire WHERE tech_id LIKE '%%%s%%'", tech_id);
+    g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) FROM dictionnaire WHERE tech_id LIKE '%%%s%%'", tech_id);
     if (classe)
      { g_strlcat ( chaine,  " AND classe='", sizeof(chaine) );
        g_strlcat ( chaine, classe, sizeof(chaine) );

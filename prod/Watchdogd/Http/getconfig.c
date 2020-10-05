@@ -123,7 +123,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_config_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
-  { gchar *buf, requete[256];
+  { gchar *buf, requete[256], critere[128];
     gsize taille_buf;
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -133,13 +133,24 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
 
-    gchar *process = g_hash_table_lookup ( query, "process" );
-    if (!process)
+
+    gchar *thread = Normaliser_as_ascii ( g_hash_table_lookup ( query, "thread" ) );
+    gchar *param   = Normaliser_as_ascii ( g_hash_table_lookup ( query, "param" ) );
+    if (!thread && !param)
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    g_snprintf( requete, sizeof(requete), "SELECT * FROM config WHERE nom_thread='%s'", process );
+    g_snprintf( requete, sizeof(requete), "SELECT * FROM config WHERE 1=1 ");
+    if (thread)
+     { g_snprintf( critere, sizeof(critere), " AND nom_thread LIKE '%s'", thread );
+       g_strlcat ( requete, critere, sizeof(requete) );
+     }
+
+    if (param)
+     { g_snprintf( critere, sizeof(critere), " AND nom LIKE '%s'", param );
+       g_strlcat ( requete, critere, sizeof(requete) );
+     }
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
@@ -147,7 +158,7 @@
        return;
      }
 
-    SQL_Select_to_JSON ( builder, "parametres", requete );
+    SQL_Select_to_JSON ( builder, "configs", requete );
 
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
