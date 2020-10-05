@@ -34,6 +34,7 @@
 
        document.getElementById("idConfigInstance").innerHTML = Response.instance;
        document.getElementById("idConfigMaster").innerHTML = (Response.instance_is_master ? "TRUE" : "FALSE");
+       document.getElementById("idConfigMasterHost").innerHTML = Response.master_host;
        document.getElementById("idConfigVersion").innerHTML = Response.version;
        document.getElementById("idConfigRunAs").innerHTML = Response.run_as;
        document.getElementById("idConfigStarted").innerHTML = Response.started;
