@@ -10,6 +10,7 @@
         { $('#idSelectedInstance').append("<option value='"+instance.instance_id+"'"+
                                           (instance.instance_id == Get_locale_instance() ? "selected" : "")+">"+
                                           instance.instance_id+"</option>"); } );
+       $('#idTitleInstance').text(Get_locale_instance());
      });
   }
 /********************************************* Redirige la page ***************************************************************/
@@ -28,3 +29,14 @@
 /********************************************* Redirige la page ***************************************************************/
  function Change_selected_instance ( instance )
   { Set_locale_instance ( $('#idSelectedInstance').val() ); }
+
+/********************************************* Reload Process *****************************************************************/
+ function Process_reload ( instance, thread, hard )
+  { var json_request = JSON.stringify(
+       { instance: instance,
+         thread  : thread,
+         hard    : (hard === "true" ? true : false),
+       }
+     );
+    Send_to_API ( "POST", "/api/process/reload", json_request, null, null);
+  }

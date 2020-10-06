@@ -192,6 +192,15 @@
     return(json_object_get_array_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
+/* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
+/* Entrée: la query, le nom du parametre                                                                                      */
+/* Sortie: la chaine de caractere                                                                                             */
+/******************************************************************************************************************************/
+ JsonObject *Json_get_object ( JsonNode *query, gchar *chaine )
+  { JsonObject *object = json_node_get_object (query);
+    return(json_object_get_object_member ( object, chaine ));
+  }
+/******************************************************************************************************************************/
 /* Json_get_int: Recupere l'entier dont le nom est en parametre                                                               */
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */

@@ -10,6 +10,10 @@
      });
     Send_to_API ( 'POST', "/api/process/smsg/set", json_request, null );
   }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function GSM_Reload ( )
+  { Process_reload ( Get_locale_instance(), "SMSG", false );
+  }
 /************************************ Demande l'envoi d'un SMS de test ********************************************************/
  function GSM_test ( )
   { var json_request = JSON.stringify(
@@ -20,8 +24,6 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   {
-    $('#idTitleInstance').text(Get_locale_instance());
-
     Send_to_API ( "GET", "/api/process/smsg/status?instance="+Get_locale_instance(), null, function(Response)
      { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
                                   else { $('#idAlertThreadNotRunning').show(); }
