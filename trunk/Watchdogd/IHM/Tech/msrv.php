@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container">
 
  <div class="row m-2">
    <h3><i class="fas fa-crown text-danger"></i> Statut du Processus MSRV sur <strong id='idTitleInstance'></strong></h3>
