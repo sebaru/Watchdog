@@ -673,6 +673,12 @@ end:
           g_free(is_master);
         }
 
+       gchar *master_host = Recuperer_configDB_by_nom ( "msrv", "master_host" );
+       if (master_host)
+        { g_snprintf( Config.master_host, sizeof(Config.master_host), "%s", master_host );
+          g_free(master_host);
+        }
+
        Print_config();
 /************************************* Création des zones de bits internes dynamiques *****************************************/
        Partage->Dls_data_DI     = NULL;

@@ -1207,6 +1207,11 @@
           SQL_Write ( requete );
           g_free(requete);
 
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_REGISTRE WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
+          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
+          SQL_Write ( requete );
+          g_free(requete);
+
           g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
           requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
           SQL_Write ( requete );

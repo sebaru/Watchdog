@@ -41,15 +41,12 @@
   }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Load_page ()
-  { console.log ("in load process !");
-
-    $('#idTitleInstance').text(Get_locale_instance());
-
+  { $('#idTitleInstance').val(Get_target_instance());
     $('#idTableProcess').DataTable(
        { pageLength : 25,
          fixedHeader: true,
          ajax: {	url : "/api/process/list",	type : "GET", dataSrc: "Process",
-                 data: { "instance": Get_locale_instance() },
+                 data: { "instance": Get_target_instance() },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:

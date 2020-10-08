@@ -75,14 +75,29 @@
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error"); }
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_config_list: Fourni une list JSON des configs Watchdog dans le domaine                                    */
+/* Http_Modifier_Config: Modifie une entrée de la table de configuration                                                      */
+/* Entrées: l'element Json a positionner                                                                                      */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Http_Modifier_config ( JsonObject *object, const gchar *member_name, JsonNode *member_node, gpointer user_data )
+  { gchar *conditions = user_data;
+    gchar requete[256];
+    gchar *valeur = Normaliser_chaine ( json_object_get_string_member ( object, member_name ) );
+    gchar *param  = Normaliser_chaine ( member_name );
+    g_snprintf( requete, sizeof(requete), "UPDATE config set valeur='%s' WHERE %s AND nom='%s'", valeur, conditions, param );
+    SQL_Write ( requete );
+    g_free(valeur);
+    g_free(param);
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_config_set: Modifie une liste d'entrée dans la table config                                                   */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Http_traiter_config_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
   { GBytes *request_brute;
-    gchar requete[256];
+    gchar critere[256];
     gsize taille;
     if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -99,22 +114,26 @@
        return;
      }
 
-    if ( ! (Json_has_member ( request, "id" ) && Json_has_member ( request, "valeur" ) ) )
+    if ( ! (Json_has_member ( request, "instance" ) && Json_has_member ( request, "thread" ) && Json_has_member ( request, "parametres" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    gchar *valeur = Normaliser_chaine ( Json_get_string( request, "valeur" ) );
-    g_snprintf( requete, sizeof(requete), "UPDATE config SET valeur='%s' WHERE id=%d", valeur, Json_get_int ( request, "id" ) );
-    Audit_log ( session, "Config id %d changed to '%s'", Json_get_int ( request, "id" ), valeur );
-    json_node_unref(request);
-    g_free(valeur);
+    gchar *instance;
+    if (!strcasecmp(Json_get_string( request, "instance" ), "MASTER") || Config.instance_is_master == FALSE)
+     { instance = g_strdup(g_get_host_name()); }
+    else instance = Normaliser_chaine ( Json_get_string( request, "instance" ) );
 
-    if (SQL_Write ( requete ))
-     { soup_message_set_status (msg, SOUP_STATUS_OK); }
-    else
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error"); }
+    gchar *thread   = Normaliser_chaine ( Json_get_string( request, "thread" ) );
+    g_snprintf( critere, sizeof(critere), " instance_id='%s' AND nom_thread='%s' ",instance, thread );
+    g_free(instance);
+    g_free(thread);
+    json_object_foreach_member ( Json_get_object(request, "parametres"), Http_Modifier_config, critere );
+
+    Audit_log ( session, "Config for '%s':'%s' changed", Json_get_string( request, "instance" ), Json_get_string( request, "thread" ) );
+    json_node_unref(request);
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_config_list: Fourni une list JSON des configs Watchdog dans le domaine                                    */
@@ -134,14 +153,21 @@
     if (!Http_check_session( msg, session, 6 )) return;
 
 
-    gchar *thread = Normaliser_as_ascii ( g_hash_table_lookup ( query, "thread" ) );
-    gchar *param   = Normaliser_as_ascii ( g_hash_table_lookup ( query, "param" ) );
-    if (!thread && !param)
+    gchar *instance = Normaliser_as_ascii ( g_hash_table_lookup ( query, "instance" ) );
+    gchar *thread   = Normaliser_as_ascii ( g_hash_table_lookup ( query, "thread" ) );
+    gchar *param    = Normaliser_as_ascii ( g_hash_table_lookup ( query, "param" ) );
+    if (!instance && !thread && !param)
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
+    if (!instance || !strcasecmp(instance, "MASTER")) { instance = g_get_host_name(); }
 
     g_snprintf( requete, sizeof(requete), "SELECT * FROM config WHERE 1=1 ");
+    if (instance)
+     { g_snprintf( critere, sizeof(critere), " AND instance_id LIKE '%s'", instance );
+       g_strlcat ( requete, critere, sizeof(requete) );
+     }
+
     if (thread)
      { g_snprintf( critere, sizeof(critere), " AND nom_thread LIKE '%s'", thread );
        g_strlcat ( requete, critere, sizeof(requete) );

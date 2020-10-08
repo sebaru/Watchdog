@@ -310,9 +310,10 @@
 
 /*************************************************** WS Reload library ********************************************************/
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading start for '%s' (hard=%d)", __func__, thread, hard );
-         if ( ! strcasecmp( thread, "dls" ) )  { Partage->com_dls.Thread_reload  = TRUE; }
+         if ( ! strcasecmp( thread, "dls" ) )     { Partage->com_dls.Thread_reload  = TRUE; }
     else if ( ! strcasecmp( thread, "archive" ) ) { Partage->com_arch.Thread_reload = TRUE; }
-    else if ( ! strcasecmp( thread, "http" ) ) { Cfg_http.lib->Thread_reload     = TRUE; }
+    else if ( ! strcasecmp( thread, "msrv" ) )    { Partage->com_msrv.Thread_run    = FALSE; }
+    else if ( ! strcasecmp( thread, "http" ) )    { Cfg_http.lib->Thread_reload     = TRUE; }
     else if ( hard )
      { Decharger_librairie_par_prompt ( thread );
        Charger_librairie_par_prompt ( thread );
