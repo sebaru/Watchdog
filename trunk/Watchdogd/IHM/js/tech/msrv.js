@@ -22,8 +22,6 @@
     Send_to_API ( "GET", "/api/config/get?instance="+Get_target_instance()+"&thread=MSRV", null, function(Response)
      { var parametre={};
        Response.configs.map ( function (item) { parametre[item.nom] = item.valeur; console.log("test"+item.nom+" "+item.valeur); } );
-       console.log(parametre);
-       console.log(parametre.instance_is_master);
        $('#idMSRVIsMaster').val( parametre.instance_is_master );
        $('#idMSRVMasterHost').val( parametre.master_host );
        $('#idMSRVDescription').val( parametre.description );
