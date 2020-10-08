@@ -68,7 +68,7 @@
  extern struct DB *Rechercher_Tempo ( gchar *tech_id, gchar *acronyme );
  extern void Dls_TEMPO_to_json ( JsonBuilder *builder, struct DLS_TEMPO *bit );
 
- extern void Charger_confDB_Registre ( void );                                                       /* Dans Mnemo_registre.c */
+ extern void Charger_confDB_Registre ( gchar *tech_id );                                             /* Dans Mnemo_registre.c */
  extern void Updater_confDB_Registre ( void );
  extern gboolean Mnemo_auto_create_REGISTRE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src );
  extern gboolean Recuperer_mnemos_R_by_map_question_vocale ( struct DB **db_retour, gchar *map_snips );

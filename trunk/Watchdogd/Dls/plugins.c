@@ -138,6 +138,7 @@
         }
        liste_bit = g_slist_next(liste_bit);
      }
+    Charger_confDB_Registre ( plugin->plugindb.tech_id );
     liste_bit = Partage->Dls_data_MSG;                                                /* Decharge tous les messages du module */
     while(liste_bit)
      { struct DLS_MESSAGES *msg = liste_bit->data;
