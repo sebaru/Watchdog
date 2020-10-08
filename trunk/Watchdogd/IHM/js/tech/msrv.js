@@ -18,7 +18,7 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  {
+  { $('#idTitleInstance').val(Get_target_instance());
     Send_to_API ( "GET", "/api/config/get?instance="+Get_target_instance()+"&thread=MSRV", null, function(Response)
      { var parametre={};
        Response.configs.map ( function (item) { parametre[item.nom] = item.valeur; console.log("test"+item.nom+" "+item.valeur); } );

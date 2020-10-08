@@ -23,7 +23,7 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  {
+  { $('#idTitleInstance').val(Get_target_instance());
     Send_to_API ( "GET", "/api/process/smsg/status?instance="+Get_target_instance(), null, function(Response)
      { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
                                   else { $('#idAlertThreadNotRunning').show(); }

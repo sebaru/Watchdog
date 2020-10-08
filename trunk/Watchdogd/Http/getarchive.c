@@ -44,7 +44,7 @@
     gsize taille, taille_buf;
     gchar *buf, requete[256];
 
-    if (msg->method != SOUP_METHOD_PUT)
+    if (msg->method != SOUP_METHOD_PUT || Config.instance_is_master == FALSE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
