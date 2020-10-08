@@ -121,7 +121,8 @@
      }
 
     gchar *instance;
-    if (!strcasecmp(Json_get_string( request, "instance" ), "MASTER")) { instance = g_strdup(g_get_host_name()); }
+    if (!strcasecmp(Json_get_string( request, "instance" ), "MASTER") || Config.instance_is_master == FALSE)
+     { instance = g_strdup(g_get_host_name()); }
     else instance = Normaliser_chaine ( Json_get_string( request, "instance" ) );
 
     gchar *thread   = Normaliser_chaine ( Json_get_string( request, "thread" ) );

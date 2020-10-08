@@ -167,7 +167,7 @@
 
       <div class ="nav-item ml-2">
         <div class="input-group">
-  		      <select onchange="Change_selected_instance()" id="idSelectedInstance" class="custom-select text-info"></select>
+  		      <select onchange="Change_target_instance()" id="idTargetInstance" class="custom-select text-info"></select>
 					   </div>
       </div>
 

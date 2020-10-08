@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container">
 
  <div class="row m-2">
    <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Statut du GSM sur <strong id='idTitleInstance'></strong></h3>
