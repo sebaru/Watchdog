@@ -149,10 +149,11 @@ printf("Afficher_propriete: debut\n");
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
 
-    switch (infos->Selection.type)
+/*    switch (infos->Selection.type)
      { case TYPE_MOTIF      : Changer_couleur_motif_directe ( infos->Selection.trame_motif ); break;
        default: printf("Changer_couleur_directe: Type de selection inconnu\n");
      }
+*/
   }
 /**********************************************************************************************************/
 /* Mettre_a_jour_position: S'occupe des rulers et des entry posxy pour affichage position souris/objet    */

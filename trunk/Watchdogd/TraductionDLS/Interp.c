@@ -637,7 +637,7 @@
 /******************************************************************************************************************************/
  struct ACTION *New_action_icone( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
-    int taille, rouge, vert, bleu, mode, coul, cligno;
+    int taille, mode, coul, cligno;
     gchar *color;
 
     mode   = Get_option_entier ( options, MODE   ); if (mode   == -1) mode   = 0;
@@ -647,27 +647,29 @@
     action = New_action();
     action->alors = New_chaine( taille );
     switch (coul)
-     { case ROUGE   : rouge = 255; vert =   0; bleu =   0; color="red"; break;
-       case VERT    : rouge =   0; vert = 255; bleu =   0; color="lime"; break;
-       case BLEU    : rouge =   0; vert =   0; bleu = 255; color="blue"; break;
-       case JAUNE   : rouge = 255; vert = 255; bleu =   0; color="yellow"; break;
-       case ORANGE  : rouge = 255; vert = 190; bleu =   0; color="orange"; break;
-       case BLANC   : rouge = 255; vert = 255; bleu = 255; color="white"; break;
-       case GRIS    : rouge = 127; vert = 127; bleu = 127; color="lightgray"; break;
-       case KAKI    : rouge =   0; vert = 100; bleu =   0; color="brown"; break;
-       default      : rouge = vert = bleu = 0; color="black";
+     { case ROUGE   : color="red"; break;
+       case VERT    : color="lime"; break;
+       case BLEU    : color="blue"; break;
+       case JAUNE   : color="yellow"; break;
+       case ORANGE  : color="orange"; break;
+       case BLANC   : color="white"; break;
+       case GRIS    : color="lightgray"; break;
+       case KAKI    : color="brown"; break;
+       default      : color="black";
      }
-    if (alias->type==ALIAS_TYPE_STATIC)
-     { g_snprintf( action->alors, taille,
-                   "  if (vars->bit_comm_out) SI(%d, 0, 0, 100, 0, 1); else SI(%d,%d,%d,%d,%d,%d);\n",
-                     alias->num, alias->num, mode, rouge, vert, bleu, cligno );
-     }
-    else
+    if (alias->num==-1)
      { g_snprintf( action->alors, taille,
                    "  if (vars->bit_comm_out) Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, 0, \"darkgreen\", 1 );"
                    " else Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, %d, \"%s\", %d );\n",
                      alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
                      alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno );
+     }
+    else
+     { g_snprintf( action->alors, taille,
+                   "  if (vars->bit_comm_out) Dls_data_set_VISUEL( vars, \"OLD_I\", \"%d\", &_%s_%s, 0, \"darkgreen\", 1 );"
+                   " else Dls_data_set_VISUEL( vars, \"OLD_I\", \"%d\", &_%s_%s, %d, \"%s\", %d );\n",
+                     alias->num, alias->tech_id, alias->acronyme,
+                     alias->num, alias->tech_id, alias->acronyme, mode, color, cligno );
      }
     return(action);
   }
@@ -1212,7 +1214,7 @@
           SQL_Write ( requete );
           g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE  deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
           requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
           SQL_Write ( requete );
           g_free(requete);

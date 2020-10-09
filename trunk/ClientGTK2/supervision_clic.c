@@ -114,9 +114,7 @@
         { printf("Appui sur bouton num_image=%d\n", trame_motif->num_image );
           if ( (trame_motif->num_image % 3) == 1 )
            { Trame_choisir_frame( trame_motif, trame_motif->num_image + 1,                          /* Frame 2: bouton appuyé */
-                                  trame_motif->rouge,
-                                  trame_motif->vert,
-                                  trame_motif->bleu );
+                                  trame_motif->color );
            }
           time(&appui->last_clic);                                                         /* Mémorisation de la date de clic */
         }
@@ -124,7 +122,7 @@
     else if (event->type == GDK_BUTTON_RELEASE && appui)
      { if (appui->motif->type_gestion == TYPE_BOUTON)                                     /* On met la frame 1: bouton relevé */
         { if ( (trame_motif->num_image % 3) == 2 )
-           { Trame_choisir_frame( appui, trame_motif->num_image - 1, appui->rouge, appui->vert, appui->bleu );
+           { Trame_choisir_frame( appui, trame_motif->num_image - 1, appui->color );
              switch ( trame_motif->motif->type_dialog )
               { case ACTION_IMMEDIATE: Envoyer_action_immediate( trame_motif ); break;
                 case ACTION_CONFIRME : Envoyer_action_confirme( trame_motif );  break;

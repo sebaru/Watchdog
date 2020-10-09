@@ -40,7 +40,6 @@
     gint    icone_id;                                                                           /* Correspond au fichier .gif */
     gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                                 /* "Vanne gaz chaudière" */
     guint   access_level;                                                            /* Nom du groupe d'appartenance du motif */
-    gint    bit_controle;                                                                                       /* Ixxx, Cxxx */
     gchar   clic_tech_id[32];                                                  /* tech id du dls a positionner si clic gauche */
     gchar   clic_acronyme[64];                                                /* acronyme du dls a positionner si clic gauche */
     gint    rafraich;                                                         /* Temps de rafraichissement du motif à l'ecran */
@@ -49,10 +48,8 @@
     gint    largeur;                                                                   /* Taille de l'image sur le synoptique */
     gint    hauteur;
     gint    angle;
+    gchar   def_color[16];                                                    /* acronyme du dls a positionner si clic gauche */
     gchar   type_dialog;                                             /* Type de la boite de dialogue pour le clic de commande */
-    guchar  rouge0;
-    guchar  vert0;
-    guchar  bleu0;
     gchar   type_gestion;                                                                      /* Statique/dynamique/cyclique */
     gint    layer;
     gchar   tech_id[32];                                                                         /* Visuel Acronyme du cadran */

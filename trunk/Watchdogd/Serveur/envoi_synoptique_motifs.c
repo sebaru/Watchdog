@@ -116,27 +116,23 @@
  void Envoyer_bit_init_motif ( struct CLIENT *client, GSList *liste_bit_init )
   { struct CMD_ETAT_BIT_CTRL init_etat;
     while(liste_bit_init)                                         /* Envoi de la valeur d'initialisation des bits I au client */
-     { guint bit_controle;
-       bit_controle = GPOINTER_TO_INT( liste_bit_init->data );
+     { struct DLS_VISUEL *visuel = liste_bit_init->data;
 
-       if (bit_controle<NBR_BIT_CONTROLE)                                                          /* Verification des bornes */
-        { if ( ! g_slist_find(client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) ) )     /* Ajout dans la liste recurrente */
-           { client->Liste_bit_syns = g_slist_prepend( client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) );
-             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "Envoyer_bit_init_motif: ajout du bit_syn %03d dans la liste d'envoi recurrent",
-                       bit_controle );
-           }
+       if ( ! g_slist_find(client->Liste_bit_syns, visuel) )                                /* Ajout dans la liste recurrente */
+        { client->Liste_bit_syns = g_slist_prepend( client->Liste_bit_syns, visuel );
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                   "Envoyer_bit_init_motif: ajout du bit_syn %s:%s dans la liste d'envoi recurrent",
+                    visuel->tech_id, visuel->acronyme );
+        }
 
-          init_etat.num    = bit_controle;                          /* Initialisation de la structure avant envoi au client ! */
-          init_etat.etat   = Partage->i[ bit_controle ].etat;
-          init_etat.rouge  = Partage->i[ bit_controle ].rouge;
-          init_etat.vert   = Partage->i[ bit_controle ].vert;
-          init_etat.bleu   = Partage->i[ bit_controle ].bleu;
-          init_etat.cligno = Partage->i[ bit_controle ].cligno;
-          Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
-                        (gchar *)&init_etat, sizeof(struct CMD_ETAT_BIT_CTRL) );
-         }
-      liste_bit_init = g_slist_remove (liste_bit_init, liste_bit_init->data);
+       init_etat.etat   = visuel->mode;
+       init_etat.cligno = visuel->cligno;
+       g_snprintf( init_etat.color, sizeof(init_etat.color), "%s", visuel->color );
+       g_snprintf( init_etat.tech_id, sizeof(init_etat.tech_id), "%s", visuel->tech_id );
+       g_snprintf( init_etat.acronyme, sizeof(init_etat.acronyme), "%s", visuel->acronyme );
+       Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
+                     (gchar *)&init_etat, sizeof(struct CMD_ETAT_BIT_CTRL) );
+       liste_bit_init = g_slist_remove (liste_bit_init, visuel);
      }
   }
 /******************************************************************************************************************************/
@@ -186,12 +182,14 @@
           g_free(motif);
         }
 
-       if ( tag == TAG_SUPERVISION && motif && (! g_slist_find(liste_bit_init, GINT_TO_POINTER(motif->bit_controle) ) ) &&
-            motif->type_gestion != 0 /* TYPE_INERTE */
-          )
-        { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(motif->bit_controle) );
-          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "Envoyer_motif_tag: liste des bit_init_syn adding bit i %d", motif->bit_controle );
+       if ( tag == TAG_SUPERVISION && motif && motif->type_gestion != 0 /* TYPE_INERTE */ )
+        { struct DLS_VISUEL *visuel=NULL;
+          Dls_data_get_VISUEL ( motif->tech_id, motif->acronyme, (gpointer)&visuel );
+          if ( visuel && (! g_slist_find(liste_bit_init, visuel ) ) )
+           { liste_bit_init = g_slist_prepend( liste_bit_init, visuel );
+             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                      "Envoyer_motif_tag: liste des bit_init_syn adding bit %s:%s", motif->tech_id, motif->acronyme );
+           }
         }
 
        if ( (motif == NULL) || motifs->nbr_motifs == max_enreg )                  /* Si depassement de tampon ou plus d'enreg */

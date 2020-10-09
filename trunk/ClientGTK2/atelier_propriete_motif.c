@@ -75,8 +75,8 @@
  static GtkWidget *Entry_libelle;                                                      /* Libelle du motif en cours d'edition */
  static GtkWidget *Entry_clic_tech_id;                                            /* tech_id dls a positionner si clic gauche */
  static GtkWidget *Entry_clic_acronyme;                                          /* acronyme dls a positionner si clic gauche */
- static GtkWidget *Spin_bit_ctrl;                                                          /* Bit de controle (Ixxx) du motif */
- static GtkWidget *Entry_bit_ctrl;                                                           /* Mnemonique du bit de controle */
+ static GtkWidget *Entry_tech_id;                                                 /* tech_id dls a positionner si clic gauche */
+ static GtkWidget *Entry_acronyme;                                               /* acronyme dls a positionner si clic gauche */
  static struct TRAME *Trame_preview0;                                                 /* Previsualisation du motif par défaut */
  static struct TRAME *Trame_preview1;                                                      /* Previsualisation du motif actif */
  static struct TRAME_ITEM_MOTIF *Trame_motif;                                                  /* Motif en cours de selection */
@@ -117,14 +117,14 @@
     if (Trame_motif->motif->type_gestion == TYPE_DYNAMIQUE ||
         Trame_motif->motif->type_gestion == TYPE_BOUTON )
      { Trame_choisir_frame( Trame_motif_p1, Trame_motif_p1->num_image+1,
-                                            ROUGE1, VERT1, BLEU1 );                    /* frame numero ++ */
+                                            "lime" );                    /* frame numero ++ */
      }
     else if (Trame_motif->motif->type_gestion == TYPE_CYCLIQUE_0N ||
              Trame_motif->motif->type_gestion == TYPE_PROGRESSIF
             )
      { if (top >= Trame_motif->motif->rafraich)
         { Trame_choisir_frame( Trame_motif_p1, Trame_motif_p1->num_image+1,
-                                               ROUGE1, VERT1, BLEU1 );                 /* frame numero ++ */
+                                               "lime" );                 /* frame numero ++ */
           top = 0;                                                            /* Raz pour prochaine frame */
         }
      }
@@ -132,11 +132,11 @@
      { if (top >= Trame_motif->motif->rafraich)
         { if (Trame_motif_p1->num_image == Trame_motif_p1->nbr_images-1)
            { Trame_choisir_frame( Trame_motif_p1, 1,
-                                  ROUGE1, VERT1, BLEU1 );                              /* frame numero ++ */
+                                  "lime" );                              /* frame numero ++ */
            }
           else
            { Trame_choisir_frame( Trame_motif_p1, Trame_motif_p1->num_image+1,
-                                  ROUGE1, VERT1, BLEU1 );                              /* frame numero ++ */
+                                  "lime" );                              /* frame numero ++ */
            }
           top = 0;                                                            /* Raz pour prochaine frame */
         }
@@ -145,11 +145,11 @@
      { if (top >= Trame_motif->motif->rafraich)
         { if (Trame_motif_p1->num_image == Trame_motif_p1->nbr_images-1)
            { Trame_choisir_frame( Trame_motif_p1, 2,
-                                  ROUGE1, VERT1, BLEU1 );                              /* frame numero ++ */
+                                  "lime" );                              /* frame numero ++ */
            }
           else
            { Trame_choisir_frame( Trame_motif_p1, Trame_motif_p1->num_image+1,
-                                  ROUGE1, VERT1, BLEU1 );                              /* frame numero ++ */
+                                  "lime" );                              /* frame numero ++ */
            }
           top = 0;                                                            /* Raz pour prochaine frame */
         }
@@ -164,27 +164,19 @@
 /******************************************************************************************************************************/
  void Rafraichir_sensibilite ( void )
   { gtk_widget_set_sensitive( Spin_rafraich, FALSE );
-    gtk_widget_set_sensitive( Spin_bit_ctrl, TRUE );
-    gtk_widget_set_sensitive( Entry_bit_ctrl, TRUE );
     printf("Rafraichir_sensibilite1\n" );
 
     switch( Trame_motif->motif->type_gestion )
      { case TYPE_FOND:
-       case TYPE_INERTE  :   gtk_widget_set_sensitive( Spin_bit_ctrl, FALSE );                      /* Pas de bit de controle */
-                             gtk_widget_set_sensitive( Entry_bit_ctrl, FALSE );
-                             /*gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_ctrl), 0 );*/
-                             Trame_choisir_frame( Trame_motif_p1, 0,
-                                                                  Trame_motif->motif->rouge0,
-                                                                  Trame_motif->motif->vert0,
-                                                                  Trame_motif->motif->bleu0 ); /* frame 0 */
+       case TYPE_INERTE  :   Trame_choisir_frame( Trame_motif_p1, 0, "black" ); /* frame 0 */
                              ok_timer = TIMER_OFF;
                              break;
-       case TYPE_STATIQUE:   Trame_choisir_frame( Trame_motif_p1, 0, ROUGE1, VERT1, BLEU1 );   /* frame 0 */
+       case TYPE_STATIQUE:   Trame_choisir_frame( Trame_motif_p1, 0, "lime" );   /* frame 0 */
                              ok_timer = TIMER_OFF;
                              break;
        case TYPE_BOUTON    :
        case TYPE_PROGRESSIF:
-       case TYPE_DYNAMIQUE : Trame_choisir_frame( Trame_motif_p1, 1, ROUGE1, VERT1, BLEU1 );   /* frame 1 */
+       case TYPE_DYNAMIQUE : Trame_choisir_frame( Trame_motif_p1, 1, "lime" );   /* frame 1 */
                              ok_timer = TIMER_ON;
                              break;
        case TYPE_CYCLIQUE_0N:
@@ -239,6 +231,7 @@
  static void Changer_rafraich( GtkWidget *widget, gpointer data )
   { Trame_motif->motif->rafraich = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Spin_rafraich));
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Changer_couleur: Changement de la couleur du motif                                                     */
 /* Entrée: widget, data = 0 pour un chgmt via propriete DLS, 1 pour chgmt via Couleur par Def             */
@@ -253,8 +246,8 @@ printf("Changer_couleur %p\n", data);
        Trame_motif->motif->rouge0 = r;
        Trame_motif->motif->vert0  = v;
        Trame_motif->motif->bleu0  = b;
-       Trame_peindre_motif( Trame_motif, r, v, b );
-       Trame_peindre_motif( Trame_motif_p0, r, v, b );
+       /*Trame_peindre_motif( Trame_motif, r, v, b );
+       Trame_peindre_motif( Trame_motif_p0, r, v, b );*/
      }
     else                                                                     /* Rafraichissement direct ? */
      { gdouble coul[8];
@@ -262,9 +255,9 @@ printf("Changer_couleur %p\n", data);
        Trame_motif->motif->rouge0 = (guchar)(coul[0]*255.0);
        Trame_motif->motif->vert0  = (guchar)(coul[1]*255.0);
        Trame_motif->motif->bleu0  = (guchar)(coul[2]*255.0);
-       Trame_peindre_motif( Trame_motif, Trame_motif->motif->rouge0,
+       /*Trame_peindre_motif( Trame_motif, Trame_motif->motif->rouge0,
                                          Trame_motif->motif->vert0,
-                                         Trame_motif->motif->bleu0 );
+                                         Trame_motif->motif->bleu0 );*/
      }
   }
 /**********************************************************************************************************/
@@ -296,10 +289,11 @@ printf("Changer_couleur %p\n", data);
     coul[7] = 0.0;
 
     gtk_color_selection_set_color( GTK_COLOR_SELECTION(choix), &coul[0] );
-    g_signal_connect( G_OBJECT( choix ), "color_changed",
-                      G_CALLBACK( Changer_couleur ), choix );
+/*    g_signal_connect( G_OBJECT( choix ), "color_changed",
+                      G_CALLBACK( Changer_couleur ), choix );*/
     gtk_widget_show_all( fen );
   }
+#endif
 /**********************************************************************************************************/
 /* Rafraichir_propriete: Rafraichit les données de la fenetre d'edition des proprietes du motif           */
 /* Entrée: Le trame_motif souhaité                                                                        */
@@ -314,8 +308,8 @@ printf("Changer_couleur %p\n", data);
     if (!F_propriete) return;
     motif = Trame_motif->motif;
 
-    gnome_color_picker_set_i8 ( GNOME_COLOR_PICKER(Couleur_inactive),
-                                motif->rouge0, motif->vert0, motif->bleu0, 0 );
+/*    gnome_color_picker_set_i8 ( GNOME_COLOR_PICKER(Couleur_inactive),
+                                motif->rouge0, motif->vert0, motif->bleu0, 0 );*/
 
     memcpy( &Motif_preview0, trame_motif->motif, sizeof(struct CMD_TYPE_MOTIF) );/* Recopie et ajustement */
     memcpy( &Motif_preview1, trame_motif->motif, sizeof(struct CMD_TYPE_MOTIF) );/* Recopie et ajustement */
@@ -341,7 +335,8 @@ printf("Changer_couleur %p\n", data);
 
     gtk_entry_set_text( GTK_ENTRY(Entry_libelle), motif->libelle );
 
-    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_ctrl), motif->bit_controle );
+    gtk_entry_set_text( GTK_ENTRY(Entry_tech_id), motif->tech_id );
+    gtk_entry_set_text( GTK_ENTRY(Entry_acronyme), motif->acronyme );
     gtk_entry_set_text( GTK_ENTRY(Entry_clic_tech_id), motif->clic_tech_id );
     gtk_entry_set_text( GTK_ENTRY(Entry_clic_acronyme), motif->clic_acronyme );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_rafraich), motif->rafraich );
@@ -375,37 +370,6 @@ printf("Changer_couleur %p\n", data);
 
     Rafraichir_sensibilite();  /* test 18/01/2006 */
     printf("rafraichir_propriete Oktimer = %d\n", ok_timer );
-  }
-/**********************************************************************************************************/
-/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
-/* Entre: widget, data.                                                                                   */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
- void Proto_afficher_mnemo_atelier ( int tag, struct CMD_TYPE_MNEMO_BASE *mnemo )
-  { gchar chaine[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+10];
-    snprintf( chaine, sizeof(chaine), "%s%04d  %s",
-              Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );             /* Formatage */
-    switch (tag)
-     { case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC:
-            break;
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CTRL:
-            gtk_entry_set_text( GTK_ENTRY(Entry_bit_ctrl), chaine );
-            break;
-     }
-  }
-/**********************************************************************************************************/
-/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
-/* Entre: widget, data.                                                                                   */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
- static void Afficher_mnemo_ctrl ( void )
-  { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
-    mnemo.type = MNEMO_MOTIF;
-    mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_bit_ctrl) );
-    Trame_motif->motif->bit_controle = mnemo.num;
-
-    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_TYPE_NUM_MNEMO_CTRL,
-                   (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
 /**********************************************************************************************************/
 /* Editer_propriete_TOR: Mise à jour des parametres de la fenetre edition motif et du motif proprement dit*/
@@ -528,14 +492,13 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     texte = gtk_label_new( _("Control bit (I)") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 2, 3 );
 
-    Spin_bit_ctrl = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
-    g_signal_connect( G_OBJECT(Spin_bit_ctrl), "value-changed",
-                      G_CALLBACK(Afficher_mnemo_ctrl), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_ctrl, 1, 2, 2, 3 );
+    Entry_tech_id = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_clic_tech_id), TRUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_tech_id, 1, 2, 2, 3 );
 
-    Entry_bit_ctrl = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_bit_ctrl), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_ctrl, 2, 4, 2, 3 );
+    Entry_acronyme = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_acronyme), TRUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_acronyme, 2, 4, 2, 3 );
 
     texte = gtk_label_new( _("Type of dialog box") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, 3, 4 );
@@ -579,8 +542,8 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
 
     Couleur_inactive = gnome_color_picker_new();
     gtk_table_attach_defaults( GTK_TABLE(table), Couleur_inactive, 2, 4, 7, 8 );
-    g_signal_connect( G_OBJECT(Couleur_inactive), "color_set",
-                      G_CALLBACK(Changer_couleur), NULL );
+/*    g_signal_connect( G_OBJECT(Couleur_inactive), "color_set",
+                      G_CALLBACK(Changer_couleur), NULL );*/
 
     texte = gtk_label_new( _("Access Level") );                                  /* Combo du type d'acces */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, 8, 9 );

@@ -96,9 +96,7 @@
     Motif_preview0.icone_id = atoi(icone_id);
     Motif_preview0.position_x = TAILLE_ICONE_X/2;
     Motif_preview0.position_y = TAILLE_ICONE_Y/2;
-    Motif_preview0.rouge0 = 0;
-    Motif_preview0.vert0  = 255;
-    Motif_preview0.bleu0  = 0;
+    g_snprintf( Motif_preview0.def_color, sizeof(Motif_preview0), "lime" );
     g_free(icone_id);
     g_free(libelle);
 
@@ -287,18 +285,17 @@
                                              "%s" , Motif_preview0.libelle );
                                  g_snprintf( add_motif.clic_tech_id, sizeof(add_motif.clic_tech_id), "NONE" );
                                  g_snprintf( add_motif.clic_acronyme, sizeof(add_motif.clic_acronyme), "NONE" );
+                                 g_snprintf( add_motif.tech_id, sizeof(add_motif.tech_id), "NONE" );
+                                 g_snprintf( add_motif.acronyme, sizeof(add_motif.acronyme), "NONE" );
                                  add_motif.syn_id = infos->syn.id;
                                  add_motif.access_level = 0;     /* Nom du groupe d'appartenance du motif */
-                                 add_motif.bit_controle = 0;                                /* Ixxx, Cxxx */
                                  add_motif.angle = 0.0; /*infos->Adj_angle->value;*/
                                  add_motif.type_dialog = 0;               /* Type de la boite de dialogue */
                                  add_motif.type_gestion = 0;
                                  /*add_motif.position_x et posy positionné par le serveur */
                                  add_motif.largeur = Trame_motif_p0->gif_largeur;
                                  add_motif.hauteur = Trame_motif_p0->gif_hauteur;
-                                 add_motif.rouge0 = 255;
-                                 add_motif.vert0 = 255;
-                                 add_motif.bleu0 = 255;
+                                 g_snprintf ( add_motif.def_color, sizeof(add_motif.def_color), "white" );
                                  Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_MOTIF,
                                                 (gchar *)&add_motif, sizeof(struct CMD_TYPE_MOTIF) );
                                  printf("Requete envoyée au serveur....\n");

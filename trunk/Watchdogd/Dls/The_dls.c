@@ -98,63 +98,6 @@
   { if (!(avant && apres)) return(0.0);
     else return( apres->tv_sec - avant->tv_sec + (apres->tv_usec - avant->tv_usec)/1000000.0 );
   }
-/**********************************************************************************************************/
-/* SI: Positionnement d'un motif TOR                                                                      */
-/* Entrée: numero, etat                                                                                   */
-/* Sortie: Neant                                                                                          */
-/**********************************************************************************************************/
- void SI( int num, int etat, int rouge, int vert, int bleu, int cligno )
-  { if ( num<0 || num>=NBR_BIT_CONTROLE )
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SI : num %d out of range", num ); }
-       return;
-     }
-
-    if (Partage->i[num].etat   != etat || Partage->i[num].rouge != rouge ||
-        Partage->i[num].vert   != vert || Partage->i[num].bleu  != bleu  ||
-        Partage->i[num].cligno != cligno
-       )
-     { if ( Partage->i[num].last_change + 50 <= Partage->top )   /* Si pas de change depuis plus de 5 sec */
-        { Partage->i[num].changes = 0; }
-
-       if ( Partage->i[num].changes <= 10 )                            /* Si moins de 10 changes en 5 sec */
-        {
-          if ( Partage->i[num].changes == 10 )                  /* Est-ce le dernier change avant blocage */
-           { Partage->i[num].etat   = 0;                     /* Si oui, on passe le visuel en kaki cligno */
-             Partage->i[num].rouge  = 0;
-             Partage->i[num].vert   = 100;                                                   /* Mode Kaki */
-             Partage->i[num].bleu   = 0;
-             Partage->i[num].cligno = 1;                                                    /* Clignotant */
-           }
-          else { Partage->i[num].etat   = etat;  /* Sinon on recopie ce qui est demandé par le plugin DLS */
-                 Partage->i[num].rouge  = rouge;
-                 Partage->i[num].vert   = vert;
-                 Partage->i[num].bleu   = bleu;
-                 Partage->i[num].cligno = cligno;
-               }
-          gchar chaine[20], *color;
-          g_snprintf( chaine, sizeof(chaine), "%d", num );
-               if (rouge == 255 && vert ==   0 && bleu ==   0) color="red";
-          else if (rouge ==   0 && vert == 255 && bleu ==   0) color="lime";
-          else if (rouge ==   0 && vert ==   0 && bleu == 255) color="blue";
-          else if (rouge == 255 && vert == 255 && bleu ==   0) color="yellow";
-          else if (rouge == 255 && vert == 190 && bleu ==   0) color="orange";
-          else if (rouge == 255 && vert == 255 && bleu == 255) color="white";
-          else if (rouge == 127 && vert == 127 && bleu == 127) color="lightgray";
-          else if (rouge ==   0 && vert == 100 && bleu ==   0) color="brown";
-          else color = "black";
-          Dls_data_set_VISUEL ( NULL, "OLD_I", chaine, NULL, etat, color, cligno );
-
-          Partage->i[num].last_change = Partage->top;                               /* Date de la photo ! */
-          pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de i a traiter */
-          Partage->com_msrv.liste_i = g_slist_append( Partage->com_msrv.liste_i,
-                                                      GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Partage->i[num].changes++;                                               /* Un change de plus ! */
-        }
-       Partage->audit_bit_interne_per_sec++;
-     }
-  }
 /******************************************************************************************************************************/
 /* STR_local: Positionnement d'une Tempo retard DLS                                                                           */
 /* Entrée: la structure tempo et son etat                                                                                     */
@@ -315,6 +258,7 @@
     if (bool->etat != valeur)
      { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
                  __func__, bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
+       Partage->audit_bit_interne_per_sec++;
      }
     bool->etat = valeur;
   }
@@ -429,6 +373,7 @@
     if (di->etat != valeur)
      { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_DI '%s:%s'=%d up %d down %d",
                  __func__, di->tech_id, di->acronyme, valeur, di->edge_up, di->edge_down );
+       Partage->audit_bit_interne_per_sec++;
      }
     di->etat = valeur;
   }
@@ -569,6 +514,7 @@
         { pthread_mutex_lock( &Partage->com_msrv.synchro );
           Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, dout );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          Partage->audit_bit_interne_per_sec++;
         }
      }
     dout->etat = etat;
@@ -856,6 +802,7 @@
         }
        else if ( cpt_imp->etat == FALSE )                                                                 /* Passage en actif */
         { cpt_imp->etat = TRUE;
+          Partage->audit_bit_interne_per_sec++;
           cpt_imp->val_en_cours1++;
           if (cpt_imp->val_en_cours1>=ratio)
            { cpt_imp->valeur++;
@@ -1313,7 +1260,7 @@
 
           visu->last_change = Partage->top;                                                             /* Date de la photo ! */
           pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
-          Partage->com_msrv.liste_new_i = g_slist_append( Partage->com_msrv.liste_new_i, visu );
+          Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d",
                     __func__, visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno );
@@ -1669,8 +1616,6 @@
         }
 
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
-
-       SI(1, 1, 255, 0, 0, 0 );                                                                   /* Icone toujours à 1:rouge */
 
        pthread_mutex_lock( &Partage->com_dls.synchro );
        Dls_run_dls_tree( Partage->com_dls.Dls_tree );
