@@ -54,6 +54,7 @@
     Creer_configDB ( NOM_THREAD, "smsbox_apikey", "changeme" );
     Creer_configDB ( NOM_THREAD, "description",   "Ou est le téléphone ?" );
     Creer_configDB ( NOM_THREAD, "debug",         "false" );
+    Creer_configDB ( NOM_THREAD, "nbr_sms",       "0" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Database connexion failed.", __func__ );
@@ -65,6 +66,8 @@
         { g_snprintf( Cfg_smsg.smsbox_apikey, sizeof(Cfg_smsg.smsbox_apikey), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
         { g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "nbr_sms" ) )
+        { Cfg_smsg.nbr_sms = atoi(valeur); }
        else if ( ! g_ascii_strcasecmp ( nom, "description" ) )
         { g_snprintf( Cfg_smsg.description, sizeof(Cfg_smsg.description), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
@@ -698,6 +701,8 @@ reload:
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_from_bus );
     Close_zmq ( Cfg_smsg.zmq_to_master );
+
+    Modifier_configDB_int ( NOM_THREAD, "nbr_sms", Cfg_smsg.nbr_sms );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
