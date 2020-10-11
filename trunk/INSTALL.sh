@@ -38,7 +38,7 @@ if [ "$SOCLE" = "debian" || "$SOCLE" = "raspbian" ]
   apt install -y sox libsox-fmt-all python3-pip mpg123
   apt install -y libjson-glib-dev libmosquitto-dev vlc
   apt install -y libgtk-3-dev libgoocanvas-2.0-dev
-  apt install -y libsoup2.4-dev -t testing
+  apt install -y libsoup2.4-dev
 fi
 
     if [ "$SOCLE" = "fedora" ]
@@ -67,4 +67,4 @@ systemctl daemon-reload
     echo "Son mot de passe est "$NEWPASSWORD
     echo "Le point d'accès pour poursuivre l'installation est http://"`hostname`":5560/install"
 
-systemctl restart Watchdogd
+systemctl enable Watchdogd --now

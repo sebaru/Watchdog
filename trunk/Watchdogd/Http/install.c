@@ -165,6 +165,7 @@
                "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
                "nom='master_host',valeur='%s' "
                "ON DUPLICATE KEY UPDATE valeur=VALUES(valeur)", g_get_host_name(), master_host );
+    Lancer_requete_SQL ( db, chaine );
     g_free(master_host);
     gchar *description = Normaliser_chaine ( Json_get_string(request,"description") );
     g_snprintf( chaine, sizeof(chaine),
