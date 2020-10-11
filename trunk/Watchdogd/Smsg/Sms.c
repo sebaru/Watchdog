@@ -682,13 +682,7 @@ reload:
                       "%s : Sending msg '%s:%s' (%s)", __func__, histo->msg.tech_id, histo->msg.acronyme, histo->msg.libelle_sms );
 
 /*************************************************** Envoi en mode GSM ********************************************************/
-             if (Partage->top < TOP_MIN_ENVOI_SMS)
-              { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,
-                         "%s: Envoi trop tot !! (%s)", __func__, histo->msg.libelle_sms );
-                sleep(1);
-              }
-             else
-              { Smsg_send_to_all_authorized_recipients( &histo->msg ); }
+             Smsg_send_to_all_authorized_recipients( &histo->msg );
            }
           else
            { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG,
