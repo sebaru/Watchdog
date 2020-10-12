@@ -64,17 +64,14 @@
     motif->icone_id     = Json_get_int ( element, "icone" );
     motif->type_dialog  = Json_get_int ( element, "dialog" );
     motif->type_gestion = Json_get_int ( element, "gestion" );
-    motif->rouge0       = Json_get_int ( element, "rouge" );
-    motif->vert0        = Json_get_int ( element, "vert" );
-    motif->bleu0        = Json_get_int ( element, "bleu" );
     motif->layer        = Json_get_int ( element, "layer" );
+    g_snprintf( motif->def_color,     sizeof(motif->def_color),     "%s", Json_get_string( element, "def_color" ) );
     g_snprintf( motif->tech_id,       sizeof(motif->tech_id),       "%s", Json_get_string( element, "tech_id" ) );
     g_snprintf( motif->acronyme,      sizeof(motif->acronyme),      "%s", Json_get_string( element, "acronyme" ) );
     g_snprintf( motif->clic_tech_id,  sizeof(motif->clic_tech_id),  "%s", Json_get_string( element, "clic_tech_id" ) );
     g_snprintf( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", Json_get_string( element, "clic_acronyme" ) );
     g_snprintf( motif->libelle,       sizeof(motif->libelle),       "%s", Json_get_string( element, "libelle" ) );
     motif->access_level = Json_get_int ( element, "access_level" );
-    motif->bit_controle = Json_get_int ( element, "bitctrl" );
     motif->rafraich     = Json_get_int ( element, "rafraich" );
 
     if (page->type == TYPE_PAGE_SUPERVISION)
@@ -84,9 +81,7 @@
         { printf("Erreur creation d'un nouveau motif\n");
           return;                                                          /* Ajout d'un test anti seg-fault */
         }
-       trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */
-       trame_motif->vert   = motif->vert0;                                          /* Sauvegarde etat motif */
-       trame_motif->bleu   = motif->bleu0;                                          /* Sauvegarde etat motif */
+       g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", motif->def_color );
        trame_motif->mode   = 0;                                                     /* Sauvegarde etat motif */
        trame_motif->cligno = 0;                                                     /* Sauvegarde etat motif */
        g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
