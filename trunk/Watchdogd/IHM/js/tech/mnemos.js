@@ -33,7 +33,7 @@
   { table = $('#idTableRegistre').DataTable();
     selection = table.ajax.json().R.filter( function(item) { return (item.acronyme==acronyme) } )[0];
     var json_request = JSON.stringify(
-       { classe   : "RI",
+       { classe   : "R",
          tech_id  : selection.tech_id,
          acronyme : selection.acronyme,
          archivage: $('#idRArchivage'+acronyme).val()
@@ -42,6 +42,22 @@
 
     Send_to_API ( 'POST', "/api/mnemos/set", json_request, function ()
      { $('#idTableRegistre').DataTable().ajax.reload(null, false);
+     });
+  }
+/******************************************************************************************************************************/
+ function Mnemos_MSG_set_sms ( acronyme )
+  { table = $('#idTableMessage').DataTable();
+    selection = table.ajax.json().MSG.filter( function(item) { return (item.acronyme==acronyme) } )[0];
+    var json_request = JSON.stringify(
+       { classe   : "MSG",
+         tech_id  : selection.tech_id,
+         acronyme : selection.acronyme,
+         sms      : $('#idMSGSms'+acronyme).val()
+       }
+     );
+
+    Send_to_API ( 'POST', "/api/mnemos/set", json_request, function ()
+     { $('#idTableMessage').DataTable().ajax.reload(null, false);
      });
   }
 /******************************************************************************************************************************/
@@ -238,14 +254,21 @@
          columns:
            [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
              { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "hidden-xs" },
-             { "data": "audio", "title":"Audio ?",    "className": "hidden-xs" },
-             { "data": "libelle_audio", "title":"Audio",    "className": "hidden-xs" },
-             { "data": "sms", "title":"SMS ?",    "className": "hidden-xs" },
-             { "data": "libelle_sms", "title":"SMS",    "className": "hidden-xs" },
-             { "data": "profil_audio", "title":"Profil Audio",    "className": "hidden-xs" },
              { "data": "enable", "title":"Enable",    "className": "hidden-xs" },
-             { "data": "etat", "title":"Etat",    "className": "hidden-xs" },
+             { "data": "libelle",    "title":"Libellé",    "className": "hidden-xs" },
+             { "data": "libelle_audio", "title":"Libellé Audio",    "className": "hidden-xs" },
+             { "data": "profil_audio", "title":"Profil Audio",    "className": "hidden-xs" },
+             { "data": null, "title":"SMS", "className": "",
+               "render": function (item)
+                 { return("<select id='idMSGSms"+item.acronyme+"' class='custom-select'"+
+                          "onchange=Mnemos_MSG_set_sms('"+item.acronyme+"')>"+
+                          "<option value='0' "+(item.sms==0 ? "selected" : "")+">Non</option>"+
+                          "<option value='1' "+(item.sms==1 ? "selected" : "")+">Oui</option>"+
+                          "<option value='2' "+(item.sms==2 ? "selected" : "")+">GSM Only</option>"+
+                          "<option value='3' "+(item.sms==3 ? "selected" : "")+">SMSBox Only</option>");
+                 }
+             },
+             { "data": "libelle_sms", "title":"Libellé SMS",    "className": "hidden-xs" },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,

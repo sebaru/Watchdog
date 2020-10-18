@@ -124,9 +124,9 @@
     Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
-/* Handle_zmq_message_for_master: Analyse et reagi à un message ZMQ a destination du MSRV                   */
-/* Entrée: le message                                       */
-/* Sortie: rien                                             */
+/* Handle_zmq_message_for_master: Analyse et reagi à un message ZMQ a destination du MSRV                                     */
+/* Entrée: le message                                                                                                         */
+/* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Handle_zmq_message_for_master ( struct ZMQ_TARGET *event, gchar *payload )
   { if ( !strcmp(event->tag,"SET_AI") )

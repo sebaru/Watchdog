@@ -143,12 +143,35 @@
           Audit_log ( session, "Mnemos %s:%s -> archivage = '%d'", tech_id, acronyme, archivage );
         }
      }
+    else if ( ! strcasecmp ( classe, "R" ) )
+     { struct DLS_REGISTRE *reg=NULL;
+       Dls_data_get_R ( tech_id, acronyme, (gpointer)&reg );
+       if ( Json_has_member ( request, "archivage" ) )
+        { gchar chaine[128];
+          gint archivage = Json_get_int ( request, "archivage" );
+          if (reg) { reg->archivage = archivage; }                           /* Si le bit existe, on change sa running config */
+          g_snprintf( chaine, sizeof(chaine), "UPDATE mnemos_R SET archivage='%d' WHERE tech_id='%s' AND acronyme='%s'",
+                      archivage, tech_id, acronyme );
+          SQL_Write ( chaine );                                                   /* Qu'il existe ou non, ou met a jour la DB */
+          Audit_log ( session, "Mnemos %s:%s -> archivage = '%d'", tech_id, acronyme, archivage );
+        }
+     }
     else if ( ! strcasecmp ( classe, "DI" ) )
      { struct DLS_DI *di=NULL;
        if ( Json_has_member ( request, "etat" ) )
         { gboolean etat = Json_get_bool ( request, "etat" );
           Dls_data_set_DI ( NULL, tech_id, acronyme, (gpointer)&di, etat );  /* Si le bit existe, on change sa running config */
           Audit_log ( session, "Mnemos %s:%s -> set to '%d'", tech_id, acronyme, etat );
+        }
+     }
+    if ( ! strcasecmp ( classe, "MSG" ) )
+     { if ( Json_has_member ( request, "sms" ) )
+        { gchar chaine[128];
+          gint sms = Json_get_int ( request, "sms" );
+          g_snprintf( chaine, sizeof(chaine), "UPDATE msgs SET sms='%d' WHERE tech_id='%s' AND acronyme='%s'",
+                      sms, tech_id, acronyme );
+          SQL_Write ( chaine );                                                   /* Qu'il existe ou non, ou met a jour la DB */
+          Audit_log ( session, "Mnemos %s:%s -> SMS = '%d'", tech_id, acronyme, sms );
         }
      }
     /*else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }

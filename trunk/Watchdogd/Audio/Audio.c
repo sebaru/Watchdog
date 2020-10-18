@@ -211,8 +211,8 @@ reload:
 
        histo = &histo_buf;
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "%s : Recu message '%s:%s' (histo->msg.audio=%d, alive=%d)", __func__,
-                histo->msg.tech_id, histo->msg.acronyme, histo->msg.audio, histo->alive );
+                "%s : Recu message '%s:%s' (histo->msg.profil_audio=%s, alive=%d)", __func__,
+                histo->msg.tech_id, histo->msg.acronyme, histo->msg.profil_audio, histo->alive );
 
        if ( Cfg_audio.diffusion_enabled == FALSE &&
             ! (histo->msg.type == MSG_ALERTE || histo->msg.type == MSG_DANGER)
@@ -222,10 +222,10 @@ reload:
           continue;
         }
 
-       if ( histo->alive == 1 && histo->msg.audio )                                                 /* Si le message apparait */
+       if ( histo->alive == 1 && strcasecmp(histo->msg.profil_audio, "P_NONE") )                    /* Si le message apparait */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
-                   "%s : Envoi du message audio '%s:%s' (histo->msg.audio=%d)",
-                    __func__, histo->msg.tech_id, histo->msg.acronyme, histo->msg.audio);
+                   "%s : Envoi du message audio '%s:%s' (histo->msg.profil_audio=%s)",
+                    __func__, histo->msg.tech_id, histo->msg.acronyme, histo->msg.profil_audio);
 
           if (Config.instance_is_master)
            { Envoyer_commande_dls_data( "AUDIO", histo->msg.profil_audio );  /* Positionnement du profil audio via monostable */

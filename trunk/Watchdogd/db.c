@@ -1970,6 +1970,13 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 5044)
+     { g_snprintf( requete, sizeof(requete), "UPDATE TABLE msgs SET profil_audio='P_NONE' WHERE audio=0" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs DROP `audio`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

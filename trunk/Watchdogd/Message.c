@@ -33,7 +33,7 @@
  #include <fcntl.h>
  #include <string.h>
 
- #define MSGS_SQL_SELECT  "SELECT msg.id,msg.libelle,msg.type,syn.libelle,audio,enable,parent_syn.page,syn.page," \
+ #define MSGS_SQL_SELECT  "SELECT msg.id,msg.libelle,msg.type,syn.libelle,enable,parent_syn.page,syn.page," \
                           "sms,libelle_audio,libelle_sms,dls.shortname,syn.id,profil_audio,msg.tech_id,msg.acronyme" \
                           " FROM msgs as msg" \
                           " INNER JOIN dls as dls ON msg.tech_id=dls.tech_id" \
@@ -75,7 +75,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s SET tech_id='%s',acronyme='%s',libelle='%s',libelle_audio='%s',libelle_sms='%s',"
-                "type='%d',audio='0',enable='1',sms='0' "
+                "type='%d',enable='1',sms='0' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), type=VALUES(type)", NOM_TABLE_MSG, msg->tech_id, msg->acronyme,
                 libelle, libelle, libelle, msg->type
               );
@@ -99,47 +99,6 @@
     return(id);
   }
 /******************************************************************************************************************************/
-/* Recuperer_messageDB_with_conditions: Recupération de la liste des ids des messages avec conditions en paramètre            */
-/* Entrée: une database et des conditions                                                                                     */
-/* Sortie: FALSE si probleme                                                                                                  */
-/******************************************************************************************************************************/
- static gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length )
-  { gchar requete[512], critere[80];
-    gboolean retour;
-    struct DB *db;
-
-    g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
-                " WHERE %s AND num<>'-1' ORDER BY parent_syn.page,syn.page,num ", (conditions ? conditions : "1=1")  /* Where */
-              );
-
-    if (start != -1 && length != -1)                                                 /* Critere d'affichage (offset et count) */
-     { g_snprintf( critere, sizeof(critere), " LIMIT %d,%d", start, length );
-       g_strlcat( requete, critere, sizeof(requete) );
-     }
-    else if (length!=-1)
-     { g_snprintf( critere, sizeof(critere), " LIMIT %d", length );
-       g_strlcat( requete, critere, sizeof(requete) );
-     }
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE) Libere_DB_SQL (&db);
-    *db_retour = db;
-    return ( retour );
-  }
-/******************************************************************************************************************************/
-/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                                */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: une GList                                                                                                          */
-/******************************************************************************************************************************/
- gboolean Recuperer_messageDB ( struct DB **db_retour )
-  { return( Recuperer_messageDB_with_conditions ( db_retour, NULL, -1, -1 ) ); }
-/******************************************************************************************************************************/
 /* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                                */
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
@@ -161,51 +120,21 @@
     else
      { g_snprintf( msg->libelle,         sizeof(msg->libelle      ),   "%s", db->row[1]  );      /* Recopie dans la structure */
        g_snprintf( msg->syn_libelle,     sizeof(msg->syn_libelle  ),   "%s", db->row[3]  );
-       g_snprintf( msg->syn_parent_page, sizeof(msg->syn_parent_page), "%s", db->row[6]  );
-       g_snprintf( msg->syn_page,        sizeof(msg->syn_page     ),   "%s", db->row[7]  );
-       g_snprintf( msg->libelle_audio,   sizeof(msg->libelle_audio),   "%s", db->row[9] );
-       g_snprintf( msg->libelle_sms,     sizeof(msg->libelle_sms  ),   "%s", db->row[10] );
-       g_snprintf( msg->dls_shortname,   sizeof(msg->dls_shortname),   "%s", db->row[11] );
-       g_snprintf( msg->profil_audio,    sizeof(msg->profil_audio ),   "%s", db->row[13] );
-       g_snprintf( msg->tech_id,         sizeof(msg->tech_id      ),   "%s", db->row[14] );
-       g_snprintf( msg->acronyme,        sizeof(msg->acronyme     ),   "%s", db->row[15] );
+       g_snprintf( msg->syn_parent_page, sizeof(msg->syn_parent_page), "%s", db->row[5]  );
+       g_snprintf( msg->syn_page,        sizeof(msg->syn_page     ),   "%s", db->row[6]  );
+       g_snprintf( msg->libelle_audio,   sizeof(msg->libelle_audio),   "%s", db->row[8] );
+       g_snprintf( msg->libelle_sms,     sizeof(msg->libelle_sms  ),   "%s", db->row[9] );
+       g_snprintf( msg->dls_shortname,   sizeof(msg->dls_shortname),   "%s", db->row[10] );
+       g_snprintf( msg->profil_audio,    sizeof(msg->profil_audio ),   "%s", db->row[12] );
+       g_snprintf( msg->tech_id,         sizeof(msg->tech_id      ),   "%s", db->row[13] );
+       g_snprintf( msg->acronyme,        sizeof(msg->acronyme     ),   "%s", db->row[14] );
        msg->id          = atoi(db->row[0]);
        msg->type        = atoi(db->row[2]);
-       msg->audio       = atoi(db->row[4]);
-       msg->enable      = atoi(db->row[5]);
-       msg->sms         = atoi(db->row[8]);
-       msg->syn_id      = atoi(db->row[12]);
+       msg->enable      = atoi(db->row[4]);
+       msg->sms         = atoi(db->row[7]);
+       msg->syn_id      = atoi(db->row[11]);
      }
     return(msg);
-  }
-
-/******************************************************************************************************************************/
-/* Rechercher_messageDB_par_id: Recupération du message dont l'id est en parametre                                            */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: une GList                                                                                                          */
-/******************************************************************************************************************************/
- struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( guint id )
-  { struct CMD_TYPE_MESSAGE *message;
-    gchar requete[512];
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(NULL);
-     }
-
-    g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
-                " WHERE msg.id=%d LIMIT 1", id                                                                       /* Where */
-              );
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { Libere_DB_SQL( &db );
-       return(NULL);
-     }
-
-    message = Recuperer_messageDB_suite( &db );
-    if (message) Libere_DB_SQL ( &db );
-    return(message);
   }
 /******************************************************************************************************************************/
 /* Rechercher_messageDB_par_id: Recupération du message dont l'id est en parametre                                            */
