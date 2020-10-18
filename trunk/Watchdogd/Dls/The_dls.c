@@ -1587,6 +1587,7 @@
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
      { gpointer dls_top_10sec=NULL, dls_top_5sec=NULL, dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
        gpointer dls_flipflop_1sec=NULL, dls_flipflop_2hz=NULL;
+       gpointer dls_wait = NULL, dls_tour_per_sec = NULL, dls_bit_per_sec = NULL;
 
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
@@ -1605,6 +1606,21 @@
           Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec,
                               !Dls_data_get_bool ( "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec) );
           last_top_1sec = Partage->top;
+
+          Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
+          Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
+          Partage->audit_bit_interne_per_sec = 0;                                                               /* historique */
+          Dls_data_set_AI ( "SYS", "DLS_BIT_PER_SEC", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold, TRUE );
+
+          Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
+          Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
+          Partage->audit_tour_dls_per_sec = 0;
+          Dls_data_set_AI ( "SYS", "DLS_TOUR_PER_SEC", &dls_tour_per_sec, Partage->audit_tour_dls_per_sec_hold, TRUE );
+          if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
+           { Partage->com_dls.temps_sched += 50; }
+          else if (Partage->audit_tour_dls_per_sec_hold < 80)
+           { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
+          Dls_data_set_AI ( "SYS", "DLS_WAIT", &dls_wait, Partage->com_dls.temps_sched, TRUE );                 /* historique */
         }
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
         { Dls_data_set_bool ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, TRUE );
