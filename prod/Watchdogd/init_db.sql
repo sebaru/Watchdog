@@ -118,6 +118,7 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "/* Default ! */",
   `errorlog` TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "No Error",
   `nbr_ligne` int(11) NOT NULL DEFAULT '0',
+  `debug` TINYINT(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;

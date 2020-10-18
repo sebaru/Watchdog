@@ -89,8 +89,7 @@
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
-    GSList *liste_i;                                                             /* liste de I a traiter dans la distribution */
-    GSList *liste_new_i;                                             /* liste de I (dynamique) a traiter dans la distribution */
+    GSList *liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
     GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Liste_AO;                                                            /* liste de A a traiter dans la distribution */
     struct ZMQUEUE *zmq_msg;                                                           /* Message Queue des messages Watchdog */
@@ -121,7 +120,6 @@
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                                      /* Com avec le thread ARCH */
 
-    struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                                               /* DLS=rw, Sserveur=r */
     GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */
     GSList *Dls_data_BOOL;                                                              /* Liste des bistables et monostables */
     GSList *Dls_data_DI;                                                                  /* Liste des entrees dynamiques TOR */

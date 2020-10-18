@@ -38,29 +38,14 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Gerer_arrive_Ixxx_dls ( void )
-  { gint num, reste;
+  { gint reste;
 
-    if (Partage->com_msrv.liste_i)                                                              /* Traitement des I statiques */
-     { pthread_mutex_lock( &Partage->com_msrv.synchro );                            /* Récupération depuis la liste a traiter */
-       num = GPOINTER_TO_INT(Partage->com_msrv.liste_i->data);                                 /* Recuperation du numero de i */
-       Partage->com_msrv.liste_i = g_slist_remove ( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) );
-       reste = g_slist_length(Partage->com_msrv.liste_i);
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: Recu I(%03d)=%d, r%03d v%03d, b%03d. Reste a traiter %03d", __func__,
-                 num, Partage->i[num].etat,
-                 Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu, reste
-               );
-       Send_zmq ( Partage->com_msrv.zmq_motif, &num, sizeof(num) );
-     }
-
-    if (Partage->com_msrv.liste_new_i)                                                         /* Traitement des I dynamiques */
+    if (Partage->com_msrv.liste_visuel)                                                        /* Traitement des I dynamiques */
      { struct DLS_VISUEL *visu;
        pthread_mutex_lock( &Partage->com_msrv.synchro );                            /* Récupération depuis la liste a traiter */
-       visu = Partage->com_msrv.liste_new_i->data;                                        /* Recuperation du numero du visuel */
-       Partage->com_msrv.liste_new_i = g_slist_remove ( Partage->com_msrv.liste_new_i, visu );
-       reste = g_slist_length(Partage->com_msrv.liste_new_i);
+       visu = Partage->com_msrv.liste_visuel->data;                                       /* Recuperation du numero du visuel */
+       Partage->com_msrv.liste_visuel = g_slist_remove ( Partage->com_msrv.liste_visuel, visu );
+       reste = g_slist_length(Partage->com_msrv.liste_visuel);
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
        Info_new( Config.log, Config.log_msrv, LOG_INFO,

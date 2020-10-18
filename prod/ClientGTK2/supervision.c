@@ -259,9 +259,8 @@
        return;                                                          /* Ajout d'un test anti seg-fault */
      }
     trame_motif->groupe_dpl = Nouveau_groupe();                   /* Numéro de groupe pour le deplacement */
-    trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */
-    trame_motif->vert   = motif->vert0;                                          /* Sauvegarde etat motif */
-    trame_motif->bleu   = motif->bleu0;                                          /* Sauvegarde etat motif */
+printf("New motif %s:%s\n", motif->tech_id, motif->acronyme);
+    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", motif->def_color );
     trame_motif->etat   = 0;                                                     /* Sauvegarde etat motif */
     trame_motif->cligno = 0;                                                     /* Sauvegarde etat motif */
     g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
@@ -275,43 +274,35 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Changer_etat_motif( struct TRAME_ITEM_MOTIF *trame_motif, struct CMD_ETAT_BIT_CTRL *etat_motif )
-  { printf("Changer_etat_motif: %d = %d %d %d etat %d (type %d) cligno=%d %s\n",
-            trame_motif->motif->bit_controle,
-            etat_motif->rouge,
-            etat_motif->vert,
-            etat_motif->bleu, etat_motif->etat, trame_motif->motif->type_gestion, etat_motif->cligno, trame_motif->motif->libelle );
-    trame_motif->rouge  = etat_motif->rouge;                                     /* Sauvegarde etat motif */
-    trame_motif->vert   = etat_motif->vert;                                      /* Sauvegarde etat motif */
-    trame_motif->bleu   = etat_motif->bleu;                                      /* Sauvegarde etat motif */
+  { printf("Changer_etat_motif: %s:%s = %s etat %d (type %d) cligno=%d %s\n",
+            trame_motif->motif->tech_id,
+            trame_motif->motif->acronyme, etat_motif->color,
+            etat_motif->etat, trame_motif->motif->type_gestion, etat_motif->cligno, trame_motif->motif->libelle );
+    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", etat_motif->color );
     trame_motif->etat   = etat_motif->etat;                                      /* Sauvegarde etat motif */
     trame_motif->cligno = etat_motif->cligno;                                    /* Sauvegarde etat motif */
+
     switch( trame_motif->motif->type_gestion )
      { case TYPE_INERTE: break;                          /* Si le motif est inerte, nous n'y touchons pas */
        case TYPE_STATIQUE:
-            Trame_choisir_frame( trame_motif, 0, etat_motif->rouge,
-                                                 etat_motif->vert,
-                                                 etat_motif->bleu );                           /* frame 1 */
+            Trame_choisir_frame( trame_motif, 0, etat_motif->color );                           /* frame 1 */
             break;
        case TYPE_BOUTON:
             if ( ! (etat_motif->etat % 2) )
              { Trame_choisir_frame( trame_motif, 3*(etat_motif->etat/2),
-                                    etat_motif->rouge, etat_motif->vert, etat_motif->bleu );
+                                    etat_motif->color );
              } else
              { Trame_choisir_frame( trame_motif, 3*(etat_motif->etat/2) + 1,
-                                    etat_motif->rouge, etat_motif->vert, etat_motif->bleu );
+                                    etat_motif->color );
              }
             break;
        case TYPE_DYNAMIQUE:
-            Trame_choisir_frame( trame_motif, etat_motif->etat, etat_motif->rouge,
-                                                                etat_motif->vert,
-                                                                etat_motif->bleu );            /* frame 1 */
+            Trame_choisir_frame( trame_motif, etat_motif->etat, etat_motif->color );            /* frame 1 */
        case TYPE_PROGRESSIF:
-            Trame_peindre_motif ( trame_motif, etat_motif->rouge,
-                                               etat_motif->vert,
-                                               etat_motif->bleu );
+            Trame_peindre_motif ( trame_motif, etat_motif->color );
             break;
-       default: printf("Changer_etat_motif: type gestion non géré %d bit_ctrl=%d\n",
-                        trame_motif->motif->type_gestion, trame_motif->motif->bit_controle );
+       default: printf("Changer_etat_motif: type gestion non géré %d %s:%s\n",
+                        trame_motif->motif->type_gestion, trame_motif->motif->tech_id, trame_motif->motif->acronyme );
      }
   }
 /******************************************************************************************************************************/
@@ -421,8 +412,7 @@
     GList *liste;
     gint cpt;
 
-printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, etat_motif->etat, etat_motif->rouge,
-                                                         etat_motif->vert, etat_motif->bleu );
+printf("Recu changement etat motif: %s:%s = %d color=%s\n", etat_motif->tech_id, etat_motif->acronyme, etat_motif->etat, etat_motif->color );
     cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */
     liste = Liste_pages;
     while(liste)                                                                  /* On parcours toutes les pages SUPERVISION */
@@ -435,7 +425,10 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
        while (liste_motifs)
         { switch( *((gint *)liste_motifs->data) )
            { case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)liste_motifs->data;
-                                    if (trame_motif->motif->bit_controle == etat_motif->num)
+                                    printf("Searching for %s:%s with %s:%s\n",trame_motif->motif->tech_id, trame_motif->motif->acronyme,
+                                           etat_motif->tech_id, etat_motif->acronyme );
+                                    if (!strcasecmp(trame_motif->motif->tech_id, etat_motif->tech_id) &&
+                                        !strcasecmp(trame_motif->motif->acronyme, etat_motif->acronyme) )
                                      { Changer_etat_motif( trame_motif, etat_motif );
                                        cpt++;                                             /* Nous updatons un motif de plus ! */
                                      }

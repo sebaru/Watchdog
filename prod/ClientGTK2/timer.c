@@ -57,100 +57,65 @@
        case TYPE_PROGRESSIF:
             if (trame_motif->etat && trame_motif->num_image != trame_motif->nbr_images-1)
              { Trame_choisir_frame ( trame_motif, trame_motif->num_image+1,
-                                                  trame_motif->rouge,
-                                                  trame_motif->vert,
-                                                  trame_motif->bleu );
+                                                  trame_motif->color );
              }
             else if (!trame_motif->etat && trame_motif->num_image != 0)
              { Trame_choisir_frame ( trame_motif, trame_motif->num_image-1,
-                                                  trame_motif->rouge,
-                                                  trame_motif->vert,
-                                                  trame_motif->bleu );
+                                                  trame_motif->color );
              }
             break;
        case TYPE_CYCLIQUE_0N:
             if (trame_motif->etat)
              {  if (trame_motif->num_image != trame_motif->nbr_images-1)
                  { Trame_choisir_frame ( trame_motif, trame_motif->num_image+1,
-                                                      trame_motif->rouge,
-                                                      trame_motif->vert,
-                                                      trame_motif->bleu );
+                                                      trame_motif->color );
                  }
                 else
-                 { Trame_choisir_frame ( trame_motif, 0, trame_motif->rouge,
-                                                         trame_motif->vert,
-                                                         trame_motif->bleu );
+                 { Trame_choisir_frame ( trame_motif, 0, trame_motif->color );
                  }
              }
             else
-             { Trame_choisir_frame ( trame_motif, 0, trame_motif->rouge,
-                                                     trame_motif->vert,
-                                                     trame_motif->bleu );
+             { Trame_choisir_frame ( trame_motif, 0, trame_motif->color );
              }
             break;
        case TYPE_CYCLIQUE_1N:
             if (trame_motif->etat)
              {  if (trame_motif->num_image != trame_motif->nbr_images-1)
                  { Trame_choisir_frame ( trame_motif, trame_motif->num_image+1,
-                                                      trame_motif->rouge,
-                                                      trame_motif->vert,
-                                                      trame_motif->bleu );
+                                                      trame_motif->color );
                  }
                 else
-                 { Trame_choisir_frame ( trame_motif, 1, trame_motif->rouge,
-                                                         trame_motif->vert,
-                                                         trame_motif->bleu );
+                 { Trame_choisir_frame ( trame_motif, 1, trame_motif->color );
                  }
              }
             else
-             { Trame_choisir_frame ( trame_motif, 0, trame_motif->rouge,
-                                                     trame_motif->vert,
-                                                     trame_motif->bleu );
+             { Trame_choisir_frame ( trame_motif, 0, trame_motif->color );
              }
             break;
        case TYPE_CYCLIQUE_2N:
             if (trame_motif->etat >= 2)
              {  if (trame_motif->num_image != trame_motif->nbr_images-1)
                  { Trame_choisir_frame ( trame_motif, trame_motif->num_image+1,
-                                                      trame_motif->rouge,
-                                                      trame_motif->vert,
-                                                      trame_motif->bleu );
+                                                      trame_motif->color );
                  }
                 else
-                 { Trame_choisir_frame ( trame_motif, 2, trame_motif->rouge,
-                                                         trame_motif->vert,
-                                                         trame_motif->bleu );
+                 { Trame_choisir_frame ( trame_motif, 2, trame_motif->color );
                  }
              }
             else if (trame_motif->etat == 1)
-             { Trame_choisir_frame ( trame_motif, 1, trame_motif->rouge,
-                                                     trame_motif->vert,
-                                                     trame_motif->bleu );
+             { Trame_choisir_frame ( trame_motif, 1, trame_motif->color );
              }
             else
-             { Trame_choisir_frame ( trame_motif, 0, trame_motif->rouge,
-                                                     trame_motif->vert,
-                                                     trame_motif->bleu );
+             { Trame_choisir_frame ( trame_motif, 0, trame_motif->color );
              }
             break;
      }
 
-    if (trame_motif->cligno == 1 && !cligno &&                                    /* Gestion clignotement */
-        (trame_motif->en_cours_rouge != 100 ||
-         trame_motif->en_cours_vert  != 100 ||
-         trame_motif->en_cours_bleu  != 100
-        )
-       )
-     { Trame_peindre_motif ( trame_motif, 100, 100, 100 ); }
+    if (trame_motif->cligno == 1 && !cligno)                                                          /* Gestion clignotement */
+     { Trame_peindre_motif ( trame_motif, "black" ); }
 
-    if ( cligno && (trame_motif->en_cours_rouge != trame_motif->rouge ||
-                    trame_motif->en_cours_vert  != trame_motif->vert  ||
-                    trame_motif->en_cours_bleu  != trame_motif->bleu
-                   )
-       )
-     { Trame_peindre_motif ( trame_motif, trame_motif->rouge,
-                                          trame_motif->vert,
-                                          trame_motif->bleu );
+    if ( cligno && (strcasecmp(trame_motif->en_cours_color, trame_motif->color)) )
+     { Trame_peindre_motif ( trame_motif, trame_motif->color );
      }
   }
 /**********************************************************************************************************/

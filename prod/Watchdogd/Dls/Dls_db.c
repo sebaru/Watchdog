@@ -212,7 +212,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.package,dls.syn_id,parent_syn.page,syn.page,"
-                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne"
+                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne,debug"
                 " FROM dls INNER JOIN syns as syn ON dls.syn_id = syn.id "
                 " INNER JOIN syns AS parent_syn ON parent_syn.id=syn.parent_id"
                 " %s "
@@ -275,6 +275,7 @@
        dls->compil_status = atoi(db->row[9]);
        dls->nbr_compil    = atoi(db->row[10]);
        dls->nbr_ligne     = atoi(db->row[12]);
+       dls->debug         = atoi(db->row[13]);
      }
     return( dls );
   }

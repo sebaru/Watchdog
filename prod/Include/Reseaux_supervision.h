@@ -30,11 +30,11 @@
 
  struct CMD_ETAT_BIT_CTRL
   { guint   num;
-    guchar  etat;
-    guchar  rouge;
-    guchar  vert;
-    guchar  bleu;
+    gchar   etat;
     guchar  cligno;
+    gchar   tech_id[32];
+    gchar   acronyme[64];
+    gchar   color[16];
   };
  struct CMD_ETAT_BIT_CADRAN
   { gint    type;

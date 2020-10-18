@@ -188,16 +188,6 @@
     guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
   };
 
- struct I_MOTIF
-  { gint etat;
-    gint rouge;
-    gint vert;
-    gint bleu;
-    gint cligno;
-    gint last_change;
-    gint changes;
-  };
-
  struct DLS_TREE
   { struct CMD_TYPE_SYN_VARS syn_vars;
     GSList *Liste_plugin_dls;                                                /* Liste des plugins D.L.S associé au synoptique */

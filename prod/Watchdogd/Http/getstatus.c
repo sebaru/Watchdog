@@ -81,9 +81,9 @@
     Json_add_int  ( builder, "bit_par_sec",  Partage->audit_bit_interne_per_sec_hold );
     Json_add_int  ( builder, "tour_par_sec", Partage->audit_tour_dls_per_sec_hold );
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                                              /* Synchro */
-    num = g_slist_length( Partage->com_msrv.liste_i );                                            /* Recuperation du nbr de i */
+    num = g_slist_length( Partage->com_msrv.liste_visuel );                                       /* Recuperation du nbr de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    Json_add_int  ( builder, "length_i", num );
+    Json_add_int  ( builder, "length_visuel", num );
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                                              /* Synchro */
     num = g_slist_length( Partage->com_msrv.liste_msg );                                       /* Recuperation du numero de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );

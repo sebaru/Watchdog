@@ -152,9 +152,7 @@
         { printf("Appui sur bouton num_image=%d\n", trame_motif->num_image );
           //if ( (trame_motif->num_image % 3) == 1 )
            { Trame_choisir_frame( trame_motif, trame_motif->num_image + 1,                          /* Frame 2: bouton appuyé */
-                                  trame_motif->rouge,
-                                  trame_motif->vert,
-                                  trame_motif->bleu );
+                                  trame_motif->color );
            }
           time(&trame_motif->last_clic);                                                   /* Mémorisation de la date de clic */
         }
@@ -162,7 +160,7 @@
     else if (event->type == GDK_BUTTON_RELEASE)
      { if (trame_motif->motif->type_gestion == TYPE_BOUTON)                               /* On met la frame 1: bouton relevé */
         { if ( (trame_motif->num_image % 3) == 2 )
-           { Trame_choisir_frame( trame_motif, trame_motif->num_image - 1, trame_motif->rouge, trame_motif->vert, trame_motif->bleu );
+           { Trame_choisir_frame( trame_motif, trame_motif->num_image - 1, trame_motif->color );
              switch ( trame_motif->motif->type_dialog )
               { case ACTION_IMMEDIATE: Envoyer_action_immediate( trame_motif ); break;
                 //case ACTION_CONFIRME : Envoyer_action_confirme( trame_motif );  break;
@@ -194,50 +192,27 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
 static void Updater_un_motif( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *motif )
-  { gchar *color, rouge, vert, bleu;
-
+  {
 printf("%s\n", __func__);
-    color = Json_get_string ( motif, "color" );
-         if (!strcmp(color, "red"))       { rouge = 255; vert =   0; bleu =   0; }
-    else if (!strcmp(color, "lime"))      { rouge =   0; vert = 255; bleu =   0; }
-    else if (!strcmp(color, "blue"))      { rouge =   0; vert =   0; bleu = 255; }
-    else if (!strcmp(color, "yellow"))    { rouge = 255; vert = 255; bleu =   0; }
-    else if (!strcmp(color, "orange"))    { rouge = 255; vert = 190; bleu =   0; }
-    else if (!strcmp(color, "white"))     { rouge = 255; vert = 255; bleu = 255; }
-    else if (!strcmp(color, "lightgray")) { rouge = 127; vert = 127; bleu = 127; }
-    else if (!strcmp(color, "brown"))     { rouge =   0; vert = 100; bleu =   0; }
-    else rouge = vert = bleu = 0;
-
-    trame_motif->rouge  = rouge;
-    trame_motif->vert   = vert;
-    trame_motif->bleu   = bleu;
     trame_motif->mode   = Json_get_int(motif,"mode");                                                /* Sauvegarde etat motif */
     trame_motif->cligno = Json_get_bool(motif,"cligno");                                             /* Sauvegarde etat motif */
 
     switch( trame_motif->motif->type_gestion )
      { case TYPE_INERTE: break;                          /* Si le motif est inerte, nous n'y touchons pas */
        case TYPE_STATIQUE:
-            Trame_choisir_frame( trame_motif, 0, trame_motif->rouge,
-                                                 trame_motif->vert,
-                                                 trame_motif->bleu );                           /* frame 1 */
+            Trame_choisir_frame( trame_motif, 0, trame_motif->color );
             break;
        case TYPE_BOUTON:
             if ( ! (trame_motif->mode % 2) )
-             { Trame_choisir_frame( trame_motif, 3*(trame_motif->mode/2),
-                                    trame_motif->rouge, trame_motif->vert, trame_motif->bleu );
+             { Trame_choisir_frame( trame_motif, 3*(trame_motif->mode/2), trame_motif->color );
              } else
-             { Trame_choisir_frame( trame_motif, 3*(trame_motif->mode/2) + 1,
-                                    trame_motif->rouge, trame_motif->vert, trame_motif->bleu );
+             { Trame_choisir_frame( trame_motif, 3*(trame_motif->mode/2) + 1, trame_motif->color );
              }
             break;
        case TYPE_DYNAMIQUE:
-            Trame_choisir_frame( trame_motif, trame_motif->mode, trame_motif->rouge,
-                                                                 trame_motif->vert,
-                                                                 trame_motif->bleu );            /* frame 1 */
+            Trame_choisir_frame( trame_motif, trame_motif->mode, trame_motif->color );
        case TYPE_PROGRESSIF:
-            Trame_peindre_motif ( trame_motif, trame_motif->rouge,
-                                               trame_motif->vert,
-                                               trame_motif->bleu );
+            Trame_peindre_motif ( trame_motif, trame_motif->color );
             break;
        default: printf("Changer_etat_motif: type gestion non géré %d\n",
                         trame_motif->motif->type_gestion );
@@ -261,8 +236,6 @@ printf("%s\n", __func__);
              struct TRAME_ITEM_MOTIF *trame_motif = liste_motifs->data;
              if ( (!strcmp( Json_get_string(motif,"tech_id"), trame_motif->motif->tech_id) &&
                    !strcmp( Json_get_string(motif,"acronyme"), trame_motif->motif->acronyme))
-                  ||
-                  (!strcmp( Json_get_string(motif,"tech_id"), "OLD_I") && trame_motif->motif->bit_controle == Json_get_int (motif, "acronyme") )
                 )
               { Updater_un_motif ( trame_motif, motif );
                 printf("%s: change motif %s:%s\n", __func__, trame_motif->motif->tech_id, trame_motif->motif->acronyme );
@@ -352,6 +325,7 @@ printf("%s\n", __func__);
        liste = g_list_next ( liste );
      }
     Json_end_array ( builder );
+
     Json_add_array  ( builder, "motifs" );
     liste = infos->Trame->trame_items;
     while (liste)
@@ -359,20 +333,10 @@ printf("%s\n", __func__);
        switch( *(gint *)item )
         { case TYPE_MOTIF:
            { struct TRAME_ITEM_MOTIF *trame_motif = liste->data;
-            Json_add_object ( builder, NULL );
-             if (trame_motif->motif->bit_controle!=-1)
-              { Json_add_int    ( builder, "bit_controle", trame_motif->motif->bit_controle );
-                Json_add_string ( builder, "tech_id", "OLD_I" );
-                gchar num[20];
-                g_snprintf(num, sizeof(num), "%d", trame_motif->motif->bit_controle );
-                Json_add_string ( builder, "acronyme", num );
-                printf("%s: abonnement motif to OLD_I:%d\n", __func__, trame_motif->motif->bit_controle );
-              }
-             else { Json_add_string ( builder, "tech_id", trame_motif->motif->tech_id );
-                    Json_add_string ( builder, "acronyme", trame_motif->motif->acronyme );
-                    printf("%s: abonnement motif to %s:%s\n", __func__, trame_motif->motif->tech_id, trame_motif->motif->acronyme );
-
-                  }
+             Json_add_object ( builder, NULL );
+             Json_add_string ( builder, "tech_id", trame_motif->motif->tech_id );
+             Json_add_string ( builder, "acronyme", trame_motif->motif->acronyme );
+             printf("%s: abonnement motif to %s:%s\n", __func__, trame_motif->motif->tech_id, trame_motif->motif->acronyme );
              Json_end_object ( builder );
              break;
            }
@@ -380,6 +344,7 @@ printf("%s\n", __func__);
        liste = g_list_next ( liste );
      }
     Json_end_array ( builder );
+
     gchar *buf = Json_get_buf (builder, &taille_buf);
     GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
     soup_websocket_connection_send_message (infos->ws_motifs, SOUP_WEBSOCKET_DATA_TEXT, gbytes );

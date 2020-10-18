@@ -190,8 +190,8 @@
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
- void Charger_confDB_Registre ( void )
-  { gchar requete[512];
+ void Charger_confDB_Registre ( gchar *tech_id )
+  { gchar requete[512], critere[80];
     struct DB *db;
 
     db = Init_DB_SQL();
@@ -203,6 +203,10 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT m.tech_id, m.acronyme, m.valeur, m.unite, m.archivage FROM mnemos_R as m"
               );
+    if (tech_id)
+     { g_snprintf( critere, sizeof(critere), " WHERE tech_id='%s'", tech_id );
+       g_strlcat ( requete, critere, sizeof(requete) );
+     }
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);

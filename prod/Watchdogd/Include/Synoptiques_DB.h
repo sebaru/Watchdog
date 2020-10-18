@@ -57,7 +57,6 @@
  extern struct CMD_TYPE_MOTIF *Rechercher_motifDB ( guint id );
  extern gboolean Modifier_motifDB( struct CMD_TYPE_MOTIF *motif );
  extern void Dls_VISUEL_to_json ( JsonBuilder *builder, struct DLS_VISUEL *bit );
- extern gboolean Recuperer_motifDB_new ( struct DB **db_retour, gint id_syn );
 
  extern gboolean Retirer_commentDB ( struct CMD_TYPE_COMMENT *comment );
  extern gint Ajouter_commentDB ( struct CMD_TYPE_COMMENT *comment );

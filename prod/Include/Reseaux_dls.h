@@ -63,6 +63,7 @@
     guint compil_status;                                                                    /* Statut de derniere compilation */
     guint nbr_compil;                                                                         /* Nombre de compilation totale */
     guint nbr_ligne;                                                                               /* Nombre de ligne de code */
+    gboolean debug;                                                                                /* Nombre de ligne de code */
   };
 
  struct CMD_TYPE_SOURCE_DLS

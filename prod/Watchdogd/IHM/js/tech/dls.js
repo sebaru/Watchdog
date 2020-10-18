@@ -21,7 +21,6 @@
   { var json_request = JSON.stringify( { tech_id : tech_id } );
     Send_to_API ( 'POST', "/api/dls/start", json_request, function ()
      { $('#idTableDLS').DataTable().ajax.reload();
-       $('#idToastStatus').toast('show');
      }
     );
   }
@@ -29,16 +28,27 @@
   { var json_request = JSON.stringify( { tech_id : tech_id } );
     Send_to_API ( 'POST', "/api/dls/stop", json_request, function ()
      { $('#idTableDLS').DataTable().ajax.reload();
-       $('#idToastStatus').toast('show');
      }
     );
+  }
+ function Dls_debug_plugin ( tech_id )
+  { var json_request = JSON.stringify( { tech_id : tech_id } );
+    Send_to_API ( 'POST', "/api/dls/debug", json_request, function ()
+     { $('#idTableDLS').DataTable().ajax.reload();
+     });
+  }
+
+ function Dls_undebug_plugin ( tech_id )
+  { var json_request = JSON.stringify( { tech_id : tech_id } );
+    Send_to_API ( 'POST', "/api/dls/undebug", json_request, function ()
+     { $('#idTableDLS').DataTable().ajax.reload();
+     });
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Dls_Del ( tech_id )
   { var json_request = JSON.stringify( { tech_id : tech_id } );
     Send_to_API ( 'DELETE', "/api/dls/del", json_request, function ()
      { $('#idTableDLS').DataTable().ajax.reload(null, false);
-       $('#idToastStatus').toast('show');
      }
     );
   }
@@ -86,6 +96,13 @@
                                       "Dls_start_plugin", item.tech_id, "Désactivé" ) );
                    }
                 }
+            },
+            { "data": null, title:"Debug",  "className": "text-center align-middle", "render": function (item)
+              { if (item.debug==true)
+                 { return( Bouton ( "warning", "Désactiver le debug", "Dls_undebug_plugin", item.tech_id, "Actif" ) ); }
+                else
+                 { return( Bouton ( "outline-secondary", "Activer le débug", "Dls_debug_plugin", item.tech_id, "Désactivé" ) ); }
+              }
             },
             { "data": null, "title":"TechID", "className": "align-middle text-center",
               "render": function (item)

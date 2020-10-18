@@ -57,7 +57,7 @@
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CTRL:
              { struct CMD_TYPE_MNEMO_BASE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
-               Proto_afficher_mnemo_atelier( Reseau_ss_tag ( connexion ), mnemo );
+               /*Proto_afficher_mnemo_atelier( Reseau_ss_tag ( connexion ), mnemo );*/
              }
             break;
        case SSTAG_SERVEUR_ATELIER_ADD_MOTIF_OK:

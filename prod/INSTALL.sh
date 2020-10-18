@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SOCLE=`grep "^ID" /etc/os-release | cut -f 2 -d '='`
+SOCLE=`grep "^ID=" /etc/os-release | cut -f 2 -d '='`
 USER=`whoami`
 
 
@@ -27,7 +27,7 @@ if [ "$SOCLE" = "fedora" ]
   rm -rf libstrophe
 fi
 
-if [ "$SOCLE" = "debian" ]
+if [ "$SOCLE" = "debian" || "$SOCLE" = "raspbian" ]
  then
   echo "Installing debian dependencies"
   apt update
@@ -37,7 +37,8 @@ if [ "$SOCLE" = "debian" ]
   apt install -y liblircclient-dev libpopt-dev libssl-dev libmariadbclient-dev libzmq3-dev
   apt install -y sox libsox-fmt-all python3-pip mpg123
   apt install -y libjson-glib-dev libmosquitto-dev vlc
-  apt install -y libgtk-3-dev libsoup2.4-dev libgoocanvas-2.0-dev
+  apt install -y libgtk-3-dev libgoocanvas-2.0-dev
+  apt install -y libsoup2.4-dev
 fi
 
     if [ "$SOCLE" = "fedora" ]
@@ -66,4 +67,4 @@ systemctl daemon-reload
     echo "Son mot de passe est "$NEWPASSWORD
     echo "Le point d'accès pour poursuivre l'installation est http://"`hostname`":5560/install"
 
-systemctl restart Watchdogd
+systemctl enable Watchdogd --now

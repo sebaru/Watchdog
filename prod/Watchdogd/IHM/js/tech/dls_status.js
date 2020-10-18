@@ -16,22 +16,6 @@
      });
   }
 
- function Dls_debug_plugin ( tech_id )
-  { var json_request = JSON.stringify( { tech_id : tech_id } );
-    Send_to_API ( 'POST', "/api/dls/debug", json_request, function ()
-     { $('#idTableRunDLS').DataTable().ajax.reload();
-       $('#idToastStatus').toast('show');
-     });
-  }
-
- function Dls_undebug_plugin ( tech_id )
-  { var json_request = JSON.stringify( { tech_id : tech_id } );
-    Send_to_API ( 'POST', "/api/dls/undebug", json_request, function ()
-     { $('#idTableRunDLS').DataTable().ajax.reload();
-       $('#idToastStatus').toast('show');
-     });
-  }
-
  function Dls_acquitter_plugin ( tech_id )
   { var json_request = JSON.stringify( { tech_id : tech_id } );
     Send_to_API ( 'POST', "/api/dls/acquitter", json_request, function ()
@@ -67,13 +51,6 @@
           },
           { "data": null, title:"Conso",  "className": "text-center align-middle", "render": function (item)
              { return( item.conso.toFixed(2) ); }
-          },
-          { "data": null, title:"Debug",  "className": "text-center align-middle", "render": function (item)
-            { if (item.debug==true)
-               { return( Bouton ( "warning", "Désactiver le debug", "Dls_undebug_plugin", item.tech_id, "Actif" ) ); }
-              else
-               { return( Bouton ( "outline-secondary", "Activer le débug", "Dls_debug_plugin", item.tech_id, "Désactivé" ) ); }
-            }
           },
           { "data": null, title:"Comm",  "className": "text-center align-middle", "render": function (item)
             { if (item.bit_comm_out==true)

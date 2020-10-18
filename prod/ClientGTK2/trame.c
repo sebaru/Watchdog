@@ -299,7 +299,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
 /* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                        */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, guchar r, guchar v, guchar b )
+ void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, gchar *color )
   { guint x, max, base;
     guchar *buffer;
 
@@ -314,15 +314,26 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     trame_motif->pixbuf = gdk_pixbuf_copy( (GdkPixbuf *)(trame_motif->image->data) );
     buffer = gdk_pixbuf_get_pixels( trame_motif->pixbuf );
 
+    gint rouge = 0, vert = 0, bleu = 0;
+         if (!strcasecmp(color, "red"))       { rouge = 255; vert =   0; bleu =   0; }
+    else if (!strcasecmp(color, "lime"))      { rouge =   0; vert = 255; bleu =   0; }
+    else if (!strcasecmp(color, "blue"))      { rouge =   0; vert =   0; bleu = 255; }
+    else if (!strcasecmp(color, "yellow"))    { rouge = 255; vert = 255; bleu =   0; }
+    else if (!strcasecmp(color, "orange"))    { rouge = 255; vert = 190; bleu =   0; }
+    else if (!strcasecmp(color, "white"))     { rouge = 255; vert = 255; bleu = 255; }
+    else if (!strcasecmp(color, "lightgray")) { rouge = 127; vert = 127; bleu = 127; }
+    else if (!strcasecmp(color, "brown"))     { rouge =   0; vert = 100; bleu =   0; }
+    else if (!strcasecmp(color, "kaki"))      { rouge = 100; vert = 100; bleu = 100; }
+
     if ( gdk_pixbuf_get_has_alpha( trame_motif->pixbuf ) )                  /* y a-t-il un canal alpha ?? */
      { for (x=0; x<max; x++)
         { base = x<<2;
           if (buffer[ base+0 ] == buffer[ base+1 ] &&
               buffer[ base+1 ] == buffer[ base+2 ] &&
               buffer[ base+2 ] == COULEUR_ACTIVE)
-           {  buffer[ base+0 ] = r;
-              buffer[ base+1 ] = v;
-              buffer[ base+2 ] = b;
+           {  buffer[ base+0 ] = rouge;
+              buffer[ base+1 ] = vert;
+              buffer[ base+2 ] = bleu;
            }
         }
      }
@@ -332,24 +343,22 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
           if (buffer[ base+0 ] == buffer[ base+1 ] &&
               buffer[ base+1 ] == buffer[ base+2 ] &&
               buffer[ base+2 ] == COULEUR_ACTIVE)
-           {  buffer[ base+0 ] = r;
-              buffer[ base+1 ] = v;
-              buffer[ base+2 ] = b;
+           {  buffer[ base+0 ] = rouge;
+              buffer[ base+1 ] = vert;
+              buffer[ base+2 ] = bleu;
            }
         }
      }
 
     if (trame_motif->item) g_object_set( trame_motif->item, "pixbuf", trame_motif->pixbuf, NULL );
-    trame_motif->en_cours_rouge = r;                        /* Sauvegarde de la couleur actuelle du motif */
-    trame_motif->en_cours_vert  = v;
-    trame_motif->en_cours_bleu  = b;
+    g_snprintf( trame_motif->en_cours_color, sizeof(trame_motif->en_cours_color), "%s", color );
   }
 /******************************************************************************************************************************/
 /* Trame_choisir_frame: Choisit une frame parmi celles du motif                                                               */
 /* Entrée: une structure TRAME_ITEM_MOTIF, le numero de frame voulue                                                          */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num, guchar r, guchar v, guchar b )
+ void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num, gchar *color )
   { GList *frame;
 
     if (!(trame_motif && trame_motif->motif)) { printf ("Niet\n"); return; }
@@ -361,7 +370,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
 
     trame_motif->image = frame;
     trame_motif->num_image = num;
-    Trame_peindre_motif( trame_motif, r, v, b );
+    Trame_peindre_motif( trame_motif, color );
   }
 
 /******************************************************************************************************************************/
@@ -656,7 +665,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
        return(NULL);
      }
 
-    Trame_peindre_motif( trame_motif, motif->rouge0, motif->vert0, motif->bleu0 );
+    Trame_peindre_motif( trame_motif, "black" ); /*motif->def_colorssrouge0, motif->vert0, motif->bleu0 );*/
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
@@ -759,9 +768,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
                                    struct TRAME_ITEM_MOTIF *trame_motif )
   { trame_motif->image = trame_motif->images;
 
-    Trame_choisir_frame( trame_motif, 0, trame_motif->motif->rouge0,
-                                      trame_motif->motif->vert0,
-                                      trame_motif->motif->bleu0 );
+    Trame_choisir_frame( trame_motif, 0, "black" );
 #ifdef DEBUG_TRAME
 printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->motif->hauteur );
 #endif

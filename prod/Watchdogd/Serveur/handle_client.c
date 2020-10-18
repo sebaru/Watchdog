@@ -34,29 +34,27 @@
  #include "Sous_serveur.h"
  extern struct SSRV_CONFIG Cfg_ssrv;
 /******************************************************************************************************************************/
-/* Envoyer_new_motif_au_client: Parcours la liste des motifs et les envoi                                                     */
+/* Envoyer_new_motif_au_client: Envoi un visuel au format dynamique au client                                                 */
 /* Entrée : le client a gerer                                                                                                 */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Envoyer_new_motif_au_client ( struct CLIENT *client, gint num_i )
+ static void Envoyer_new_motif_au_client ( struct CLIENT *client, struct DLS_VISUEL *visuel )
   { struct CMD_ETAT_BIT_CTRL motif;
 
 /**************************************** Création de la structure passée aux clients *****************************************/
-    motif.num    = num_i;
-    motif.etat   = Partage->i[num_i].etat;
-    motif.rouge  = Partage->i[num_i].rouge;
-    motif.vert   = Partage->i[num_i].vert;
-    motif.bleu   = Partage->i[num_i].bleu;
-    motif.cligno = Partage->i[num_i].cligno;
+    motif.num    = 0;
+    motif.etat   = visuel->mode;
+    g_snprintf( motif.tech_id,  sizeof(motif.tech_id),  "%s", visuel->tech_id );
+    g_snprintf( motif.acronyme, sizeof(motif.acronyme), "%s", visuel->acronyme );
+    g_snprintf( motif.color, sizeof(motif.color), "%s", visuel->color );
+    motif.cligno = visuel->cligno;
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "%s: Motif traite : I%03d=%d rvbc %d/%d/%d/%d", __func__,
-              motif.num, motif.etat, motif.rouge, motif.vert, motif.bleu, motif.cligno );
+             "%s: Motif traite : I %s:%s=%d rvbc %s/%d", __func__,
+              motif.tech_id, motif.acronyme, motif.etat, motif.color, motif.cligno );
 
-    if ( g_slist_find( client->Liste_bit_syns, GINT_TO_POINTER(motif.num) ) )    /* Envoi uniquement si le client en a besoin */
-     { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
-                     (gchar *)&motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
-     }
+    Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
+                  (gchar *)&motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
   }
 /******************************************************************************************************************************/
 /* Envoyer_new_histo_au_client: Parcours la liste des histo et les envoi                                                      */
@@ -138,15 +136,15 @@
        if (client->mode == VALIDE)                                                /* Envoi au suppression des histo au client */
         { struct CMD_TYPE_HISTO histo;
           struct ZMQ_TARGET *event;
+          struct DLS_VISUEL dls_visuel;
           gchar buffer[2048];
           void *payload;
-          gint num_i;
           gint byte;
 
           if ( Recv_zmq ( zmq_msg, &histo, sizeof(histo) ) == sizeof(struct CMD_TYPE_HISTO) )
            { Envoyer_histo_au_client ( client, &histo ); }
-          if ( Recv_zmq ( zmq_motif, &num_i, sizeof(gint) ) == sizeof(gint) )
-           { Envoyer_new_motif_au_client ( client, num_i ); }
+          if ( Recv_zmq ( zmq_motif, &dls_visuel, sizeof(dls_visuel) ) == sizeof(struct DLS_VISUEL) )
+           { Envoyer_new_motif_au_client ( client, &dls_visuel ); }
 
           if ( (byte=Recv_zmq_with_tag( zmq_from_bus, "ssrv", &buffer, sizeof(buffer), &event, &payload )) > 0 )
            { if (!strcmp(event->tag, "SET_SYN_VARS"))

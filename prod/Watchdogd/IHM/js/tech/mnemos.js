@@ -43,7 +43,34 @@
      { $('#idTableCptImp').DataTable().ajax.reload(null, false);
      });
   }
+/******************************************************************************************************************************/
+ function Mnemos_DI_set ( acronyme )
+  { table = $('#idTableEntreeTor').DataTable();
+    selection = table.ajax.json().DI.filter( function(item) { return (item.acronyme==acronyme) } )[0];
+    var json_request = JSON.stringify(
+       { classe   : "DI",
+         tech_id  : selection.tech_id,
+         acronyme : selection.acronyme,
+         etat     : true
+       }
+     );
 
+    Send_to_API ( 'POST', "/api/mnemos/set", json_request, null, null );
+  }
+/******************************************************************************************************************************/
+ function Mnemos_DI_reset ( acronyme )
+  { table = $('#idTableEntreeTor').DataTable();
+    selection = table.ajax.json().DI.filter( function(item) { return (item.acronyme==acronyme) } )[0];
+    var json_request = JSON.stringify(
+       { classe   : "DI",
+         tech_id  : selection.tech_id,
+         acronyme : selection.acronyme,
+         etat     : false
+       }
+     );
+
+    Send_to_API ( 'POST', "/api/mnemos/set", json_request, null, null );
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { vars = window.location.pathname.split('/');
@@ -64,14 +91,15 @@
                     { "data": "map_thread", "title":"map_thread", "className": "hidden-xs" },
                     { "data": "map_tech_id","title":"map_tech_id","className": "hidden-xs" },
                     { "data": "map_tag",    "title":"map_tag",   "className": "hidden-xs" },
-                    /*{ "data": null, "title":"Actions", "orderable": false, "className":"text-center",
+                    { "data": null, "title":"Actions", "orderable": false, "className":"text-center",
                       "render": function (item)
                         { boutons = Bouton_actions_start ();
-                          boutons += Bouton_actions_add ( "danger", "Supprimer le mnémonique", "Show_Modal_Del_DI", item.acronyme, "trash", null );
+                          boutons += Bouton_actions_add ( "outline-success", "Active cette entrée", "Mnemos_DI_set", item.acronyme, "power-off", null );
+                          boutons += Bouton_actions_add ( "outline-secondary", "Désactive cette entrée", "Mnemos_DI_reset", item.acronyme, "power-off", null );
                           boutons += Bouton_actions_end ();
                           return(boutons);
                         },
-                    }*/
+                    }
                   ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,

@@ -217,7 +217,6 @@
  static void Changer_rafraich( GtkWidget *widget, gpointer data )
   { Trame_motif->motif->rafraich = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Spin_rafraich));
   }
-#endif
 /******************************************************************************************************************************/
 /* Changer_couleur: Changement de la couleur du motif                                                                         */
 /* Entrée: widget, data = 0 pour un chgmt via propriete DLS, 1 pour chgmt via Couleur par Def                                 */
@@ -234,6 +233,8 @@ printf("%s\n", __func__ );
                                       trame_motif->motif->vert0,
                                       trame_motif->motif->bleu0 );
   }
+#endif
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Changer_couleur_motif_directe: Changement de la couleur du motif en direct live                                            */
 /* Entrée: widget, data =0 pour inactive, 1 pour active                                                                       */
@@ -267,7 +268,6 @@ printf("%s\n", __func__ );
     Changer_default_couleur ( GTK_COLOR_CHOOSER(choix), &color, trame_motif );
     gtk_widget_destroy ( dialog );
   }
-#ifdef bouh
 /**********************************************************************************************************/
 /* Rafraichir_propriete: Rafraichit les données de la fenetre d'edition des proprietes du motif           */
 /* Entrée: Le trame_motif souhaité                                                                        */

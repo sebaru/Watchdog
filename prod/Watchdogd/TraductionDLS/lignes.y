@@ -105,9 +105,6 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                 | T_STATIC ID EQUIV barre alias_bit ENTIER PVIRGULE
                 {{ switch($5)
                     { case MNEMO_ENTREE:
-                                 if ( New_alias(ALIAS_TYPE_STATIC, NULL, $2, $5, $6, $4, NULL) == FALSE )    /* Deja defini ? */
-                                  { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                                 break;
                       case MNEMO_CPTH:
                       case MNEMO_CPT_IMP:
                       case MNEMO_TEMPO:
@@ -123,7 +120,7 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                                  if ($4==1)                                                                   /* Barre = 1 ?? */
                                   { Emettre_erreur_new( "Use of '/%s' is forbidden",  $2 ); }
                                  else
-                                  { if (New_alias(ALIAS_TYPE_STATIC, NULL, $2, $5, $6, 0, NULL) == FALSE)
+                                  { if (New_alias(ALIAS_TYPE_DYNAMIC, NULL, $2, MNEMO_MOTIF, $6, 0, NULL) == FALSE)
                                      { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                                   }
                                  break;

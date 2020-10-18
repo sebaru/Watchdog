@@ -30,8 +30,6 @@
 
  #define NOM_THREAD                    "smsg"
 
- #define TOP_MIN_ENVOI_SMS              1200                                      /* 2 minutes sans envoi de SMS au démarrage */
-
  struct SMS_CONFIG
   { struct LIBRAIRIE *lib;
     gchar description[80];                                        /* Une description du téléphone ou sa position par exemple */

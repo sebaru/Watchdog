@@ -99,13 +99,8 @@
     guchar num_image;                                                             /* Numero de l'image actuellement présentée */
     guchar nbr_images;                                                                   /* Nombre total d'image dans le .gif */
 
-    guchar rouge;                                                                                /* Couleur attendue du motif */
-    guchar vert;
-    guchar bleu;
-
-    guchar en_cours_rouge;                                                                       /* Couleur actuelle du motif */
-    guchar en_cours_vert;
-    guchar en_cours_bleu;
+    gchar  color[32];
+    gchar  en_cours_color[32];
 
     guint gif_largeur;
     guint gif_hauteur;
@@ -201,9 +196,8 @@
  extern void Trame_rafraichir_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_rafraichir_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
- extern void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num,
-                                   guchar r, guchar v, guchar b );
- extern void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, guchar r, guchar v, guchar b );
+ extern void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num, gchar *color );
+ extern void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, gchar *color );
  extern void Trame_set_svg ( struct TRAME_ITEM_SVG *trame_svg, gchar *couleur, gint mode, gboolean cligno );
  extern void Charger_gif ( struct TRAME_ITEM_MOTIF *trame_item, gchar *nom_fichier );
  extern void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier );

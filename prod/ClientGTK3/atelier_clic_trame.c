@@ -151,7 +151,7 @@ printf("Afficher_propriete: debut\n");
     switch ( *((gint *)(infos->Selection->data) ) )
      { case TYPE_MOTIF:
         { struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
-          Changer_couleur_motif_directe ( trame_motif );
+          /*Changer_couleur_motif_directe ( trame_motif );*/
           break;
         }
        default: printf("Changer_couleur_directe: Type de selection inconnu\n");
@@ -316,7 +316,7 @@ printf("Afficher_propriete: debut\n");
 
     item = Menu ( "Couleur par défaut", "applications-graphics" );
     gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
-    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Changer_couleur_directe), page );
+    /*g_signal_connect_swapped ( item, "activate", G_CALLBACK (Changer_couleur_directe), page );*/
 
     gtk_menu_shell_append (GTK_MENU_SHELL(Popup), gtk_separator_menu_item_new () );
 
