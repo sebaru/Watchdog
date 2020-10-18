@@ -1943,20 +1943,25 @@ encore:
      }
 
     if (database_version < 4984)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`;");
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI ADD `deletable` TINYINT(1) NOT NULL DEFAULT '1' AFTER `id`;");
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DO ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`;");
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DO ADD `deletable` TINYINT(1) NOT NULL DEFAULT '1' AFTER `id`;");
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`;");
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI ADD `deletable` TINYINT(1) NOT NULL DEFAULT '1' AFTER `id`;");
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AO ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`;");
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AO ADD `deletable` TINYINT(1) NOT NULL DEFAULT '1' AFTER `id`;");
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_BOOL ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`;");
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_BOOL ADD `deletable` TINYINT(1) NOT NULL DEFAULT '1' AFTER `id`;");
        Lancer_requete_SQL ( db, requete );
      }
 
     if (database_version < 4987)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs DROP `bitclic`;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 5039)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `debug` TINYINT(1) NOT NULL DEFAULT '0';");
        Lancer_requete_SQL ( db, requete );
      }
 

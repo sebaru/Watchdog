@@ -113,10 +113,11 @@
        Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
      }
 
-    dls->conso    = 0.0;
+    dls->conso = 0.0;
     if (dls->plugindb.on) dls->start_date = time(NULL);
                      else dls->start_date = 0;
     memset ( &dls->vars, 0, sizeof(dls->vars) );                                 /* Mise à zero de tous les bits de remontées */
+    dls->vars.debug = dls->plugindb.debug;                         /* Recopie du champ de debug depuis la DB vers la zone RUN */
   /*dls->vars.bit_comm_out = 1;                             /* Par construction, on considere que la comm est HS au démarrage */
     return(TRUE);
   }
@@ -353,7 +354,7 @@
  static void Dls_start_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
-     { gchar chaine[80];
+     { gchar chaine[128];
        plugin->plugindb.on = TRUE;
        plugin->conso = 0.0;
        plugin->start_date = time(NULL);
@@ -371,7 +372,7 @@
  static void Dls_stop_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
-     { gchar chaine[80];
+     { gchar chaine[128];
        plugin->plugindb.on = FALSE;
        plugin->start_date = 0;
        plugin->conso = 0.0;
@@ -398,9 +399,12 @@
  static void Dls_debug_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug started ('%s')", __func__,
+     { gchar chaine[128];
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug started ('%s')", __func__,
                  plugin->plugindb.tech_id, plugin->plugindb.nom );
        plugin->vars.debug = TRUE;
+       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET debug='1' WHERE tech_id = '%s'", plugin->plugindb.tech_id );
+       SQL_Write ( chaine );
      }
   }
 /******************************************************************************************************************************/
@@ -411,9 +415,12 @@
  static void Dls_undebug_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug stopped ('%s')", __func__,
+     { gchar chaine[128];
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug stopped ('%s')", __func__,
                  plugin->plugindb.tech_id, plugin->plugindb.nom );
        plugin->vars.debug = FALSE;
+       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET debug='0' WHERE tech_id = '%s'", plugin->plugindb.tech_id );
+       SQL_Write ( chaine );
      }
   }
 /******************************************************************************************************************************/
