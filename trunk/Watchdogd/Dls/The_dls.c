@@ -911,6 +911,7 @@
              cpt_h->old_top = new_top;
              Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_CH '%s:%s'=%d",
                        __func__, cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
+             Partage->audit_bit_interne_per_sec++;
            }
           if (cpt_h->last_arch + 600 < Partage->top)
            { Ajouter_arch_by_nom( cpt_h->acronyme, cpt_h->tech_id, 1.0*cpt_h->valeur );
@@ -1341,6 +1342,7 @@
        need_arch = TRUE;
        Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_REGISTRE '%s:%s'=%f",
                  __func__, reg->tech_id, reg->acronyme, reg->valeur );
+       Partage->audit_bit_interne_per_sec++;
      }
 
     if ( (reg->archivage == 1 && need_arch == TRUE) ||
