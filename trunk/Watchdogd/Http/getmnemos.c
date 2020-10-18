@@ -135,10 +135,10 @@
        Dls_data_get_CI ( tech_id, acronyme, (gpointer)&ci );
        if ( Json_has_member ( request, "archivage" ) )
         { gchar chaine[128];
-          gboolean archivage = Json_get_bool ( request, "archivage" );
+          gint archivage = Json_get_int ( request, "archivage" );
           if (ci) { ci->archivage = archivage; }                            /* Si le bit existe, on change sa running config */
-          g_snprintf(chaine, sizeof(chaine), "UPDATE mnemos_CI SET archivage=%d WHERE tech_id='%s' AND acronyme='%s'",
-                     archivage, tech_id, acronyme );
+          g_snprintf( chaine, sizeof(chaine), "UPDATE mnemos_CI SET archivage='%d' WHERE tech_id='%s' AND acronyme='%s'",
+                      archivage, tech_id, acronyme );
           SQL_Write ( chaine );                                                   /* Qu'il existe ou non, ou met a jour la DB */
           Audit_log ( session, "Mnemos %s:%s -> archivage = '%d'", tech_id, acronyme, archivage );
         }

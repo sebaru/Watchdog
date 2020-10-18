@@ -198,6 +198,7 @@
     Json_add_double ( builder, "multi",     bit->multi );
     Json_add_string ( builder, "unite",     bit->unite );
     Json_add_bool   ( builder, "etat",      bit->etat );
-    Json_add_bool   ( builder, "archivage", bit->archivage );
+    Json_add_int    ( builder, "archivage", bit->archivage );
+    Json_add_int    ( builder, "last_arch", bit->last_arch );
   };
 /*----------------------------------------------------------------------------------------------------------------------------*/

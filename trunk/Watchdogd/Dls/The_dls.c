@@ -822,8 +822,14 @@
        cpt_imp->imp_par_minute = cpt_imp->valeur - cpt_imp->valeurs[0];
      }
 
-    if (cpt_imp->archivage && need_arch == TRUE)
-     { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 ); }  /* Archivage si besoin */
+    if ( (cpt_imp->archivage == 1 && need_arch == TRUE) ||
+         (cpt_imp->archivage == 2 && cpt_imp->last_arch + 600    <= Partage->top) ||
+         (cpt_imp->archivage == 3 && cpt_imp->last_arch + 36000  <= Partage->top) ||
+         (cpt_imp->archivage == 4 && cpt_imp->last_arch + 864000 <= Partage->top)
+       )
+     { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 );             /* Archivage si besoin */
+       cpt_imp->last_arch = Partage->top;
+     }
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_CI : Recupere la valeur de l'EA en parametre                                                             */
@@ -1329,14 +1335,21 @@
       }
     else reg = (struct DLS_REGISTRE *)*r_p;
 
-    if (valeur != reg->valeur || reg->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top)
+    gboolean need_arch = FALSE;
+    if (valeur != reg->valeur)
      { reg->valeur = valeur;
-       if(reg->archivage)
-        { Ajouter_arch_by_nom( reg->acronyme, reg->tech_id, reg->valeur );                             /* Archivage si besoin */
-          reg->last_arch = Partage->top;
-        }
+       need_arch = TRUE;
        Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_REGISTRE '%s:%s'=%f",
                  __func__, reg->tech_id, reg->acronyme, reg->valeur );
+     }
+
+    if ( (reg->archivage == 1 && need_arch == TRUE) ||
+         (reg->archivage == 2 && reg->last_arch + 600    <= Partage->top) ||
+         (reg->archivage == 3 && reg->last_arch + 36000  <= Partage->top) ||
+         (reg->archivage == 4 && reg->last_arch + 864000 <= Partage->top)
+       )
+     { Ajouter_arch_by_nom( reg->acronyme, reg->tech_id, reg->valeur );                                /* Archivage si besoin */
+       reg->last_arch = Partage->top;
      }
   }
 /******************************************************************************************************************************/
