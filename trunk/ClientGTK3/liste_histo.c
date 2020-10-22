@@ -115,8 +115,7 @@
        Json_add_string( builder, "acronyme", acronyme );
        g_free(tech_id);
        g_free(acronyme);
-       buf = Json_get_buf (builder, &taille_buf);
-       Envoi_au_serveur( client, "POST", buf, taille_buf, "histo/ack", NULL );
+       Envoi_json_au_serveur( client, "POST", builder, "/api/histo/ack", NULL );
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
      }
