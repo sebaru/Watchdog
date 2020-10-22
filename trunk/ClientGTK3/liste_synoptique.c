@@ -184,18 +184,14 @@
     gtk_widget_show_all( dialog );
 
     if (gtk_dialog_run( GTK_DIALOG(dialog) ) == GTK_RESPONSE_OK)                       /* Attente de reponse de l'utilisateur */
-     { gsize taille_buf;
-       gchar chaine[80];
-       JsonBuilder *builder = Json_create ();
+     { JsonBuilder *builder = Json_create ();
        if (builder)
         { Json_add_string ( builder, "libelle", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
           Json_add_string ( builder, "page", gtk_entry_get_text( GTK_ENTRY(Entry_page) ) );
           Json_add_string ( builder, "ppage", gtk_entry_get_text( GTK_ENTRY(Entry_ppage) ) );
           Json_add_int    ( builder, "access_level", gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_access_level) ) );
           if (syn) { Json_add_int ( builder, "id", Json_get_int( syn, "id" ) ); }
-          g_snprintf( chaine, sizeof( chaine ), "syn/edit" );
-          gchar *buf = Json_get_buf (builder, &taille_buf);
-          Envoi_au_serveur( client, "POST", buf, taille_buf, chaine, Synoptique_edited_CB );
+          Envoi_json_au_serveur( client, "POST", builder, "/api/syn/edit", Synoptique_edited_CB );
         }
      }
     gtk_widget_destroy( dialog );
@@ -248,9 +244,11 @@
     gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                   /* Recup du id */
 
-    gchar chaine[80];
-    g_snprintf(chaine, sizeof(chaine), "syn/edit/%d", id );
-    Envoi_au_serveur( page->client, "GET", NULL, 0, chaine, Show_Proprietes_synoptique_CB );
+    JsonBuilder *builder = Json_create ();
+    if (builder)
+     { Json_add_int ( builder, "syn_id", id );
+       Envoi_json_au_serveur( page->client, "PUT", builder, "/api/syn/edit", Show_Proprietes_synoptique_CB );
+     }
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -317,7 +315,11 @@
        gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                /* Recup du id */
        g_snprintf(chaine, sizeof(chaine), "syn/del/%d", id );
-       Envoi_au_serveur ( page->client, "DELETE", NULL, 0, chaine, Synoptique_deleted_CB );
+       JsonBuilder *builder = Json_create ();
+       if (builder)
+        { Json_add_int ( builder, "syn_id", id );
+          Envoi_json_au_serveur ( page->client, "DELETE", NULL, chaine, Synoptique_deleted_CB );
+        }
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
      }
@@ -385,12 +387,14 @@
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(page->client->Liste_synoptique) );
     lignes    = gtk_tree_selection_get_selected_rows ( selection, NULL );
     while ( lignes )
-     { gchar chaine[80];
-       gint id;
+     { gint id;
        gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                /* Recup du id */
-       g_snprintf(chaine, sizeof(chaine), "syn/show/%d", id );
-       Envoi_au_serveur ( page->client, "GET", NULL, 0, chaine, Creer_page_atelier_CB );
+       JsonBuilder *builder = Json_create ();
+       if (builder)
+        { Json_add_int (builder, "syn_id", id);
+          Envoi_json_au_serveur ( page->client, "PUT", builder, "/api/syn/show", Creer_page_atelier_CB );
+        }
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
      }
@@ -645,6 +649,6 @@
 /******************************************************************************************************************************/
  void Menu_want_liste_synoptique ( struct CLIENT *client )
   { if (Chercher_page_notebook( client, TYPE_PAGE_ATELIER, 1, TRUE )) return;
-    Envoi_au_serveur( client, "GET", NULL, 0, "syn/list", Creer_page_liste_synoptique_CB );
+    Envoi_json_au_serveur( client, "GET", NULL, "/api/syn/list", Creer_page_liste_synoptique_CB );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

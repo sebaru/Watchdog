@@ -55,36 +55,9 @@
  void Deconnecter ( struct CLIENT *client )
   { printf("%s : %p\n", __func__, client );
     if (!client->connexion) return;
-    Envoi_json_au_serveur ( client, "GET", NULL, "/api/disconnect", Deconnecter_CB );
+    Envoi_json_au_serveur ( client, "PUT", NULL, "/api/disconnect", Deconnecter_CB );
     Reset_page_histo( client );
     Log ( client, "Disconnected" );
-  }
-/******************************************************************************************************************************/
-/* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
-/* Entrée: des infos sur le paquet à envoyer                                                                                  */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- void Envoi_au_serveur ( struct CLIENT *client, gchar *methode, gchar *payload, gsize taille_buf, gchar *URI, SoupSessionCallback callback )
-  { gchar target[128];
-    printf("%s : sending %s\n", __func__, URI );
-    g_snprintf( target, sizeof(target), "http://%s:5560/%s", client->hostname, URI );
-    SoupMessage *msg = soup_message_new ( methode, target );
-    client->network_size_sent = 0;
-    g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
-    if (payload)
-     { soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
-       client->network_size_to_send = taille_buf;
-       gchar chaine[128];
-       g_snprintf ( chaine, sizeof(chaine), "Sending %s : %s\n", URI, payload );
-       chaine[126]='\n';
-       printf(chaine);
-     }
-    SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", client->wtd_session, "/", NULL, 0 );
-    GSList *liste = g_slist_append ( NULL, wtd_session );
-    soup_cookies_to_request ( liste, msg );
-    g_slist_free(liste);
-    if (!msg) { Log( client, "Erreur envoi au serveur"); Deconnecter_sale(client); }
-    else soup_session_queue_message (client->connexion, msg, callback, client);
   }
 /******************************************************************************************************************************/
 /* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
@@ -104,10 +77,11 @@
        soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
        client->network_size_to_send = taille_buf;
        gchar chaine[128];
-       g_snprintf ( chaine, sizeof(chaine), "Sending %s : %s\n", URI, buf );
+       g_snprintf ( chaine, sizeof(chaine), "Sending %s %s : %s\n", methode, URI, buf );
        chaine[126]='\n';
        printf(chaine);
      }
+    else { printf ( "Sending %s %s\n", methode, URI ); }
     SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", client->wtd_session, "/", NULL, 0 );
     GSList *liste = g_slist_append ( NULL, wtd_session );
     soup_cookies_to_request ( liste, msg );

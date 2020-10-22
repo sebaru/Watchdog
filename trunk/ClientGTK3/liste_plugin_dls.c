@@ -603,12 +603,14 @@
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(page->client->Liste_plugin_dls) );
     lignes    = gtk_tree_selection_get_selected_rows ( selection, NULL );
     while ( lignes )
-     { gchar chaine[80];
-       gint id;
+     { gint id;
        gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                /* Recup du id */
-       g_snprintf(chaine, sizeof(chaine), "dls/del/%d", id );
-       Envoi_au_serveur ( page->client, "GET", NULL, 0, chaine, Updater_un_plugin_CB );
+       JsonBuilder *builder = Json_create ();
+       if (builder)
+        { Json_add_int ( builder, "dls_id", id );
+          Envoi_json_au_serveur ( page->client, "DELETE", builder, "/api/dls/del", Updater_un_plugin_CB );
+        }
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
      }
@@ -973,6 +975,6 @@
 /******************************************************************************************************************************/
  void Menu_want_edition_DLS ( struct CLIENT *client )
   { if (Chercher_page_notebook( client, TYPE_PAGE_PLUGIN_DLS, 1, TRUE )) return;
-    Envoi_au_serveur( client, "GET", NULL, 0, "dls/list", Creer_page_plugin_dls_CB );
+    Envoi_json_au_serveur( client, "GET", NULL, "/api/dls/list", Creer_page_plugin_dls_CB );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -127,26 +127,33 @@
                               SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
     gsize taille_buf;
-    gint syn_id;
-    if (msg->method != SOUP_METHOD_GET)
+    GBytes *request_brute;
+    gsize taille;
+
+    if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 0 )) return;
+    if (!Http_check_session( msg, session, 6 )) return;
 
-    gchar *prefix = "/syn/show/";
-    if ( ! g_str_has_prefix ( path, prefix ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
        return;
      }
 
-    if (!strlen (path+strlen(prefix)))
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+    if ( ! (Json_has_member ( request, "syn_id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-    syn_id = atoi(path+strlen(prefix));
+
+    gint syn_id = Json_get_int ( request, "syn_id" );
+    json_node_unref(request);
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
@@ -225,8 +232,10 @@
  void Http_traiter_syn_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
+    GBytes *request_brute;
     gsize taille_buf;
-    gint syn_id;
+    gsize taille;
+
     if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -235,17 +244,22 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
 
-    gchar *prefix = "/syn/del/";
-    if ( ! g_str_has_prefix ( path, prefix ) )
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
        return;
      }
 
-    if (!strlen (path+strlen(prefix)))
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+    if ( ! (Json_has_member ( request, "syn_id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-    syn_id = atoi(path+strlen(prefix));
+
+    gint syn_id = Json_get_int ( request, "syn_id" );
+    json_node_unref(request);
 
     if (syn_id==1)
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Syn 1 can not be deleted");
@@ -335,9 +349,10 @@
                             SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
     gsize taille_buf;
-    gint syn_id;
+    GBytes *request_brute;
+    gsize taille;
 
-    if (msg->method != SOUP_METHOD_GET)
+    if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -345,17 +360,22 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
 
-    gchar *prefix = "/syn/get/";
-    if ( ! g_str_has_prefix ( path, prefix ) )
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
        return;
      }
 
-    if (!strlen (path+strlen(prefix)))
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+    if ( ! (Json_has_member ( request, "syn_id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-    syn_id = atoi(path+strlen(prefix));
+
+    gint syn_id = Json_get_int ( request, "syn_id" );
+    json_node_unref(request);
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
