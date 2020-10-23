@@ -224,7 +224,7 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-    Audit_log ( session, "Synoptique '%d' showed", id );
+    Audit_log ( session, "Synoptique '%d' showed", syn_id );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -286,7 +286,7 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-    Audit_log ( session, "Synoptique '%d' deleted", id );
+    Audit_log ( session, "Synoptique '%d' deleted", syn_id );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -323,10 +323,10 @@
     gint  access_level = Json_get_int ( request, "access_level" );
     if (access_level>=session->access_level) access_level = session->access_level-1;
 
-    if ( Json_has_member ( request, "id" ) )                                                                       /* Edition */
+    if ( Json_has_member ( request, "syn_id" ) )                                                                   /* Edition */
      { g_snprintf( requete, sizeof(requete),
                   "UPDATE syns SET libelle='%s', page='%s', access_level='%d' WHERE id='%d' AND access_level<'%d'",
-                   libelle, page, access_level, Json_get_int(request,"id"), session->access_level );
+                   libelle, page, access_level, Json_get_int(request,"syn_id"), session->access_level );
      }
     else
      {
@@ -341,7 +341,7 @@
     g_free(libelle);
     g_free(page);
     g_free(ppage);
-    Audit_log ( session, "Synoptique '%d' - %s '%s'changed", id, page, libelle );
+    Audit_log ( session, "Synoptique %s - '%s' changed", page, libelle );
     json_node_unref(request);
   }
 /******************************************************************************************************************************/
@@ -399,7 +399,7 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-    Audit_log ( session, "Synoptique '%d' sent", id );
+    Audit_log ( session, "Synoptique '%d' get", syn_id );
   }
 /******************************************************************************************************************************/
 /* Http_get_syn_save_un_motif: Enregistre un motif en base de données                                                         */
