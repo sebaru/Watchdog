@@ -71,6 +71,7 @@
     gchar *acronyme = Normaliser_chaine ( params[1] );
     g_strfreev( params );
     Envoyer_commande_dls_data ( tech_id, acronyme );
+    Audit_log ( session, "Clic Synoptique : %s:%s", tech_id, acronyme );
     g_free(tech_id);
     g_free(acronyme);
 /*************************************************** Envoi au client **********************************************************/
@@ -223,6 +224,7 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    Audit_log ( session, "Synoptique '%d' showed", id );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -284,6 +286,7 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    Audit_log ( session, "Synoptique '%d' deleted", id );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -338,6 +341,7 @@
     g_free(libelle);
     g_free(page);
     g_free(ppage);
+    Audit_log ( session, "Synoptique '%d' - %s '%s'changed", id, page, libelle );
     json_node_unref(request);
   }
 /******************************************************************************************************************************/
@@ -395,6 +399,7 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    Audit_log ( session, "Synoptique '%d' sent", id );
   }
 /******************************************************************************************************************************/
 /* Http_get_syn_save_un_motif: Enregistre un motif en base de données                                                         */
