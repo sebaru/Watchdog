@@ -37,14 +37,12 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void Changer_vue_directe ( struct CLIENT *client, guint num_syn )
-  { gchar chaine[80];
-    if (Chercher_page_notebook( client, TYPE_PAGE_SUPERVISION, num_syn, TRUE )) return;
+  { if (Chercher_page_notebook( client, TYPE_PAGE_SUPERVISION, num_syn, TRUE )) return;
 
     JsonBuilder *builder = Json_create ();
     if (builder == NULL) return;
     Json_add_int ( builder, "syn_id", num_syn );
-    g_snprintf( chaine, sizeof(chaine), "syn/get/%d", num_syn );
-    Envoi_json_au_serveur( client, "PUT", builder, "/api/syn/get", Creer_page_supervision_CB );
+    Envoi_json_au_serveur( client, "PUT", builder, "/api/syn/show", Creer_page_supervision_CB );
   }
 /******************************************************************************************************************************/
 /* Changer_vue: Demande au serveur une nouvelle vue                                                                           */
