@@ -665,7 +665,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
        return(NULL);
      }
 
-    Trame_peindre_motif( trame_motif, "black" ); /*motif->def_colorssrouge0, motif->vert0, motif->bleu0 );*/
+    Trame_peindre_motif( trame_motif, motif->def_color );
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,

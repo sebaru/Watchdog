@@ -12,7 +12,7 @@
    <a href="/tech/modbus_map"><img src="/img/wago_750342.webp" class="card-img-top" alt="Wago 750-342"></a>
    <div class="card-header">Entrées/Sorties Wago</div>
    <div class="card-body">
-     <p>Configurer les entées/sorties des automates Wago</p>
+     <p>Configurer les entrées/sorties des automates Wago</p>
    </div>
   </div>
 

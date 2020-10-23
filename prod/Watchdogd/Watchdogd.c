@@ -54,30 +54,13 @@
 /* Entrée: numero du signal à gerer                                                                                           */
 /******************************************************************************************************************************/
  static void Traitement_signaux( int num )
-  { static gpointer dls_wait, dls_tour_per_sec, dls_bit_per_sec;
-    char chaine[50];
+  { char chaine[50];
     if (num == SIGALRM)
      { Partage->top++;
        if (Partage->com_msrv.Thread_run != TRUE) return;
 
        if (!Partage->top)                                             /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Timer: Partage->top = 0 !!", __func__ ); }
-       if (!(Partage->top%10))                                                                  /* Cligno toutes les secondes */
-        { Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
-          Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
-          Partage->audit_bit_interne_per_sec = 0;                                                               /* historique */
-          Dls_data_set_AI ( "SYS", "DLS_BIT_PER_SEC", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold, TRUE );
-
-          Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
-          Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
-          Partage->audit_tour_dls_per_sec = 0;
-          Dls_data_set_AI ( "SYS", "DLS_TOUR_PER_SEC", &dls_tour_per_sec, Partage->audit_tour_dls_per_sec_hold, TRUE );
-          if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
-           { Partage->com_dls.temps_sched += 50; }
-          else if (Partage->audit_tour_dls_per_sec_hold < 80)
-           { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          Dls_data_set_AI ( "SYS", "DLS_WAIT", &dls_wait, Partage->com_dls.temps_sched, TRUE );                 /* historique */
-        }
 
        Partage->top_cdg_plugin_dls++;                                                            /* Chien de garde plugin DLS */
        if (Partage->top_cdg_plugin_dls>200)                                         /* Si pas de réponse D.L.S en 20 secondes */
@@ -141,9 +124,9 @@
     Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
-/* Handle_zmq_message_for_master: Analyse et reagi à un message ZMQ a destination du MSRV                   */
-/* Entrée: le message                                       */
-/* Sortie: rien                                             */
+/* Handle_zmq_message_for_master: Analyse et reagi à un message ZMQ a destination du MSRV                                     */
+/* Entrée: le message                                                                                                         */
+/* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Handle_zmq_message_for_master ( struct ZMQ_TARGET *event, gchar *payload )
   { if ( !strcmp(event->tag,"SET_AI") )

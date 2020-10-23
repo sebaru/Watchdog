@@ -276,7 +276,6 @@
     Json_add_string ( builder, "syn_page", histo->msg.syn_page );
     Json_add_string ( builder, "syn_libelle", histo->msg.syn_libelle );
     Json_add_int    ( builder, "sms", histo->msg.sms );
-    Json_add_bool   ( builder, "audio", histo->msg.audio );
     Json_add_string ( builder, "libelle_audio", histo->msg.libelle_audio );
     Json_add_string ( builder, "profil_audio", histo->msg.profil_audio );
   }

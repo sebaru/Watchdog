@@ -630,9 +630,10 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
 /* Entrée/Sortie: l'instance cliente, l'id du synoptique a demander                                                           */
 /******************************************************************************************************************************/
  void Demander_synoptique_supervision ( struct CLIENT *client, gint id )
-  { gchar chaine[80];
-    g_snprintf( chaine, sizeof(chaine), "syn/show/%d", id );
-    Envoi_au_serveur( client, "GET", NULL, 0, chaine, Creer_page_supervision_CB );
+  { JsonBuilder *builder = Json_create ();
+    if (!builder) return;
+    Json_add_int ( builder, "syn_id", 1 );
+    Envoi_json_au_serveur( client, "PUT", builder, "/api/syn/show", Creer_page_supervision_CB );
   }
 /******************************************************************************************************************************/
 /* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                                                 */

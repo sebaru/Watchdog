@@ -467,11 +467,11 @@ reload:
     soup_server_add_handler ( socket, "/api/map/del",        Http_traiter_map_del, NULL, NULL );
     soup_server_add_handler ( socket, "/api/map/set",        Http_traiter_map_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/list",       Http_traiter_syn_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/show/",      Http_traiter_syn_show, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/del/",       Http_traiter_syn_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/get/",       Http_traiter_syn_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/show",       Http_traiter_syn_show, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/del",        Http_traiter_syn_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/get",        Http_traiter_syn_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/set",        Http_traiter_syn_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/clic/",      Http_traiter_syn_clic, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/clic",       Http_traiter_syn_clic, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/update_motifs", Http_traiter_syn_update_motifs, NULL, NULL );
     soup_server_add_handler ( socket, "/api/archive/get",    Http_traiter_archive_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/reload", Http_traiter_process_reload, NULL, NULL );

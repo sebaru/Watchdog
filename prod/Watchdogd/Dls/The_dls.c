@@ -822,8 +822,14 @@
        cpt_imp->imp_par_minute = cpt_imp->valeur - cpt_imp->valeurs[0];
      }
 
-    if (cpt_imp->archivage && need_arch == TRUE)
-     { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 ); }  /* Archivage si besoin */
+    if ( (cpt_imp->archivage == 1 && need_arch == TRUE) ||
+         (cpt_imp->archivage == 2 && cpt_imp->last_arch + 600    <= Partage->top) ||
+         (cpt_imp->archivage == 3 && cpt_imp->last_arch + 36000  <= Partage->top) ||
+         (cpt_imp->archivage == 4 && cpt_imp->last_arch + 864000 <= Partage->top)
+       )
+     { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 );             /* Archivage si besoin */
+       cpt_imp->last_arch = Partage->top;
+     }
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_CI : Recupere la valeur de l'EA en parametre                                                             */
@@ -905,6 +911,7 @@
              cpt_h->old_top = new_top;
              Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_CH '%s:%s'=%d",
                        __func__, cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
+             Partage->audit_bit_interne_per_sec++;
            }
           if (cpt_h->last_arch + 600 < Partage->top)
            { Ajouter_arch_by_nom( cpt_h->acronyme, cpt_h->tech_id, 1.0*cpt_h->valeur );
@@ -1329,14 +1336,22 @@
       }
     else reg = (struct DLS_REGISTRE *)*r_p;
 
-    if (valeur != reg->valeur || reg->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top)
+    gboolean need_arch = FALSE;
+    if (valeur != reg->valeur)
      { reg->valeur = valeur;
-       if(reg->archivage)
-        { Ajouter_arch_by_nom( reg->acronyme, reg->tech_id, reg->valeur );                             /* Archivage si besoin */
-          reg->last_arch = Partage->top;
-        }
+       need_arch = TRUE;
        Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_REGISTRE '%s:%s'=%f",
                  __func__, reg->tech_id, reg->acronyme, reg->valeur );
+       Partage->audit_bit_interne_per_sec++;
+     }
+
+    if ( (reg->archivage == 1 && need_arch == TRUE) ||
+         (reg->archivage == 2 && reg->last_arch + 600    <= Partage->top) ||
+         (reg->archivage == 3 && reg->last_arch + 36000  <= Partage->top) ||
+         (reg->archivage == 4 && reg->last_arch + 864000 <= Partage->top)
+       )
+     { Ajouter_arch_by_nom( reg->acronyme, reg->tech_id, reg->valeur );                                /* Archivage si besoin */
+       reg->last_arch = Partage->top;
      }
   }
 /******************************************************************************************************************************/
@@ -1572,6 +1587,7 @@
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
      { gpointer dls_top_10sec=NULL, dls_top_5sec=NULL, dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
        gpointer dls_flipflop_1sec=NULL, dls_flipflop_2hz=NULL;
+       gpointer dls_wait = NULL, dls_tour_per_sec = NULL, dls_bit_per_sec = NULL;
 
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
@@ -1590,6 +1606,21 @@
           Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec,
                               !Dls_data_get_bool ( "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec) );
           last_top_1sec = Partage->top;
+
+          Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
+          Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
+          Partage->audit_bit_interne_per_sec = 0;                                                               /* historique */
+          Dls_data_set_AI ( "SYS", "DLS_BIT_PER_SEC", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold, TRUE );
+
+          Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
+          Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
+          Partage->audit_tour_dls_per_sec = 0;
+          Dls_data_set_AI ( "SYS", "DLS_TOUR_PER_SEC", &dls_tour_per_sec, Partage->audit_tour_dls_per_sec_hold, TRUE );
+          if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
+           { Partage->com_dls.temps_sched += 50; }
+          else if (Partage->audit_tour_dls_per_sec_hold < 80)
+           { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
+          Dls_data_set_AI ( "SYS", "DLS_WAIT", &dls_wait, Partage->com_dls.temps_sched, TRUE );                 /* historique */
         }
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
         { Dls_data_set_bool ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, TRUE );

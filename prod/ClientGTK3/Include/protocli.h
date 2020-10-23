@@ -177,8 +177,7 @@
 
  extern void Connecter ( struct CLIENT *Client );                                                           /* Dans connect.c */
  extern void Deconnecter ( struct CLIENT *Client );
- extern void Envoi_au_serveur ( struct CLIENT *Client, gchar *methode, gchar *payload, gsize taille_buf, gchar *URI, SoupSessionCallback callback );
-
+ extern void Envoi_json_au_serveur ( struct CLIENT *client, gchar *methode, JsonBuilder *builder, gchar *URI, SoupSessionCallback callback );
 #ifdef bouh
  extern gboolean Connecter_ssl ( void );
  extern gboolean Connecter_au_serveur ( void );

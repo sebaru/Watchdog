@@ -184,6 +184,8 @@
 
        if ( tag == TAG_SUPERVISION && motif && motif->type_gestion != 0 /* TYPE_INERTE */ )
         { struct DLS_VISUEL *visuel=NULL;
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                   "%s: searching for motif %s:%s", __func__, motif->tech_id, motif->acronyme );
           Dls_data_get_VISUEL ( motif->tech_id, motif->acronyme, (gpointer)&visuel );
           if ( visuel && (! g_slist_find(liste_bit_init, visuel ) ) )
            { liste_bit_init = g_slist_prepend( liste_bit_init, visuel );

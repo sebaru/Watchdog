@@ -112,7 +112,8 @@
 		     return;
      }
 
-    Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 0 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -130,10 +131,7 @@
        g_snprintf( date_fixe, sizeof(date_fixe), "%s", temp_date_fixe );
        g_free( temp_date_fixe );
 
-       gchar *username = soup_client_context_get_auth_user (client);
-       if (!username) username = "unknown";
-
-       Acquitter_histo_msgsDB ( tech_id, acronyme, username, date_fixe );
+       Acquitter_histo_msgsDB ( tech_id, acronyme, session->username, date_fixe );
 
        JsonBuilder *builder = Json_create ();
        if (builder == NULL)
@@ -145,7 +143,7 @@
           Json_add_string ( builder, "zmq_type", "update_histo" );
           Json_add_string ( builder, "tech_id", tech_id );
           Json_add_string ( builder, "acronyme", acronyme );
-          Json_add_string ( builder, "nom_ack", username );
+          Json_add_string ( builder, "nom_ack", session->username );
           Json_add_string ( builder, "date_fixe", date_fixe );
           gchar *buf = Json_get_buf ( builder, &taille_buf );
           Http_msgs_send_to_all ( buf );

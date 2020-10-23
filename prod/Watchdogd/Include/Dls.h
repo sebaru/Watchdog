@@ -143,7 +143,8 @@
     gint    valeurs[60];                                                                              /* 60 dernieres valeurs */
     gchar   unite[32];
     gboolean etat;
-    gboolean archivage;
+    gint    archivage;
+    guint   last_arch;
   };
 
  struct DLS_CH
@@ -180,12 +181,12 @@
   };
 
  struct DLS_REGISTRE
-  { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gfloat   valeur;
-    gboolean archivage;
-    gchar   unite[32];
-    guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
+  { gchar  tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gfloat valeur;
+    gchar  unite[32];
+    gint   archivage;
+    guint  last_arch;                                                    /* Date de dernier enregistrement en base de données */
   };
 
  struct DLS_TREE

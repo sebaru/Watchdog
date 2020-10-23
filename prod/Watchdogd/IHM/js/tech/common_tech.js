@@ -45,4 +45,14 @@
      );
     Send_to_API ( "POST", "/api/process/reload", json_request, null, null);
   }
+/********************************************* Renvoi un Select d'archivage ***************************************************/
+ function Bouton_Archivage ( id, fonction, selected )
+  { return("<select id='"+id+"' class='custom-select'"+
+           "onchange="+fonction+">"+
+           "<option value='0' "+(selected==0 ? "selected" : "")+">Aucun</option>"+
+           "<option value='1' "+(selected==1 ? "selected" : "")+">En temps reél</option>"+
+           "<option value='2' "+(selected==2 ? "selected" : "")+">Un par minute</option>"+
+           "<option value='3' "+(selected==3 ? "selected" : "")+">Un par heure</option>"+
+           "<option value='4' "+(selected==4 ? "selected" : "")+">Un par jour</option>");
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

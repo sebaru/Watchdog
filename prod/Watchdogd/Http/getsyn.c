@@ -71,6 +71,7 @@
     gchar *acronyme = Normaliser_chaine ( params[1] );
     g_strfreev( params );
     Envoyer_commande_dls_data ( tech_id, acronyme );
+    Audit_log ( session, "Clic Synoptique : %s:%s", tech_id, acronyme );
     g_free(tech_id);
     g_free(acronyme);
 /*************************************************** Envoi au client **********************************************************/
@@ -127,26 +128,33 @@
                               SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
     gsize taille_buf;
-    gint syn_id;
-    if (msg->method != SOUP_METHOD_GET)
+    GBytes *request_brute;
+    gsize taille;
+
+    if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 0 )) return;
+    if (!Http_check_session( msg, session, 6 )) return;
 
-    gchar *prefix = "/syn/show/";
-    if ( ! g_str_has_prefix ( path, prefix ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
        return;
      }
 
-    if (!strlen (path+strlen(prefix)))
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+    if ( ! (Json_has_member ( request, "syn_id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-    syn_id = atoi(path+strlen(prefix));
+
+    gint syn_id = Json_get_int ( request, "syn_id" );
+    json_node_unref(request);
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
@@ -216,6 +224,7 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    Audit_log ( session, "Synoptique '%d' showed", syn_id );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -225,8 +234,10 @@
  void Http_traiter_syn_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
+    GBytes *request_brute;
     gsize taille_buf;
-    gint syn_id;
+    gsize taille;
+
     if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -235,17 +246,22 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
 
-    gchar *prefix = "/syn/del/";
-    if ( ! g_str_has_prefix ( path, prefix ) )
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
        return;
      }
 
-    if (!strlen (path+strlen(prefix)))
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+    if ( ! (Json_has_member ( request, "syn_id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-    syn_id = atoi(path+strlen(prefix));
+
+    gint syn_id = Json_get_int ( request, "syn_id" );
+    json_node_unref(request);
 
     if (syn_id==1)
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Syn 1 can not be deleted");
@@ -270,6 +286,7 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    Audit_log ( session, "Synoptique '%d' deleted", syn_id );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -306,10 +323,10 @@
     gint  access_level = Json_get_int ( request, "access_level" );
     if (access_level>=session->access_level) access_level = session->access_level-1;
 
-    if ( Json_has_member ( request, "id" ) )                                                                       /* Edition */
+    if ( Json_has_member ( request, "syn_id" ) )                                                                   /* Edition */
      { g_snprintf( requete, sizeof(requete),
                   "UPDATE syns SET libelle='%s', page='%s', access_level='%d' WHERE id='%d' AND access_level<'%d'",
-                   libelle, page, access_level, Json_get_int(request,"id"), session->access_level );
+                   libelle, page, access_level, Json_get_int(request,"syn_id"), session->access_level );
      }
     else
      {
@@ -324,6 +341,7 @@
     g_free(libelle);
     g_free(page);
     g_free(ppage);
+    Audit_log ( session, "Synoptique %s - '%s' changed", page, libelle );
     json_node_unref(request);
   }
 /******************************************************************************************************************************/
@@ -335,9 +353,10 @@
                             SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
     gsize taille_buf;
-    gint syn_id;
+    GBytes *request_brute;
+    gsize taille;
 
-    if (msg->method != SOUP_METHOD_GET)
+    if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -345,17 +364,22 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
 
-    gchar *prefix = "/syn/get/";
-    if ( ! g_str_has_prefix ( path, prefix ) )
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
        return;
      }
 
-    if (!strlen (path+strlen(prefix)))
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+    if ( ! (Json_has_member ( request, "syn_id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-    syn_id = atoi(path+strlen(prefix));
+
+    gint syn_id = Json_get_int ( request, "syn_id" );
+    json_node_unref(request);
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
@@ -375,6 +399,7 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    Audit_log ( session, "Synoptique '%d' get", syn_id );
   }
 /******************************************************************************************************************************/
 /* Http_get_syn_save_un_motif: Enregistre un motif en base de données                                                         */

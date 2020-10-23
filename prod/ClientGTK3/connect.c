@@ -55,7 +55,7 @@
  void Deconnecter ( struct CLIENT *client )
   { printf("%s : %p\n", __func__, client );
     if (!client->connexion) return;
-    Envoi_au_serveur ( client, "GET", NULL, 0, "disconnect", Deconnecter_CB );
+    Envoi_json_au_serveur ( client, "PUT", NULL, "/api/disconnect", Deconnecter_CB );
     Reset_page_histo( client );
     Log ( client, "Disconnected" );
   }
@@ -64,21 +64,24 @@
 /* Entrée: des infos sur le paquet à envoyer                                                                                  */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Envoi_au_serveur ( struct CLIENT *client, gchar *methode, gchar *payload, gsize taille_buf, gchar *URI, SoupSessionCallback callback )
+ void Envoi_json_au_serveur ( struct CLIENT *client, gchar *methode, JsonBuilder *builder, gchar *URI, SoupSessionCallback callback )
   { gchar target[128];
     printf("%s : sending %s\n", __func__, URI );
-    g_snprintf( target, sizeof(target), "http://%s:5560/%s", client->hostname, URI );
+    g_snprintf( target, sizeof(target), "http://%s:5560%s", client->hostname, URI );
     SoupMessage *msg = soup_message_new ( methode, target );
     client->network_size_sent = 0;
     g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
-    if (payload)
-     { soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, payload, taille_buf );
+    if (builder)
+     { gsize taille_buf;
+       gchar *buf = Json_get_buf (builder, &taille_buf);
+       soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
        client->network_size_to_send = taille_buf;
        gchar chaine[128];
-       g_snprintf ( chaine, sizeof(chaine), "Sending %s : %s\n", URI, payload );
+       g_snprintf ( chaine, sizeof(chaine), "Sending %s %s : %s\n", methode, URI, buf );
        chaine[126]='\n';
        printf(chaine);
      }
+    else { printf ( "Sending %s %s\n", methode, URI ); }
     SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", client->wtd_session, "/", NULL, 0 );
     GSList *liste = g_slist_append ( NULL, wtd_session );
     soup_cookies_to_request ( liste, msg );
@@ -167,22 +170,10 @@
     client->access_level = Json_get_int ( response, "access_level" );
     Log(client, chaine);
     json_node_unref(response);
-    g_snprintf( chaine, sizeof(chaine), "histo/alive" );
-    Envoi_au_serveur( client, "GET", NULL, 0, chaine, Afficher_histo_alive_CB );
-    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/live-msgs", client->hostname );
+    Envoi_json_au_serveur( client, "GET", NULL, "/api/histo/alive", Afficher_histo_alive_CB );
+    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/api/live-msgs", client->hostname );
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
                                            NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
-  }
-/******************************************************************************************************************************/
-/* Connecter: Tentative de connexion au serveur                                                                               */
-/* Entrée: une nom et un password                                                                                             */
-/* Sortie: les variables globales sont initialisées, FALSE si pb                                                              */
-/******************************************************************************************************************************/
- static void Send_credentials_CB ( SoupSession *session, SoupMessage *msg, SoupAuth  *auth, gboolean retrying, struct CLIENT *client)
-  { printf("%s\n", __func__ );
-    if (retrying)
-     { Log( client, "Wrong Credentials - Unable to connect" ); Deconnecter_sale(client); return; }
-    soup_auth_authenticate (auth, client->username, client->password);
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -193,8 +184,12 @@
   { printf("%s\n", __func__ );
     Log( client, "Trying to connect" );
     client->connexion = soup_session_new();
-    g_signal_connect( client->connexion, "authenticate", G_CALLBACK(Send_credentials_CB), client );
-    Envoi_au_serveur ( client, "GET", NULL, 0, "connect", Connecter_au_serveur_CB );
+
+    JsonBuilder *builder = Json_create ();
+    if (builder == NULL) return;
+    Json_add_string ( builder, "username", client->username );
+    Json_add_string ( builder, "password", client->password );
+    Envoi_json_au_serveur ( client, "POST", builder, "/api/connect", Connecter_au_serveur_CB );
   }
 /******************************************************************************************************************************/
 /* Identifier: Affiche la fenetre d'identification de l'utilisateur                                                           */

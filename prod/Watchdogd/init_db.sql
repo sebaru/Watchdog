@@ -286,7 +286,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_CI` (
   `valeur` INT(11) NOT NULL DEFAULT '0',
   `multi` float NOT NULL DEFAULT '1',
   `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'fois',
-  `archivage` BOOLEAN NOT NULL DEFAULT '1',
+  `archivage` INT(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
