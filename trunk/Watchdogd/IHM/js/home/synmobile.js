@@ -94,13 +94,9 @@
   { console.log ("in load page !");
 
     vars = window.location.pathname.split('/');
-    var xhr = new XMLHttpRequest;
-    xhr.open('GET', "/api/syn/show/" + vars[3], true);
-    xhr.onreadystatechange = function()
-     { if ( ! (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) ) return;
-       var Response = JSON.parse(xhr.responseText);                                         /* Pointe sur <synoptique a=1 ..> */
-
-       console.log("Traite motifs: "+Response.motifs.length);
+    var json_request = JSON.stringify( { syn_id : vars[3] } );
+    Send_to_API ( "PUT", "/api/syn/show", json_request, function(Response)
+     { console.log("Traite motifs: "+Response.motifs.length);
        for (var i = 0; i < Response.motifs.length; i++)                          /* Pour chacun des motifs, parsing un par un */
         { var motif = Response.motifs[i];
           $('#idContainer').append("<div class='row border border-warning mb-1'>"+
@@ -109,10 +105,9 @@
                                    "</div>");
           Load_Motif_to_canvas ( motif );
         }
-     }
-    xhr.send();
+     }, null );
 
-    var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/ws/live-motifs", "live-motifs");
+    var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/ws/live-motifs", "live-motifs");
     WTDWebSocket.onopen = function (event)
      { console.log("Connecté au websocket !");
        this.send ( JSON.stringify( { syn_id: id } ) );

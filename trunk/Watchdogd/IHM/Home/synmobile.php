@@ -4,4 +4,4 @@
 
 </div>
 
-<script src="/js/synmobile.js" type="text/javascript"></script>
+<script src="/js/home/synmobile.js" type="text/javascript"></script>
