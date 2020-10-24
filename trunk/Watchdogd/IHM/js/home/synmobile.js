@@ -107,10 +107,10 @@
         }
      }, null );
 
-    var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/ws/live-motifs", "live-motifs");
+    var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/live-motifs", "live-motifs");
     WTDWebSocket.onopen = function (event)
      { console.log("Connecté au websocket !");
-       this.send ( JSON.stringify( { syn_id: id } ) );
+       this.send ( JSON.stringify( { syn_id: vars[3] } ) );
      }
     WTDWebSocket.onerror = function (event)
      { console.log("Error au websocket !");

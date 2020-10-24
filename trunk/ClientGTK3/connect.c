@@ -67,7 +67,7 @@
  void Envoi_json_au_serveur ( struct CLIENT *client, gchar *methode, JsonBuilder *builder, gchar *URI, SoupSessionCallback callback )
   { gchar target[128];
     printf("%s : sending %s\n", __func__, URI );
-    g_snprintf( target, sizeof(target), "http://%s:5560%s", client->hostname, URI );
+    g_snprintf( target, sizeof(target), "https://%s:5560%s", client->hostname, URI );
     SoupMessage *msg = soup_message_new ( methode, target );
     client->network_size_sent = 0;
     g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
@@ -171,7 +171,7 @@
     Log(client, chaine);
     json_node_unref(response);
     Envoi_json_au_serveur( client, "GET", NULL, "/api/histo/alive", Afficher_histo_alive_CB );
-    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/api/live-msgs", client->hostname );
+    g_snprintf(chaine, sizeof(chaine), "wss://%s:5560/api/live-msgs", client->hostname );
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
                                            NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
   }
@@ -184,7 +184,7 @@
   { printf("%s\n", __func__ );
     Log( client, "Trying to connect" );
     client->connexion = soup_session_new();
-
+    g_object_set ( G_OBJECT(client->connexion), "ssl-strict", FALSE, NULL );
     JsonBuilder *builder = Json_create ();
     if (builder == NULL) return;
     Json_add_string ( builder, "username", client->username );
