@@ -575,7 +575,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `enable` tinyint(1) NOT NULL DEFAULT '0',
   `sms` int(11) NOT NULL DEFAULT '0',
   `etat` tinyint(1) NOT NULL DEFAULT '0',
-  `profil_audio` VARCHAR(80) NOT NULL DEFAULT 'P_ALL',
+  `profil_audio` VARCHAR(80) NOT NULL DEFAULT 'P_NONE',
   PRIMARY KEY (`id`),
   UNIQUE(`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE

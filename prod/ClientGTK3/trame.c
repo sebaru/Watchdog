@@ -294,10 +294,6 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
 
     if (!(trame_motif && trame_motif->motif && trame_motif->image)) return;
     max = trame_motif->gif_largeur*trame_motif->gif_hauteur;
-#ifdef DEBUG_TRAME
-    printf("Trame_peindre_motif: gif_largeur=%d  gif_hauteur=%d  r=%d,v=%d,b=%d\n",
-            trame_motif->gif_largeur, trame_motif->gif_hauteur, r, v, b );
-#endif
 
     if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
     trame_motif->pixbuf = gdk_pixbuf_copy( (GdkPixbuf *)(trame_motif->image->data) );
@@ -316,6 +312,17 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     else if (!strcasecmp(color, "#000"))      { rouge =   0; vert =   0; bleu =   0; }
     else if (!strcasecmp(color, "#FFFFFF"))   { rouge = 255; vert = 255; bleu = 255; }
     else if (!strcasecmp(color, "#1A1A1A"))   { rouge = 0x1A; vert = 0x1A; bleu = 0x1A; }
+    else if (!strcasecmp(color, "#7F7F7F"))   { rouge = 0x7F; vert = 0x7F; bleu = 0x7F; }
+    else if (!strcasecmp(color, "#FFFF0"))    { rouge = 0xFF; vert = 0xFF; bleu = 0x00; }
+    else if (!strcasecmp(color, "#ADD8E6"))   { rouge = 0xAD; vert = 0xD8; bleu = 0xE6; }
+    else if (!strcasecmp(color, "#A52A2A"))   { rouge = 0xA5; vert = 0x2A; bleu = 0x2A; }
+    else if (!strcasecmp(color, "#8B6914"))   { rouge = 0x8B; vert = 0x69; bleu = 0x14; }
+    else if (!strcasecmp(color, "#0FFFF"))    { rouge = 0x00; vert = 0xFF; bleu = 0xFF; }
+    else if (!strcasecmp(color, "#FF00"))     { rouge = 0xFF; vert = 0x00; bleu = 0x00; }
+    else if (!strcasecmp(color, "#00FF"))     { rouge = 0x00; vert = 0x00; bleu = 0xFF; }
+    else if (!strcasecmp(color, "#BFBFBF"))   { rouge = 0xBF; vert = 0xBF; bleu = 0xBF; }
+    else if (!strcasecmp(color, "#0FFFC"))    { rouge = 0x00; vert = 0xFF; bleu = 0xFC; }
+    else if (!strcasecmp(color, "#0FEFE"))    { rouge = 0x00; vert = 0xFE; bleu = 0xFE; }
     else printf("%s: color '%s' unknown\n", __func__, color);
 
     if ( gdk_pixbuf_get_has_alpha( trame_motif->pixbuf ) )                  /* y a-t-il un canal alpha ?? */

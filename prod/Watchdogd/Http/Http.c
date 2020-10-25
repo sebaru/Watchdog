@@ -46,12 +46,12 @@
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_http.lib->Thread_debug  = FALSE;                                                        /* Settings default parameters */
-    Cfg_http.tcp_port           = HTTP_DEFAUT_TCP_PORT;
-    Cfg_http.ssl_enable         = FALSE;
-    Cfg_http.wtd_session_expiry = 3600*2;
-    g_snprintf( Cfg_http.ssl_cert_filepath,        sizeof(Cfg_http.ssl_cert_filepath), "%s", HTTP_DEFAUT_FILE_CERT );
-    g_snprintf( Cfg_http.ssl_private_key_filepath, sizeof(Cfg_http.ssl_private_key_filepath), "%s", HTTP_DEFAUT_FILE_KEY );
+    Creer_configDB ( NOM_THREAD, "debug",             "false" );
+    Creer_configDB ( NOM_THREAD, "ssl_file_cert",      HTTP_DEFAUT_FILE_CERT );
+    Creer_configDB ( NOM_THREAD, "ssl_file_key",       HTTP_DEFAUT_FILE_KEY );
+    Creer_configDB ( NOM_THREAD, "ssl",                "true" );
+    Creer_configDB ( NOM_THREAD, "tcp_port",           "5560" );
+    Creer_configDB ( NOM_THREAD, "wtd_session_expiry", "7200" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
@@ -72,10 +72,6 @@
         { Cfg_http.wtd_session_expiry = atoi(valeur); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.lib->Thread_debug = TRUE;  }
-       else
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
-        }
      }
     return(TRUE);
   }
@@ -447,6 +443,32 @@ reload:
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer new Failed !", __func__ );
        goto end;
      }
+
+    if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
+     { struct stat sbuf;
+       if ( stat ( Cfg_http.ssl_cert_filepath, &sbuf ) == -1 ||                                   /* Test présence du fichier */
+            stat ( Cfg_http.ssl_private_key_filepath, &sbuf ) == -1 )                             /* Test présence du fichier */
+        { gchar chaine[256];
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "%s: unable to load '%s' and '%s' (error '%s'). Generating new ones.", __func__,
+                    Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath, strerror(errno) );
+          g_snprintf( chaine, sizeof(chaine),
+                      "openssl req -subj '/C=FR/ST=FRANCE/O=ABLS-HABITAT/OU=PRODUCTION/CN=Watchdog Server on %s' -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 -out '%s' -keyout '%s'",
+                      g_get_host_name(), Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath );
+          system( chaine );
+        }
+       GError *error;
+       if (soup_server_set_ssl_cert_file ( socket, Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath, &error ))
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: SSL Loaded with '%s' and '%s'", __func__,
+                    Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath );
+        }
+       else
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
+                     __func__, Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath, error->message  );
+          g_error_free(error);
+        }
+     }
+
     soup_server_add_handler ( socket, "/api/connect",        Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/api/disconnect",     Http_traiter_disconnect, NULL, NULL );
     soup_server_add_handler ( socket, "/api/dls/list",       Http_traiter_dls_list, NULL, NULL );
@@ -499,29 +521,8 @@ reload:
     soup_server_add_websocket_handler ( socket, "/api/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
     soup_server_add_websocket_handler ( socket, "/api/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
 
-    if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
-     { struct stat sbuf;
-       if ( stat ( Cfg_http.ssl_cert_filepath, &sbuf ) == -1)                                     /* Test présence du fichier */
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "%s: unable to load '%s' (error '%s'). Setting ssl=FALSE", __func__,
-                    Cfg_http.ssl_cert_filepath, strerror(errno) );
-          Cfg_http.ssl_enable=FALSE;
-        }
-       else if ( stat ( Cfg_http.ssl_private_key_filepath, &sbuf ) == -1)                         /* Test présence du fichier */
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "%s: unable to load '%s' (error '%s'). Setting ssl=FALSE", __func__,
-                    Cfg_http.ssl_private_key_filepath, strerror(errno) );
-          Cfg_http.ssl_enable=FALSE;
-        }
-       else
-        { if (!soup_server_set_ssl_cert_file ( socket, Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath, NULL ))
-           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Failed to load SSL Certificate", __func__ );
-             Cfg_http.ssl_enable=FALSE;
-           }
-        }
-     }
 
-    if (!soup_server_listen_all (socket, Cfg_http.tcp_port, 0, NULL))
+    if (!soup_server_listen_all (socket, Cfg_http.tcp_port, SOUP_SERVER_LISTEN_HTTPS, NULL))
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer Listen Failed !", __func__ );
        goto end;
      }
