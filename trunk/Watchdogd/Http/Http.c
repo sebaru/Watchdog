@@ -468,6 +468,8 @@ reload:
           g_error_free(error);
         }
      }
+    else
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: SSL is disabled", __func__ ); }
 
     soup_server_add_handler ( socket, "/api/connect",        Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/api/disconnect",     Http_traiter_disconnect, NULL, NULL );
@@ -522,7 +524,7 @@ reload:
     soup_server_add_websocket_handler ( socket, "/api/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
 
 
-    if (!soup_server_listen_all (socket, Cfg_http.tcp_port, SOUP_SERVER_LISTEN_HTTPS, NULL))
+    if (!soup_server_listen_all (socket, Cfg_http.tcp_port, (Cfg_http.ssl_enable ? SOUP_SERVER_LISTEN_HTTPS : 0), NULL))
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer Listen Failed !", __func__ );
        goto end;
      }
