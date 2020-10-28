@@ -324,6 +324,21 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     else if (!strcasecmp(color, "lightgray")) { rouge = 127; vert = 127; bleu = 127; }
     else if (!strcasecmp(color, "brown"))     { rouge =   0; vert = 100; bleu =   0; }
     else if (!strcasecmp(color, "kaki"))      { rouge = 100; vert = 100; bleu = 100; }
+    else if (!strcasecmp(color, "#000"))      { rouge =   0; vert =   0; bleu =   0; }
+    else if (!strcasecmp(color, "#FFFFFF"))   { rouge = 255; vert = 255; bleu = 255; }
+    else if (!strcasecmp(color, "#1A1A1A"))   { rouge = 0x1A; vert = 0x1A; bleu = 0x1A; }
+    else if (!strcasecmp(color, "#7F7F7F"))   { rouge = 0x7F; vert = 0x7F; bleu = 0x7F; }
+    else if (!strcasecmp(color, "#FFFF0"))    { rouge = 0xFF; vert = 0xFF; bleu = 0x00; }
+    else if (!strcasecmp(color, "#ADD8E6"))   { rouge = 0xAD; vert = 0xD8; bleu = 0xE6; }
+    else if (!strcasecmp(color, "#A52A2A"))   { rouge = 0xA5; vert = 0x2A; bleu = 0x2A; }
+    else if (!strcasecmp(color, "#8B6914"))   { rouge = 0x8B; vert = 0x69; bleu = 0x14; }
+    else if (!strcasecmp(color, "#0FFFF"))    { rouge = 0x00; vert = 0xFF; bleu = 0xFF; }
+    else if (!strcasecmp(color, "#FF00"))     { rouge = 0xFF; vert = 0x00; bleu = 0x00; }
+    else if (!strcasecmp(color, "#00FF"))     { rouge = 0x00; vert = 0x00; bleu = 0xFF; }
+    else if (!strcasecmp(color, "#BFBFBF"))   { rouge = 0xBF; vert = 0xBF; bleu = 0xBF; }
+    else if (!strcasecmp(color, "#0FFFC"))    { rouge = 0x00; vert = 0xFF; bleu = 0xFC; }
+    else if (!strcasecmp(color, "#0FEFE"))    { rouge = 0x00; vert = 0xFE; bleu = 0xFE; }
+    else printf("%s: color '%s' unknown\n", __func__, color);
 
     if ( gdk_pixbuf_get_has_alpha( trame_motif->pixbuf ) )                  /* y a-t-il un canal alpha ?? */
      { for (x=0; x<max; x++)
@@ -651,13 +666,13 @@ printf("Charger_pixbuf_file: %s\n", fichier );
   { struct TRAME_ITEM_MOTIF *trame_motif;
 
     if (!(trame && motif)) return(NULL);
-
+    if (motif->icone_id==-1) return(NULL);
     trame_motif = Trame_new_item();
     if (!trame_motif) { printf("Trame_ajout_motif: Erreur mémoire\n"); return(NULL); }
 
     trame_motif->motif = motif;
     trame_motif->type = TYPE_MOTIF;
-
+    printf("Chargement motif %d color='%s'\n", motif->icone_id, motif->def_color );
     Charger_pixbuf_id( trame_motif, motif->icone_id );
     if (!trame_motif->images)                                                               /* En cas de probleme, on sort */
      { Trame_del_item(trame_motif);

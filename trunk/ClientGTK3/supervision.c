@@ -411,7 +411,7 @@ printf("%s\n", __func__);
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Detruire_page_supervision), page );
 
-    bouton = Bouton ( "Imprimer", "dpcument-print", "Imprime le synoptique de la page" );
+    bouton = Bouton ( "Imprimer", "document-print", "Imprime le synoptique de la page" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_exporter_synoptique), infos );
 
@@ -464,7 +464,7 @@ printf("%s\n", __func__);
     json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, page );
 
-    g_snprintf(chaine, sizeof(chaine), "ws://%s:5560/api/live-motifs", client->hostname );
+    g_snprintf(chaine, sizeof(chaine), "wss://%s:5560/api/live-motifs", client->hostname );
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
                                            NULL, NULL, g_cancellable_new(), Traiter_connect_ws_motifs_CB, page );
   }
