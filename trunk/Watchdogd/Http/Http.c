@@ -588,16 +588,15 @@ reload:
           last_pulse = Partage->top;
           GSList *liste = Cfg_http.liste_http_clients;
           while(liste)
-           { struct HTTP_CLIENT_SESSION *session = liste->data;
+           { struct HTTP_CLIENT_SESSION *client = liste->data;
              liste = g_slist_next ( liste );
-             if (session->last_request + Cfg_http.wtd_session_expiry*10 < Partage->top )
-              { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
-                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Session '%s' out of time", __func__, session->wtd_session );
-                g_free(session);
+             if (client->last_request + Cfg_http.wtd_session_expiry*10 < Partage->top )
+              { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, client );
+                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Session '%s' out of time", __func__, client->wtd_session );
+                g_free(client);
               }
            }
         }
-
 
        g_main_context_iteration ( loop_context, FALSE );
      }

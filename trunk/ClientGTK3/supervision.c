@@ -226,7 +226,8 @@ printf("%s\n", __func__);
  static void Updater_les_motifs( struct TYPE_INFO_SUPERVISION *infos, JsonNode *motif )
   { GList *liste_motifs;
     gint cpt;
-printf("%s\n", __func__);
+    printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
+           Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );
 
     liste_motifs = infos->Trame->trame_items;                                     /* On parcours tous les motifs de la page */
     while (liste_motifs)
@@ -259,8 +260,6 @@ printf("%s\n", __func__);
  static void Traiter_reception_ws_motifs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
   { struct TYPE_INFO_SUPERVISION *infos = user_data;
     gsize taille;
-    printf("%s\n", __func__ );
-    /*printf("Recu via WS-MOTIFS: %s :\n", g_bytes_get_data ( message_brut, &taille ) );*/
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
     if ( !strcmp ( Json_get_string(response,"msg_type"), "update_cadran" ) ) { Updater_les_cadrans ( infos, response ); }
@@ -302,7 +301,18 @@ printf("%s\n", __func__);
     g_signal_connect ( infos->ws_motifs, "message", G_CALLBACK(Traiter_reception_ws_motifs_CB), infos );
     g_signal_connect ( infos->ws_motifs, "closed",  G_CALLBACK(Traiter_reception_ws_motifs_on_closed), infos );
     g_signal_connect ( infos->ws_motifs, "error",   G_CALLBACK(Traiter_reception_ws_motifs_on_error), infos );
+
     JsonBuilder *builder = Json_create ();
+    if (builder == NULL) return;
+
+    Json_add_string ( builder, "msg_type", "send_wtd_session" );
+    Json_add_string ( builder, "wtd_session", page->client->wtd_session );
+    gchar *buf = Json_get_buf (builder, &taille_buf);
+    GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
+    soup_websocket_connection_send_message (infos->ws_motifs, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
+    g_bytes_unref( gbytes );
+
+    builder = Json_create ();
     if (builder == NULL) return;
     Json_add_string ( builder, "msg_type", "abonnements" );
     Json_add_array  ( builder, "cadrans" );
@@ -345,8 +355,8 @@ printf("%s\n", __func__);
      }
     Json_end_array ( builder );
 
-    gchar *buf = Json_get_buf (builder, &taille_buf);
-    GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
+    buf = Json_get_buf (builder, &taille_buf);
+    gbytes = g_bytes_new_take ( buf, taille_buf );
     soup_websocket_connection_send_message (infos->ws_motifs, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
     g_bytes_unref( gbytes );
   }
