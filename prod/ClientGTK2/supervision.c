@@ -425,8 +425,8 @@ printf("Recu changement etat motif: %s:%s = %d color=%s\n", etat_motif->tech_id,
        while (liste_motifs)
         { switch( *((gint *)liste_motifs->data) )
            { case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)liste_motifs->data;
-                                    printf("Searching for %s:%s with %s:%s\n",trame_motif->motif->tech_id, trame_motif->motif->acronyme,
-                                           etat_motif->tech_id, etat_motif->acronyme );
+                                    /*printf("Searching for %s:%s with %s:%s\n",trame_motif->motif->tech_id, trame_motif->motif->acronyme,
+                                           etat_motif->tech_id, etat_motif->acronyme );*/
                                     if (!strcasecmp(trame_motif->motif->tech_id, etat_motif->tech_id) &&
                                         !strcasecmp(trame_motif->motif->acronyme, etat_motif->acronyme) )
                                      { Changer_etat_motif( trame_motif, etat_motif );
