@@ -242,11 +242,13 @@
        motif->icone_id     = atoi(db->row[2]);                                                  /* Correspond au fichier .gif */
        motif->syn_id       = atoi(db->row[3]);
        motif->access_level = atoi(db->row[4]);                                       /* Nom du groupe d'appartenance du motif */
+#ifdef bouh
        if (atoi(db->row[19]) != 0)
         { g_snprintf ( motif->tech_id, sizeof(motif->tech_id), "OLD_I" );                        /* Recopie dans la structure */
           g_snprintf ( motif->acronyme, sizeof(motif->acronyme), "%s", db->row[19] );                /* Recopie dans la structure */
         }
        else
+#endif
         { g_snprintf ( motif->tech_id, sizeof(motif->tech_id), "%s", db->row[5] );                  /* Recopie dans la structure */
           g_snprintf ( motif->acronyme, sizeof(motif->acronyme), "%s", db->row[6] );                /* Recopie dans la structure */
         }

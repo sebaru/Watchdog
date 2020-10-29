@@ -657,13 +657,16 @@
        case KAKI    : color="brown"; break;
        default      : color="black";
      }
+#ifdef bouh
     if (alias->num==-1)
+#endif
      { g_snprintf( action->alors, taille,
                    "  if (vars->bit_comm_out) Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, 0, \"darkgreen\", 1 );"
                    " else Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, %d, \"%s\", %d );\n",
                      alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
                      alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno );
      }
+#ifdef bouh
     else
      { g_snprintf( action->alors, taille,
                    "  if (vars->bit_comm_out) Dls_data_set_VISUEL( vars, \"OLD_I\", \"%d\", &_%s_%s, 0, \"darkgreen\", 1 );"
@@ -671,6 +674,7 @@
                      alias->num, alias->tech_id, alias->acronyme,
                      alias->num, alias->tech_id, alias->acronyme, mode, color, cligno );
      }
+#endif
     return(action);
   }
 /******************************************************************************************************************************/
