@@ -549,7 +549,7 @@
     mode   = Get_option_entier ( options, MODE   ); if (mode   == -1) mode   = 0;
     coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul   = 0;
     cligno = Get_option_entier ( options, CLIGNO ); if (cligno == -1) cligno = 0;
-    taille = 256;
+    taille = 512;
     action = New_action();
     action->alors = New_chaine( taille );
     switch (coul)
