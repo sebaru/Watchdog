@@ -169,7 +169,7 @@
     while(liste)
      { struct DLS_CI *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_CI_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -182,7 +182,7 @@
     while(liste)
      { struct DLS_BOOL *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_BOOL_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -195,7 +195,7 @@
     while(liste)
      { struct DLS_CH *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_CH_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -208,7 +208,7 @@
     while(liste)
      { struct DLS_AI *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_AI_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -221,7 +221,7 @@
     while(liste)
      { struct DLS_AO *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_AO_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -234,7 +234,7 @@
     while(liste)
      { struct DLS_TEMPO *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_TEMPO_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -247,7 +247,7 @@
     while(liste)
      { struct DLS_DI *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_DI_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -260,7 +260,7 @@
     while(liste)
      { struct DLS_DO *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_DO_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -268,12 +268,12 @@
      }
     Json_end_array( builder );
 /*----------------------------------------------- Visuels --------------------------------------------------------------------*/
-    Json_add_array ( builder, "I" );
+    Json_add_array ( builder, "VISUEL" );
     liste = Partage->Dls_data_VISUEL;
     while(liste)
      { struct DLS_VISUEL *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_VISUEL_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -302,19 +302,6 @@
        if (!strcasecmp(bit->tech_id, tech_id))
         { Json_add_object ( builder, bit->acronyme );
           Dls_REGISTRE_to_json ( builder, bit );
-          Json_end_object( builder );
-        }
-       liste = g_slist_next(liste);
-     }
-    Json_end_array( builder );
-/*----------------------------------------------- Registre -------------------------------------------------------------------*/
-    Json_add_array ( builder, "VISUEL" );
-    liste = Partage->Dls_data_VISUEL;
-    while(liste)
-     { struct DLS_VISUEL *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
-          Dls_VISUEL_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);
