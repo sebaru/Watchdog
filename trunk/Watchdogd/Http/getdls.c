@@ -307,6 +307,19 @@
        liste = g_slist_next(liste);
      }
     Json_end_array( builder );
+/*----------------------------------------------- Registre -------------------------------------------------------------------*/
+    Json_add_array ( builder, "VISUEL" );
+    liste = Partage->Dls_data_VISUEL;
+    while(liste)
+     { struct DLS_VISUEL *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, bit->acronyme );
+          Dls_VISUEL_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
 /*------------------------------------------------------- fin ----------------------------------------------------------------*/
     json_node_unref(request);
     buf = Json_get_buf ( builder, &taille_buf );
