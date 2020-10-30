@@ -875,8 +875,7 @@
        else
         { gchar *include = " #include <Module_dls.h>\n";
           gchar *Start_Go = " void Go ( struct DLS_TO_PLUGIN *vars )\n"
-                            "  {\n"
-                            "    Update_edge_up_value();\n";
+                            "  {\n";
           gchar *End_Go =   "  }\n";
           struct tm *temps;
           time_t ltime;
