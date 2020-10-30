@@ -52,7 +52,8 @@
        { classe   : "MSG",
          tech_id  : selection.tech_id,
          acronyme : selection.acronyme,
-         sms      : $('#idMSGSms'+acronyme).val()
+         sms      : $('#idMSGSms'+acronyme).val(),
+         libelle_sms: $('#idMSGLibelleSms'+acronyme).val()
        }
      );
 
@@ -268,7 +269,14 @@
                           "<option value='3' "+(item.sms==3 ? "selected" : "")+">SMSBox Only</option>");
                  }
              },
-             { "data": "libelle_sms", "title":"Libellé SMS",    "className": "hidden-xs" },
+             { "data": null, "title":"Libellé SMS", "className": "hidden-xs",
+               "render": function (item)
+                 { return("<input id='idMSGLibelleSms"+item.acronyme+"' class='form-control' "+
+                          "placeholder='Libellé du SMS' "+
+                          "onchange=Mnemos_MSG_set_sms('"+item.acronyme+"') "+
+                          "value='"+item.libelle_sms+"'/>");
+                 }
+             },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,

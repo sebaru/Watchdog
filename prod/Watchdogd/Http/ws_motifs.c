@@ -244,6 +244,7 @@
   { struct WS_CLIENT_SESSION *client = user_data;
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Message received !", __func__ );
     gsize taille;
+
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
@@ -256,7 +257,27 @@
        json_node_unref(response);
        return;
      }
-    if(!strcmp(msg_type,"abonnements"))
+
+    if(!strcmp(msg_type,"send_wtd_session"))
+     { if (!Json_has_member( response, "wtd_session"))
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket 'Send_wtd_session' without wtd_session !", __func__ ); }
+       else
+        { gchar *wtd_session = Json_get_string ( response, "wtd_session");
+          GSList *liste = Cfg_http.liste_http_clients;
+          while ( liste )
+           { struct HTTP_CLIENT_SESSION *http_session = liste->data;
+             if (!strcmp(http_session->wtd_session, wtd_session))
+              { client->http_session = http_session;
+                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: session found for '%s' !", __func__, http_session->username );
+                break;
+              }
+             liste = g_slist_next ( liste );
+           }
+        }
+     }
+    else if (!client->http_session)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Not authorized !", __func__ ); }
+    else if(!strcmp(msg_type,"abonnements"))
      { JsonArray *array;
        array = Json_get_array ( response, "cadrans" );
        if (array) { json_array_foreach_element ( array, Abonner_un_cadran, client ); }

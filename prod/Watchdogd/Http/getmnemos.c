@@ -165,13 +165,16 @@
         }
      }
     if ( ! strcasecmp ( classe, "MSG" ) )
-     { if ( Json_has_member ( request, "sms" ) )
+     { if ( Json_has_member ( request, "sms" ) && Json_has_member ( request, "libelle_sms" ))
         { gchar chaine[128];
           gint sms = Json_get_int ( request, "sms" );
-          g_snprintf( chaine, sizeof(chaine), "UPDATE msgs SET sms='%d' WHERE tech_id='%s' AND acronyme='%s'",
-                      sms, tech_id, acronyme );
+          gchar *libelle = Normaliser_chaine ( Json_get_string ( request, "libelle_sms" ) );
+          g_snprintf( chaine, sizeof(chaine), "UPDATE msgs SET sms='%d',libelle_sms='%s' WHERE tech_id='%s' AND acronyme='%s'",
+                      sms, libelle, tech_id, acronyme );
           SQL_Write ( chaine );                                                   /* Qu'il existe ou non, ou met a jour la DB */
           Audit_log ( session, "Mnemos %s:%s -> SMS = '%d'", tech_id, acronyme, sms );
+          Audit_log ( session, "Mnemos %s:%s -> Libelle_SMS = '%s'", tech_id, acronyme, libelle );
+          g_free(libelle);
         }
      }
     /*else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }

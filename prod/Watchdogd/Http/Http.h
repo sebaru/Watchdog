@@ -41,6 +41,7 @@
     SoupClientContext *context;
     GSList *Liste_bit_cadrans;
     GSList *Liste_bit_motifs;
+    struct HTTP_CLIENT_SESSION *http_session;
   };
 
  struct HTTP_CLIENT_SESSION
