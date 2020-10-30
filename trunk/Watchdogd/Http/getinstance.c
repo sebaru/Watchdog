@@ -63,4 +63,40 @@
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
+/******************************************************************************************************************************/
+/* Http_traiter_instance_reset: Reset une instance                                                                            */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_instance_reset ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                    SoupClientContext *client, gpointer user_data )
+  { GBytes *request_brute;
+    gsize taille;
+    if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
+       return;
+     }
+
+    if ( Json_has_member ( request, "instance" ) && strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+         strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
+     { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
+       json_node_unref(request);
+       return;
+     }
+
+    Partage->com_msrv.Thread_run = FALSE;
+    Audit_log ( session, "Instance is restarting" );
+    json_node_unref(request);
+    soup_message_set_status ( msg, SOUP_STATUS_OK );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
