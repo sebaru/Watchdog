@@ -151,7 +151,6 @@ newline       [\n\r]+
 "forme"                    { DlsScanner_lval.val = T_FORME;     return T_FORME;     }
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }
-"#static"                  { DlsScanner_lval.val = T_STATIC;    return T_STATIC;    }
 "dyn_string"               { DlsScanner_lval.val = T_DYN_STRING;return T_DYN_STRING;}
 "switch"                   { DlsScanner_lval.val = T_SWITCH;    return T_SWITCH;    }
 "."                        { DlsScanner_lval.val = ET;          return ET;          }

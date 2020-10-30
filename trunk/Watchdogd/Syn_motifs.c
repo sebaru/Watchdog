@@ -83,7 +83,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT IGNORE INTO %s SET "
                 "syn_id=(SELECT syns.id FROM dls INNER JOIN syns ON dls.syn_id = syns.id WHERE dls.tech_id='%s'), "
-                "tech_id='%s', acronyme='%s', forme='%s', icone='-1', libelle='%s', access_level=0, bitctrl='-1', "
+                "tech_id='%s', acronyme='%s', forme='%s', icone='-1', libelle='%s', access_level=0, "
                 "posx='150', posy='150', larg='-1', haut='-1', angle='0', auto_create=1 ",
                 NOM_TABLE_MOTIF, tech_id, tech_id, acro, forme, libelle );
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
@@ -208,7 +208,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT sm.id,sm.libelle,icone,syn_id,access_level,tech_id,acronyme,posx,posy,larg,haut,angle,"
                 "dialog,gestion,def_color,rafraich,layer,"
-                "sm.clic_tech_id, sm.clic_acronyme, bitctrl"
+                "sm.clic_tech_id, sm.clic_acronyme"
                 " FROM syns_motifs AS sm"
                 " WHERE syn_id='%d' ORDER BY layer", id_syn );
 
@@ -242,16 +242,8 @@
        motif->icone_id     = atoi(db->row[2]);                                                  /* Correspond au fichier .gif */
        motif->syn_id       = atoi(db->row[3]);
        motif->access_level = atoi(db->row[4]);                                       /* Nom du groupe d'appartenance du motif */
-#ifdef bouh
-       if (atoi(db->row[19]) != 0)
-        { g_snprintf ( motif->tech_id, sizeof(motif->tech_id), "OLD_I" );                        /* Recopie dans la structure */
-          g_snprintf ( motif->acronyme, sizeof(motif->acronyme), "%s", db->row[19] );                /* Recopie dans la structure */
-        }
-       else
-#endif
-        { g_snprintf ( motif->tech_id, sizeof(motif->tech_id), "%s", db->row[5] );                  /* Recopie dans la structure */
-          g_snprintf ( motif->acronyme, sizeof(motif->acronyme), "%s", db->row[6] );                /* Recopie dans la structure */
-        }
+       g_snprintf ( motif->tech_id, sizeof(motif->tech_id), "%s", db->row[5] );                  /* Recopie dans la structure */
+       g_snprintf ( motif->acronyme, sizeof(motif->acronyme), "%s", db->row[6] );                /* Recopie dans la structure */
        motif->position_x   = atoi(db->row[7]);                                                   /* en abscisses et ordonnées */
        motif->position_y   = atoi(db->row[8]);
        motif->largeur      = atoi(db->row[9]);                                         /* Taille de l'image sur le synoptique */
@@ -285,7 +277,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT sm.id,sm.libelle,icone,syn_id,access_level,tech_id,acronyme,posx,posy,larg,haut,angle,"
                 "dialog,gestion,def_color,rafraich,layer,"
-                "sm.clic_tech_id, sm.clic_acronyme, bitctrl"
+                "sm.clic_tech_id, sm.clic_acronyme"
                 " FROM syns_motifs AS sm"
                 " WHERE sm.id=%d", id );
 

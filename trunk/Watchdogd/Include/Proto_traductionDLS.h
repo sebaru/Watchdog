@@ -57,18 +57,10 @@
           };
   };
 
- enum
-  { ALIAS_TYPE_STATIC,
-    ALIAS_TYPE_DYNAMIC
-  };
-
  struct ALIAS
-  { gint type;                                                                                 /* Alias static ou dynamique ? */
-    gchar *tech_id;
+  { gchar *tech_id;
     gchar *acronyme;
     gint type_bit;                                                                           /* Type de tableau (E/A/B/M....) */
-    gint num;                                                                                  /* Numero du bit interne ciblé */
-    int barre;                                                                               /* Represente la negation ou pas */
     GList *options;
     gint used;
     gboolean external;                 /* TRUE si le bit interne est externe au module (ie pas déclaré en tant qu'alias local */
@@ -102,7 +94,7 @@
  extern struct ACTION *New_action_bi( struct ALIAS *alias, gint barre );
  extern struct ACTION *New_action_cpt_h( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_cpt_imp( struct ALIAS *alias, GList *options );
- extern gboolean New_alias( gint type, gchar *tech_id, gchar *acronyme, gint bit, gint num, gint barre, GList *options );
+ extern gboolean New_alias( gchar *tech_id, gchar *acronyme, gint bit, GList *options );
  extern struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme );
  extern struct ALIAS *Get_alias_par_acronyme( gchar *tech_id, gchar *acronyme );
  extern struct OPTION *New_option( void );
