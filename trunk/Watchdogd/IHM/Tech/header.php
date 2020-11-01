@@ -23,6 +23,7 @@
         .nav-link:hover { color: white;
                           background-color: #48BBC0;
                         }
+        .courbe-dashboard { height: 300px; }
       </style>
 
     </head>

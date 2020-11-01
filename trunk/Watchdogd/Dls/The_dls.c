@@ -1568,6 +1568,8 @@
     Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
     Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
     Mnemo_auto_create_AI ( FALSE, "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
+    Mnemo_auto_create_AI ( FALSE, "SYS", "NBR_MSG_QUEUE", "Nombre de messages dans la file de traitement", "messages" );
+    Mnemo_auto_create_AI ( FALSE, "SYS", "NBR_VISUEL_QUEUE", "Nombre de visuels dans la file de traitement", "visuels" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_1MIN", "Impulsion toutes les minutes" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_1SEC", "Impulsion toutes les secondes" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_5SEC", "Impulsion toutes les 5 secondes" );
@@ -1588,6 +1590,7 @@
      { gpointer dls_top_10sec=NULL, dls_top_5sec=NULL, dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
        gpointer dls_flipflop_1sec=NULL, dls_flipflop_2hz=NULL;
        gpointer dls_wait = NULL, dls_tour_per_sec = NULL, dls_bit_per_sec = NULL;
+       gpointer dls_nbr_msg_queue = NULL, dls_nbr_visuel_queue = NULL;
 
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
@@ -1599,6 +1602,8 @@
 
        if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
         { Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
+          Dls_data_set_AI ( "SYS", "NBR_MSG_QUEUE", &dls_nbr_msg_queue, g_slist_length(Partage->com_msrv.liste_msg), TRUE );
+          Dls_data_set_AI ( "SYS", "NBR_VISUEL_QUEUE", &dls_nbr_visuel_queue, g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
           last_top_1min = Partage->top;
         }
        if (Partage->top-last_top_1sec>=10)                                                             /* Toutes les secondes */
