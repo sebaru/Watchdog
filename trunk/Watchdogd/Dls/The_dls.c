@@ -378,7 +378,7 @@
     di->etat = valeur;
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_bool: Remonte l'etat d'un boolean                                                                             */
+/* Dls_data_get_DI: Remonte l'etat d'une entrée TOR                                                                           */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
  gboolean Dls_data_get_DI ( gchar *tech_id, gchar *acronyme, gpointer *di_p )
