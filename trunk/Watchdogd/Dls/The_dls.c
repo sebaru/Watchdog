@@ -254,12 +254,12 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Reset_edge ( void )
-  { while( Partage->com_dls.Reset_Dls_Bool_Edge_up )                                       /* A-t-on un boolean up a allumer ?? */
+  { while( Partage->com_dls.Reset_Dls_Bool_Edge_up )                                     /* A-t-on un boolean up a allumer ?? */
      { struct DLS_BOOL *bool = Partage->com_dls.Reset_Dls_Bool_Edge_up->data;
        Partage->com_dls.Reset_Dls_Bool_Edge_up = g_slist_remove ( Partage->com_dls.Reset_Dls_Bool_Edge_up, bool );
        bool->edge_up = FALSE;
      }
-    while( Partage->com_dls.Reset_Dls_Bool_Edge_down )                                       /* A-t-on un boolean down a allumer ?? */
+    while( Partage->com_dls.Reset_Dls_Bool_Edge_down )                                 /* A-t-on un boolean down a allumer ?? */
      { struct DLS_BOOL *bool = Partage->com_dls.Reset_Dls_Bool_Edge_down->data;
        Partage->com_dls.Reset_Dls_Bool_Edge_down = g_slist_remove ( Partage->com_dls.Reset_Dls_Bool_Edge_down, bool );
        bool->edge_down = FALSE;
@@ -269,7 +269,7 @@
        Partage->com_dls.Reset_Dls_DI_Edge_up = g_slist_remove ( Partage->com_dls.Reset_Dls_DI_Edge_up, di );
        di->edge_up = FALSE;
      }
-    while( Partage->com_dls.Set_Dls_DI_Edge_down )                                       /* A-t-on un boolean down a allumer ?? */
+    while( Partage->com_dls.Reset_Dls_DI_Edge_down )                                   /* A-t-on un boolean down a allumer ?? */
      { struct DLS_DI *di = Partage->com_dls.Reset_Dls_DI_Edge_down->data;
        Partage->com_dls.Reset_Dls_DI_Edge_down = g_slist_remove ( Partage->com_dls.Reset_Dls_DI_Edge_down, di );
        di->edge_down = FALSE;
