@@ -40,7 +40,7 @@
 
  #include "watchdogd.h"
 
- #define DLS_LIBRARY_VERSION  "20200503"
+ #define DLS_LIBRARY_VERSION  "20201101"
 
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
@@ -51,9 +51,12 @@
   { gchar *nom, *valeur;
     struct DB *db;
 
+    Creer_configDB ( "dls", "compil_at_boot", "false" );                                       /* Settings default parameters */
     Partage->com_dls.Compil_at_boot = FALSE;                                                   /* Settings default parameters */
+    Creer_configDB ( "dls", "debug", "false" );                                                /* Settings default parameters */
     Partage->com_dls.Thread_debug   = FALSE;                                                   /* Settings default parameters */
-    g_snprintf( Partage->com_dls.Library_version, sizeof(Partage->com_dls.Library_version), "unknown" );
+    Creer_configDB ( "dls", "library_version", DLS_LIBRARY_VERSION );                          /* Settings default parameters */
+    g_snprintf( Partage->com_dls.Library_version, sizeof(Partage->com_dls.Library_version), DLS_LIBRARY_VERSION );
 
     if ( ! Recuperer_configDB( &db, "dls" ) )                                               /* Connexion a la base de données */
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
@@ -68,10 +71,6 @@
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Partage->com_dls.Compil_at_boot = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "library_version" ) )
         { g_snprintf( Partage->com_dls.Library_version, sizeof(Partage->com_dls.Library_version), "%s", valeur ); }
-       else
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE,
-                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
-        }
      }
     return(TRUE);
   }
@@ -218,6 +217,64 @@
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
+/******************************************************************************************************************************/
+/* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Set_edge ( void )
+  { while( Partage->com_dls.Set_Dls_Bool_Edge_up )                                       /* A-t-on un boolean up a allumer ?? */
+     { struct DLS_BOOL *bool = Partage->com_dls.Set_Dls_Bool_Edge_up->data;
+       Partage->com_dls.Set_Dls_Bool_Edge_up   = g_slist_remove  ( Partage->com_dls.Set_Dls_Bool_Edge_up, bool );
+       Partage->com_dls.Reset_Dls_Bool_Edge_up = g_slist_prepend ( Partage->com_dls.Reset_Dls_Bool_Edge_up, bool );
+       bool->edge_up = TRUE;
+     }
+    while( Partage->com_dls.Set_Dls_Bool_Edge_down )                                       /* A-t-on un boolean down a allumer ?? */
+     { struct DLS_BOOL *bool = Partage->com_dls.Set_Dls_Bool_Edge_down->data;
+       Partage->com_dls.Set_Dls_Bool_Edge_down   = g_slist_remove  ( Partage->com_dls.Set_Dls_Bool_Edge_down, bool );
+       Partage->com_dls.Reset_Dls_Bool_Edge_down = g_slist_prepend ( Partage->com_dls.Reset_Dls_Bool_Edge_down, bool );
+       bool->edge_down = TRUE;
+     }
+    while( Partage->com_dls.Set_Dls_DI_Edge_up )                                       /* A-t-on un boolean up a allumer ?? */
+     { struct DLS_DI *di = Partage->com_dls.Set_Dls_DI_Edge_up->data;
+       Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_remove  ( Partage->com_dls.Set_Dls_DI_Edge_up, di );
+       Partage->com_dls.Reset_Dls_DI_Edge_up = g_slist_prepend ( Partage->com_dls.Reset_Dls_DI_Edge_up, di );
+       di->edge_up = TRUE;
+     }
+    while( Partage->com_dls.Set_Dls_DI_Edge_down )                                       /* A-t-on un boolean down a allumer ?? */
+     { struct DLS_DI *di = Partage->com_dls.Set_Dls_DI_Edge_down->data;
+       Partage->com_dls.Set_Dls_DI_Edge_down   = g_slist_remove  ( Partage->com_dls.Set_Dls_DI_Edge_down, di );
+       Partage->com_dls.Reset_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Reset_Dls_DI_Edge_down, di );
+       di->edge_down = TRUE;
+     }
+  }
+/******************************************************************************************************************************/
+/* Reset_cde_exterieure: Mise à zero des bits de commande exterieure                                                          */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Reset_edge ( void )
+  { while( Partage->com_dls.Reset_Dls_Bool_Edge_up )                                       /* A-t-on un boolean up a allumer ?? */
+     { struct DLS_BOOL *bool = Partage->com_dls.Reset_Dls_Bool_Edge_up->data;
+       Partage->com_dls.Reset_Dls_Bool_Edge_up = g_slist_remove ( Partage->com_dls.Reset_Dls_Bool_Edge_up, bool );
+       bool->edge_up = FALSE;
+     }
+    while( Partage->com_dls.Reset_Dls_Bool_Edge_down )                                       /* A-t-on un boolean down a allumer ?? */
+     { struct DLS_BOOL *bool = Partage->com_dls.Reset_Dls_Bool_Edge_down->data;
+       Partage->com_dls.Reset_Dls_Bool_Edge_down = g_slist_remove ( Partage->com_dls.Reset_Dls_Bool_Edge_down, bool );
+       bool->edge_down = FALSE;
+     }
+    while( Partage->com_dls.Reset_Dls_DI_Edge_up )                                       /* A-t-on un boolean up a allumer ?? */
+     { struct DLS_DI *di = Partage->com_dls.Reset_Dls_DI_Edge_up->data;
+       Partage->com_dls.Reset_Dls_DI_Edge_up = g_slist_remove ( Partage->com_dls.Reset_Dls_DI_Edge_up, di );
+       di->edge_up = FALSE;
+     }
+    while( Partage->com_dls.Set_Dls_DI_Edge_down )                                       /* A-t-on un boolean down a allumer ?? */
+     { struct DLS_DI *di = Partage->com_dls.Reset_Dls_DI_Edge_down->data;
+       Partage->com_dls.Reset_Dls_DI_Edge_down = g_slist_remove ( Partage->com_dls.Reset_Dls_DI_Edge_down, di );
+       di->edge_down = FALSE;
+     }
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 /******************************************************************************************************************************/
 /* Dls_data_set_bool: Positionne un boolean                                                                                   */
@@ -253,11 +310,11 @@
       }
     else bool = (struct DLS_BOOL *)*bool_p;
 
-    if (valeur == TRUE && bool->etat==FALSE) { bool->edge_up = TRUE; } else { bool->edge_up = FALSE; }
-    if (valeur == FALSE && bool->etat==TRUE) { bool->edge_down = TRUE; } else { bool->edge_down = FALSE; }
     if (bool->etat != valeur)
      { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
                  __func__, bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
+       if (valeur == TRUE) Partage->com_dls.Set_Dls_Bool_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_up, bool );
+                      else Partage->com_dls.Set_Dls_Bool_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_down, bool );
        Partage->audit_bit_interne_per_sec++;
      }
     bool->etat = valeur;
@@ -368,11 +425,11 @@
       }
     else di = (struct DLS_DI *)*di_p;
 
-    if (valeur == TRUE && di->etat==FALSE) { di->edge_up = TRUE; } else { di->edge_up = FALSE; }
-    if (valeur == FALSE && di->etat==TRUE) { di->edge_down = TRUE; } else { di->edge_down = FALSE; }
     if (di->etat != valeur)
      { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_DI '%s:%s'=%d up %d down %d",
                  __func__, di->tech_id, di->acronyme, valeur, di->edge_up, di->edge_down );
+       if (valeur == TRUE) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up, di );
+                      else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, di );
        Partage->audit_bit_interne_per_sec++;
      }
     di->etat = valeur;
@@ -1552,7 +1609,7 @@
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
-    Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */
+    Partage->com_dls.Thread_run = TRUE;                                                                 /* Le thread tourne ! */
     Dls_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
 
@@ -1651,6 +1708,7 @@
           Update_heure=Partage->top;
         }
 
+       Set_edge();                                                                     /* Mise à zero des bit de egde up/down */
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
 
        pthread_mutex_lock( &Partage->com_dls.synchro );
@@ -1663,6 +1721,7 @@
        Dls_data_set_bool ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, FALSE );
        Partage->com_dls.Top_check_horaire = FALSE;                         /* Cotrole horaire effectué un fois par minute max */
+       Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
        Partage->audit_tour_dls_per_sec++;                                   /* Gestion de l'audit nbr de tour DLS par seconde */
 /******************************************** Gestion des 1000 tours DLS par seconde ******************************************/

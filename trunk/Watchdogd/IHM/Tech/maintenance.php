@@ -12,19 +12,6 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-6 col-form-label text-right">Log Level</label>
-						     <select id="idMaintenanceLogLevel" class="custom-select">
-             <option value="0">Debug</option>
-             <option value="1">Info</option>
-             <option value="2">Notice</option>
-             <option value="3">Warning</option>
-             <option value="4">Error</option>
-           </select>
-     					</div>
-  					</div>
-
-       <div class="col form-group">
-					     <div class="input-group">
 						     <label class="col-6 col-form-label text-right">Compil All D.L.S Plugins</label>
            <button type="button" onclick="Maintenance_Compiler_tous_dls()" class="btn btn-warning"><i class="fas fa-code"></i> Tout Compiler</button>
      					</div>
