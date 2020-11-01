@@ -1988,6 +1988,11 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 5070)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs DROP `enable`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

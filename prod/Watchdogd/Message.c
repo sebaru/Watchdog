@@ -33,7 +33,7 @@
  #include <fcntl.h>
  #include <string.h>
 
- #define MSGS_SQL_SELECT  "SELECT msg.id,msg.libelle,msg.type,syn.libelle,enable,parent_syn.page,syn.page," \
+ #define MSGS_SQL_SELECT  "SELECT msg.id,msg.libelle,msg.type,syn.libelle,parent_syn.page,syn.page," \
                           "sms,libelle_audio,libelle_sms,dls.shortname,syn.id,profil_audio,msg.tech_id,msg.acronyme" \
                           " FROM msgs as msg" \
                           " INNER JOIN dls as dls ON msg.tech_id=dls.tech_id" \
@@ -75,7 +75,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s SET tech_id='%s',acronyme='%s',libelle='%s',libelle_audio='%s',libelle_sms='%s',"
-                "type='%d',enable='1',sms='0' "
+                "type='%d',sms='0' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), type=VALUES(type)", NOM_TABLE_MSG, msg->tech_id, msg->acronyme,
                 libelle, libelle, libelle, msg->type
               );
@@ -120,19 +120,18 @@
     else
      { g_snprintf( msg->libelle,         sizeof(msg->libelle      ),   "%s", db->row[1]  );      /* Recopie dans la structure */
        g_snprintf( msg->syn_libelle,     sizeof(msg->syn_libelle  ),   "%s", db->row[3]  );
-       g_snprintf( msg->syn_parent_page, sizeof(msg->syn_parent_page), "%s", db->row[5]  );
-       g_snprintf( msg->syn_page,        sizeof(msg->syn_page     ),   "%s", db->row[6]  );
-       g_snprintf( msg->libelle_audio,   sizeof(msg->libelle_audio),   "%s", db->row[8] );
-       g_snprintf( msg->libelle_sms,     sizeof(msg->libelle_sms  ),   "%s", db->row[9] );
-       g_snprintf( msg->dls_shortname,   sizeof(msg->dls_shortname),   "%s", db->row[10] );
-       g_snprintf( msg->profil_audio,    sizeof(msg->profil_audio ),   "%s", db->row[12] );
-       g_snprintf( msg->tech_id,         sizeof(msg->tech_id      ),   "%s", db->row[13] );
-       g_snprintf( msg->acronyme,        sizeof(msg->acronyme     ),   "%s", db->row[14] );
+       g_snprintf( msg->syn_parent_page, sizeof(msg->syn_parent_page), "%s", db->row[4]  );
+       g_snprintf( msg->syn_page,        sizeof(msg->syn_page     ),   "%s", db->row[5]  );
+       g_snprintf( msg->libelle_audio,   sizeof(msg->libelle_audio),   "%s", db->row[7] );
+       g_snprintf( msg->libelle_sms,     sizeof(msg->libelle_sms  ),   "%s", db->row[8] );
+       g_snprintf( msg->dls_shortname,   sizeof(msg->dls_shortname),   "%s", db->row[9] );
+       g_snprintf( msg->profil_audio,    sizeof(msg->profil_audio ),   "%s", db->row[11] );
+       g_snprintf( msg->tech_id,         sizeof(msg->tech_id      ),   "%s", db->row[12] );
+       g_snprintf( msg->acronyme,        sizeof(msg->acronyme     ),   "%s", db->row[13] );
        msg->id          = atoi(db->row[0]);
        msg->type        = atoi(db->row[2]);
-       msg->enable      = atoi(db->row[4]);
-       msg->sms         = atoi(db->row[7]);
-       msg->syn_id      = atoi(db->row[11]);
+       msg->sms         = atoi(db->row[6]);
+       msg->syn_id      = atoi(db->row[10]);
      }
     return(msg);
   }

@@ -260,7 +260,6 @@
  void Histo_msg_print_to_JSON ( JsonBuilder *builder, struct CMD_TYPE_HISTO *histo )
   { Json_add_int    ( builder, "id", histo->id );
     Json_add_bool   ( builder, "alive", histo->alive );                             /* Le message est-il encore d'actualité ? */
-    Json_add_bool   ( builder, "enable", histo->msg.enable );                       /* Le message est-il encore d'actualité ? */
     Json_add_string ( builder, "nom_ack", histo->nom_ack );
     Json_add_string ( builder, "date_create", histo->date_create );
     Json_add_string ( builder, "date_fixe", histo->date_fixe );

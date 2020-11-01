@@ -67,7 +67,7 @@
 %token <val>    T_MSG T_ICONE T_CPT_H T_CPT_IMP EANA T_START T_REGISTRE T_DIGITAL_OUTPUT
 %type  <val>    alias_bit
 
-%token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_IN_RANGE
+%token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_EDGE_DOWN T_IN_RANGE
 %type  <val>    couleur
 
 %token <chaine> ID T_CHAINE
@@ -863,6 +863,11 @@ une_option:     MODE T_EGAL ENTIER
                 | T_EDGE_UP
                 {{ $$=New_option();
                    $$->type = T_EDGE_UP;
+                   $$->entier = 1;
+                }}
+                | T_EDGE_DOWN
+                {{ $$=New_option();
+                   $$->type = T_EDGE_DOWN;
                    $$->entier = 1;
                 }}
                 | T_IN_RANGE

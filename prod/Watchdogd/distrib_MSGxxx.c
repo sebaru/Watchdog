@@ -51,13 +51,8 @@
     memcpy( &histo.msg, message, sizeof(struct CMD_TYPE_MESSAGE) );                                       /* Ajout dans la DB */
     g_free( message );                                                                 /* On a plus besoin de cette reference */
 
-    if (!histo.msg.enable)                                                       /* Distribution du message aux sous serveurs */
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Message %s:%s not enabled !", __func__,
-                 msg->tech_id, msg->acronyme);
-       return;
-     }
 /***************************************** Création de la structure interne de stockage ***************************************/
-    histo.alive            = TRUE;
+    histo.alive = TRUE;
     gettimeofday( &tv, NULL );
     temps = localtime( (time_t *)&tv.tv_sec );
     strftime( chaine, sizeof(chaine), "%F %T", temps );

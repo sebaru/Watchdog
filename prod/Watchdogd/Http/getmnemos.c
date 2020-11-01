@@ -129,6 +129,7 @@
     gchar   *tech_id  = Normaliser_as_ascii ( Json_get_string ( request,"tech_id" ) );
     gchar   *acronyme = Normaliser_as_ascii ( Json_get_string ( request,"acronyme" ) );
     gchar   *classe   = Normaliser_as_ascii ( Json_get_string ( request,"classe" ) );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
 
     if ( ! strcasecmp ( classe, "CI" ) )
      { struct DLS_CI *ci=NULL;
@@ -142,6 +143,7 @@
           SQL_Write ( chaine );                                                   /* Qu'il existe ou non, ou met a jour la DB */
           Audit_log ( session, "Mnemos %s:%s -> archivage = '%d'", tech_id, acronyme, archivage );
         }
+	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
      }
     else if ( ! strcasecmp ( classe, "R" ) )
      { struct DLS_REGISTRE *reg=NULL;
@@ -155,6 +157,7 @@
           SQL_Write ( chaine );                                                   /* Qu'il existe ou non, ou met a jour la DB */
           Audit_log ( session, "Mnemos %s:%s -> archivage = '%d'", tech_id, acronyme, archivage );
         }
+	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
      }
     else if ( ! strcasecmp ( classe, "DI" ) )
      { struct DLS_DI *di=NULL;
@@ -163,25 +166,35 @@
           Dls_data_set_DI ( NULL, tech_id, acronyme, (gpointer)&di, etat );  /* Si le bit existe, on change sa running config */
           Audit_log ( session, "Mnemos %s:%s -> set to '%d'", tech_id, acronyme, etat );
         }
+	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
      }
     if ( ! strcasecmp ( classe, "MSG" ) )
-     { if ( Json_has_member ( request, "sms" ) && Json_has_member ( request, "libelle_sms" ))
-        { gchar chaine[128];
-          gint sms = Json_get_int ( request, "sms" );
-          gchar *libelle = Normaliser_chaine ( Json_get_string ( request, "libelle_sms" ) );
-          g_snprintf( chaine, sizeof(chaine), "UPDATE msgs SET sms='%d',libelle_sms='%s' WHERE tech_id='%s' AND acronyme='%s'",
-                      sms, libelle, tech_id, acronyme );
+     { if ( Json_has_member ( request, "sms" ) && Json_has_member ( request, "libelle_sms" ) &&
+            Json_has_member ( request, "profil_audio" ) && Json_has_member ( request, "libelle_audio" )
+          )
+        { gchar chaine[1024];
+          gint sms    = Json_get_int ( request, "sms" );
+          gchar *libelle_sms   = Normaliser_chaine ( Json_get_string ( request, "libelle_sms" ) );
+          gchar *libelle_audio = Normaliser_chaine ( Json_get_string ( request, "libelle_audio" ) );
+          gchar *profil_audio  = Normaliser_chaine ( Json_get_string ( request, "profil_audio" ) );
+          g_snprintf( chaine, sizeof(chaine), "UPDATE msgs SET sms='%d', libelle_sms='%s', profil_audio='%s', libelle_audio='%s' "
+                                              "WHERE tech_id='%s' AND acronyme='%s'",
+                      sms, libelle_sms, profil_audio, libelle_audio, tech_id, acronyme );
           SQL_Write ( chaine );                                                   /* Qu'il existe ou non, ou met a jour la DB */
           Audit_log ( session, "Mnemos %s:%s -> SMS = '%d'", tech_id, acronyme, sms );
-          Audit_log ( session, "Mnemos %s:%s -> Libelle_SMS = '%s'", tech_id, acronyme, libelle );
-          g_free(libelle);
+          Audit_log ( session, "Mnemos %s:%s -> Libelle_SMS = '%s'", tech_id, acronyme, libelle_sms );
+          Audit_log ( session, "Mnemos %s:%s -> Profil_AUDIO = '%s'", tech_id, acronyme, profil_audio );
+          Audit_log ( session, "Mnemos %s:%s -> Libelle_AUDIO = '%s'", tech_id, acronyme, libelle_audio );
+          g_free(libelle_sms);
+          g_free(profil_audio);
+          g_free(libelle_audio);
         }
+	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
      }
     /*else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
     else if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
     else if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }*/
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
     json_node_unref(request);
   }
 /******************************************************************************************************************************/

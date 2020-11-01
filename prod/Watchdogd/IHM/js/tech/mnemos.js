@@ -45,15 +45,17 @@
      });
   }
 /******************************************************************************************************************************/
- function Mnemos_MSG_set_sms ( acronyme )
+ function Mnemos_MSG_set ( acronyme )
   { table = $('#idTableMessage').DataTable();
     selection = table.ajax.json().MSG.filter( function(item) { return (item.acronyme==acronyme) } )[0];
     var json_request = JSON.stringify(
        { classe   : "MSG",
          tech_id  : selection.tech_id,
          acronyme : selection.acronyme,
-         sms      : $('#idMSGSms'+acronyme).val(),
-         libelle_sms: $('#idMSGLibelleSms'+acronyme).val()
+         sms        : $('#idMSGSms'+acronyme).val(),
+         libelle_sms: $('#idMSGLibelleSms'+acronyme).val(),
+         profil_audio : $('#idMSGProfilAudio'+acronyme).val(),
+         libelle_audio: $('#idMSGLibelleAudio'+acronyme).val(),
        }
      );
 
@@ -255,14 +257,27 @@
          columns:
            [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
              { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-             { "data": "enable", "title":"Enable",    "className": "hidden-xs" },
              { "data": "libelle",    "title":"Libellé",    "className": "hidden-xs" },
-             { "data": "libelle_audio", "title":"Libellé Audio",    "className": "hidden-xs" },
-             { "data": "profil_audio", "title":"Profil Audio",    "className": "hidden-xs" },
+             { "data": null, "title":"Profil AUDIO", "className": "hidden-xs",
+               "render": function (item)
+                 { return("<input id='idMSGProfilAudio"+item.acronyme+"' class='form-control' "+
+                          "placeholder='Profil audio' "+
+                          "onchange=Mnemos_MSG_set('"+item.acronyme+"') "+
+                          "value='"+item.profil_audio+"'/>");
+                 }
+             },
+             { "data": null, "title":"Libellé Audio", "className": "hidden-xs",
+               "render": function (item)
+                 { return("<input id='idMSGLibelleAudio"+item.acronyme+"' class='form-control' "+
+                          "placeholder='Libellé audio du message' "+
+                          "onchange=Mnemos_MSG_set('"+item.acronyme+"') "+
+                          "value='"+item.libelle_audio+"'/>");
+                 }
+             },
              { "data": null, "title":"SMS", "className": "",
                "render": function (item)
                  { return("<select id='idMSGSms"+item.acronyme+"' class='custom-select'"+
-                          "onchange=Mnemos_MSG_set_sms('"+item.acronyme+"')>"+
+                          "onchange=Mnemos_MSG_set('"+item.acronyme+"')>"+
                           "<option value='0' "+(item.sms==0 ? "selected" : "")+">Non</option>"+
                           "<option value='1' "+(item.sms==1 ? "selected" : "")+">Oui</option>"+
                           "<option value='2' "+(item.sms==2 ? "selected" : "")+">GSM Only</option>"+
@@ -273,7 +288,7 @@
                "render": function (item)
                  { return("<input id='idMSGLibelleSms"+item.acronyme+"' class='form-control' "+
                           "placeholder='Libellé du SMS' "+
-                          "onchange=Mnemos_MSG_set_sms('"+item.acronyme+"') "+
+                          "onchange=Mnemos_MSG_set('"+item.acronyme+"') "+
                           "value='"+item.libelle_sms+"'/>");
                  }
              },
