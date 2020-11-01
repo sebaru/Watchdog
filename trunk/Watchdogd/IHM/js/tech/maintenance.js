@@ -20,7 +20,7 @@
        retention:   $('#idArchiveDBRetention').val(),
        buffer_size: $('#idArchiveDBBufferSize').val(),
      };
-    if ($('#idArchiveDBPassword').val().length > 0) { json_request.password = $('#idArchiveDBPassword').val(); }*/
+    if ($('#idArchiveDBPassword').val().length > 0) { json_request.password = $('#idArchiveDBPassword').val(); }
     Send_to_API ( "GET", "/api/config/get", null, function ( Response )
      { /*if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
                                   else { $('#idAlertThreadNotRunning').show(); }
