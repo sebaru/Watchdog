@@ -428,7 +428,6 @@
     memset ( &msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );
     g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
     g_snprintf(msg.dls_shortname, sizeof(msg.dls_shortname), "%s", Cfg_smsg.tech_id );
-    msg.enable = TRUE;
     msg.sms    = MSG_SMS_SMSBOX_ONLY;
 
     Smsg_send_to_all_authorized_recipients( &msg );
@@ -444,7 +443,6 @@
     memset ( &msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );
     g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
     g_snprintf(msg.dls_shortname, sizeof(msg.dls_shortname), "%s", Cfg_smsg.tech_id );
-    msg.enable = TRUE;
     msg.sms    = MSG_SMS_GSM_ONLY;
 
     Smsg_send_to_all_authorized_recipients( &msg );

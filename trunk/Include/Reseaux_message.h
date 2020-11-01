@@ -63,7 +63,6 @@
     gchar  syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  syn_libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
     guchar type;                                                                           /* Etat, prealarme, defaut, alarme */
-    gboolean enable;                                                  /* Flag pour la gestion par exemple de l'inhibition ... */
     guint  sms;                                                                                             /* Envoi de sms ? */
     gchar  libelle_audio[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  profil_audio[81];

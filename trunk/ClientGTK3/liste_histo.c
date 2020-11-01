@@ -104,9 +104,7 @@
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     while ( lignes )
-     { gsize taille_buf;
-       gchar *buf;
-       gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
+     { gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
 
        JsonBuilder *builder = Json_create ();
