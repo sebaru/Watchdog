@@ -672,7 +672,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
     trame_motif->motif = motif;
     trame_motif->type = TYPE_MOTIF;
-    printf("Chargement motif %d color='%s'\n", motif->icone_id, motif->def_color );
+    printf("Chargement motif %s:%s icone_id=%d, color='%s' libelle=%s\n", motif->tech_id, motif->acronyme, motif->icone_id, motif->def_color, motif->libelle );
     Charger_pixbuf_id( trame_motif, motif->icone_id );
     if (!trame_motif->images)                                                               /* En cas de probleme, on sort */
      { Trame_del_item(trame_motif);

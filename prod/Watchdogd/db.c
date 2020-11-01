@@ -1980,6 +1980,12 @@ encore:
     if (database_version < 5057)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs DROP `bitctrl`" );
        Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs DROP `rouge`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs DROP `vert`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs DROP `bleu`" );
+       Lancer_requete_SQL ( db, requete );
      }
 
 fin:

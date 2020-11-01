@@ -179,19 +179,19 @@
        if (motif)                                                                  /* Si enregegistrement, alors on le pousse */
         { memcpy ( &motifs->motif[motifs->nbr_motifs], motif, sizeof(struct CMD_TYPE_MOTIF) );
           motifs->nbr_motifs++;                              /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
-          g_free(motif);
-        }
 
-       if ( tag == TAG_SUPERVISION && motif && motif->type_gestion != 0 /* TYPE_INERTE */ )
-        { struct DLS_VISUEL *visuel=NULL;
-          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "%s: searching for motif %s:%s", __func__, motif->tech_id, motif->acronyme );
-          Dls_data_get_VISUEL ( motif->tech_id, motif->acronyme, (gpointer)&visuel );
-          if ( visuel && (! g_slist_find(liste_bit_init, visuel ) ) )
-           { liste_bit_init = g_slist_prepend( liste_bit_init, visuel );
+          if ( tag == TAG_SUPERVISION && motif->type_gestion != 0 /* TYPE_INERTE */ )
+           { struct DLS_VISUEL *visuel=NULL;
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "Envoyer_motif_tag: liste des bit_init_syn adding bit %s:%s", motif->tech_id, motif->acronyme );
+                      "%s: searching for visuel %s:%s", __func__, motif->tech_id, motif->acronyme );
+             Dls_data_get_VISUEL ( motif->tech_id, motif->acronyme, (gpointer)&visuel );
+             if ( visuel && (! g_slist_find(liste_bit_init, visuel ) ) )
+              { liste_bit_init = g_slist_prepend( liste_bit_init, visuel );
+                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                         "Envoyer_motif_tag: liste des bit_init_syn adding bit %s:%s", visuel->tech_id, visuel->acronyme );
+              }
            }
+          g_free(motif);
         }
 
        if ( (motif == NULL) || motifs->nbr_motifs == max_enreg )                  /* Si depassement de tampon ou plus d'enreg */

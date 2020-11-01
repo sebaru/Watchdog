@@ -135,7 +135,6 @@
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
     if ( !request)
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
        return;
@@ -169,7 +168,7 @@
     while(liste)
      { struct DLS_CI *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_CI_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -182,7 +181,7 @@
     while(liste)
      { struct DLS_BOOL *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_BOOL_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -195,7 +194,7 @@
     while(liste)
      { struct DLS_CH *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_CH_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -208,7 +207,7 @@
     while(liste)
      { struct DLS_AI *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_AI_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -221,7 +220,7 @@
     while(liste)
      { struct DLS_AO *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_AO_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -234,7 +233,7 @@
     while(liste)
      { struct DLS_TEMPO *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_TEMPO_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -247,7 +246,7 @@
     while(liste)
      { struct DLS_DI *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_DI_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -260,7 +259,7 @@
     while(liste)
      { struct DLS_DO *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_DO_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -268,12 +267,12 @@
      }
     Json_end_array( builder );
 /*----------------------------------------------- Visuels --------------------------------------------------------------------*/
-    Json_add_array ( builder, "I" );
+    Json_add_array ( builder, "VISUEL" );
     liste = Partage->Dls_data_VISUEL;
     while(liste)
      { struct DLS_VISUEL *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_VISUEL_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -336,7 +335,6 @@
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
     if ( !request)
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
        return;
@@ -638,6 +636,16 @@
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
+/* Http_Dls_compil: Compilation du plugin DLS fourni. Appellé récursivement pour compiler tous les plugins                    */
+/* Entrées: la session utilisateur et le plugin                                                                               */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Http_Dls_compil (void *user_data, struct PLUGIN_DLS *plugin)
+  { struct HTTP_CLIENT_SESSION *session = user_data;
+    Compiler_source_dls( FALSE, plugin->plugindb.tech_id, NULL, 0 );
+    Audit_log ( session, "DLS '%s' compilé", plugin->plugindb.tech_id );
+  }
+/******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
@@ -657,6 +665,17 @@
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
+       return;
+     }
+
+    if ( Json_has_member ( request, "compil_all" ) && Json_get_bool ( request, "compil_all" ) == TRUE )
+     { Dls_foreach ( session, Http_Dls_compil, NULL );
+       json_node_unref(request);
+       soup_message_set_status(msg, SOUP_STATUS_OK);
+       return;
+     }
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
