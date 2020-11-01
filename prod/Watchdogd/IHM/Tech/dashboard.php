@@ -1,6 +1,13 @@
-    <div class="container">
+    <div class="container-fluid">
 
-<div class="row justify-content-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 row-cols-xl-3">
+ <div class="row m-2">
+   <h3><i class="fas fa-tachometer-alt text-primary"></i> Tableau de bord</h3>
+ </div>
+
+<hr>
+
+
+<div class="row justify-content-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 row-cols-xl-4">
 <div class="col p-1">
   <div class="card h-100">
     <div class="card-header bg-highlight">
@@ -183,21 +190,35 @@
     <!--<p class="card-text text-center"><small class="text-muted">Last updated 3 mins ago</small></p>-->
   </div>
 </div>
-
 </div>
 
-<div class="row m-1 border border-info">
-   <canvas id="idCourbeDlsTourParSec" class="col"></canvas>
-</div>
-<div class="row m-1 border border-info">
-   <canvas id="idCourbeDlsBitParSec" class="col"></canvas>
-</div>
-<div class="row m-1 border border-info">
-   <canvas id="idCourbeDlsAttente" class="col"></canvas>
-</div>
-<div class="row m-1 border border-info">
-   <canvas id="idCourbeNbArchive" class="col"></canvas>
-</div>
+
+<hr>
+
+  <div class="row p-1">
+      <canvas id="idCourbeDlsTourParSec" class="courbe-dashboard border border-info"></canvas>
+  </div>
+
+  <div class="row p-1">
+      <canvas id="idCourbeDlsBitParSec" class="courbe-dashboard border border-info"></canvas>
+  </div>
+
+  <div class="row p-1">
+   <canvas id="idCourbeDlsAttente" class="courbe-dashboard border border-info"></canvas>
+  </div>
+
+  <div class="row p-1">
+   <canvas id="idCourbeNbArchive" class="courbe-dashboard border border-info"></canvas>
+  </div>
+
+  <div class="row p-1">
+   <canvas id="idCourbeDlsNbMSG" class="courbe-dashboard border border-info"></canvas>
+  </div>
+
+  <div class="row p-1">
+   <canvas id="idCourbeDlsNbVISUEL" class="courbe-dashboard border border-info"></canvas>
+  </div>
+
 
 <script src="/js/tech/dashboard.js" type="text/javascript"></script>
 <!-- Container -->

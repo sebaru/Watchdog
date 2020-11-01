@@ -61,7 +61,7 @@
     g_free(path_to_lower);
 
     if (!URI)
-     { soup_message_set_redirect ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "URI Split Failed" );
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "URI Split Failed" );
        return;
      }
 
@@ -113,7 +113,11 @@
      { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/img/%s", WTD_PKGDATADIR, URI[2] ); }
     else
      { g_strfreev(URI);
-       soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
+       if (session && session->access_level >= 6)
+        { soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/tech/dashboard" ); }
+       else if (session && session->access_level < 6)
+        { soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/home/synmobile/1" ); }
+       else soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
        return;
      }
     g_strfreev(URI);

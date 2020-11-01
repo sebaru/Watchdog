@@ -202,7 +202,15 @@
     struct DLS_TREE *Dls_tree;                                                                       /* Arbre d'execution DLS */
     pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
     struct ZMQUEUE *zmq_to_master;
+    GSList *Set_Dls_DI_Edge_up;                                                 /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_DI_Edge_down;                                               /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_Bool_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_Bool_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
     GSList *Set_Dls_Data;                                                       /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_DI_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_DI_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_Bool_Edge_up;                                             /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_Bool_Edge_down;                                           /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_Data;                                               /* liste des Mxxx a désactiver à la fin du tour prg */
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
