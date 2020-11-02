@@ -1603,7 +1603,7 @@
 /* Main: Fonction principale du DLS                                                                                           */
 /******************************************************************************************************************************/
  void Run_dls ( void )
-  { gint last_top_10sec, last_top_5sec, last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min;
+  { gint last_top_10sec, last_top_5sec, last_top_2sec, last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min;
     gint Update_heure=0;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
@@ -1633,8 +1633,10 @@
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_10SEC", "Impulsion toutes les 10 secondes" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_2SEC", "Creneaux d'une durée de deux secondes" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_5HZ",  "Creneaux d'une durée d'un 5ième de seconde" );
 
     gint wait=30;
     while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
@@ -1642,10 +1644,11 @@
 
     Partage->com_dls.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
-    last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
+    last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
      { gpointer dls_top_10sec=NULL, dls_top_5sec=NULL, dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
        gpointer dls_flipflop_1sec=NULL, dls_flipflop_2hz=NULL;
+       gpointer dls_flipflop_2sec=NULL, dls_flipflop_5hz=NULL;
        gpointer dls_wait = NULL, dls_tour_per_sec = NULL, dls_bit_per_sec = NULL;
        gpointer dls_nbr_msg_queue = NULL, dls_nbr_visuel_queue = NULL;
 
@@ -1657,11 +1660,17 @@
           Partage->com_dls.Thread_reload = FALSE;
         }
 
-       if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
-        { Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
-          Dls_data_set_AI ( "SYS", "NBR_MSG_QUEUE", &dls_nbr_msg_queue, g_slist_length(Partage->com_msrv.liste_msg), TRUE );
-          Dls_data_set_AI ( "SYS", "NBR_VISUEL_QUEUE", &dls_nbr_visuel_queue, g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
-          last_top_1min = Partage->top;
+       if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
+        { Dls_data_set_bool ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, TRUE );
+          Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz,
+                              !Dls_data_get_bool ( "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz) );
+          last_top_5hz = Partage->top;
+        }
+       if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
+        { Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
+          Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz,
+                              !Dls_data_get_bool ( "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz) );
+          last_top_2hz = Partage->top;
         }
        if (Partage->top-last_top_1sec>=10)                                                             /* Toutes les secondes */
         { Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
@@ -1684,6 +1693,11 @@
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
           Dls_data_set_AI ( "SYS", "DLS_WAIT", &dls_wait, Partage->com_dls.temps_sched, TRUE );                 /* historique */
         }
+       if (Partage->top-last_top_2sec>=20)                                                             /* Toutes les secondes */
+        { Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_2SEC", &dls_flipflop_2sec,
+                              !Dls_data_get_bool ( "SYS", "FLIPFLOP_2SEC", &dls_flipflop_2sec) );
+          last_top_2sec = Partage->top;
+        }
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
         { Dls_data_set_bool ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, TRUE );
           last_top_5sec = Partage->top;
@@ -1692,15 +1706,11 @@
         { Dls_data_set_bool ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, TRUE );
           last_top_10sec = Partage->top;
         }
-       if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
-        { Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
-          Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz,
-                              !Dls_data_get_bool ( "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz) );
-          last_top_2hz = Partage->top;
-        }
-       if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
-        { Dls_data_set_bool ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, TRUE );
-          last_top_5hz = Partage->top;
+       if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
+        { Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
+          Dls_data_set_AI ( "SYS", "NBR_MSG_QUEUE", &dls_nbr_msg_queue, g_slist_length(Partage->com_msrv.liste_msg), TRUE );
+          Dls_data_set_AI ( "SYS", "NBR_VISUEL_QUEUE", &dls_nbr_visuel_queue, g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
+          last_top_1min = Partage->top;
         }
 
        if (Partage->top-Update_heure>=600)                          /* Gestion des changements d'horaire (toutes les minutes) */
