@@ -53,8 +53,8 @@
   { gchar *nom, *valeur;
     struct DB *db;
 
+    Creer_configDB ( NOM_THREAD, "debug", "false" );
     Cfg_modbus.lib->Thread_debug = FALSE;                                                      /* Settings default parameters */
-    Cfg_modbus.nbr_request_par_sec      = 50;
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
@@ -66,8 +66,6 @@
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_modbus.lib->Thread_debug = TRUE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "nbr_request_par_sec" ) )
-        { Cfg_modbus.nbr_request_par_sec = atoi(valeur);  }
      }
     return(TRUE);
   }
@@ -96,7 +94,8 @@
                    "`hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                    "`tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT hostname,"
                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                   "`watchdog` int(11) NOT NULL,"
+                   "`watchdog` int(11) NOT NULL DEFAULT 50,"
+                   "`max_request_par_sec` int(11) NOT NULL DEFAULT 50,"
                    "PRIMARY KEY (`id`)"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
        goto end;
@@ -109,6 +108,11 @@
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_A`" );
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_AA`" );
      }
+
+    if (database_version < 5079)
+     { SQL_Write ( "ALTER TABLE `modbus_modules` ADD `max_request_par_sec` int(11) NOT NULL DEFAULT 50" );
+     }
+
 end:
     Modifier_configDB ( "modbus", "database_version", WTD_DB_VERSION );
   }
@@ -121,7 +125,7 @@ end:
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,date_create,enable,hostname,tech_id,watchdog,description "
+                "SELECT id,date_create,enable,hostname,tech_id,watchdog,description,max_request_par_sec "
                 " FROM %s ORDER BY description",
                 NOM_TABLE_MODULE_MODBUS );
 
@@ -146,12 +150,13 @@ end:
                           "%s: Erreur allocation mémoire", __func__ );
     else
      { g_snprintf( modbus->description, sizeof(modbus->description), "%s", db->row[6] );
-       g_snprintf( modbus->tech_id, sizeof(modbus->tech_id), "%s", db->row[4] );
-       g_snprintf( modbus->hostname, sizeof(modbus->hostname), "%s", db->row[3] );
+       g_snprintf( modbus->tech_id,     sizeof(modbus->tech_id),     "%s", db->row[4] );
+       g_snprintf( modbus->hostname,    sizeof(modbus->hostname),    "%s", db->row[3] );
        g_snprintf( modbus->date_create, sizeof(modbus->date_create), "%s", db->row[1] );
-       modbus->id       = atoi(db->row[0]);
-       modbus->enable   = atoi(db->row[2]);
-       modbus->watchdog = atoi(db->row[5]);
+       modbus->id                  = atoi(db->row[0]);
+       modbus->enable              = atoi(db->row[2]);
+       modbus->watchdog            = atoi(db->row[5]);
+       modbus->max_request_par_sec = atoi(db->row[7]);
      }
     return(modbus);
   }
@@ -1021,7 +1026,7 @@ end:
        if (Partage->top>=module->last_top+10)                                                        /* Toutes les 1 secondes */
         { module->nbr_request_par_sec = module->nbr_request;
           module->nbr_request = 0;
-          if(module->nbr_request_par_sec > Cfg_modbus.nbr_request_par_sec) module->delai += 50;
+          if(module->nbr_request_par_sec > module->modbus.max_request_par_sec) module->delai += 50;
           else if(module->delai>0) module->delai -= 50;
           module->last_top = Partage->top;
         }

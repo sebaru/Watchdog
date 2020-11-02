@@ -11,6 +11,7 @@
    </div>
 </div>
 <hr>
+
 <!----------------------------------------------------------------------------------------------------------------------------->
       <h4><img style="width: 30px" data-toggle="tooltip" title="Entrées TOR"
                        src="https://icons.abls-habitat.fr/assets/gif/Entree.png" />Entrées TOR</h4>
