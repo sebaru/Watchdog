@@ -6,7 +6,6 @@
 
 <hr>
 
-
 <div class="row justify-content-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 row-cols-xl-4">
 <div class="col p-1">
   <div class="card h-100">

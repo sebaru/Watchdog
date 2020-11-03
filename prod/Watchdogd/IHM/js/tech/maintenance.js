@@ -29,7 +29,7 @@
        $('#idArchiveDBUsername').val(Response.username);
        $('#idArchiveDBDatabase').val(Response.database);
        $('#idArchiveDBRetention').val(Response.retention);
-       $('#idArchiveDBBufferSize').val(Response.buffer_size);*/
-     });
+       $('#idArchiveDBBufferSize').val(Response.buffer_size);
+     });*/
 
   }

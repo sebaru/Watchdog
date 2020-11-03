@@ -161,6 +161,11 @@
     </ul>
 
     <ul class="navbar-nav">
+
+      <div class="mt-1 spinner-border text-primary ClassLoadingSpinner" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+
       <form class="form-inline ml-2">
         <input class="form-control mr-sm-2" type="search" placeholder="Rechercher" aria-label="Rechercher">
         <button class="btn btn-success rounded my-1 my-sm-0" type="submit">Search</button> <!--btn-outline-success-->

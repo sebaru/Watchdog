@@ -64,7 +64,6 @@
  struct MODBUS_CONFIG                                                                 /* Communication entre DLS et la MODBUS */
   { struct LIBRAIRIE *lib;
     GSList *Modules_MODBUS;
-    gint nbr_request_par_sec;
   };
 
  struct TRAME_MODBUS_REQUETE                                                                 /* Definition d'une trame MODBUS */
@@ -99,6 +98,7 @@
     gchar hostname[32];                                                                       /* Adresses IP du module MODBUS */
     gchar tech_id[32];                                                                            /* Tech_id du module MODBUS */
     gchar description[128];                                                                              /* Libelle du modbus */
+    gint max_request_par_sec;                                                        /* Nombre de requete maximum par seconde */
   };
 
  struct MODULE_MODBUS

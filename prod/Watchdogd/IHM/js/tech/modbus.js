@@ -44,6 +44,7 @@
          hostname: $('#idModalModbusEditHostname').val(),
          description: $('#idModalModbusEditDescription').val(),
          watchdog: $('#idModalModbusEditWatchdog').val(),
+         max_request_par_sec: $('#idModalModbusEditMaxRequestParSec').val(),
        }
      );
     Send_to_API ( 'POST', "/api/process/modbus/set", json_request, function ()
@@ -61,6 +62,7 @@
     $('#idModalModbusEditHostname').val ( selection.hostname );
     $('#idModalModbusEditDescription').val( selection.description );
     $('#idModalModbusEditWatchdog').val( selection.watchdog );
+    $('#idModalModbusEditMaxRequestParSec').val( selection.max_request_par_sec );
     $('#idModalModbusEditValider').attr( "onclick", "Valider_Modbus_Edit('"+tech_id+"')" );
     $('#idModalModbusEdit').modal("show");
   }
@@ -71,6 +73,7 @@
          hostname:    $('#idModalModbusEditHostname').val(),
          description: $('#idModalModbusEditDescription').val(),
          watchdog:    $('#idModalModbusEditWatchdog').val(),
+         max_request_par_sec: $('#idModalModbusEditMaxRequestParSec').val(),
        }
      );
     Send_to_API ( 'POST', "/api/process/modbus/add", json_request, function ()
@@ -85,7 +88,8 @@
     $('#idModalModbusEditTechID').attr ( "readonly", false );
     $('#idModalModbusEditHostname').val ( "" );
     $('#idModalModbusEditDescription').val( "" );
-    $('#idModalModbusEditWatchdog').val( "" );
+    $('#idModalModbusEditWatchdog').val( "5" );
+    $('#idModalModbusEditMaxRequestParSec').val( "100" );
     $('#idModalModbusEditValider').attr( "onclick", "Valider_Modbus_Add()" );
     $('#idModalModbusEdit').modal("show");
   }
@@ -118,7 +122,9 @@
                 },
             },
             { "data": "description", "title":"Description", "className": "align-middle text-center hidden-xs" },
-            { "data": "watchdog", "title":"Watchdog", "className": "align-middle text-center hidden-xs" },
+            { "data": "watchdog", "title":"Watchdog (s)", "className": "align-middle text-center hidden-xs" },
+            { "data": "max_request_par_sec", "title":"Max Requete/s", "className": "align-middle text-center hidden-xs" },
+            { "data": "date_create", "title":"Date Création", "className": "align-middle text-center hidden-xs" },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-primary", "Editer le module", "Show_Modal_Modbus_Edit", item.tech_id, "pen", null );
@@ -143,20 +149,22 @@
          columns:
           [ { "data": "tech_id", "title":"TechID", "className": "align-middle text-center" },
             { "data": "mode", "title":"Mode", "className": "align-middle text-center" },
-            { "data": null, "title":"started", "className": "align-middle text-center",
+            { "data": null, "title":"Started", "className": "align-middle text-center",
               "render": function (item)
-                { if (item.thread_is_running==false)
-                   { return( Bouton ( "outline-warning", "Le thread ne tourne pas", null, null, "Thread OFF" ) ); }
-                  else if (item.started==false)
-                   { return( Bouton ( "outline-secondary", "Le module est désactivé", null, null, "Non" ) ); }
+                { if (item.started==false)
+                       { return( Bouton ( "outline-warning", "Le module ne tourne pas", null, null, "Module OFF" ) ); }
                   else { return( Bouton ( "success", "Le module est activé", null, null, "Oui" ) ); }
                 }
             },
-            { "data": "started", "title":"Mode", "className": "align-middle text-center" },
-            { "data": "nbr_entree_tor", "title":"nbr_entree_tor", "className": "align-middle text-center hidden-xs" },
-            { "data": "nbr_entree_ana", "title":"nbr_entree_ana", "className": "align-middle text-center hidden-xs" },
-            { "data": "nbr_sortie_tor", "title":"nbr_sortie_tor", "className": "align-middle text-center hidden-xs" },
-            { "data": "nbr_sortie_ana", "title":"nbr_sortie_ana", "className": "align-middle text-center hidden-xs" },
+            { "data": "last_reponse", "title":"Last Response", "className": "align-middle text-center hidden-xs" },
+            { "data": "nbr_deconnect", "title":"Nbr Deconnect", "className": "align-middle text-center hidden-xs" },
+            { "data": "date_retente", "title":"Date Retente", "className": "align-middle text-center hidden-xs" },
+            { "data": "date_next_eana", "title":"Next EANA", "className": "align-middle text-center hidden-xs" },
+            { "data": "nbr_request_par_sec", "title":"Requetes/s", "className": "align-middle text-center hidden-xs" },
+            { "data": "nbr_entree_tor", "title":"Nbr Entrees TOR", "className": "align-middle text-center hidden-xs" },
+            { "data": "nbr_entree_ana", "title":"Nbr Entrees ANA", "className": "align-middle text-center hidden-xs" },
+            { "data": "nbr_sortie_tor", "title":"Nbr Sorties TOR", "className": "align-middle text-center hidden-xs" },
+            { "data": "nbr_sortie_ana", "title":"Nbr Sorties ANA", "className": "align-middle text-center hidden-xs" },
 
           ],
          /*order: [ [0, "desc"] ],*/

@@ -2,7 +2,6 @@
 
  <div class="row m-2">
    <h3><img src="/img/wago_750342.webp" style="width:80px" alt="Wago 750-342">Liste des Modules WAGO sur Modbus</h3>
-
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Show_Modal_Modbus_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
         <button type="button" onclick="window.location='/tech/modbus_map'" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
@@ -39,7 +38,7 @@
 
 
 <div id="idModalModbusEdit" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered" role="document">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
         <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalModbusEditTitre"></span></h5>
@@ -81,7 +80,22 @@
 						     <div class="input-group-prepend">
 							     <span class="input-group-text">Watchdog</span>
 						     </div>
-						     <input id="idModalModbusEditWatchdog" type="number" class="form-control" min=0 max=1200 placeholder="Délai avant de couper les sorties en hors comm">
+						     <input id="idModalModbusEditWatchdog" type="number" class="form-control" min=10 max=1200 placeholder="Nombre de 1/10 de secondes avant de couper les sorties">
+						     <div class="input-group-append">
+							     <span class="input-group-text">secondes</span>
+						     </div>
+     					</div>
+        </div>
+
+        <div class="form-group">
+					     <div class="input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text">Max Requetes/sec</span>
+						     </div>
+						     <input id="idModalModbusEditMaxRequestParSec" type="number" class="form-control" min=1 max=100 placeholder="Nombre de requetes max par seconde">
+						     <div class="input-group-append">
+							     <span class="input-group-text">par seconde</span>
+						     </div>
      					</div>
         </div>
 

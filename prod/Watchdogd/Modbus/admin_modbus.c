@@ -86,8 +86,8 @@
      }
 
     Json_add_bool ( builder, "thread_is_running", Lib->Thread_run );
-    if (Lib->Thread_run)                                    /* Warning : Cfg_modbus does not exist if thread is not running ! */
-     { Json_add_int ( builder, "nbr_request_par_sec", Cfg_modbus.nbr_request_par_sec ); }
+/*    if (Lib->Thread_run)                                    /* Warning : Cfg_modbus does not exist if thread is not running ! */
+/*     { Json_add_int ( builder, "nbr_request_par_sec", Cfg_modbus.nbr_request_par_sec ); }*/
 
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
@@ -251,7 +251,8 @@
      }
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "hostname" ) &&
-            Json_has_member ( request, "description" ) && Json_has_member ( request, "watchdog" ) ) )
+            Json_has_member ( request, "description" ) && Json_has_member ( request, "watchdog" ) &&
+            Json_has_member ( request, "max_request_par_sec" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        json_node_unref(request);
        return;
@@ -261,11 +262,12 @@
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
     gint  watchdog     = Json_get_int ( request, "watchdog" );
+    gint  max_request_par_sec = Json_get_int ( request, "max_request_par_sec" );
     json_node_unref(request);
 
     g_snprintf( requete, sizeof(requete),
-               "UPDATE modbus_modules SET description='%s', hostname='%s', watchdog='%d' WHERE tech_id='%s'",
-                description, hostname, watchdog, tech_id );
+               "UPDATE modbus_modules SET description='%s', hostname='%s', watchdog='%d', max_request_par_sec='%d' WHERE tech_id='%s'",
+                description, hostname, watchdog, max_request_par_sec, tech_id );
     g_free(tech_id);
     g_free(description);
     g_free(hostname);
@@ -336,7 +338,8 @@
      }
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "hostname" ) &&
-            Json_has_member ( request, "description" ) && Json_has_member ( request, "watchdog" ) ) )
+            Json_has_member ( request, "description" ) && Json_has_member ( request, "watchdog" ) &&
+            Json_has_member ( request, "max_request_par_sec" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        json_node_unref(request);
        return;
@@ -346,14 +349,16 @@
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
     gint  watchdog     = Json_get_int ( request, "watchdog" );
-    json_node_unref(request);
+    gint  max_request_par_sec = Json_get_int ( request, "max_request_par_sec" );
 
     g_snprintf( requete, sizeof(requete),
                "INSERT INTO modbus_modules SET tech_id='%s', description='%s', hostname='%s', watchdog='%d', "
-               "enable=0, date_create=NOW()",
-                tech_id, description, hostname, watchdog );
+               "max_request_par_sec='%d', enable=0, date_create=NOW()",
+                tech_id, description, hostname, watchdog, max_request_par_sec );
     g_free(description);
     g_free(hostname);
+    json_node_unref(request);
+
     if (SQL_Write (requete))
      { soup_message_set_status (msg, SOUP_STATUS_OK);
        Lib->Thread_reload = TRUE;

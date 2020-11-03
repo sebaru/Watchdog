@@ -3,10 +3,12 @@
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Send_to_API ( method, URL, parametre, fonction_ok, fonction_nok )
   { var xhr = new XMLHttpRequest;
+    $(".ClassLoadingSpinner").show();
     xhr.open(method, URL, true);
     if (method=="POST") { xhr.setRequestHeader('Content-type', 'application/json'); }
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
+       $(".ClassLoadingSpinner").hide();
        if (xhr.status == 200)
         { try { var Response = JSON.parse(xhr.responseText); }
           catch (error) { Response=undefined; }
