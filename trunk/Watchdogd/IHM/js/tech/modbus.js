@@ -151,14 +151,11 @@
             { "data": "mode", "title":"Mode", "className": "align-middle text-center" },
             { "data": null, "title":"Started", "className": "align-middle text-center",
               "render": function (item)
-                { if (item.thread_is_running==false)
-                   { return( Bouton ( "outline-warning", "Le thread ne tourne pas", null, null, "Thread OFF" ) ); }
-                  else if (item.started==false)
-                   { return( Bouton ( "outline-secondary", "Le module est désactivé", null, null, "Non" ) ); }
+                { if (item.started==false)
+                       { return( Bouton ( "outline-warning", "Le module ne tourne pas", null, null, "Module OFF" ) ); }
                   else { return( Bouton ( "success", "Le module est activé", null, null, "Oui" ) ); }
                 }
             },
-            { "data": "started", "title":"Mode", "className": "align-middle text-center" },
             { "data": "last_reponse", "title":"Last Response", "className": "align-middle text-center hidden-xs" },
             { "data": "nbr_deconnect", "title":"Nbr Deconnect", "className": "align-middle text-center hidden-xs" },
             { "data": "date_retente", "title":"Date Retente", "className": "align-middle text-center hidden-xs" },

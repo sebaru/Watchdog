@@ -27,7 +27,7 @@ if [ "$SOCLE" = "fedora" ]
   rm -rf libstrophe
 fi
 
-if [ "$SOCLE" = "debian" || "$SOCLE" = "raspbian" ]
+if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
  then
   echo "Installing debian dependencies"
   apt update
