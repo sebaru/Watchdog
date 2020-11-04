@@ -41,7 +41,6 @@
        document.getElementById("idConfigTop").innerHTML = Response.top;
      });
 
-    document.getElementById("idUsername").innerHTML = sessionStorage.getItem("username");
     Charger_une_courbe ( "idCourbeDlsTourParSec", "SYS", "DLS_TOUR_PER_SEC", "HOUR" );
     Charger_une_courbe ( "idCourbeDlsBitParSec", "SYS", "DLS_BIT_PER_SEC", "HOUR" );
     Charger_une_courbe ( "idCourbeDlsAttente", "SYS", "DLS_WAIT", "HOUR" );

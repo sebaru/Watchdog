@@ -71,6 +71,10 @@
 
     if (!strcasecmp( URI[1], "img"))
      { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/img/%s", WTD_PKGDATADIR, URI[2] ); }
+    else if (!strcasecmp( URI[1], "js"))
+     { if (URI[3]) g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s/%s", WTD_PKGDATADIR, URI[2], URI[3] );
+              else g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s", WTD_PKGDATADIR, URI[2] );
+     }
     else if (!strcasecmp( URI[1], "install"))
      { if(Config.installed == FALSE) g_snprintf ( fichier, sizeof(fichier), "%s/IHM/install.php", WTD_PKGDATADIR );
        else
@@ -79,16 +83,12 @@
           return;
         }
      }
-    else if (!strcasecmp( URI[1], "js"))
-     { if (URI[3]) g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s/%s", WTD_PKGDATADIR, URI[2], URI[3] );
-              else g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s", WTD_PKGDATADIR, URI[2] );
-     }
     else if (!Config.installed)
      { g_strfreev(URI);
        soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
        return;
      }
-    else if (!strcmp(URI[1], "tech"))
+    else if (!strcasecmp(URI[1], "tech"))
      { if (!Http_check_session( msg, session, 6 ))
         { g_strfreev(URI);
           soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
@@ -100,7 +100,7 @@
        g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Tech/%s.php", WTD_PKGDATADIR, (URI[2] ? URI[2] : "dashboard") );
 
      }
-    else if (!strcmp(URI[1], "home" ))
+    else if (!strcasecmp(URI[1], "home" ))
      { if ( !Http_check_session( msg, session, 0 ))
         { g_strfreev(URI);
           soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );

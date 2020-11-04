@@ -201,3 +201,9 @@
 </nav>
 </header>
 
+   <div id="idAlertNotMaster" class="alert alert-warning" role="alert" style="display: none">
+     <h4 class="alert-heading">Attention !</h4>
+         Vous etes sur une instance Slave !
+   </div>
+
+

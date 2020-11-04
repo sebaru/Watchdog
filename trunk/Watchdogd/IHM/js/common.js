@@ -30,6 +30,10 @@
      { document.getElementById("idUsername").innerHTML = localStorage.getItem("username");
        document.getElementById("idHrefUsername").href = "/tech/user/"+localStorage.getItem("username");
      }
+    else
+     { document.getElementById("idUsername").innerHTML = "Se connecter";
+       document.getElementById("idHrefUsername").href = "/login");
+     }
     /*$("body").tooltip({ selector: '[data-toggle=tooltip]' });*/
   }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/

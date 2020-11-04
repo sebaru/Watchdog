@@ -15,7 +15,9 @@
         }, null);
      }
     else
-     { localStorage.setItem ( "TargetInstance", localStorage.getItem("instance") );
+     { $('#idAlertNotMaster').show();
+       if (localStorage.getItem("instance") === null) { localStorage.setItem("instance", "LOCAL" ); }
+       localStorage.setItem ( "TargetInstance", localStorage.getItem("instance") );
        $('#idTargetInstance').append("<option value='"+localStorage.getItem("instance")+"'>"+localStorage.getItem("instance")+"</option>");
      }
   }
@@ -31,7 +33,7 @@
   { localStorage.setItem ( "TargetInstance", instance );
     window.location.reload();
   }
-/********************************************* Redirige la page ***************************************************************/
+/**************************** Appeller par le navigateur lors du changement d'instance dans le select *************************/
  function Change_target_instance ( instance )
   { Set_target_instance ( $('#idTargetInstance').val() ); }
 
