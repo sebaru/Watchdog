@@ -309,6 +309,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     else if (!strcasecmp(color, "lightgray")) { rouge = 127; vert = 127; bleu = 127; }
     else if (!strcasecmp(color, "brown"))     { rouge =   0; vert = 100; bleu =   0; }
     else if (!strcasecmp(color, "kaki"))      { rouge = 100; vert = 100; bleu = 100; }
+    else if (!strcasecmp(color, "black"))     { rouge =   0; vert =   0; bleu =   0; }
     else if (!strcasecmp(color, "#000"))      { rouge =   0; vert =   0; bleu =   0; }
     else if (!strcasecmp(color, "#FFFFFF"))   { rouge = 255; vert = 255; bleu = 255; }
     else if (!strcasecmp(color, "#1A1A1A"))   { rouge = 0x1A; vert = 0x1A; bleu = 0x1A; }

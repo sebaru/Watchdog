@@ -69,13 +69,19 @@
     result = NULL;
     has_template = FALSE;
 
-    if (!strcasecmp( URI[1], "install"))
+    if (!strcasecmp( URI[1], "img"))
+     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/img/%s", WTD_PKGDATADIR, URI[2] ); }
+    else if (!strcasecmp( URI[1], "install"))
      { if(Config.installed == FALSE) g_snprintf ( fichier, sizeof(fichier), "%s/IHM/install.php", WTD_PKGDATADIR );
        else
         { g_strfreev(URI);
           soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/" );
           return;
         }
+     }
+    else if (!strcasecmp( URI[1], "js"))
+     { if (URI[3]) g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s/%s", WTD_PKGDATADIR, URI[2], URI[3] );
+              else g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s", WTD_PKGDATADIR, URI[2] );
      }
     else if (!Config.installed)
      { g_strfreev(URI);
@@ -107,12 +113,6 @@
      }
     else if (!strcasecmp( URI[1], "login"))
      { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/login.php", WTD_PKGDATADIR ); }
-    else if (!strcasecmp( URI[1], "js"))
-     { if (URI[3]) g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s/%s", WTD_PKGDATADIR, URI[2], URI[3] );
-              else g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s", WTD_PKGDATADIR, URI[2] );
-     }
-    else if (!strcasecmp( URI[1], "img"))
-     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/img/%s", WTD_PKGDATADIR, URI[2] ); }
     else
      { g_strfreev(URI);
        if (session && session->access_level >= 6)
