@@ -19,6 +19,12 @@
        </div>
      </div>
 
+     <div class="row m-1">
+       <div class="col-12 border border-info">
+         <textarea id="idSourceCode" rows="10"></textarea>
+       </div>
+     </div>
+
 <!-- Container -->
 </div>
 
