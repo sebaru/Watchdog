@@ -49,6 +49,7 @@
     struct DB *db;
 
     Cfg_ups.lib->Thread_debug = FALSE;                                                         /* Settings default parameters */
+    Creer_configDB ( NOM_THREAD, "debug", "false" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
@@ -61,10 +62,6 @@
                 "Ups_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_ups.lib->Thread_debug = TRUE;  }
-       else
-        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
-        }
      }
     return(TRUE);
   }

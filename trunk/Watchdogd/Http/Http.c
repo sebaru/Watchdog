@@ -46,12 +46,23 @@
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Creer_configDB ( NOM_THREAD, "debug",             "false" );
-    Creer_configDB ( NOM_THREAD, "ssl_file_cert",      HTTP_DEFAUT_FILE_CERT );
-    Creer_configDB ( NOM_THREAD, "ssl_file_key",       HTTP_DEFAUT_FILE_KEY );
-    Creer_configDB ( NOM_THREAD, "ssl",                "true" );
-    Creer_configDB ( NOM_THREAD, "tcp_port",           "5560" );
-    Creer_configDB ( NOM_THREAD, "wtd_session_expiry", "7200" );
+    Cfg_http.lib->Thread_debug = FALSE;
+    Creer_configDB ( NOM_THREAD, "debug", "false" );
+
+    g_snprintf( Cfg_http.ssl_cert_filepath, sizeof(Cfg_http.ssl_cert_filepath), "%s", HTTP_DEFAUT_FILE_CERT );
+    Creer_configDB ( NOM_THREAD, "ssl_file_cert", Cfg_http.ssl_cert_filepath );
+
+    g_snprintf( Cfg_http.ssl_private_key_filepath, sizeof(Cfg_http.ssl_private_key_filepath), "%s", HTTP_DEFAUT_FILE_KEY );
+    Creer_configDB ( NOM_THREAD, "ssl_file_key", Cfg_http.ssl_private_key_filepath );
+
+    Cfg_http.ssl_enable = TRUE;
+    Creer_configDB ( NOM_THREAD, "ssl", "true" );
+
+    Cfg_http.tcp_port = 5560;
+    Creer_configDB_int ( NOM_THREAD, "tcp_port", Cfg_http.tcp_port );
+
+    Cfg_http.wtd_session_expiry = 7200;
+    Creer_configDB_int ( NOM_THREAD, "wtd_session_expiry", Cfg_http.wtd_session_expiry );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
@@ -65,7 +76,7 @@
        else if ( ! g_ascii_strcasecmp ( nom, "ssl_file_key" ) )
         { g_snprintf( Cfg_http.ssl_private_key_filepath, sizeof(Cfg_http.ssl_private_key_filepath), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "ssl" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.ssl_enable = TRUE;  }
+        { if ( g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.ssl_enable = FALSE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "tcp_port" ) )
         { Cfg_http.tcp_port = atoi(valeur);  }
        else if ( ! g_ascii_strcasecmp ( nom, "wtd_session_expiry" ) )

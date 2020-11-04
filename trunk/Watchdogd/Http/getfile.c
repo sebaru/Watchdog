@@ -69,40 +69,42 @@
     result = NULL;
     has_template = FALSE;
 
-    if (!strcmp(URI[1], "tech"))
-     { g_snprintf ( header, sizeof(header), "%s/IHM/Tech/header.php", WTD_PKGDATADIR );
+    if (!strcasecmp( URI[1], "install"))
+     { if(Config.installed == FALSE) g_snprintf ( fichier, sizeof(fichier), "%s/IHM/install.php", WTD_PKGDATADIR );
+       else
+        { g_strfreev(URI);
+          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/" );
+          return;
+        }
+     }
+    else if (!Config.installed)
+     { g_strfreev(URI);
+       soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
+       return;
+     }
+    else if (!strcmp(URI[1], "tech"))
+     { if (!Http_check_session( msg, session, 6 ))
+        { g_strfreev(URI);
+          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
+          return;
+        }
+       g_snprintf ( header, sizeof(header), "%s/IHM/Tech/header.php", WTD_PKGDATADIR );
        g_snprintf ( footer, sizeof(footer), "%s/IHM/Tech/footer.php", WTD_PKGDATADIR );
        has_template = TRUE;
        g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Tech/%s.php", WTD_PKGDATADIR, (URI[2] ? URI[2] : "dashboard") );
-       if (!Config.installed)
-        { g_strfreev(URI);
-          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
-          return;
-        }
-       if (!Http_check_session( msg, session, 6 ))
+
+     }
+    else if (!strcmp(URI[1], "home" ))
+     { if ( !Http_check_session( msg, session, 0 ))
         { g_strfreev(URI);
           soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
           return;
         }
-     }
-    else if (!strcmp(URI[1], "home" ))
-     { g_snprintf ( header, sizeof(header), "%s/IHM/Home/header.php", WTD_PKGDATADIR );
+       g_snprintf ( header, sizeof(header), "%s/IHM/Home/header.php", WTD_PKGDATADIR );
        g_snprintf ( footer, sizeof(footer), "%s/IHM/Home/footer.php", WTD_PKGDATADIR );
        has_template = TRUE;
        g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Home/%s.php", WTD_PKGDATADIR, URI[2] );
-       if (!Config.installed)
-        { g_strfreev(URI);
-          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
-          return;
-        }
-       if ( !Http_check_session( msg, session, 0 ))
-        { g_strfreev(URI);
-          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
-          return;
-        }
      }
-    else if (!strcasecmp( URI[1], "install"))
-     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/install.php", WTD_PKGDATADIR ); }
     else if (!strcasecmp( URI[1], "login"))
      { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/login.php", WTD_PKGDATADIR ); }
     else if (!strcasecmp( URI[1], "js"))

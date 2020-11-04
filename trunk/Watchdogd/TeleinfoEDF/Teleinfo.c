@@ -48,8 +48,13 @@
     struct DB *db;
 
     Cfg_teleinfo.lib->Thread_debug = FALSE;                                                    /* Settings default parameters */
-    g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port),
-               "%s", DEFAUT_PORT_TELEINFO );
+    Creer_configDB ( NOM_THREAD, "debug", "false" );
+
+    g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port), "%s", DEFAUT_PORT_TELEINFO );
+    Creer_configDB ( NOM_THREAD, "port", Cfg_teleinfo.port );
+
+    g_snprintf( Cfg_teleinfo.tech_id, sizeof(Cfg_teleinfo.tech_id), "EDF" );
+    Creer_configDB ( NOM_THREAD, "tech_id", Cfg_teleinfo.tech_id );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_WARNING,
@@ -66,10 +71,6 @@
         { g_snprintf( Cfg_teleinfo.tech_id, sizeof(Cfg_teleinfo.tech_id), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_teleinfo.lib->Thread_debug = TRUE;  }
-       else
-        { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
-                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
-        }
      }
     return(TRUE);
   }
