@@ -41,9 +41,16 @@
     struct DB *db;
 
     Cfg_imsgs.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
+    Creer_configDB ( NOM_THREAD, "debug", "false" );
+
     g_snprintf( Cfg_imsgs.tech_id,  sizeof(Cfg_imsgs.tech_id ), NOM_THREAD );
+    Creer_configDB ( NOM_THREAD, "tech_id", Cfg_imsgs.tech_id );
+
     g_snprintf( Cfg_imsgs.username, sizeof(Cfg_imsgs.username), IMSGS_DEFAUT_USERNAME );
+    Creer_configDB ( NOM_THREAD, "username", Cfg_imsgs.username );
+
     g_snprintf( Cfg_imsgs.password, sizeof(Cfg_imsgs.password), IMSGS_DEFAUT_PASSWORD );
+    Creer_configDB ( NOM_THREAD, "password", Cfg_imsgs.password );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING,
@@ -62,10 +69,6 @@
         { g_snprintf( Cfg_imsgs.tech_id,  sizeof(Cfg_imsgs.tech_id),  "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_imsgs.lib->Thread_debug = TRUE;  }
-       else
-        { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE,
-                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
-        }
      }
     return(TRUE);
   }

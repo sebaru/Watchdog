@@ -13,7 +13,6 @@ if [ "$SOCLE" = "fedora" ]
   dnf install -y libcurl-devel nut-devel mariadb-devel zeromq-devel libuuid-devel
   dnf install -y gtk3-devel goocanvas2-devel popt-devel libsoup-devel
   dnf install -y gtksourceview2-devel goocanvas-devel json-glib-devel gammu-devel
-  dnf install -y vlc alsa-utils alsa-firmware
   dnf install -y mpg123 sox mosquitto-devel
   dnf install -y libgnomeui-devel
   dnf install -y git
@@ -27,16 +26,24 @@ if [ "$SOCLE" = "fedora" ]
   rm -rf libstrophe
 fi
 
+
 if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
  then
   echo "Installing debian dependencies"
   apt update
+  apt upgrade -y
+
+  if [ "$SOCLE" = "raspbian" ]
+   then
+    apt install -y gcc-8-base
+  fi
+
   apt install -y subversion libtool automake autoconf gcc git cmake
   apt install -y libglib2.0-dev bison flex libreadline-dev libgif-dev libgcrypt20-dev
   apt install -y libupsclient-dev libcurl4-gnutls-dev libssl-dev default-libmysqlclient-dev libstrophe-dev libgammu-dev
   apt install -y liblircclient-dev libpopt-dev libssl-dev libmariadbclient-dev libzmq3-dev
   apt install -y sox libsox-fmt-all python3-pip mpg123
-  apt install -y libjson-glib-dev libmosquitto-dev vlc
+  apt install -y libjson-glib-dev libmosquitto-dev
   apt install -y libgtk-3-dev libgoocanvas-2.0-dev
   apt install -y libsoup2.4-dev
 fi
