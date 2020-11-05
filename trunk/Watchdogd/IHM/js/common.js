@@ -32,7 +32,7 @@
      }
     else
      { document.getElementById("idUsername").innerHTML = "Se connecter";
-       document.getElementById("idHrefUsername").href = "/login");
+       document.getElementById("idHrefUsername").href = "/login";
      }
     /*$("body").tooltip({ selector: '[data-toggle=tooltip]' });*/
   }
