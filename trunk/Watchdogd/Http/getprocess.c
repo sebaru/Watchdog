@@ -158,7 +158,8 @@
        return;
      }
 
-    if ( Json_has_member ( request, "instance" ) && strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+    if ( Config.instance_is_master && Json_has_member ( request, "instance" ) &&
+         strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
          strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
      { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
        //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
@@ -223,7 +224,8 @@
        return;
      }
 
-    if ( Json_has_member ( request, "instance" ) && strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+    if ( Config.instance_is_master && Json_has_member ( request, "instance" ) &&
+         strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
          strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
      { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
        //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
@@ -297,7 +299,8 @@
        return;
      }
 
-    if ( Json_has_member ( request, "instance" ) && strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+    if ( Config.instance_is_master && Json_has_member ( request, "instance" ) &&
+         strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
          strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
      { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
        //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
@@ -369,7 +372,7 @@
      { GSList *liste;
        if (msg->method == SOUP_METHOD_GET)                                               /* Test si Slave redirect necessaire */
         { gpointer instance = g_hash_table_lookup ( query, "instance" );
-          if ( instance && strcasecmp ( instance, "MASTER" ) && strcasecmp ( instance, g_get_host_name() ) )
+          if ( Config.instance_is_master && instance && strcasecmp ( instance, "MASTER" ) && strcasecmp ( instance, g_get_host_name() ) )
            { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s : Redirecting %s vers %s", __func__, path, instance );
              Http_redirect_to_slave ( msg, instance );
              return;
@@ -385,7 +388,8 @@
              return;
            }
 
-          if ( Json_has_member ( request, "instance" ) && strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+          if ( Config.instance_is_master && Json_has_member ( request, "instance" ) &&
+               strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
                strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
            { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
                        "%s : Redirecting %s vers %s", __func__, path, Json_get_string(request,"instance") );

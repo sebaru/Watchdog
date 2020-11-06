@@ -87,7 +87,8 @@
        return;
      }
 
-    if ( Json_has_member ( request, "instance" ) && strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+    if ( Config.instance_is_master && Json_has_member ( request, "instance" ) &&
+         strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
          strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
      { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
        json_node_unref(request);
