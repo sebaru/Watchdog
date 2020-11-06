@@ -46,7 +46,7 @@
     struct DB *db;
 
     Cfg_radio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Creer_configDB ( NOM_THREAD, "debug", "false" );
+    Modifier_configDB ( NOM_THREAD, "debug", "false" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_WARNING,

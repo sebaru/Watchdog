@@ -93,18 +93,10 @@
        return;
      }
 
-    gchar *tech_id       = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
-    gchar *description   = Normaliser_chaine ( Json_get_string( request, "description" ) );
-    gchar *smsbox_apikey = Normaliser_chaine ( Json_get_string( request, "smsbox_apikey" ) );
+    Modifier_configDB ( NOM_THREAD, "tech_id", Json_get_string( request, "tech_id" ) );
+    Modifier_configDB ( NOM_THREAD, "description", Json_get_string( request, "description" ) );
+    Modifier_configDB ( NOM_THREAD, "smsbox_apikey", Json_get_string( request, "smsbox_apikey" ) );
     json_node_unref(request);
-
-    Modifier_configDB ( NOM_THREAD, "tech_id", tech_id );
-    Modifier_configDB ( NOM_THREAD, "description", description );
-    Modifier_configDB ( NOM_THREAD, "smsbox_apikey", smsbox_apikey );
-
-    g_free(tech_id);
-    g_free(description);
-    g_free(smsbox_apikey);
 
     soup_message_set_status (msg, SOUP_STATUS_OK);
     Lib->Thread_reload = TRUE;

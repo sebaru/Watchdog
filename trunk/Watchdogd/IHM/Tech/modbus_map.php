@@ -14,7 +14,7 @@
 
    <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
      <h4 class="alert-heading">Warning !</h4>
-         Thread "Modbus" is not running !
+         Thread <a href="/tech/process">Modbus</a> is not running !
    </div>
 
           <ul class="nav nav-tabs" role="tablist">

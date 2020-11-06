@@ -13,7 +13,7 @@
 
    <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
      <h4 class="alert-heading">Warning !</h4>
-         Le Thread "Modbus" ne tourne pas !
+         Le Thread <a href="/tech/process">Modbus</a> ne tourne pas !
    </div>
 
     <table id="idTableModbus" class="table table-striped table-bordered table-hover">

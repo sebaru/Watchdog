@@ -662,6 +662,14 @@ end:
           g_free(master_host);
         }
 
+       gchar *database_debug = Recuperer_configDB_by_nom( "db", "debug" );            /* Récupération d'une config dans la DB */
+       if (database_debug)
+        { if (!strcasecmp(database_debug,"true")) { Config.log_db = TRUE; }
+                                            else  { Config.log_db = FALSE; }
+          g_free(database_debug);
+        }
+
+
        Print_config();
 /************************************* Création des zones de bits internes dynamiques *****************************************/
        Partage->Dls_data_DI     = NULL;
