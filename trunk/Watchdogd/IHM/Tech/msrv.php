@@ -14,19 +14,6 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Log Level</label>
-						     <select id="idMSRVLogLevel" class="custom-select">
-             <option value="0">Debug</option>
-             <option value="1">Info</option>
-             <option value="2">Notice</option>
-             <option value="3">Warning</option>
-             <option value="4">Error</option>
-           </select>
-     					</div>
-  					</div>
-
-       <div class="col form-group">
-					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Instance is Master</label>
 						       <select id="idMSRVIsMaster" class="custom-select">
                <option value="true" selected>Oui</option>

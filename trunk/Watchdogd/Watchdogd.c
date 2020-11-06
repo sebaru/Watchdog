@@ -640,6 +640,13 @@ end:
            }
         }
 
+       gchar *database_debug = Recuperer_configDB_by_nom( "db", "debug" );            /* Récupération d'une config dans la DB */
+       if (database_debug)
+        { if (!strcasecmp(database_debug,"true")) { Config.log_db = TRUE; }
+                                            else  { Config.log_db = FALSE; }
+          g_free(database_debug);
+        }
+
        gchar *use_subdir = Recuperer_configDB_by_nom ( "msrv", "use_subdir" );
        if (use_subdir)
         { if (!strcasecmp(use_subdir,"true"))
@@ -662,13 +669,11 @@ end:
           g_free(master_host);
         }
 
-       gchar *database_debug = Recuperer_configDB_by_nom( "db", "debug" );            /* Récupération d'une config dans la DB */
-       if (database_debug)
-        { if (!strcasecmp(database_debug,"true")) { Config.log_db = TRUE; }
-                                            else  { Config.log_db = FALSE; }
-          g_free(database_debug);
+       gchar *log_level = Recuperer_configDB_by_nom( "msrv", "log_level" );           /* Récupération d'une config dans la DB */
+       if (log_level)
+        { Info_change_log_level ( Config.log, atoi(log_level) );
+          g_free(log_level);
         }
-
 
        Print_config();
 /************************************* Création des zones de bits internes dynamiques *****************************************/

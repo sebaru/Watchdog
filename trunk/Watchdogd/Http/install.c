@@ -157,27 +157,27 @@
 
     g_snprintf( chaine, sizeof(chaine),
                "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
-               "nom='instance_is_master',valeur='%s' "
-               "ON DUPLICATE KEY UPDATE valeur=VALUES(valeur)", g_get_host_name(), (Json_get_int(request,"is_master") ? "true" : "false") );
+               "nom='instance_is_master',valeur='%s' ", g_get_host_name(), (Json_get_int(request,"is_master") ? "true" : "false") );
     Lancer_requete_SQL ( db, chaine );
     gchar *master_host = Normaliser_chaine ( Json_get_string(request,"master_host") );
     g_snprintf( chaine, sizeof(chaine),
                "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
-               "nom='master_host',valeur='%s' "
-               "ON DUPLICATE KEY UPDATE valeur=VALUES(valeur)", g_get_host_name(), master_host );
+               "nom='master_host',valeur='%s' ", g_get_host_name(), master_host );
     Lancer_requete_SQL ( db, chaine );
     g_free(master_host);
     gchar *description = Normaliser_chaine ( Json_get_string(request,"description") );
     g_snprintf( chaine, sizeof(chaine),
                "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
-               "nom='description',valeur='%s' "
-               "ON DUPLICATE KEY UPDATE valeur=VALUES(valeur)", g_get_host_name(), description );
+               "nom='description',valeur='%s' ", g_get_host_name(), description );
     g_free(description);
     Lancer_requete_SQL ( db, chaine );
     g_snprintf( chaine, sizeof(chaine),
                "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
-               "nom='subdir',valeur='%s' "
-               "ON DUPLICATE KEY UPDATE valeur=VALUES(valeur)", g_get_host_name(), (Json_get_int(request,"use_subdir") ? "true" : "false") );
+               "nom='subdir',valeur='%s' ", g_get_host_name(), (Json_get_int(request,"use_subdir") ? "true" : "false") );
+    Lancer_requete_SQL ( db, chaine );
+    g_snprintf( chaine, sizeof(chaine),
+               "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
+               "nom='log_level',valeur=1 ", g_get_host_name() );
     Lancer_requete_SQL ( db, chaine );
     Libere_DB_SQL ( &db );
 /******************************************* Création fichier de config *******************************************************/

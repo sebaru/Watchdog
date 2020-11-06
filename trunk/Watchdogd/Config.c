@@ -104,17 +104,6 @@
      { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", chaine ); g_free(chaine); }
 
 /******************************************************** Partie LOG **********************************************************/
-    chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
-    if (chaine)
-     {      if ( ! strcmp( chaine, "debug"    ) ) Config.log_level = LOG_DEBUG;
-       else if ( ! strcmp( chaine, "info"     ) ) Config.log_level = LOG_INFO;
-       else if ( ! strcmp( chaine, "notice"   ) ) Config.log_level = LOG_NOTICE;
-       else if ( ! strcmp( chaine, "warning"  ) ) Config.log_level = LOG_WARNING;
-       else if ( ! strcmp( chaine, "error"    ) ) Config.log_level = LOG_ERR;
-       else if ( ! strcmp( chaine, "critical" ) ) Config.log_level = LOG_CRIT;
-       g_free(chaine);
-     }
-
     Config.log_msrv = g_key_file_get_boolean ( gkf, "LOG", "debug_msrv", NULL );
     Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "debug_arch", NULL );
     g_key_file_free(gkf);

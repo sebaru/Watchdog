@@ -10,6 +10,11 @@
   { var json_request = JSON.stringify( { instance: Get_target_instance() } );
     Send_to_API ( 'POST', "/api/instance/reset", json_request, null );
   }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Maintenance_Set_Log_Level ( )
+  { var json_request = JSON.stringify( { instance: Get_target_instance(), log_level: $("#idMaintenanceLogLevel").val() } );
+    Send_to_API ( 'POST', "/api/log/set", json_request, null );
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { /*var json_request =
