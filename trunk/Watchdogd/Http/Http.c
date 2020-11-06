@@ -116,6 +116,7 @@
  void Http_redirect_to_slave ( SoupMessage *msg, gchar *target )
   { SoupSession *connexion;
     connexion = soup_session_new();
+    g_object_set ( G_OBJECT(connexion), "ssl-strict", FALSE, NULL );
     SoupURI *URI = soup_uri_copy (soup_message_get_uri (msg));
     soup_uri_set_host ( URI, target );
     SoupMessage *new_msg = soup_message_new_from_uri ( msg->method, URI );
