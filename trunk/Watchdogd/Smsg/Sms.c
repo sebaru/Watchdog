@@ -51,19 +51,19 @@
     struct DB *db;
 
     Cfg_smsg.lib->Thread_debug = FALSE;
-    Modifier_configDB ( NOM_THREAD, "debug", "false" );
+    Creer_configDB ( NOM_THREAD, "debug", "false" );
 
     g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "GSM01" );
-    Modifier_configDB ( NOM_THREAD, "tech_id", Cfg_smsg.tech_id );
+    Creer_configDB ( NOM_THREAD, "tech_id", Cfg_smsg.tech_id );
 
     g_snprintf( Cfg_smsg.smsbox_apikey, sizeof(Cfg_smsg.smsbox_apikey), "changeme" );
-    Modifier_configDB ( NOM_THREAD, "smsbox_apikey", Cfg_smsg.smsbox_apikey );
+    Creer_configDB ( NOM_THREAD, "smsbox_apikey", Cfg_smsg.smsbox_apikey );
 
     g_snprintf( Cfg_smsg.description, sizeof(Cfg_smsg.description), "Ou est le téléphone ?" );
-    Modifier_configDB ( NOM_THREAD, "description", Cfg_smsg.description );
+    Creer_configDB ( NOM_THREAD, "description", Cfg_smsg.description );
 
     Cfg_smsg.nbr_sms = 0;
-    Modifier_configDB_int ( NOM_THREAD, "nbr_sms", Cfg_smsg.nbr_sms );
+    Creer_configDB_int ( NOM_THREAD, "nbr_sms", Cfg_smsg.nbr_sms );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Database connexion failed.", __func__ );
