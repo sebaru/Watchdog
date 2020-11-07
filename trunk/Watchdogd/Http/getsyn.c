@@ -94,11 +94,6 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
 
-    if ( strcmp ( path, "/syn/list" ) )
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
-       return;
-     }
-
     JsonBuilder *builder = Json_create ();
     if (!builder)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);

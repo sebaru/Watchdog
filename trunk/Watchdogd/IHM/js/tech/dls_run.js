@@ -100,7 +100,10 @@
             data: Response.CI,
             rowId: "id",
             columns:
-              [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center align-middle" },
+              [ { "data": null, "title":"Acronyme", "className": "align-middle text-center",
+                  "render": function (item)
+                    { return ( Lien ("/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
+                },
                 { "data": null, "title":"Etat", "className": "",
                   "render": function (item)
                     { if (item.etat==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
@@ -122,7 +125,10 @@
             data: Response.REGISTRE,
             rowId: "id",
             columns:
-              [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
+              [ { "data": null, "title":"Acronyme", "className": "align-middle text-center",
+                  "render": function (item)
+                    { return ( Lien ("/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
+                },
                 { "data": "valeur",     "title":"Valeur",   "className": "hidden-xs" },
                 { "data": "unite",      "title":"Unité",    "className": "hidden-xs" },
               ],
