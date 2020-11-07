@@ -43,16 +43,19 @@
             data: Response.AI,
                rowId: "id",
             columns:
-              [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                { "data": "valeur", "title":"Valeur", "className": "text-center hidden-xs" },
-                { "data": "unite", "title":"Unité", "className": "text-center hidden-xs" },
-                { "data": null, "title":"in_range", "className": "",
+              [ { "data": null, "title":"Acronyme", "className": "align-middle text-center",
+                  "render": function (item)
+                    { return ( Lien ("/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
+                },
+                { "data": "valeur", "title":"Valeur", "className": "align-middle text-center hidden-xs" },
+                { "data": "unite", "title":"Unité", "className": "align-middle text-center hidden-xs" },
+                { "data": null, "title":"in_range", "className": "align-middle",
                   "render": function (item)
                     { if (item.in_range==true) { return( Bouton ( "outline-success", "Dans les clous !", null, null, "Oui" ) );        }
                                           else { return( Bouton ( "warning", "Pb !", null, null, "Non" ) ); }
                     },
                 },
-                { "data": "last_arch", "title":"last_arch", "className": "text-center hidden-xs" },
+                { "data": "last_arch", "title":"last_arch", "className": "align text-center hidden-xs" },
               ],
             /*order: [ [0, "desc"] ],*/
             responsive: true,

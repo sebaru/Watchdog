@@ -328,8 +328,8 @@
        Mnemo_auto_create_DO ( FALSE, ups->tech_id, "OUTLET_1_ON", "Active la prise n°1" );
        Mnemo_auto_create_DO ( FALSE, ups->tech_id, "OUTLET_2_OFF", "Désactive la prise n°2" );
        Mnemo_auto_create_DO ( FALSE, ups->tech_id, "OUTLET_2_ON", "Active la prise n°2" );
-       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "START_DEEP_BAT", "Active un test de decharge profond" );
-       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "START_QUICK_BAT", "Active un test de decharge léger" );
+       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "START_DEEP_BAT", "Active un test de décharge profond" );
+       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "START_QUICK_BAT", "Active un test de décharge léger" );
        Mnemo_auto_create_DO ( FALSE, ups->tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
      }
 

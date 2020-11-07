@@ -80,7 +80,7 @@
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Ups_Add ()
-  { $('#idModalUpsEditTitre').text ( "Ajouter un composant WAGO" );
+  { $('#idModalUpsEditTitre').text ( "Ajouter d'un onduleur" );
     $('#idModalUpsEditTechID').val ( "" );
     $('#idModalUpsEditTechID').attr ( "readonly", false );
     $('#idModalUpsEditHost').val ( "" );
@@ -106,7 +106,7 @@
          columns:
           [ { "data": null, "title":"TechID", "className": "align-middle text-center",
               "render": function (item)
-                { return('<a href=/tech/dls_run/'+item.tech_id+'>'+item.tech_id+'</a>'); }
+                { return( Lien ("/tech/dls_run/"+item.tech_id, "Voir le RUN", item.tech_id ) ); }
             },
             { "data": null, "title":"Enable", "className": "align-middle text-center",
               "render": function (item)
