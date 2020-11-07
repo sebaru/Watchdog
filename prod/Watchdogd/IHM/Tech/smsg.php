@@ -17,7 +17,7 @@
 
    <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
      <h4 class="alert-heading">Warning !</h4>
-         Thread "GSM" is not running !
+         Thread <a href="/tech/process">SMSG</a> is not running !
    </div>
 
        <div class="col form-group">

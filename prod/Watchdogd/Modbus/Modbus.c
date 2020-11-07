@@ -1165,6 +1165,11 @@ reload:
     Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
     Thread_init ( "W-MODBUS", lib, WTD_VERSION, "Manage Modbus System" );
     Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
+    if (Config.instance_is_master==FALSE)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
+                "%s: Instance is not Master. Shutting Down %p", __func__, pthread_self() );
+       goto end;
+     }
     Modbus_Creer_DB();
 
     Cfg_modbus.Modules_MODBUS = NULL;                                                         /* Init des variables du thread */
@@ -1179,6 +1184,7 @@ reload:
      }
     Decharger_tous_MODBUS();
 
+end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;

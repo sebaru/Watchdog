@@ -160,7 +160,7 @@
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-    if (!instance || !strcasecmp(instance, "MASTER")) { instance = g_get_host_name(); }
+    if (!strcasecmp(instance, "MASTER") || !Config.instance_is_master ) { instance = g_get_host_name(); }
 
     g_snprintf( requete, sizeof(requete), "SELECT * FROM config WHERE 1=1 ");
     if (instance)

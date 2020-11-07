@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Onduleur/Onduleur.c  Gestion des modules UPS Watchdgo 2.0                                                        */
+/* Watchdogd/Onduleur/Onduleur.c  Gestion des upss UPS Watchdgo 2.0                                                        */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                         mar. 10 nov. 2009 15:56:10 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -66,6 +66,38 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Ups_Creer_DB ( void )
+  { gint database_version;
+
+    gchar *database_version_string = Recuperer_configDB_by_nom( NOM_THREAD, "database_version" );
+    if (database_version_string)
+     { database_version = atoi( database_version_string );
+       g_free(database_version_string);
+     } else database_version=0;
+
+    Info_new( Config.log, Config.log_db, LOG_NOTICE,
+             "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, WTD_VERSION );
+
+    SQL_Write ( "CREATE TABLE IF NOT EXISTS `ups` ("
+                "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
+                "`enable` tinyint(1) NOT NULL DEFAULT '0',"
+                "`host` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+                "`name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+                "`admin_username` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+                "`admin_password` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+                "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                "PRIMARY KEY (`id`)"
+                ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
+
+/*end:*/
+    Modifier_configDB ( NOM_THREAD, "database_version", WTD_DB_VERSION );
+  }
+/******************************************************************************************************************************/
 /* Recuperer_liste_id_MODULE_UPS: Recupération de la liste des ids des upss                                                   */
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
@@ -81,8 +113,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,tech_id,host,name,username,password,enable "
-                " FROM %s ORDER BY host,name", NOM_TABLE_UPS );
+                "SELECT tech_id,host,name,admin_username,admin_password,enable,date_create FROM ups ORDER BY host,name");
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);
@@ -107,27 +138,27 @@
     ups = (struct MODULE_UPS *)g_try_malloc0( sizeof(struct MODULE_UPS) );
     if (!ups) Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
-     { g_snprintf( ups->tech_id,  sizeof(ups->tech_id),  "%s", db->row[1] );
-       g_snprintf( ups->host,     sizeof(ups->host),     "%s", db->row[2] );
-       g_snprintf( ups->name,     sizeof(ups->name),     "%s", db->row[3] );
-       g_snprintf( ups->username, sizeof(ups->username), "%s", db->row[4] );
-       g_snprintf( ups->password, sizeof(ups->password), "%s", db->row[5] );
-       ups->enable            = atoi(db->row[6]);
-       ups->id                = atoi(db->row[0]);
+     { g_snprintf( ups->tech_id,  sizeof(ups->tech_id),  "%s", db->row[0] );
+       g_snprintf( ups->host,     sizeof(ups->host),     "%s", db->row[1] );
+       g_snprintf( ups->name,     sizeof(ups->name),     "%s", db->row[2] );
+       g_snprintf( ups->admin_username, sizeof(ups->admin_username), "%s", db->row[3] );
+       g_snprintf( ups->admin_password, sizeof(ups->admin_password), "%s", db->row[4] );
+       g_snprintf( ups->date_create, sizeof(ups->date_create), "%s", db->row[6] );
+       ups->enable = atoi(db->row[5]);
      }
     return(ups);
   }
 /******************************************************************************************************************************/
-/* Charger_tous_ups: Requete la DB pour charger les modules ups                                                               */
+/* Charger_tous_ups: Requete la DB pour charger les upss ups                                                               */
 /* Entrée: rien                                                                                                               */
-/* Sortie: le nombre de modules trouvé                                                                                        */
+/* Sortie: le nombre de upss trouvé                                                                                        */
 /******************************************************************************************************************************/
  static gboolean Charger_tous_ups ( void  )
-  { struct MODULE_UPS *module;
+  { struct MODULE_UPS *ups;
     struct DB *db;
     gint cpt;
 
-/**************************************************** Chargement des modules **************************************************/
+/**************************************************** Chargement des upss **************************************************/
     if ( (db = Recuperer_ups()) == NULL )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_ups Failed", __func__ );
        return(FALSE);
@@ -135,15 +166,15 @@
 
     Cfg_ups.Modules_UPS = NULL;
     cpt = 0;
-    while ( (module = Recuperer_ups_suite( db )) != NULL )
-     { cpt++;                                                                  /* Nous avons ajouté un module dans la liste ! */
+    while ( (ups = Recuperer_ups_suite( db )) != NULL )
+     { cpt++;                                                                  /* Nous avons ajouté un ups dans la liste ! */
                                                                                             /* Ajout dans la liste de travail */
        pthread_mutex_lock( &Cfg_ups.lib->synchro );
-       Cfg_ups.Modules_UPS = g_slist_prepend ( Cfg_ups.Modules_UPS, module );
+       Cfg_ups.Modules_UPS = g_slist_prepend ( Cfg_ups.Modules_UPS, ups );
        pthread_mutex_unlock( &Cfg_ups.lib->synchro );
        Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
                 "%s: tech_id='%s', host=%s, name=%s", __func__,
-                 module->tech_id, module->host, module->name );
+                 ups->tech_id, ups->host, ups->name );
      }
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "%s: %03d UPS found  !", __func__, cpt );
 
@@ -151,162 +182,162 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Deconnecter: Deconnexion du module                                                                                         */
+/* Deconnecter: Deconnexion du ups                                                                                         */
 /* Entrée: un id                                                                                                              */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Deconnecter_UPS ( struct MODULE_UPS *module )
-  { if (!module) return;
+ static void Deconnecter_UPS ( struct MODULE_UPS *ups )
+  { if (!ups) return;
 
-    if (module->started == TRUE)
-     { upscli_disconnect( &module->upsconn );
-       module->started = FALSE;
+    if (ups->started == TRUE)
+     { upscli_disconnect( &ups->upsconn );
+       ups->started = FALSE;
      }
 
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-              "%s: %s disconnected (host='%s')", __func__, module->tech_id, module->host );
-    Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "COMM", FALSE );
+              "%s: %s disconnected (host='%s')", __func__, ups->tech_id, ups->host );
+    Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "COMM", FALSE );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
 /* Entrée: une nom et un password                                                                                             */
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                                              */
 /******************************************************************************************************************************/
- static gboolean Connecter_ups ( struct MODULE_UPS *module )
+ static gboolean Connecter_ups ( struct MODULE_UPS *ups )
   { gchar buffer[80];
     int connexion;
 
-    if ( (connexion = upscli_connect( &module->upsconn, module->host, UPS_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
+    if ( (connexion = upscli_connect( &ups->upsconn, ups->host, UPS_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: %s: connexion refused by module (host '%s' -> %s)", __func__, module->tech_id,
-                 module->host, (char *)upscli_strerror(&module->upsconn) );
+                "%s: %s: connexion refused by ups (host '%s' -> %s)", __func__, ups->tech_id,
+                 ups->host, (char *)upscli_strerror(&ups->upsconn) );
        return(FALSE);
      }
 
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-              "%s: %s connected (host='%s')", __func__, module->tech_id, module->host );
+              "%s: %s connected (host='%s')", __func__, ups->tech_id, ups->host );
 /********************************************************* UPSDESC ************************************************************/
-    g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->name );
-    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
+    g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", ups->name );
+    if ( upscli_sendline( &ups->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: %s: Sending GET UPSDESC failed (%s)", __func__, module->tech_id,
-                (char *)upscli_strerror(&module->upsconn) );
+                "%s: %s: Sending GET UPSDESC failed (%s)", __func__, ups->tech_id,
+                (char *)upscli_strerror(&ups->upsconn) );
      }
     else
-     { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
+     { if ( upscli_readline( &ups->upsconn, buffer, sizeof(buffer) ) == -1 )
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                   "%s: %s: Reading GET UPSDESC failed (%s)", __func__, module->tech_id,
-                   (char *)upscli_strerror(&module->upsconn) );
+                   "%s: %s: Reading GET UPSDESC failed (%s)", __func__, ups->tech_id,
+                   (char *)upscli_strerror(&ups->upsconn) );
         }
        else
-        { g_snprintf( module->libelle, sizeof(module->libelle), "%s", buffer + strlen(module->name) + 9 );
+        { g_snprintf( ups->description, sizeof(ups->description), "%s", buffer + strlen(ups->name) + 9 );
           Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                   "%s: %s: Reading GET UPSDESC %s", __func__, module->tech_id,
-                   module->libelle );
+                   "%s: %s: Reading GET UPSDESC %s", __func__, ups->tech_id,
+                   ups->description );
         }
      }
 /**************************************************** USERNAME ****************************************************************/
-    g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", module->username );
-    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
+    g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", ups->admin_username );
+    if ( upscli_sendline( &ups->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: %s: Sending USERNAME failed %s", __func__, module->tech_id,
-                (char *)upscli_strerror(&module->upsconn) );
+                "%s: %s: Sending USERNAME failed %s", __func__, ups->tech_id,
+                (char *)upscli_strerror(&ups->upsconn) );
      }
     else
-     { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
+     { if ( upscli_readline( &ups->upsconn, buffer, sizeof(buffer) ) == -1 )
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                   "%s: %s: Reading USERNAME failed %s", __func__, module->tech_id,
-                   (char *)upscli_strerror(&module->upsconn) );
+                   "%s: %s: Reading USERNAME failed %s", __func__, ups->tech_id,
+                   (char *)upscli_strerror(&ups->upsconn) );
         }
        else
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                   "%s: %s: Reading USERNAME %s", __func__, module->tech_id,
+                   "%s: %s: Reading USERNAME %s", __func__, ups->tech_id,
                     buffer );
         }
      }
 
 /******************************************************* PASSWORD *************************************************************/
-    g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", module->password );
-    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
+    g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", ups->admin_password );
+    if ( upscli_sendline( &ups->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: %s: Sending PASSWORD failed %s", __func__, module->tech_id,
-                (char *)upscli_strerror(&module->upsconn) );
+                "%s: %s: Sending PASSWORD failed %s", __func__, ups->tech_id,
+                (char *)upscli_strerror(&ups->upsconn) );
      }
     else
-     { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
+     { if ( upscli_readline( &ups->upsconn, buffer, sizeof(buffer) ) == -1 )
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                   "%s: %s: Reading PASSWORD failed %s", __func__, module->tech_id,
-                   (char *)upscli_strerror(&module->upsconn) );
+                   "%s: %s: Reading PASSWORD failed %s", __func__, ups->tech_id,
+                   (char *)upscli_strerror(&ups->upsconn) );
         }
        else
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                   "%s: %s: Reading PASSWORD %s", __func__, module->tech_id,
+                   "%s: %s: Reading PASSWORD %s", __func__, ups->tech_id,
                    buffer );
         }
      }
 
 /************************************************** PREPARE LES AI ************************************************************/
-    if (!module->nbr_connexion)
+    if (!ups->nbr_connexion)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
-                "%s: %s: Initialise le DLS et charge les AI ", __func__, module->tech_id );
-       if (Dls_auto_create_plugin( module->tech_id, "Gestion de l'onduleur" ) == FALSE)
-        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->tech_id ); }
+                "%s: %s: Initialise le DLS et charge les AI ", __func__, ups->tech_id );
+       if (Dls_auto_create_plugin( ups->tech_id, "Gestion de l'onduleur" ) == FALSE)
+        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", ups->tech_id ); }
 
-       Mnemo_auto_create_DI ( FALSE, module->tech_id, "COMM", "Statut de la communication avec l'onduleur" );
-       Mnemo_auto_create_DI ( FALSE, module->tech_id, "OUTLET_1_STATUS", "Statut de la prise n°1" );
-       Mnemo_auto_create_DI ( FALSE, module->tech_id, "OUTLET_2_STATUS", "Statut de la prise n°2" );
-       Mnemo_auto_create_DI ( FALSE, module->tech_id, "UPS_ONLINE", "UPS Online" );
-       Mnemo_auto_create_DI ( FALSE, module->tech_id, "UPS_CHARGING", "UPS en charge" );
-       Mnemo_auto_create_DI ( FALSE, module->tech_id, "UPS_ON_BATT",  "UPS sur batterie" );
-       Mnemo_auto_create_DI ( FALSE, module->tech_id, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
-       Mnemo_auto_create_DI ( FALSE, module->tech_id, "UPS_ALARM",  "UPS en alarme !" );
+       Mnemo_auto_create_DI ( FALSE, ups->tech_id, "COMM", "Statut de la communication avec l'onduleur" );
+       Mnemo_auto_create_DI ( FALSE, ups->tech_id, "OUTLET_1_STATUS", "Statut de la prise n°1" );
+       Mnemo_auto_create_DI ( FALSE, ups->tech_id, "OUTLET_2_STATUS", "Statut de la prise n°2" );
+       Mnemo_auto_create_DI ( FALSE, ups->tech_id, "UPS_ONLINE", "UPS Online" );
+       Mnemo_auto_create_DI ( FALSE, ups->tech_id, "UPS_CHARGING", "UPS en charge" );
+       Mnemo_auto_create_DI ( FALSE, ups->tech_id, "UPS_ON_BATT",  "UPS sur batterie" );
+       Mnemo_auto_create_DI ( FALSE, ups->tech_id, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
+       Mnemo_auto_create_DI ( FALSE, ups->tech_id, "UPS_ALARM",  "UPS en alarme !" );
 
-       Mnemo_auto_create_AI ( FALSE, module->tech_id, "LOAD", "Charge onduleur", "%" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "LOAD", 0.0, FALSE );
+       Mnemo_auto_create_AI ( FALSE, ups->tech_id, "LOAD", "Charge onduleur", "%" );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "LOAD", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( FALSE, module->tech_id, "REALPOWER", "Charge onduleur", "W" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "REALPOWER", 0.0, FALSE );
+       Mnemo_auto_create_AI ( FALSE, ups->tech_id, "REALPOWER", "Charge onduleur", "W" );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "REALPOWER", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( FALSE, module->tech_id, "BATTERY_CHARGE", "Charge batterie", "%" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_CHARGE", 0.0, FALSE );
+       Mnemo_auto_create_AI ( FALSE, ups->tech_id, "BATTERY_CHARGE", "Charge batterie", "%" );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_CHARGE", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( FALSE, module->tech_id, "INPUT_VOLTAGE", "Tension d'entrée", "V" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "INPUT_VOLTAGE", 0.0, FALSE );
+       Mnemo_auto_create_AI ( FALSE, ups->tech_id, "INPUT_VOLTAGE", "Tension d'entrée", "V" );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "INPUT_VOLTAGE", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( FALSE, module->tech_id, "BATTERY_RUNTIME", "Durée de batterie restante", "s" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_RUNTIME", 0.0, FALSE );
+       Mnemo_auto_create_AI ( FALSE, ups->tech_id, "BATTERY_RUNTIME", "Durée de batterie restante", "s" );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_RUNTIME", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( FALSE, module->tech_id, "BATTERY_VOLTAGE", "Tension batterie", "V" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_VOLTAGE", 0.0, FALSE );
+       Mnemo_auto_create_AI ( FALSE, ups->tech_id, "BATTERY_VOLTAGE", "Tension batterie", "V" );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_VOLTAGE", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( FALSE, module->tech_id, "INPUT_HZ", "Fréquence d'entrée", "HZ" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "INPUT_HZ", 0.0, FALSE );
+       Mnemo_auto_create_AI ( FALSE, ups->tech_id, "INPUT_HZ", "Fréquence d'entrée", "HZ" );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "INPUT_HZ", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( FALSE, module->tech_id, "OUTPUT_CURRENT", "Courant de sortie", "A" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_CURRENT", 0.0, FALSE );
+       Mnemo_auto_create_AI ( FALSE, ups->tech_id, "OUTPUT_CURRENT", "Courant de sortie", "A" );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_CURRENT", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( FALSE, module->tech_id, "OUTPUT_HZ", "Fréquence de sortie", "HZ" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_HZ", 0.0, FALSE );
+       Mnemo_auto_create_AI ( FALSE, ups->tech_id, "OUTPUT_HZ", "Fréquence de sortie", "HZ" );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_HZ", 0.0, FALSE );
 
-       Mnemo_auto_create_AI ( FALSE, module->tech_id, "OUTPUT_VOLTAGE", "Tension de sortie", "V" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_VOLTAGE", 0.0, FALSE );
+       Mnemo_auto_create_AI ( FALSE, ups->tech_id, "OUTPUT_VOLTAGE", "Tension de sortie", "V" );
+       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_VOLTAGE", 0.0, FALSE );
 
-       Mnemo_auto_create_DO ( FALSE, module->tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
-       Mnemo_auto_create_DO ( FALSE, module->tech_id, "LOAD_ON", "Active la sortie ondulée" );
-       Mnemo_auto_create_DO ( FALSE, module->tech_id, "OUTLET_1_OFF", "Désactive la prise n°1" );
-       Mnemo_auto_create_DO ( FALSE, module->tech_id, "OUTLET_1_ON", "Active la prise n°1" );
-       Mnemo_auto_create_DO ( FALSE, module->tech_id, "OUTLET_2_OFF", "Désactive la prise n°2" );
-       Mnemo_auto_create_DO ( FALSE, module->tech_id, "OUTLET_2_ON", "Active la prise n°2" );
-       Mnemo_auto_create_DO ( FALSE, module->tech_id, "START_DEEP_BAT", "Active un test de decharge profond" );
-       Mnemo_auto_create_DO ( FALSE, module->tech_id, "START_QUICK_BAT", "Active un test de decharge léger" );
-       Mnemo_auto_create_DO ( FALSE, module->tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
+       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
+       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "LOAD_ON", "Active la sortie ondulée" );
+       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "OUTLET_1_OFF", "Désactive la prise n°1" );
+       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "OUTLET_1_ON", "Active la prise n°1" );
+       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "OUTLET_2_OFF", "Désactive la prise n°2" );
+       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "OUTLET_2_ON", "Active la prise n°2" );
+       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "START_DEEP_BAT", "Active un test de décharge profond" );
+       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "START_QUICK_BAT", "Active un test de décharge léger" );
+       Mnemo_auto_create_DO ( FALSE, ups->tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
      }
 
-    module->date_next_connexion = 0;
-    module->started = TRUE;
-    module->nbr_connexion++;
+    ups->date_next_connexion = 0;
+    ups->started = TRUE;
+    ups->nbr_connexion++;
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-              "%s: %s up and running (host='%s')", __func__, module->tech_id, module->host );
+              "%s: %s up and running (host='%s')", __func__, ups->tech_id, ups->host );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -314,24 +345,24 @@
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
- static void Decharger_un_UPS ( struct MODULE_UPS *module )
-  { if (!module) return;
+ static void Decharger_un_UPS ( struct MODULE_UPS *ups )
+  { if (!ups) return;
     pthread_mutex_lock( &Cfg_ups.lib->synchro );
-    Cfg_ups.Modules_UPS = g_slist_remove ( Cfg_ups.Modules_UPS, module );
+    Cfg_ups.Modules_UPS = g_slist_remove ( Cfg_ups.Modules_UPS, ups );
     pthread_mutex_unlock( &Cfg_ups.lib->synchro );
-    Deconnecter_UPS ( module );
-    g_free(module);
+    Deconnecter_UPS ( ups );
+    g_free(ups);
   }
 /******************************************************************************************************************************/
-/* Decharger_tous_Decharge l'ensemble des modules UPS                                                                         */
+/* Decharger_tous_Decharge l'ensemble des upss UPS                                                                         */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Decharger_tous_UPS ( void  )
-  { struct MODULE_UPS *module;
+  { struct MODULE_UPS *ups;
     while ( Cfg_ups.Modules_UPS )
-     { module = (struct MODULE_UPS *)Cfg_ups.Modules_UPS->data;
-       Decharger_un_UPS ( module );
+     { ups = (struct MODULE_UPS *)Cfg_ups.Modules_UPS->data;
+       Decharger_un_UPS ( ups );
      }
   }
 /******************************************************************************************************************************/
@@ -339,30 +370,30 @@
 /* Entrée : l'ups, le nom de la commande                                                                                      */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
 /******************************************************************************************************************************/
- static void Onduleur_set_instcmd ( struct MODULE_UPS *module, gchar *nom_cmd )
+ static void Onduleur_set_instcmd ( struct MODULE_UPS *ups, gchar *nom_cmd )
   { gchar buffer[80];
 
-    if (module->started != TRUE) return;
+    if (ups->started != TRUE) return;
 
-    g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->name, nom_cmd );
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s'", __func__, module->tech_id, buffer );
-    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
+    g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", ups->name, nom_cmd );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s'", __func__, ups->tech_id, buffer );
+    if ( upscli_sendline( &ups->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                 "%s: %s: Sending INSTCMD failed with error '%s' for '%s'", __func__, module->tech_id,
-                 (char *)upscli_strerror(&module->upsconn), buffer );
-       Deconnecter_UPS ( module );
+                 "%s: %s: Sending INSTCMD failed with error '%s' for '%s'", __func__, ups->tech_id,
+                 (char *)upscli_strerror(&ups->upsconn), buffer );
+       Deconnecter_UPS ( ups );
        return;
      }
 
-    if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
+    if ( upscli_readline( &ups->upsconn, buffer, sizeof(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: %s: Reading INSTCMD result failed (%s) error %s", __func__, module->tech_id,
-                 nom_cmd, (char *)upscli_strerror(&module->upsconn) );
-       Deconnecter_UPS ( module );
+                "%s: %s: Reading INSTCMD result failed (%s) error %s", __func__, ups->tech_id,
+                 nom_cmd, (char *)upscli_strerror(&ups->upsconn) );
+       Deconnecter_UPS ( ups );
        return;
      }
     else
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s' OK", __func__, module->tech_id, nom_cmd );
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s' OK", __func__, ups->tech_id, nom_cmd );
      }
   }
 /******************************************************************************************************************************/
@@ -370,36 +401,36 @@
 /* Entrée : l'ups, le nom de variable, la variable a renseigner                                                               */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
 /******************************************************************************************************************************/
- static gchar *Onduleur_get_var ( struct MODULE_UPS *module, gchar *nom_var )
+ static gchar *Onduleur_get_var ( struct MODULE_UPS *ups, gchar *nom_var )
   { static gchar buffer[80];
     gint retour_read;
 
-    if (module->started != TRUE) return(NULL);
+    if (ups->started != TRUE) return(NULL);
 
-    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->name, nom_var );
-    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
+    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", ups->name, nom_var );
+    if ( upscli_sendline( &ups->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: %s: Sending GET VAR failed (%s) error=%s", __func__, module->tech_id,
-                buffer, (char *)upscli_strerror(&module->upsconn) );
-       Deconnecter_UPS ( module );
+                "%s: %s: Sending GET VAR failed (%s) error=%s", __func__, ups->tech_id,
+                buffer, (char *)upscli_strerror(&ups->upsconn) );
+       Deconnecter_UPS ( ups );
        return(NULL);
      }
 
-    retour_read = upscli_readline( &module->upsconn, buffer, sizeof(buffer) );
+    retour_read = upscli_readline( &ups->upsconn, buffer, sizeof(buffer) );
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-             "%s: %s: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s", __func__, module->tech_id,
-              nom_var, retour_read, upscli_upserror(&module->upsconn), buffer );
+             "%s: %s: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s", __func__, ups->tech_id,
+              nom_var, retour_read, upscli_upserror(&ups->upsconn), buffer );
     if ( retour_read == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: %s: Reading GET VAR result failed (%s) error=%s", __func__, module->tech_id,
-                 nom_var, (char *)upscli_strerror(&module->upsconn) );
+                "%s: %s: Reading GET VAR result failed (%s) error=%s", __func__, ups->tech_id,
+                 nom_var, (char *)upscli_strerror(&ups->upsconn) );
        return(NULL);
      }
 
     if ( ! strncmp ( buffer, "VAR", 3 ) )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                "%s: %s: Reading GET VAR %s OK = %s", __func__, module->tech_id, nom_var, buffer );
-       return(buffer + 6 + strlen(module->name) + strlen(nom_var));
+                "%s: %s: Reading GET VAR %s OK = %s", __func__, ups->tech_id, nom_var, buffer );
+       return(buffer + 6 + strlen(ups->name) + strlen(nom_var));
      }
 
     if ( ! strcmp ( buffer, "ERR VAR-NOT-SUPPORTED" ) )
@@ -407,15 +438,15 @@
      }
 
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-             "%s: %s: Reading GET VAR %s Failed : error %s (buffer %s)", __func__, module->tech_id,
-              nom_var, (char *)upscli_strerror(&module->upsconn), buffer );
-    Deconnecter_UPS ( module );
-    module->date_next_connexion = Partage->top + UPS_RETRY;
+             "%s: %s: Reading GET VAR %s Failed : error %s (buffer %s)", __func__, ups->tech_id,
+              nom_var, (char *)upscli_strerror(&ups->upsconn), buffer );
+    Deconnecter_UPS ( ups );
+    ups->date_next_connexion = Partage->top + UPS_RETRY;
     return(NULL);
   }
 /******************************************************************************************************************************/
 /* Envoyer_sortie_ups: Envoi des sorties/InstantCommand à l'ups                                                               */
-/* Entrée: identifiants des modules ups                                                                                       */
+/* Entrée: identifiants des upss ups                                                                                       */
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_sortie_aux_ups( void )
@@ -459,17 +490,17 @@
 
           GSList *liste = Cfg_ups.Modules_UPS;
           while (liste)
-           { struct MODULE_UPS *module = (struct MODULE_UPS *)liste->data;
-             if (!strcasecmp(module->tech_id, tech_id))
-              { if (!strcasecmp(acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( module, "load.off" );
-                if (!strcasecmp(acronyme, "LOAD_ON"))         Onduleur_set_instcmd ( module, "load.on" );
-                if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    Onduleur_set_instcmd ( module, "outlet.1.load.off" );
-                if (!strcasecmp(acronyme, "OUTLET_1_ON"))     Onduleur_set_instcmd ( module, "outlet.1.load.on" );
-                if (!strcasecmp(acronyme, "OUTLET_2_OFF"))    Onduleur_set_instcmd ( module, "outlet.2.load.off" );
-                if (!strcasecmp(acronyme, "OUTLET_2_ON"))     Onduleur_set_instcmd ( module, "outlet.2.load.on" );
-                if (!strcasecmp(acronyme, "START_DEEP_BAT"))  Onduleur_set_instcmd ( module, "test.battery.start.deep" );
-                if (!strcasecmp(acronyme, "START_QUICK_BAT")) Onduleur_set_instcmd ( module, "test.battery.start.quick" );
-                if (!strcasecmp(acronyme, "STOP_TEST_BAT"))   Onduleur_set_instcmd ( module, "test.battery.stop" );
+           { struct MODULE_UPS *ups = (struct MODULE_UPS *)liste->data;
+             if (!strcasecmp(ups->tech_id, tech_id))
+              { if (!strcasecmp(acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( ups, "load.off" );
+                if (!strcasecmp(acronyme, "LOAD_ON"))         Onduleur_set_instcmd ( ups, "load.on" );
+                if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    Onduleur_set_instcmd ( ups, "outlet.1.load.off" );
+                if (!strcasecmp(acronyme, "OUTLET_1_ON"))     Onduleur_set_instcmd ( ups, "outlet.1.load.on" );
+                if (!strcasecmp(acronyme, "OUTLET_2_OFF"))    Onduleur_set_instcmd ( ups, "outlet.2.load.off" );
+                if (!strcasecmp(acronyme, "OUTLET_2_ON"))     Onduleur_set_instcmd ( ups, "outlet.2.load.on" );
+                if (!strcasecmp(acronyme, "START_DEEP_BAT"))  Onduleur_set_instcmd ( ups, "test.battery.start.deep" );
+                if (!strcasecmp(acronyme, "START_QUICK_BAT")) Onduleur_set_instcmd ( ups, "test.battery.start.quick" );
+                if (!strcasecmp(acronyme, "STOP_TEST_BAT"))   Onduleur_set_instcmd ( ups, "test.battery.stop" );
               }
              liste = g_slist_next(liste);
            }
@@ -479,64 +510,64 @@
   }
 /******************************************************************************************************************************/
 /* Interroger_ups: Interrogation d'un ups                                                                                     */
-/* Entrée: identifiants des modules ups                                                                                       */
+/* Entrée: identifiants des upss ups                                                                                       */
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
- static gboolean Interroger_ups( struct MODULE_UPS *module )
+ static gboolean Interroger_ups( struct MODULE_UPS *ups )
   { gchar *reponse;
 
-    if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "LOAD", atof(reponse+1), TRUE ); }
+    if ( (reponse = Onduleur_get_var ( ups, "ups.load" )) != NULL )
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "LOAD", atof(reponse+1), TRUE ); }
 
-    if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "REALPOWER", atof(reponse+1), TRUE ); }
+    if ( (reponse = Onduleur_get_var ( ups, "ups.realpower" )) != NULL )
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "REALPOWER", atof(reponse+1), TRUE ); }
 
-    if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_CHARGE", atof(reponse+1), TRUE ); }
+    if ( (reponse = Onduleur_get_var ( ups, "battery.charge" )) != NULL )
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_CHARGE", atof(reponse+1), TRUE ); }
 
-    if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "INPUT_VOLTAGE", atof(reponse+1), TRUE ); }
+    if ( (reponse = Onduleur_get_var ( ups, "input.voltage" )) != NULL )
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "INPUT_VOLTAGE", atof(reponse+1), TRUE ); }
 
-    if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_RUNTIME", atof(reponse+1), TRUE ); }
+    if ( (reponse = Onduleur_get_var ( ups, "battery.runtime" )) != NULL )
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_RUNTIME", atof(reponse+1), TRUE ); }
 
-    if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "BATTERY_VOLTAGE", atof(reponse+1), TRUE ); }
+    if ( (reponse = Onduleur_get_var ( ups, "battery.voltage" )) != NULL )
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_VOLTAGE", atof(reponse+1), TRUE ); }
 
-    if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "INPUT_HZ", atof(reponse+1), TRUE ); }
+    if ( (reponse = Onduleur_get_var ( ups, "input.frequency" )) != NULL )
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "INPUT_HZ", atof(reponse+1), TRUE ); }
 
-    if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_CURRENT", atof(reponse+1), TRUE ); }
+    if ( (reponse = Onduleur_get_var ( ups, "output.current" )) != NULL )
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_CURRENT", atof(reponse+1), TRUE ); }
 
-    if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_HZ", atof(reponse+1), TRUE ); }
+    if ( (reponse = Onduleur_get_var ( ups, "output.frequency" )) != NULL )
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_HZ", atof(reponse+1), TRUE ); }
 
-    if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTPUT_VOLTAGE", atof(reponse+1), TRUE ); }
+    if ( (reponse = Onduleur_get_var ( ups, "output.voltage" )) != NULL )
+     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_VOLTAGE", atof(reponse+1), TRUE ); }
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
-    if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
-     { Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTLET_1_STATUS", !strcmp(reponse, "\"on\"") ); }
+    if ( (reponse = Onduleur_get_var ( ups, "outlet.1.status" )) != NULL )
+     { Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTLET_1_STATUS", !strcmp(reponse, "\"on\"") ); }
 
-    if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
-     { Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "OUTLET_2_STATUS", !strcmp(reponse, "\"on\"") ); }
+    if ( (reponse = Onduleur_get_var ( ups, "outlet.2.status" )) != NULL )
+     { Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTLET_2_STATUS", !strcmp(reponse, "\"on\"") ); }
 
-    if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "UPS_ONLINE",       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
-       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "UPS_CHARGING",     (g_strrstr(reponse, "CHRG")?TRUE:FALSE) );
-       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "UPS_ON_BATT",      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
-       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "UPS_REPLACE_BATT", (g_strrstr(reponse, "RB")?TRUE:FALSE) );
-       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "UPS_ALARM",        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
+    if ( (reponse = Onduleur_get_var ( ups, "ups.status" )) != NULL )
+     { Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_ONLINE",       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
+       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_CHARGING",     (g_strrstr(reponse, "CHRG")?TRUE:FALSE) );
+       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_ON_BATT",      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
+       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_REPLACE_BATT", (g_strrstr(reponse, "RB")?TRUE:FALSE) );
+       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_ALARM",        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
      }
-    Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, module->tech_id, "COMM", TRUE );
+    Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "COMM", TRUE );
     return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du UPS                                                                                           */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct MODULE_UPS *module;
+  { struct MODULE_UPS *ups;
     GSList *liste;
 
 reload:
@@ -544,21 +575,18 @@ reload:
     Cfg_ups.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
     Thread_init ( "W-UPS", lib, WTD_VERSION, "Manage UPS Module" );
     Ups_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
-
     if (Config.instance_is_master==FALSE)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
                 "%s: Instance is not Master. Shutting Down %p", __func__, pthread_self() );
        goto end;
      }
+    Ups_Creer_DB();
 
     Cfg_ups.zmq_from_bus  = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     Cfg_ups.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Cfg_ups.Modules_UPS = NULL;                                                               /* Init des variables du thread */
 
-    if ( Charger_tous_ups() == FALSE )                                                          /* Chargement des modules ups */
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: No module UPS found -> stop", __func__ );
-       goto end;
-     }
+    Charger_tous_ups();                                                                         /* Chargement des upss ups */
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
@@ -567,35 +595,35 @@ reload:
 
        Envoyer_sortie_aux_ups();
 
-       if (Cfg_ups.Modules_UPS == NULL)                                             /* Si pas de module référencés, on attend */
-        { sleep(2); continue; }
+       if (Cfg_ups.Modules_UPS == NULL)                                                /* Si pas de ups référencés, on attend */
+        { sleep(1); continue; }
 
        pthread_mutex_lock ( &Cfg_ups.lib->synchro );                                   /* Car utilisation de la liste chainée */
        liste = Cfg_ups.Modules_UPS;
        while (liste && lib->Thread_run == TRUE && lib->Thread_reload == FALSE)
-        { module = (struct MODULE_UPS *)liste->data;
-          if ( module->enable != TRUE ||                            /* si le module n'est pas enable, on ne le traite pas */
-               Partage->top < module->date_next_connexion )                        /* Si attente retente, on change de module */
-           { liste = g_slist_next(liste);                                  /* On prépare le prochain accès au prochain module */
+        { ups = (struct MODULE_UPS *)liste->data;
+          if ( ups->enable != TRUE ||                            /* si le ups n'est pas enable, on ne le traite pas */
+               Partage->top < ups->date_next_connexion )                        /* Si attente retente, on change de ups */
+           { liste = g_slist_next(liste);                                  /* On prépare le prochain accès au prochain ups */
              continue;
            }
-/******************************************** Début de l'interrogation du module **********************************************/
-          if ( ! module->started )                                                               /* Communication OK ou non ? */
-           { if ( ! Connecter_ups( module ) )                                                 /* Demande de connexion a l'ups */
-              { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: %s: Module DOWN", __func__, module->tech_id );
-                Deconnecter_UPS ( module );                                         /* Sur erreur, on deconnecte le module */
-                module->date_next_connexion = Partage->top + UPS_RETRY;
+/******************************************** Début de l'interrogation du ups **********************************************/
+          if ( ! ups->started )                                                               /* Communication OK ou non ? */
+           { if ( ! Connecter_ups( ups ) )                                                 /* Demande de connexion a l'ups */
+              { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: %s: Module DOWN", __func__, ups->tech_id );
+                Deconnecter_UPS ( ups );                                         /* Sur erreur, on deconnecte le ups */
+                ups->date_next_connexion = Partage->top + UPS_RETRY;
               }
            }
           else
-           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: %s: Interrogation ups", __func__, module->tech_id );
-             if ( Interroger_ups ( module ) == FALSE )
-              { Deconnecter_UPS ( module );
-                module->date_next_connexion = Partage->top + UPS_RETRY;                       /* On retente dans longtemps */
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: %s: Interrogation ups", __func__, ups->tech_id );
+             if ( Interroger_ups ( ups ) == FALSE )
+              { Deconnecter_UPS ( ups );
+                ups->date_next_connexion = Partage->top + UPS_RETRY;                       /* On retente dans longtemps */
               }
-             else module->date_next_connexion = Partage->top + UPS_POLLING;               /* Update toutes les xx secondes */
+             else ups->date_next_connexion = Partage->top + UPS_POLLING;               /* Update toutes les xx secondes */
            }
-          liste = liste->next;                                            /* On prépare le prochain accès au prochain module */
+          liste = liste->next;                                            /* On prépare le prochain accès au prochain ups */
         }
        pthread_mutex_unlock ( &Cfg_ups.lib->synchro );                                 /* Car utilisation de la liste chainée */
      }

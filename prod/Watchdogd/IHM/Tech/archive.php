@@ -16,7 +16,7 @@
 
    <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
      <h4 class="alert-heading">Warning !</h4>
-         Le Thread "Archive" ne tourne pas !
+         Le Thread <a href="/tech/process">Archive</a> ne tourne pas !
    </div>
 
        <div class="col form-group">

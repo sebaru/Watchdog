@@ -93,20 +93,40 @@
 /******************************************************************************************************************************/
  static void Http_traiter_log ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data)
-  { if (msg->method != SOUP_METHOD_GET)
+  { GBytes *request_brute;
+    gsize taille;
+
+    if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
+       return;
+     }
+
+    if ( ! Json_has_member ( request, "log_level" ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    gchar *log_level = Json_get_string ( request, "log_level" );
+         if ( ! g_ascii_strcasecmp ( log_level, "LOG_DEBUG"   ) ) { Info_change_log_level ( Config.log, LOG_DEBUG   ); }
+    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_NOTICE"  ) ) { Info_change_log_level ( Config.log, LOG_NOTICE  ); }
+    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_INFO"    ) ) { Info_change_log_level ( Config.log, LOG_INFO    ); }
+    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_WARNING" ) ) { Info_change_log_level ( Config.log, LOG_WARNING ); }
+    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_ERROR"   ) ) { Info_change_log_level ( Config.log, LOG_ERR     ); }
+	   else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais niveau de log");
+    json_node_unref(request);
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
-         if ( ! strcasecmp ( path, "/log/debug"   ) ) { Info_change_log_level ( Config.log, LOG_DEBUG   ); }
-    else if ( ! strcasecmp ( path, "/log/notice"  ) ) { Info_change_log_level ( Config.log, LOG_NOTICE  ); }
-    else if ( ! strcasecmp ( path, "/log/info"    ) ) { Info_change_log_level ( Config.log, LOG_INFO    ); }
-    else if ( ! strcasecmp ( path, "/log/warning" ) ) { Info_change_log_level ( Config.log, LOG_WARNING ); }
-    else if ( ! strcasecmp ( path, "/log/error"   ) ) { Info_change_log_level ( Config.log, LOG_ERR     ); }
-	   else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
-    /*soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, "LogLevel set", 18 );*/
   }
 /******************************************************************************************************************************/
 /* Http_redirect_to_slave: Proxifie une requete vers un slave                                                                 */
@@ -116,6 +136,7 @@
  void Http_redirect_to_slave ( SoupMessage *msg, gchar *target )
   { SoupSession *connexion;
     connexion = soup_session_new();
+    g_object_set ( G_OBJECT(connexion), "ssl-strict", FALSE, NULL );
     SoupURI *URI = soup_uri_copy (soup_message_get_uri (msg));
     soup_uri_set_host ( URI, target );
     SoupMessage *new_msg = soup_message_new_from_uri ( msg->method, URI );
