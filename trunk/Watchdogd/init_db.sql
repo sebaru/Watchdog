@@ -600,29 +600,6 @@ CREATE TABLE IF NOT EXISTS `histo_msgs` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `ups`
---
-
-CREATE TABLE IF NOT EXISTS `ups` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT "NEW",
-  `enable` tinyint(1) NOT NULL,
-  `host` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `username` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `password` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `map_EA` int(11) NOT NULL,
-  `map_E` int(11) NOT NULL,
-  `map_A` int(11) NOT NULL,
-  `date_create` DATETIME NOT NULL DEFAULT NOW(),
-
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `rfxcom`
 --
 
