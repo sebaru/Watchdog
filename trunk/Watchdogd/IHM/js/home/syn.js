@@ -18,6 +18,7 @@
     svg.setAttribute("height", Motif.haut );
     svg.setAttribute("width", Motif.larg );
     svg.setAttribute("id","WTD-motif-"+Motif.id);
+    svg.setAttribute( "class", "svg-button" );
     if (Motif.gestion==1) $("#TopSVG").prepend(svg);                                                                 /* ajout du SVG dans le Top SVG */
     else $("#TopSVG").append(svg);                                                                 /* ajout du SVG dans le Top SVG */
 
@@ -26,14 +27,16 @@
  function Load_Motif_to_canvas ( Motif )
   {
     var request = new XMLHttpRequest();                         /* Envoie une requete de récupération du SVG associé au motif */
-    request.open("GET", "https://icons.abls-habitat.fr/assets/gif/"+Motif.forme+".svg", true);
-    /*request.open("GET", "http://test.watchdog.fr/assets/gif/Jauge_2.svg", true);*/
+    request.open("GET", "/img/"+Motif.forme+".svg", true);
     request.onreadystatechange = function()
      { if (request.readyState == 4 && (request.status == 200 || request.status == 0))
        { var svg = request.responseXML.documentElement;
          svg.motif = Motif;                                                            /* Sauvegarde du pointeur Motif source */
 
-         svg.SetMode = new Function ( "mode", "color", svg.getElementById("SetMode").innerHTML );
+         if (svg.getElementById("SetMode") === null)
+          { svg.SetMode = new Function ( "mode", "color", "return('false');"); }
+         else
+          { svg.SetMode = new Function ( "mode", "color", svg.getElementById("SetMode").innerHTML ); }
 
          var mytitle=document.createElementNS("http://www.w3.org/2000/svg", 'title');
          mytitle.innerHTML = Motif.libelle;
@@ -237,7 +240,7 @@
      { console.log("Traite motifs: "+Response.motifs.length);
        for (var i = 0; i < Response.motifs.length; i++)                          /* Pour chacun des motifs, parsing un par un */
         { var motif = Response.motifs[i];
-          if (motif.icone>0) Load_Gif_to_canvas ( motif );
+          if (motif.forme=="none") Load_Gif_to_canvas ( motif );
           else Load_Motif_to_canvas ( motif );
         }
 

@@ -22,6 +22,7 @@
         .nav-link:hover { color: white;
                           background-color: #48BBC0;
                         }
+    }
       </style>
 
     </head>
