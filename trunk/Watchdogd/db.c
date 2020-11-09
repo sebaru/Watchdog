@@ -2002,6 +2002,8 @@ encore:
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "update syns_motifs set forme='klaxon' where icone=44");
        Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "update syns_motifs set forme='lampe_lune' where icone=458");
+       Lancer_requete_SQL ( db, requete );
      }
 
 fin:
