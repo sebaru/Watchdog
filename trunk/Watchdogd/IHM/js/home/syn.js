@@ -240,7 +240,31 @@
      { console.log("Traite motifs: "+Response.motifs.length);
        for (var i = 0; i < Response.motifs.length; i++)                          /* Pour chacun des motifs, parsing un par un */
         { var motif = Response.motifs[i];
-          if (motif.forme=="none") Load_Gif_to_canvas ( motif );
+          if (motif.icone==424)
+           { /*var button = document.createElement("button");
+             button.type = "button";
+             button.innerHTML = "Stop Klaxon";
+             button.setAttribute( "class", "btn btn-primary");
+             button.setAttribute("style", "position:relative; top:"+motif.posy+ "px; left:"+motif.posx+"px;" );
+             /*button.onclick = func;*/
+             /*$("#idTopDIV").prepend(button);                                                                 /* ajout du SVG dans le Top SVG */
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+    svg.setAttribute('x',"0");
+    svg.setAttribute('y',"0");
+    svg.setAttribute('width',"100%");
+    svg.setAttribute('height',"100%");
+    var button = document.createElementNS("http://www.w3.org/1999/xhtml",'html:button');
+    button.setAttribute('style',"position: relative; top:"+motif.posy+"px; left:"+motif.posx+"px;");
+    /*button.setAttribute('x',motif.posx);
+    button.setAttribute('y',motif.posy);*/
+    button.type = "button";
+    button.innerHTML = "Stop Klaxon";
+    button.setAttribute('class',"btn btn-sm btn-primary");
+    svg.append(button);
+         /*svg.textContent = "test !!";*/
+   $("#TopSVG").append(svg);                                                            /* ajout du SVG dans le Top SVG */
+           }
+          else if (motif.forme=="none") Load_Gif_to_canvas ( motif );
           else Load_Motif_to_canvas ( motif );
         }
 
