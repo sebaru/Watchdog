@@ -56,7 +56,7 @@
     g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "GSM01" );
     Creer_configDB ( NOM_THREAD, "tech_id", Cfg_smsg.tech_id );
 
-    g_snprintf( Cfg_smsg.ovh_service_name, sizeof(Cfg_smsg.ovh_service_name), "sms-123456-1" );
+    g_snprintf( Cfg_smsg.ovh_service_name, sizeof(Cfg_smsg.ovh_service_name), "sms-xx123456-1" );
     Creer_configDB ( NOM_THREAD, "ovh_service_name", Cfg_smsg.ovh_service_name );
 
     g_snprintf( Cfg_smsg.ovh_application_key, sizeof(Cfg_smsg.ovh_application_key), "AppKey" );
