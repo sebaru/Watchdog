@@ -1,13 +1,13 @@
 <div class="container">
 
  <div class="row m-2">
-   <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Statut du GSM sur <strong id='idTitleInstance'></strong></h3>
+   <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Statut du SMS sur <strong id='idTitleInstance'></strong></h3>
 
    <div class ="ml-auto btn-group align-items-start">
-        <button type="button" onclick="GSM_Sauver_parametre()" class="btn btn-outline-success"><i class="fas fa-save"></i> Sauvegarder</button>
-        <button type="button" onclick="GSM_test()" class="btn btn-outline-info"><i class="fas fa-question"></i> Test d'envoi</button>
+        <button type="button" onclick="SMS_Sauver_parametre()" class="btn btn-outline-success"><i class="fas fa-save"></i> Sauvegarder</button>
+        <button type="button" onclick="SMS_test()" class="btn btn-outline-info"><i class="fas fa-question"></i> Test d'envoi</button>
         <button type="button" onclick="Redirect('/tech/smsg_map')" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
-        <button type="button" onclick="GSM_Reload()" class="btn btn-outline-warning"><i class="fas fa-redo"></i> Reload</button>
+        <button type="button" onclick="SMS_Reload()" class="btn btn-outline-warning"><i class="fas fa-redo"></i> Reload</button>
         <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
         <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
@@ -39,6 +39,7 @@
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">OVH Service Name</label>
 						     <input id="idGSMOVHServiceName" type="text" class="form-control" placeholder="OVH Service Name (sms-xxxxxx-1)">
+           <a target="_blank" href="https://eu.api.ovh.com/createToken/index.cgi?GET=/sms&GET=/sms/*/jobs&POST=/sms/*/jobs" class="col-2 col-form-label">Creer un token</a>
      					</div>
   					</div>
 
@@ -65,7 +66,7 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Statut Communication</label>
+						     <label class="col-3 col-form-label text-right">GSM Communication</label>
 						     <input id="idGSMComm" type="text" class="form-control" placeholder="Communication">
      					</div>
   					</div>

@@ -34,10 +34,10 @@
   { struct LIBRAIRIE *lib;
     gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];                                                       /* Tech_id du téléphone */
     gchar description[80];                                         /* Une description du téléphone ou sa position par exemple */
-    gchar ovh_service_name[32];                                                                     /* Login de connexion OVH */
-    gchar ovh_application_key[32];                                                                            /* Clef API OVH */
-    gchar ovh_application_secret[32];                                                                         /* Clef API OVH */
-    gchar ovh_consumer_key[32];                                                                               /* Clef API OVH */
+    gchar ovh_service_name[16];                                                                     /* Login de connexion OVH */
+    gchar ovh_application_key[33];                                                                            /* Clef API OVH */
+    gchar ovh_application_secret[33];                                                                         /* Clef API OVH */
+    gchar ovh_consumer_key[33];                                                                               /* Clef API OVH */
     gboolean comm_status;
     gboolean send_test;                                                  /* TRUE si une demande de test a été faite par l'IHM */
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */

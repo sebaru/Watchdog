@@ -246,6 +246,7 @@
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                 "%s: FindGammuRC Failed (%s)", __func__, GSM_ErrorString(error) );
        if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
+       goto end;
      }
 
    	error = GSM_ReadConfig(cfg, GSM_GetConfig(s, 0), 0);
@@ -253,6 +254,7 @@
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                 "%s: ReadConfig Failed (%s)", __func__, GSM_ErrorString(error) );
        if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
+       goto end;
      }
 
    	INI_Free(cfg);
@@ -263,6 +265,7 @@
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                 "%s: InitConnection Failed (%s)", __func__, GSM_ErrorString(error) );
        if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
+       goto end;
      }
 
     GSM_SetSendSMSStatusCallback(s, Smsg_Send_CB, NULL);
@@ -273,6 +276,7 @@
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                 "%s: GetSMSC Failed (%s)", __func__, GSM_ErrorString(error) );
        if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
+       goto end;
      }
 
 	   CopyUnicodeString(sms.SMSC.Number, PhoneSMSC.Number);                                       /* Set SMSC number in message */
@@ -283,8 +287,8 @@
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                 "%s: SendSMS Failed (%s)", __func__, GSM_ErrorString(error) );
        if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
+       goto end;
      }
-
 
     wait = Partage->top; 	                                                                          /* Wait for network reply */
 	   while ( (Partage->top < wait+150) && sms_send_status == ERR_TIMEOUT )
@@ -305,7 +309,7 @@
        if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
      }
 
-
+end:
 	   GSM_FreeStateMachine(s);                                                                          	/* Free up used memory */
     if (sms_send_status == ERR_NONE) { Cfg_smsg.nbr_sms++; return(TRUE); }
     else return(FALSE);
@@ -423,7 +427,7 @@
                   sleep(5);
                   if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
                    { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                               "%s: Second Error sending with GSM. Falling back to SMSBOX", __func__ );
+                               "%s: Second Error sending with GSM. Falling back to OVH", __func__ );
                      Envoi_sms_ovh( msg, sms->user_phone );
                    }
                 }

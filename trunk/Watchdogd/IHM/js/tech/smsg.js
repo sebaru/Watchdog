@@ -1,7 +1,7 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function GSM_Sauver_parametre ( )
+ function SMS_Sauver_parametre ( )
   { var json_request = JSON.stringify(
      { /*instance:      Get_target_instance(),*/
        tech_id:       $('#idGSMTechID').val(),
@@ -14,11 +14,11 @@
     Send_to_API ( 'POST', "/api/process/smsg/set", json_request, null );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function GSM_Reload ( )
+ function SMS_Reload ( )
   { Process_reload ( Get_target_instance(), "SMSG", false );
   }
 /************************************ Demande l'envoi d'un SMS de test ********************************************************/
- function GSM_test ( )
+ function SMS_test ( )
   { var json_request = JSON.stringify(
      { instance:      Get_target_instance(),
      });
