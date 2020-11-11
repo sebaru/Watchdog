@@ -280,6 +280,73 @@
 /* Dls_data_set_bool: Positionne un boolean                                                                                   */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
+ void Dls_data_set_watchdog ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *wtd_p, gint consigne )
+  { struct DLS_WATCHDOG *wtd;
+
+    if (!wtd_p || !*wtd_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_WATCHDOG;
+       while (liste)
+        { wtd = (struct DLS_WATCHDOG *)liste->data;
+          if ( !strcasecmp ( wtd->acronyme, acronyme ) && !strcasecmp( wtd->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+
+       if (!liste)
+        { wtd = g_try_malloc0 ( sizeof(struct DLS_WATCHDOG) );
+          if (!wtd)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( wtd->acronyme, sizeof(wtd->acronyme), "%s", acronyme );
+          g_snprintf( wtd->tech_id,  sizeof(wtd->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_WATCHDOG, wtd );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding DLS_WATCHDOG '%s:%s'", __func__, tech_id, acronyme );
+        }
+       if (wtd_p) *wtd_p = (gpointer)wtd;                                        /* Sauvegarde pour acceleration si besoin */
+      }
+    else wtd = (struct DLS_WATCHDOG *)*wtd_p;
+
+    if (wtd->last_top != Partage->top)
+     { wtd->last_top = Partage->top;
+       wtd->consigne = consigne;
+       Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_WATCHDOG '%s:%s'=%d",
+                 __func__, wtd->tech_id, wtd->acronyme, consigne );
+       Partage->audit_bit_interne_per_sec++;
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_bool: Remonte l'etat d'un boolean                                                                             */
+/* Sortie : TRUE sur le boolean est UP                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_watchdog ( gchar *tech_id, gchar *acronyme, gpointer *wtd_p )
+  { struct DLS_WATCHDOG *wtd;
+    GSList *liste;
+    if (wtd_p && *wtd_p)                                                           /* Si pointeur d'acceleration disponible */
+     { wtd = (struct DLS_WATCHDOG *)*wtd_p;
+       goto end;
+     }
+    if (!tech_id || !acronyme) return(FALSE);
+
+    liste = Partage->Dls_data_WATCHDOG;
+    while (liste)
+     { wtd = (struct DLS_WATCHDOG *)liste->data;
+       if ( !strcasecmp ( wtd->acronyme, acronyme ) && !strcasecmp( wtd->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste) return(FALSE);
+    if (wtd_p) *wtd_p = (gpointer)wtd;                                           /* Sauvegarde pour acceleration si besoin */
+end:
+    return( Partage->top < wtd->last_top + wtd->consigne );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_bool: Positionne un boolean                                                                                   */
+/* Sortie : TRUE sur le boolean est UP                                                                                        */
+/******************************************************************************************************************************/
  void Dls_data_set_bool ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur )
   { struct DLS_BOOL *bool;
 

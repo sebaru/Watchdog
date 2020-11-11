@@ -129,6 +129,7 @@
     GSList *Dls_data_CH;                                                                      /* Liste des compteurs horaires */
     GSList *Dls_data_VISUEL;                                                                    /* Liste des visuels (bits I) */
     GSList *Dls_data_REGISTRE;                                                                /* Liste des registres (bits R) */
+    GSList *Dls_data_WATCHDOG;                                                                /* Liste des registres (bits R) */
   };
 
 /************************************************ Définitions des prototypes **************************************************/

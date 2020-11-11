@@ -677,17 +677,18 @@ end:
 
        Print_config();
 /************************************* Création des zones de bits internes dynamiques *****************************************/
-       Partage->Dls_data_DI     = NULL;
-       Partage->Dls_data_DO     = NULL;
-       Partage->Dls_data_AI     = NULL;
-       Partage->Dls_data_AO     = NULL;
-       Partage->Dls_data_BOOL   = NULL;
+       Partage->Dls_data_DI       = NULL;
+       Partage->Dls_data_DO       = NULL;
+       Partage->Dls_data_AI       = NULL;
+       Partage->Dls_data_AO       = NULL;
+       Partage->Dls_data_BOOL     = NULL;
        Partage->Dls_data_REGISTRE = NULL;
-       Partage->Dls_data_MSG    = NULL;
-       Partage->Dls_data_CH     = NULL;
-       Partage->Dls_data_CI     = NULL;
-       Partage->Dls_data_TEMPO  = NULL;
-       Partage->Dls_data_VISUEL = NULL;
+       Partage->Dls_data_MSG      = NULL;
+       Partage->Dls_data_CH       = NULL;
+       Partage->Dls_data_CI       = NULL;
+       Partage->Dls_data_TEMPO    = NULL;
+       Partage->Dls_data_VISUEL   = NULL;
+       Partage->Dls_data_WATCHDOG = NULL;
 
        sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
@@ -775,6 +776,9 @@ end:
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique VISUEL", __func__ );
        g_slist_foreach (Partage->Dls_data_VISUEL, (GFunc) g_free, NULL );
        g_slist_free (Partage->Dls_data_VISUEL);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique WATCHDOG", __func__ );
+       g_slist_foreach (Partage->Dls_data_WATCHDOG, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_WATCHDOG);
 
        pthread_mutex_destroy( &Partage->com_msrv.synchro );
        pthread_mutex_destroy( &Partage->com_dls.synchro );
