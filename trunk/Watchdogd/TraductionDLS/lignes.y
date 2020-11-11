@@ -415,7 +415,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                 {{ int taille;
                    taille = 20;
                    $$ = New_chaine(taille);
-                   g_snprintf( $$, taille, "(vars->starting)" );
+                   g_snprintf( $$, taille, "(vars->resetted)" );
                 }}
                 | T_TRUE
                 {{ int taille;

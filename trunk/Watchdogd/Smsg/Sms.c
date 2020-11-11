@@ -335,7 +335,8 @@ end:
     Json_add_array ( builder, "receivers" );
     json_builder_add_string_value( builder, telephone );
     Json_end_array ( builder );
-    gchar *libelle = (strlen(msg->libelle_sms) ? msg->libelle_sms : msg->libelle);
+    gchar libelle[128];
+    g_snprintf( libelle, sizeof(libelle), "%s: %s", msg->dls_shortname, msg->libelle_sms );
     Json_add_string( builder, "message", libelle );
     gchar *body = Json_get_buf( builder, &taille_buf );
 

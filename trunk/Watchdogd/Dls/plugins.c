@@ -179,7 +179,7 @@
                        plugin->plugindb.tech_id, plugin->plugindb.shortname );
            }
           Charger_un_plugin ( plugin );
-          plugin->vars.starting = 1;                                               /* au chargement, le bit de start vaut 1 ! */
+          plugin->vars.resetted = TRUE;                                             /* au chargement, le bit de start vaut 1 ! */
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin '%s' (%s) loaded", __func__,
                     plugin->plugindb.tech_id, plugin->plugindb.shortname );
           return;
@@ -358,7 +358,7 @@
        plugin->plugindb.on = TRUE;
        plugin->conso = 0.0;
        plugin->start_date = time(NULL);
-       plugin->vars.starting = 1;
+       plugin->vars.resetted = FALSE;
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' started (%s)", __func__, plugin->plugindb.tech_id, plugin->plugindb.nom );
        g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET actif='1' WHERE tech_id = '%s'", plugin->plugindb.tech_id );
        SQL_Write ( chaine );

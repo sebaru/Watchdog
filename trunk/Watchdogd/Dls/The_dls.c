@@ -40,7 +40,7 @@
 
  #include "watchdogd.h"
 
- #define DLS_LIBRARY_VERSION  "20201101"
+ #define DLS_LIBRARY_VERSION  "20201111"
 
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
@@ -1519,7 +1519,7 @@
           plugin_actuel->go( &plugin_actuel->vars );                                                    /* On appel le plugin */
           gettimeofday( &tv_apres, NULL );
           plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
-          plugin_actuel->vars.starting = 0;
+          plugin_actuel->vars.resetted = FALSE;
 
           plugin_actuel->vars.bit_acquit = 0;                                                 /* On arrete l'acquit du plugin */
                                                                                                   /* Bit de synthese activite */

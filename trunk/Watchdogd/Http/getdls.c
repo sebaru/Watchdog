@@ -58,7 +58,6 @@
     Json_add_string ( builder, "start_date", date );
 
     Json_add_double ( builder, "conso", dls->conso );
-    Json_add_bool   ( builder, "starting",             dls->vars.starting );
     Json_add_bool   ( builder, "debug",                dls->vars.debug );
     Json_add_bool   ( builder, "bit_comm_out",         dls->vars.bit_comm_out );
     Json_add_bool   ( builder, "bit_defaut",           dls->vars.bit_defaut );
