@@ -5,7 +5,10 @@
   { var json_request = JSON.stringify(
      { /*instance:      Get_target_instance(),*/
        tech_id:       $('#idGSMTechID').val(),
-       smsbox_apikey: $('#idGSMAPIKey').val(),
+       ovh_service_name: $('#idGSMOVHServiceName').val(),
+       ovh_application_key: $('#idGSMOVHApplicationKey').val(),
+       ovh_application_secret: $('#idGSMOVHApplicationSecret').val(),
+       ovh_consumer_key: $('#idGSMOVHConsumerKey').val(),
        description:   $('#idGSMDescription').val(),
      });
     Send_to_API ( 'POST', "/api/process/smsg/set", json_request, null );
@@ -29,7 +32,10 @@
                                   else { $('#idAlertThreadNotRunning').show(); }
        $('#idGSMTechID').val( Response.tech_id );
        $('#idGSMDescription').val( Response.description );
-       $('#idGSMAPIKey').val( Response.smsbox_apikey );
+       $('#idGSMOVHServiceName').val( Response.ovh_service_name );
+       $('#idGSMOVHApplicationKey').val( Response.ovh_application_key );
+       $('#idGSMOVHApplicationSecret').val( Response.ovh_application_secret );
+       $('#idGSMOVHConsumerKey').val( Response.ovh_consumer_key );
        $('#idGSMComm').val( (Response.comm_status ? "TRUE" : "FALSE" ) );
        $('#idGSMNbrSMS').val( Response.nbr_sms );
      }, null);

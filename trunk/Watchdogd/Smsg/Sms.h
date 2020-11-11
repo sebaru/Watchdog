@@ -32,9 +32,12 @@
 
  struct SMS_CONFIG
   { struct LIBRAIRIE *lib;
-    gchar description[80];                                        /* Une description du téléphone ou sa position par exemple */
-    gchar smsbox_apikey[129];                                                                              /* Clef API SMSBOX */
     gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];                                                       /* Tech_id du téléphone */
+    gchar description[80];                                         /* Une description du téléphone ou sa position par exemple */
+    gchar ovh_service_name[32];                                                                     /* Login de connexion OVH */
+    gchar ovh_application_key[32];                                                                            /* Clef API OVH */
+    gchar ovh_application_secret[32];                                                                         /* Clef API OVH */
+    gchar ovh_consumer_key[32];                                                                               /* Clef API OVH */
     gboolean comm_status;
     gboolean send_test;                                                  /* TRUE si une demande de test a été faite par l'IHM */
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
@@ -52,9 +55,5 @@
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/
- extern gboolean Smsg_Recuperer_smsDB ( struct DB *db );
- extern struct SMSDB *Smsg_Recuperer_smsDB_suite( struct DB *db );
- extern void Envoyer_smsg_smsbox_text ( gchar *texte );
- extern void Envoyer_smsg_gsm_text ( gchar *texte );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

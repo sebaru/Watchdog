@@ -56,8 +56,17 @@
     g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "GSM01" );
     Creer_configDB ( NOM_THREAD, "tech_id", Cfg_smsg.tech_id );
 
-    g_snprintf( Cfg_smsg.smsbox_apikey, sizeof(Cfg_smsg.smsbox_apikey), "changeme" );
-    Creer_configDB ( NOM_THREAD, "smsbox_apikey", Cfg_smsg.smsbox_apikey );
+    g_snprintf( Cfg_smsg.ovh_service_name, sizeof(Cfg_smsg.ovh_service_name), "sms-123456-1" );
+    Creer_configDB ( NOM_THREAD, "ovh_service_name", Cfg_smsg.ovh_service_name );
+
+    g_snprintf( Cfg_smsg.ovh_application_key, sizeof(Cfg_smsg.ovh_application_key), "AppKey" );
+    Creer_configDB ( NOM_THREAD, "ovh_application_key", Cfg_smsg.ovh_application_key );
+
+    g_snprintf( Cfg_smsg.ovh_application_secret, sizeof(Cfg_smsg.ovh_application_secret), "AppSecret" );
+    Creer_configDB ( NOM_THREAD, "ovh_application_secret", Cfg_smsg.ovh_application_secret );
+
+    g_snprintf( Cfg_smsg.ovh_consumer_key, sizeof(Cfg_smsg.ovh_consumer_key), "ConsumerKey" );
+    Creer_configDB ( NOM_THREAD, "ovh_consumer_key", Cfg_smsg.ovh_consumer_key );
 
     g_snprintf( Cfg_smsg.description, sizeof(Cfg_smsg.description), "Ou est le téléphone ?" );
     Creer_configDB ( NOM_THREAD, "description", Cfg_smsg.description );
@@ -71,8 +80,14 @@
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     {      if ( ! g_ascii_strcasecmp ( nom, "smsbox_apikey" ) )
-        { g_snprintf( Cfg_smsg.smsbox_apikey, sizeof(Cfg_smsg.smsbox_apikey), "%s", valeur ); }
+     {      if ( ! g_ascii_strcasecmp ( nom, "ovh_service_name" ) )
+        { g_snprintf( Cfg_smsg.ovh_service_name, sizeof(Cfg_smsg.ovh_service_name), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "ovh_application_key" ) )
+        { g_snprintf( Cfg_smsg.ovh_application_key, sizeof(Cfg_smsg.ovh_application_key), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "ovh_application_secret" ) )
+        { g_snprintf( Cfg_smsg.ovh_application_secret, sizeof(Cfg_smsg.ovh_application_secret), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "ovh_consumer_key" ) )
+        { g_snprintf( Cfg_smsg.ovh_consumer_key, sizeof(Cfg_smsg.ovh_consumer_key), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
         { g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "nbr_sms" ) )
@@ -300,78 +315,77 @@
 /* Entrée: le message à envoyer sateur                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Envoi_sms_smsbox ( struct CMD_TYPE_MESSAGE *msg, gchar *telephone )
-  { gchar erreur[CURL_ERROR_SIZE+1];
-    struct curl_httppost *formpost;
-    struct curl_httppost *lastptr;
-    gchar chaine[256];
-    CURLcode res;
-    CURL *curl;
+ static void Envoi_sms_ovh ( struct CMD_TYPE_MESSAGE *msg, gchar *telephone )
+  { gchar clair[512], hash_string[48], signature[48], query[128];
+    unsigned char hash_bin[EVP_MAX_MD_SIZE];
+    EVP_MD_CTX *mdctx;
+    gsize taille_buf;
+    int md_len;
 
-    g_snprintf( chaine, sizeof(chaine), "%s: %s", msg->dls_shortname, msg->libelle_sms );
-    formpost = lastptr = NULL;
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "apikey",
-                  CURLFORM_COPYCONTENTS, Cfg_smsg.smsbox_apikey,
-                  CURLFORM_END);
-/*    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "login",
-                  CURLFORM_COPYCONTENTS, Cfg_smsg.smsbox_username,
-                  CURLFORM_END);
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "pass",
-                  CURLFORM_COPYCONTENTS, Cfg_smsg.smsbox_password,
-                  CURLFORM_END); */
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "msg",
-                  CURLFORM_COPYCONTENTS, chaine,
-                  CURLFORM_END);
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "charset",
-                  CURLFORM_COPYCONTENTS, "utf-8",
-                  CURLFORM_END);
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "dest",
-                  CURLFORM_COPYCONTENTS, telephone,
-                  CURLFORM_END);
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "strategy",
-                  CURLFORM_COPYCONTENTS, "2",
-                  CURLFORM_END);
-    curl_formadd( &formpost, &lastptr,                              /* Pas de SMS les 2 premières minutes de vie du processus */
-                  CURLFORM_COPYNAME,     "origine",                                 /* 'debugvar' pour lancer en mode semonce */
-                  CURLFORM_COPYCONTENTS, WTD_VERSION,
-/*                     CURLFORM_COPYCONTENTS, "debugvar",*/
-                  CURLFORM_END);
+    JsonBuilder *builder = Json_create();
+    Json_add_bool  ( builder, "noStopClause", TRUE );
+    Json_add_string( builder, "priority", "high" );
+    Json_add_bool  ( builder, "senderForResponse", TRUE );
+    Json_add_int   ( builder, "validityPeriod", 2880 ); /* 2 jours */
+    Json_add_string( builder, "charset", "UTF-8" );
+    Json_add_array ( builder, "receivers" );
+    json_builder_add_string_value( builder, telephone );
+    Json_end_array ( builder );
+    gchar *libelle = (strlen(msg->libelle_sms) ? msg->libelle_sms : msg->libelle);
+    Json_add_string( builder, "message", libelle );
+    gchar *body = Json_get_buf( builder, &taille_buf );
 
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "mode",
-                  CURLFORM_COPYCONTENTS, "Standard",
-                  CURLFORM_END);
+    gchar *method = "POST";
+    g_snprintf( query, sizeof(query), "https://eu.api.ovh.com/1.0/sms/%s/jobs", Cfg_smsg.ovh_service_name );
+    gchar timestamp[20];
+    g_snprintf( timestamp, sizeof(timestamp), "%ld", time(NULL) );
 
-    curl = curl_easy_init();
-    if (curl)
-     { curl_easy_setopt(curl, CURLOPT_URL, "https://api.smsbox.fr/1.1/api.php" );
-       curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-       curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
-       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
-       res = curl_easy_perform(curl);
-       if (!res)
-        { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,
-                   "%s: Envoi SMS '%s' to '%s'", __func__, msg->libelle_sms, telephone );
-          Cfg_smsg.nbr_sms++;
-        }
-       else
-        { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
-                   "%s: Envoi SMS Nok - Pb cURL (%s)", __func__, erreur);
-        }
-       curl_easy_cleanup(curl);
+/******************************************************* Calcul signature *****************************************************/
+    g_snprintf( clair, sizeof(clair), "%s+%s+%s+%s+%s+%s", Cfg_smsg.ovh_application_secret, Cfg_smsg.ovh_consumer_key,
+                method, query, body, timestamp );
+
+    mdctx = EVP_MD_CTX_new();                                                                               /* Calcul du SHA1 */
+    EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL);
+    EVP_DigestUpdate(mdctx, clair, strlen(clair));
+    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
+    EVP_MD_CTX_free(mdctx);
+
+    memset( hash_string, 0, sizeof(hash_string));                                                       /* Conversion en Hexa */
+    for (gint i=0; i<20; i++)
+     { gchar chaine[3];
+       g_snprintf(chaine, sizeof(chaine), "%02x", hash_bin[i] );
+       g_strlcat(hash_string, chaine, sizeof(hash_string) );
      }
-    else
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
-                "%s: Envoi SMS Nok - Pb cURL Init", __func__ );
+
+    g_snprintf( signature, sizeof(signature), "$1$%s", hash_string );
+
+/********************************************************* Envoi de la requete ************************************************/
+    SoupSession *connexion = soup_session_new();
+    SoupMessage *soup_msg = soup_message_new ( method, query );
+    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, body, taille_buf );
+    SoupMessageHeaders *headers;
+    g_object_get ( G_OBJECT(soup_msg), "request_headers", &headers, NULL );
+    soup_message_headers_append ( headers, "X-Ovh-Application", Cfg_smsg.ovh_application_key );
+    soup_message_headers_append ( headers, "X-Ovh-Consumer",    Cfg_smsg.ovh_consumer_key );
+    soup_message_headers_append ( headers, "X-Ovh-Signature",   signature );
+    soup_message_headers_append ( headers, "X-Ovh-Timestamp",   timestamp );
+    soup_session_send_message (connexion, soup_msg);
+
+    GBytes *response_brute;
+    gchar *reason_phrase;
+    gint status_code;
+
+    g_object_get ( soup_msg, "status-code", &status_code, "reason-phrase", &reason_phrase, "response-body-data", &response_brute, NULL );
+    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
+    if (status_code!=200)
+     { gsize taille;
+       gchar *error = g_bytes_get_data ( response_brute, &taille );
+       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error: %s\n", __func__, error );
+       g_free(error);
      }
-    curl_formfree(formpost);
+    else Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: '%s' sent to '%s'", __func__, libelle, telephone );
+    g_object_unref( soup_msg );
+    soup_session_abort ( connexion );
   }
 /******************************************************************************************************************************/
 /* Smsg_send_to_all_authorized_recipients : Envoi à tous les portables autorisés                                              */
@@ -410,7 +424,7 @@
                   if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
                    { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                                "%s: Second Error sending with GSM. Falling back to SMSBOX", __func__ );
-                     Envoi_sms_smsbox( msg, sms->user_phone );
+                     Envoi_sms_ovh( msg, sms->user_phone );
                    }
                 }
                break;
@@ -418,7 +432,7 @@
                Envoi_sms_gsm   ( msg, sms->user_phone );
                break;
           case MSG_SMS_SMSBOX_ONLY:
-               Envoi_sms_smsbox( msg, sms->user_phone );
+               Envoi_sms_ovh( msg, sms->user_phone );
                break;
         }
        /*sleep(5);*/
@@ -431,7 +445,7 @@
 /* Entrée: un texte au format UTF8 si possible                                                                                */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Envoyer_smsg_smsbox_text ( gchar *texte )
+ static void Envoyer_smsg_ovh_text ( gchar *texte )
   { struct CMD_TYPE_MESSAGE msg;
 
     memset ( &msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );
@@ -446,7 +460,7 @@
 /* Entrée: un texte au format UTF8 si possible                                                                                */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Envoyer_smsg_gsm_text ( gchar *texte )
+ static void Envoyer_smsg_gsm_text ( gchar *texte )
   { struct CMD_TYPE_MESSAGE msg;
 
     memset ( &msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );
@@ -671,12 +685,13 @@ reload:
 
 /****************************************************** SMS de test ! *********************************************************/
        if (Cfg_smsg.send_test)
-        { Envoyer_smsg_gsm_text ( "Test OK !" );
+        { Envoyer_smsg_gsm_text ( "Test SMS GSM OK !" );
+          Envoyer_smsg_ovh_text ( "Test SMS OVH OK !" );
           Cfg_smsg.send_test = FALSE;
         }
 /********************************************************* Envoi de SMS *******************************************************/
        if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( !strcmp( event->tag, "send_smsbox" ) )   { Envoyer_smsg_smsbox_text ( payload ); }
+        {      if ( !strcmp( event->tag, "send_ovh" ) ) { Envoyer_smsg_ovh_text ( payload ); }
           else if ( !strcmp( event->tag, "send_sms" ) ) { Envoyer_smsg_gsm_text ( payload ); }
         }
 

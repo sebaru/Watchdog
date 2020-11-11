@@ -55,7 +55,10 @@
 
     if (Lib->Thread_run)                                      /* Warning : Cfg_smsg does not exist if thread is not running ! */
      { Json_add_string ( builder, "tech_id", Cfg_smsg.tech_id );
-       Json_add_string ( builder, "smsbox_apikey", Cfg_smsg.smsbox_apikey );
+       Json_add_string ( builder, "ovh_service_name", Cfg_smsg.ovh_service_name );
+       Json_add_string ( builder, "ovh_application_key", Cfg_smsg.ovh_application_key );
+       Json_add_string ( builder, "ovh_application_secret", Cfg_smsg.ovh_application_secret );
+       Json_add_string ( builder, "ovh_consumer_key", Cfg_smsg.ovh_consumer_key );
        Json_add_string ( builder, "description", Cfg_smsg.description );
        Json_add_bool   ( builder, "comm_status", Cfg_smsg.comm_status );
        Json_add_int    ( builder, "nbr_sms", Cfg_smsg.nbr_sms );
@@ -86,8 +89,10 @@
        return;
      }
 
-    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "smsbox_apikey" ) &&
-            Json_has_member ( request, "description" ) ) )
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "description" ) &&
+            Json_has_member ( request, "ovh_service_name" ) && Json_has_member ( request, "ovh_application_key" ) &&
+            Json_has_member ( request, "ovh_consumer_key" ) && Json_has_member ( request, "ovh_application_secret" )
+           ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        json_node_unref(request);
        return;
@@ -95,7 +100,10 @@
 
     Modifier_configDB ( NOM_THREAD, "tech_id", Json_get_string( request, "tech_id" ) );
     Modifier_configDB ( NOM_THREAD, "description", Json_get_string( request, "description" ) );
-    Modifier_configDB ( NOM_THREAD, "smsbox_apikey", Json_get_string( request, "smsbox_apikey" ) );
+    Modifier_configDB ( NOM_THREAD, "ovh_service_name", Json_get_string( request, "ovh_service_name" ) );
+    Modifier_configDB ( NOM_THREAD, "ovh_application_key", Json_get_string( request, "ovh_application_key" ) );
+    Modifier_configDB ( NOM_THREAD, "ovh_application_secret", Json_get_string( request, "ovh_application_secret" ) );
+    Modifier_configDB ( NOM_THREAD, "ovh_consumer_key", Json_get_string( request, "ovh_consumer_key" ) );
     json_node_unref(request);
 
     soup_message_set_status (msg, SOUP_STATUS_OK);

@@ -34,10 +34,32 @@
      					</div>
   					</div>
 
+
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Clef API SMSBOX</label>
-						     <input id="idGSMAPIKey" type="text" class="form-control" placeholder="Clef API SMSBox">
+						     <label class="col-3 col-form-label text-right">OVH Service Name</label>
+						     <input id="idGSMOVHServiceName" type="text" class="form-control" placeholder="OVH Service Name (sms-xxxxxx-1)">
+     					</div>
+  					</div>
+
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-3 col-form-label text-right">OVH Application Key</label>
+						     <input id="idGSMOVHApplicationKey" type="text" class="form-control" placeholder="OVH Application Key">
+     					</div>
+  					</div>
+
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-3 col-form-label text-right">OVH Application Secret</label>
+						     <input id="idGSMOVHApplicationSecret" type="text" class="form-control" placeholder="OVH Application Secret">
+     					</div>
+  					</div>
+
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-3 col-form-label text-right">OVH Consumer Key</label>
+						     <input id="idGSMOVHConsumerKey" type="text" class="form-control" placeholder="OVH Consumer Key">
      					</div>
   					</div>
 
