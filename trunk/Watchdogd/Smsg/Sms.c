@@ -420,7 +420,7 @@ end:
 
     while ( (sms = Smsg_Recuperer_smsDB_suite( db )) != NULL)
      { switch (msg->sms)
-        { case MSG_SMS_YES:
+        { case MESSAGE_SMS_YES:
                if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
                 { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                             "%s: First Error sending with GSM. Trying another one in 5 sec", __func__ );
@@ -432,10 +432,10 @@ end:
                    }
                 }
                break;
-          case MSG_SMS_GSM_ONLY:
+          case MESSAGE_SMS_GSM_ONLY:
                Envoi_sms_gsm   ( msg, sms->user_phone );
                break;
-          case MSG_SMS_SMSBOX_ONLY:
+          case MESSAGE_SMS_OVH_ONLY:
                Envoi_sms_ovh( msg, sms->user_phone );
                break;
         }

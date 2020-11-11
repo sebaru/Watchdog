@@ -33,11 +33,11 @@
  #define NOM_TABLE_MSG       "msgs"
 
  enum
-  { MSG_SMS_NONE,
-    MSG_SMS_YES,
-    MSG_SMS_GSM_ONLY,
-    MSG_SMS_OVH_ONLY,
-    NBR_TYPE_MSG_SMS
+  { MESSAGE_SMS_NONE,
+    MESSAGE_SMS_YES,
+    MESSAGE_SMS_GSM_ONLY,
+    MESSAGE_SMS_OVH_ONLY,
+    NBR_TYPE_MESSAGE_SMS
   };
 
 /******************************************** Définitions des prototypes ******************************************************/

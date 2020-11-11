@@ -281,7 +281,7 @@
                           "<option value='0' "+(item.sms==0 ? "selected" : "")+">Non</option>"+
                           "<option value='1' "+(item.sms==1 ? "selected" : "")+">Oui</option>"+
                           "<option value='2' "+(item.sms==2 ? "selected" : "")+">GSM Only</option>"+
-                          "<option value='3' "+(item.sms==3 ? "selected" : "")+">SMSBox Only</option>");
+                          "<option value='3' "+(item.sms==3 ? "selected" : "")+">OVH Only</option>");
                  }
              },
              { "data": null, "title":"Libellé SMS", "className": "hidden-xs",
