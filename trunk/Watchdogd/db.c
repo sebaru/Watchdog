@@ -2036,9 +2036,10 @@ fin:
        "SELECT 'HORLOGE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_HORLOGE UNION "
        "SELECT 'TEMPO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_Tempo UNION "
        "SELECT 'REGISTRE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_R UNION "
-       "SELECT 'VISUEL' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from syns_motifs",
+       "SELECT 'VISUEL' AS type_bit, -1 AS type_bit_int,tech_id,acronyme,libelle from syns_motifs UNION "
+       "SELECT 'MESSAGE' AS type_bit, -1 AS type_bit_int,tech_id,acronyme,libelle from msgs",
         MNEMO_ENTREE_ANA, MNEMO_ENTREE, MNEMO_SORTIE, MNEMO_SORTIE_ANA, MNEMO_CPTH, MNEMO_CPT_IMP, MNEMO_HORLOGE,
-        MNEMO_TEMPO, MNEMO_REGISTRE, -1
+        MNEMO_TEMPO, MNEMO_REGISTRE
       );
     Lancer_requete_SQL ( db, requete );
     Libere_DB_SQL(&db);
