@@ -232,7 +232,8 @@ reload:
              else { nbr_octet_lu = 0;                                                              /* Depassement de tampon ! */
                     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
                     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
-                             "%s: BufferOverflow, dropping trame", __func__ );
+                             "%s: BufferOverflow, dropping trame (nbr_octet_lu=%d, cpt=%d, taille buffer=%d)",
+                              __func__, nbr_octet_lu, cpt, TAILLE_BUFFER_TELEINFO  );
                   }
 
            }

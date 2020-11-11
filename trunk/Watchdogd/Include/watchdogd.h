@@ -58,8 +58,6 @@
  #define VERROU_SERVEUR              "watchdogd.lock"
  #define FICHIER_EXPORT              "export.wdg"
 
- #define MAX_ENREG_QUEUE               1500      /* (a virer) Nombre maximum d'enregistrement dans une queue de communication */
-
  struct LIBRAIRIE
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
