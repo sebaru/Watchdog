@@ -45,10 +45,15 @@
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_audio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_audio.diffusion_enabled = TRUE;
+    Cfg_audio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
+    Creer_configDB ( NOM_THREAD, "debug", "false" );
+
     g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", AUDIO_DEFAUT_LANGUAGE );
+    Creer_configDB ( NOM_THREAD, "language", Cfg_audio.language );
+
     g_snprintf( Cfg_audio.device,   sizeof(Cfg_audio.device), "plughw" );
+    Creer_configDB ( NOM_THREAD, "device", Cfg_audio.device );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
@@ -64,10 +69,6 @@
         { g_snprintf( Cfg_audio.device, sizeof(Cfg_audio.device), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "language" ) )
         { g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", valeur ); }
-       else
-        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
-                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
-        }
      }
     return(TRUE);
   }
@@ -158,9 +159,7 @@
 /* Main: Fonction principale du Thread Audio                                                                                  */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct CMD_TYPE_HISTO *histo, histo_buf;
-    struct ZMQUEUE *zmq_msg;
-    struct ZMQUEUE *zmq_from_bus;
+  { struct ZMQUEUE *zmq_from_bus;
 
 reload:
     memset( &Cfg_audio, 0, sizeof(Cfg_audio) );                                     /* Mise a zero de la structure de travail */
@@ -175,78 +174,60 @@ reload:
        Mnemo_auto_create_DI ( FALSE, "AUDIO", "P_NONE", "Profil audio: All Hps disabled" );
      }
 
-    zmq_msg      = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
     zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { struct ZMQ_TARGET *event;
-       gchar buffer[256];
-       void *payload;
+     { gchar buffer[1024];
 
-       if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( !strcmp( event->tag, "play_wav" ) )
-           { gchar fichier[80];
+       JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
+       if (request)
+        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
+          if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) && Json_get_bool ( request, "alive" ) == TRUE &&
+                strcasecmp( Json_get_string( request, "profil_audio" ), "P_NONE" ) )
+           { gchar *tech_id       = Json_get_string ( request, "tech_id" );
+             gchar *acronyme      = Json_get_string ( request, "acronyme" );
+             gchar *profil_audio  = Json_get_string ( request, "profil_audio" );
+             gchar *libelle_audio = Json_get_string ( request, "libelle_audio" );
+             gchar *libelle       = Json_get_string ( request, "libelle" );
+             gint type_msg = Json_get_int ( request, "type_msg" );
+
              Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                      "%s : Reception d'un message PLAY_WAV : %s", __func__, (gchar *)payload );
-             g_snprintf( fichier, sizeof(fichier), "%s", (gchar *)payload );
-             Jouer_wav_by_file ( fichier );
+                       "%s : Recu message '%s:%s' (profil_audio=%s)", __func__, tech_id, acronyme, profil_audio );
+
+             if ( Cfg_audio.diffusion_enabled == FALSE &&
+                  ! (type_msg == MSG_ALERTE || type_msg == MSG_DANGER)
+                )                                                               /* Bit positionné quand arret diffusion audio */
+              { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
+                          "%s : Envoi audio inhibé. Dropping '%s:%s'", __func__, tech_id, acronyme );
+              }
+             else
+              { if (Config.instance_is_master)
+                 { Envoyer_commande_dls_data( "AUDIO", profil_audio ); }                  /* Pos. du profil audio via interne */
+
+                if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)                        /* Si Pas de message depuis xx */
+                 { Jouer_wav_by_file("jingle"); }                                                   /* On balance le jingle ! */
+                Cfg_audio.last_audio = Partage->top;
+
+                if (strlen(libelle_audio))                  /* Si libelle_audio, le jouer, sinon jouer le libelle tout court) */
+                 { Jouer_google_speech( libelle_audio ); }
+                else
+                 { Jouer_google_speech( libelle ); }
+
+                if (Config.instance_is_master)
+                 { Envoyer_commande_dls_data( "AUDIO", "P_NONE" ); }                         /* Bit de fin d'emission message */
+              }
            }
-          else if ( !strcmp( event->tag, "play_google" ) )
-           { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                      "%s : Reception d'un message PLAY_GOOGLE : %s", __func__, (gchar *)payload );
-             Jouer_google_speech ( payload );
-           }
-          else if ( !strcmp( event->tag, "disable" ) )
+          else if ( !strcasecmp( zmq_tag, "DISABLE" ) )
            { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s : Diffusion disabled by master", __func__ );
              Cfg_audio.diffusion_enabled = FALSE;
            }
-          else if ( !strcmp( event->tag, "enable" ) )
+          else if ( !strcasecmp( zmq_tag, "ENABLE" ) )
            { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s : Diffusion enabled by master", __func__ );
              Cfg_audio.diffusion_enabled = TRUE;
            }
-        }
-
-       if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
-        { sleep(1); continue; }
-
-       histo = &histo_buf;
-       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "%s : Recu message '%s:%s' (histo->msg.profil_audio=%s, alive=%d)", __func__,
-                histo->msg.tech_id, histo->msg.acronyme, histo->msg.profil_audio, histo->alive );
-
-       if ( Cfg_audio.diffusion_enabled == FALSE &&
-            ! (histo->msg.type == MSG_ALERTE || histo->msg.type == MSG_DANGER)
-          )                                                                     /* Bit positionné quand arret diffusion audio */
-        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                   "%s : Envoi audio inhibé pour '%s:%s'", __func__, histo->msg.tech_id, histo->msg.acronyme );
-          continue;
-        }
-
-       if ( histo->alive == 1 && strcasecmp(histo->msg.profil_audio, "P_NONE") )                    /* Si le message apparait */
-        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
-                   "%s : Envoi du message audio '%s:%s' (histo->msg.profil_audio=%s)",
-                    __func__, histo->msg.tech_id, histo->msg.acronyme, histo->msg.profil_audio);
-
-          if (Config.instance_is_master)
-           { Envoyer_commande_dls_data( "AUDIO", histo->msg.profil_audio );  /* Positionnement du profil audio via monostable */
-           }
-
-          if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)                              /* Si Pas de message depuis xx */
-           { Jouer_wav_by_file("jingle"); }                                                         /* On balance le jingle ! */
-          Cfg_audio.last_audio = Partage->top;
-
-          if (strlen(histo->msg.libelle_audio))             /* Si libelle_audio, le jouer, sinon jouer le libelle tout court) */
-           { Jouer_google_speech( histo->msg.libelle_audio ); }
-          else
-           { Jouer_google_speech( histo->msg.libelle ); }
-
-          if (Config.instance_is_master)
-           { Envoyer_commande_dls_data( "AUDIO", "P_NONE" );                                 /* Bit de fin d'emission message */
-           }
-
+          json_node_unref ( request );
         }
      }
-    Close_zmq ( zmq_msg );
     Close_zmq ( zmq_from_bus );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)

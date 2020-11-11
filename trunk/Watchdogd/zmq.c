@@ -255,45 +255,55 @@
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Send_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_source_thread,
-                               const gchar *zmq_target_instance, const gchar *zmq_target_thread,
+ gboolean Send_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_src_thread,
+                               const gchar *zmq_dst_instance, const gchar *zmq_dst_thread,
                                const gchar *zmq_tag, JsonBuilder *builder )
-  { if (!zmq) return(FALSE);
-
+  { return (Send_double_zmq_with_json ( zmq, NULL, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag, builder )); }
+/******************************************************************************************************************************/
+/* Send_zmq_with_tag: Envoie un message dans la socket avec le tag en prefixe                                                 */
+/* Entrée: la socket, le tag, le message, sa longueur                                                                         */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gboolean Send_double_zmq_with_json ( struct ZMQUEUE *zmq1, struct ZMQUEUE *zmq2, const gchar *zmq_src_thread,
+                                      const gchar *zmq_dst_instance, const gchar *zmq_dst_thread,
+                                      const gchar *zmq_tag, JsonBuilder *builder )
+  { if (!zmq1) return(FALSE);
     if(!builder) builder = Json_create();
     if(!builder)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "%s: '%s' ('%s') : MEMORY ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
-                 g_get_host_name, zmq_source_thread, zmq_target_instance, zmq_target_thread, zmq_tag );
+                "%s: '%s' ('%s') : MEMORY ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq1->name, zmq1->endpoint,
+                 g_get_host_name, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
        return(FALSE);
      }
 
-    Json_add_string ( builder, "zmq_source_instance", g_get_host_name() );
-    Json_add_string ( builder, "zmq_source_thread", zmq_source_thread );
+    Json_add_string ( builder, "zmq_src_instance", g_get_host_name() );
+    Json_add_string ( builder, "zmq_src_thread", zmq_src_thread );
     Json_add_string ( builder, "zmq_tag", zmq_tag );
 
-    if (zmq_target_instance)
-         { Json_add_string ( builder, "zmq_target_instance", zmq_target_instance ); }
-    else { Json_add_string ( builder, "zmq_target_instance", "*" ); }
+    if (zmq_dst_instance)
+         { Json_add_string ( builder, "zmq_dst_instance", zmq_dst_instance ); }
+    else { Json_add_string ( builder, "zmq_dst_instance", "*" ); }
 
-    if (zmq_target_thread)
-         { Json_add_string ( builder, "zmq_target_thread", zmq_target_thread ); }
-    else { Json_add_string ( builder, "zmq_target_thread", "*" ); }
+    if (zmq_dst_thread)
+         { Json_add_string ( builder, "zmq_dst_thread", zmq_dst_thread ); }
+    else { Json_add_string ( builder, "zmq_dst_thread", "*" ); }
 
     gsize taille_buf;
+    gboolean retour;
     gchar *buf      = Json_get_buf (builder, &taille_buf);
-    gboolean retour = Send_zmq( zmq, buf, taille_buf );
+    retour = Send_zmq( zmq1, buf, taille_buf );
+    if (zmq2) Send_zmq( zmq2, buf, taille_buf );
     g_free(buf);
     if (retour==FALSE)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "%s: '%s' ('%s') : ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
-                 g_get_host_name, zmq_source_thread, zmq_target_instance, zmq_target_thread, zmq_tag );
+                "%s: '%s' ('%s') : ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq1->name, zmq1->endpoint,
+                 g_get_host_name, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
        return(FALSE);
      }
     else
      { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
-                 g_get_host_name, zmq_source_thread, zmq_target_instance, zmq_target_thread, zmq_tag );
+                "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/%s", __func__, zmq1->name, zmq1->endpoint,
+                 g_get_host_name, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
      }
     return(TRUE);
   }
@@ -346,8 +356,8 @@
        return(NULL);
      }
 
-    if (!Json_has_member( request, "zmq_source_instance") && !Json_has_member( request, "zmq_source_thread"))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_source'. Dropping.", __func__ );
+    if (!Json_has_member( request, "zmq_src_instance") && !Json_has_member( request, "zmq_src_thread"))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_src'. Dropping.", __func__ );
        json_node_unref(request);
        return(NULL);
      }
@@ -358,36 +368,36 @@
        return(NULL);
      }
 
-    if (!Json_has_member( request, "zmq_target_instance"))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_target_instance'. Dropping.", __func__ );
+    if (!Json_has_member( request, "zmq_dst_instance"))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_dst_instance'. Dropping.", __func__ );
        json_node_unref(request);
        return(NULL);
      }
 
-    gchar *zmq_target_instance = Json_get_string(request,"zmq_target_instance");
-    if ( strcasecmp( zmq_target_instance, "*" ) && strcasecmp ( zmq_target_instance, g_get_host_name() ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s'. Dropping", __func__, zmq_target_instance );
+    gchar *zmq_dst_instance = Json_get_string(request,"zmq_dst_instance");
+    if ( strcasecmp( zmq_dst_instance, "*" ) && strcasecmp ( zmq_dst_instance, g_get_host_name() ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s'. Dropping", __func__, zmq_dst_instance );
        json_node_unref(request);
        return(NULL);
      }
 
-    if (!Json_has_member( request, "zmq_target_thread"))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_target_thread'. Dropping.", __func__ );
+    if (!Json_has_member( request, "zmq_dst_thread"))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_dst_thread'. Dropping.", __func__ );
        json_node_unref(request);
        return(NULL);
      }
 
-    gchar *zmq_target_thread = Json_get_string(request,"zmq_target_thread");
-    if ( strcasecmp( zmq_target_thread, "*" ) && strcasecmp ( zmq_target_thread, thread ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s'. Dropping", __func__, zmq_target_instance );
+    gchar *zmq_dst_thread = Json_get_string(request,"zmq_dst_thread");
+    if ( strcasecmp( zmq_dst_thread, "*" ) && strcasecmp ( zmq_dst_thread, thread ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s'. Dropping", __func__, zmq_dst_instance );
        json_node_unref(request);
        return(NULL);
      }
 
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
               "%s: '%s' ('%s') : %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
-             Json_get_string(request,"zmq_source_instance"), Json_get_string(request,"zmq_source_thread"),
-             zmq_target_instance, zmq_target_thread, Json_get_string(request,"zmq_tag") );
+             Json_get_string(request,"zmq_src_instance"), Json_get_string(request,"zmq_src_thread"),
+             zmq_dst_instance, zmq_dst_thread, Json_get_string(request,"zmq_tag") );
     return(request);
   }
 /******************************************************************************************************************************/
@@ -397,8 +407,6 @@
 /******************************************************************************************************************************/
  void Send_zmq_DI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gboolean etat )
   { JsonBuilder *builder;
-    gchar *result;
-    gsize taille;
 
     if (!zmq) return;
     builder = Json_create ();
@@ -406,9 +414,7 @@
     Json_add_string ( builder, "tech_id",  tech_id );
     Json_add_string ( builder, "acronyme", acronyme );
     Json_add_bool   ( builder, "etat", etat );
-    result = Json_get_buf ( builder, &taille );
-    Send_zmq_with_tag ( zmq, NULL, thread, "*", "msrv", "SET_DI", result, taille );
-    g_free(result);
+    Send_zmq_with_json ( zmq, thread, "*", "msrv", "SET_DI", builder );
   }
 /******************************************************************************************************************************/
 /* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
@@ -417,8 +423,6 @@
 /******************************************************************************************************************************/
  void Send_zmq_AI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range)
   { JsonBuilder *builder;
-    gchar *result;
-    gsize taille;
 
     if (!zmq) return;
     builder = Json_create ();
@@ -427,9 +431,7 @@
     Json_add_string ( builder, "acronyme", acronyme );
     Json_add_double ( builder, "valeur", valeur );
     Json_add_bool   ( builder, "in_range", in_range );
-    result = Json_get_buf ( builder, &taille );
-    Send_zmq_with_tag ( zmq, NULL, thread, "*", "msrv", "SET_AI", result, taille );
-    g_free(result);
+    Send_zmq_with_json ( zmq, thread, "*", "msrv", "SET_AI", builder );
   }
 /******************************************************************************************************************************/
 /* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
@@ -438,16 +440,12 @@
 /******************************************************************************************************************************/
  void Send_zmq_CDE_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme )
   { JsonBuilder *builder;
-    gchar *result;
-    gsize taille;
 
     if (!zmq) return;
     builder = Json_create ();
     if(!builder) return;
     Json_add_string ( builder, "tech_id",  tech_id );
     Json_add_string ( builder, "acronyme", acronyme );
-    result = Json_get_buf ( builder, &taille );
-    Send_zmq_with_tag ( zmq, NULL, thread, "*", "msrv", "SET_CDE", result, taille );
-    g_free(result);
+    Send_zmq_with_json ( zmq, thread, "*", "msrv", "SET_CDE", builder );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

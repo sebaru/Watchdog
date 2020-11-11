@@ -210,19 +210,19 @@
 /* Entrée: le message à envoyer sateur                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static gboolean Envoi_sms_gsm ( struct CMD_TYPE_MESSAGE *msg, gchar *telephone )
+ static gboolean Envoi_sms_gsm ( JsonNode *msg, gchar *telephone )
   { GSM_StateMachine *s;
     GSM_SMSMessage sms;
     GSM_SMSC PhoneSMSC;
-    gchar chaine[256];
+    gchar libelle[256];
     INI_Section *cfg;
     GSM_Error error;
     gint wait;
 
     GSM_InitLocales(NULL);
    	memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
-    g_snprintf( chaine, sizeof(chaine), "%s: %s", msg->dls_shortname, msg->libelle_sms );
-	  	EncodeUnicode( sms.Text, chaine, strlen(chaine));                                                  /* Encode message text */
+    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle_sms") );
+	  	EncodeUnicode( sms.Text, libelle, strlen(libelle));                                                /* Encode message text */
     EncodeUnicode( sms.Number, telephone, strlen(telephone));
 
 	   sms.PDU = SMS_Submit;                                                                        /* We want to submit message */
@@ -296,7 +296,7 @@
 
     if (sms_send_status == ERR_NONE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,
-                "%s: Envoi SMS Ok to %s (%s)", __func__, telephone, msg->libelle_sms );
+                "%s: Envoi SMS Ok to %s (%s)", __func__, telephone, libelle );
      }
     else
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
@@ -319,7 +319,7 @@ end:
 /* Entrée: le message à envoyer sateur                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Envoi_sms_ovh ( struct CMD_TYPE_MESSAGE *msg, gchar *telephone )
+ static void Envoi_sms_ovh ( JsonNode *msg, gchar *telephone )
   { gchar clair[512], hash_string[48], signature[48], query[128];
     unsigned char hash_bin[EVP_MAX_MD_SIZE];
     EVP_MD_CTX *mdctx;
@@ -336,7 +336,7 @@ end:
     json_builder_add_string_value( builder, telephone );
     Json_end_array ( builder );
     gchar libelle[128];
-    g_snprintf( libelle, sizeof(libelle), "%s: %s", msg->dls_shortname, msg->libelle_sms );
+    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle_sms") );
     Json_add_string( builder, "message", libelle );
     gchar *body = Json_get_buf( builder, &taille_buf );
 
@@ -397,7 +397,7 @@ end:
 /* Entrée: le message                                                                                                         */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Smsg_send_to_all_authorized_recipients ( struct CMD_TYPE_MESSAGE *msg )
+ void Smsg_send_to_all_authorized_recipients ( JsonNode *msg )
   { struct SMSDB *sms;
     struct DB *db;
 
@@ -419,8 +419,9 @@ end:
        return;
      }
 
+    gint type_sms = Json_get_int ( msg, "type_sms" );
     while ( (sms = Smsg_Recuperer_smsDB_suite( db )) != NULL)
-     { switch (msg->sms)
+     { switch (type_sms)
         { case MESSAGE_SMS_YES:
                if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
                 { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
@@ -451,14 +452,13 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_smsg_ovh_text ( gchar *texte )
-  { struct CMD_TYPE_MESSAGE msg;
-
-    memset ( &msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );
-    g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
-    g_snprintf(msg.dls_shortname, sizeof(msg.dls_shortname), "%s", Cfg_smsg.tech_id );
-    msg.sms    = MSG_SMS_SMSBOX_ONLY;
-
-    Smsg_send_to_all_authorized_recipients( &msg );
+  { JsonBuilder *builder = Json_create();
+    Json_add_string ( builder, "libelle_sms", texte );
+    Json_add_string ( builder, "dls_shortname", Cfg_smsg.tech_id );
+    Json_add_int    ( builder, "type_sms", MESSAGE_SMS_OVH_ONLY );
+    JsonNode *msg = Json_end ( builder );
+    Smsg_send_to_all_authorized_recipients( msg );
+    json_node_unref(msg);
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -466,14 +466,13 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_smsg_gsm_text ( gchar *texte )
-  { struct CMD_TYPE_MESSAGE msg;
-
-    memset ( &msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );
-    g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
-    g_snprintf(msg.dls_shortname, sizeof(msg.dls_shortname), "%s", Cfg_smsg.tech_id );
-    msg.sms    = MSG_SMS_GSM_ONLY;
-
-    Smsg_send_to_all_authorized_recipients( &msg );
+  { JsonBuilder *builder = Json_create();
+    Json_add_string ( builder, "libelle_sms", texte );
+    Json_add_string ( builder, "dls_shortname", Cfg_smsg.tech_id );
+    Json_add_int    ( builder, "type_sms", MESSAGE_SMS_GSM_ONLY );
+    JsonNode *msg = Json_end ( builder );
+    Smsg_send_to_all_authorized_recipients( msg );
+    json_node_unref(msg);
   }
 /******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
@@ -661,7 +660,6 @@ end:
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
-    struct ZMQUEUE *zmq_msg;
     struct ZMQUEUE *zmq_from_bus;
 reload:
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
@@ -674,16 +672,13 @@ reload:
 
     Mnemo_auto_create_DI ( FALSE, Cfg_smsg.tech_id, "COMM", "Statut de la communication avec le GSM" );
 
-    zmq_msg                = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
     zmq_from_bus           = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     Cfg_smsg.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     Envoyer_smsg_gsm_text ( "SMS System is running" );
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { struct ZMQ_TARGET *event;
-       gchar buffer[256];
-       void *payload;
+     { gchar buffer[1024];
 
 /****************************************************** Lecture de SMS ********************************************************/
        Lire_sms_gsm();
@@ -695,31 +690,28 @@ reload:
           Cfg_smsg.send_test = FALSE;
         }
 /********************************************************* Envoi de SMS *******************************************************/
-       if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        {      if ( !strcmp( event->tag, "send_ovh" ) ) { Envoyer_smsg_ovh_text ( payload ); }
-          else if ( !strcmp( event->tag, "send_sms" ) ) { Envoyer_smsg_gsm_text ( payload ); }
-        }
-
-       while ( Cfg_smsg.lib->Thread_run == TRUE &&
-               Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
-        { histo = &histo_buf;
-
-          if ( histo && histo->alive == TRUE && histo->msg.sms != MSG_SMS_NONE)             /* On n'envoie que si MSGnum == 1 */
-           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
-                      "%s : Sending msg '%s:%s' (%s)", __func__, histo->msg.tech_id, histo->msg.acronyme, histo->msg.libelle_sms );
+       JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
+       if (request)
+        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
+          if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
+               Json_get_bool ( request, "alive" ) == TRUE &&
+               Json_get_int  ( request, "type_sms" ) != MESSAGE_SMS_NONE )
+           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s : Sending msg '%s:%s' (%s)", __func__,
+                       Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
+                       Json_get_string ( request, "libelle_sms" ) );
 
 /*************************************************** Envoi en mode GSM ********************************************************/
-             Smsg_send_to_all_authorized_recipients( &histo->msg );
+             Smsg_send_to_all_authorized_recipients( request );
            }
           else
-           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG,
-                       "%s : msg '%s:'%s' not sent (alive=%d, msg.sms = %d) (%s)", __func__,
-                       histo->msg.tech_id, histo->msg.acronyme, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
+           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s : msg '%s:%s' not sent (alive=%d, msg.sms = %d) (%s)", __func__,
+                       Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
+                       Json_get_bool ( request, "alive" ), Json_get_int ( request, "type_sms" ) );
            }
+          json_node_unref(request);
         }
      }
     Send_zmq_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", FALSE );
-    Close_zmq ( zmq_msg );
     Close_zmq ( zmq_from_bus );
     Close_zmq ( Cfg_smsg.zmq_to_master );
 

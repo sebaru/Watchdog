@@ -46,11 +46,10 @@
 
     message = Rechercher_messageDB_par_acronyme ( msg->tech_id, msg->acronyme );
     if (!message) return;
-
     memset ( &histo, 0, sizeof(struct CMD_TYPE_HISTO) );
     memcpy( &histo.msg, message, sizeof(struct CMD_TYPE_MESSAGE) );                                       /* Ajout dans la DB */
-    g_free( message );                                                                 /* On a plus besoin de cette reference */
 
+    JsonBuilder *builder = Json_create ();
 /***************************************** Création de la structure interne de stockage ***************************************/
     histo.alive = TRUE;
     gettimeofday( &tv, NULL );
@@ -62,9 +61,22 @@
     g_snprintf( histo.nom_ack, sizeof(histo.nom_ack), "None" );
     Ajouter_histo_msgsDB( &histo );                                                                    /* Si ajout dans DB OK */
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
-    Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "histo",
-                       &histo, sizeof(struct CMD_TYPE_HISTO) );
+    Json_add_string ( builder, "tech_id", message->tech_id );
+    Json_add_string ( builder, "acronyme", message->acronyme );
+    Json_add_int    ( builder, "type_msg", message->type );
+    Json_add_string ( builder, "dls_shortname", message->dls_shortname );
+    Json_add_string ( builder, "libelle", message->libelle );
+    Json_add_int    ( builder, "type_sms", message->sms );
+    Json_add_string ( builder, "libelle_sms", message->libelle_sms );
+    Json_add_string ( builder, "profil_audio", message->profil_audio );
+    Json_add_string ( builder, "libelle_audio", message->libelle_audio );
+    Json_add_bool   ( builder, "alive", TRUE );
+    Json_add_string ( builder, "date_create", histo.date_create );
+    Json_add_string ( builder, "nom_ack", histo.nom_ack );
+
+    Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_slave, Partage->com_msrv.zmq_to_bus,
+                                "msrv", "*", "*","DLS_HISTO", builder );
+    g_free( message );                                                                 /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */

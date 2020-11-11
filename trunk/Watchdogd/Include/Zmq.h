@@ -72,5 +72,9 @@
  extern gboolean Send_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_source_thread,
                                       const gchar *zmq_target_instance, const gchar *zmq_target_thread,
                                       const gchar *zmq_tag, JsonBuilder *builder );
+ extern gboolean Send_double_zmq_with_json ( struct ZMQUEUE *zmq1, struct ZMQUEUE *zmq2, const gchar *zmq_src_thread,
+                                             const gchar *zmq_dst_instance, const gchar *zmq_dst_thread,
+                                             const gchar *zmq_tag, JsonBuilder *builder );
+
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

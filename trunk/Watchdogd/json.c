@@ -40,6 +40,17 @@
     return(builder);
   }
 /******************************************************************************************************************************/
+/* Json_end: Termine le builder et retourne le node associé                                                                   */
+/* Entrée: le builder                                                                                                         */
+/* Sortie: le rootnode associé                                                                                                */
+/******************************************************************************************************************************/
+ JsonNode *Json_end ( JsonBuilder *builder )
+  { json_builder_end_object(builder);
+    JsonNode *RootNode = json_builder_get_root(builder);
+    g_object_unref(builder);
+    return(RootNode);
+  }
+/******************************************************************************************************************************/
 /* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
 /* Entrée: le builder, le nom du parametre, la valeur                                                                         */
 /* Sortie: néant                                                                                                              */
