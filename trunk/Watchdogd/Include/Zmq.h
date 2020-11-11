@@ -68,5 +68,9 @@
  extern void Send_zmq_DI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gboolean etat );
  extern void Send_zmq_AI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range);
  extern void Send_zmq_CDE_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme );
+ extern JsonNode *Recv_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *thread, gchar *buf, gint taille_buf );
+ extern gboolean Send_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_source_thread,
+                                      const gchar *zmq_target_instance, const gchar *zmq_target_thread,
+                                      const gchar *zmq_tag, JsonBuilder *builder );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

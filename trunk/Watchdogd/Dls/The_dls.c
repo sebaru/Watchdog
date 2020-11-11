@@ -280,7 +280,7 @@
 /* Dls_data_set_bool: Positionne un boolean                                                                                   */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- void Dls_data_set_watchdog ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *wtd_p, gint consigne )
+ void Dls_data_set_WATCHDOG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *wtd_p, gint consigne )
   { struct DLS_WATCHDOG *wtd;
 
     if (!wtd_p || !*wtd_p)
@@ -322,7 +322,7 @@
 /* Dls_data_get_bool: Remonte l'etat d'un boolean                                                                             */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_watchdog ( gchar *tech_id, gchar *acronyme, gpointer *wtd_p )
+ gboolean Dls_data_get_WATCHDOG ( gchar *tech_id, gchar *acronyme, gpointer *wtd_p )
   { struct DLS_WATCHDOG *wtd;
     GSList *liste;
     if (wtd_p && *wtd_p)                                                           /* Si pointeur d'acceleration disponible */

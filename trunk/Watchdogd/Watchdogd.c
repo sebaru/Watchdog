@@ -253,6 +253,25 @@
      }
   }
 /******************************************************************************************************************************/
+/* Handle_zmq_message_for_master: Analyse et reagi à un message ZMQ a destination du MSRV                                     */
+/* Entrée: le message                                                                                                         */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Handle_zmq_json_message_for_master ( JsonNode *request )
+  { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
+         if ( !strcasecmp( zmq_tag, "ping") )
+     { gchar *zmq_src = Json_get_string ( request, "zmq_source_instance" );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src );
+       Dls_data_set_WATCHDOG ( NULL, zmq_src, "COMM", NULL, 600 );
+     }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s/%s to %s/%s/%s",
+           __func__, Json_get_string ( request, "zmq_source_instance" ), Json_get_string ( request, "zmq_source_thread" ),
+                     Json_get_string ( request, "zmq_target_instance" ), Json_get_string ( request, "zmq_source_thread" ),
+                     zmq_tag );
+     }
+  }
+/******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
@@ -301,6 +320,7 @@
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
      { struct ZMQ_TARGET *event;
        gchar buffer[2048];
+       JsonNode *request;
        void *payload;
        gint byte;
 
@@ -310,6 +330,12 @@
 
        if ( (byte=Recv_zmq_with_tag( zmq_from_slave, "msrv", &buffer, sizeof(buffer)-1, &event, &payload )) > 0 )
         { Handle_zmq_message_for_master( event, payload ); }
+
+       request = Recv_zmq_with_json( zmq_from_slave, "msrv", &buffer, sizeof(buffer)-1 );
+       if (request)
+        { Handle_zmq_json_message_for_master( request );
+          json_node_unref ( request );
+        }
 
        if ( (byte=Recv_zmq_with_tag( zmq_from_bus, NULL, &buffer, sizeof(buffer)-1, &event, &payload )) > 0 )
         { if (!strcmp(event->dst_thread, "msrv"))
@@ -321,7 +347,7 @@
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
-        { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "ping", NULL, 0 );
+        { Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "msrv", "ping", NULL );
           Save_dls_data_to_DB();
           cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
@@ -376,15 +402,16 @@
     if (!zmq_from_master) goto end;
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
-    if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Arch Thread is administratively DOWN", __func__ );
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: D.L.S Thread is administratively DOWN", __func__ );
-
-       Charger_librairies();                                                  /* Chargement de toutes les librairies Watchdog */
-     }
-    else
+    if (Config.single)                                                                             /* Si demarrage des thread */
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: NOT starting threads (single mode=true)", __func__ ); }
+    else
+     { if (Config.installed)
+        { Charger_librairies(); }                                             /* Chargement de toutes les librairies Watchdog */
+       else
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
+     }
 
+    if (!Config.installed) Charger_librairie_par_prompt ("http");/* Charge uniquement le module HTTP si instance pas installée*/
 /***************************************** Debut de la boucle sans fin ********************************************************/
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
@@ -424,7 +451,7 @@
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
-        { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, NULL, "msrv", Config.master_host, "msrv", "ping", NULL, 0 );
+        { Send_zmq_with_json ( Partage->com_msrv.zmq_to_master, "msrv", Config.master_host, "msrv", "ping", NULL );
           cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
 

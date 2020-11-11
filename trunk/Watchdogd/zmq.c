@@ -251,6 +251,53 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Send_zmq_with_tag: Envoie un message dans la socket avec le tag en prefixe                                                 */
+/* Entrée: la socket, le tag, le message, sa longueur                                                                         */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gboolean Send_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_source_thread,
+                               const gchar *zmq_target_instance, const gchar *zmq_target_thread,
+                               const gchar *zmq_tag, JsonBuilder *builder )
+  { if (!zmq) return(FALSE);
+
+    if(!builder) builder = Json_create();
+    if(!builder)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: '%s' ('%s') : MEMORY ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
+                 g_get_host_name, zmq_source_thread, zmq_target_instance, zmq_target_thread, zmq_tag );
+       return(FALSE);
+     }
+
+    Json_add_string ( builder, "zmq_source_instance", g_get_host_name() );
+    Json_add_string ( builder, "zmq_source_thread", zmq_source_thread );
+    Json_add_string ( builder, "zmq_tag", zmq_tag );
+
+    if (zmq_target_instance)
+         { Json_add_string ( builder, "zmq_target_instance", zmq_target_instance ); }
+    else { Json_add_string ( builder, "zmq_target_instance", "*" ); }
+
+    if (zmq_target_thread)
+         { Json_add_string ( builder, "zmq_target_thread", zmq_target_thread ); }
+    else { Json_add_string ( builder, "zmq_target_thread", "*" ); }
+
+    gsize taille_buf;
+    gchar *buf      = Json_get_buf (builder, &taille_buf);
+    gboolean retour = Send_zmq( zmq, buf, taille_buf );
+    g_free(buf);
+    if (retour==FALSE)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: '%s' ('%s') : ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
+                 g_get_host_name, zmq_source_thread, zmq_target_instance, zmq_target_thread, zmq_tag );
+       return(FALSE);
+     }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
+                 g_get_host_name, zmq_source_thread, zmq_target_instance, zmq_target_thread, zmq_tag );
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Recv_zmq: Receptionne un message sur le file en paremetre (sans attendre)                                                  */
 /* Entrée: la file, le buffer d'accueil, la taille du buffer                                                                  */
 /* Sortie: Nombre de caractere lu, -1 si erreur                                                                               */
@@ -282,6 +329,66 @@
        else return(0);                                                                        /* Si pas destinataire, on drop */
      }
     return(byte);
+  }
+/******************************************************************************************************************************/
+/* Recv_zmq: Receptionne un message sur le file en paremetre (sans attendre)                                                  */
+/* Entrée: la file, le buffer d'accueil, la taille du buffer                                                                  */
+/* Sortie: Nombre de caractere lu, -1 si erreur                                                                               */
+/******************************************************************************************************************************/
+ JsonNode *Recv_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *thread, gchar *buf, gint taille_buf )
+  { gint byte;
+    byte = zmq_recv ( zmq->socket, buf, taille_buf-1, ZMQ_DONTWAIT );
+    if (byte<0) return(NULL);
+    buf[byte]=0;                                                                                     /* Caractere nul d'arret */
+    JsonNode *request = Json_get_from_string ( buf );
+    if (!request)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Received %d byte but this is not JSON", __func__, byte );
+       return(NULL);
+     }
+
+    if (!Json_has_member( request, "zmq_source_instance") && !Json_has_member( request, "zmq_source_thread"))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_source'. Dropping.", __func__ );
+       json_node_unref(request);
+       return(NULL);
+     }
+
+    if (!Json_has_member( request, "zmq_tag"))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_tag'. Dropping.", __func__ );
+       json_node_unref(request);
+       return(NULL);
+     }
+
+    if (!Json_has_member( request, "zmq_target_instance"))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_target_instance'. Dropping.", __func__ );
+       json_node_unref(request);
+       return(NULL);
+     }
+
+    gchar *zmq_target_instance = Json_get_string(request,"zmq_target_instance");
+    if ( strcasecmp( zmq_target_instance, "*" ) && strcasecmp ( zmq_target_instance, g_get_host_name() ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s'. Dropping", __func__, zmq_target_instance );
+       json_node_unref(request);
+       return(NULL);
+     }
+
+    if (!Json_has_member( request, "zmq_target_thread"))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_target_thread'. Dropping.", __func__ );
+       json_node_unref(request);
+       return(NULL);
+     }
+
+    gchar *zmq_target_thread = Json_get_string(request,"zmq_target_thread");
+    if ( strcasecmp( zmq_target_thread, "*" ) && strcasecmp ( zmq_target_thread, thread ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s'. Dropping", __func__, zmq_target_instance );
+       json_node_unref(request);
+       return(NULL);
+     }
+
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+              "%s: '%s' ('%s') : %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
+             Json_get_string(request,"zmq_source_instance"), Json_get_string(request,"zmq_source_thread"),
+             zmq_target_instance, zmq_target_thread, Json_get_string(request,"zmq_tag") );
+    return(request);
   }
 /******************************************************************************************************************************/
 /* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
