@@ -478,7 +478,7 @@
            }
           json_node_unref ( request );
         }
-                                               /* Si reception depuis un thread, report vers le master et les autres threads */
+                                                /* Si reception depuis un thread, report vers le master et les autres threads */
        if ( (byte=Recv_zmq( zmq_from_bus, &buffer, sizeof(buffer) )) > 0 )
         { Send_zmq_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, byte );
           Send_zmq_as_raw ( Partage->com_msrv.zmq_to_master, buffer, byte );
