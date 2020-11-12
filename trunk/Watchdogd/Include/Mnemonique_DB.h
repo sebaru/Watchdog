@@ -100,5 +100,8 @@
  extern void Updater_confDB_AO ( void );
  extern void Dls_AO_to_json ( JsonBuilder *builder, struct DLS_AO *bit );
 
+ extern gboolean Mnemo_auto_create_WATCHDOG ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src );
+ extern void Dls_WATCHDOG_to_json ( JsonBuilder *builder, struct DLS_WATCHDOG *bit );
+
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

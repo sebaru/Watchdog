@@ -105,7 +105,7 @@
     g_free( date_fin );
 
     Modifier_histo_msgsDB ( &histo );
-    Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
+    Send_zmq_as_raw ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
     Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "histo",
                        &histo, sizeof(struct CMD_TYPE_HISTO) );
   }

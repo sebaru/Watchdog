@@ -135,9 +135,20 @@
     gchar *zmq_dst_instance = Json_get_string ( request, "zmq_dst_instance" );
     gchar *zmq_dst_thread   = Json_get_string ( request, "zmq_dst_thread" );
 
-         if ( !strcasecmp( zmq_tag, "ping") )
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src_instance );
-       Dls_data_set_WATCHDOG ( NULL, zmq_src_instance, "COMM", NULL, 600 );
+         if ( !strcasecmp( zmq_tag, "SET_WATCHDOG") )
+     { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+              Json_has_member ( request, "consigne" ) ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_WATCHDOG : wrong parameters from %s", __func__, zmq_src_instance );
+          return;
+        }
+
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                 "%s: receive SET_WATCHDOG from %s/%s to %s/%s : '%s:%s'+=%d", __func__,
+                 zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
+                 Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
+                 Json_get_int ( request, "consigne" ) );
+       Dls_data_set_WATCHDOG ( NULL, Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), NULL,
+                               Json_get_int    ( request, "consigne" ) );
      }
     else if ( !strcasecmp( zmq_tag, "SET_AI") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
@@ -279,7 +290,6 @@
 
          if ( !strcasecmp( zmq_tag, "ping") )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src_instance );
-       Dls_data_set_WATCHDOG ( NULL, zmq_src_instance, "COMM", NULL, 600 );
      }
 #ifdef bouh
 
@@ -374,20 +384,20 @@
            { Handle_zmq_json_message_for_master( request ); }
           else
            { gint taille = strlen(buffer);
-             Send_zmq ( Partage->com_msrv.zmq_to_bus, buffer, taille );                         /* Sinon on envoi aux threads */
-             Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, taille );                         /* Sinon on envoi aux slave */
+             Send_zmq_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                  /* Sinon on envoi aux threads */
+             Send_zmq_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                  /* Sinon on envoi aux slave */
            }
           json_node_unref ( request );
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
-        { Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "msrv", "ping", NULL );
-          Save_dls_data_to_DB();
+        { Save_dls_data_to_DB();
           cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Print_SQL_status();                                                             /* Print SQL status for debugging ! */
+        { Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "msrv", "ping", NULL );
+          Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
@@ -463,23 +473,23 @@
         { if (!strcasecmp( Json_get_string ( request, "zmq_dst_thread" ), "msrv"))
            { Handle_zmq_json_message_for_slave( request ); }
           else
-           { Send_zmq ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );                 /* Sinon on envoi aux threads */
+           { Send_zmq_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );          /* Sinon on envoi aux threads */
            }
           json_node_unref ( request );
         }
                                                /* Si reception depuis un thread, report vers le master et les autres threads */
        if ( (byte=Recv_zmq( zmq_from_bus, &buffer, sizeof(buffer) )) > 0 )
-        { Send_zmq ( Partage->com_msrv.zmq_to_bus, buffer, byte );
-          Send_zmq ( Partage->com_msrv.zmq_to_master, buffer, byte );
+        { Send_zmq_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, byte );
+          Send_zmq_as_raw ( Partage->com_msrv.zmq_to_master, buffer, byte );
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
-        { Send_zmq_with_json ( Partage->com_msrv.zmq_to_master, "msrv", Config.master_host, "msrv", "ping", NULL );
-          cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
+        { cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Print_SQL_status();                                                             /* Print SQL status for debugging ! */
+        { Send_zmq_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "COMM", 600 );
+          Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 

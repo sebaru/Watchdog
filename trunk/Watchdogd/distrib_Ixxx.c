@@ -52,7 +52,7 @@
                  "%s: Recu VISUEL %s:%s mode=%d, color=%s, cligno=%d. Reste a traiter %03d", __func__,
                  visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno, reste
                );
-       Send_zmq ( Partage->com_msrv.zmq_motif, visu, sizeof(struct DLS_VISUEL) );
+       Send_zmq_as_raw ( Partage->com_msrv.zmq_motif, visu, sizeof(struct DLS_VISUEL) );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

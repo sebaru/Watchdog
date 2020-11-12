@@ -189,7 +189,7 @@
 /* Entrée: la socket, le message, sa longueur                                                                                 */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Send_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille )
+ gboolean Send_zmq_as_raw ( struct ZMQUEUE *zmq, void *buf, gint taille )
   { if (!zmq) return(FALSE);
     if (zmq_send( zmq->socket, buf, taille, 0 ) == -1)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
@@ -235,7 +235,7 @@
 
     memcpy ( buffer, &event, sizeof(struct ZMQ_TARGET) );                                                   /* Recopie entete */
     memcpy ( buffer + sizeof(struct ZMQ_TARGET), source, taille );                                  /* Recopie buffer payload */
-    retour = Send_zmq( zmq, buffer, taille + sizeof(struct ZMQ_TARGET) );
+    retour = Send_zmq_as_raw( zmq, buffer, taille + sizeof(struct ZMQ_TARGET) );
     g_free(buffer);
     if (retour==FALSE)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
@@ -291,8 +291,8 @@
     gsize taille_buf;
     gboolean retour;
     gchar *buf      = Json_get_buf (builder, &taille_buf);
-    retour = Send_zmq( zmq1, buf, taille_buf );
-    if (zmq2) Send_zmq( zmq2, buf, taille_buf );
+    retour = Send_zmq_as_raw( zmq1, buf, taille_buf );
+    if (zmq2) Send_zmq_as_raw( zmq2, buf, taille_buf );
     g_free(buf);
     if (retour==FALSE)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
@@ -447,5 +447,21 @@
     Json_add_string ( builder, "tech_id",  tech_id );
     Json_add_string ( builder, "acronyme", acronyme );
     Send_zmq_with_json ( zmq, thread, "*", "msrv", "SET_CDE", builder );
+  }
+/******************************************************************************************************************************/
+/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
+/* Entrée: le status du GSM                                                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Send_zmq_WATCHDOG_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gint consigne )
+  { JsonBuilder *builder;
+
+    if (!zmq) return;
+    builder = Json_create ();
+    if(!builder) return;
+    Json_add_string ( builder, "tech_id",  tech_id );
+    Json_add_string ( builder, "acronyme", acronyme );
+    Json_add_int    ( builder, "consigne", consigne );
+    Send_zmq_with_json ( zmq, thread, "*", "msrv", "SET_WATCHDOG", builder );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

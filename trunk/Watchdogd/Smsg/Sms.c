@@ -645,11 +645,11 @@ end:
     if (found) Traiter_commande_sms ( from, texte );
 
     if ( (error == ERR_NONE) || (error == ERR_EMPTY) )
-     { Send_zmq_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", TRUE );
+     { Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", 600 );
        Cfg_smsg.comm_status = TRUE;
      }
     else
-     { Send_zmq_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", FALSE );
+     { Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", 0 );
        Cfg_smsg.comm_status = FALSE;
      }
   }
@@ -659,8 +659,7 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct CMD_TYPE_HISTO *histo, histo_buf;
-    struct ZMQUEUE *zmq_from_bus;
+  { struct ZMQUEUE *zmq_from_bus;
 reload:
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
@@ -670,7 +669,7 @@ reload:
     if (Dls_auto_create_plugin( Cfg_smsg.tech_id, "Gestion du GSM" ) == FALSE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_smsg.tech_id ); }
 
-    Mnemo_auto_create_DI ( FALSE, Cfg_smsg.tech_id, "COMM", "Statut de la communication avec le GSM" );
+    Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_smsg.tech_id, "COMM", "Statut de la communication avec le GSM" );
 
     zmq_from_bus           = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     Cfg_smsg.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
@@ -711,7 +710,8 @@ reload:
           json_node_unref(request);
         }
      }
-    Send_zmq_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", FALSE );
+
+    Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "COMM", 0 );
     Close_zmq ( zmq_from_bus );
     Close_zmq ( Cfg_smsg.zmq_to_master );
 
