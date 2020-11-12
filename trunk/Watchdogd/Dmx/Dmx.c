@@ -51,8 +51,13 @@
     struct DB *db;
 
     Cfg_dmx.lib->Thread_debug = FALSE;                                                         /* Settings default parameters */
+    Creer_configDB ( NOM_THREAD, "debug", "false" );
+
     g_snprintf( Cfg_dmx.tech_id, sizeof(Cfg_dmx.tech_id), "DMX01" );
+    Creer_configDB ( NOM_THREAD, "tech_id", Cfg_dmx.tech_id );
+
     g_snprintf( Cfg_dmx.device, sizeof(Cfg_dmx.device), "/dev/ttyUSB0" );
+    Creer_configDB ( NOM_THREAD, "device", Cfg_dmx.device );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_WARNING,
@@ -68,30 +73,8 @@
         { g_snprintf( Cfg_dmx.tech_id, sizeof(Cfg_dmx.tech_id), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "device" ) )
         { g_snprintf( Cfg_dmx.device, sizeof(Cfg_dmx.device), "%s", valeur ); }
-       else
-        { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE,
-                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
-        }
      }
     return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Dmx_send_status_to_master: Envoie le bit de comm au master selon le status du port DMX                                     */
-/* Entrée: le status du DMX                                                                                                   */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dmx_send_status_to_master ( gboolean status )
-  { JsonBuilder *builder;
-    gchar *result;
-    gsize taille;
-    builder = Json_create ();
-    Json_add_string ( builder, "tech_id",  Cfg_dmx.tech_id );
-    Json_add_string ( builder, "acronyme", "COMM" );
-    Json_add_bool   ( builder, "etat", status );
-    result = Json_get_buf ( builder, &taille );
-    Send_zmq_with_tag ( Cfg_dmx.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_DI", result, taille );
-    g_free(result);
-    Cfg_dmx.comm_status = status;
   }
 /******************************************************************************************************************************/
 /* Dmx_do_mapping : mappe les entrees/sorties Wago avec la zone de mémoire interne dynamique                                  */
@@ -153,7 +136,7 @@
     Cfg_dmx.taille_trame_dmx = sizeof(struct TRAME_DMX);
     memset ( &Cfg_dmx.Trame_dmx, 0, sizeof(struct TRAME_DMX) );
     Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Ouverture port dmx okay %s", __func__, Cfg_dmx.device );
-    Dmx_send_status_to_master( TRUE );
+    Cfg_dmx.comm_status = TRUE;
     Dmx_do_mapping();
   }
 /******************************************************************************************************************************/
@@ -166,7 +149,8 @@
        close(Cfg_dmx.fd);
        Cfg_dmx.fd = -1;
      }
-    Dmx_send_status_to_master( FALSE );
+    Send_zmq_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, "tech_id", "COMM", 0 );
+    Cfg_dmx.comm_status = FALSE;
   }
 /******************************************************************************************************************************/
 /* Envoyer_trame_dmx_request: envoie une trame DMX au token USB                                                               */
@@ -194,28 +178,25 @@
 /* Main: Fonction principale du MODBUS                                                                                        */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct ZMQUEUE *zmq_from_bus;
+  {
 reload:
     memset( &Cfg_dmx, 0, sizeof(Cfg_dmx) );                                         /* Mise a zero de la structure de travail */
     Cfg_dmx.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
     Thread_init ( "W-DMX", lib, WTD_VERSION, "Manage Dmx System" );
     Dmx_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
-    zmq_from_bus          = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    Cfg_dmx.zmq_from_bus  = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     Cfg_dmx.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     if (Dls_auto_create_plugin( Cfg_dmx.tech_id, "Gestion du DMX" ) == FALSE)
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", Cfg_dmx.tech_id ); }
 
-    Mnemo_auto_create_DI ( FALSE, Cfg_dmx.tech_id, "COMM", "Statut de la communication avec le token DMX" );
+    Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_dmx.tech_id, "COMM", "Statut de la communication avec le token DMX" );
 
     Dmx_init();
     Envoyer_trame_dmx_request();
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { struct ZMQ_TARGET *event;
-       gchar buffer[256];
-       void *payload;
-       gint byte;
+     { gchar buffer[256];
        usleep(1000);
        sched_yield();
 
@@ -226,62 +207,46 @@ reload:
           break;
         }
 
-       if ( (byte=Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer)-1, &event, &payload )) > 0) /* Reception d'un paquet master ? */
-        { JsonObject *object;
-          JsonNode *Query;
-          buffer[byte] = 0;
+       if (!Partage->top%600) Send_zmq_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, Cfg_dmx.tech_id, "COMM", 900 );
 
-          if ( !strcasecmp( event->tag, "SET_AO" ) )
-           { gchar *tech_id, *acronyme;
-             gdouble valeur;
-             gint num;
-             Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_AO from bus: %s", __func__, payload );
-             Query = json_from_string ( payload, NULL );
-
-             if (!Query)
-              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ ); continue; }
-
-             object = json_node_get_object (Query);
-             if (!object)
-              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
-                json_node_unref (Query);
-                continue;
-              }
-
-             tech_id  = json_object_get_string_member ( object, "tech_id" );
-             acronyme = json_object_get_string_member ( object, "acronyme" );
-             valeur   = json_object_get_double_member ( object, "valeur" );
+/********************************************************* Envoi de SMS *******************************************************/
+       JsonNode *request = Recv_zmq_with_json( Cfg_dmx.zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
+       if (request)
+        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
+          if ( !strcasecmp( zmq_tag, "SET_AO" ) &&
+               Json_get_bool ( request, "alive" ) == TRUE &&
+               Json_get_int  ( request, "type_sms" ) != MESSAGE_SMS_NONE )
+           { gchar *tech_id  = Json_get_string ( request, "tech_id" );
+             gchar *acronyme = Json_get_string ( request, "acronyme" );
+             gint   valeur   = Json_get_int    ( request, "valeur" );
              if (!tech_id)
-              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ );
-                json_node_unref (Query);
-                continue;
-              }
+              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ ); }
              else if (!acronyme)
-              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ );
-                json_node_unref (Query);
-                continue;
-              }
+              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ ); }
+             else if (!valeur)
+              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque valeur", __func__ ); }
+             else
+              { for (gint num=0; num<DMX_CHANNEL; num++)
+                 { if (!strcasecmp( Cfg_dmx.Canal[num].tech_id, tech_id) &&
+                       !strcasecmp( Cfg_dmx.Canal[num].acronyme, acronyme))
+                    { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Setting %s:%s=%f (Canal %d)", __func__,
+                                tech_id, acronyme, valeur, num );
+                      Cfg_dmx.Canal[num].val_avant_ech = valeur;
+                      break;
+                    }
 
-             for (num=0; num<DMX_CHANNEL; num++)
-              { if (!strcasecmp( Cfg_dmx.Canal[num].tech_id, tech_id) &&
-                    !strcasecmp( Cfg_dmx.Canal[num].acronyme, acronyme))
-                 { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Setting %s:%s=%f (Canal %d)", __func__,
-                             tech_id, acronyme, valeur, num );
-                   Cfg_dmx.Canal[num].val_avant_ech = valeur;
-                   break;
                  }
-
+                Envoyer_trame_dmx_request();
               }
-             json_node_unref (Query);
-             Envoyer_trame_dmx_request();
            }
+          json_node_unref(request);
         }
-     }                                                                     /* Fin du while partage->arret */
+     }                                                                                         /* Fin du while partage->arret */
 
     Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Preparing to stop . . . TID = %p", __func__, pthread_self() );
     Dmx_close();
     Close_zmq ( Cfg_dmx.zmq_to_master );
-    Close_zmq ( zmq_from_bus );
+    Close_zmq ( Cfg_dmx.zmq_from_bus );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
