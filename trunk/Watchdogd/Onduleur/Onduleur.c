@@ -450,62 +450,41 @@
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_sortie_aux_ups( void )
-  { struct ZMQ_TARGET *event;
-    gchar buffer[256];
-    void *payload;
-    gint byte;
+  { gchar buffer[256];
                                                                                             /* Reception d'un paquet master ? */
-    while( (byte=Recv_zmq_with_tag ( Cfg_ups.zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer)-1, &event, &payload )) > 0)
-     { JsonObject *object;
-       JsonNode *Query;
-       buffer[byte] = 0;
-
-       if ( !strcasecmp( event->tag, "SET_DO" ) )
+    JsonNode *request = Recv_zmq_with_json( Cfg_ups.zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
+    if (request)
+     { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
+       if ( !strcasecmp( zmq_tag, "SET_DO" ) )
         { gchar *tech_id, *acronyme;
-          Query = json_from_string ( payload, NULL );
-
-          if (!Query)
-           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ ); continue; }
-          object = json_node_get_object (Query);
-          if (!object)
-           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
-             json_node_unref (Query);
-             continue;
-           }
-
-          tech_id  = json_object_get_string_member ( object, "tech_id" );
-          acronyme = json_object_get_string_member ( object, "acronyme" );
+          tech_id  = Json_get_string ( request, "tech_id" );
+          acronyme = Json_get_string ( request, "acronyme" );
           if (!tech_id)
-           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ );
-             json_node_unref (Query);
-             continue;
-           }
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ ); }
           else if (!acronyme)
-           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ );
-             json_node_unref (Query);
-             continue;
-           }
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ ); }
+          else
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s", __func__, tech_id, acronyme );
 
-          Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s", __func__, tech_id, acronyme );
-
-          GSList *liste = Cfg_ups.Modules_UPS;
-          while (liste)
-           { struct MODULE_UPS *ups = (struct MODULE_UPS *)liste->data;
-             if (!strcasecmp(ups->tech_id, tech_id))
-              { if (!strcasecmp(acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( ups, "load.off" );
-                if (!strcasecmp(acronyme, "LOAD_ON"))         Onduleur_set_instcmd ( ups, "load.on" );
-                if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    Onduleur_set_instcmd ( ups, "outlet.1.load.off" );
-                if (!strcasecmp(acronyme, "OUTLET_1_ON"))     Onduleur_set_instcmd ( ups, "outlet.1.load.on" );
-                if (!strcasecmp(acronyme, "OUTLET_2_OFF"))    Onduleur_set_instcmd ( ups, "outlet.2.load.off" );
-                if (!strcasecmp(acronyme, "OUTLET_2_ON"))     Onduleur_set_instcmd ( ups, "outlet.2.load.on" );
-                if (!strcasecmp(acronyme, "START_DEEP_BAT"))  Onduleur_set_instcmd ( ups, "test.battery.start.deep" );
-                if (!strcasecmp(acronyme, "START_QUICK_BAT")) Onduleur_set_instcmd ( ups, "test.battery.start.quick" );
-                if (!strcasecmp(acronyme, "STOP_TEST_BAT"))   Onduleur_set_instcmd ( ups, "test.battery.stop" );
+             GSList *liste = Cfg_ups.Modules_UPS;
+             while (liste)
+              { struct MODULE_UPS *ups = (struct MODULE_UPS *)liste->data;
+                if (!strcasecmp(ups->tech_id, tech_id))
+                 { if (!strcasecmp(acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( ups, "load.off" );
+                   if (!strcasecmp(acronyme, "LOAD_ON"))         Onduleur_set_instcmd ( ups, "load.on" );
+                   if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    Onduleur_set_instcmd ( ups, "outlet.1.load.off" );
+                   if (!strcasecmp(acronyme, "OUTLET_1_ON"))     Onduleur_set_instcmd ( ups, "outlet.1.load.on" );
+                   if (!strcasecmp(acronyme, "OUTLET_2_OFF"))    Onduleur_set_instcmd ( ups, "outlet.2.load.off" );
+                   if (!strcasecmp(acronyme, "OUTLET_2_ON"))     Onduleur_set_instcmd ( ups, "outlet.2.load.on" );
+                   if (!strcasecmp(acronyme, "START_DEEP_BAT"))  Onduleur_set_instcmd ( ups, "test.battery.start.deep" );
+                   if (!strcasecmp(acronyme, "START_QUICK_BAT")) Onduleur_set_instcmd ( ups, "test.battery.start.quick" );
+                   if (!strcasecmp(acronyme, "STOP_TEST_BAT"))   Onduleur_set_instcmd ( ups, "test.battery.stop" );
+                 }
+                liste = g_slist_next(liste);
               }
-             liste = g_slist_next(liste);
            }
-          json_node_unref (Query);
         }
+       json_node_unref (request);
      }
   }
 /******************************************************************************************************************************/
