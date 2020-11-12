@@ -553,10 +553,11 @@ reload:
     soup_server_add_handler ( socket, "/api/histo/alive",    Http_traiter_histo_alive, NULL, NULL );
     soup_server_add_handler ( socket, "/api/histo/ack",      Http_traiter_histo_ack, NULL, NULL );
     soup_server_add_handler ( socket, "/",                   Http_traiter_file, NULL, NULL );
-    gchar *protocols[] = { "live-motifs", "live-msgs" };
-    soup_server_add_websocket_handler ( socket, "/api/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
-    soup_server_add_websocket_handler ( socket, "/api/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
-
+    if (Config.instance_is_master==TRUE)
+     { gchar *protocols[] = { "live-motifs", "live-msgs" };
+       soup_server_add_websocket_handler ( socket, "/api/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
+       soup_server_add_websocket_handler ( socket, "/api/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
+     }
 
     if (!soup_server_listen_all (socket, Cfg_http.tcp_port, (Cfg_http.ssl_enable ? SOUP_SERVER_LISTEN_HTTPS : 0), &error))
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer Listen Failed '%s' !", __func__, error->message );
