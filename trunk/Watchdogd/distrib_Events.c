@@ -40,8 +40,6 @@
   { JsonBuilder *builder;
     struct DLS_DO *dout;
     struct DLS_AO *ao;
-    gsize taille_buf;
-    gchar *buffer;
     gint reste;
 
     if (!Partage->com_msrv.Liste_DO) goto suite_AO;                                               /* Si pas de a, on se barre */
@@ -58,12 +56,7 @@
     builder = Json_create ();
     if (builder)
      { Dls_DO_to_json ( builder, dout );
-       buffer = Json_get_buf ( builder, &taille_buf );
-       if (buffer)
-        { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "*", "SET_DO", buffer, taille_buf );
-          Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "SET_DO", buffer, taille_buf );
-          g_free(buffer);
-        }
+       Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_bus, Partage->com_msrv.zmq_to_slave, "msrv", "*", "*", "SET_DO", builder );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ ); }
 
@@ -81,12 +74,7 @@ suite_AO:
     builder = Json_create ();
     if (builder)
      { Dls_AO_to_json ( builder, ao );
-       buffer = Json_get_buf ( builder, &taille_buf );
-       if (buffer)
-        { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", "*", "*", "SET_AO", buffer, taille_buf );
-          Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "SET_AO", buffer, taille_buf );
-          g_free(buffer);
-        }
+       Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_bus, Partage->com_msrv.zmq_to_slave, "msrv", "*", "*", "SET_DO", builder );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ ); }
   }

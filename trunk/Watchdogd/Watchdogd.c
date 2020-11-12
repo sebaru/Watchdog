@@ -223,9 +223,9 @@
           result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_ENTREE_ANA, tech_id, acronyme, &ai_p );
           Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
                     event->src_instance, result_string );
-          Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
+          Send_zmq_with_json ( Partage->com_msrv.zmq_to_bus, "msrv", event->src_instance,
                               "audio", "play_google", result_string, strlen(result_string)+1 );
-          Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
+          Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
                               "audio", "play_google", result_string, strlen(result_string)+1 );
           g_free(result_string);
         }
@@ -242,9 +242,9 @@
           result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_REGISTRE, tech_id, acronyme, &reg_p );
           Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
                     event->src_instance, result_string );
-          Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
+          Send_zmq_with_json ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
                               "audio", "play_google", result_string, strlen(result_string)+1 );
-          Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
+          Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
                               "audio", "play_google", result_string, strlen(result_string)+1 );
           g_free(result_string);
         }
