@@ -344,8 +344,12 @@
 /******************************************************************************************************************************/
  JsonNode *Recv_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *thread, gchar *buf, gint taille_buf )
   { gint byte;
-    byte = zmq_recv ( zmq->socket, buf, taille_buf-1, ZMQ_DONTWAIT );
+    byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
     if (byte<0) return(NULL);
+    if (byte>=taille_buf)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Received %d bytes. Message too long. Dropping.", __func__, byte );
+       return(NULL);
+     }
     buf[byte]=0;                                                                                     /* Caractere nul d'arret */
     JsonNode *request = Json_get_from_string ( buf );
     if (!request)
