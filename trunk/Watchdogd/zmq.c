@@ -290,20 +290,20 @@
 
     gsize taille_buf;
     gboolean retour;
-    gchar *buf      = Json_get_buf (builder, &taille_buf);
-    retour = Send_zmq_as_raw( zmq1, buf, taille_buf );
+    gchar *buf = Json_get_buf (builder, &taille_buf);
+    retour  = Send_zmq_as_raw( zmq1, buf, taille_buf );
     if (zmq2) Send_zmq_as_raw( zmq2, buf, taille_buf );
     g_free(buf);
     if (retour==FALSE)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "%s: '%s' ('%s') : ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq1->name, zmq1->endpoint,
-                 g_get_host_name, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
+                 g_get_host_name(), zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
        return(FALSE);
      }
     else
      { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                 "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/%s", __func__, zmq1->name, zmq1->endpoint,
-                 g_get_host_name, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
+                 g_get_host_name(), zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
      }
     return(TRUE);
   }

@@ -94,8 +94,7 @@
 
     memset ( &histo, 0, sizeof(struct CMD_TYPE_HISTO) );
     memcpy( &histo.msg, message, sizeof(struct CMD_TYPE_MESSAGE) );                                       /* Ajout dans la DB */
-    g_free( message );                                                                 /* On a plus besoin de cette reference */
-
+    JsonBuilder *builder = Json_create ();
     histo.alive  = FALSE;
     gettimeofday( &tv, NULL );
     temps = localtime( (time_t *)&tv.tv_sec );
@@ -103,11 +102,18 @@
     date_fin = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
     g_snprintf( histo.date_fin, sizeof(histo.date_fin), "%s.%02d", date_fin, (gint)tv.tv_usec/10000 );
     g_free( date_fin );
+/******************************************************* Envoi du message aux librairies abonnées *****************************/
+    Json_add_string ( builder, "tech_id", message->tech_id );
+    Json_add_string ( builder, "acronyme", message->acronyme );
+    Json_add_bool   ( builder, "alive", FALSE );
+    Json_add_string ( builder, "date_fin", histo.date_fin );
 
     Modifier_histo_msgsDB ( &histo );
+    Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_slave, Partage->com_msrv.zmq_to_bus,
+                                "msrv", "*", "*","DLS_HISTO", builder );
+
     Send_zmq_as_raw ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "msrv", "histo",
-                       &histo, sizeof(struct CMD_TYPE_HISTO) );
+    g_free( message );                                                                 /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */

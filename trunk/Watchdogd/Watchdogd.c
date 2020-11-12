@@ -462,7 +462,7 @@
 
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, NULL, "msrv", "*", "msrv", "SLAVE_START", NULL, 0 );
+    Send_zmq_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_START", NULL );
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
      { gchar buffer[2048];
        JsonNode *request;
@@ -498,7 +498,7 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, NULL, "msrv", "*", "msrv", "SLAVE_STOP", NULL, 0 );
+    Send_zmq_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_STOP", NULL );
 end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
@@ -705,6 +705,13 @@ end:
         { if (!strcasecmp(database_debug,"true")) { Config.log_db = TRUE; }
                                             else  { Config.log_db = FALSE; }
           g_free(database_debug);
+        }
+
+       gchar *msrv_debug = Recuperer_configDB_by_nom( "msrv", "debug" );              /* Récupération d'une config dans la DB */
+       if (msrv_debug)
+        { if (!strcasecmp(msrv_debug,"true")) { Config.log_msrv = TRUE; }
+                                        else  { Config.log_msrv = FALSE; }
+          g_free(msrv_debug);
         }
 
        gchar *use_subdir = Recuperer_configDB_by_nom ( "msrv", "use_subdir" );
