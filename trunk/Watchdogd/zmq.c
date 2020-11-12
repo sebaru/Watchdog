@@ -288,6 +288,8 @@
          { Json_add_string ( builder, "zmq_dst_thread", zmq_dst_thread ); }
     else { Json_add_string ( builder, "zmq_dst_thread", "*" ); }
 
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/%s", __func__,
+              zmq1->name, zmq1->endpoint, g_get_host_name(), zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
     gsize taille_buf;
     gboolean retour;
     gchar *buf = Json_get_buf (builder, &taille_buf);
@@ -299,11 +301,6 @@
                 "%s: '%s' ('%s') : ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq1->name, zmq1->endpoint,
                  g_get_host_name(), zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
        return(FALSE);
-     }
-    else
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/%s", __func__, zmq1->name, zmq1->endpoint,
-                 g_get_host_name(), zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
      }
     return(TRUE);
   }
