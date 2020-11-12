@@ -128,7 +128,7 @@
 /* Entrée: le message                                                                                                         */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Handle_zmq_json_message_for_master ( JsonNode *request )
+ static void Handle_zmq_for_master ( JsonNode *request )
   { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
     gchar *zmq_src_instance = Json_get_string ( request, "zmq_src_instance" );
     gchar *zmq_src_thread   = Json_get_string ( request, "zmq_src_thread" );
@@ -273,7 +273,7 @@
 /* Entrée: le message                                                                                                         */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Handle_zmq_json_message_for_slave ( JsonNode *request )
+ static void Handle_zmq_for_slave ( JsonNode *request )
   { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
     gchar *zmq_src_instance = Json_get_string ( request, "zmq_src_instance" );
     gchar *zmq_src_thread   = Json_get_string ( request, "zmq_src_thread" );
@@ -366,14 +366,14 @@
 
        request = Recv_zmq_with_json( zmq_from_slave, "msrv", (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { Handle_zmq_json_message_for_master( request );
+        { Handle_zmq_for_master( request );
           json_node_unref ( request );
         }
 
        request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
         { if (!strcasecmp( Json_get_string ( request, "zmq_dst_thread" ), "msrv"))
-           { Handle_zmq_json_message_for_master( request ); }
+           { Handle_zmq_for_master( request ); }
           else
            { gint taille = strlen(buffer);
              Send_zmq_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                  /* Sinon on envoi aux threads */
@@ -464,7 +464,7 @@
        request = Recv_zmq_with_json( zmq_from_master, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
         { if (!strcasecmp( Json_get_string ( request, "zmq_dst_thread" ), "msrv"))
-           { Handle_zmq_json_message_for_slave( request ); }
+           { Handle_zmq_for_slave( request ); }
           else
            { Send_zmq_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );          /* Sinon on envoi aux threads */
            }
