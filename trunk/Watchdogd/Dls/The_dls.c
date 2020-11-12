@@ -302,7 +302,7 @@
           g_snprintf( wtd->acronyme, sizeof(wtd->acronyme), "%s", acronyme );
           g_snprintf( wtd->tech_id,  sizeof(wtd->tech_id),  "%s", tech_id );
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
-          Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_WATCHDOG, wtd );
+          Partage->Dls_data_WATCHDOG = g_slist_prepend ( Partage->Dls_data_WATCHDOG, wtd );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding DLS_WATCHDOG '%s:%s'", __func__, tech_id, acronyme );
         }

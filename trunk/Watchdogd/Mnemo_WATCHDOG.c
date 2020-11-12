@@ -63,7 +63,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                "INSERT INTO mnemos_WATCHDOG SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s' "
+                "INSERT INTO mnemos_WATCHDOG SET deletable='%d', tech_id=UPPER('%s'),acronyme='%s',libelle='%s' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
                 deletable, tech_id, acro, libelle );
     g_free(libelle);
