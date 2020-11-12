@@ -349,7 +349,7 @@
     buf[byte]=0;                                                                                     /* Caractere nul d'arret */
     JsonNode *request = Json_get_from_string ( buf );
     if (!request)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Received %d byte but this is not JSON", __func__, byte );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Received %d bytes but this is not JSON", __func__, byte );
        return(NULL);
      }
 

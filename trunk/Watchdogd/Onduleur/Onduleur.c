@@ -450,7 +450,7 @@
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_sortie_aux_ups( void )
-  { gchar buffer[256];
+  { gchar buffer[512];
                                                                                             /* Reception d'un paquet master ? */
     JsonNode *request = Recv_zmq_with_json( Cfg_ups.zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
     if (request)
