@@ -285,7 +285,7 @@
     while(liste)
      { struct DLS_MESSAGES *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_MESSAGE_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -298,7 +298,7 @@
     while(liste)
      { struct DLS_REGISTRE *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_REGISTRE_to_json ( builder, bit );
           Json_end_object( builder );
         }

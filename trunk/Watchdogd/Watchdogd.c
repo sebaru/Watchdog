@@ -143,7 +143,7 @@
         }
 
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: receive SET_WATCHDOG from %s/%s to %s/%s : '%s:%s'+=%d", __func__,
+                 "%s: SET_WATCHDOG from %s/%s to %s/%s : '%s:%s'+=%d", __func__,
                  zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                  Json_get_int ( request, "consigne" ) );
@@ -158,7 +158,7 @@
         }
 
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: receive SET_AI from %s/%s to %s/%s : '%s:%s'=%f (range=%d)", __func__,
+                 "%s: SET_AI from %s/%s to %s/%s : '%s:%s'=%f (range=%d)", __func__,
                  zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                  Json_get_float ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
@@ -171,7 +171,7 @@
           return;
         }
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: receive SET_CDE=1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
+                 "%s: SET_CDE=1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
                  zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
        Envoyer_commande_dls_data ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
@@ -182,7 +182,7 @@
           return;
         }
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: receive SET_DI from %s/%s to %s/%s : '%s:%s'=%d", __func__,
+                 "%s: SET_DI from %s/%s to %s/%s : '%s:%s'=%d", __func__,
                  zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), Json_get_bool ( request, "etat" ) );
        Dls_data_set_DI ( NULL, Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
@@ -193,25 +193,17 @@
     else if ( !strcasecmp( zmq_tag, "SLAVE_START") )
      { struct DLS_AO *ao;
        GSList *liste;
-#ifdef bouh
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' started. Sending AO !", __func__, zmq_src_instance );
        liste = Partage->Dls_data_AO;
        while (liste)
         { ao = (struct DLS_AO *)Partage->com_msrv.Liste_AO->data;            /* Recuperation du numero de a */
           JsonBuilder *builder = Json_create ();
           if (builder)
-           { gsize taille_buf;
-             Dls_AO_to_json( builder, ao );
-             gchar *buf = Json_get_buf ( builder, &taille_buf );
-              if(buf)
-               { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus,   NULL, "msrv", event->src_instance, "*", "SET_AO", buf, taille_buf );
-                 Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance, "*", "SET_AO", buf, taille_buf );
-                 g_free(buf);
-               }
+           { Dls_AO_to_json( builder, ao );
+             Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", zmq_src_instance, "*", "SET_AO", builder );
            }
           liste = g_slist_next(liste);
         }
-#endif
      }
 #ifdef bouh
     else if ( !strcmp(event->tag, "SNIPS_QUESTION") )
