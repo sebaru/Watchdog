@@ -101,39 +101,6 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Rechercher_AI: Recupération des champs de base de données pour le AI tech_id:acro en parametre                             */
-/* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
-/* Sortie: la struct DB                                                                                                       */
-/******************************************************************************************************************************/
- struct DB *Rechercher_AI ( gchar *tech_id, gchar *acronyme )
-  { gchar requete[512];
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(NULL);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT ai.unite"
-                " FROM mnemos_AI as ai"
-                " WHERE ai.tech_id='%s' AND ai.acronyme='%s' LIMIT 1",
-                tech_id, acronyme
-              );
-
-    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
-     { Libere_DB_SQL (&db);
-       return(NULL);
-     }
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Libere_DB_SQL( &db );
-       return(NULL);
-     }
-    return(db);
-  }
-/******************************************************************************************************************************/
 /* Rechercher_AI_by_text: Recupération des champs de base de données pour le AI par map                                       */
 /* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
 /* Sortie: la struct DB                                                                                                       */

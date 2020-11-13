@@ -2006,6 +2006,21 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
+
+    if (database_version <= 5132)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `mnemos_WATCHDOG` ("
+                                             "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                                             "`deletable` tinyint(1) NOT NULL DEFAULT '1',"
+                                             "`tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,"
+                                             "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                                             "`libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                                             "PRIMARY KEY (`id`),"
+                                             "UNIQUE (`tech_id`,`acronyme`),"
+                                             "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                                             ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000");
+       Lancer_requete_SQL ( db, requete );
+     }
+
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
@@ -2037,9 +2052,10 @@ fin:
        "SELECT 'TEMPO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_Tempo UNION "
        "SELECT 'REGISTRE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_R UNION "
        "SELECT 'VISUEL' AS type_bit, -1 AS type_bit_int,tech_id,acronyme,libelle from syns_motifs UNION "
-       "SELECT 'MESSAGE' AS type_bit, -1 AS type_bit_int,tech_id,acronyme,libelle from msgs",
+       "SELECT 'WATCHDOG' AS type_bit, %d1 AS type_bit_int,tech_id,acronyme,libelle from mnemos_WATCHDOG UNION "
+       "SELECT 'MESSAGE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from msgs",
         MNEMO_ENTREE_ANA, MNEMO_ENTREE, MNEMO_SORTIE, MNEMO_SORTIE_ANA, MNEMO_CPTH, MNEMO_CPT_IMP, MNEMO_HORLOGE,
-        MNEMO_TEMPO, MNEMO_REGISTRE
+        MNEMO_TEMPO, MNEMO_REGISTRE, MNEMO_WATCHDOG, MNEMO_MSG
       );
     Lancer_requete_SQL ( db, requete );
     Libere_DB_SQL(&db);

@@ -80,7 +80,7 @@
     if (!cadran) return;
 
     if (cadran->dls_data == NULL)
-     { gint type = Rechercher_type_bit(cadran->tech_id, cadran->acronyme );
+     { gint type = Rechercher_DICO_type(cadran->tech_id, cadran->acronyme );
         if (type==-1) return;
         cadran->type = type;
      }

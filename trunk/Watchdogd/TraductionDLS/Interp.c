@@ -365,6 +365,25 @@
    return(result);
  }
 /******************************************************************************************************************************/
+/* New_condition_horloge: Prepare la chaine de caractere associée à la condition, en respectant les options                   */
+/* Entrées: l'alias de l'horloge et sa liste d'options                                                                        */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_WATCHDOG( int barre, struct ALIAS *alias, GList *options )
+  { gchar *result;
+    gint taille;
+    taille = 256;                                                                               /* Alias par nom uniquement ! */
+    result = New_chaine( taille ); /* 10 caractères max */
+    if ( !barre )
+         { g_snprintf( result, taille, "Dls_data_get_WATCHDOG ( \"%s\", \"%s\", &_%s_%s )",
+                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+         }
+    else { g_snprintf( result, taille, "!Dls_data_get_WATCHDOG ( \"%s\", \"%s\", &_%s_%s )",
+                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+         }
+   return(result);
+ }
+/******************************************************************************************************************************/
 /* New_condition_vars: formate une condition avec le nom de variable en parametre                                             */
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
@@ -535,6 +554,23 @@
     return(action);
   }
 /******************************************************************************************************************************/
+/* New_action_WATCHDOG: Prepare une struct action pour une action de type WATCHDOG                                            */
+/* Entrées: l'alias source, et ses options                                                                                    */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_WATCHDOG( struct ALIAS *alias, GList *options )
+  { struct ACTION *action;
+
+    gint consigne = Get_option_entier ( options, T_CONSIGNE ); if (consigne == -1) consigne = 600;
+    gint taille = 256;
+    action = New_action();
+    action->alors = New_chaine( taille );
+
+    g_snprintf( action->alors, taille, "   Dls_data_set_WATCHDOG ( vars, \"%s\", \"%s\", &_%s_%s, %d );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, consigne );
+    return(action);
+  }
+/******************************************************************************************************************************/
 /* New_action_icone: Prepare une struct action avec une commande SI                                                           */
 /* Entrées: numero du motif                                                                                                   */
 /* Sortie: la structure action                                                                                                */
@@ -677,7 +713,7 @@
 /******************************************************************************************************************************/
  struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme )
   { struct ALIAS *alias;
-    struct DB *db;
+    gint type;
 
     alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
     if (!alias) { return(NULL); }
@@ -685,47 +721,15 @@
     alias->used     = 1;
     alias->external = TRUE;
 
-    if (!strcmp(tech_id,"THIS")) tech_id=Dls_plugin.tech_id;
+    if (!tech_id) tech_id=Dls_plugin.tech_id;
 
-    if ( (db=Rechercher_BOOL ( tech_id, acronyme )) != NULL )
+    if ( (type=Rechercher_DICO_type ( tech_id, acronyme )) != -1 )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = atoi(db->row[0]);
-       Libere_DB_SQL (&db);
-     }
-    else if ( (db=Rechercher_AI ( tech_id, acronyme )) != NULL )
-     { alias->tech_id  = g_strdup(tech_id);
-       alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = MNEMO_ENTREE_ANA;
-       Libere_DB_SQL (&db);
-     }
-    else if ( (db=Rechercher_DI ( tech_id, acronyme )) != NULL )
-     { alias->tech_id  = g_strdup(tech_id);
-       alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = atoi(db->row[0]);
-       Libere_DB_SQL (&db);
-     }
-    else if ( (db=Rechercher_DO ( tech_id, acronyme )) != NULL )
-     { alias->tech_id  = g_strdup(tech_id);
-       alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = MNEMO_DIGITAL_OUTPUT;
-       Libere_DB_SQL (&db);
-     }
-    else if ( (db=Rechercher_CI ( tech_id, acronyme )) != NULL )
-     { alias->tech_id  = g_strdup(tech_id);
-       alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = MNEMO_CPT_IMP;
-       Libere_DB_SQL (&db);
-     }
-    else if ( (db=Rechercher_CH ( tech_id, acronyme )) != NULL )
-     { alias->tech_id  = g_strdup(tech_id);
-       alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = MNEMO_CPTH;
-       Libere_DB_SQL (&db);
+       alias->type_bit = type;
      }
     else
      { g_free(alias);
-       Emettre_erreur_new( "Bit %s:%s not found", tech_id, acronyme );
        return(NULL);
      }
     Alias = g_slist_prepend( Alias, alias );
@@ -964,6 +968,10 @@
                    Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle, unite );
                    break;
                  }
+                case MNEMO_WATCHDOG:
+                 { Mnemo_auto_create_WATCHDOG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   break;
+                 }
                 case MNEMO_MOTIF:
                  { gchar *forme = Get_option_chaine( alias->options, T_FORME );
                    if (!forme) forme="none";
@@ -1021,7 +1029,7 @@
           SQL_Write ( requete );
           g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE  deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
           requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
           SQL_Write ( requete );
           g_free(requete);
@@ -1047,6 +1055,11 @@
           g_free(requete);
 
           g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_HORLOGE WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
+          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
+          SQL_Write ( requete );
+          g_free(requete);
+
+          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_WATCHDOG WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
           requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
           SQL_Write ( requete );
           g_free(requete);

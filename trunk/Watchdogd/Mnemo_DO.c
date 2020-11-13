@@ -79,39 +79,6 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Rechercher_DO: Recupération des champs de base de données pour le DO tech_id:acro en parametre                             */
-/* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
-/* Sortie: la struct DB                                                                                                       */
-/******************************************************************************************************************************/
- struct DB *Rechercher_DO ( gchar *tech_id, gchar *acronyme )
-  { gchar requete[512];
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(NULL);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %d"
-                " FROM mnemos_DO as m"
-                " WHERE m.tech_id='%s' AND m.acronyme='%s' LIMIT 1",
-                MNEMO_DIGITAL_OUTPUT, tech_id, acronyme
-              );
-
-    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
-     { Libere_DB_SQL (&db);
-       return(NULL);
-     }
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Libere_DB_SQL( &db );
-       return(NULL);
-     }
-    return(db);
-  }
-/******************************************************************************************************************************/
 /* Recuperer_mnemo_baseDB_by_command_text: Recupération de la liste des mnemo par command_text                                */
 /* Entrée: un pointeur vers une nouvelle connexion de base de données, le critere de recherche                                */
 /* Sortie: FALSE si erreur                                                      ********************                          */

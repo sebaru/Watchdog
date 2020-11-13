@@ -204,7 +204,6 @@
 /******************************************************************************************************************************/
  static void Abonner_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct WS_CLIENT_SESSION *client = user_data;
-    struct DB *db;
 
     struct WS_CADRAN *ws_cadran;
     ws_cadran = (struct WS_CADRAN *)g_try_malloc0(sizeof(struct WS_CADRAN));
@@ -212,23 +211,8 @@
 
     g_snprintf( ws_cadran->tech_id,  sizeof(ws_cadran->tech_id), "%s", Json_get_string(element, "tech_id") );
     g_snprintf( ws_cadran->acronyme, sizeof(ws_cadran->acronyme), "%s", Json_get_string(element, "acronyme") );
-    if ( (db=Rechercher_CI ( ws_cadran->tech_id, ws_cadran->acronyme )) != NULL )
-     { ws_cadran->type = MNEMO_CPT_IMP;
-       Libere_DB_SQL (&db);
-     }
-    else if ( (db=Rechercher_AI ( ws_cadran->tech_id, ws_cadran->acronyme )) != NULL )
-     { ws_cadran->type = MNEMO_ENTREE_ANA;
-       Libere_DB_SQL (&db);
-     }
-    else if ( (db=Rechercher_Tempo ( ws_cadran->tech_id, ws_cadran->acronyme )) != NULL )
-     { ws_cadran->type = MNEMO_TEMPO;
-       Libere_DB_SQL (&db);
-     }
-    else if ( (db=Rechercher_CH ( ws_cadran->tech_id, ws_cadran->acronyme )) != NULL )
-     { ws_cadran->type = MNEMO_CPTH;
-       Libere_DB_SQL (&db);
-     }
-    else { g_free(ws_cadran); return; }                                                                   /* Si pas trouvé... */
+    ws_cadran->type = Rechercher_DICO_type ( ws_cadran->tech_id, ws_cadran->acronyme );
+    if (ws_cadran->type==-1) { g_free(ws_cadran); return; }                                               /* Si pas trouvé... */
 
     Formater_cadran(ws_cadran);                                                            /* Formatage de la chaine associée */
     Envoyer_un_cadran ( client, ws_cadran );                                                        /* Envoi de l'init cadran */

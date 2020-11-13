@@ -40,7 +40,7 @@
 
  #include "watchdogd.h"
 
- #define DLS_LIBRARY_VERSION  "20201111"
+ #define DLS_LIBRARY_VERSION  "20201113"
 
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
@@ -229,19 +229,19 @@
        Partage->com_dls.Reset_Dls_Bool_Edge_up = g_slist_prepend ( Partage->com_dls.Reset_Dls_Bool_Edge_up, bool );
        bool->edge_up = TRUE;
      }
-    while( Partage->com_dls.Set_Dls_Bool_Edge_down )                                       /* A-t-on un boolean down a allumer ?? */
+    while( Partage->com_dls.Set_Dls_Bool_Edge_down )                                   /* A-t-on un boolean down a allumer ?? */
      { struct DLS_BOOL *bool = Partage->com_dls.Set_Dls_Bool_Edge_down->data;
        Partage->com_dls.Set_Dls_Bool_Edge_down   = g_slist_remove  ( Partage->com_dls.Set_Dls_Bool_Edge_down, bool );
        Partage->com_dls.Reset_Dls_Bool_Edge_down = g_slist_prepend ( Partage->com_dls.Reset_Dls_Bool_Edge_down, bool );
        bool->edge_down = TRUE;
      }
-    while( Partage->com_dls.Set_Dls_DI_Edge_up )                                       /* A-t-on un boolean up a allumer ?? */
+    while( Partage->com_dls.Set_Dls_DI_Edge_up )                                         /* A-t-on un boolean up a allumer ?? */
      { struct DLS_DI *di = Partage->com_dls.Set_Dls_DI_Edge_up->data;
        Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_remove  ( Partage->com_dls.Set_Dls_DI_Edge_up, di );
        Partage->com_dls.Reset_Dls_DI_Edge_up = g_slist_prepend ( Partage->com_dls.Reset_Dls_DI_Edge_up, di );
        di->edge_up = TRUE;
      }
-    while( Partage->com_dls.Set_Dls_DI_Edge_down )                                       /* A-t-on un boolean down a allumer ?? */
+    while( Partage->com_dls.Set_Dls_DI_Edge_down )                                     /* A-t-on un boolean down a allumer ?? */
      { struct DLS_DI *di = Partage->com_dls.Set_Dls_DI_Edge_down->data;
        Partage->com_dls.Set_Dls_DI_Edge_down   = g_slist_remove  ( Partage->com_dls.Set_Dls_DI_Edge_down, di );
        Partage->com_dls.Reset_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Reset_Dls_DI_Edge_down, di );

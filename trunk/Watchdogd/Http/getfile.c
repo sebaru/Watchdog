@@ -123,7 +123,7 @@
        return;
      }
     g_strfreev(URI);
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s : Serving file %s", __func__, fichier );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s : Serving file %s", __func__, fichier );
 
 /*--------------------------------------------------- LEcture header ---------------------------------------------------------*/
     if (has_template)

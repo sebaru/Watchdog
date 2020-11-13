@@ -62,10 +62,18 @@
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                "INSERT INTO mnemos_WATCHDOG SET deletable='%d', tech_id=UPPER('%s'),acronyme='%s',libelle='%s' "
-                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                deletable, tech_id, acro, libelle );
+    if (deletable==FALSE)
+     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                   "INSERT INTO mnemos_WATCHDOG SET deletable='0', tech_id='%s',acronyme='%s',libelle='%s' "
+                   " ON DUPLICATE KEY UPDATE deletable='0', libelle=VALUES(libelle)",
+                   tech_id, acro, libelle );
+     }
+    else
+     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                   "INSERT INTO mnemos_WATCHDOG SET deletable='1', tech_id='%s',acronyme='%s',libelle='%s' "
+                   " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
+                   tech_id, acro, libelle );
+     }
     g_free(libelle);
     g_free(acro);
 
@@ -86,6 +94,6 @@
  void Dls_WATCHDOG_to_json ( JsonBuilder *builder, struct DLS_WATCHDOG *bit )
   { Json_add_string ( builder, "tech_id",  bit->tech_id );
     Json_add_string ( builder, "acronyme", bit->acronyme );
-    Json_add_bool   ( builder, "etat",     Dls_data_get_WATCHDOG ( bit->tech_id, bit->acronyme, &bit ) );
+    Json_add_bool   ( builder, "etat",     Dls_data_get_WATCHDOG ( bit->tech_id, bit->acronyme, (gpointer)&bit ) );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

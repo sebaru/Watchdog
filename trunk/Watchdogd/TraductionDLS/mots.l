@@ -69,6 +69,7 @@ newline       [\n\r]+
 "_CH"                      { DlsScanner_lval.val = T_CPT_H;         return T_CPT_H;         }
 "_CI"                      { DlsScanner_lval.val = T_CPT_IMP;       return T_CPT_IMP;       }
 "_HORLOGE"                 { DlsScanner_lval.val = T_HORLOGE;       return T_HORLOGE;       }
+"_WATCHDOG"                { DlsScanner_lval.val = T_WATCHDOG;      return T_WATCHDOG;      }
 "_MSG"                     { DlsScanner_lval.val = T_MSG;           return T_MSG;           }
 "_START"                   { DlsScanner_lval.val = T_START;         return T_START;         }
 "_TRUE"                    { DlsScanner_lval.val = T_TRUE;          return T_TRUE;          }
@@ -136,6 +137,7 @@ newline       [\n\r]+
 "dma"                      { DlsScanner_lval.val = T_DMINA;     return T_DMINA;     }
 "dMa"                      { DlsScanner_lval.val = T_DMAXA;     return T_DMAXA;     }
 "dad"                      { DlsScanner_lval.val = T_DAD;       return T_DAD;       }
+"consigne"                 { DlsScanner_lval.val = T_CONSIGNE;  return T_CONSIGNE;  }
 "type"                     { DlsScanner_lval.val = T_TYPE;      return T_TYPE;      }
 "info"                     { DlsScanner_lval.val = T_INFO;      return T_INFO;      }
 "attente"                  { DlsScanner_lval.val = T_ATTENTE;   return T_ATTENTE;   }

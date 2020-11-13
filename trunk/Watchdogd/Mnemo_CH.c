@@ -79,39 +79,6 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Rechercher_CH: Recupération des champs de base de données pour le CH tech_id:acro en parametre                        */
-/* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
-/* Sortie: la struct DB                                                                                                       */
-/******************************************************************************************************************************/
- struct DB *Rechercher_CH ( gchar *tech_id, gchar *acronyme )
-  { gchar requete[512];
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(NULL);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT cpt.valeur"
-                " FROM mnemos_CH as cpt"
-                " WHERE cpt.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
-                tech_id, acronyme
-              );
-
-    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
-     { Libere_DB_SQL (&db);
-       return(NULL);
-     }
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Libere_DB_SQL( &db );
-       return(NULL);
-     }
-    return(db);
-  }
-/******************************************************************************************************************************/
 /* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */

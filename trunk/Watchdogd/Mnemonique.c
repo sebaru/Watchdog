@@ -40,7 +40,7 @@
 /* Entrée: le tech_id et acronyme                                                                                             */
 /* Sortie: -1 si erreur                                                                                                       */
 /******************************************************************************************************************************/
- gint Rechercher_type_bit ( gchar *tech_id, gchar *acronyme )
+ gint Rechercher_DICO_type ( gchar *tech_id, gchar *acronyme )
   { gchar requete[512];
     struct DB *db;
 

@@ -81,6 +81,7 @@
  extern gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_tempo( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options );
+ extern gchar *New_condition_WATCHDOG( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_vars( int barre, gchar *nom );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( struct ALIAS *alias, GList *options );
@@ -94,6 +95,7 @@
  extern struct ACTION *New_action_bi( struct ALIAS *alias, gint barre );
  extern struct ACTION *New_action_cpt_h( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_cpt_imp( struct ALIAS *alias, GList *options );
+ extern struct ACTION *New_action_WATCHDOG( struct ALIAS *alias, GList *options );
  extern gboolean New_alias( gchar *tech_id, gchar *acronyme, gint bit, GList *options );
  extern struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme );
  extern struct ALIAS *Get_alias_par_acronyme( gchar *tech_id, gchar *acronyme );

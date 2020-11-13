@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_BOOL` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `deletable` tinyint(1) NOT NULL DEFAULT '1',
   `type` int(11) NOT NULL DEFAULT 0,
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `etat` tinyint(1) NOT NULL DEFAULT 0,
@@ -181,10 +181,27 @@ CREATE TABLE IF NOT EXISTS `mnemos_BOOL` (
 -- Structure de la table `mnemos`
 --
 
+CREATE TABLE IF NOT EXISTS `mnemos_WATCHDOG` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deletable` tinyint(1) NOT NULL DEFAULT '1',
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  PRIMARY KEY (`id`),
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `mnemos`
+--
+
 CREATE TABLE IF NOT EXISTS `mnemos_DI` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `deletable` tinyint(1) NOT NULL DEFAULT '1',
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `map_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
@@ -205,7 +222,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_DI` (
 CREATE TABLE IF NOT EXISTS `mnemos_DO` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `deletable` tinyint(1) NOT NULL DEFAULT '1',
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `map_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
@@ -227,7 +244,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_DO` (
 CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `deletable` tinyint(1) NOT NULL DEFAULT '1',
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `type` int(11) NOT NULL DEFAULT '0',
@@ -255,7 +272,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
 CREATE TABLE IF NOT EXISTS `mnemos_AO` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `deletable` tinyint(1) NOT NULL DEFAULT '1',
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   `type` int(11) NOT NULL DEFAULT '0',
@@ -279,7 +296,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AO` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_CI` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `etat` BOOLEAN NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
@@ -301,10 +318,10 @@ CREATE TABLE IF NOT EXISTS `mnemos_CI` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_CH` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-  `etat` BOOLEAN NOT NULL DEFAULT '0',
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `etat` BOOLEAN NOT NULL DEFAULT '0',
   `valeur` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
@@ -320,7 +337,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_CH` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   PRIMARY KEY (`id`),
@@ -337,7 +354,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   PRIMARY KEY (`id`),
@@ -370,7 +387,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE_ticks` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_R` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL,
   `valeur` FLOAT NOT NULL DEFAULT '0',
@@ -562,12 +579,11 @@ CREATE TABLE IF NOT EXISTS `syns_rectangles` (
 CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
-  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT,
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No libelle",
   `libelle_audio` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `libelle_sms` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `type` int(11) NOT NULL DEFAULT '0',
-  `audio` tinyint(1) NOT NULL DEFAULT '0',
   `sms` int(11) NOT NULL DEFAULT '0',
   `etat` tinyint(1) NOT NULL DEFAULT '0',
   `profil_audio` VARCHAR(80) NOT NULL DEFAULT 'P_NONE',
