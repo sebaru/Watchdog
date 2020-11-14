@@ -212,7 +212,7 @@
      }
 
 /*----------------------------------------------- Visuels --------------------------------------------------------------------*/
-    Json_add_array ( builder, "VISUEL" );
+    Json_add_array ( builder, "visuels" );
     struct DB *db = Init_DB_SQL();
     if (db)
      { g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) from dls WHERE syn_id=%d", syn_id );

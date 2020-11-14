@@ -122,7 +122,7 @@
          svg.addEventListener ( "click", function (event) { Clic_sur_motif( svg, event ) }, false);
          svg.UpdateSVGMatrix();                     /* Mise a jour du SVG en fonction des parametres de positionnements Motif */
          $("#TopSVG").append(svg);                                                            /* ajout du SVG dans le Top SVG */
-         setTimeout(function(){ svg.SetState ( 0, Motif.def_color, 0 ); }, 500);
+         /*setTimeout(function(){ svg.SetState ( 0, Motif.def_color, 0 ); }, 500);*/
        }
      };
     request.send(null);
@@ -302,6 +302,15 @@
         { var comment = Response.comments[i];
           Load_Comment_to_canvas(comment);
         }
+
+       console.log("Traite Visuels: "+Response.visuels.length);
+       for (var i = 0; i < Response.visuels.length; i++)                            /* Pour chacun des liens, parsing un par un */
+        { var visuel = Response.visuels[i];
+          Liste = document.getElementsByClassName("WTDCtrl_bit_" + visuel.tech_id + "_" + visuel.acronyme);
+          for (const svg of Liste)
+           { svg.SetState ( visuel.mode, visuel.color, visuel.cligno ); }
+        }
+
 
      }, null );
 
