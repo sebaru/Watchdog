@@ -272,6 +272,7 @@
               }
              if (j==Response.visuels.length) /* si pas trouvé */
               { Load_Motif_to_canvas ( motif, 0, motif.def_color, 0 ); }
+           }
         }
 
        console.log("Traite Lien: "+Response.liens.length);
