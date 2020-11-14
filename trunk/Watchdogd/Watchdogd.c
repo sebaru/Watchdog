@@ -418,15 +418,22 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void *Boucle_pere_slave ( void )
-  { gint cpt_5_minutes, cpt_1_minute;
-    struct ZMQUEUE *zmq_from_master, *zmq_from_bus;
+  { struct ZMQUEUE *zmq_from_master, *zmq_from_bus;
+    gint cpt_5_minutes, cpt_1_minute;
+    gchar chaine[128];
 
     prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
     Modifier_configDB ( "msrv", "thread_version", WTD_VERSION );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
-    Mnemo_auto_create_WATCHDOG ( FALSE, g_get_host_name(), "COMM", "Statut de la communication avec le Slave" );
+    g_snprintf(chaine, sizeof(chaine), "Gestion de l'instance slave %s", g_get_host_name());
+    if (Dls_auto_create_plugin( g_get_host_name(), chaine ) == FALSE)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, g_get_host_name ); }
+
+    g_snprintf(chaine, sizeof(chaine), "Statut de la communication avec le slave %s", g_get_host_name() );
+    Mnemo_auto_create_WATCHDOG ( FALSE, g_get_host_name(), "COMM", chaine );
+
 /************************************************* Socket ZMQ interne *********************************************************/
     Partage->com_msrv.zmq_msg    = Bind_zmq ( ZMQ_PUB, "pub-int-msgs",  "inproc", ZMQUEUE_LIVE_MSGS, 0 );
     Partage->com_msrv.zmq_to_bus = Bind_zmq ( ZMQ_PUB, "pub-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
