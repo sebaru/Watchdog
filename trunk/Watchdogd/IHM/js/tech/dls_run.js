@@ -184,7 +184,7 @@
        $('#idTableVisuel').DataTable(
           { pageLength : 50,
             fixedHeader: true, paging: false, ordering: false, searching: false,
-            data: Response.I,
+            data: Response.VISUEL,
             rowId: "id",
             columns:
               [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
