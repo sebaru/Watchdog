@@ -61,7 +61,7 @@
                                     "et toutes ses dépendances (Mnémoniques, ...) ?<hr>"+
                                     "<strong>"+selection.tech_id + " - " + selection.shortname + "</strong>" + "<br>" + selection.name
                                    );
-    $('#idModalDLSDelValider').attr( "onclick", "Valider_Dls_Del("+tech_id+")" );
+    $('#idModalDLSDelValider').attr( "onclick", "Valider_Dls_Del('"+tech_id+"')" );
     $('#idModalDLSDel').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
