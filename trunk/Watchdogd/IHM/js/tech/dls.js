@@ -131,7 +131,7 @@
             },
             { "data": "nbr_compil", "title":"Nbr Compil", "className": "align-middle text-center hidden-xs" },
             { "data": "nbr_ligne", "title":"Nbr Lignes", "className": "align-middle text-center hidden-xs" },
-            { "data": null, "title":"Actions", "orderable": false,
+            { "data": null, "title":"Actions", "orderable": false, "className": "align-middle"
               "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-primary", "Voir le code", "Redirect", "/tech/dls_source/"+item.tech_id, "code", null );

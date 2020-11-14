@@ -211,6 +211,29 @@
        return;
      }
 
+/*----------------------------------------------- Visuels --------------------------------------------------------------------*/
+    Json_add_array ( builder, "VISUEL" );
+    struct DB *db = Init_DB_SQL();
+    if (db)
+     { g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) from dls WHERE syn_id=%d", syn_id );
+       Lancer_requete_SQL ( db, chaine );                                                      /* Execution de la requete SQL */
+       while(Recuperer_ligne_SQL(db))                                                      /* Chargement d'une ligne resultat */
+        { GSList *liste = Partage->Dls_data_VISUEL;
+          while(liste)
+           { struct DLS_VISUEL *bit=liste->data;
+             if (!strcasecmp(bit->tech_id, db->row[0]))
+              { Json_add_object ( builder, NULL );
+                Dls_VISUEL_to_json ( builder, bit );
+                Json_end_object( builder );
+              }
+             liste = g_slist_next(liste);
+           }
+        }
+       Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+     }
+    Json_end_array( builder );
+
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
