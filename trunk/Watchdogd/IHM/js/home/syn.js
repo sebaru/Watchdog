@@ -24,7 +24,7 @@
 
   }
 /********************************************* Prepare un objet SVG et l'affiche sur la page **********************************/
- function Load_Motif_to_canvas ( Motif )
+ function Load_Motif_to_canvas ( Motif, init_mode, init_color, init_cligno )
   {
     var request = new XMLHttpRequest();                         /* Envoie une requete de récupération du SVG associé au motif */
     request.open("GET", "/img/"+Motif.forme+".svg", true);
@@ -122,7 +122,7 @@
          svg.addEventListener ( "click", function (event) { Clic_sur_motif( svg, event ) }, false);
          svg.UpdateSVGMatrix();                     /* Mise a jour du SVG en fonction des parametres de positionnements Motif */
          $("#TopSVG").append(svg);                                                            /* ajout du SVG dans le Top SVG */
-         /*setTimeout(function(){ svg.SetState ( 0, Motif.def_color, 0 ); }, 500);*/
+         svg.SetState ( init_mode, init_color, init_cligno );
        }
      };
     request.send(null);
@@ -150,7 +150,7 @@
     Motif.scale = 0.4;
     Motif.angle = 0;
     Motif.def_color = "#c8c8c8";
-    Load_Motif_to_canvas(Motif);
+    Load_Motif_to_canvas(Motif, 0, Motif.def_color, 0 );
 
     var Motif = new Object;
     Motif.forme="bouclier";
@@ -160,7 +160,7 @@
     Motif.scale = 0.4;
     Motif.angle = 0;
     Motif.def_color = "#c8c8c8";
-    Load_Motif_to_canvas(Motif);
+    Load_Motif_to_canvas(Motif, 0, Motif.def_color, 0 );
 
     if(svg.passerelle.angle == undefined) svg.passerelle.angle=0;
     svg.setAttribute("transform","rotate("+svg.passerelle.angle+" "+svg.passerelle.posx+" "+svg.passerelle.posy+")");
@@ -264,7 +264,14 @@
              $("#TopSVG").append(button);                                                     /* ajout du SVG dans le Top SVG */
            }
           else if (motif.forme=="none") Load_Gif_to_canvas ( motif );
-          else Load_Motif_to_canvas ( motif );
+          else
+           { for (var j = 0; j < Response.visuels.length; j++)                  /* Pour chacun des visuels, parsing un par un */
+              { var visuel = Response.visuels[i];
+                if (visuel.tech_id == motif.tech_id && visuel.acronyme==motif.acronyme)
+                 { Load_Motif_to_canvas ( motif, visuel.mode, visuel.color, visuel.cligno ); }
+              }
+             if (j==Response.visuels.length) /* si pas trouvé */
+              { Load_Motif_to_canvas ( motif, 0, motif.def_color, 0 ); }
         }
 
        console.log("Traite Lien: "+Response.liens.length);
@@ -303,15 +310,6 @@
           Load_Comment_to_canvas(comment);
         }
 
-       console.log("Traite Visuels: "+Response.visuels.length);
-       for (var i = 0; i < Response.visuels.length; i++)                            /* Pour chacun des liens, parsing un par un */
-        { var visuel = Response.visuels[i];
-          Liste = document.getElementsByClassName("WTDCtrl_bit_" + visuel.tech_id + "_" + visuel.acronyme);
-          for (const svg of Liste)
-           { svg.SetState ( visuel.mode, visuel.color, visuel.cligno ); }
-        }
-
-
      }, null );
 
     var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/live-motifs", "live-motifs");
@@ -330,9 +328,14 @@
     WTDWebSocket.onmessage = function (event)
      { console.log("Recu WS Motif "+event.data);
        var Response = JSON.parse(event.data);                                               /* Pointe sur <synoptique a=1 ..> */
-       Liste = document.getElementsByClassName("WTDCtrl_bit_" + Response.tech_id + "_" + Response.acronyme);
-       for (const svg of Liste)
-        { svg.SetState ( Response.mode, Response.color, Response.cligno ); }
+       Visuel_Set_State ( Response.tech_id, Response.acronyme, Response.mode, Response.color, Response.cligno );
      }
 
+  }
+/******************************************************************************************************************************/
+ function Visuel_Set_State ( tech_id, acronyme, mode, color, cligno )
+  { console.log("Visuel Set State "+tech_id+":"+acronyme+" mode:"+mode+" color:"+color+" cligno:"+cligno );
+    Liste = document.getElementsByClassName("WTDCtrl_bit_" + tech_id + "_" + acronyme);
+    for (const svg of Liste)
+     { svg.SetState ( mode, color, cligno ); }
   }
