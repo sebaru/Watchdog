@@ -700,7 +700,7 @@
     if (!tech_id) alias->tech_id = g_strdup(Dls_plugin.tech_id);
              else alias->tech_id = g_strdup(tech_id);
     alias->acronyme = g_strdup(acronyme);
-    alias->type_bit = bit;
+    alias->classe = bit;
     alias->options  = options;
     alias->used     = 0;
     Alias = g_slist_prepend( Alias, alias );
@@ -726,7 +726,7 @@
     if ( (type=Rechercher_DICO_type ( tech_id, acronyme )) != -1 )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = type;
+       alias->classe = type;
      }
     else
      { g_free(alias);
@@ -931,12 +931,12 @@
                 g_free(old_Liste_acronyme);
               }
 
-             switch(alias->type_bit)
+             switch(alias->classe)
               { case MNEMO_BUS:
                    break;
                 case MNEMO_BISTABLE:
                 case MNEMO_MONOSTABLE:
-                 { Mnemo_auto_create_BOOL ( TRUE, alias->type_bit, Dls_plugin.tech_id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_BOOL ( TRUE, alias->classe, Dls_plugin.tech_id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_ENTREE:

@@ -202,6 +202,25 @@
           }
         );
 
+       $('#idTableWatchdog').DataTable(
+          { pageLength : 50,
+            fixedHeader: true, paging: false, ordering: false, searching: false,
+            data: Response.WATCHDOG,
+            rowId: "id",
+            columns:
+              [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
+                { "data": null, "title":"Etat", "className": "",
+                  "render": function (item)
+                    { if (item.etat==true) { return( Bouton ( "success", "Le compteur décompte", null, null, "En décompte" ) );        }
+                                      else { return( Bouton ( "outline-warning", "Le compteur est échu", null, null, "échu" ) ); }
+                    },
+                },
+              ],
+            /*order: [ [0, "desc"] ],*/
+            responsive: true,
+          }
+        );
+
        $('#idTableMessages').DataTable(
           { pageLength : 50,
             fixedHeader: true, paging: false, ordering: false, searching: false,

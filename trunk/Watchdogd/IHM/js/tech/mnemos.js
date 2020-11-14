@@ -105,8 +105,7 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          rowId: "id",
-         columns: [ { "data": "tech_id",    "title":"TechId",     "className": "align-middle text-center hidden-xs" },
-                    { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+         columns: [        { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
                     { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
                     { "data": "map_thread", "title":"map_thread", "className": "align-middle hidden-xs" },
                     { "data": "map_tech_id","title":"map_tech_id","className": "align-middle hidden-xs" },
@@ -133,8 +132,7 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          rowId: "id",
-         columns: [ { "data": "tech_id",    "title":"TechId",     "className": "align-middle text-center hidden-xs" },
-                    { "data": null, "title":"Acronyme", "className": "align-middle text-center",
+         columns: [        { "data": null, "title":"Acronyme", "className": "align-middle text-center",
                       "render": function (item)
                        { return( Lien ( "/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir la courbe", item.acronyme ) ); }
                     },
@@ -159,8 +157,7 @@
                },
 
          rowId: "id",
-         columns: [ { "data": "tech_id",    "title":"TechId",     "className": "align-middle text-center hidden-xs" },
-                    { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+         columns: [        { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
                     { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
                     { "data": "map_thread", "title":"map_thread", "className": "align-middle hidden-xs" },
                     { "data": "map_tech_id","title":"map_tech_id","className": "align-middle hidden-xs" },
@@ -202,8 +199,7 @@
                },
          rowId: "id",
          columns:
-           [ { "data": "tech_id",    "title":"TechId",     "className": "align-middle text-center hidden-xs" },
-             { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+           [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
              { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
              { "data": "unite",      "title":"Unité",    "className": "align-middle idden-xs" },
              { "data": null, "title":"Archivage", "className": "hidden-xs",
@@ -226,8 +222,7 @@
                },
          rowId: "id",
          columns:
-           [ { "data": "tech_id",    "title":"TechId",     "className": "align-middle text-center hidden-xs" },
-             { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+           [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
              { "data": "libelle",    "title":"Libellé",    "className": "align-middle hidden-xs" },
              { "data": null, "title":"Etat", "className": "",
                "render": function (item)
@@ -255,8 +250,7 @@
                },
          rowId: "id",
          columns:
-           [ { "data": "tech_id",    "title":"TechId",     "className": "align-middle text-center hidden-xs" },
-             { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+           [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
              { "data": "libelle",    "title":"Libellé",    "className": "align-middle hidden-xs" },
              { "data": null, "title":"Profil AUDIO", "className": "align-middle hidden-xs",
                "render": function (item)
@@ -292,6 +286,22 @@
                           "value='"+item.libelle_sms+"'/>");
                  }
              },
+           ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
+
+    $('#idTableWatchdog').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         ajax: {	url : "/api/mnemos/list",	type : "GET", data: { "classe": "WATCHDOG", "tech_id": tech_id }, dataSrc: "WATCHDOG",
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
+         rowId: "id",
+         columns:
+           [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle hidden-xs" },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,

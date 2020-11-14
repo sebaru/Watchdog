@@ -158,12 +158,12 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                    if ($8)
                     { taille = strlen($5)+strlen($2)+strlen($8->tech_id)+strlen($8->acronyme)+100;
                       $$ = New_chaine( taille );
-                      if ($8->type_bit==MNEMO_SORTIE_ANA)
+                      if ($8->classe==MNEMO_SORTIE_ANA)
                        { g_snprintf( $$, taille,
                                      "if(%s) { Dls_data_set_AO ( vars, \"%s\", \"%s\", &_%s_%s, %s ); }\n",
                                      $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
                        }
-                      else if ($8->type_bit==MNEMO_REGISTRE)
+                      else if ($8->classe==MNEMO_REGISTRE)
                        { g_snprintf( $$, taille,
                                      "if(%s) { Dls_data_set_R ( vars, \"%s\", \"%s\", &_%s_%s, %s ); }\n",
                                      $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
@@ -286,7 +286,7 @@ calcul_expr3:   VALF
                          else { alias = Set_new_external_alias("THIS",acro); }/* Si dependance pseudo-externe, on va chercher */
                     }
                    if (alias)
-                    { switch(alias->type_bit)               /* On traite que ce qui peut passer en "condition" */
+                    { switch(alias->classe)               /* On traite que ce qui peut passer en "condition" */
                        { case MNEMO_REGISTRE:
                           { taille = 256;
                             $$ = New_chaine( taille ); /* 10 caractères max */
@@ -351,7 +351,7 @@ calcul_ea_result: ID
                 {{ struct ALIAS *alias;
                    alias = Get_alias_par_acronyme(NULL,$1);                                            /* On recupere l'alias */
                    if (alias)
-                    { switch(alias->type_bit)                              /* On traite que ce qui peut passer en "condition" */
+                    { switch(alias->classe)                              /* On traite que ce qui peut passer en "condition" */
                        { case MNEMO_REGISTRE:
                          case MNEMO_SORTIE_ANA:
                           { $$ = alias;
@@ -502,29 +502,29 @@ unite:          modulateur ENTIER HEURE ENTIER
                     { alias = Set_new_external_alias(tech_id,acro); }                /* Si dependance externe, on va chercher */
 
                    if (alias)
-                    { if ($5 && (alias->type_bit==MNEMO_TEMPO ||                              /* Vérification des bits non comparables */
-                                 alias->type_bit==MNEMO_ENTREE ||
-                                 alias->type_bit==MNEMO_SORTIE ||
-                                 alias->type_bit==MNEMO_BISTABLE ||
-                                 alias->type_bit==MNEMO_MONOSTABLE ||
-                                 alias->type_bit==MNEMO_DIGITAL_OUTPUT ||
-                                 alias->type_bit==MNEMO_WATCHDOG ||
-                                 alias->type_bit==MNEMO_HORLOGE)
+                    { if ($5 && (alias->classe==MNEMO_TEMPO ||                              /* Vérification des bits non comparables */
+                                 alias->classe==MNEMO_ENTREE ||
+                                 alias->classe==MNEMO_SORTIE ||
+                                 alias->classe==MNEMO_BISTABLE ||
+                                 alias->classe==MNEMO_MONOSTABLE ||
+                                 alias->classe==MNEMO_DIGITAL_OUTPUT ||
+                                 alias->classe==MNEMO_WATCHDOG ||
+                                 alias->classe==MNEMO_HORLOGE)
                          )
                        { Emettre_erreur_new( "'%s' ne peut s'utiliser dans une comparaison", $3 );
                          $$=New_chaine(2);
                          g_snprintf( $$, 2, "0" );
                        } else
-                      if (!$5 && (alias->type_bit==MNEMO_SORTIE_ANA ||
-                                  alias->type_bit==MNEMO_REGISTRE ||
-                                  alias->type_bit==MNEMO_CPT_IMP ||
-                                  alias->type_bit==MNEMO_CPTH)
+                      if (!$5 && (alias->classe==MNEMO_SORTIE_ANA ||
+                                  alias->classe==MNEMO_REGISTRE ||
+                                  alias->classe==MNEMO_CPT_IMP ||
+                                  alias->classe==MNEMO_CPTH)
                          )
                        { Emettre_erreur_new( "'%s' ne peut s'utiliser qu'avec une comparaison", $3 );
                          $$=New_chaine(2);
                          g_snprintf( $$, 2, "0" );
                        }
-                      else switch(alias->type_bit)                              /* On traite que ce qui peut passer en "condition" */
+                      else switch(alias->classe)                              /* On traite que ce qui peut passer en "condition" */
                        { case MNEMO_TEMPO :
                           { $$ = New_condition_tempo( $1, alias, $4 );
                             break;
@@ -732,13 +732,13 @@ une_action:     T_ACT_COMOUT
                       options_g = g_list_copy( $4 );
                       options_d = g_list_copy( alias->options );
                       options = g_list_concat( options_g, options_d );                  /* Concaténation des listes d'options */
-                      if ($1 && (alias->type_bit==MNEMO_TEMPO ||
-                                 alias->type_bit==MNEMO_MSG ||
-                                 alias->type_bit==MNEMO_BUS ||
-                                 alias->type_bit==MNEMO_MOTIF ||
-                                 alias->type_bit==MNEMO_DIGITAL_OUTPUT ||
-                                 alias->type_bit==MNEMO_WATCHDOG ||
-                                 alias->type_bit==MNEMO_MONOSTABLE)
+                      if ($1 && (alias->classe==MNEMO_TEMPO ||
+                                 alias->classe==MNEMO_MSG ||
+                                 alias->classe==MNEMO_BUS ||
+                                 alias->classe==MNEMO_MOTIF ||
+                                 alias->classe==MNEMO_DIGITAL_OUTPUT ||
+                                 alias->classe==MNEMO_WATCHDOG ||
+                                 alias->classe==MNEMO_MONOSTABLE)
                          )
                        { Emettre_erreur_new( "'/%s' ne peut s'utiliser", alias->acronyme );
                          $$=New_action();
@@ -747,7 +747,7 @@ une_action:     T_ACT_COMOUT
                          g_snprintf( $$->alors, taille, " " );
                          $$->sinon = NULL;
                        }
-                      else switch(alias->type_bit)
+                      else switch(alias->classe)
                        { case MNEMO_TEMPO : $$=New_action_tempo( alias, options ); break;
                          case MNEMO_MSG   : $$=New_action_msg( alias, options );   break;
                          case MNEMO_BUS   : $$=New_action_bus( alias, options );   break;
@@ -973,7 +973,7 @@ dyn_string:     T_CHAINE
                       $$->type = T_DYN_STRING;
                       $$->chaine = g_try_malloc0(taille_chaine);
                       g_snprintf( $$->chaine, taille_chaine, "Dls_dyn_string(\"%s\",%d,\"%s\",\"%s\", &_%s_%s)",
-                                  $3, alias->type_bit, alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+                                  $3, alias->classe, alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                     }
                    g_free($3);
                    g_free($5);

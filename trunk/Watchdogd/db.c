@@ -2041,19 +2041,19 @@ fin:
 
     g_snprintf( requete, sizeof(requete),
        "CREATE OR REPLACE VIEW dictionnaire AS "
-       "SELECT 'AI' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_AI UNION "
-       "SELECT 'DI' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_DI UNION "
-       "SELECT 'DO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_DO UNION "
-       "SELECT 'AO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_AO UNION "
-       "SELECT 'BOOL' AS type_bit, type AS type_bit_int,tech_id,acronyme,libelle from mnemos_BOOL UNION "
-       "SELECT 'CH' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_CH UNION "
-       "SELECT 'CI' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_CI UNION "
-       "SELECT 'HORLOGE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_HORLOGE UNION "
-       "SELECT 'TEMPO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_Tempo UNION "
-       "SELECT 'REGISTRE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_R UNION "
-       "SELECT 'VISUEL' AS type_bit, -1 AS type_bit_int,tech_id,acronyme,libelle from syns_motifs UNION "
-       "SELECT 'WATCHDOG' AS type_bit, %d1 AS type_bit_int,tech_id,acronyme,libelle from mnemos_WATCHDOG UNION "
-       "SELECT 'MESSAGE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from msgs",
+       "SELECT 'AI' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_AI UNION "
+       "SELECT 'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_DI UNION "
+       "SELECT 'DO' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_DO UNION "
+       "SELECT 'AO' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_AO UNION "
+       "SELECT 'BOOL' AS classe, type AS classe_int,tech_id,acronyme,libelle from mnemos_BOOL UNION "
+       "SELECT 'CH' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_CH UNION "
+       "SELECT 'CI' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_CI UNION "
+       "SELECT 'HORLOGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_HORLOGE UNION "
+       "SELECT 'TEMPO' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_Tempo UNION "
+       "SELECT 'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_R UNION "
+       "SELECT 'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle from syns_motifs UNION "
+       "SELECT 'WATCHDOG' AS classe, %d1 AS classe_int,tech_id,acronyme,libelle from mnemos_WATCHDOG UNION "
+       "SELECT 'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle from msgs",
         MNEMO_ENTREE_ANA, MNEMO_ENTREE, MNEMO_SORTIE, MNEMO_SORTIE_ANA, MNEMO_CPTH, MNEMO_CPT_IMP, MNEMO_HORLOGE,
         MNEMO_TEMPO, MNEMO_REGISTRE, MNEMO_WATCHDOG, MNEMO_MSG
       );

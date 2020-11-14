@@ -305,6 +305,19 @@
        liste = g_slist_next(liste);
      }
     Json_end_array( builder );
+/*----------------------------------------------- Watchdog -------------------------------------------------------------------*/
+    Json_add_array ( builder, "WATCHDOG" );
+    liste = Partage->Dls_data_WATCHDOG;
+    while(liste)
+     { struct DLS_WATCHDOG *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, NULL );
+          Dls_WATCHDOG_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
 /*------------------------------------------------------- fin ----------------------------------------------------------------*/
     json_node_unref(request);
     buf = Json_get_buf ( builder, &taille_buf );

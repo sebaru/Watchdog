@@ -51,7 +51,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT type_bit_int FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme
+                "SELECT classe_int FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */

@@ -89,6 +89,8 @@
      { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_Tempo AS m WHERE m.tech_id='%s'", tech_id ); }
     else if (!strcasecmp ( classe, "BOOL" ) )
      { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_BOOL AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "WATCHDOG" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_WATCHDOG AS m WHERE m.tech_id='%s'", tech_id ); }
     else if (!strcasecmp ( classe, "MSG" ) )
      { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from msgs AS m WHERE m.tech_id='%s'", tech_id ); }
     SQL_Select_to_JSON ( builder, classe, chaine );

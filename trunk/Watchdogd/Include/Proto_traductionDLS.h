@@ -60,7 +60,7 @@
  struct ALIAS
   { gchar *tech_id;
     gchar *acronyme;
-    gint type_bit;                                                                           /* Type de tableau (E/A/B/M....) */
+    gint classe;                                                                             /* Type de tableau (E/A/B/M....) */
     GList *options;
     gint used;
     gboolean external;                 /* TRUE si le bit interne est externe au module (ie pas déclaré en tant qu'alias local */

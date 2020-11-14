@@ -1507,12 +1507,12 @@ end:
 /* Entrée : La chaine source, le type de bit, le tech_id/acronyme, le pointeur de raccourci                                   */
 /* sortie : Une nouvelle chaine de caractere à g_freer                                                                        */
 /******************************************************************************************************************************/
- gchar *Dls_dyn_string ( gchar *format, gint type_bit, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p )
+ gchar *Dls_dyn_string ( gchar *format, gint classe, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p )
   { gchar result[128], *debut, chaine[64];
     debut = g_strrstr ( format, "$1" );                            /* Début pointe sur le $ de "$1" si présent dans la chaine */
     if (!debut) return(g_strdup(format));
     g_snprintf( result, debut-format+1, "%s", format );                                                           /* Prologue */
-    switch (type_bit)
+    switch (classe)
      { case MNEMO_CPT_IMP:
              { struct DLS_CI *ci = *dlsdata_p;
                g_snprintf( chaine, sizeof(chaine), "%d %s", ci->valeur, ci->unite ); /* Row1 = unite */
