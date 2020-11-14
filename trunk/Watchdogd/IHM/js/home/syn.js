@@ -266,7 +266,7 @@
           else if (motif.forme=="none") Load_Gif_to_canvas ( motif );
           else
            { for (var j = 0; j < Response.visuels.length; j++)                  /* Pour chacun des visuels, parsing un par un */
-              { var visuel = Response.visuels[i];
+              { var visuel = Response.visuels[j];
                 if (visuel.tech_id == motif.tech_id && visuel.acronyme==motif.acronyme)
                  { Load_Motif_to_canvas ( motif, visuel.mode, visuel.color, visuel.cligno ); }
               }
