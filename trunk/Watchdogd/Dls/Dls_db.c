@@ -82,7 +82,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                "INSERT INTO dls SET "
-               "tech_id='%s',shortname='%s',name='%s',package='custom',"
+               "tech_id=UPPER('%s'),shortname='%s',name='%s',package='custom',"
                "actif=0,syn_id=1,compil_status=0,sourcecode='/* Default ! */' "
                "ON DUPLICATE KEY UPDATE shortname=VALUES(shortname),name=VALUES(name)", tech_id, tech_id, nom );
     g_free(nom);

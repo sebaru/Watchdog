@@ -301,6 +301,7 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+             { "data": "decompte",   "title":"Décompte",   "className": "align-middle hidden-xs" },
              { "data": "libelle",    "title":"Libellé",    "className": "align-middle hidden-xs" },
            ],
          /*order: [ [0, "desc"] ],*/
