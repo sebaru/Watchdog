@@ -56,13 +56,13 @@
  function Show_Modal_Dls_Del ( tech_id )
   { table = $('#idTableDLS').DataTable();
     selection = table.ajax.json().plugins.filter( function(item) { return item.tech_id==tech_id } )[0];
-    $('#idModalDLSDelTitre').text ( "Détruire le module ?" );
-    $('#idModalDLSDelMessage').html("Etes-vous sur de vouloir supprimer le module DLS "+
-                                    "et toutes ses dépendances (Mnémoniques, ...) ?<hr>"+
-                                    "<strong>"+selection.tech_id + " - " + selection.shortname + "</strong>" + "<br>" + selection.name
-                                   );
-    $('#idModalDLSDelValider').attr( "onclick", "Valider_Dls_Del('"+tech_id+"')" );
-    $('#idModalDLSDel').modal("show");
+    $('#idModalDelTitre').text ( "Détruire le module ?" );
+    $('#idModalDelMessage').html("Etes-vous sur de vouloir supprimer le module DLS "+
+                                 "et toutes ses dépendances (Mnémoniques, ...) ?<hr>"+
+                                 "<strong>"+selection.tech_id + " - " + selection.shortname + "</strong>" + "<br>" + selection.name
+                                );
+    $('#idModalDelValider').attr( "onclick", "Valider_Dls_Del('"+tech_id+"')" );
+    $('#idModalDel').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Dls_compiler ( tech_id )

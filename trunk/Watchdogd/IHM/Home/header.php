@@ -19,7 +19,10 @@
         .navbar { background-color: rgba(30,28,56,0.8);
                 }
 
-        .nav-link:hover { color: white;
+        .nav-link { color: white !important;
+                  }
+
+        .nav-link:hover { color: white !important;
                           background-color: #48BBC0;
                         }
     }
@@ -27,37 +30,25 @@
 
     </head>
 
-    <body class="bg-dark">
+    <body class="bg-light">
 
-
-
-  <div id="idToastAlert" class="toast" role="status" style="position: absolute; bottom: 50px; right: 50px; z-index: 99">
-   <div class="toast-header">
-     <i class="fas fa-exclamation-circle"></i>
-     <strong class="mr-auto">Bootstrap</strong>
-     <!--<small>11 mins ago</small>-->
-     <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-       <span aria-hidden="true">&times;</span>
-     </button>
-   </div>
-   <div class="toast-body">
-     Hello, world! This is a toast message.
-   </div>
-</div>
-
-
-<div class="position-fixed" style="bottom: 3rem; right: 3rem; z-index:9999">
-  <div id="idToastStatus" data-delay="3000" class="toast bg-success" role="status">
-   <div class="toast-header">
-     <strong class="mr-auto"> Résultat de la commande</strong>
-     <!--<small>11 mins ago</small>-->
-     <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-       <span aria-hidden="true">&times;</span>
-     </button>
-   </div>
-   <div class="toast-header">
-     <i class="fas fa-check-circle text-success"></i><span>Succès !</span>
-   </div>
+<div id="idModalDel" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content ">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title text-justify"><i class="fas fa-trash"></i> <span id="idModalDelTitre"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="idModalDelMessage"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
+        <button id="idModalDelValider" type="button" class="btn btn-danger" data-dismiss="modal"><i class="fas fa-trash"></i> Valider</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -99,13 +90,13 @@
     </form>
       <li class="nav-item dropdown">
         <a class="nav-link rounded dropdown-toggle ml-2" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fas fa-user"></i>
+          <i class="fas fa-user text-white"></i>
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUSER">
           <a class="dropdown-item" id="idHrefUsername" href="#"><i class="fas fa-user text-info"></i> <span id="idUsername">-</span></a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="/tech/users"><i class="fas fa-users-cog text-info"></i> <span>Gestion des utilisateurs</span></a>
-          <a class="dropdown-item" href="/tech/users_sessions"><i class="fas fa-list text-info"></i> <span>Gestion des sessions</span></a>
+          <a class="dropdown-item" href="/home/users"><i class="fas fa-users-cog text-info"></i> <span>Utilisateurs</span></a>
+          <a class="dropdown-item" href="/tech/users_sessions"><i class="fas fa-list text-info"></i> <span>Sessions</span></a>
           <a class="dropdown-item" href="/tech/log"><i class="fas fa-database text-warning"></i> <span>Audit Log</span></a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="/tech/dashboard"><i class="fas fa-tachometer-alt text-primary"></i> <span>Mode Technicien</span> </a>

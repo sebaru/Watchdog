@@ -134,8 +134,8 @@
        return;
      }
 
-    g_snprintf( chaine, sizeof(chaine), "SELECT * FROM users WHERE access_level<='%d'", session->access_level );
-    SQL_Select_to_JSON ( builder, "Users", chaine );
+    g_snprintf( chaine, sizeof(chaine), "SELECT * FROM users WHERE access_level<'%d'", session->access_level );
+    SQL_Select_to_JSON ( builder, "users", chaine );
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
