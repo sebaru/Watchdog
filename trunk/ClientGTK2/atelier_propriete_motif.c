@@ -394,8 +394,17 @@ printf("Changer_couleur %p\n", data);
      }
     g_snprintf( Trame_motif->motif->libelle, sizeof(Trame_motif->motif->libelle),
                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_libelle) ) );
+
+    g_snprintf( Trame_motif->motif->tech_id, sizeof(Trame_motif->motif->tech_id),
+               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tech_id) ) );
+    g_strcanon( Trame_motif->motif->tech_id, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", '_' );
+    g_snprintf( Trame_motif->motif->acronyme, sizeof(Trame_motif->motif->acronyme),
+               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acronyme) ) );
+    g_strcanon( Trame_motif->motif->acronyme, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", '_' );
+
     g_snprintf( Trame_motif->motif->clic_tech_id, sizeof(Trame_motif->motif->clic_tech_id),
                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_clic_tech_id) ) );
+    g_strcanon( Trame_motif->motif->clic_tech_id, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", '_' );
     g_snprintf( Trame_motif->motif->clic_acronyme, sizeof(Trame_motif->motif->clic_acronyme),
                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_clic_acronyme) ) );
     g_strcanon( Trame_motif->motif->clic_acronyme, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", '_' );
@@ -493,7 +502,7 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 2, 3 );
 
     Entry_tech_id = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_clic_tech_id), TRUE );
+    gtk_entry_set_editable( GTK_ENTRY(Entry_tech_id), TRUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_tech_id, 1, 2, 2, 3 );
 
     Entry_acronyme = gtk_entry_new();
@@ -517,7 +526,7 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     texte = gtk_label_new( _("Action bit (M)") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 4, 5 );
 
-    texte = gtk_label_new( _("Tech_ID/Acronyme (M)") );
+    texte = gtk_label_new( _("Clic Tech_ID/Acronyme (M)") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 5, 6 );
 
     Entry_clic_tech_id = gtk_entry_new();
