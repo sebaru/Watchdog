@@ -40,7 +40,7 @@
 /* Entrée: le tech_id et acronyme                                                                                             */
 /* Sortie: -1 si erreur                                                                                                       */
 /******************************************************************************************************************************/
- gint Rechercher_type_bit ( gchar *tech_id, gchar *acronyme )
+ gint Rechercher_DICO_type ( gchar *tech_id, gchar *acronyme )
   { gchar requete[512];
     struct DB *db;
 
@@ -51,7 +51,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT type_bit_int FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme
+                "SELECT classe_int FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */

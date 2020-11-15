@@ -39,7 +39,10 @@
 /******************************************************************************************************************************/
  void Http_traiter_syn_clic ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                               SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_POST)
+  { GBytes *request_brute;
+    gsize taille;
+
+    if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -47,29 +50,22 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 0 )) return;
 
-    gchar *prefix = "/syn/clic/";
-    if ( ! g_str_has_prefix ( path, prefix ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Prefix");
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
        return;
      }
 
-    if (!strlen (path+strlen(prefix)))
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       json_node_unref(request);
        return;
      }
 
-    gchar *temp = g_utf8_strup( path+strlen(prefix), -1 );
-    gchar **params = g_strsplit ( temp, "/", 2 );
-    g_free(temp);
-    if( ! (params && params[0] && params[1]) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
-       g_strfreev( params );
-       return;
-     }
-
-    gchar *tech_id  = Normaliser_chaine ( params[0] );
-    gchar *acronyme = Normaliser_chaine ( params[1] );
-    g_strfreev( params );
+    gchar *tech_id  = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *acronyme = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
+    json_node_unref( request );
     Envoyer_commande_dls_data ( tech_id, acronyme );
     Audit_log ( session, "Clic Synoptique : %s:%s", tech_id, acronyme );
     g_free(tech_id);
@@ -93,11 +89,6 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-
-    if ( strcmp ( path, "/syn/list" ) )
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
-       return;
-     }
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
@@ -219,6 +210,29 @@
        g_object_unref(builder);
        return;
      }
+
+/*----------------------------------------------- Visuels --------------------------------------------------------------------*/
+    Json_add_array ( builder, "visuels" );
+    struct DB *db = Init_DB_SQL();
+    if (db)
+     { g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) from dls WHERE syn_id=%d", syn_id );
+       Lancer_requete_SQL ( db, chaine );                                                      /* Execution de la requete SQL */
+       while(Recuperer_ligne_SQL(db))                                                      /* Chargement d'une ligne resultat */
+        { GSList *liste = Partage->Dls_data_VISUEL;
+          while(liste)
+           { struct DLS_VISUEL *bit=liste->data;
+             if (!strcasecmp(bit->tech_id, db->row[0]))
+              { Json_add_object ( builder, NULL );
+                Dls_VISUEL_to_json ( builder, bit );
+                Json_end_object( builder );
+              }
+             liste = g_slist_next(liste);
+           }
+        }
+       Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+     }
+    Json_end_array( builder );
 
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/

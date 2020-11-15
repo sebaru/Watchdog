@@ -107,6 +107,13 @@
     gint last_change;                                                                    /* Date du dernier changement d'etat */
   };
 
+ struct DLS_WATCHDOG
+  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gint    last_top;
+    gint    consigne;
+  };
+
  struct DLS_BOOL
   { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];

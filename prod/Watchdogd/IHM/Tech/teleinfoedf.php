@@ -67,6 +67,9 @@
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Last View</label>
 						     <input disabled id="idTINFOLastView" type="text" class="form-control" placeholder="Date de last view">
+						     <div class="input-group-append">
+							     <span class="input-group-text">secondes</span>
+						     </div>
      					</div>
   					</div>
 <!-- Container -->

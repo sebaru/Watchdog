@@ -32,6 +32,7 @@
 
 /************************************************ Définitions des prototypes **************************************************/
  extern JsonBuilder *Json_create ( void );
+ extern JsonNode *Json_end ( JsonBuilder *builder );
  extern void Json_add_string ( JsonBuilder *builder, gchar *name, gchar *chaine );
  extern void Json_add_int ( JsonBuilder *builder, gchar *name, gint valeur );
  extern void Json_add_double ( JsonBuilder *builder, gchar *name, gdouble valeur );

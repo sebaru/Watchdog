@@ -58,7 +58,6 @@
     Json_add_string ( builder, "start_date", date );
 
     Json_add_double ( builder, "conso", dls->conso );
-    Json_add_bool   ( builder, "starting",             dls->vars.starting );
     Json_add_bool   ( builder, "debug",                dls->vars.debug );
     Json_add_bool   ( builder, "bit_comm_out",         dls->vars.bit_comm_out );
     Json_add_bool   ( builder, "bit_defaut",           dls->vars.bit_defaut );
@@ -286,7 +285,7 @@
     while(liste)
      { struct DLS_MESSAGES *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_MESSAGE_to_json ( builder, bit );
           Json_end_object( builder );
         }
@@ -299,8 +298,21 @@
     while(liste)
      { struct DLS_REGISTRE *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, bit->acronyme );
+        { Json_add_object ( builder, NULL );
           Dls_REGISTRE_to_json ( builder, bit );
+          Json_end_object( builder );
+        }
+       liste = g_slist_next(liste);
+     }
+    Json_end_array( builder );
+/*----------------------------------------------- Watchdog -------------------------------------------------------------------*/
+    Json_add_array ( builder, "WATCHDOG" );
+    liste = Partage->Dls_data_WATCHDOG;
+    while(liste)
+     { struct DLS_WATCHDOG *bit=liste->data;
+       if (!strcasecmp(bit->tech_id, tech_id))
+        { Json_add_object ( builder, NULL );
+          Dls_WATCHDOG_to_json ( builder, bit );
           Json_end_object( builder );
         }
        liste = g_slist_next(liste);

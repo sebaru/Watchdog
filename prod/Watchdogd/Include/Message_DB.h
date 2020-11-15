@@ -32,6 +32,14 @@
 
  #define NOM_TABLE_MSG       "msgs"
 
+ enum
+  { MESSAGE_SMS_NONE,
+    MESSAGE_SMS_YES,
+    MESSAGE_SMS_GSM_ONLY,
+    MESSAGE_SMS_OVH_ONLY,
+    NBR_TYPE_MESSAGE_SMS
+  };
+
 /******************************************** Définitions des prototypes ******************************************************/
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_acronyme ( gchar *tech_id, gchar *acronyme );
  extern struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db );

@@ -56,13 +56,13 @@
  function Show_Modal_Dls_Del ( tech_id )
   { table = $('#idTableDLS').DataTable();
     selection = table.ajax.json().plugins.filter( function(item) { return item.tech_id==tech_id } )[0];
-    $('#idModalDLSDelTitre').text ( "Détruire le module ?" );
-    $('#idModalDLSDelMessage').html("Etes-vous sur de vouloir supprimer le module DLS "+
-                                    "et toutes ses dépendances (Mnémoniques, ...) ?<hr>"+
-                                    "<strong>"+selection.tech_id + " - " + selection.shortname + "</strong>" + "<br>" + selection.name
-                                   );
-    $('#idModalDLSDelValider').attr( "onclick", "Valider_Dls_Del("+tech_id+")" );
-    $('#idModalDLSDel').modal("show");
+    $('#idModalDelTitre').text ( "Détruire le module ?" );
+    $('#idModalDelMessage').html("Etes-vous sur de vouloir supprimer le module DLS "+
+                                 "et toutes ses dépendances (Mnémoniques, ...) ?<hr>"+
+                                 "<strong>"+selection.tech_id + " - " + selection.shortname + "</strong>" + "<br>" + selection.name
+                                );
+    $('#idModalDelValider').attr( "onclick", "Valider_Dls_Del('"+tech_id+"')" );
+    $('#idModalDel').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Dls_compiler ( tech_id )
@@ -131,7 +131,7 @@
             },
             { "data": "nbr_compil", "title":"Nbr Compil", "className": "align-middle text-center hidden-xs" },
             { "data": "nbr_ligne", "title":"Nbr Lignes", "className": "align-middle text-center hidden-xs" },
-            { "data": null, "title":"Actions", "orderable": false,
+            { "data": null, "title":"Actions", "orderable": false, "className": "align-middle",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-primary", "Voir le code", "Redirect", "/tech/dls_source/"+item.tech_id, "code", null );

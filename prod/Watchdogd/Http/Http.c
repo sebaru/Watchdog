@@ -463,6 +463,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { void *zmq_motifs, *zmq_msgs;
     gint last_pulse = 0;
+    GError *error;
 
 reload:
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
@@ -489,7 +490,7 @@ reload:
                       g_get_host_name(), Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath );
           system( chaine );
         }
-       GError *error;
+
        if (soup_server_set_ssl_cert_file ( socket, Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath, &error ))
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: SSL Loaded with '%s' and '%s'", __func__,
                     Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath );
@@ -552,13 +553,15 @@ reload:
     soup_server_add_handler ( socket, "/api/histo/alive",    Http_traiter_histo_alive, NULL, NULL );
     soup_server_add_handler ( socket, "/api/histo/ack",      Http_traiter_histo_ack, NULL, NULL );
     soup_server_add_handler ( socket, "/",                   Http_traiter_file, NULL, NULL );
-    gchar *protocols[] = { "live-motifs", "live-msgs" };
-    soup_server_add_websocket_handler ( socket, "/api/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
-    soup_server_add_websocket_handler ( socket, "/api/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
+    if (Config.instance_is_master==TRUE)
+     { gchar *protocols[] = { "live-motifs", "live-msgs" };
+       soup_server_add_websocket_handler ( socket, "/api/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
+       soup_server_add_websocket_handler ( socket, "/api/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
+     }
 
-
-    if (!soup_server_listen_all (socket, Cfg_http.tcp_port, (Cfg_http.ssl_enable ? SOUP_SERVER_LISTEN_HTTPS : 0), NULL))
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer Listen Failed !", __func__ );
+    if (!soup_server_listen_all (socket, Cfg_http.tcp_port, (Cfg_http.ssl_enable ? SOUP_SERVER_LISTEN_HTTPS : 0), &error))
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer Listen Failed '%s' !", __func__, error->message );
+       g_error_free(error);
        goto end;
      }
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,

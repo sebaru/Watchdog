@@ -29,39 +29,51 @@
  #include "Audio.h"
  extern struct AUDIO_CONFIG Cfg_audio;
 /******************************************************************************************************************************/
-/* Admin_json_list : fonction appelée pour lister les modules modbus                                                          */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
+/* Entrée : un JSon Builder                                                                                                   */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_status ( JsonBuilder *builder )
-  { Json_add_string ( builder, "langage", Cfg_audio.language );
-    Json_add_string ( builder, "device", Cfg_audio.device );
-    Json_add_bool ( builder, "diffusion_enabled",    Cfg_audio.diffusion_enabled );
-    Json_add_int  ( builder, "last_audio",           Cfg_audio.last_audio );
-    Json_add_int  ( builder, "nbr_diffusion_wav",    Cfg_audio.nbr_diffusion_wav );
-    Json_add_int  ( builder, "nbr_diffusion_google", Cfg_audio.nbr_diffusion_google );
+ static void Admin_json_audio_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { JsonBuilder *builder;
+    gsize taille_buf;
+    gchar *buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    Json_add_bool ( builder, "thread_is_running", Lib->Thread_run );
+    if (Lib->Thread_run)                                     /* Warning : Cfg_audio does not exist if thread is not running ! */
+     { Json_add_string ( builder, "langage", Cfg_audio.language );
+       Json_add_string ( builder, "device", Cfg_audio.device );
+       Json_add_bool ( builder, "diffusion_enabled",    Cfg_audio.diffusion_enabled );
+       Json_add_int  ( builder, "last_audio",           Cfg_audio.last_audio );
+       Json_add_int  ( builder, "nbr_diffusion_wav",    Cfg_audio.nbr_diffusion_wav );
+       Json_add_int  ( builder, "nbr_diffusion_google", Cfg_audio.nbr_diffusion_google );
+     }
+    buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( gchar *commande, gchar **buffer_p, gsize *taille_p )
-  { JsonBuilder *builder;
-    *buffer_p = NULL;
-    *taille_p = 0;
-
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+ void Admin_json ( struct LIBRAIRIE *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
+  { if (access_level < 6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
-/************************************************ Préparation du buffer JSON **************************************************/
-                                                                      /* Lancement de la requete de recuperation des messages */
-    if (!strcmp(commande, "/status")) { Admin_json_status ( builder ); }
-
-/************************************************ Génération du JSON **********************************************************/
-    *buffer_p = Json_get_buf (builder, taille_p);
-    return;
+         if (!strcasecmp(path, "/status"))   { Admin_json_audio_status ( lib, msg ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

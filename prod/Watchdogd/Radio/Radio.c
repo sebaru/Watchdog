@@ -36,6 +36,12 @@
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Radio.h"
  struct RADIO_CONFIG Cfg_radio;
+
+ gchar *RADIO[][2] =
+  { { "voltage", "http://start-voltage.ice.infomaniak.ch/playlists/start-voltage-high.mp3.m3u" }
+  };
+
+
 /******************************************************************************************************************************/
 /* Radio_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
@@ -109,7 +115,6 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct ZMQUEUE *zmq_from_bus;
-    gchar radio[128];
 
 reload:
     memset( &Cfg_radio, 0, sizeof(Cfg_radio) );                                     /* Mise a zero de la structure de travail */
@@ -118,24 +123,24 @@ reload:
     Radio_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
     zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    g_snprintf( radio, sizeof(radio), "%s",                                                               /* Radio par défaut */
-                "http://start-voltage.ice.infomaniak.ch/playlists/start-voltage-high.mp3.m3u" );
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { struct ZMQ_TARGET *event;
-       gchar buffer[256];
-       void *payload;
+     { gchar buffer[256];
 
-       if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( !strcmp( event->tag, "play_radio" ) )
-           { if (strlen(payload)) { g_snprintf(radio, sizeof(radio), "%s", (gchar *) payload); }
-             Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_DEBUG,
-                       "%s : Reception d'un message PLAY RADIO : %s", __func__, radio );
+/********************************************************* Envoi de SMS *******************************************************/
+       JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
+       if (request)
+        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
+          if ( !strcasecmp( zmq_tag, "PLAY_RADIO" ) )
+           { gchar *radio = Json_get_string ( request, "radio" );
+             Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_NOTICE, "%s : Diffusing %s", __func__, radio );
              Jouer_radio ( radio );
-           } else
-          if ( !strcmp( event->tag, "stop_radio" ) )
-           { Stopper_radio(); }
+           }
+          else if ( !strcasecmp( zmq_tag, "STOP_RADIO" ) )
+           { Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_NOTICE, "%s : Stopping radio", __func__ );
+             Stopper_radio();
+           }
+          json_node_unref(request);
         }
-
        sleep(1);
      }
     Close_zmq ( zmq_from_bus );

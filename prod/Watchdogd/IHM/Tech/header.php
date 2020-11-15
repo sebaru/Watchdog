@@ -20,7 +20,10 @@
         .navbar { background-color: rgba(30,28,56,0.8);
                 }
 
-        .nav-link:hover { color: white;
+        .nav-link { color: white !important;
+                  }
+
+        .nav-link:hover { color: white !important;
                           background-color: #48BBC0;
                         }
         .courbe-dashboard { height: 300px; }
@@ -179,18 +182,18 @@
 
       <li class="nav-item dropdown">
         <a class="nav-link rounded dropdown-toggle ml-2" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fas fa-user"></i>
+          <i class="fas fa-user  text-warning"></i>
         </a>
-
 
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUSER">
           <a class="dropdown-item" id="idHrefUsername" href="#"><i class="fas fa-user text-info"></i> <span id="idUsername">-</span></a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="/tech/users_list"><i class="fas fa-users-cog text-info"></i> <span>Gestion des utilisateurs</span></a>
-          <a class="dropdown-item" href="/tech/users_sessions"><i class="fas fa-list text-info"></i> <span>Gestion des sessions</span></a>
+          <a class="dropdown-item" href="/home/users"><i class="fas fa-users-cog text-info"></i> <span>Utilisateurs</span></a>
+          <a class="dropdown-item" href="/tech/users_sessions"><i class="fas fa-list text-info"></i> <span>Sessions</span></a>
           <a class="dropdown-item" href="/tech/log"><i class="fas fa-binoculars text-warning"></i> <span>Audit Log</span></a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="/home/synmobile/1"><i class="fas fa-home text-primary"></i> <span>Mode Client</span> </a>
+          <a class="dropdown-item" href="/home/syn/1"><i class="fas fa-home text-primary"></i> <span>Mode Client</span> </a>
+          <a class="dropdown-item" href="/home/synmobile/1"><i class="fas fa-home text-primary"></i> <span>Mode Client Mobile</span> </a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" onclick="Logout()"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
         </div>

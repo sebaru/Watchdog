@@ -101,6 +101,23 @@
            "</span>" );
   }
 
+/********************************************* Renvoi un Select d'access Level ************************************************/
+ function Select_Access_level ( id, fonction, selected )
+  { retour = "<select id='"+id+"' class='custom-select'"+
+             "onchange="+fonction+">";
+    for ( i=0; i<localStorage.getItem("access_level"); i++ )
+     { retour += "<option value='"+i+"' "+(selected==i ? "selected" : "")+">"+i+"</option>"; }
+    retour +="</select>";
+    return(retour);
+  }
+/********************************************* Renvoi un input ****************************************************************/
+ function Input ( id, fonction, place_holder, value )
+  { retour = "<input id='"+id+"' class='form-control'"+
+             "placeholder='"+place_holder+"' "+
+             "onchange="+fonction+" "+
+             "value='"+value+"'/>";
+    return(retour);
+  }
 /********************************* Chargement d'une courbe dans u synoptique 1 au démrrage ************************************/
  function Charger_une_courbe ( idChart, tech_id, acronyme, period )
   { if (localStorage.getItem("instance_is_master")!="true") return;

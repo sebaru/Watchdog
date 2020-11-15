@@ -1,21 +1,24 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function GSM_Sauver_parametre ( )
+ function SMS_Sauver_parametre ( )
   { var json_request = JSON.stringify(
      { /*instance:      Get_target_instance(),*/
        tech_id:       $('#idGSMTechID').val(),
-       smsbox_apikey: $('#idGSMAPIKey').val(),
+       ovh_service_name: $('#idGSMOVHServiceName').val(),
+       ovh_application_key: $('#idGSMOVHApplicationKey').val(),
+       ovh_application_secret: $('#idGSMOVHApplicationSecret').val(),
+       ovh_consumer_key: $('#idGSMOVHConsumerKey').val(),
        description:   $('#idGSMDescription').val(),
      });
     Send_to_API ( 'POST', "/api/process/smsg/set", json_request, null );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function GSM_Reload ( )
+ function SMS_Reload ( )
   { Process_reload ( Get_target_instance(), "SMSG", false );
   }
 /************************************ Demande l'envoi d'un SMS de test ********************************************************/
- function GSM_test ( )
+ function SMS_test ( )
   { var json_request = JSON.stringify(
      { instance:      Get_target_instance(),
      });
@@ -29,7 +32,10 @@
                                   else { $('#idAlertThreadNotRunning').show(); }
        $('#idGSMTechID').val( Response.tech_id );
        $('#idGSMDescription').val( Response.description );
-       $('#idGSMAPIKey').val( Response.smsbox_apikey );
+       $('#idGSMOVHServiceName').val( Response.ovh_service_name );
+       $('#idGSMOVHApplicationKey').val( Response.ovh_application_key );
+       $('#idGSMOVHApplicationSecret').val( Response.ovh_application_secret );
+       $('#idGSMOVHConsumerKey').val( Response.ovh_consumer_key );
        $('#idGSMComm').val( (Response.comm_status ? "TRUE" : "FALSE" ) );
        $('#idGSMNbrSMS').val( Response.nbr_sms );
      }, null);

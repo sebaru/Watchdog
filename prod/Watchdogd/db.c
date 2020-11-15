@@ -474,7 +474,7 @@ encore:
 
     if (database_version==0) goto fin;
 
-    if (database_version < 2500)
+    if (database_version <= 2500)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE users DROP `imsg_bit_presence`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete),
@@ -483,7 +483,7 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2510)
+    if (database_version <= 2510)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES"
                   "(23, 3,9999, 1, 'EVENT_NONE_TOR', 'Used for detected Event with no mapping yet.', ''),"
@@ -492,7 +492,7 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2532)
+    if (database_version <= 2532)
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE eana TO mnemos_AnalogInput" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete),
@@ -503,22 +503,22 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2541)
+    if (database_version <= 2541)
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE dls_cpt_imp TO mnemos_CptImp" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2543)
+    if (database_version <= 2543)
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE tempo TO mnemos_Tempo" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2571)
+    if (database_version <= 2571)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `users` ADD `imsg_available` TINYINT NOT NULL AFTER `imsg_allow_cde`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2573)
+    if (database_version <= 2573)
      { g_snprintf( requete, sizeof(requete), "INSERT INTO `mnemos` "
                    "(`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES "
                    "(25, 5, 122, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
@@ -548,7 +548,7 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2581)
+    if (database_version <= 2581)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `min_e_tor` `map_E` INT(11) NOT NULL" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `min_e_ana` `map_EA` INT(11) NOT NULL" );
@@ -559,7 +559,7 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2582)
+    if (database_version <= 2582)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `rfxcom` CHANGE `e_min` `map_E` INT(11) NOT NULL" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `rfxcom` CHANGE `ea_min` `map_EA` INT(11) NOT NULL" );
@@ -568,7 +568,7 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2583)
+    if (database_version <= 2583)
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE onduleurs TO ups" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `ups` CHANGE `e_min` `map_E` INT(11) NOT NULL" );
@@ -579,19 +579,19 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2669)
+    if (database_version <= 2669)
      { g_snprintf( requete, sizeof(requete), "DROP TABLE rfxcom" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2696)
+    if (database_version <= 2696)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `compil_date` int(11) NOT NULL AFTER `actif`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `compil_status` int(11) NOT NULL AFTER `compil_date`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2728)
+    if (database_version <= 2728)
      { g_snprintf( requete, sizeof(requete),
       "ALTER TABLE `config` CHANGE `instance_id` `instance_id` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL;" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
@@ -606,7 +606,7 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2743)
+    if (database_version <= 2743)
      { g_snprintf( requete, sizeof(requete), "INSERT INTO `mnemos` "
                    "(`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES "
                    "(79, 0, 39, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
@@ -644,73 +644,73 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2748)
+    if (database_version <= 2748)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_DigitalInput` DROP COLUMN `furtif`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2847)
+    if (database_version <= 2847)
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE dls_cpth TO mnemos_CptHoraire" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2850)
+    if (database_version <= 2850)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_CptHoraire` CHANGE `val` `valeur` INT(11) NOT NULL" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2857)
+    if (database_version <= 2857)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` ADD `acro_syn` text NOT NULL AFTER `tableau`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2871)
+    if (database_version <= 2871)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_CptImp` CHANGE `val` `valeur`  float NOT NULL" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2909)
+    if (database_version <= 2909)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `shortname` text NOT NULL AFTER `name`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "UPDATE dls SET shortname='Systeme' WHERE id=1" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2911)
+    if (database_version <= 2911)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `id_plugin_dls` INT(11) NOT NULL AFTER `num`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "UPDATE msgs SET id_plugin_dls=1" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2912)
+    if (database_version <= 2912)
      { g_snprintf( requete, sizeof(requete), "UPDATE msgs INNER JOIN syns ON msgs.id_syn=syns.id INNER JOIN dls ON dls.num_syn=syns.id SET msgs.id_plugin_dls=dls.id;" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs DROP COLUMN `id_syn`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2914)
+    if (database_version <= 2914)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls CHANGE `num_syn` `syn_id` int(11) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2915)
+    if (database_version <= 2915)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `id_plugin_dls` `dls_id` int(11) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2934)
+    if (database_version <= 2934)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE histo_msgs CHANGE `id_num` `id_msg` int(11) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2951)
+    if (database_version <= 2951)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE histo_bit ADD `date_time` DATETIME(6) AFTER `date_usec`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2974)
+    if (database_version <= 2974)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns ADD `vignette_activite` INT(11) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE syns ADD `vignette_secu_bien` INT(11) NOT NULL DEFAULT '0'" );
@@ -726,7 +726,7 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2991)
+    if (database_version <= 2991)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` ENGINE = INNODB ROW_FORMAT = DYNAMIC;" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE histo_msgs ADD FOREIGN KEY fk_id_msg (`id_msg`) REFERENCES msgs(`id`)"
@@ -734,7 +734,7 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 2994)
+    if (database_version <= 2994)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` ENGINE = INNODB ROW_FORMAT = DYNAMIC;" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` ENGINE = INNODB ROW_FORMAT = DYNAMIC;" );
@@ -764,7 +764,7 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3019)
+    if (database_version <= 3019)
      { g_snprintf( requete, sizeof(requete),
                   "CREATE TABLE IF NOT EXISTS `icons_new` ("
                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -776,7 +776,7 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3055)
+    if (database_version <= 3055)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `bit_voc` `bit_audio` int(11) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `audio` TINYINT(1) NOT NULL DEFAULT '0' AFTER `bit_audio`" );
@@ -785,14 +785,14 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3083)
+    if (database_version <= 3083)
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE syns_capteurs TO syns_cadrans" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `persist` TINYINT(1) NOT NULL DEFAULT '0' AFTER `enable`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3086)
+    if (database_version <= 3086)
      { g_snprintf( requete, sizeof(requete),
                   "CREATE TABLE IF NOT EXISTS `mnemos_Registre` ("
                   "`id_mnemo` int(11) NOT NULL,"
@@ -803,23 +803,23 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3113)
+    if (database_version <= 3113)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos CHANGE `num_plugin` `dls_id` int(11) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3128)
+    if (database_version <= 3128)
      { g_snprintf( requete, sizeof(requete), "INSERT INTO mnemos (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `command_text`) VALUES "
                                              "(110, 1, 07, 1, 'SYS_EVENT_NOT_FOUND', 'Event not found', '')" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3159)
+    if (database_version <= 3159)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `nbr_compil` INT(11) NOT NULL DEFAULT '0' AFTER `compil_status`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3178)
+    if (database_version <= 3178)
      { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `syns_scenario` ("
                                              "`id` int(11) NOT NULL AUTO_INCREMENT,"
                                              "`id_syn` int(11) NOT NULL DEFAULT '0',"
@@ -833,12 +833,12 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3209)
+    if (database_version <= 3209)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs CHANGE `syn` `syn_id` int(11) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3215)
+    if (database_version <= 3215)
      { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `syns_camerasup` ("
                                              "`id` int(11) NOT NULL AUTO_INCREMENT,"
                                              "`syn_id` int(11) NOT NULL,"
@@ -852,7 +852,7 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3247)
+    if (database_version <= 3247)
      { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `scenario_ticks` ("
                                              "`id` int(11) NOT NULL,"
                                              "`num` int(11) NOT NULL,"
@@ -869,23 +869,23 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3252)
+    if (database_version <= 3252)
      { g_snprintf( requete, sizeof(requete), "INSERT INTO mnemos (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `command_text`) VALUES "
                                              "(111, 1,  8, 1, 'SYS_NEW_TICK', 'Default Command by Tick', '');" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3310)
+    if (database_version <= 3310)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `is_mp3` TINYINT(1) NOT NULL DEFAULT '0' AFTER `time_repeat`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3348)
+    if (database_version <= 3348)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE users ADD `phphash` VARCHAR(130) NOT NULL AFTER `hash`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3353)
+    if (database_version <= 3353)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE users ADD `access_level` INT(11) NOT NULL AFTER `enable`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "UPDATE users SET phphash='$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a' WHERE id=0" );
@@ -906,7 +906,7 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3380)
+    if (database_version <= 3380)
      { g_snprintf( requete, sizeof(requete), "CREATE TABLE `users_sessions` ("
                                              "`id` varchar(128) NOT NULL,"
                                              "`login` varchar(32) NOT NULL,"
@@ -920,26 +920,26 @@ encore:
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3386)
+    if (database_version <= 3386)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `sourcecode` MEDIUMTEXT NOT NULL AFTER `nbr_compil`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3444)
+    if (database_version <= 3444)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_modules ADD `date_create` DATETIME NOT NULL AFTER `id`" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_modules DROP `instance_id`" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3448)
+    if (database_version <= 3448)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE rs485 CHANGE `instance_id` `host` TEXT NOT NULL" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE rs485 ADD `date_ajout` DATETIME AFTER `host`" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3463)
+    if (database_version <= 3463)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos ADD `ev_host` VARCHAR(40) NOT NULL AFTER `libelle`" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos ADD `ev_thread` VARCHAR(20) NOT NULL AFTER `ev_host`" );
@@ -948,17 +948,17 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3470)
+    if (database_version <= 3470)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_modules ADD `max_nbr_E` INT(11) NOT NULL AFTER `map_E`" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3490)
+    if (database_version <= 3490)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE rs485 ADD `forced_e_min` INT(11) NOT NULL DEFAULT '0' AFTER `e_min`" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3521)
+    if (database_version <= 3521)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns` ENGINE = INNODB" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_camerasup` ENGINE = INNODB" );
@@ -981,7 +981,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3550)
+    if (database_version <= 3550)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` ADD `created_by_user` INT(1) NOT NULL DEFAULT '1' AFTER `id`" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` CHANGE `libelle` `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default'");
@@ -998,19 +998,19 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3555)
+    if (database_version <= 3555)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `tech_id` VARCHAR(24) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT id AFTER `id`" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3586)
+    if (database_version <= 3586)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` DROP `type`" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `package` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'custom' AFTER `tech_id`" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3596)
+    if (database_version <= 3596)
      { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `mnemos_Horloge` ("
                                              "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                                              "`id_mnemo` int(11) NOT NULL,"
@@ -1022,12 +1022,12 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3641)
+    if (database_version <= 3641)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` DROP `created_by_user`" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3663)
+    if (database_version <= 3663)
      { g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='ARCH_REQUEST_NUMBER' WHERE id=13" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='DLS_BIT_PER_SEC' WHERE id=12" );
@@ -1040,14 +1040,14 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3681)
+    if (database_version <= 3681)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs ADD `mnemo_id` int(11) UNIQUE NULL DEFAULT NULL" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs ADD CONSTRAINT FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3682)
+    if (database_version <= 3682)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `sms_phone` `phone` VARCHAR(80) DEFAULT ''" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE users ALTER TABLE users DROP `jabberid`" );
@@ -1062,27 +1062,27 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3687)
+    if (database_version <= 3687)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `ip` `hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT ''" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3693)
+    if (database_version <= 3693)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `nbr_ligne` int(11) NOT NULL DEFAULT '0' AFTER `sourcecode`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3694)
+    if (database_version <= 3694)
      { g_snprintf( requete, sizeof(requete), "UPDATE dls SET nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''));" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3728)
+    if (database_version <= 3728)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE users ADD `email` varchar(120) COLLATE utf8_unicode_ci DEFAULT NULL AFTER `hash`" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3747)
+    if (database_version <= 3747)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `compil_date_temp` DATETIME NOT NULL DEFAULT NOW();");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "UPDATE dls SET compil_date_temp=FROM_UNIXTIME(compil_date);");
@@ -1093,7 +1093,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3751)
+    if (database_version <= 3751)
      { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `audit_log` ("
                                              "`id` int(11) NOT NULL AUTO_INCREMENT,"
                                              "`username` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
@@ -1113,12 +1113,12 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3779)
+    if (database_version <= 3779)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `mnemo_id` int(11) NULL DEFAULT NULL AFTER `id`" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3781)
+    if (database_version <= 3781)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `libelle` `libelle` VARCHAR(256)"
                                              " COLLATE utf8_unicode_ci NOT NULL DEFAULT 'No libelle'");
        Lancer_requete_SQL ( db, requete );
@@ -1132,7 +1132,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3792)
+    if (database_version <= 3792)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_modules CHANGE `libelle` `description` VARCHAR(128)"
                                              " COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT'" );
        Lancer_requete_SQL ( db, requete );
@@ -1141,7 +1141,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3796)
+    if (database_version <= 3796)
      { g_snprintf( requete, sizeof(requete), "DROP TABLE gids" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE icons ENGINE=INNODB");
@@ -1158,7 +1158,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3815)
+    if (database_version <= 3815)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `acronyme` VARCHAR(64)"
                                              " COLLATE utf8_unicode_ci NULL DEFAULT NULL" );
        Lancer_requete_SQL ( db, requete );
@@ -1166,13 +1166,13 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4009)
+    if (database_version <= 4009)
      { g_snprintf( requete, sizeof(requete),
       "ALTER TABLE `dls` CHANGE `tech_id` `tech_id` VARCHAR(25) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL;" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4024)
+    if (database_version <= 4024)
      { g_snprintf( requete, sizeof(requete),
                   "CREATE TABLE IF NOT EXISTS `mnemos_DI` ("
                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -1191,7 +1191,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4030)
+    if (database_version <= 4030)
      { g_snprintf( requete, sizeof(requete),
                    "CREATE TABLE IF NOT EXISTS `mnemos_DO` ("
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -1210,7 +1210,7 @@ encore:
      }
 
 
-    if (database_version < 4079)
+    if (database_version <= 4079)
      { g_snprintf( requete, sizeof(requete),
                    "CREATE TABLE IF NOT EXISTS `mnemos_CI` ("
                    "`id` INT(11) NOT NULL AUTO_INCREMENT,"
@@ -1228,7 +1228,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4084)
+    if (database_version <= 4084)
      { g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE syns_cadrans ADD `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
        Lancer_requete_SQL ( db, requete );
@@ -1238,7 +1238,7 @@ encore:
      }
 
 
-    if (database_version < 4087)
+    if (database_version <= 4087)
      { g_snprintf( requete, sizeof(requete),
                   "CREATE TABLE IF NOT EXISTS `mnemos_AI` ("
                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -1260,7 +1260,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4094)
+    if (database_version <= 4094)
      { g_snprintf( requete, sizeof(requete),
                   "CREATE TABLE IF NOT EXISTS `mnemos_CH` ("
                   "`id` INT(11) NOT NULL AUTO_INCREMENT,"
@@ -1276,7 +1276,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4103)
+    if (database_version <= 4103)
      { g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `icons` ADD `type` VARCHAR(4) NOT NULL DEFAULT 'svg' AFTER `id`");
        g_snprintf( requete, sizeof(requete),
@@ -1290,14 +1290,14 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4105)
+    if (database_version <= 4105)
      { g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `syns_motifs` ADD `scale` float NOT NULL DEFAULT '1' AFTER `angle`;"
                    "ALTER TABLE `syns_motifs` ADD `def_color` VARCHAR(12) NOT NULL DEFAULT '#c0c0c0' AFTER `scale`;" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4110)
+    if (database_version <= 4110)
      { g_snprintf( requete, sizeof(requete),
                    "CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` ("
                    "`id` INT(11) NOT NULL AUTO_INCREMENT,"
@@ -1316,7 +1316,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4115)
+    if (database_version <= 4115)
      { g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `syns_motifs` DROP `bitclic2`;" );
        Lancer_requete_SQL ( db, requete );
@@ -1328,13 +1328,13 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4117)
+    if (database_version <= 4117)
      { g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `mnemos_AI` ADD `map_reponse_vocale` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun';" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4174)
+    if (database_version <= 4174)
      { g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `ups` ADD `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT 'NEW';" );
        Lancer_requete_SQL ( db, requete );
@@ -1350,7 +1350,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4187)
+    if (database_version <= 4187)
      { g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `mnemos_Tempo` ADD `dls_id` int(11) NOT NULL DEFAULT '0';" );
        Lancer_requete_SQL ( db, requete );
@@ -1372,7 +1372,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4203)
+    if (database_version <= 4203)
      { g_snprintf( requete, sizeof(requete),
                   "ALTER TABLE `mnemos_AI` ADD `tech_id` VARCHAR(32) NULL DEFAULT NULL AFTER `dls_id`;");
        Lancer_requete_SQL ( db, requete );
@@ -1394,7 +1394,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4205)
+    if (database_version <= 4205)
      { g_snprintf( requete, sizeof(requete),
                   "ALTER TABLE `mnemos_DI` ADD `tech_id` VARCHAR(32) NULL DEFAULT NULL AFTER `dls_id`;");
        Lancer_requete_SQL ( db, requete );
@@ -1496,7 +1496,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4206)
+    if (database_version <= 4206)
      { g_snprintf( requete, sizeof(requete),
                   "CREATE TABLE IF NOT EXISTS `mnemos_BOOL` ("
                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -1511,7 +1511,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4219)
+    if (database_version <= 4219)
      { g_snprintf( requete, sizeof(requete),
                    "CREATE TABLE IF NOT EXISTS `tableau` ("
                    "`id` INT NOT NULL AUTO_INCREMENT ,"
@@ -1535,7 +1535,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4230)
+    if (database_version <= 4230)
      { g_snprintf( requete, sizeof(requete), "DROP TABLE mnemos_HORLOGE" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete),
@@ -1561,7 +1561,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4267)
+    if (database_version <= 4267)
      { g_snprintf( requete, sizeof(requete), "alter table histo_msgs ADD `date_create` DATETIME(2)");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete),
@@ -1589,12 +1589,12 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4271)
+    if (database_version <= 4271)
      { g_snprintf( requete, sizeof(requete), "alter table msgs ADD `etat` tinyint(1) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4277)
+    if (database_version <= 4277)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `fleche_left` tinyint(1) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `nb_decimal` int(11) NOT NULL DEFAULT '2'" );
@@ -1603,7 +1603,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4307)
+    if (database_version <= 4307)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE histo_msgs CHANGE `alive` `alive` tinyint(1) NULL DEFAULT NULL" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "UPDATE histo_msgs SET `alive`=NULL WHERE `alive`=0" );
@@ -1614,7 +1614,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4323)
+    if (database_version <= 4323)
      { g_snprintf( requete, sizeof(requete),
                    "CREATE TABLE IF NOT EXISTS `syns_liens` ("
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -1650,7 +1650,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4327)
+    if (database_version <= 4327)
      { g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `syns_liens` ADD `stroke_linecap` varchar(32) COLLATE utf8_unicode_ci DEFAULT 'butt'" );
        Lancer_requete_SQL ( db, requete );
@@ -1662,7 +1662,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4328)
+    if (database_version <= 4328)
      { g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `syns_rectangles` ADD `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';" );
        Lancer_requete_SQL ( db, requete );
@@ -1671,21 +1671,21 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4333)
+    if (database_version <= 4333)
      { g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE users ADD `session_id` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'NONE'" );
        Lancer_requete_SQL ( db, requete );
      }
 
 
-    if (database_version < 4334)
+    if (database_version <= 4334)
      { g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `syns_rectangles` CHANGE "
                    "`fill` `def_color` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL;" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4377)
+    if (database_version <= 4377)
      { g_snprintf( requete, sizeof(requete),
                    "CREATE TABLE IF NOT EXISTS `mnemos_AO` ("
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -1706,24 +1706,24 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4412)
+    if (database_version <= 4412)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` ADD `mode_old_static` TINYINT(1) NOT NULL DEFAULT '0'");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4422)
+    if (database_version <= 4422)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_cadrans` CHANGE `fleche_left` `fleche` int(11) NOT NULL DEFAULT '0'");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4430)
+    if (database_version <= 4430)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` DROP `mode_old_static`");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` DROP `bit`");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4433)
+    if (database_version <= 4433)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` DROP FOREIGN KEY `mnemos_Tempo_tech_id`;");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` ADD CONSTRAINT `mnemos_Tempo_tech_id`"
@@ -1731,37 +1731,37 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4435)
+    if (database_version <= 4435)
      { g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_CptHoraire` SET valeur = valeur * 60;");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_CH` SET valeur = valeur * 60;");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4437)
+    if (database_version <= 4437)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_comments` ADD `font_size` int(11) NOT NULL DEFAULT '20'");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_comments` ADD `def_color` VARCHAR(12) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'white'");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4446)
+    if (database_version <= 4446)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` ADD `profil_audio` VARCHAR(80) NOT NULL DEFAULT 'P_ALL'");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4480)
+    if (database_version <= 4480)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_cadrans` DROP `bitctrl`");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4494)
+    if (database_version <= 4494)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_HORLOGE` ADD `libelle` VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default' AFTER `acronyme`; ");
        Lancer_requete_SQL ( db, requete );
      }
 
 
-    if (database_version < 4503)
+    if (database_version <= 4503)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_motifs` ADD `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown' AFTER`id`");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_motifs` ADD `auto_create` tinyint(1) NULL DEFAULT NULL AFTER `id`");
@@ -1770,7 +1770,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4511)
+    if (database_version <= 4511)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` ADD `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' AFTER `id`");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "UPDATE `msgs` INNER JOIN dls ON msgs.dls_id=dls.id SET msgs.tech_id=dls.tech_id;");
@@ -1781,7 +1781,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4511)
+    if (database_version <= 4511)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` DROP `dls_id`");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` DROP `mnemo_id`");
@@ -1796,7 +1796,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4531)
+    if (database_version <= 4531)
      { g_snprintf( requete, sizeof(requete), "update mnemos_DI set src_thread='imsgs' where src_thread='imsgp'");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "DROP TABLE `mnemos_CptImp`");
@@ -1819,7 +1819,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4551)
+    if (database_version <= 4551)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_R` ADD `archivage` BOOLEAN NOT NULL DEFAULT '0'");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_R` ADD `map_question_vocale` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
@@ -1828,17 +1828,17 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4562)
+    if (database_version <= 4562)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_cadrans` DROP `fleche`");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4567)
+    if (database_version <= 4567)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_AI` ADD `valeur` float NOT NULL DEFAULT '0' AFTER `max`");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4722)
+    if (database_version <= 4722)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE users ENGINE=INNODB");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "DROP TABLE users_sessions;");
@@ -1852,12 +1852,12 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4851)
+    if (database_version <= 4851)
      { g_snprintf( requete, sizeof(requete), "DROP TABLE `mnemos_AnalogInput`");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4880)
+    if (database_version <= 4880)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI CHANGE `src_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI CHANGE `src_text` `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
@@ -1881,7 +1881,7 @@ encore:
 
      }
 
-    if (database_version < 4889)
+    if (database_version <= 4889)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI CHANGE `map_host` `map_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI CHANGE `map_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
@@ -1901,7 +1901,7 @@ encore:
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_AI` ADD UNIQUE(`map_tech_id`, `map_tag`); ");
        Lancer_requete_SQL ( db, requete );
      }
-    if (database_version < 4891)
+    if (database_version <= 4891)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DO CHANGE `dst_host` `map_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DO CHANGE `dst_thread` `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL");
@@ -1922,12 +1922,12 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4908)
+    if (database_version <= 4908)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_CI ADD `archivage` BOOLEAN NOT NULL DEFAULT '1'");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4952)
+    if (database_version <= 4952)
      { g_snprintf( requete, sizeof(requete), "UPDATE syns_cadrans SET tech_id='SYS' WHERE tech_id=''");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD "
@@ -1935,14 +1935,14 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4968)
+    if (database_version <= 4968)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE config DROP CONSTRAINT PRIMARY KEY;");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE config ADD `id` int(11) NOT NULL AUTO_INCREMENT");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4984)
+    if (database_version <= 4984)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DI ADD `deletable` TINYINT(1) NOT NULL DEFAULT '1' AFTER `id`;");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DO ADD `deletable` TINYINT(1) NOT NULL DEFAULT '1' AFTER `id`;");
@@ -1955,29 +1955,29 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4987)
+    if (database_version <= 4987)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs DROP `bitclic`;");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 5039)
+    if (database_version <= 5039)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `debug` TINYINT(1) NOT NULL DEFAULT '0';");
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 5041)
+    if (database_version <= 5041)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_CI CHANGE `archivage` `archivage` INT(11) NOT NULL DEFAULT '1'" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 5044)
+    if (database_version <= 5044)
      { g_snprintf( requete, sizeof(requete), "UPDATE msgs SET profil_audio='P_NONE' WHERE audio=0" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs DROP `audio`" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 5057)
+    if (database_version <= 5057)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs DROP `bitctrl`" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs DROP `rouge`" );
@@ -1988,8 +1988,36 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 5070)
+    if (database_version <= 5070)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs DROP `enable`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version <= 5105)
+     { g_snprintf( requete, sizeof(requete), "update syns_motifs set forme='abls' where icone=535");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "update syns_motifs set forme='none' where forme='unknown'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "update syns_motifs set forme='goutte_eau' where icone=443");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "update syns_motifs set forme='klaxon' where icone=44");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "update syns_motifs set forme='lampe_lune' where icone=458");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+
+    if (database_version <= 5132)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `mnemos_WATCHDOG` ("
+                                             "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                                             "`deletable` tinyint(1) NOT NULL DEFAULT '1',"
+                                             "`tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,"
+                                             "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                                             "`libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                                             "PRIMARY KEY (`id`),"
+                                             "UNIQUE (`tech_id`,`acronyme`),"
+                                             "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                                             ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000");
        Lancer_requete_SQL ( db, requete );
      }
 
@@ -2013,19 +2041,21 @@ fin:
 
     g_snprintf( requete, sizeof(requete),
        "CREATE OR REPLACE VIEW dictionnaire AS "
-       "SELECT 'AI' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_AI UNION "
-       "SELECT 'DI' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_DI UNION "
-       "SELECT 'DO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_DO UNION "
-       "SELECT 'AO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_AO UNION "
-       "SELECT 'BOOL' AS type_bit, type AS type_bit_int,tech_id,acronyme,libelle from mnemos_BOOL UNION "
-       "SELECT 'CH' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_CH UNION "
-       "SELECT 'CI' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_CI UNION "
-       "SELECT 'HORLOGE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_HORLOGE UNION "
-       "SELECT 'TEMPO' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_Tempo UNION "
-       "SELECT 'REGISTRE' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from mnemos_R UNION "
-       "SELECT 'VISUEL' AS type_bit, %d AS type_bit_int,tech_id,acronyme,libelle from syns_motifs",
+       "SELECT 'AI' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_AI UNION "
+       "SELECT 'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_DI UNION "
+       "SELECT 'DO' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_DO UNION "
+       "SELECT 'AO' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_AO UNION "
+       "SELECT 'BOOL' AS classe, type AS classe_int,tech_id,acronyme,libelle from mnemos_BOOL UNION "
+       "SELECT 'CH' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_CH UNION "
+       "SELECT 'CI' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_CI UNION "
+       "SELECT 'HORLOGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_HORLOGE UNION "
+       "SELECT 'TEMPO' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_Tempo UNION "
+       "SELECT 'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_R UNION "
+       "SELECT 'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle from syns_motifs UNION "
+       "SELECT 'WATCHDOG' AS classe, %d1 AS classe_int,tech_id,acronyme,libelle from mnemos_WATCHDOG UNION "
+       "SELECT 'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle from msgs",
         MNEMO_ENTREE_ANA, MNEMO_ENTREE, MNEMO_SORTIE, MNEMO_SORTIE_ANA, MNEMO_CPTH, MNEMO_CPT_IMP, MNEMO_HORLOGE,
-        MNEMO_TEMPO, MNEMO_REGISTRE, -1
+        MNEMO_TEMPO, MNEMO_REGISTRE, MNEMO_WATCHDOG, MNEMO_MSG
       );
     Lancer_requete_SQL ( db, requete );
     Libere_DB_SQL(&db);

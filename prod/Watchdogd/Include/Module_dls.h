@@ -30,7 +30,7 @@
  #include <glib.h>
 
  struct DLS_TO_PLUGIN                                                 /* structure dechange de données entre DLS et le plugin */
-  { gint starting;                                      /* 1 si les bits internes "start" du plugins doivent etre positionnés */
+  { gboolean resetted;                                  /* 1 si les bits internes "start" du plugins doivent etre positionnés */
     gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
     gboolean bit_comm_out;
     gboolean bit_defaut;
@@ -67,6 +67,8 @@
  extern gfloat   Dls_data_get_AO        ( gchar *tech_id, gchar *acronyme, gpointer *ao_p );
  extern void     Dls_data_set_AO        ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *ao_p, gfloat val_avant_ech );
  extern gboolean Dls_data_get_tempo     ( gchar *tech_id, gchar *acronyme, gpointer *tempo_p );
+ extern gboolean Dls_data_get_WATCHDOG ( gchar *tech_id, gchar *acronyme, gpointer *wtd_p );
+ extern void     Dls_data_set_WATCHDOG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *wtd_p, gint consigne );
  extern void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
                                 gchar *host, gchar *thread, gchar *tag, gchar *param1);
  extern gfloat   Dls_data_get_AI        ( gchar *tech_id, gchar *acronyme, gpointer *ai_p );

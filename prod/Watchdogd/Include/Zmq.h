@@ -55,7 +55,7 @@
  extern struct ZMQUEUE *Connect_zmq ( gint pattern, gchar *name, gchar *type, gchar *endpoint, gint port );     /* Dans zmq.c */
  extern struct ZMQUEUE *Bind_zmq ( gint pattern, gchar *name, gchar *type, gchar *endpoint, gint port );
  extern void Close_zmq ( struct ZMQUEUE *zmq );
- extern gboolean Send_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille );
+ extern gboolean Send_zmq_as_raw ( struct ZMQUEUE *zmq, void *buf, gint taille );
  extern gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq,
                                      const gchar *source_instance, const gchar *source_thread,
                                      const gchar *target_instance, const gchar *target_thread,
@@ -68,5 +68,14 @@
  extern void Send_zmq_DI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gboolean etat );
  extern void Send_zmq_AI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range);
  extern void Send_zmq_CDE_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme );
+ extern  void Send_zmq_WATCHDOG_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gint consigne );
+ extern JsonNode *Recv_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *thread, gchar *buf, gint taille_buf );
+ extern gboolean Send_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_source_thread,
+                                      const gchar *zmq_target_instance, const gchar *zmq_target_thread,
+                                      const gchar *zmq_tag, JsonBuilder *builder );
+ extern gboolean Send_double_zmq_with_json ( struct ZMQUEUE *zmq1, struct ZMQUEUE *zmq2, const gchar *zmq_src_thread,
+                                             const gchar *zmq_dst_instance, const gchar *zmq_dst_thread,
+                                             const gchar *zmq_tag, JsonBuilder *builder );
+
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

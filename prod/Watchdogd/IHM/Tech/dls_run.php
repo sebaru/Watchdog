@@ -14,7 +14,7 @@
 
 <!----------------------------------------------------------------------------------------------------------------------------->
       <h4><img style="width: 30px" data-toggle="tooltip" title="Entrées TOR"
-                       src="https://icons.abls-habitat.fr/assets/gif/Entree.png" />Entrées TOR</h4>
+                       src="/img/entree.png" /> Entrées TOR</h4>
 
       <table id="idTableEntreeTOR" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
@@ -25,7 +25,7 @@
       <hr>
 <!----------------------------------------------------------------------------------------------------------------------------->
       <h4><img style="width: 30px" data-toggle="tooltip" title="Entrées ANA"
-                       src="https://icons.abls-habitat.fr/assets/gif/Entree_Analogique.png" />Entrées ANA</h4>
+                       src="/img/entree_analogique.png" /> Entrées ANA</h4>
 
       <table id="idTableEntreeANA" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
@@ -36,7 +36,7 @@
       <hr>
 <!----------------------------------------------------------------------------------------------------------------------------->
       <h4><img style="width: 30px" data-toggle="tooltip" title="Sorties TOR"
-                       src="https://icons.abls-habitat.fr/assets/gif/Sortie.png" />Sorties TOR</h4>
+                       src="/img/sortie.png" /> Sorties TOR</h4>
       <table id="idTableSortieTOR" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
         </thead>
@@ -47,7 +47,7 @@
 
 <!----------------------------------------------------------------------------------------------------------------------------->
       <h4><img style="width: 30px" data-toggle="tooltip" title="Sorties ANA"
-                       src="https://icons.abls-habitat.fr/assets/gif/Sortie_Analogique.png" />Sorties ANA</h4>
+                       src="/img/sortie_analogique.png" /> Sorties ANA</h4>
       <table id="idTableSortieANA" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
         </thead>
@@ -58,7 +58,7 @@
 
 <!----------------------------------------------------------------------------------------------------------------------------->
       <h4><img style="width: 30px" data-toggle="tooltip" title="Registres"
-                       src="https://icons.abls-habitat.fr/assets/gif/Calculatrice.png" />Registres</h4>
+                       src="/img/calculatrice.png" /> Registres</h4>
       <table id="idTableRegistre" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
         </thead>
@@ -69,7 +69,7 @@
 
 <!----------------------------------------------------------------------------------------------------------------------------->
       <h4><img style="width: 30px" data-toggle="tooltip" title="Compteurs d'impulsions"
-                       src="https://icons.abls-habitat.fr/assets/gif/Front_montant.png" />Compteurs d'impulsions</h4>
+                       src="/img/front_montant.png" /> Compteurs d'impulsions</h4>
       <table id="idTableCI" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
         </thead>
@@ -80,7 +80,7 @@
 
 <!----------------------------------------------------------------------------------------------------------------------------->
       <h4><img style="width: 30px" data-toggle="tooltip" title="Compteurs horaires"
-                       src="https://icons.abls-habitat.fr/assets/gif/Compteur_horaire.png" />Compteurs horaires</h4>
+                       src="/img/compteur_horaire.png" /> Compteurs horaires</h4>
       <table id="idTableCH" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
         </thead>
@@ -91,7 +91,7 @@
 
 <!----------------------------------------------------------------------------------------------------------------------------->
       <h4><img style="width: 30px" data-toggle="tooltip" title="Temporisations"
-                       src="https://icons.abls-habitat.fr/assets/gif/Sablier.png" />Temporisations</h4>
+                       src="/img/sablier.png" /> Temporisations</h4>
       <table id="idTableTempo" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
         </thead>
@@ -101,8 +101,19 @@
       <hr>
 
 <!----------------------------------------------------------------------------------------------------------------------------->
+      <h4><img style="width: 30px" data-toggle="tooltip" title="Watchdogs"
+                       src="/img/countdown.svg" /> Watchdogs</h4>
+      <table id="idTableWatchdog" class="table table-striped table-bordered table-hover">
+        <thead class="thead-dark">
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <hr>
+
+<!----------------------------------------------------------------------------------------------------------------------------->
       <h4><img style="width: 30px" data-toggle="tooltip" title="Messages"
-                       src="https://icons.abls-habitat.fr/assets/gif/Message.png" />Messages</h4>
+                       src="/img/message.png" /> Messages</h4>
       <table id="idTableMessages" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
         </thead>
@@ -113,7 +124,7 @@
 
 <!----------------------------------------------------------------------------------------------------------------------------->
       <h4><img style="width: 30px" data-toggle="tooltip" title="Mono et Bistables"
-                       src="https://icons.abls-habitat.fr/assets/gif/Message.png" />Monostables et Bistables</h4>
+                       src="/img/message.png" /> Monostables et Bistables</h4>
       <table id="idTableBool" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
         </thead>
@@ -124,7 +135,7 @@
 
 
 <!----------------------------------------------------------------------------------------------------------------------------->
-      <h4><span><i class="fas fa-eye text-primary"></i></span>Visuels</h4>
+      <h4><span><i class="fas fa-eye text-primary"></i></span> Visuels</h4>
       <table id="idTableVisuel" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
         </thead>

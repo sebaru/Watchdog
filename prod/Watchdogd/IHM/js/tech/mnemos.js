@@ -105,13 +105,12 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          rowId: "id",
-         columns: [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
-                    { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                    { "data": "libelle",    "title":"Libellé",    "className": "" },
-                    { "data": "map_thread", "title":"map_thread", "className": "hidden-xs" },
-                    { "data": "map_tech_id","title":"map_tech_id","className": "hidden-xs" },
-                    { "data": "map_tag",    "title":"map_tag",   "className": "hidden-xs" },
-                    { "data": null, "title":"Actions", "orderable": false, "className":"text-center",
+         columns: [        { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+                    { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
+                    { "data": "map_thread", "title":"map_thread", "className": "align-middle hidden-xs" },
+                    { "data": "map_tech_id","title":"map_tech_id","className": "align-middle hidden-xs" },
+                    { "data": "map_tag",    "title":"map_tag",   "className": "align-middle hidden-xs" },
+                    { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
                       "render": function (item)
                         { boutons = Bouton_actions_start ();
                           boutons += Bouton_actions_add ( "outline-success", "Active cette entrée", "Mnemos_DI_set", item.acronyme, "power-off", null );
@@ -133,19 +132,18 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          rowId: "id",
-         columns: [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
-                    { "data": null, "title":"Acronyme", "className": "text-center",
+         columns: [        { "data": null, "title":"Acronyme", "className": "align-middle text-center",
                       "render": function (item)
                        { return( Lien ( "/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir la courbe", item.acronyme ) ); }
                     },
-                    { "data": "libelle",    "title":"Libellé",    "className": "" },
-                    { "data": "unite",   "title":"Unité",   "className": "hidden-xs" },
-                    { "data": "type",   "title":"Type",   "className": "hidden-xs" },
-                    { "data": "min", "title":"min", "className": "hidden-xs" },
-                    { "data": "max", "title":"max", "className": "hidden-xs" },
-                    { "data": "map_thread", "title":"map_thread", "className": "hidden-xs" },
-                    { "data": "map_tech_id","title":"map_tech_id","className": "hidden-xs" },
-                    { "data": "map_tag",    "title":"map_tag",   "className": "hidden-xs" },
+                    { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
+                    { "data": "unite",   "title":"Unité",   "className": "align-middle hidden-xs" },
+                    { "data": "type",   "title":"Type",   "className": "align-middle hidden-xs" },
+                    { "data": "min", "title":"min", "className": "align-middle hidden-xs" },
+                    { "data": "max", "title":"max", "className": "align-middle hidden-xs" },
+                    { "data": "map_thread", "title":"map_thread", "className": "align-middle hidden-xs" },
+                    { "data": "map_tech_id","title":"map_tech_id","className": "align-middle hidden-xs" },
+                    { "data": "map_tag",    "title":"map_tag",   "className": "align-middle hidden-xs" },
                   ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -159,13 +157,12 @@
                },
 
          rowId: "id",
-         columns: [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
-                    { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                    { "data": "libelle",    "title":"Libellé",    "className": "" },
-                    { "data": "map_thread", "title":"map_thread", "className": "hidden-xs" },
-                    { "data": "map_tech_id","title":"map_tech_id","className": "hidden-xs" },
-                    { "data": "map_tag",    "title":"map_tag",    "className": "hidden-xs" },
-                    { "data": "dst_param1", "title":"dst_param1", "className": "hidden-xs" },
+         columns: [        { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+                    { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
+                    { "data": "map_thread", "title":"map_thread", "className": "align-middle hidden-xs" },
+                    { "data": "map_tech_id","title":"map_tech_id","className": "align-middle hidden-xs" },
+                    { "data": "map_tag",    "title":"map_tag",    "className": "align-middle hidden-xs" },
+                    { "data": "dst_param1", "title":"dst_param1", "className": "align-middle hidden-xs" },
                   ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -179,15 +176,15 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          rowId: "id",
-         columns: [ { "data": "tech_id",  "title":"TechId",     "className": "text-center hidden-xs" },
-                    { "data": "acronyme", "title":"Acronyme",   "className": "text-center" },
-                    { "data": "libelle",  "title":"Libellé",    "className": "" },
-                    { "data": "type",     "title":"Type",   "className": "hidden-xs" },
-                    { "data": "min",      "title":"min", "className": "hidden-xs" },
-                    { "data": "max",      "title":"max", "className": "hidden-xs" },
-                    { "data": "map_thread", "title":"map_thread", "className": "hidden-xs" },
-                    { "data": "map_tech_id","title":"map_tech_id","className": "hidden-xs" },
-                    { "data": "map_tag",    "title":"map_tag",    "className": "hidden-xs" },
+         columns: [ { "data": "tech_id",  "title":"TechId",     "className": "align-middle text-center hidden-xs" },
+                    { "data": "acronyme", "title":"Acronyme",   "className": "align-middle text-center" },
+                    { "data": "libelle",  "title":"Libellé",    "className": "align-middle " },
+                    { "data": "type",     "title":"Type",   "className": "align-middle hidden-xs" },
+                    { "data": "min",      "title":"min", "className": "align-middle hidden-xs" },
+                    { "data": "max",      "title":"max", "className": "align-middle hidden-xs" },
+                    { "data": "map_thread", "title":"map_thread", "className": "align-middle hidden-xs" },
+                    { "data": "map_tech_id","title":"map_tech_id","className": "align-middle hidden-xs" },
+                    { "data": "map_tag",    "title":"map_tag",    "className": "align-middle hidden-xs" },
                   ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -202,16 +199,15 @@
                },
          rowId: "id",
          columns:
-           [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
-             { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "" },
-             { "data": "unite",      "title":"Unité",    "className": "hidden-xs" },
+           [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
+             { "data": "unite",      "title":"Unité",    "className": "align-middle idden-xs" },
              { "data": null, "title":"Archivage", "className": "hidden-xs",
                "render": function (item)
                  { return(Bouton_Archivage ( "idRArchivage"+item.acronyme, "Mnemos_R_set_archivage('"+item.acronyme+"')", item.archivage )); }
              },
-             { "data": "map_question_vocale",   "title":"Question Vocale",   "className": "hidden-xs" },
-             { "data": "map_reponse_vocale",    "title":"Reponse Vocale",    "className": "hidden-xs" },
+             { "data": "map_question_vocale",   "title":"Question Vocale",   "className": "align-middle hidden-xs" },
+             { "data": "map_reponse_vocale",    "title":"Reponse Vocale",    "className": "align-middle hidden-xs" },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -226,17 +222,16 @@
                },
          rowId: "id",
          columns:
-           [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
-             { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "hidden-xs" },
+           [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle hidden-xs" },
              { "data": null, "title":"Etat", "className": "",
                "render": function (item)
                  { if (item.etat==true) { return( Bouton ( "success", "Activé", null, null, "Actif" ) );        }
                                    else { return( Bouton ( "outline-secondary", "Désactivé", null, null, "Inactif" ) ); }
                  },
              },
-             { "data": "multi",      "title":"Multi.",   "className": "text-center hidden-xs" },
-             { "data": "unite",      "title":"Unité",    "className": "text-center hidden-xs" },
+             { "data": "multi",      "title":"Multi.",   "className": "align-middle text-center hidden-xs" },
+             { "data": "unite",      "title":"Unité",    "className": "align-middle text-center hidden-xs" },
              { "data": null, "title":"Archivage", "className": "hidden-xs",
                "render": function (item)
                  { return(Bouton_Archivage ( "idCIArchivage"+item.acronyme, "Mnemos_CI_set_archivage('"+item.acronyme+"')", item.archivage )); }
@@ -255,10 +250,9 @@
                },
          rowId: "id",
          columns:
-           [ { "data": "tech_id",    "title":"TechId",     "className": "text-center hidden-xs" },
-             { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "hidden-xs" },
-             { "data": null, "title":"Profil AUDIO", "className": "hidden-xs",
+           [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle hidden-xs" },
+             { "data": null, "title":"Profil AUDIO", "className": "align-middle hidden-xs",
                "render": function (item)
                  { return("<input id='idMSGProfilAudio"+item.acronyme+"' class='form-control' "+
                           "placeholder='Profil audio' "+
@@ -266,7 +260,7 @@
                           "value='"+item.profil_audio+"'/>");
                  }
              },
-             { "data": null, "title":"Libellé Audio", "className": "hidden-xs",
+             { "data": null, "title":"Libellé Audio", "className": "align-middle hidden-xs",
                "render": function (item)
                  { return("<input id='idMSGLibelleAudio"+item.acronyme+"' class='form-control' "+
                           "placeholder='Libellé audio du message' "+
@@ -274,17 +268,17 @@
                           "value='"+item.libelle_audio+"'/>");
                  }
              },
-             { "data": null, "title":"SMS", "className": "",
+             { "data": null, "title":"SMS", "className": "align-middle ",
                "render": function (item)
                  { return("<select id='idMSGSms"+item.acronyme+"' class='custom-select'"+
                           "onchange=Mnemos_MSG_set('"+item.acronyme+"')>"+
                           "<option value='0' "+(item.sms==0 ? "selected" : "")+">Non</option>"+
                           "<option value='1' "+(item.sms==1 ? "selected" : "")+">Oui</option>"+
                           "<option value='2' "+(item.sms==2 ? "selected" : "")+">GSM Only</option>"+
-                          "<option value='3' "+(item.sms==3 ? "selected" : "")+">SMSBox Only</option>");
+                          "<option value='3' "+(item.sms==3 ? "selected" : "")+">OVH Only</option>");
                  }
              },
-             { "data": null, "title":"Libellé SMS", "className": "hidden-xs",
+             { "data": null, "title":"Libellé SMS", "className": "align-middle hidden-xs",
                "render": function (item)
                  { return("<input id='idMSGLibelleSms"+item.acronyme+"' class='form-control' "+
                           "placeholder='Libellé du SMS' "+
@@ -292,6 +286,23 @@
                           "value='"+item.libelle_sms+"'/>");
                  }
              },
+           ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
+
+    $('#idTableWatchdog').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         ajax: {	url : "/api/mnemos/list",	type : "GET", data: { "classe": "WATCHDOG", "tech_id": tech_id }, dataSrc: "WATCHDOG",
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
+         rowId: "id",
+         columns:
+           [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+             { "data": "decompte",   "title":"Décompte",   "className": "align-middle hidden-xs" },
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle hidden-xs" },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,

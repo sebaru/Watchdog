@@ -109,7 +109,7 @@
        if (Dls_auto_create_plugin( Cfg_teleinfo.tech_id, "Gestion du compteur EDF" ) == FALSE)
         { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_teleinfo.tech_id ); }
 
-       Mnemo_auto_create_DI ( FALSE, Cfg_teleinfo.tech_id, "COMM", "Statut de la communication avec le copteur EDF" );
+       Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_teleinfo.tech_id, "COMM", "Statut de la communication avec le compteur EDF" );
 
        Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "ADCO",  "N° d’identification du compteur", "numéro" );
        Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "ISOUS", "Intensité EDF souscrite ", "A" );
@@ -120,7 +120,6 @@
        Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "IMAX",  "Intensité EDF maximale", "A" );
        Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "PAPP",  "Puissance apparente EDF consommée", "VA" );
      }
-    Send_zmq_DI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", TRUE );
     Cfg_teleinfo.comm_status = TRUE;
     Cfg_teleinfo.nbr_connexion++;
     return(fd);
@@ -157,6 +156,8 @@
      { Send_AI_to_master ( "PAPP", Cfg_teleinfo.buffer + 5 ); }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     Cfg_teleinfo.last_view = Partage->top;
+    if (!Partage->top % 300)
+     { Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", 400 ); }
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread Teleinfo                                                                               */
@@ -232,7 +233,8 @@ reload:
              else { nbr_octet_lu = 0;                                                              /* Depassement de tampon ! */
                     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
                     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
-                             "%s: BufferOverflow, dropping trame", __func__ );
+                             "%s: BufferOverflow, dropping trame (nbr_octet_lu=%d, cpt=%d, taille buffer=%d)",
+                              __func__, nbr_octet_lu, cpt, TAILLE_BUFFER_TELEINFO  );
                   }
 
            }
@@ -257,7 +259,7 @@ reload:
            { close(Cfg_teleinfo.fd);
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
-             Send_zmq_DI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", FALSE );
+             Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", 0 );
              Cfg_teleinfo.comm_status = FALSE;
            }
         }
