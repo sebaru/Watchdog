@@ -105,7 +105,7 @@
  function Select_Access_level ( id, fonction, selected )
   { retour = "<select id='"+id+"' class='custom-select'"+
              "onchange="+fonction+">";
-    for ( i=0; i<localStorage.getItem("access_level")-1; i++ )
+    for ( i=0; i<localStorage.getItem("access_level"); i++ )
      { retour += "<option value='"+i+"' "+(selected==i ? "selected" : "")+">"+i+"</option>"; }
     retour +="</select>";
     return(retour);
