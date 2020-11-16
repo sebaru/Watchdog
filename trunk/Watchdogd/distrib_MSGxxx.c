@@ -76,6 +76,7 @@
 
     Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_slave, Partage->com_msrv.zmq_to_bus,
                                 "msrv", "*", "*","DLS_HISTO", builder );
+    Send_zmq_as_raw ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );      /* Pour thread SSRV uniquement */
     g_free( message );                                                                 /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
