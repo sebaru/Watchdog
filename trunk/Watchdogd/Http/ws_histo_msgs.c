@@ -79,7 +79,7 @@
      }
 
     g_snprintf( chaine, sizeof(chaine),
-                "SELECT histo.*, histo.alive, msg.libelle, msg.type, dls.syn_id,"
+                "SELECT histo.*, histo.alive, msg.libelle, msg.typologie, dls.syn_id,"
                 "parent_syn.page as syn_parent_page, syn.page as syn_page,"
                 "dls.shortname as dls_shortname, msg.tech_id, msg.acronyme"
                 " FROM histo_msgs as histo"
@@ -141,10 +141,12 @@
        else
         { gsize taille_buf;
           Json_add_string ( builder, "zmq_type", "update_histo" );
+          Json_add_object ( builder, "histo" );
           Json_add_string ( builder, "tech_id", tech_id );
           Json_add_string ( builder, "acronyme", acronyme );
           Json_add_string ( builder, "nom_ack", session->username );
           Json_add_string ( builder, "date_fixe", date_fixe );
+          Json_end_object ( builder );
           gchar *buf = Json_get_buf ( builder, &taille_buf );
           Http_msgs_send_to_all ( buf );
           soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -158,7 +160,7 @@
 /* Entrée: La base de données de travail                                                                                      */
 /* Sortie: False si probleme                                                                                                  */
 /******************************************************************************************************************************/
- void Http_msgs_send_histo_to_all ( struct CMD_TYPE_HISTO *histo )
+ void Http_msgs_send_histo_to_all ( JsonNode *histo )
   { gsize taille_buf;
     JsonBuilder *builder = Json_create ();
     if (builder == NULL)
@@ -166,7 +168,7 @@
        return;
      }
     Json_add_string( builder, "zmq_type", "update_histo" );
-    Histo_msg_print_to_JSON ( builder, histo );
+    Json_add_node ( builder, "histo", histo );
     gchar *buf = Json_get_buf ( builder, &taille_buf );
     Http_msgs_send_to_all ( buf );
   }

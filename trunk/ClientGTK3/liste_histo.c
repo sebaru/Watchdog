@@ -241,7 +241,7 @@ again:
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Afficher_un_histo (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { gchar ack[128], groupe_page[512];
+  { gchar groupe_page[512];
     GtkTreePath *path;
     GdkPixbuf *pixbuf;
     GtkTreeIter iter;
@@ -252,12 +252,16 @@ again:
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s",
                 Json_get_string(element, "syn_parent_page"), Json_get_string(element, "syn_page") );
 
-    if (strcmp(Json_get_string(element, "nom_ack"),"None"))
-     { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") ); }
-    else
-     { g_snprintf( ack, sizeof(ack), "(%s)", Json_get_string(element, "nom_ack" ) ); }
+    if (Json_has_member(element, "nom_ack"))
+     { gchar ack[128];
+       if (strcmp(Json_get_string(element, "nom_ack"),"None"))
+        { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") ); }
+       else
+        { g_snprintf( ack, sizeof(ack), "(%s)", Json_get_string(element, "nom_ack" ) ); }
+       gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, ack, -1 );
+     }
 
-    switch (Json_get_int(element, "type"))
+    switch (Json_get_int(element, "typologie"))
      { case MSG_ALARME: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Pignon_orange.svg", 30, 30, TRUE, NULL ); break;
        case MSG_ALERTE: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Bouclier2_rouge.svg", 30, 30, TRUE, NULL ); break;
        case MSG_DANGER: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Croix_rouge_rouge.svg", 30, 30, TRUE, NULL ); break;
@@ -271,16 +275,15 @@ again:
     gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
                          COLONNE_TECH_ID, Json_get_string(element, "tech_id"),
                          COLONNE_ACRONYME, Json_get_string(element, "acronyme"),
-                         COLONNE_TYPE, Type_vers_string(Json_get_int(element, "type")),
+                         COLONNE_TYPE, Type_vers_string(Json_get_int(element, "typologie")),
                          COLONNE_TYPE_PIXBUF, pixbuf,
                          COLONNE_SYN_ID, Json_get_int(element, "syn_id"),
                          COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_DATE_CREATE, Json_get_string(element, "date_create"),
                          COLONNE_DLS_SHORTNAME, Json_get_string(element, "dls_shortname"),
-                         COLONNE_ACK, ack,
                          COLONNE_LIBELLE, Json_get_string(element, "libelle"),
-                         COLONNE_COULEUR_FOND, &COULEUR_FOND[Json_get_int(element, "type")],
-                         COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[Json_get_int(element, "type")],
+                         COLONNE_COULEUR_FOND, &COULEUR_FOND[Json_get_int(element, "typologie")],
+                         COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[Json_get_int(element, "typologie")],
                          -1
                        );
     path = gtk_tree_model_get_path ( GTK_TREE_MODEL(store), &iter );
@@ -293,13 +296,12 @@ again:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Updater_histo ( struct CLIENT *client, JsonNode *element )
-  { gchar *tech_id, *acronyme;
-    GtkTreeIter iter;
+  { GtkTreeIter iter;
 
     gchar *acronyme_recu = Json_get_string ( element, "acronyme" );
     gchar *tech_id_recu  = Json_get_string ( element, "tech_id" );
 
-    if (!acronyme || !tech_id) return;
+    if (!acronyme_recu || !tech_id_recu) return;
 
     if (Json_has_member(element,"alive") && Json_get_bool(element,"alive") == FALSE) { Cacher_un_histo ( client, element ); return; }
 
@@ -307,8 +309,9 @@ again:
     gboolean valide      = gtk_tree_model_get_iter_first( store, &iter );
     gboolean found = FALSE;
     while ( valide )                                              /* A la recherche de l'iter perdu. Si trouvé, on met a jour */
-     { gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
-       if ( !strcmp(tech_id, tech_id_recu) && !strcmp(acronyme,acronyme_recu) )
+     { gchar *tech_id, *acronyme;
+       gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, COLONNE_ACRONYME, &acronyme, -1 );
+       if ( !strcmp(tech_id, tech_id_recu) && !strcmp(acronyme, acronyme_recu) )
         { gchar ack[80];
           found = TRUE;
           if(Json_has_member(element, "nom_ack"))
@@ -339,7 +342,7 @@ again:
 
     gchar *zmq_type = Json_get_string( response, "zmq_type" );
     if (zmq_type)
-     {      if(!strcmp(zmq_type,"update_histo")) { Updater_histo( client, response ); }
+     {      if(!strcmp(zmq_type,"update_histo")) { Updater_histo( client, Json_get_object_as_node ( response, "histo" ) ); }
        else if(!strcmp(zmq_type,"pulse"))        { Set_progress_pulse( client ); }
      }
     json_node_unref(response);

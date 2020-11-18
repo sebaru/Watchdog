@@ -55,17 +55,17 @@
   { guint  id;
     gchar  tech_id[32];
     gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    guchar typologie;                                                                      /* Etat, prealarme, defaut, alarme */
     gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  libelle_sms[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     guint  syn_id;                                                             /* Numéro ID du synoptique rattaché au message */
     gchar  syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  syn_libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
-    guchar type;                                                                           /* Etat, prealarme, defaut, alarme */
-    guint  sms;                                                                                             /* Envoi de sms ? */
-    gchar  libelle_audio[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  profil_audio[81];
+    guint  sms_notification;                                                                                /* Envoi de sms ? */
+    gchar  sms_libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
+    gchar  audio_libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
+    gchar  audio_profil[81];
   };
 
  enum

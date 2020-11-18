@@ -993,8 +993,8 @@
                    g_snprintf( msg.acronyme, sizeof(msg.acronyme), "%s", alias->acronyme );
                    g_snprintf( msg.libelle,  sizeof(msg.libelle),  "%s", libelle );
                    param = Get_option_entier ( alias->options, T_TYPE );
-                   if (param!=-1) msg.type = param;
-                             else msg.type = MSG_ETAT;
+                   if (param!=-1) msg.typologie = param;
+                             else msg.typologie = MSG_ETAT;
                    Mnemo_auto_create_MSG ( &msg );
                    break;
                  }

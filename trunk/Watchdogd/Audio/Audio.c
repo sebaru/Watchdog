@@ -129,29 +129,29 @@
 /* Entrée : le message à jouer                                                                                                */
 /* Sortie : True si OK, False sinon                                                                                           */
 /******************************************************************************************************************************/
- gboolean Jouer_google_speech ( gchar *libelle_audio )
+ gboolean Jouer_google_speech ( gchar *audio_libelle )
   { gint pid;
 
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: Send '%s'", __func__, libelle_audio );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: Send '%s'", __func__, audio_libelle );
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                 "%s: '%s' fork failed pid=%d (%s)", __func__, libelle_audio, pid, strerror(errno) );
+                 "%s: '%s' fork failed pid=%d (%s)", __func__, audio_libelle, pid, strerror(errno) );
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "Wtd_play_google.sh", "Wtd_play_google", Cfg_audio.language, libelle_audio, Cfg_audio.device, NULL );
+     { execlp( "Wtd_play_google.sh", "Wtd_play_google", Cfg_audio.language, audio_libelle, Cfg_audio.device, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "%s: '%s' exec failed pid=%d (%s)", __func__, libelle_audio, pid, strerror( errno ) );
+                "%s: '%s' exec failed pid=%d (%s)", __func__, audio_libelle, pid, strerror( errno ) );
        _exit(0);
      }
     else
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "%s: '%s' waiting to finish pid=%d", __func__, libelle_audio, pid );
+                "%s: '%s' waiting to finish pid=%d", __func__, audio_libelle, pid );
        waitpid(pid, NULL, 0 );
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "%s: Wtd_play_google %s '%s' %s finished pid=%d", __func__,
-              Cfg_audio.language, libelle_audio, Cfg_audio.device, pid );
+              Cfg_audio.language, audio_libelle, Cfg_audio.device, pid );
     Cfg_audio.nbr_diffusion_google++;
     return(TRUE);
   }
@@ -182,34 +182,37 @@ reload:
        JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
        if (request)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-          if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) && Json_get_bool ( request, "alive" ) == TRUE &&
-                strcasecmp( Json_get_string( request, "profil_audio" ), "P_NONE" ) )
+          if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) && Json_has_member ( request, "alive" ) &&
+               Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+               Json_has_member ( request, "audio_profil" ) && Json_has_member ( request, "audio_libelle" ) &&
+               Json_get_bool ( request, "alive" ) == TRUE &&
+               strcasecmp( Json_get_string( request, "audio_profil" ), "P_NONE" ) )
            { gchar *tech_id       = Json_get_string ( request, "tech_id" );
              gchar *acronyme      = Json_get_string ( request, "acronyme" );
-             gchar *profil_audio  = Json_get_string ( request, "profil_audio" );
-             gchar *libelle_audio = Json_get_string ( request, "libelle_audio" );
+             gchar *audio_profil  = Json_get_string ( request, "audio_profil" );
+             gchar *audio_libelle = Json_get_string ( request, "audio_libelle" );
              gchar *libelle       = Json_get_string ( request, "libelle" );
-             gint type_msg = Json_get_int ( request, "type_msg" );
+             gint typologie = Json_get_int ( request, "typologie" );
 
              Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                       "%s : Recu message '%s:%s' (profil_audio=%s)", __func__, tech_id, acronyme, profil_audio );
+                       "%s : Recu message '%s:%s' (audio_profil=%s)", __func__, tech_id, acronyme, audio_profil );
 
              if ( Cfg_audio.diffusion_enabled == FALSE &&
-                  ! (type_msg == MSG_ALERTE || type_msg == MSG_DANGER)
+                  ! (typologie == MSG_ALERTE || typologie == MSG_DANGER)
                 )                                                               /* Bit positionné quand arret diffusion audio */
               { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
                           "%s : Envoi audio inhibé. Dropping '%s:%s'", __func__, tech_id, acronyme );
               }
              else
               { if (Config.instance_is_master)
-                 { Envoyer_commande_dls_data( "AUDIO", profil_audio ); }                  /* Pos. du profil audio via interne */
+                 { Envoyer_commande_dls_data( "AUDIO", audio_profil ); }                  /* Pos. du profil audio via interne */
 
                 if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)                        /* Si Pas de message depuis xx */
                  { Jouer_wav_by_file("jingle"); }                                                   /* On balance le jingle ! */
                 Cfg_audio.last_audio = Partage->top;
 
-                if (strlen(libelle_audio))                  /* Si libelle_audio, le jouer, sinon jouer le libelle tout court) */
-                 { Jouer_google_speech( libelle_audio ); }
+                if (strlen(audio_libelle))                  /* Si audio_libelle, le jouer, sinon jouer le libelle tout court) */
+                 { Jouer_google_speech( audio_libelle ); }
                 else
                  { Jouer_google_speech( libelle ); }
 

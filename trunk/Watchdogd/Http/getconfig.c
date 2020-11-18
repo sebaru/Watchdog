@@ -129,7 +129,7 @@
     g_snprintf( critere, sizeof(critere), " instance_id='%s' AND nom_thread='%s' ",instance, thread );
     g_free(instance);
     g_free(thread);
-    json_object_foreach_member ( Json_get_object(request, "parametres"), Http_Modifier_config, critere );
+    json_object_foreach_member ( Json_get_object_as_object(request, "parametres"), Http_Modifier_config, critere );
 
     Audit_log ( session, "Config for '%s':'%s' changed", Json_get_string( request, "instance" ), Json_get_string( request, "thread" ) );
     json_node_unref(request);
