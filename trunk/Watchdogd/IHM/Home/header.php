@@ -19,7 +19,8 @@
         .navbar { background-color: rgba(30,28,56,0.8);
                 }
 
-        .nav-link { color: white !important;
+        .nav-link {
+        .nav-link {
                   }
 
         .nav-link:hover { color: white !important;
@@ -84,10 +85,6 @@
     </ul>
 
     <ul class="navbar-nav">
-    <form class="form-inline ml-2">
-      <input class="form-control mr-sm-2" type="search" placeholder="Rechercher" aria-label="Rechercher">
-      <button class="btn btn-success rounded my-1 my-sm-0" type="submit">Search</button> <!--btn-outline-success-->
-    </form>
       <li class="nav-item dropdown">
         <a class="nav-link rounded dropdown-toggle ml-2" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-user text-white"></i> <span id="idUsername">-</span>

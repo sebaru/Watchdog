@@ -20,7 +20,7 @@
         .navbar { background-color: rgba(30,28,56,0.8);
                 }
 
-        .nav-link { color: white !important;
+        .nav-link {
                   }
 
         .nav-link:hover { color: white !important;
@@ -169,10 +169,12 @@
         <span class="sr-only">Loading...</span>
       </div>
 
-      <form class="form-inline ml-2">
-        <input class="form-control mr-sm-2" type="search" placeholder="Rechercher" aria-label="Rechercher">
-        <button class="btn btn-success rounded my-1 my-sm-0" type="submit">Search</button> <!--btn-outline-success-->
-      </form>
+      <div class ="nav-item ml-2">
+        <input id="idSearchFor" class="form-control mr-sm-2" type="search" placeholder="Rechercher" aria-label="Rechercher">
+      </div>
+      <div class ="nav-item ml-2">
+        <button class="btn btn-success rounded my-1 my-sm-0" onclick="Rechercher()">Search</button> <!--btn-outline-success-->
+      </div>
 
       <div class ="nav-item ml-2">
         <div class="input-group">

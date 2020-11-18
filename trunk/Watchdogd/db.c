@@ -2053,6 +2053,7 @@ fin:
 
     g_snprintf( requete, sizeof(requete),
        "CREATE OR REPLACE VIEW dictionnaire AS "
+       "SELECT 'DLS' AS classe, -1 AS classe_int,tech_id,"",libelle from dls UNION "
        "SELECT 'AI' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_AI UNION "
        "SELECT 'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_DI UNION "
        "SELECT 'DO' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_DO UNION "
