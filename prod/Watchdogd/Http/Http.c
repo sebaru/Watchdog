@@ -461,7 +461,7 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { void *zmq_motifs, *zmq_msgs;
+  { void *zmq_motifs, *zmq_from_bus;
     gint last_pulse = 0;
     GError *error;
 
@@ -571,13 +571,13 @@ reload:
     GMainLoop *loop = g_main_loop_new (NULL, TRUE);
     GMainContext *loop_context = g_main_loop_get_context ( loop );
 
-    zmq_msgs   = Connect_zmq ( ZMQ_SUB, "listen-to-msgs",   "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-    zmq_motifs = Connect_zmq ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+    zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_motifs   = Connect_zmq ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
     Cfg_http.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { struct CMD_TYPE_HISTO histo;
-       struct DLS_VISUEL visu;
+     { struct DLS_VISUEL visu;
+       gchar buffer[2048];
        usleep(1000);
        sched_yield();
 
@@ -613,10 +613,12 @@ reload:
           g_free(buf);
         }
 
-       if ( Recv_zmq ( zmq_msgs, &histo, sizeof(histo) ) == sizeof(struct CMD_TYPE_HISTO) && Cfg_http.liste_ws_msgs_clients )
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: MSG %s:%s=%d received",
-                    __func__, histo.msg.tech_id, histo.msg.acronyme, histo.alive );
-          Http_msgs_send_histo_to_all(&histo);
+       JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
+       if (request)
+        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
+          if (!strcasecmp( zmq_tag, "DLS_HISTO" ))
+           { Http_msgs_send_histo_to_all( request ); }
+          else json_node_unref ( request );
         }
 
        if ( Partage->top > last_pulse + 50 )
@@ -641,7 +643,7 @@ reload:
     /*Close_zmq ( Cfg_http.zmq_from_bus );*/
     Close_zmq ( Cfg_http.zmq_to_master );
     Close_zmq ( zmq_motifs );
-    Close_zmq ( zmq_msgs );
+    Close_zmq ( zmq_from_bus );
     g_main_loop_unref(loop);
 
     g_slist_foreach ( Cfg_http.liste_http_clients, (GFunc) g_free, NULL );

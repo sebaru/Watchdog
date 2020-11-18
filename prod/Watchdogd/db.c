@@ -2006,7 +2006,6 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-
     if (database_version <= 5132)
      { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `mnemos_WATCHDOG` ("
                                              "`id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -2018,6 +2017,19 @@ encore:
                                              "UNIQUE (`tech_id`,`acronyme`),"
                                              "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                                              ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version <= 5153)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `sms` `sms_notification` int(11) NOT NULL DEFAULT '0'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `libelle_sms` `sms_libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `profil_audio` `audio_profil` VARCHAR(80) NOT NULL DEFAULT 'P_NONE'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `libelle_audio` `audio_libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `type` `typologie` int(11) NOT NULL DEFAULT '0'");
        Lancer_requete_SQL ( db, requete );
      }
 

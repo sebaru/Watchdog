@@ -38,7 +38,7 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  static void Gerer_arrive_MSG_event_dls_on ( struct DLS_MESSAGES *msg )
-  { gchar chaine[80], *date_create;
+  { gchar chaine[512], *date_create;
     struct CMD_TYPE_MESSAGE *message;
     struct CMD_TYPE_HISTO histo;
     struct timeval tv;
@@ -49,7 +49,6 @@
     memset ( &histo, 0, sizeof(struct CMD_TYPE_HISTO) );
     memcpy( &histo.msg, message, sizeof(struct CMD_TYPE_MESSAGE) );                                       /* Ajout dans la DB */
 
-    JsonBuilder *builder = Json_create ();
 /***************************************** Création de la structure interne de stockage ***************************************/
     histo.alive = TRUE;
     gettimeofday( &tv, NULL );
@@ -61,21 +60,23 @@
     g_snprintf( histo.nom_ack, sizeof(histo.nom_ack), "None" );
     Ajouter_histo_msgsDB( &histo );                                                                    /* Si ajout dans DB OK */
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
-    Json_add_string ( builder, "tech_id", message->tech_id );
-    Json_add_string ( builder, "acronyme", message->acronyme );
-    Json_add_int    ( builder, "type_msg", message->type );
-    Json_add_string ( builder, "dls_shortname", message->dls_shortname );
-    Json_add_string ( builder, "libelle", message->libelle );
-    Json_add_int    ( builder, "type_sms", message->sms );
-    Json_add_string ( builder, "libelle_sms", message->libelle_sms );
-    Json_add_string ( builder, "profil_audio", message->profil_audio );
-    Json_add_string ( builder, "libelle_audio", message->libelle_audio );
-    Json_add_bool   ( builder, "alive", TRUE );
-    Json_add_string ( builder, "date_create", histo.date_create );
-    Json_add_string ( builder, "nom_ack", histo.nom_ack );
+    JsonBuilder *builder = Json_create ();
+    g_snprintf( chaine, sizeof(chaine),
+               "SELECT msgs.*,dls.shortname as dls_shortname, dls.syn_id,"
+               "parent_syn.page as syn_parent_page, syn.page as syn_page "
+               "FROM msgs "
+               "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
+               "INNER JOIN syns as syn ON syn.id = dls.syn_id "
+               "INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id "
+               "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme );
+    SQL_Select_to_JSON ( builder, NULL, chaine );
+    Json_add_bool   ( builder, "alive",            TRUE );
+    Json_add_string ( builder, "date_create",      histo.date_create );
+    Json_add_string ( builder, "nom_ack",          histo.nom_ack );
 
     Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_slave, Partage->com_msrv.zmq_to_bus,
                                 "msrv", "*", "*","DLS_HISTO", builder );
+    Send_zmq_as_raw ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );      /* Pour thread SSRV uniquement */
     g_free( message );                                                                 /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/

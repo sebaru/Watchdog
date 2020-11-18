@@ -152,7 +152,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.libelle, msg.type, dls.syn_id,"
+                "SELECT histo.id, histo.alive, msg.libelle, msg.typologie, dls.syn_id,"
                 "parent_syn.page, syn.page, histo.nom_ack, histo.date_create,"
                 "histo.date_fixe, histo.date_fin, dls.shortname, msg.id, msg.tech_id, msg.acronyme"
                 " FROM %s as histo"
@@ -186,7 +186,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.libelle, msg.type, dls.syn_id,"
+                "SELECT histo.id, histo.alive, msg.libelle, msg.typologie, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create,"
                 "histo.date_fixe, histo.date_fin, dls.shortname, msg.id, msg.tech_id, msg.acronyme"
                 " FROM %s as histo"
@@ -243,7 +243,7 @@
        g_snprintf( histo_msgs->msg.acronyme,        sizeof(histo_msgs->msg.acronyme),        "%s", db->row[14] );
        histo_msgs->id               = atoi(db->row[0]);
        histo_msgs->alive            = atoi(db->row[1]);
-       histo_msgs->msg.type         = atoi(db->row[3]);
+       histo_msgs->msg.typologie    = atoi(db->row[3]);
        histo_msgs->msg.syn_id       = atoi(db->row[4]);
        g_snprintf ( histo_msgs->date_create, sizeof(histo_msgs->date_create), "%s", db->row[8] );
        if (db->row[9])  g_snprintf ( histo_msgs->date_fixe,   sizeof(histo_msgs->date_fixe), "%s", db->row[9] );
@@ -257,25 +257,24 @@
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
- void Histo_msg_print_to_JSON ( JsonBuilder *builder, struct CMD_TYPE_HISTO *histo )
-  { Json_add_int    ( builder, "id", histo->id );
-    Json_add_bool   ( builder, "alive", histo->alive );                             /* Le message est-il encore d'actualité ? */
-    Json_add_string ( builder, "nom_ack", histo->nom_ack );
-    Json_add_string ( builder, "date_create", histo->date_create );
-    Json_add_string ( builder, "date_fixe", histo->date_fixe );
-    Json_add_string ( builder, "date_fin", histo->date_fin );
-    Json_add_string ( builder, "tech_id", histo->msg.tech_id );
-    Json_add_string ( builder, "acronyme", histo->msg.acronyme );
-    Json_add_int    ( builder, "type", histo->msg.type );
-    Json_add_string ( builder, "dls_shortname", histo->msg.dls_shortname );
-    Json_add_string ( builder, "libelle", histo->msg.libelle );
-    Json_add_string ( builder, "libelle_sms", histo->msg.libelle_sms );
-    Json_add_int    ( builder, "syn_id", histo->msg.syn_id );
-    Json_add_string ( builder, "syn_parent_page", histo->msg.syn_parent_page );
-    Json_add_string ( builder, "syn_page", histo->msg.syn_page );
-    Json_add_string ( builder, "syn_libelle", histo->msg.syn_libelle );
-    Json_add_int    ( builder, "sms", histo->msg.sms );
-    Json_add_string ( builder, "libelle_audio", histo->msg.libelle_audio );
-    Json_add_string ( builder, "profil_audio", histo->msg.profil_audio );
+ void Histo_msg_print_to_JSON ( JsonBuilder *builder, JsonNode *histo )
+  { Json_add_bool   ( builder, "alive",           Json_get_bool( histo, "alive") ); /* Le message est-il encore d'actualité ? */
+    Json_add_string ( builder, "nom_ack",         Json_get_string( histo, "nom_ack") );
+    Json_add_string ( builder, "date_create",     Json_get_string( histo, "date_create") );
+    Json_add_string ( builder, "date_fixe",       Json_get_string( histo, "date_fixe") );
+    Json_add_string ( builder, "date_fin",        Json_get_string( histo, "date_fin") );
+    Json_add_string ( builder, "tech_id",         Json_get_string( histo, "tech_id") );
+    Json_add_string ( builder, "acronyme",        Json_get_string( histo, "acronyme") );
+    Json_add_int    ( builder, "typologie",       Json_get_int( histo, "typologie") );
+    Json_add_string ( builder, "dls_shortname",   Json_get_string( histo, "dls_shortname") );
+    Json_add_string ( builder, "libelle",         Json_get_string( histo, "libelle") );
+    Json_add_string ( builder, "libelle_sms",     Json_get_string( histo, "libelle_sms") );
+    Json_add_int    ( builder, "syn_id",          Json_get_int( histo, "syn_id") );
+    Json_add_string ( builder, "syn_parent_page", Json_get_string( histo, "syn_parent_page") );
+    Json_add_string ( builder, "syn_page",        Json_get_string( histo, "syn_page") );
+    Json_add_string ( builder, "syn_libelle",     Json_get_string( histo, "syn_libelle") );
+    Json_add_int    ( builder, "sms",             Json_get_int( histo, "sms") );
+    Json_add_string ( builder, "libelle_audio",   Json_get_string( histo, "libelle_audio") );
+    Json_add_string ( builder, "profil_audio",    Json_get_string( histo, "profil_audio") );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

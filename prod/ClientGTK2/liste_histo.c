@@ -222,13 +222,13 @@
                          COLONNE_ACRONYME, histo->msg.acronyme,
                          COLONNE_SYN_ID, histo->msg.syn_id,
                          COLONNE_GROUPE_PAGE, groupe_page,
-                         COLONNE_TYPE, Type_vers_string(histo->msg.type),
+                         COLONNE_TYPE, Type_vers_string(histo->msg.typologie),
                          COLONNE_DATE_CREATE, histo->date_create,
                          COLONNE_DLS_SHORTNAME, histo->msg.dls_shortname,
                          COLONNE_ACK, ack,
                          COLONNE_LIBELLE, histo->msg.libelle,
-                         COLONNE_COULEUR_FOND, &COULEUR_FOND[histo->msg.type],
-                         COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[histo->msg.type],
+                         COLONNE_COULEUR_FOND, &COULEUR_FOND[histo->msg.typologie],
+                         COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[histo->msg.typologie],
                          -1
                        );
   }

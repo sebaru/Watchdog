@@ -33,8 +33,8 @@
  #include <fcntl.h>
  #include <string.h>
 
- #define MSGS_SQL_SELECT  "SELECT msg.id,msg.libelle,msg.type,syn.libelle,parent_syn.page,syn.page," \
-                          "sms,libelle_audio,libelle_sms,dls.shortname,syn.id,profil_audio,msg.tech_id,msg.acronyme" \
+ #define MSGS_SQL_SELECT  "SELECT msg.id,msg.libelle,msg.typologie,syn.libelle,parent_syn.page,syn.page," \
+                          "sms_notification,audio_libelle,sms_libelle,dls.shortname,syn.id,audio_profil,msg.tech_id,msg.acronyme" \
                           " FROM msgs as msg" \
                           " INNER JOIN dls as dls ON msg.tech_id=dls.tech_id" \
                           " INNER JOIN syns as syn ON dls.syn_id=syn.id" \
@@ -48,7 +48,7 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gint Mnemo_auto_create_MSG ( struct CMD_TYPE_MESSAGE *msg )
-  { gchar *libelle, *libelle_audio, *libelle_sms;
+  { gchar *libelle, *audio_libelle, *sms_libelle;
     gchar requete[2048];
     gboolean retour;
     struct DB *db;
@@ -59,29 +59,29 @@
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle impossible", __func__ );
        return(-1);
      }
-    libelle_audio = Normaliser_chaine ( msg->libelle_audio );                                /* Formatage correct des chaines */
-    if (!libelle_audio)
+    audio_libelle = Normaliser_chaine ( msg->audio_libelle );                                /* Formatage correct des chaines */
+    if (!audio_libelle)
      { g_free(libelle);
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle_audio impossible", __func__ );
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation audio_libelle impossible", __func__ );
        return(-1);
      }
-    libelle_sms = Normaliser_chaine ( msg->libelle_sms );                                    /* Formatage correct des chaines */
-    if (!libelle_sms)
+    sms_libelle = Normaliser_chaine ( msg->sms_libelle );                                    /* Formatage correct des chaines */
+    if (!sms_libelle)
      { g_free(libelle);
-       g_free(libelle_audio);
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle_sms impossible", __func__ );
+       g_free(audio_libelle);
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation sms_libelle impossible", __func__ );
        return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s SET tech_id='%s',acronyme='%s',libelle='%s',libelle_audio='%s',libelle_sms='%s',"
-                "type='%d',sms='0' "
+                "INSERT INTO %s SET tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s',sms_libelle='%s',"
+                "typologie='%d',sms_notification='0' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), type=VALUES(type)", NOM_TABLE_MSG, msg->tech_id, msg->acronyme,
-                libelle, libelle, libelle, msg->type
+                libelle, libelle, libelle, msg->typologie
               );
     g_free(libelle);
-    g_free(libelle_audio);
-    g_free(libelle_sms);
+    g_free(audio_libelle);
+    g_free(sms_libelle);
 
     db = Init_DB_SQL();
     if (!db)
@@ -122,15 +122,15 @@
        g_snprintf( msg->syn_libelle,     sizeof(msg->syn_libelle  ),   "%s", db->row[3]  );
        g_snprintf( msg->syn_parent_page, sizeof(msg->syn_parent_page), "%s", db->row[4]  );
        g_snprintf( msg->syn_page,        sizeof(msg->syn_page     ),   "%s", db->row[5]  );
-       g_snprintf( msg->libelle_audio,   sizeof(msg->libelle_audio),   "%s", db->row[7] );
-       g_snprintf( msg->libelle_sms,     sizeof(msg->libelle_sms  ),   "%s", db->row[8] );
+       g_snprintf( msg->audio_libelle,   sizeof(msg->audio_libelle),   "%s", db->row[7] );
+       g_snprintf( msg->sms_libelle,     sizeof(msg->sms_libelle  ),   "%s", db->row[8] );
        g_snprintf( msg->dls_shortname,   sizeof(msg->dls_shortname),   "%s", db->row[9] );
-       g_snprintf( msg->profil_audio,    sizeof(msg->profil_audio ),   "%s", db->row[11] );
+       g_snprintf( msg->audio_profil,    sizeof(msg->audio_profil ),   "%s", db->row[11] );
        g_snprintf( msg->tech_id,         sizeof(msg->tech_id      ),   "%s", db->row[12] );
        g_snprintf( msg->acronyme,        sizeof(msg->acronyme     ),   "%s", db->row[13] );
        msg->id          = atoi(db->row[0]);
-       msg->type        = atoi(db->row[2]);
-       msg->sms         = atoi(db->row[6]);
+       msg->typologie   = atoi(db->row[2]);
+       msg->sms_notification = atoi(db->row[6]);
        msg->syn_id      = atoi(db->row[10]);
      }
     return(msg);

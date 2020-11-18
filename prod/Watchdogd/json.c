@@ -60,6 +60,15 @@
     json_builder_add_string_value ( builder, chaine );
   }
 /******************************************************************************************************************************/
+/* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
+/* Entrée: le builder, le nom du parametre, la valeur                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_add_node ( JsonBuilder *builder, gchar *name, JsonNode *node )
+  { if (name) json_builder_set_member_name  ( builder, name );
+    json_builder_add_value ( builder, node );
+  }
+/******************************************************************************************************************************/
 /* Json_add_boolean: Ajoute un enregistrement name/bool dans le builder                                                       */
 /* Entrée: le builder, le nom du parametre, la valeur                                                                         */
 /* Sortie: néant                                                                                                              */
@@ -207,9 +216,18 @@
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
- JsonObject *Json_get_object ( JsonNode *query, gchar *chaine )
+ JsonObject *Json_get_object_as_object ( JsonNode *query, gchar *chaine )
   { JsonObject *object = json_node_get_object (query);
     return(json_object_get_object_member ( object, chaine ));
+  }
+/******************************************************************************************************************************/
+/* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
+/* Entrée: la query, le nom du parametre                                                                                      */
+/* Sortie: la chaine de caractere                                                                                             */
+/******************************************************************************************************************************/
+ JsonNode *Json_get_object_as_node ( JsonNode *query, gchar *chaine )
+  { JsonObject *object = json_node_get_object (query);
+    return(json_object_get_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
 /* Json_get_int: Recupere l'entier dont le nom est en parametre                                                               */

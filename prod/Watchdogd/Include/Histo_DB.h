@@ -41,6 +41,6 @@
  extern struct CMD_TYPE_HISTO *Rechercher_histo_msgsDB_by_id ( guint id );
  extern gboolean Recuperer_histo_msgsDB_alive ( struct DB **db );
  extern struct CMD_TYPE_HISTO *Recuperer_histo_msgsDB_suite( struct DB **db );
- extern void Histo_msg_print_to_JSON ( JsonBuilder *builder, struct CMD_TYPE_HISTO *histo );
+ extern void Histo_msg_print_to_JSON ( JsonBuilder *builder, JsonNode *histo );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
