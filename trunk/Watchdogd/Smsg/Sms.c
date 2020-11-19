@@ -109,7 +109,7 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,username,enable,comment,sms_enable,sms_phone,sms_allow_cde "
+                "SELECT id,username,enable,comment,notification,phone,allow_cde "
                 " FROM users as user ORDER BY username" );
 
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
@@ -123,8 +123,8 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,username,enable,comment,sms_enable,sms_phone,sms_allow_cde "
-                " FROM users as user WHERE enable=1 AND sms_enable=1 ORDER BY username" );
+                "SELECT id,username,enable,comment,notification,phone,allow_cde "
+                " FROM users as user WHERE enable=1 AND notification=1 ORDER BY username" );
 
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
@@ -150,8 +150,8 @@
        g_snprintf( sms->user_comment,   sizeof(sms->user_comment),   "%s", db->row[3] );
        sms->user_id            = atoi(db->row[0]);
        sms->user_enable        = atoi(db->row[2]);
-       sms->user_sms_enable    = atoi(db->row[4]);
-       sms->user_sms_allow_cde = atoi(db->row[6]);
+       sms->user_notification  = atoi(db->row[4]);
+       sms->user_allow_cde     = atoi(db->row[6]);
      }
     return(sms);
   }
@@ -173,8 +173,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,username,enable,comment,sms_enable,sms_phone,sms_allow_cde "
-                " FROM users as user WHERE enable=1 AND sms_allow_cde=1 AND sms_phone LIKE '%s'"
+                "SELECT id,username,enable,comment,notification,phone,allow_cde "
+                " FROM users as user WHERE enable=1 AND allow_cde=1 AND phone LIKE '%s'"
                 " ORDER BY username LIMIT 1", phone );
     g_free(phone);
 
@@ -221,7 +221,7 @@
 
     GSM_InitLocales(NULL);
    	memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
-    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle_sms") );
+    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "sms_libelle") );
 	  	EncodeUnicode( sms.Text, libelle, strlen(libelle));                                                /* Encode message text */
     EncodeUnicode( sms.Number, telephone, strlen(telephone));
 
@@ -336,7 +336,7 @@ end:
     json_builder_add_string_value( builder, telephone );
     Json_end_array ( builder );
     gchar libelle[128];
-    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle_sms") );
+    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "sms_libelle") );
     Json_add_string( builder, "message", libelle );
     gchar *body = Json_get_buf( builder, &taille_buf );
 
@@ -419,9 +419,9 @@ end:
        return;
      }
 
-    gint type_sms = Json_get_int ( msg, "type_sms" );
+    gint sms_notification = Json_get_int ( msg, "sms_notification" );
     while ( (sms = Smsg_Recuperer_smsDB_suite( db )) != NULL)
-     { switch (type_sms)
+     { switch (sms_notification)
         { case MESSAGE_SMS_YES:
                if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
                 { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
@@ -453,9 +453,9 @@ end:
 /******************************************************************************************************************************/
  static void Envoyer_smsg_ovh_text ( gchar *texte )
   { JsonBuilder *builder = Json_create();
-    Json_add_string ( builder, "libelle_sms", texte );
+    Json_add_string ( builder, "sms_libelle", texte );
     Json_add_string ( builder, "dls_shortname", Cfg_smsg.tech_id );
-    Json_add_int    ( builder, "type_sms", MESSAGE_SMS_OVH_ONLY );
+    Json_add_int    ( builder, "sms_notification", MESSAGE_SMS_OVH_ONLY );
     JsonNode *msg = Json_end ( builder );
     Smsg_send_to_all_authorized_recipients( msg );
     json_node_unref(msg);
@@ -467,9 +467,9 @@ end:
 /******************************************************************************************************************************/
  static void Envoyer_smsg_gsm_text ( gchar *texte )
   { JsonBuilder *builder = Json_create();
-    Json_add_string ( builder, "libelle_sms", texte );
+    Json_add_string ( builder, "sms_libelle", texte );
     Json_add_string ( builder, "dls_shortname", Cfg_smsg.tech_id );
-    Json_add_int    ( builder, "type_sms", MESSAGE_SMS_GSM_ONLY );
+    Json_add_int    ( builder, "sms_notification", MESSAGE_SMS_GSM_ONLY );
     JsonNode *msg = Json_end ( builder );
     Smsg_send_to_all_authorized_recipients( msg );
     json_node_unref(msg);
@@ -694,19 +694,16 @@ reload:
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
-               Json_get_int  ( request, "type_sms" ) != MESSAGE_SMS_NONE )
+               Json_get_int  ( request, "sms_notification" ) != MESSAGE_SMS_NONE )
            { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s : Sending msg '%s:%s' (%s)", __func__,
                        Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
-                       Json_get_string ( request, "libelle_sms" ) );
+                       Json_get_string ( request, "sms_libelle" ) );
 
 /*************************************************** Envoi en mode GSM ********************************************************/
              Smsg_send_to_all_authorized_recipients( request );
            }
           else
-           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s : msg '%s:%s' not sent (alive=%d, msg.sms = %d) (%s)", __func__,
-                       Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
-                       Json_get_bool ( request, "alive" ), Json_get_int ( request, "type_sms" ) );
-           }
+           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s : zmq_tag '%s' not for this thread", __func__, zmq_tag ); }
           json_node_unref(request);
         }
      }

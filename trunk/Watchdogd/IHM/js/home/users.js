@@ -79,7 +79,7 @@
          access_level: $('#idUserLevel_'+username).val(),
          email       : $('#idUserMail_'+username).val(),
          xmpp        : $('#idUserXmpp_'+username).val(),
-         telephone   : $('#idUserPhone_'+username).val(),
+         phone       : $('#idUserPhone_'+username).val(),
          commentaire : $('#idUserComment_'+username).val(),
        }
      );
@@ -122,7 +122,7 @@
             },
             { "data": null, "title":"Notification", "className": "align-middle hidden-xs text-center",
               "render": function (item)
-                { if (item.sms_enable==true)
+                { if (item.notification==true)
                    { return( Bouton ( "success", "Désactiver les notifications",
                                       "User_disable_notif", item.username, "Oui" ) );
                    }
@@ -145,7 +145,7 @@
                 { return( Input ( "idUserXmpp_"+item.username,
                                   "User_set('"+item.username+"')",
                                   "Adresse de messagerie instantanée",
-                                  item.imsg_jabberid )
+                                  item.xmpp )
                         );
                 }
             },
@@ -154,7 +154,7 @@
                 { return( Input ( "idUserPhone_"+item.username,
                                   "User_set('"+item.username+"')",
                                   "Téléphone de cet utilisateur",
-                                  item.sms_phone )
+                                  item.phone )
                         );
                 }
             },

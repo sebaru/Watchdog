@@ -42,7 +42,7 @@
     gchar    user_name[80];
     gchar    user_comment[80];
     gboolean user_enable;
-    gboolean user_imsg_enable;
+    gboolean user_notification;
     gboolean user_allow_cde;
     gboolean user_available;
   };

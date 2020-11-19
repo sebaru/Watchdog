@@ -80,7 +80,7 @@
  gboolean Recuperer_imsgsDB ( struct DB *db )
   { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,username,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
+                "SELECT id,username,enable,comment,notification,xmpp,imsg_allow_cde,imsg_available "
                 " FROM users as user ORDER BY username" );
 
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
@@ -93,8 +93,8 @@
  static gboolean Recuperer_all_available_imsgDB ( struct DB *db )
   { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,username,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
-                " FROM users as user WHERE enable=1 AND imsg_enable=1 AND imsg_available=1 ORDER BY username" );
+                "SELECT id,username,enable,comment,notification,xmpp,imsg_allow_cde,imsg_available "
+                " FROM users as user WHERE enable=1 AND notification=1 AND imsg_available=1 ORDER BY username" );
 
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
@@ -120,7 +120,7 @@
        g_snprintf( imsg->user_comment,  sizeof(imsg->user_comment),  "%s", db->row[3] );
        imsg->user_id           = atoi(db->row[0]);
        imsg->user_enable       = atoi(db->row[2]);
-       imsg->user_imsg_enable  = atoi(db->row[4]);
+       imsg->user_notification  = atoi(db->row[4]);
        imsg->user_allow_cde    = atoi(db->row[6]);
        imsg->user_available    = atoi(db->row[7]);
      }
@@ -159,8 +159,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,username,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
-                " FROM users as user WHERE enable=1 AND imsg_allow_cde=1 AND imsg_jabberid LIKE '%s' LIMIT 1", jabberid );
+                "SELECT id,username,enable,comment,notification,xmpp,imsg_allow_cde,imsg_available "
+                " FROM users as user WHERE enable=1 AND imsg_allow_cde=1 AND xmpp LIKE '%s' LIMIT 1", jabberid );
     g_free(jabberid);
 
     db = Init_DB_SQL();
@@ -290,7 +290,7 @@ end:
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE users SET imsg_available='%d' WHERE imsg_jabberid='%s'", available, jabberid );
+                "UPDATE users SET imsg_available='%d' WHERE xmpp='%s'", available, jabberid );
     g_free(jabberid);
 
     db = Init_DB_SQL();

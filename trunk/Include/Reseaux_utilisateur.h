@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -43,17 +43,15 @@
     gboolean enable;
     gchar    date_create[32];
     gchar    date_modif[32];
-    gboolean sms_enable;
+    gboolean notification;
     gchar    sms_phone[80];
-    gboolean sms_allow_cde;
-    gboolean imsg_enable;
+    gboolean allow_cde;
     gchar    imsg_jabberid[80];
-    gboolean imsg_allow_cde;
     gboolean imsg_available;
     guint    ssrv_bit_presence;
   };
 
- enum 
+ enum
   { SSTAG_CLIENT_WANT_PAGE_UTIL,
     SSTAG_SERVEUR_CREATE_PAGE_UTIL_OK,                                        /* Affichage de la page DLS */
     SSTAG_SERVEUR_ADDPROGRESS_UTIL,                       /* Ajout d'un utilisateur dans la liste cliente */

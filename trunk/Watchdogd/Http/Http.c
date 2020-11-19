@@ -610,6 +610,7 @@ reload:
     soup_server_add_handler ( socket, "/api/ping",           Http_traiter_ping, NULL, NULL );
     soup_server_add_handler ( socket, "/api/search",         Http_traiter_search, NULL, NULL );
     soup_server_add_handler ( socket, "/api/users/list",     Http_traiter_users_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/users/set",      Http_traiter_users_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/users/kill",     Http_traiter_users_kill, NULL, NULL );
     soup_server_add_handler ( socket, "/api/users/sessions", Http_traiter_users_sessions, NULL, NULL );
     soup_server_add_handler ( socket, "/api/histo/alive",    Http_traiter_histo_alive, NULL, NULL );

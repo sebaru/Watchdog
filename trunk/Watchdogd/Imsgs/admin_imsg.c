@@ -53,9 +53,9 @@
      { Json_add_object ( builder, imsgs->user_name );
        Json_add_int    ( builder, "user_id", imsgs->user_id );
        Json_add_bool   ( builder, "user_enable", imsgs->user_enable );
-       Json_add_bool   ( builder, "user_imsg_enable", imsgs->user_imsg_enable );
+       Json_add_bool   ( builder, "user_notification", imsgs->user_notification );
        Json_add_string ( builder, "user_jabber_id", imsgs->user_jabberid );
-       Json_add_bool   ( builder, "user_allow_command", imsgs->user_allow_cde );
+       Json_add_bool   ( builder, "user_allow_cde", imsgs->user_allow_cde );
        Json_add_bool   ( builder, "user_available", imsgs->user_available );
        Json_add_string ( builder, "user_comment", imsgs->user_comment );
        Json_end_object ( builder );                                                                           /* End Document */
