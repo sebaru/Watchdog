@@ -116,6 +116,49 @@
     json_node_unref(request);
   }
 /******************************************************************************************************************************/
+/* Http_Traiter_mnemos_set: Modifie la config d'un mnemonique                                                                 */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : HTTP Response code                                                                                                */
+/******************************************************************************************************************************/
+ void Http_traiter_users_add ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                               SoupClientContext *client, gpointer user_data )
+  { GBytes *request_brute;
+    gsize taille;
+
+    if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 1 )) return;
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
+       return;
+     }
+
+    if ( ! (Json_has_member ( request, "username" ) ) )
+     { if (request) json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    gchar chaine[256];
+    gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
+    g_snprintf ( chaine, sizeof(chaine), "INSERT INTO users SET username='%s'", username );
+    if (SQL_Write ( chaine ))
+         { soup_message_set_status ( msg, SOUP_STATUS_OK ); }
+    else { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
+    Audit_log ( session, "User '%s' added", username );
+    g_free(username);
+/*************************************************** Envoi au client **********************************************************/
+    json_node_unref(request);
+  }
+/******************************************************************************************************************************/
 /* Http_Traiter_users_kill: Kill une session utilisateur                                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
@@ -222,6 +265,7 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    Audit_log ( session, "Get User session list" );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getusers_list: Traite une requete sur l'URI users/list                                                */

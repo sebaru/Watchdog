@@ -88,6 +88,20 @@
      { $('#idTableUsers').DataTable().ajax.reload(null, false);
      }, null);
   }
+/******************************************************************************************************************************/
+ function Users_Valider_add_user ()
+  { var json_request = JSON.stringify(
+       { username    : $('#idModalUserNewUsername').val(),
+       }
+     );
+
+    Send_to_API ( 'POST', "/api/users/add", json_request, function ()
+     { $('#idTableUsers').DataTable().ajax.reload(null, false);
+     }, null);
+  }
+/******************************************************************************************************************************/
+ function Users_Show_add_user ()
+  { $('#idModalUserAdd').modal("show"); }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { console.log ("in load page !");
