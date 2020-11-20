@@ -49,9 +49,9 @@
     gchar    user_name[80];
     gboolean user_enable;
     gchar    user_comment[80];
-    gboolean user_sms_enable;
+    gboolean user_notification;
     gchar    user_phone[80];
-    gboolean user_sms_allow_cde;
+    gboolean user_allow_cde;
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/

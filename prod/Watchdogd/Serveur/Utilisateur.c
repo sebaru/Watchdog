@@ -94,18 +94,16 @@
        g_snprintf( util->commentaire,    sizeof(util->commentaire),   "%s", db->row[2] );
        g_snprintf( util->hash,           sizeof(util->hash),          "%s", db->row[7]);
        g_snprintf( util->sms_phone,      sizeof(util->sms_phone),     "%s", db->row[9]);
-       g_snprintf( util->imsg_jabberid,  sizeof(util->imsg_jabberid), "%s", db->row[12]);
+       g_snprintf( util->imsg_jabberid,  sizeof(util->imsg_jabberid), "%s", db->row[11]);
        g_snprintf( util->date_create,    sizeof(util->date_create),   "%s", db->row[5]);
        g_snprintf( util->date_modif,     sizeof(util->date_modif),    "%s", db->row[6]);
        util->id                = atoi(db->row[1]);
        util->enable            = atoi(db->row[3]);
        util->access_level      = atoi(db->row[4]);
-       util->sms_enable        = atoi(db->row[8]);
-       util->sms_allow_cde     = atoi(db->row[10]);
-       util->imsg_enable       = atoi(db->row[11]);
-       util->imsg_allow_cde    = atoi(db->row[13]);
-       util->imsg_available    = atoi(db->row[14]);
-       util->ssrv_bit_presence = atoi(db->row[15]);
+       util->notification      = atoi(db->row[8]);
+       util->allow_cde         = atoi(db->row[10]);
+       util->imsg_available    = atoi(db->row[12]);
+       util->ssrv_bit_presence = atoi(db->row[13]);
      }
     return( util );
   }
@@ -128,7 +126,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT username,id,comment,enable,access_level,date_create,"
                 "date_modif,hash,sms_enable,sms_phone,sms_allow_cde,"
-                "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
+                "imsg_enable,imsg_jabberid,imsg_available,ssrv_bit_presence "
                 "FROM %s WHERE username='%s' LIMIT 1", NOM_TABLE_UTIL, name );
     g_free(name);
 

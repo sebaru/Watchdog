@@ -975,7 +975,7 @@
                 case MNEMO_MOTIF:
                  { gchar *forme = Get_option_chaine( alias->options, T_FORME );
                    if (!forme) forme="none";
-                   Synoptique_auto_create_VISUEL ( Dls_plugin.tech_id, alias->acronyme, libelle, forme );
+                   /*Synoptique_auto_create_VISUEL ( Dls_plugin.tech_id, alias->acronyme, libelle, forme );*/
                    break;
                  }
                 case MNEMO_CPT_IMP:

@@ -2033,6 +2033,25 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
+
+    if (database_version <= 5157)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `sms_enable` `notififation` tinyint(1) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `sms_allow_cde` `allow_cde` tinyint(1) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users DROP `imsg_allow_cde`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users DROP `imsg_enable`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users DROP `session_id`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `imsg_jabberid` `xmpp` varchar(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `sms_phone` `phone` varchar(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+       Lancer_requete_SQL ( db, requete );
+
+     }
+
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
@@ -2053,6 +2072,8 @@ fin:
 
     g_snprintf( requete, sizeof(requete),
        "CREATE OR REPLACE VIEW dictionnaire AS "
+       "SELECT 'DLS' AS classe, -1 AS classe_int,tech_id,shortname as acronyme,name as libelle from dls UNION "
+       "SELECT 'SYNOPTIQUE' AS classe, -1 AS classe_int,page as tech_id,'' as acronyme,libelle from syns UNION "
        "SELECT 'AI' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_AI UNION "
        "SELECT 'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_DI UNION "
        "SELECT 'DO' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_DO UNION "
@@ -2064,7 +2085,7 @@ fin:
        "SELECT 'TEMPO' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_Tempo UNION "
        "SELECT 'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_R UNION "
        "SELECT 'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle from syns_motifs UNION "
-       "SELECT 'WATCHDOG' AS classe, %d1 AS classe_int,tech_id,acronyme,libelle from mnemos_WATCHDOG UNION "
+       "SELECT 'WATCHDOG' AS classe, %d AS classe_int,tech_id,acronyme,libelle from mnemos_WATCHDOG UNION "
        "SELECT 'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle from msgs",
         MNEMO_ENTREE_ANA, MNEMO_ENTREE, MNEMO_SORTIE, MNEMO_SORTIE_ANA, MNEMO_CPTH, MNEMO_CPT_IMP, MNEMO_HORLOGE,
         MNEMO_TEMPO, MNEMO_REGISTRE, MNEMO_WATCHDOG, MNEMO_MSG
