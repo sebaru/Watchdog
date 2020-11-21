@@ -44,9 +44,9 @@
     gchar    date_create[32];
     gchar    date_modif[32];
     gboolean notification;
-    gchar    sms_phone[80];
+    gchar    phone[80];
     gboolean allow_cde;
-    gchar    imsg_jabberid[80];
+    gchar    xmpp[80];
     gboolean imsg_available;
     guint    ssrv_bit_presence;
   };
