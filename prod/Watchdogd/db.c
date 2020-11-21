@@ -2035,7 +2035,7 @@ encore:
 
 
     if (database_version <= 5157)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `sms_enable` `notififation` tinyint(1) NOT NULL DEFAULT '0'" );
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `sms_enable` `notification` tinyint(1) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `sms_allow_cde` `allow_cde` tinyint(1) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );

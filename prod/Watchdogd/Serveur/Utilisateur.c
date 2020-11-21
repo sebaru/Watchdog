@@ -90,13 +90,13 @@
     util = (struct CMD_TYPE_UTILISATEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_UTILISATEUR) );
     if (!util) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
-     { g_snprintf( util->username,       sizeof(util->username),      "%s", db->row[0] );        /* Recopie dans la structure */
-       g_snprintf( util->commentaire,    sizeof(util->commentaire),   "%s", db->row[2] );
-       g_snprintf( util->hash,           sizeof(util->hash),          "%s", db->row[7]);
-       g_snprintf( util->sms_phone,      sizeof(util->sms_phone),     "%s", db->row[9]);
-       g_snprintf( util->imsg_jabberid,  sizeof(util->imsg_jabberid), "%s", db->row[11]);
-       g_snprintf( util->date_create,    sizeof(util->date_create),   "%s", db->row[5]);
-       g_snprintf( util->date_modif,     sizeof(util->date_modif),    "%s", db->row[6]);
+     { g_snprintf( util->username,    sizeof(util->username),    "%s", db->row[0] );        /* Recopie dans la structure */
+       g_snprintf( util->commentaire, sizeof(util->commentaire), "%s", db->row[2] );
+       g_snprintf( util->hash,        sizeof(util->hash),        "%s", db->row[7]);
+       g_snprintf( util->phone,       sizeof(util->phone),       "%s", db->row[9]);
+       g_snprintf( util->xmpp,        sizeof(util->xmpp),        "%s", db->row[11]);
+       g_snprintf( util->date_create, sizeof(util->date_create), "%s", db->row[5]);
+       g_snprintf( util->date_modif,  sizeof(util->date_modif),  "%s", db->row[6]);
        util->id                = atoi(db->row[1]);
        util->enable            = atoi(db->row[3]);
        util->access_level      = atoi(db->row[4]);
@@ -125,8 +125,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT username,id,comment,enable,access_level,date_create,"
-                "date_modif,hash,sms_enable,sms_phone,sms_allow_cde,"
-                "imsg_enable,imsg_jabberid,imsg_available,ssrv_bit_presence "
+                "date_modif,hash,notification,phone,allow_cde,"
+                "xmpp,imsg_available,ssrv_bit_presence "
                 "FROM %s WHERE username='%s' LIMIT 1", NOM_TABLE_UTIL, name );
     g_free(name);
 
