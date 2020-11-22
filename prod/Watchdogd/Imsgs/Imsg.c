@@ -80,7 +80,7 @@
  gboolean Recuperer_imsgsDB ( struct DB *db )
   { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,username,enable,comment,notification,xmpp,imsg_allow_cde,imsg_available "
+                "SELECT id,username,enable,comment,notification,xmpp,allow_cde,imsg_available "
                 " FROM users as user ORDER BY username" );
 
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
@@ -93,7 +93,7 @@
  static gboolean Recuperer_all_available_imsgDB ( struct DB *db )
   { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,username,enable,comment,notification,xmpp,imsg_allow_cde,imsg_available "
+                "SELECT id,username,enable,comment,notification,xmpp,allow_cde,imsg_available "
                 " FROM users as user WHERE enable=1 AND notification=1 AND imsg_available=1 ORDER BY username" );
 
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
@@ -159,8 +159,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,username,enable,comment,notification,xmpp,imsg_allow_cde,imsg_available "
-                " FROM users as user WHERE enable=1 AND imsg_allow_cde=1 AND xmpp LIKE '%s' LIMIT 1", jabberid );
+                "SELECT id,username,enable,comment,notification,xmpp,allow_cde,imsg_available "
+                " FROM users as user WHERE enable=1 AND allow_cde=1 AND xmpp LIKE '%s' LIMIT 1", jabberid );
     g_free(jabberid);
 
     db = Init_DB_SQL();

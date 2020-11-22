@@ -80,7 +80,7 @@
          email       : $('#idUserMail_'+username).val(),
          xmpp        : $('#idUserXmpp_'+username).val(),
          phone       : $('#idUserPhone_'+username).val(),
-         commentaire : $('#idUserComment_'+username).val(),
+         comment     : $('#idUserComment_'+username).val(),
        }
      );
 
@@ -88,10 +88,33 @@
      { $('#idTableUsers').DataTable().ajax.reload(null, false);
      }, null);
   }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function Show_Modal_user_del ( username )
+  { table = $('#idTableUsers').DataTable();
+    selection = table.ajax.json().users.filter( function(item) { return (item.username==username) } )[0];
+    Show_modal_del ( "Supprimer cet utilisateur ?",
+                     "Etes-vous sur de vouloir supprimer l'utilisateur "+selection.username+ "? <hr>"+
+                     "<strong>"+selection.username + " - " + selection.comment + "</strong>",
+                     "User_Valider_user_del('"+username+"')" );
+  }
+/******************************************************************************************************************************/
+ function User_Valider_user_del ( username )
+  { table = $('#idTableUsers').DataTable();
+    selection = table.ajax.json().users.filter( function(item) { return (item.username==username) } )[0];
+    var json_request = JSON.stringify(
+       { username    : selection.username,
+       }
+     );
+
+    Send_to_API ( 'DELETE', "/api/users/del", json_request, function ()
+     { $('#idTableUsers').DataTable().ajax.reload(null, false);
+     }, null);
+  }
 /******************************************************************************************************************************/
  function Users_Valider_add_user ()
   { var json_request = JSON.stringify(
        { username    : $('#idModalUserNewUsername').val(),
+         email       : $('#idModalUserNewEmail').val(),
        }
      );
 
@@ -147,7 +170,7 @@
                 }
             },            { "data": null, "title":"Adresse Mail", "className": "align-middle hidden-xs",
               "render": function (item)
-                { return( Input ( "idUserMail_"+item.username,
+                { return( Input ( "email", "idUserMail_"+item.username,
                                   "User_set('"+item.username+"')",
                                   "Adresse de messagerie",
                                   item.email )
@@ -156,7 +179,7 @@
             },
             { "data": null, "title":"Messagerie Instantanée", "className": "align-middle hidden-xs",
               "render": function (item)
-                { return( Input ( "idUserXmpp_"+item.username,
+                { return( Input ( "email", "idUserXmpp_"+item.username,
                                   "User_set('"+item.username+"')",
                                   "Adresse de messagerie instantanée",
                                   item.xmpp )
@@ -165,7 +188,7 @@
             },
             { "data": null, "title":"Téléphone", "className": "align-middle hidden-xs",
               "render": function (item)
-                { return( Input ( "idUserPhone_"+item.username,
+                { return( Input ( "tel", "idUserPhone_"+item.username,
                                   "User_set('"+item.username+"')",
                                   "Téléphone de cet utilisateur",
                                   item.phone )
@@ -174,7 +197,7 @@
             },
             { "data": null, "title":"Commentaire", "className": "align-middle hidden-xs",
               "render": function (item)
-                { return( Input ( "idUserComment_"+item.username,
+                { return( Input ( "text", "idUserComment_"+item.username,
                                   "User_set('"+item.username+"')",
                                   "Qui est cet utilisateur ?",
                                   item.comment )
@@ -185,7 +208,7 @@
               "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "warning", "Reseter son mot de passe", "User_reset_password", item.username, "key", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer cet utilisateur", "Show_Modal_User_Del", item.username, "trash", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer cet utilisateur", "Show_Modal_user_del", item.username, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },

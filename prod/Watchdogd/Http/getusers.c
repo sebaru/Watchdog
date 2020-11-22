@@ -104,6 +104,13 @@
        g_strlcat ( chaine, critere, sizeof(chaine) );
      }
 
+    if ( Json_has_member ( request, "comment" ) )
+     { gchar *comment = Normaliser_chaine ( Json_get_string ( request, "comment" ) );
+       g_snprintf( critere, sizeof(critere), ", comment='%s'", comment );
+       g_free(comment);
+       g_strlcat ( chaine, critere, sizeof(chaine) );
+     }
+
     gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
     g_snprintf( critere, sizeof(critere), " WHERE username='%s' AND access_level<%d", username, session->access_level );
     g_free(username);
@@ -141,6 +148,52 @@
        return;
      }
 
+    if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "email" ) ) )
+     { if (request) json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    gchar chaine[256];
+    gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
+    gchar *email    = Normaliser_chaine ( Json_get_string ( request, "email" ) );
+    g_snprintf ( chaine, sizeof(chaine), "INSERT INTO users SET username='%s', email='%s'", username, email );
+    if (SQL_Write ( chaine ))
+         { soup_message_set_status ( msg, SOUP_STATUS_OK );
+           Audit_log ( session, "User '%s' ('%s') added", username, email );
+         }
+    else { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
+    g_free(username);
+    g_free(email);
+/*************************************************** Envoi au client **********************************************************/
+    json_node_unref(request);
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_mnemos_set: Modifie la config d'un mnemonique                                                                 */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : HTTP Response code                                                                                                */
+/******************************************************************************************************************************/
+ void Http_traiter_users_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                               SoupClientContext *client, gpointer user_data )
+  { GBytes *request_brute;
+    gsize taille;
+
+    if (msg->method != SOUP_METHOD_DELETE)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 1 )) return;
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
+       return;
+     }
+
     if ( ! (Json_has_member ( request, "username" ) ) )
      { if (request) json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -149,11 +202,12 @@
 
     gchar chaine[256];
     gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
-    g_snprintf ( chaine, sizeof(chaine), "INSERT INTO users SET username='%s'", username );
+    g_snprintf ( chaine, sizeof(chaine), "DELETE FROM users WHERE username='%s' AND access_level<%d", username, session->access_level );
     if (SQL_Write ( chaine ))
-         { soup_message_set_status ( msg, SOUP_STATUS_OK ); }
+         { soup_message_set_status ( msg, SOUP_STATUS_OK );
+           Audit_log ( session, "User '%s' deleted", username );
+         }
     else { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
-    Audit_log ( session, "User '%s' added", username );
     g_free(username);
 /*************************************************** Envoi au client **********************************************************/
     json_node_unref(request);

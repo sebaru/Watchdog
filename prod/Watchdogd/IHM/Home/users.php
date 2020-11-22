@@ -22,7 +22,7 @@
 </div>
 
 <div id="idModalUserAdd" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered" role="document">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
         <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> Ajouter un utilisateur</h5>
@@ -38,6 +38,15 @@
 							     <span class="input-group-text">Username</span>
 						     </div>
 						     <input id="idModalUserNewUsername" type="text" class="form-control" placeholder="Nom du nouvel utilisateur">
+     					</div>
+   					</div>
+
+        <div class="form-group">
+					     <div class="input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text">Username</span>
+						     </div>
+						     <input id="idModalUserNewEmail" type="email" class="form-control" placeholder="E-mail du nouvel utilisateur">
      					</div>
    					</div>
 
