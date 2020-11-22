@@ -113,6 +113,13 @@
 /****************************************** Escape les " et ' *****************************************************************/
  function htmlEncode ( string )
   { return ( string.replace(/'/g,'&#39').replace(/"/g,'&#34') ); }
+/****************************************** Are you sure **********************************************************************/
+ function Show_modal_del ( titre, message, fonction )
+  { $('#idModalDelTitre').text ( htmlEncode(titre) );
+    $('#idModalDelMessage').html( htmlEncode(message) );
+    $('#idModalDelValider').attr( "onclick", fonction );
+    $('#idModalDel').modal("show");
+  }
 /********************************************* Renvoi un input ****************************************************************/
  function Input ( type, id, change_fonction, place_holder, value )
   { retour = "<input id='"+id+"' class='form-control' type='"+type+"' "+

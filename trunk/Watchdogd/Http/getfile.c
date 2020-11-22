@@ -88,7 +88,7 @@
        soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
        return;
      }
-    if (!strcasecmp( URI[1], "audio"))
+    else if (!strcasecmp( URI[1], "audio"))
      { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/audio/%s", WTD_PKGDATADIR, URI[2] ); }
     else if (!strcasecmp(URI[1], "tech"))
      { if (!Http_check_session( msg, session, 6 ))

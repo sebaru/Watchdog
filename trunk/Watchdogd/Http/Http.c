@@ -612,6 +612,7 @@ reload:
     soup_server_add_handler ( socket, "/api/users/list",     Http_traiter_users_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/users/set",      Http_traiter_users_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/users/add",      Http_traiter_users_add, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/users/del",      Http_traiter_users_del, NULL, NULL );
     soup_server_add_handler ( socket, "/api/users/kill",     Http_traiter_users_kill, NULL, NULL );
     soup_server_add_handler ( socket, "/api/users/sessions", Http_traiter_users_sessions, NULL, NULL );
     soup_server_add_handler ( socket, "/api/histo/alive",    Http_traiter_histo_alive, NULL, NULL );
