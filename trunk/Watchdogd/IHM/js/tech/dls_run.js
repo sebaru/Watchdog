@@ -24,8 +24,8 @@
             data: Response.DI,
             rowId: "id",
             columns:
-              [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                { "data": null, "title":"Etat", "className": "",
+              [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+                { "data": null, "title":"Etat", "className": "align-middle ",
                   "render": function (item)
                     { if (item.etat==true) { return( Bouton ( "success", "Activée", null, null, "Active" ) );        }
                                       else { return( Bouton ( "outline-secondary", "Désactivée", null, null, "Inactive" ) ); }
@@ -55,7 +55,7 @@
                                           else { return( Bouton ( "warning", "Pb !", null, null, "Non" ) ); }
                     },
                 },
-                { "data": "last_arch", "title":"last_arch", "className": "align text-center hidden-xs" },
+                { "data": "last_arch", "title":"last_arch", "className": "align-middle text-center hidden-xs" },
               ],
             /*order: [ [0, "desc"] ],*/
             responsive: true,
@@ -68,8 +68,8 @@
             data: Response.DO,
             rowId: "id",
             columns:
-              [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                { "data": null, "title":"Etat", "className": "",
+              [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+                { "data": null, "title":"Etat", "className": "align-middle ",
                   "render": function (item)
                     { if (item.etat==true) { return( Bouton ( "success", "Activée", null, null, "Active" ) );        }
                                       else { return( Bouton ( "outline-secondary", "Désactivée", null, null, "Inactive" ) ); }
@@ -86,8 +86,8 @@
             fixedHeader: true, paging: false, ordering: false, searching: false,
             data: Response.AO,
             rowId: "id",
-            columns: [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                       { "data": "libelle",    "title":"Libellé",    "className": "" },
+            columns: [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+                       { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
                      ],
             /*order: [ [0, "desc"] ],*/
             responsive: true,
@@ -129,8 +129,8 @@
                   "render": function (item)
                     { return ( Lien ("/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
                 },
-                { "data": "valeur",     "title":"Valeur",   "className": "hidden-xs" },
-                { "data": "unite",      "title":"Unité",    "className": "hidden-xs" },
+                { "data": "valeur",     "title":"Valeur",   "className": "align-middle hidden-xs" },
+                { "data": "unite",      "title":"Unité",    "className": "align-middle hidden-xs" },
               ],
             /*order: [ [0, "desc"] ],*/
             responsive: true,
@@ -143,20 +143,20 @@
             data: Response.T,
             rowId: "id",
             columns:
-              [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                { "data": null, "title":"Etat", "className": "",
+              [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+                { "data": null, "title":"Etat", "className": "align-middle ",
                   "render": function (item)
                     { if (item.etat==true) { return( Bouton ( "success", "La tempo compte le temps", null, null, "En décompte" ) );        }
                                       else { return( Bouton ( "outline-secondary", "La tempo ne compte pas", null, null, "Stoppée" ) ); }
                     },
                 },
-                { "data": "status",     "title":"Status",   "className": "hidden-xs text-center" },
-                { "data": "daa",        "title":"daa",      "className": "hidden-xs text-center" },
-                { "data": "dma",        "title":"dma",      "className": "hidden-xs text-center" },
-                { "data": "dMa",        "title":"dMa",      "className": "hidden-xs text-center" },
-                { "data": "dad",        "title":"dad",      "className": "hidden-xs text-center" },
-                { "data": "date_on",    "title":"date_on",  "className": "hidden-xs text-center" },
-                { "data": "date_off",   "title":"date_off", "className": "hidden-xs text-center" },
+                { "data": "status",     "title":"Status",   "className": "align-middle hidden-xs text-center" },
+                { "data": "daa",        "title":"daa",      "className": "align-middle hidden-xs text-center" },
+                { "data": "dma",        "title":"dma",      "className": "align-middle hidden-xs text-center" },
+                { "data": "dMa",        "title":"dMa",      "className": "align-middle hidden-xs text-center" },
+                { "data": "dad",        "title":"dad",      "className": "align-middle hidden-xs text-center" },
+                { "data": "date_on",    "title":"date_on",  "className": "align-middle hidden-xs text-center" },
+                { "data": "date_off",   "title":"date_off", "className": "align-middle hidden-xs text-center" },
               ],
             responsive: true,
           }
@@ -168,8 +168,8 @@
             data: Response.BOOL,
             rowId: "id",
             columns:
-              [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                { "data": null, "title":"Etat", "className": "",
+              [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+                { "data": null, "title":"Etat", "className": "align-middle ",
                   "render": function (item)
                     { if (item.etat==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
                                       else { return( Bouton ( "outline-secondary", "Le bit est a 0", null, null, "0" ) ); }
@@ -187,10 +187,10 @@
             data: Response.VISUEL,
             rowId: "id",
             columns:
-              [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                { "data": "mode",       "title":"Mode",     "className": "text-center" },
-                { "data": "color",      "title":"Couleur",     "className": "text-center" },
-                { "data": null, "title":"Cligno", "className": "",
+              [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+                { "data": "mode",       "title":"Mode",     "className": "align-middle text-center" },
+                { "data": "color",      "title":"Couleur",     "className": "align-middle text-center" },
+                { "data": null, "title":"Cligno", "className": "align-middle ",
                   "render": function (item)
                     { if (item.cligno==true) { return( Bouton ( "outline-success", "Le visuel clignote", null, null, "Oui" ) );          }
                                         else { return( Bouton ( "outline-secondary", "Le visuel ne clignote pas", null, null, "Non" ) ); }
@@ -208,13 +208,14 @@
             data: Response.WATCHDOG,
             rowId: "id",
             columns:
-              [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                { "data": null, "title":"Etat", "className": "",
+              [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+                { "data": null, "title":"Etat", "className": "align-middle ",
                   "render": function (item)
                     { if (item.etat==true) { return( Bouton ( "success", "Le compteur décompte", null, null, "En décompte" ) );        }
                                       else { return( Bouton ( "outline-warning", "Le compteur est échu", null, null, "échu" ) ); }
                     },
                 },
+                { "data": "decompte",   "title":"Reste en décompte", "className": "align-middle text-center" },
               ],
             /*order: [ [0, "desc"] ],*/
             responsive: true,
@@ -227,8 +228,8 @@
             data: Response.MSG,
             rowId: "id",
             columns:
-              [ { "data": "acronyme",   "title":"Acronyme",   "className": "text-center" },
-                { "data": null, "title":"Etat", "className": "",
+              [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+                { "data": null, "title":"Etat", "className": "align-middle ",
                   "render": function (item)
                     { if (item.etat==true) { return( Bouton ( "success", "Le message est a 1", null, null, "Actif" ) );        }
                                       else { return( Bouton ( "outline-secondary", "Le message est a 0", null, null, "Inactif" ) ); }

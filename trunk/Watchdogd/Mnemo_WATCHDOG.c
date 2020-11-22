@@ -96,6 +96,6 @@
     Json_add_string ( builder, "acronyme", bit->acronyme );
     Json_add_bool   ( builder, "etat",     Dls_data_get_WATCHDOG ( bit->tech_id, bit->acronyme, (gpointer)&bit ) );
     gint decompte = bit->consigne - Partage->top;
-    Json_add_bool   ( builder, "decompte", (decompte > 0 ? decompte : 0) );
+    Json_add_int    ( builder, "decompte", (decompte > 0 ? decompte : 0) );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
