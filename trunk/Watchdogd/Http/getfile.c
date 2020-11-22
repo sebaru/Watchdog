@@ -88,6 +88,8 @@
        soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
        return;
      }
+    if (!strcasecmp( URI[1], "audio"))
+     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/audio/%s", WTD_PKGDATADIR, URI[2] ); }
     else if (!strcasecmp(URI[1], "tech"))
      { if (!Http_check_session( msg, session, 6 ))
         { g_strfreev(URI);
@@ -212,6 +214,8 @@
      { soup_message_set_response ( msg, "image/jpeg; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
     else if ( g_str_has_suffix (path, ".webp") )
      { soup_message_set_response ( msg, "image/webp; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
+    else if ( g_str_has_suffix (path, ".wav") )
+     { soup_message_set_response ( msg, "audio/x-wav", SOUP_MEMORY_TAKE, result, taille_result ); }
     else
      { soup_message_set_response ( msg, "text/html; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
   }
