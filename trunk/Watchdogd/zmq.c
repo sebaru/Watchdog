@@ -390,7 +390,7 @@
 
     gchar *zmq_dst_thread = Json_get_string(request,"zmq_dst_thread");
     if ( strcasecmp( zmq_dst_thread, "*" ) && thread && strcasecmp ( zmq_dst_thread, thread ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s'. Dropping", __func__, zmq_dst_instance );
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s/%s'. Dropping", __func__, zmq_dst_instance, zmq_dst_thread );
        json_node_unref(request);
        return(NULL);
      }
