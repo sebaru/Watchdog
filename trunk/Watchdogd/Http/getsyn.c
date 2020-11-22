@@ -215,7 +215,7 @@
     Json_add_array ( builder, "visuels" );
     struct DB *db = Init_DB_SQL();
     if (db)
-     { g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) from dls WHERE syn_id=%d", syn_id );
+     { g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) FROM syns_motifs WHERE syn_id=%d", syn_id );
        Lancer_requete_SQL ( db, chaine );                                                      /* Execution de la requete SQL */
        while(Recuperer_ligne_SQL(db))                                                      /* Chargement d'une ligne resultat */
         { GSList *liste = Partage->Dls_data_VISUEL;
