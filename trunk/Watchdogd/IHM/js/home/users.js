@@ -114,6 +114,7 @@
  function Users_Valider_add_user ()
   { var json_request = JSON.stringify(
        { username    : $('#idModalUserNewUsername').val(),
+         password    : $('#idModalUserNewPassword').val(),
          email       : $('#idModalUserNewEmail').val(),
        }
      );

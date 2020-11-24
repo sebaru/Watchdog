@@ -52,18 +52,7 @@
        buffer_size: $('#idArchiveDBBufferSize').val(),
      };
     if ($('#idArchiveDBPassword').val().length > 0) { json_request.password = $('#idArchiveDBPassword').val(); }
-    Send_to_API ( 'POST', "/api/process/archive/thread_set", JSON.stringify(json_request), null );
-  }
-/************************************ Envoi les infos de modifications synoptique *********************************************/
- function Del_param ( id )
-  { table = $('#idTableConfArchive').DataTable();
-    selection = table.ajax.json().parametres.filter( function(item) { return item.id==id } )[0];
-    var json_request = JSON.stringify(
-     { id: id,
-     });
-    Send_to_API ( 'DELETE', "/api/config/del", json_request, function ()
-     { $('#idTableConfArchive').DataTable().ajax.reload(null, false);
-     });
+    Send_to_API ( 'POST', "/api/process/archive/set", JSON.stringify(json_request), null );
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
