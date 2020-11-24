@@ -87,6 +87,7 @@
          myanim.setAttribute("to","1");
          myanim.setAttribute("dur","0.3s");
          myanim.setAttribute("fill","freeze");
+         myanim.setAttribute("begin","indefinite");
          myanim.addEventListener ( "end", function (event)
                                      { if (svg.currentCligno==1) svg.getElementById("fadeout").beginElement(); }, false );
          svg.appendChild(myanim);
