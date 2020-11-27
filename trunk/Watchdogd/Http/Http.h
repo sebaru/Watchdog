@@ -137,6 +137,8 @@
                                            SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_users_set      ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                            SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_users_get      ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                           SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_users_add      ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                            SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_users_del      ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,

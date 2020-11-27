@@ -160,5 +160,7 @@
 
  extern void Gerer_arrive_Ixxx_dls ( void );                                                           /* Dans distrib_Ixxx.c */
 
+ extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
+
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

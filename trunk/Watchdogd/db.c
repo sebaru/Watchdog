@@ -2049,7 +2049,11 @@ encore:
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `sms_phone` `phone` varchar(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
        Lancer_requete_SQL ( db, requete );
+     }
 
+    if (database_version <= 5170)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users ADD `salt` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' AFTER `username`");
+       Lancer_requete_SQL ( db, requete );
      }
 
 fin:
