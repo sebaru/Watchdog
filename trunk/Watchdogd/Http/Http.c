@@ -155,21 +155,24 @@
 /* Entrées: une structure util, un code confidentiel                                                                          */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- static gboolean Http_check_utilisateur_password( gchar *hash, gchar *pwd )
-  { struct crypt_data *Data;
-    gboolean retour=FALSE;
-    gchar *result;
+ static gboolean Http_check_utilisateur_password( gchar *dbsalt, gchar *dbhash, gchar *pwd )
+  { guchar hash[EVP_MAX_MD_SIZE*2+1], hash_bin[EVP_MAX_MD_SIZE];
+    memset ( hash, 0, sizeof(hash) );
+    gint md_len;
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                   /* Calcul du SHA1 */
+    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+    EVP_DigestUpdate(mdctx, dbsalt, strlen(dbsalt));
+    EVP_DigestUpdate(mdctx, pwd, strlen(pwd) );
+    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
+    EVP_MD_CTX_free(mdctx);
 
-    Data = (struct crypt_data *)g_try_malloc0(sizeof(struct crypt_data));
-    if( !Data)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Memory Error", __func__ );
-       return(FALSE);
+    for (gint i=0; i<md_len; i++)
+     { gchar chaine[3];
+       g_snprintf(chaine, sizeof(chaine), "%02x", hash_bin[i] );
+       g_strlcat( hash, chaine, sizeof(hash) );
      }
-    result = crypt_r( pwd, hash, Data);
-    retour = memcmp( result, hash, strlen( hash ) );                                                  /* Comparaison des hash */
-    g_free(Data);
-    if (retour==0) return(TRUE);
-    return(FALSE);
+
+    return ( ! memcmp ( hash, dbhash, strlen(dbhash) ) );
   }
 /******************************************************************************************************************************/
 /* Http_rechercher_session: Recherche une session dans la liste des session                                                   */
@@ -233,11 +236,12 @@
        return(FALSE);
      }
 
+    time(&session->last_request);
+    if (min_access_level == 0) return(TRUE);
     if (session->access_level<min_access_level)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Not high enough");
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Level forbidden");
        return(FALSE);
      }
-    time(&session->last_request);
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -339,7 +343,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT username,comment,access_level,enable,hash FROM users WHERE username='%s' LIMIT 1", name );
+                "SELECT username,comment,access_level,enable,salt,hash FROM users WHERE username='%s' LIMIT 1", name );
     g_free(name);
 
     struct DB *db = Init_DB_SQL();
@@ -382,7 +386,7 @@
        return;
      }
 /*********************************************** Authentification du client par login mot de passe ****************************/
-    if ( Http_check_utilisateur_password( db->row[4], Json_get_string ( request, "password" ) ) == FALSE ) /* Comparaison MDP */
+    if ( Http_check_utilisateur_password( db->row[4], db->row[5], Json_get_string ( request, "password" ) ) == FALSE )/* Comparaison MDP */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Password error for '%s' (%s)",
                  __func__, db->row[0], db->row[1] );
        Liberer_resultat_SQL (db);

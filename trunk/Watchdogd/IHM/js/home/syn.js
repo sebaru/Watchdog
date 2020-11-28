@@ -251,7 +251,8 @@
   { console.log ("in load page !");
 
     vars = window.location.pathname.split('/');
-    var json_request = JSON.stringify( { syn_id : vars[3] } );
+    if ( vars[3] == undefined ) target=1; else target = vars[3];
+    var json_request = JSON.stringify( { syn_id : target } );
     Send_to_API ( "PUT", "/api/syn/show", json_request, function(Response)
      { console.log("Traite motifs: "+Response.motifs.length);
        for (var i = 0; i < Response.motifs.length; i++)                          /* Pour chacun des motifs, parsing un par un */

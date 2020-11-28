@@ -99,7 +99,7 @@
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="/tech/dashboard"><i class="fas fa-tachometer-alt text-primary"></i> <span>Mode Technicien</span> </a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
+          <a class="dropdown-item" href="#" onclick="Logout()"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
         </div>
       </li>
     </ul>

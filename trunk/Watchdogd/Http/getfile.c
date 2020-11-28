@@ -113,7 +113,7 @@
        has_template = TRUE;
        g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Home/%s.php", WTD_PKGDATADIR, URI[2] );
      }
-    else if (!strcasecmp( URI[1], "login"))
+    else if (!session && !strcasecmp( URI[1], "login"))
      { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/login.php", WTD_PKGDATADIR ); }
     else
      { g_strfreev(URI);
@@ -154,7 +154,7 @@
 /*--------------------------------------------------- Lecture fichier --------------------------------------------------------*/
     if (stat (fichier, &stat_buf)==-1)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : File '%s' not found", __func__, fichier );
-       soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/tech/dashboard" );
+       soup_message_set_status_full ( msg, SOUP_STATUS_NOT_FOUND, "File not found" );
        g_free(result);
        return;
      }

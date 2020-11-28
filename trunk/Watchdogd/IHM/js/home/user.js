@@ -2,17 +2,19 @@
 
 /******************************************************************************************************************************/
  function User_sauver_parametre (  )
-  { var json_request = JSON.stringify(
+  { var json_request =
        { username    : localStorage.getItem("username"),
          email       : $('#idUserEmail').val(),
          phone       : $('#idUserPhone').val(),
          xmpp        : $('#idUserXmpp').val(),
          comment     : $('#idUserComment').val(),
          notification: $('#idUserNotification').prop('checked'),
-       }
-     );
+       };
 
-    Send_to_API ( 'POST', "/api/users/set", json_request, function ()
+    if ($('#idUserPassword1').val().length>0 && $('#idUserPassword1').val() == $('#idUserPassword2').val())
+     { json_request.password = $('#idUserPassword1').val(); }
+
+    Send_to_API ( 'POST', "/api/users/set", JSON.stringify(json_request), function ()
      {
      }, null);
   }

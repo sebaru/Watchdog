@@ -57,14 +57,14 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Nouveau Mot de passe</label>
-						     <input id="idUserPassword1" type="text" class="form-control" placeholder="Mon nouveau mot de passe">
+						     <input id="idUserPassword1" type="password" class="form-control" placeholder="Mon nouveau mot de passe">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Controle du nouveau<br>Mot de passe</label>
-						     <input id="idUserPassword12 type="text" class="form-control" placeholder="Controle du nouveau mot de passe">
+						     <input id="idUserPassword2" type="password" class="form-control" placeholder="Controle du nouveau mot de passe">
      					</div>
   					</div>
 

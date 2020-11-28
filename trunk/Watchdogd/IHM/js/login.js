@@ -14,6 +14,6 @@
        document.cookie = "wtd_session="+Response.wtd_session+"; path=/";
        console.log
        if (Response.access_level>=6) window.location.replace("/tech/dashboard");
-       else window.location.replace("home/index");
+       else window.location.replace("/home/index");
      });
   }

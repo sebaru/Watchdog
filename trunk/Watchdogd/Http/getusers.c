@@ -66,7 +66,7 @@
        return;
      }
 
-    gchar chaine[256], critere[128];
+    gchar chaine[512], critere[256];
     g_snprintf ( chaine, sizeof(chaine), "UPDATE users SET date_modif=NOW()" );
 
     if ( Json_has_member ( request, "access_level" ) )
@@ -118,9 +118,44 @@
      }
 
     gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
-    g_snprintf( critere, sizeof(critere), " WHERE username='%s' AND access_level<%d", username, session->access_level );
-    g_free(username);
+
+    if ( Json_has_member ( request, "password" ) && !strcmp(username, session->username) )
+     { guchar salt[128], salt_bin[17];
+       memset ( salt, 0, sizeof(salt) );
+       RAND_bytes ( salt_bin, 16 );
+       for (gint i=0; i<16; i++)
+        { gchar temp[3];
+          g_snprintf(temp, sizeof(temp), "%02x", salt_bin[i] );
+          g_strlcat( salt, temp, sizeof(salt) );
+        }
+
+       guchar hash[EVP_MAX_MD_SIZE*2+1], hash_bin[EVP_MAX_MD_SIZE];
+       memset ( hash, 0, sizeof(hash) );
+       gint md_len;
+       EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                               /* Calcul du SHA1 */
+       EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+       EVP_DigestUpdate(mdctx, salt, strlen(salt));
+       EVP_DigestUpdate(mdctx, Json_get_string ( request, "password" ), strlen(Json_get_string ( request, "password" )));
+       EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
+       EVP_MD_CTX_free(mdctx);
+       for (gint i=0; i<md_len; i++)
+        { gchar temp[3];
+          g_snprintf(temp, sizeof(temp), "%02x", hash_bin[i] );
+          g_strlcat( hash, temp, sizeof(hash) );
+        }
+
+       g_snprintf( critere, sizeof(critere), ", salt='%s', hash='%s'", salt, hash );
+       g_strlcat ( chaine, critere, sizeof(chaine) );
+     }
+
+    g_snprintf( critere, sizeof(critere), " WHERE username='%s'", username );
     g_strlcat ( chaine, critere, sizeof(chaine) );
+
+    if (strcmp(username, session->username))
+     { g_snprintf( critere, sizeof(critere), " AND access_level<%d", session->access_level );
+       g_strlcat ( chaine, critere, sizeof(chaine) );
+     }
+    g_free(username);
 
     if (SQL_Write ( chaine ))
          { soup_message_set_status ( msg, SOUP_STATUS_OK ); }
