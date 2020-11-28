@@ -84,6 +84,11 @@
        g_strlcat ( chaine, critere, sizeof(chaine) );
      }
 
+    if ( Json_has_member ( request, "allow_cde" ) )
+     { g_snprintf( critere, sizeof(critere), ", allow_cde=%d", Json_get_bool ( request, "allow_cde" ) );
+       g_strlcat ( chaine, critere, sizeof(chaine) );
+     }
+
     if ( Json_has_member ( request, "email" ) )
      { gchar *email = Normaliser_chaine ( Json_get_string ( request, "email" ) );
        g_snprintf( critere, sizeof(critere), ", email='%s'", email );
@@ -339,7 +344,7 @@
        return;
      }
 
-    g_snprintf( chaine, sizeof(chaine), "SELECT id,access_level,username,email,enable,comment,notification,phone,xmpp "
+    g_snprintf( chaine, sizeof(chaine), "SELECT id,access_level,username,email,enable,comment,notification,allow_cde,phone,xmpp "
                                         "FROM users WHERE access_level<'%d'", session->access_level );
     SQL_Select_to_JSON ( builder, "users", chaine );
     buf = Json_get_buf ( builder, &taille_buf );
