@@ -665,9 +665,9 @@ CREATE TABLE IF NOT EXISTS `users` (
   KEY(`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
-INSERT INTO `users` (`id`, `enable`, `access_level`, `username`, `hash`, `comment`, `date_create`, `date_modif`) VALUES
-(0, 1, 10, 'root', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 'Root user ', NOW(), NOW()),
-(1, 1, 0, 'guest', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 'Guest user ', NOW(), NOW());
+INSERT INTO `users` (`id`, `enable`, `access_level`, `username`, `salt`, `hash`, `comment`, `date_create`, `date_modif`) VALUES
+(0, 1, 9, 'root', '539c14d7b1d4205f7bb259f0ea941cd0', '510ccdeda455945773552be07941cfd1d03fc17f0f09b4d93f9d4dd8b6deaff8', 'Root user ', NOW(), NOW()),
+(1, 1, 0, 'guest', 'c607ac2c103d731de0cc549f90095734', '4ef847cbf200e403327cce2c8cad26d34442073b4b3c72631631d849875935f3', 'Guest user ', NOW(), NOW());
 
 CREATE TABLE IF NOT EXISTS `users_sessions` (
   `username` VARCHAR(32) NOT NULL,

@@ -3,7 +3,7 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function SMS_Sauver_parametre ( )
   { var json_request = JSON.stringify(
-     { /*instance:      Get_target_instance(),*/
+     { instance:      Get_target_instance(),
        tech_id:       $('#idGSMTechID').val(),
        ovh_service_name: $('#idGSMOVHServiceName').val(),
        ovh_application_key: $('#idGSMOVHApplicationKey').val(),
