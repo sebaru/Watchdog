@@ -34,6 +34,49 @@
  #include "Http.h"
  extern struct HTTP_CONFIG Cfg_http;
 
+ #define USER_TAILLE_SALT  128
+ #define USER_TAILLE_HASH  (EVP_MAX_MD_SIZE*2+1)
+
+/******************************************************************************************************************************/
+/* Http_user_generate_salt: Génère un salt dans le buffer en parametre                                                        */
+/* Entrées: le buffer                                                                                                         */
+/* Sortie : le buffer, avec le salt                                                                                           */
+/******************************************************************************************************************************/
+ static gchar *Http_user_generate_salt ( void )
+  { guchar salt_bin[17];
+    gchar *salt = g_try_malloc0 ( USER_TAILLE_SALT );
+    if (!salt) return(NULL);
+    RAND_bytes ( salt_bin, 16 );
+    for (gint i=0; i<16; i++)
+     { gchar chaine[3];
+       g_snprintf(chaine, sizeof(chaine), "%02x", salt_bin[i] );
+       g_strlcat( salt, chaine, sizeof(salt) );
+     }
+    return(salt);
+  }
+/******************************************************************************************************************************/
+/* Http_user_generate_hash: Génère un hash dans le buffer en parametre, s'appuyant sur le salt                                */
+/* Entrées: le salt, le password                                                                                              */
+/* Sortie : le buffer                                                                                                         */
+/******************************************************************************************************************************/
+ static gchar *Http_user_generate_hash ( gchar *salt, gchar *password )
+  { guchar hash_bin[EVP_MAX_MD_SIZE];
+    gchar *hash = g_try_malloc0 ( USER_TAILLE_HASH );
+
+    gint md_len;
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                               /* Calcul du SHA1 */
+    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+    EVP_DigestUpdate(mdctx, salt, strlen(salt));
+    EVP_DigestUpdate(mdctx, password, strlen(password) );
+    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
+    EVP_MD_CTX_free(mdctx);
+    for (gint i=0; i<md_len; i++)
+     { gchar chaine[3];
+       g_snprintf(chaine, sizeof(chaine), "%02x", hash_bin[i] );
+       g_strlcat( hash, chaine, sizeof(hash) );
+     }
+    return(hash);
+  }
 /******************************************************************************************************************************/
 /* Http_Traiter_mnemos_set: Modifie la config d'un mnemonique                                                                 */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -120,32 +163,17 @@
     gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
 
     if ( Json_has_member ( request, "password" ) && !strcmp(username, session->username) )
-     { guchar salt[128], salt_bin[17];
-       memset ( salt, 0, sizeof(salt) );
-       RAND_bytes ( salt_bin, 16 );
-       for (gint i=0; i<16; i++)
-        { gchar temp[3];
-          g_snprintf(temp, sizeof(temp), "%02x", salt_bin[i] );
-          g_strlcat( salt, temp, sizeof(salt) );
-        }
+     { gchar *salt = Http_user_generate_salt();
+       if (salt)
+        { gchar *hash = Http_user_generate_hash( salt, Json_get_string ( request, "password" ) );
 
-       guchar hash[EVP_MAX_MD_SIZE*2+1], hash_bin[EVP_MAX_MD_SIZE];
-       memset ( hash, 0, sizeof(hash) );
-       gint md_len;
-       EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                               /* Calcul du SHA1 */
-       EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
-       EVP_DigestUpdate(mdctx, salt, strlen(salt));
-       EVP_DigestUpdate(mdctx, Json_get_string ( request, "password" ), strlen(Json_get_string ( request, "password" )));
-       EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
-       EVP_MD_CTX_free(mdctx);
-       for (gint i=0; i<md_len; i++)
-        { gchar temp[3];
-          g_snprintf(temp, sizeof(temp), "%02x", hash_bin[i] );
-          g_strlcat( hash, temp, sizeof(hash) );
+          if (hash)
+           { g_snprintf( critere, sizeof(critere), ", salt='%s', hash='%s'", salt, hash );
+             g_strlcat ( chaine, critere, sizeof(chaine) );
+             g_free(hash);
+           }
+          g_free(salt);
         }
-
-       g_snprintf( critere, sizeof(critere), ", salt='%s', hash='%s'", salt, hash );
-       g_strlcat ( chaine, critere, sizeof(chaine) );
      }
 
     g_snprintf( critere, sizeof(critere), " WHERE username='%s'", username );
@@ -197,32 +225,27 @@
        return;
      }
 
-    guchar salt[128], salt_bin[17];
-    memset ( salt, 0, sizeof(salt) );
-    RAND_bytes ( salt_bin, 16 );
-    for (gint i=0; i<16; i++)
-     { g_snprintf(chaine, sizeof(chaine), "%02x", salt_bin[i] );
-       g_strlcat( salt, chaine, sizeof(salt) );
+    gchar *salt = Http_user_generate_salt ();
+    if (!salt)
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Salt Error");
+       return;
      }
 
-    guchar hash[EVP_MAX_MD_SIZE*2+1], hash_bin[EVP_MAX_MD_SIZE];
-    memset ( hash, 0, sizeof(hash) );
-    gint md_len;
-    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                               /* Calcul du SHA1 */
-    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
-    EVP_DigestUpdate(mdctx, salt, strlen(salt));
-    EVP_DigestUpdate(mdctx, Json_get_string ( request, "password" ), strlen(Json_get_string ( request, "password" )));
-    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
-    EVP_MD_CTX_free(mdctx);
-    for (gint i=0; i<md_len; i++)
-     { g_snprintf(chaine, sizeof(chaine), "%02x", hash_bin[i] );
-       g_strlcat( hash, chaine, sizeof(hash) );
+    gchar *hash = Http_user_generate_hash ( salt, Json_get_string ( request, "password" ) );
+    if (!hash)
+     { json_node_unref(request);
+       g_free(salt);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Hash Error");
+       return;
      }
 
     gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
     gchar *email    = Normaliser_chaine ( Json_get_string ( request, "email" ) );
     g_snprintf ( chaine, sizeof(chaine), "INSERT INTO users SET username='%s', email='%s', salt='%s', hash='%s'",
                  username, email, salt, hash );
+    g_free(salt);
+    g_free(hash);
     if (SQL_Write ( chaine ))
          { soup_message_set_status ( msg, SOUP_STATUS_OK );
            Audit_log ( session, "User '%s' ('%s') added", username, email );
@@ -380,7 +403,8 @@
      }
 
     g_snprintf( chaine, sizeof(chaine), "SELECT id,access_level,username,email,enable,comment,notification,allow_cde,phone,xmpp "
-                                        "FROM users WHERE access_level<'%d'", session->access_level );
+                                        "FROM users WHERE access_level<'%d' OR (access_level='%d' AND username='%s')",
+                                         session->access_level, session->access_level, session->username );
     SQL_Select_to_JSON ( builder, "users", chaine );
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
