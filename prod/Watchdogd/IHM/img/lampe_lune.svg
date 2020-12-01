@@ -58,12 +58,12 @@
      stroke="none"
      id="g6"
      style="fill:#e15d5d;fill-opacity:1">
-    <path class="WTDActiveFillColor"
+    <path class="WTD-ActiveFillColor"
        d="M 111,104 C 99,89 90,73 90,68 90,50 134,0 150,0 c 16,0 60,50 60,68 0,19 -42,62 -60,62 -10,0 -28,-12 -39,-26 z m 69,-4 C 206,74 205,58 175,30 L 150,7 125,30 c -14,13 -25,29 -25,37 0,15 35,53 50,53 6,0 19,-9 30,-20 z"
        id="path4"
        style="fill:#ffff00;fill-opacity:1;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none"
        transform="matrix(21.808892,0,0,21.808892,481.63292,-6906.3588)" />
-    <path class="WTDActiveFillColor"
+    <path class="WTD-ActiveFillColor"
        style="opacity:0.5;fill:none;fill-opacity:1;stroke:#fff800;stroke-width:33.6924;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.90001243"
        id="path856"
        transform="matrix(-10.031372,-4.7504245,-4.7092575,10.119064,690.59767,-6350.1206)"

@@ -30,7 +30,7 @@
      { document.getElementById("idUsername").innerHTML = localStorage.getItem("username");
        document.getElementById("idHrefUsername").href = "/home/user/"+localStorage.getItem("username");
      }
-    else
+   /* else
      { document.getElementById("idUsername").innerHTML = "Se connecter";
        document.getElementById("idHrefUsername").href = "/login";
      }

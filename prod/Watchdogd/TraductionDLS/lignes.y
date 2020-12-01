@@ -282,9 +282,8 @@ calcul_expr3:   VALF
                       else { tech_id = NULL; acro = $1; }
                    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
                    if (!alias)
-                    { if ($2) { alias = Set_new_external_alias(tech_id,acro); }      /* Si dependance externe, on va chercher */
-                         else { alias = Set_new_external_alias("THIS",acro); }/* Si dependance pseudo-externe, on va chercher */
-                    }
+                    { alias = Set_new_external_alias(tech_id,acro); }      /* Si dependance externe, on va chercher */
+
                    if (alias)
                     { switch(alias->classe)               /* On traite que ce qui peut passer en "condition" */
                        { case MNEMO_REGISTRE:
@@ -714,9 +713,8 @@ une_action:     T_ACT_COMOUT
 
                    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
                    if (!alias)
-                    { if ($3) { alias = Set_new_external_alias(tech_id,acro); }      /* Si dependance externe, on va chercher */
-                         else { alias = Set_new_external_alias("THIS",acro); }/* Si dependance pseudo-externe, on va chercher */
-                    }
+                    { alias = Set_new_external_alias(tech_id,acro); }      /* Si dependance externe, on va chercher */
+
                    if (!alias)
                     { if ($3) Emettre_erreur_new( "'%s:%s' is not defined", $2, $3 );
                          else Emettre_erreur_new( "'%s' is not defined", $2 );

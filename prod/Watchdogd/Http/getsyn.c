@@ -128,7 +128,7 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
+    if (!Http_check_session( msg, session, 0 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
@@ -146,6 +146,40 @@
 
     gint syn_id = Json_get_int ( request, "syn_id" );
     json_node_unref(request);
+
+    struct DB *db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "%s: DB connexion failed for user '%s'", __func__, session->username );
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT access_level FROM syns WHERE id=%d", syn_id );
+    if ( Lancer_requete_SQL ( db, chaine ) == FALSE )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "%s: DB request failed for user '%s'",__func__, session->username );
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
+       return;
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                "%s: Syn '%d' unknown", __func__, syn_id );
+       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
+       return;
+     }
+    gint syn_access_level = atoi(db->row[0]);
+    Liberer_resultat_SQL (db);
+    Libere_DB_SQL( &db );
+
+    if (session->access_level < syn_access_level )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Acces interdit !");
+       return;
+     }
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
@@ -168,7 +202,8 @@
      }
 
     g_snprintf(chaine, sizeof(chaine), "SELECT sp.*,syn.page,syn.libelle FROM syns_pass as sp "
-                                       "INNER JOIN syns as syn ON sp.syn_cible_id=syn.id WHERE sp.syn_id=%d", syn_id );
+                                       "INNER JOIN syns as syn ON sp.syn_cible_id=syn.id "
+                                       "WHERE sp.syn_id=%d AND syn.access_level<=%d", syn_id, session->access_level );
     if (SQL_Select_to_JSON ( builder, "passerelles", chaine ) == FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
        g_object_unref(builder);
@@ -213,9 +248,9 @@
 
 /*----------------------------------------------- Visuels --------------------------------------------------------------------*/
     Json_add_array ( builder, "visuels" );
-    struct DB *db = Init_DB_SQL();
+    db = Init_DB_SQL();
     if (db)
-     { g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) from dls WHERE syn_id=%d", syn_id );
+     { g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) FROM syns_motifs WHERE syn_id=%d", syn_id );
        Lancer_requete_SQL ( db, chaine );                                                      /* Execution de la requete SQL */
        while(Recuperer_ligne_SQL(db))                                                      /* Chargement d'une ligne resultat */
         { GSList *liste = Partage->Dls_data_VISUEL;

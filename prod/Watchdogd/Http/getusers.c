@@ -27,6 +27,7 @@
 
  #include <string.h>
  #include <unistd.h>
+ #include <openssl/rand.h>
 
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
@@ -65,7 +66,7 @@
        return;
      }
 
-    gchar chaine[256], critere[128];
+    gchar chaine[512], critere[256];
     g_snprintf ( chaine, sizeof(chaine), "UPDATE users SET date_modif=NOW()" );
 
     if ( Json_has_member ( request, "access_level" ) )
@@ -80,6 +81,11 @@
 
     if ( Json_has_member ( request, "notification" ) )
      { g_snprintf( critere, sizeof(critere), ", notification=%d", Json_get_bool ( request, "notification" ) );
+       g_strlcat ( chaine, critere, sizeof(chaine) );
+     }
+
+    if ( Json_has_member ( request, "allow_cde" ) )
+     { g_snprintf( critere, sizeof(critere), ", allow_cde=%d", Json_get_bool ( request, "allow_cde" ) );
        g_strlcat ( chaine, critere, sizeof(chaine) );
      }
 
@@ -112,9 +118,44 @@
      }
 
     gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
-    g_snprintf( critere, sizeof(critere), " WHERE username='%s' AND access_level<%d", username, session->access_level );
-    g_free(username);
+
+    if ( Json_has_member ( request, "password" ) && !strcmp(username, session->username) )
+     { guchar salt[128], salt_bin[17];
+       memset ( salt, 0, sizeof(salt) );
+       RAND_bytes ( salt_bin, 16 );
+       for (gint i=0; i<16; i++)
+        { gchar temp[3];
+          g_snprintf(temp, sizeof(temp), "%02x", salt_bin[i] );
+          g_strlcat( salt, temp, sizeof(salt) );
+        }
+
+       guchar hash[EVP_MAX_MD_SIZE*2+1], hash_bin[EVP_MAX_MD_SIZE];
+       memset ( hash, 0, sizeof(hash) );
+       gint md_len;
+       EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                               /* Calcul du SHA1 */
+       EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+       EVP_DigestUpdate(mdctx, salt, strlen(salt));
+       EVP_DigestUpdate(mdctx, Json_get_string ( request, "password" ), strlen(Json_get_string ( request, "password" )));
+       EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
+       EVP_MD_CTX_free(mdctx);
+       for (gint i=0; i<md_len; i++)
+        { gchar temp[3];
+          g_snprintf(temp, sizeof(temp), "%02x", hash_bin[i] );
+          g_strlcat( hash, temp, sizeof(hash) );
+        }
+
+       g_snprintf( critere, sizeof(critere), ", salt='%s', hash='%s'", salt, hash );
+       g_strlcat ( chaine, critere, sizeof(chaine) );
+     }
+
+    g_snprintf( critere, sizeof(critere), " WHERE username='%s'", username );
     g_strlcat ( chaine, critere, sizeof(chaine) );
+
+    if (strcmp(username, session->username))
+     { g_snprintf( critere, sizeof(critere), " AND access_level<%d", session->access_level );
+       g_strlcat ( chaine, critere, sizeof(chaine) );
+     }
+    g_free(username);
 
     if (SQL_Write ( chaine ))
          { soup_message_set_status ( msg, SOUP_STATUS_OK ); }
@@ -131,6 +172,7 @@
                                SoupClientContext *client, gpointer user_data )
   { GBytes *request_brute;
     gsize taille;
+    gchar chaine[256];
 
     if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -148,19 +190,43 @@
        return;
      }
 
-    if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "email" ) ) )
-     { if (request) json_node_unref(request);
+    if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "email" ) &&
+            Json_has_member ( request, "password" ) ) )
+     { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    gchar chaine[256];
+    guchar salt[128], salt_bin[17];
+    memset ( salt, 0, sizeof(salt) );
+    RAND_bytes ( salt_bin, 16 );
+    for (gint i=0; i<16; i++)
+     { g_snprintf(chaine, sizeof(chaine), "%02x", salt_bin[i] );
+       g_strlcat( salt, chaine, sizeof(salt) );
+     }
+
+    guchar hash[EVP_MAX_MD_SIZE*2+1], hash_bin[EVP_MAX_MD_SIZE];
+    memset ( hash, 0, sizeof(hash) );
+    gint md_len;
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                               /* Calcul du SHA1 */
+    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+    EVP_DigestUpdate(mdctx, salt, strlen(salt));
+    EVP_DigestUpdate(mdctx, Json_get_string ( request, "password" ), strlen(Json_get_string ( request, "password" )));
+    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
+    EVP_MD_CTX_free(mdctx);
+    for (gint i=0; i<md_len; i++)
+     { g_snprintf(chaine, sizeof(chaine), "%02x", hash_bin[i] );
+       g_strlcat( hash, chaine, sizeof(hash) );
+     }
+
     gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
     gchar *email    = Normaliser_chaine ( Json_get_string ( request, "email" ) );
-    g_snprintf ( chaine, sizeof(chaine), "INSERT INTO users SET username='%s', email='%s'", username, email );
+    g_snprintf ( chaine, sizeof(chaine), "INSERT INTO users SET username='%s', email='%s', salt='%s', hash='%s'",
+                 username, email, salt, hash );
     if (SQL_Write ( chaine ))
          { soup_message_set_status ( msg, SOUP_STATUS_OK );
            Audit_log ( session, "User '%s' ('%s') added", username, email );
+           Send_mail ( "Bienvenu chez vous !", email, "ceci est un test !" );
          }
     else { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
     g_free(username);
@@ -313,7 +379,8 @@
        return;
      }
 
-    g_snprintf( chaine, sizeof(chaine), "SELECT * FROM users WHERE access_level<'%d'", session->access_level );
+    g_snprintf( chaine, sizeof(chaine), "SELECT id,access_level,username,email,enable,comment,notification,allow_cde,phone,xmpp "
+                                        "FROM users WHERE access_level<'%d'", session->access_level );
     SQL_Select_to_JSON ( builder, "users", chaine );
     buf = Json_get_buf ( builder, &taille_buf );
 /*************************************************** Envoi au client **********************************************************/
@@ -367,5 +434,57 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_request_getusers_list: Traite une requete sur l'URI users/list                                                */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ void Http_traiter_users_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                               SoupClientContext *client, gpointer user_data )
+  { JsonBuilder *builder;
+     GBytes *request_brute;
+    gsize taille_buf;
+    gsize taille;
+    gchar chaine[256];
+
+    if (msg->method != SOUP_METHOD_PUT)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 0 )) return;
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
+       return;
+     }
+    if ( ! (Json_has_member ( request, "username" ) ) )
+     { if (request) json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+    gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
+    json_node_unref(request);
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder)
+     { g_snprintf( chaine, sizeof(chaine), "SELECT id,access_level,username,email,enable,comment,notification,phone,xmpp "
+                                           "FROM users WHERE username='%s' and access_level<='%d'", username, session->access_level );
+       SQL_Select_to_JSON ( builder, NULL, chaine );
+       gchar *buf = Json_get_buf ( builder, &taille_buf );
+   	   soup_message_set_status (msg, SOUP_STATUS_OK);
+       soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+     }
+    else
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+    g_free(username);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

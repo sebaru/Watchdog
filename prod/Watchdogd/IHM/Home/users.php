@@ -5,6 +5,7 @@
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Users_Show_add_user()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un utilisateur</button>
+        <button type="button" onclick="Redirect('/home/user')" class="btn btn-primary"><i class="fas fa-user"></i> Mon profil</button>
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>
@@ -44,7 +45,16 @@
         <div class="form-group">
 					     <div class="input-group">
 						     <div class="input-group-prepend">
-							     <span class="input-group-text">Username</span>
+							     <span class="input-group-text">Password</span>
+						     </div>
+						     <input id="idModalUserNewPassword" type="password" class="form-control" placeholder="Mot de passe du nouvel utilisateur">
+     					</div>
+   					</div>
+
+        <div class="form-group">
+					     <div class="input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text">E-Mail</span>
 						     </div>
 						     <input id="idModalUserNewEmail" type="email" class="form-control" placeholder="E-mail du nouvel utilisateur">
      					</div>

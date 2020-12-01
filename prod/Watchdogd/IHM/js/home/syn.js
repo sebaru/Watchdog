@@ -87,6 +87,7 @@
          myanim.setAttribute("to","1");
          myanim.setAttribute("dur","0.3s");
          myanim.setAttribute("fill","freeze");
+         myanim.setAttribute("begin","indefinite");
          myanim.addEventListener ( "end", function (event)
                                      { if (svg.currentCligno==1) svg.getElementById("fadeout").beginElement(); }, false );
          svg.appendChild(myanim);
@@ -250,7 +251,8 @@
   { console.log ("in load page !");
 
     vars = window.location.pathname.split('/');
-    var json_request = JSON.stringify( { syn_id : vars[3] } );
+    if ( vars[3] == undefined ) target=1; else target = vars[3];
+    var json_request = JSON.stringify( { syn_id : target } );
     Send_to_API ( "PUT", "/api/syn/show", json_request, function(Response)
      { console.log("Traite motifs: "+Response.motifs.length);
        for (var i = 0; i < Response.motifs.length; i++)                          /* Pour chacun des motifs, parsing un par un */

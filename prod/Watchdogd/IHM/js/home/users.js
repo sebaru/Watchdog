@@ -43,6 +43,34 @@
      }, null);
   }
 /******************************************************************************************************************************/
+ function User_enable_cde ( username )
+  { table = $('#idTableUsers').DataTable();
+    selection = table.ajax.json().users.filter( function(item) { return (item.username==username) } )[0];
+    var json_request = JSON.stringify(
+       { username : selection.username,
+         allow_cde: true,
+       }
+     );
+
+    Send_to_API ( 'POST', "/api/users/set", json_request, function ()
+     { $('#idTableUsers').DataTable().ajax.reload(null, false);
+     }, null);
+  }
+/******************************************************************************************************************************/
+ function User_disable_cde ( username )
+  { table = $('#idTableUsers').DataTable();
+    selection = table.ajax.json().users.filter( function(item) { return (item.username==username) } )[0];
+    var json_request = JSON.stringify(
+       { username : selection.username,
+         allow_cde: false,
+       }
+     );
+
+    Send_to_API ( 'POST', "/api/users/set", json_request, function ()
+     { $('#idTableUsers').DataTable().ajax.reload(null, false);
+     }, null);
+  }
+/******************************************************************************************************************************/
  function User_enable_notif ( username )
   { table = $('#idTableUsers').DataTable();
     selection = table.ajax.json().users.filter( function(item) { return (item.username==username) } )[0];
@@ -114,6 +142,7 @@
  function Users_Valider_add_user ()
   { var json_request = JSON.stringify(
        { username    : $('#idModalUserNewUsername').val(),
+         password    : $('#idModalUserNewPassword').val(),
          email       : $('#idModalUserNewEmail').val(),
        }
      );
@@ -157,18 +186,30 @@
                         );
                 }
             },
-            { "data": null, "title":"Notification", "className": "align-middle hidden-xs text-center",
+            { "data": null, "title":"Notification/Cde", "className": "align-middle hidden-xs text-center",
               "render": function (item)
-                { if (item.notification==true)
-                   { return( Bouton ( "success", "Désactiver les notifications",
-                                      "User_disable_notif", item.username, "Oui" ) );
+                { boutons = Bouton_actions_start ();
+                  if (item.notification==true)
+                   { boutons += Bouton_actions_add ( "success", "Désactiver les notifications",
+                                                     "User_disable_notif", item.username, "bell", null );
                    }
                   else
-                   { return( Bouton ( "outline-warning", "Activer les notiications",
-                                      "User_enable_notif", item.username, "Désactivé" ) );
+                   { boutons += Bouton_actions_add ( "outline-warning", "Activer les notifications",
+                                                     "User_enable_notif", item.username, "bell-slash", null );
                    }
+                  if (item.allow_cde==true)
+                   { boutons += Bouton_actions_add ( "success", "Interdire les commandes",
+                                                     "User_disable_cde", item.username, "phone", null );
+                   }
+                  else
+                   { boutons += Bouton_actions_add ( "outline-warning", "Autoriser les commandes",
+                                                     "User_enable_cde", item.username, "phone-slash", null );
+                   }
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
                 }
-            },            { "data": null, "title":"Adresse Mail", "className": "align-middle hidden-xs",
+            },
+            { "data": null, "title":"Adresse Mail", "className": "align-middle hidden-xs",
               "render": function (item)
                 { return( Input ( "email", "idUserMail_"+item.username,
                                   "User_set('"+item.username+"')",
