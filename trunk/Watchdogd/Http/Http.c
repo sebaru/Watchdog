@@ -87,48 +87,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Http_traiter_log ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                SoupClientContext *client, gpointer user_data)
-  { GBytes *request_brute;
-    gsize taille;
-
-    if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
-
-    if ( ! Json_has_member ( request, "log_level" ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    gchar *log_level = Json_get_string ( request, "log_level" );
-         if ( ! g_ascii_strcasecmp ( log_level, "LOG_DEBUG"   ) ) { Info_change_log_level ( Config.log, LOG_DEBUG   ); }
-    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_NOTICE"  ) ) { Info_change_log_level ( Config.log, LOG_NOTICE  ); }
-    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_INFO"    ) ) { Info_change_log_level ( Config.log, LOG_INFO    ); }
-    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_WARNING" ) ) { Info_change_log_level ( Config.log, LOG_WARNING ); }
-    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_ERROR"   ) ) { Info_change_log_level ( Config.log, LOG_ERR     ); }
-	   else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais niveau de log");
-    json_node_unref(request);
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-  }
-/******************************************************************************************************************************/
 /* Http_redirect_to_slave: Proxifie une requete vers un slave                                                                 */
 /* Entrée : le message source, le nom de l'instance cible                                                                     */
 /* Sortie : le contenu de la reponse du slave                                                                                 */
@@ -606,9 +564,9 @@ reload:
 /*    soup_server_add_handler ( socket, "/api/config/del",     Http_traiter_config_del, NULL, NULL );*/
     soup_server_add_handler ( socket, "/api/instance/list",  Http_traiter_instance_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/instance/reset", Http_traiter_instance_reset, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/instance/loglevel", Http_traiter_instance_loglevel, NULL, NULL );
     soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/api/log/get",        Http_traiter_log_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/log",            Http_traiter_log, NULL, NULL );
     soup_server_add_handler ( socket, "/api/install",        Http_traiter_install, NULL, NULL );
     soup_server_add_handler ( socket, "/api/bus",            Http_traiter_bus, NULL, NULL );
     soup_server_add_handler ( socket, "/api/ping",           Http_traiter_ping, NULL, NULL );

@@ -664,7 +664,6 @@ end:
     if (write( fd_lock, strpid, strlen(strpid) )<0)
      { printf( "Cannot write PID on %s/%s (%s)\n", Config.home, VERROU_SERVEUR, strerror(errno) ); }
 
-
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     gcry_check_version(NULL);                                                        /* Initialisation de la librairie GCRYPT */
     curl_global_init (CURL_GLOBAL_ALL);                                                 /* Initialisation de la libraire CURL */
