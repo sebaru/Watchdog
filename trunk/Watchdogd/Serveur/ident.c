@@ -104,6 +104,8 @@
      }
 
 /*********************************************** Authentification du client par login mot de passe ****************************/
+#ifdef bouh
+#warning Désactivation controle d authentification
     if (!client->certif)                                                                            /* si pas de certificat ! */
      { if ( Check_utilisateur_password( client->util, ident->passwd ) == FALSE )                     /* Comparaison des codes */
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
@@ -113,6 +115,7 @@
           return(FALSE);
         }
      }
+#endif
 
     Autoriser_client ( client );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
