@@ -158,8 +158,7 @@
         </div>
       </li>
 
-        <a class="nav-link rounded" href="https://icons.abls-habitat.fr/admin/icons"><i class="fas fa-file-photo-o"></i> <span>Gestion des Icones</span></a>
-        <a class="nav-link rounded" href="/tech/io_config"><i class="fas fa-cogs"></i> <span>Entrées/Sorties</span></a>
+      <a class="nav-link rounded" href="/tech/io_config"><i class="fas fa-cogs"></i> <span>Entrées/Sorties</span></a>
 
     </ul>
 
