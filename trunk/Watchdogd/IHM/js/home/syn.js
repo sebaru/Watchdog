@@ -246,15 +246,10 @@
     svg.append(button);
     return(svg);
   }
-/********************************************* Appelé au chargement de la page ************************************************/
- function Load_page ()
-  { console.log ("in load page !");
 
-    vars = window.location.pathname.split('/');
-    if ( vars[3] == undefined ) target=1; else target = vars[3];
-    var json_request = JSON.stringify( { syn_id : target } );
-    Send_to_API ( "PUT", "/api/syn/show", json_request, function(Response)
-     { console.log("Traite motifs: "+Response.motifs.length);
+/********************************************* Appelé au chargement de la page ************************************************/
+ function Init_syn ( Response )
+  {    console.log("Traite motifs: "+Response.motifs.length);
        for (var i = 0; i < Response.motifs.length; i++)                          /* Pour chacun des motifs, parsing un par un */
         { var motif = Response.motifs[i];
           if (motif.icone==424)
@@ -312,13 +307,24 @@
         { var comment = Response.comments[i];
           Load_Comment_to_canvas(comment);
         }
+  }
 
-     }, null );
+/********************************************* Appelé au chargement de la page ************************************************/
+ function Load_page ()
+  { console.log ("in load page !");
+
+    vars = window.location.pathname.split('/');
+    if ( vars[3] == undefined ) target=1; else target = vars[3];
+    var json_request = JSON.stringify( { syn_id : target } );
 
     var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/live-motifs", "live-motifs");
     WTDWebSocket.onopen = function (event)
-     { console.log("Connecté au websocket !");
-       this.send ( JSON.stringify( { syn_id: vars[3] } ) );
+     { var json_request = JSON.stringify( { wtd_session: localStorage.getItem("wtd_session"),
+                                            ws_msg_type: "get_synoptique",
+                                            syn_id : target }
+                                        );
+       console.log("WSOpen" + json_request );
+       this.send ( json_request );
      }
     WTDWebSocket.onerror = function (event)
      { console.log("Error au websocket !");
@@ -329,11 +335,13 @@
        console.debug(event);
      }
     WTDWebSocket.onmessage = function (event)
-     { console.log("Recu WS Motif "+event.data);
-       var Response = JSON.parse(event.data);                                               /* Pointe sur <synoptique a=1 ..> */
-       Visuel_Set_State ( Response.tech_id, Response.acronyme, Response.mode, Response.color, Response.cligno );
+     { var Response = JSON.parse(event.data);                                               /* Pointe sur <synoptique a=1 ..> */
+       if (Response.ws_msg_type == "update_visuel")
+        { Visuel_Set_State ( Response.tech_id, Response.acronyme, Response.mode, Response.color, Response.cligno ); }
+       else if (Response.ws_msg_type == "init_syn")
+        { Init_syn ( Response ); }
+       else console.log("ws_msg_type: " + Response.ws_msg_type + " not known");
      }
-
   }
 /******************************************************************************************************************************/
  function Visuel_Set_State ( tech_id, acronyme, mode, color, cligno )

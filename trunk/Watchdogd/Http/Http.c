@@ -195,12 +195,9 @@
      }
 
     time(&session->last_request);
-    if (min_access_level == 0) return(TRUE);
-    if (session->access_level<min_access_level)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Level forbidden");
-       return(FALSE);
-     }
-    return(TRUE);
+    if (session->access_level>=min_access_level) return(TRUE);
+    soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Level forbidden");
+    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
@@ -547,7 +544,6 @@ reload:
     soup_server_add_handler ( socket, "/api/map/del",        Http_traiter_map_del, NULL, NULL );
     soup_server_add_handler ( socket, "/api/map/set",        Http_traiter_map_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/list",       Http_traiter_syn_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/show",       Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/del",        Http_traiter_syn_del, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/get",        Http_traiter_syn_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/set",        Http_traiter_syn_set, NULL, NULL );
@@ -622,23 +618,8 @@ reload:
           gchar *buf;
           GSList *liste;
 
-          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Visuel %s:%s received",
-                    __func__, visu.tech_id, visu.acronyme );
-          builder = Json_create ();
-          if (builder == NULL)
-           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
-             continue;
-           }
-          Json_add_string ( builder, "msg_type", "update_motif" );
-          Dls_VISUEL_to_json ( builder, &visu );
-          buf = Json_get_buf ( builder, &taille_buf );
-          liste = Cfg_http.liste_ws_motifs_clients;
-          while (liste)
-           { struct WS_CLIENT_SESSION *client = liste->data;
-             soup_websocket_connection_send_text ( client->connexion, buf );
-             liste = g_slist_next(liste);
-           }
-          g_free(buf);
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Visuel %s:%s received", __func__, visu.tech_id, visu.acronyme );
+          Http_Envoyer_un_visuel ( &visu );
         }
 
        JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );

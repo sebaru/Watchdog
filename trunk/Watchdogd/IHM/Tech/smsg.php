@@ -29,11 +29,19 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Description</label>
+						     <label class="col-3 col-form-label text-right">GSM Description</label>
 						     <input id="idGSMDescription" type="text" class="form-control" placeholder="Description du téléphone et/ou sa position">
      					</div>
   					</div>
 
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-3 col-form-label text-right">GSM Communication</label>
+						     <input id="idGSMComm" type="text" class="form-control" placeholder="Communication">
+     					</div>
+  					</div>
+
+<hr>
 
        <div class="col form-group">
 					     <div class="input-group">
@@ -61,13 +69,6 @@
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">OVH Consumer Key</label>
 						     <input id="idGSMOVHConsumerKey" type="text" class="form-control" placeholder="OVH Consumer Key">
-     					</div>
-  					</div>
-
-       <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">GSM Communication</label>
-						     <input id="idGSMComm" type="text" class="form-control" placeholder="Communication">
      					</div>
   					</div>
 

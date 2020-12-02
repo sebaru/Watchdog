@@ -43,66 +43,34 @@
     gint last_update;
   };
 
- struct WS_MOTIF
-  { gchar tech_id[32];
-    gchar acronyme[64];
-    gpointer dls_data;
-  };
-
 /******************************************************************************************************************************/
-/* Envoyer_un_motif: Envoi un update motif au client                                                                          */
-/* Entrée: une reference sur la session en cours, et le cadran a envoyer                                                      */
-/* Sortie: Néant                                                                                                              */
+/* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
+/* Entrée: des infos sur le paquet à envoyer                                                                                  */
+/* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Envoyer_un_motif ( struct WS_CLIENT_SESSION *client, struct WS_MOTIF *ws_motif )
+ void Envoyer_ws_au_client ( struct WS_CLIENT_SESSION *client, JsonBuilder *builder )
   { gsize taille_buf;
-    JsonBuilder *builder = Json_create ();
-    if (!builder) { return; }
-    Json_add_string ( builder, "msg_type", "update_motif" );
-    Dls_VISUEL_to_json ( builder, ws_motif->dls_data );
-    gchar *buf = Json_get_buf ( builder, &taille_buf );
+    gchar *buf = Json_get_buf (builder, &taille_buf);
     GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
     soup_websocket_connection_send_message ( client->connexion, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
     g_bytes_unref( gbytes );
   }
 /******************************************************************************************************************************/
-/* Chercher_bit_motif: Renvoie 0 si l'element en argument est dans la liste                                                   */
-/* Entrée: L'element                                                                                                          */
-/* Sortie: 0 si present, 1 sinon                                                                                              */
-/******************************************************************************************************************************/
- static gint Chercher_bit_motif ( struct WS_MOTIF *element, struct WS_MOTIF *cherche )
-  { if ( (!strcasecmp(element->tech_id, cherche->tech_id) && !strcasecmp(element->acronyme, cherche->acronyme)) ) return 0;
-    return 1;
-  }
-/******************************************************************************************************************************/
-/* Abonner_un_motif: Abonne le client aux changements motifs                                                                  */
-/* Entrée: une reference sur le message                                                                                       */
+/* Envoyer_un_visuel: Envoi un update motif au client                                                                         */
+/* Entrée: une reference sur la session en cours, et le cadran a envoyer                                                      */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Abonner_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct WS_CLIENT_SESSION *client = user_data;
-    struct WS_MOTIF *ws_motif;
-    ws_motif = (struct WS_MOTIF *)g_try_malloc0(sizeof(struct WS_MOTIF));
-    if (!ws_motif)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: user '%s': Memory Error pour %s:%s", __func__,
-                 soup_client_context_get_auth_user (client->context), ws_motif->tech_id, ws_motif->acronyme );
-       return;
-     }
-
-    g_snprintf( ws_motif->tech_id,  sizeof(ws_motif->tech_id), "%s", Json_get_string(element, "tech_id") );
-    g_snprintf( ws_motif->acronyme, sizeof(ws_motif->acronyme), "%s", Json_get_string(element, "acronyme") );
-
-    if ( g_slist_find_custom(client->Liste_bit_motifs, ws_motif, (GCompareFunc) Chercher_bit_motif) ) /* Si pas dans la liste */
-     { Dls_data_get_VISUEL ( ws_motif->tech_id, ws_motif->acronyme, &ws_motif->dls_data);
-       if (!ws_motif->dls_data)                                                                              /* Si pas trouvé */
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: user '%s': bit %s:%s not found", __func__,
-                    soup_client_context_get_auth_user (client->context), ws_motif->tech_id, ws_motif->acronyme );
-          g_free(ws_motif); return;
+ void Http_Envoyer_un_visuel ( struct DLS_VISUEL *visuel )
+  { GSList *liste = Cfg_http.liste_ws_motifs_clients;
+    while (liste)
+     { struct WS_CLIENT_SESSION *client = liste->data;
+       JsonBuilder *builder = Json_create ();
+       if (builder)
+        { Json_add_string ( builder, "ws_msg_type", "update_visuel" );
+          Dls_VISUEL_to_json ( builder, visuel );
+          Envoyer_ws_au_client ( client, builder );
         }
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné à %s:%s", __func__,
-                 soup_client_context_get_auth_user (client->context), ws_motif->tech_id, ws_motif->acronyme );
-       Envoyer_un_motif ( client, ws_motif );                                                        /* Envoi de l'init motif */
-       client->Liste_bit_motifs = g_slist_prepend( client->Liste_bit_motifs, ws_motif );
+       liste = g_slist_next(liste);
      }
   }
 /******************************************************************************************************************************/
@@ -181,43 +149,175 @@
 /* Entrée: une reference sur la session en cours, et le cadran a envoyer                                                      */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Envoyer_un_cadran ( struct WS_CLIENT_SESSION *client, struct WS_CADRAN *ws_cadran )
-  { gsize taille_buf;
-    JsonBuilder *builder = Json_create();
-    if (!builder) return;
-    Json_add_string ( builder, "msg_type", "update_cadran" );
+ static void WS_CADRAN_to_json ( JsonBuilder *builder, struct WS_CADRAN *ws_cadran )
+  { Formater_cadran ( ws_cadran );
     Json_add_string ( builder, "tech_id",  ws_cadran->tech_id );
     Json_add_string ( builder, "acronyme", ws_cadran->acronyme );
     Json_add_int    ( builder, "type",     ws_cadran->type );
     Json_add_bool   ( builder, "in_range", ws_cadran->in_range );
     Json_add_double ( builder, "valeur",   ws_cadran->valeur );
     Json_add_string ( builder, "unite",    ws_cadran->unite );
-    gchar *buf = Json_get_buf (builder, &taille_buf);
-    GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
-    soup_websocket_connection_send_message ( client->connexion, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
-    g_bytes_unref( gbytes );
   }
 /******************************************************************************************************************************/
-/* Afficher_un_cadran: Ajoute un cadran sur la trame                                                                          */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Abonner_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct WS_CLIENT_SESSION *client = user_data;
+ void Http_ws_motifs_send_synoptique ( struct WS_CLIENT_SESSION *client, gint syn_id )
+  { gchar chaine[256];
 
-    struct WS_CADRAN *ws_cadran;
-    ws_cadran = (struct WS_CADRAN *)g_try_malloc0(sizeof(struct WS_CADRAN));
-    if (!ws_cadran) { return; }
+    struct DB *db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "%s: DB connexion failed for user '%s'", __func__, client->http_session->username );
+       return;
+     }
 
-    g_snprintf( ws_cadran->tech_id,  sizeof(ws_cadran->tech_id), "%s", Json_get_string(element, "tech_id") );
-    g_snprintf( ws_cadran->acronyme, sizeof(ws_cadran->acronyme), "%s", Json_get_string(element, "acronyme") );
-    ws_cadran->type = Rechercher_DICO_type ( ws_cadran->tech_id, ws_cadran->acronyme );
-    if (ws_cadran->type==-1) { g_free(ws_cadran); return; }                                               /* Si pas trouvé... */
+    g_snprintf(chaine, sizeof(chaine), "SELECT access_level FROM syns WHERE id=%d", syn_id );
+    if ( Lancer_requete_SQL ( db, chaine ) == FALSE )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "%s: DB request failed for user '%s'",__func__, client->http_session->username );
+       return;
+     }
 
-    Formater_cadran(ws_cadran);                                                            /* Formatage de la chaine associée */
-    Envoyer_un_cadran ( client, ws_cadran );                                                        /* Envoi de l'init cadran */
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Syn '%d' unknown", __func__, syn_id );
+       return;
+     }
+    gint syn_access_level = atoi(db->row[0]);
+    Liberer_resultat_SQL (db);
+    Libere_DB_SQL( &db );
 
-    client->Liste_bit_cadrans = g_slist_prepend( client->Liste_bit_cadrans, ws_cadran );
+    if (client->http_session->access_level < syn_access_level )
+     { Audit_log ( client->http_session, "Access to '%d' forbidden", syn_id );
+       return;
+     }
+
+    JsonBuilder *builder = Json_create ();
+    if (!builder) return;
+
+    Json_add_string ( builder, "ws_msg_type", "init_syn" );
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns WHERE id=%d", syn_id );
+    if (SQL_Select_to_JSON ( builder, NULL, chaine ) == FALSE)
+     { g_object_unref(builder);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_motifs WHERE syn_id=%d", syn_id );
+    if (SQL_Select_to_JSON ( builder, "motifs", chaine ) == FALSE)
+     { g_object_unref(builder);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT sp.*,syn.page,syn.libelle FROM syns_pass as sp "
+                                       "INNER JOIN syns as syn ON sp.syn_cible_id=syn.id "
+                                       "WHERE sp.syn_id=%d AND syn.access_level<=%d", syn_id, client->http_session->access_level );
+    if (SQL_Select_to_JSON ( builder, "passerelles", chaine ) == FALSE)
+     { g_object_unref(builder);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_liens WHERE syn_id=%d", syn_id );
+    if (SQL_Select_to_JSON ( builder, "liens", chaine ) == FALSE)
+     { g_object_unref(builder);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_rectangles WHERE syn_id=%d", syn_id );
+    if (SQL_Select_to_JSON ( builder, "rectangles", chaine ) == FALSE)
+     { g_object_unref(builder);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_comments WHERE syn_id=%d", syn_id );
+    if (SQL_Select_to_JSON ( builder, "comments", chaine ) == FALSE)
+     { g_object_unref(builder);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT *,src.location,src.libelle from syns_camerasup AS cam "
+                                       "INNER JOIN cameras AS src ON cam.camera_src_id=src.id WHERE syn_id=%d", syn_id );
+    if (SQL_Select_to_JSON ( builder, "cameras", chaine ) == FALSE)
+     { g_object_unref(builder);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT syns_cadrans.* FROM syns_cadrans WHERE syn_id=%d", syn_id );
+    if (SQL_Select_to_JSON ( builder, "cadrans", chaine ) == FALSE)
+     { g_object_unref(builder);
+       return;
+     }
+
+/*----------------------------------------------- Visuels --------------------------------------------------------------------*/
+    Json_add_array ( builder, "visuels" );
+    db = Init_DB_SQL();
+    if (db)
+     { g_snprintf(chaine, sizeof(chaine), "SELECT tech_id, acronyme FROM syns_motifs WHERE syn_id=%d", syn_id );
+       Lancer_requete_SQL ( db, chaine );                                                      /* Execution de la requete SQL */
+       while(Recuperer_ligne_SQL(db))                                                      /* Chargement d'une ligne resultat */
+        { gchar *tech_id  = db->row[0];
+          gchar *acronyme = db->row[1];
+          struct DLS_VISUEL *visuel = NULL;
+          Dls_data_get_VISUEL ( tech_id, acronyme, (gpointer)&visuel );
+          if ( visuel && !g_slist_find ( client->Liste_bit_visuels, visuel ) )
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au VISUEL %s:%s", __func__,
+                       client->http_session->username, visuel->tech_id, visuel->acronyme );
+             Json_add_object ( builder, NULL );
+             Dls_VISUEL_to_json ( builder, visuel );
+             Json_end_object ( builder );
+           }
+          client->Liste_bit_visuels = g_slist_prepend( client->Liste_bit_visuels, visuel );
+        }
+       Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+     }
+    Json_end_array ( builder );
+
+/*----------------------------------------------- Cadrans --------------------------------------------------------------------*/
+    Json_add_array ( builder, "cadrans" );
+    db = Init_DB_SQL();
+    if (db)
+     { g_snprintf(chaine, sizeof(chaine), "SELECT tech_id,acronyme FROM syns_cadrans WHERE syn_id=%d", syn_id );
+       Lancer_requete_SQL ( db, chaine );                                                      /* Execution de la requete SQL */
+       while(Recuperer_ligne_SQL(db))                                                      /* Chargement d'une ligne resultat */
+        { gchar *tech_id  = db->row[0];
+          gchar *acronyme = db->row[1];
+          GSList *liste = client->Liste_bit_cadrans;
+          while(liste)
+           { struct WS_CADRAN *cadran=liste->data;
+             if ( !strcasecmp( tech_id, cadran->tech_id ) && !strcasecmp( acronyme, cadran->acronyme ) ) break;
+             liste = g_slist_next(liste);
+           }
+          if (!liste)                                       /* si le cadran n'est pas trouvé, on l'ajoute a la liste d'abonné */
+           { struct WS_CADRAN *ws_cadran;
+             ws_cadran = (struct WS_CADRAN *)g_try_malloc0(sizeof(struct WS_CADRAN));
+             if (ws_cadran)
+              { g_snprintf( ws_cadran->tech_id,  sizeof(ws_cadran->tech_id),  "%s", tech_id  );
+                g_snprintf( ws_cadran->acronyme, sizeof(ws_cadran->acronyme), "%s", acronyme );
+                ws_cadran->type = Rechercher_DICO_type ( ws_cadran->tech_id, ws_cadran->acronyme );
+                if (ws_cadran->type!=-1)
+                 { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au CADRAN %s:%s", __func__,
+                             client->http_session->username, ws_cadran->tech_id, ws_cadran->acronyme );
+                   Json_add_object ( builder, NULL );
+                   WS_CADRAN_to_json ( builder, ws_cadran );
+                   Json_end_object ( builder );
+                   client->Liste_bit_cadrans = g_slist_prepend( client->Liste_bit_cadrans, ws_cadran );
+                 }
+                else { g_free(ws_cadran); }                                                               /* Si pas trouvé... */
+              }
+           }
+        }
+       Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+     }
+    Json_end_array ( builder );
+
+    Envoyer_ws_au_client ( client, builder );
+    Audit_log ( client->http_session, "Synoptique '%d' sent", syn_id );
   }
 /******************************************************************************************************************************/
 /* Http_ws_motifs_on_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket                              */
@@ -235,15 +335,15 @@
        return;
      }
 
-    gchar *msg_type = Json_get_string( response, "msg_type" );
-    if (!msg_type)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (no 'msg_type') !", __func__ );
+    if (!Json_has_member ( response, "ws_msg_type" ))
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (no 'ws_msg_type') !", __func__ );
        json_node_unref(response);
        return;
      }
+    gchar *ws_msg_type = Json_get_string( response, "ws_msg_type" );
 
-    if(!strcmp(msg_type,"send_wtd_session"))
-     { if (!Json_has_member( response, "wtd_session"))
+    if(!strcmp(ws_msg_type,"get_synoptique"))
+     { if ( ! (Json_has_member( response, "wtd_session") && Json_has_member ( response, "syn_id" ) ))
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket 'Send_wtd_session' without wtd_session !", __func__ ); }
        else
         { gchar *wtd_session = Json_get_string ( response, "wtd_session");
@@ -253,6 +353,7 @@
              if (!strcmp(http_session->wtd_session, wtd_session))
               { client->http_session = http_session;
                 Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: session found for '%s' !", __func__, http_session->username );
+                Http_ws_motifs_send_synoptique ( client, Json_get_int ( response, "syn_id" ) );
                 break;
               }
              liste = g_slist_next ( liste );
@@ -261,18 +362,6 @@
      }
     else if (!client->http_session)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Not authorized !", __func__ ); }
-    else if(!strcmp(msg_type,"abonnements"))
-     { JsonArray *array;
-       array = Json_get_array ( response, "cadrans" );
-       if (array) { json_array_foreach_element ( array, Abonner_un_cadran, client ); }
-       array = Json_get_array ( response, "motifs" );
-       if (array) { json_array_foreach_element ( array, Abonner_un_motif, client ); }
-     }
-    else if(!strcmp(msg_type,"SET_CDE"))
-     { gchar *tech_id  = Json_get_string ( response, "tech_id" );
-       gchar *acronyme = Json_get_string ( response, "acronyme" );
-       if (tech_id && acronyme) Envoyer_commande_dls_data ( tech_id, acronyme );
-     }
     json_node_unref(response);
   }
 /******************************************************************************************************************************/
@@ -288,8 +377,12 @@
        while (cadrans)
         { struct WS_CADRAN *cadran = cadrans->data;
           if (cadran->last_update +10 <= Partage->top)
-           { Formater_cadran ( cadran );
-             Envoyer_un_cadran ( client, cadran );
+           { JsonBuilder *builder = Json_create();
+             if (builder)
+              { Json_add_string ( builder, "ws_msg_type", "update_cadran" );
+                WS_CADRAN_to_json ( builder, cadran );
+                Envoyer_ws_au_client ( client, builder );
+              }
              cadran->last_update = Partage->top;
            }
           cadrans = g_slist_next(cadrans);
@@ -307,7 +400,7 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Close Connexion received !", __func__ );
     g_object_unref(connexion);
     g_slist_foreach ( client->Liste_bit_cadrans, (GFunc)g_free, NULL );
-    g_slist_foreach ( client->Liste_bit_motifs, (GFunc)g_free, NULL );
+    g_slist_free ( client->Liste_bit_visuels );
     Cfg_http.liste_ws_motifs_clients = g_slist_remove ( Cfg_http.liste_ws_motifs_clients, client );
     g_free(client);
   }
