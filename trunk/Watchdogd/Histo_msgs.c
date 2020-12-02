@@ -268,13 +268,12 @@
     Json_add_int    ( builder, "typologie",       Json_get_int( histo, "typologie") );
     Json_add_string ( builder, "dls_shortname",   Json_get_string( histo, "dls_shortname") );
     Json_add_string ( builder, "libelle",         Json_get_string( histo, "libelle") );
-    Json_add_string ( builder, "libelle_sms",     Json_get_string( histo, "libelle_sms") );
     Json_add_int    ( builder, "syn_id",          Json_get_int( histo, "syn_id") );
     Json_add_string ( builder, "syn_parent_page", Json_get_string( histo, "syn_parent_page") );
     Json_add_string ( builder, "syn_page",        Json_get_string( histo, "syn_page") );
     Json_add_string ( builder, "syn_libelle",     Json_get_string( histo, "syn_libelle") );
     Json_add_int    ( builder, "sms",             Json_get_int( histo, "sms") );
-    Json_add_string ( builder, "libelle_audio",   Json_get_string( histo, "libelle_audio") );
-    Json_add_string ( builder, "profil_audio",    Json_get_string( histo, "profil_audio") );
+    Json_add_string ( builder, "audio_libelle",   Json_get_string( histo, "audio_libelle") );
+    Json_add_string ( builder, "audio_profil",    Json_get_string( histo, "audio_profil") );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

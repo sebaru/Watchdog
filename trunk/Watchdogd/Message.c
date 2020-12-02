@@ -34,7 +34,7 @@
  #include <string.h>
 
  #define MSGS_SQL_SELECT  "SELECT msg.id,msg.libelle,msg.typologie,syn.libelle,parent_syn.page,syn.page," \
-                          "sms_notification,audio_libelle,sms_libelle,dls.shortname,syn.id,audio_profil,msg.tech_id,msg.acronyme" \
+                          "sms_notification,audio_libelle,dls.shortname,syn.id,audio_profil,msg.tech_id,msg.acronyme" \
                           " FROM msgs as msg" \
                           " INNER JOIN dls as dls ON msg.tech_id=dls.tech_id" \
                           " INNER JOIN syns as syn ON dls.syn_id=syn.id" \
@@ -48,7 +48,7 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gint Mnemo_auto_create_MSG ( struct CMD_TYPE_MESSAGE *msg )
-  { gchar *libelle, *audio_libelle, *sms_libelle;
+  { gchar *libelle;
     gchar requete[2048];
     gboolean retour;
     struct DB *db;
@@ -59,29 +59,14 @@
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle impossible", __func__ );
        return(-1);
      }
-    audio_libelle = Normaliser_chaine ( msg->audio_libelle );                                /* Formatage correct des chaines */
-    if (!audio_libelle)
-     { g_free(libelle);
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation audio_libelle impossible", __func__ );
-       return(-1);
-     }
-    sms_libelle = Normaliser_chaine ( msg->sms_libelle );                                    /* Formatage correct des chaines */
-    if (!sms_libelle)
-     { g_free(libelle);
-       g_free(audio_libelle);
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation sms_libelle impossible", __func__ );
-       return(-1);
-     }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s SET tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s',sms_libelle='%s',"
+                "INSERT INTO %s SET tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s'"
                 "typologie='%d',sms_notification='0' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), typologie=VALUES(typologie)", NOM_TABLE_MSG, msg->tech_id, msg->acronyme,
-                libelle, libelle, libelle, msg->typologie
+                libelle, libelle, msg->typologie
               );
     g_free(libelle);
-    g_free(audio_libelle);
-    g_free(sms_libelle);
 
     db = Init_DB_SQL();
     if (!db)
@@ -123,15 +108,14 @@
        g_snprintf( msg->syn_parent_page, sizeof(msg->syn_parent_page), "%s", db->row[4]  );
        g_snprintf( msg->syn_page,        sizeof(msg->syn_page     ),   "%s", db->row[5]  );
        g_snprintf( msg->audio_libelle,   sizeof(msg->audio_libelle),   "%s", db->row[7] );
-       g_snprintf( msg->sms_libelle,     sizeof(msg->sms_libelle  ),   "%s", db->row[8] );
-       g_snprintf( msg->dls_shortname,   sizeof(msg->dls_shortname),   "%s", db->row[9] );
-       g_snprintf( msg->audio_profil,    sizeof(msg->audio_profil ),   "%s", db->row[11] );
-       g_snprintf( msg->tech_id,         sizeof(msg->tech_id      ),   "%s", db->row[12] );
-       g_snprintf( msg->acronyme,        sizeof(msg->acronyme     ),   "%s", db->row[13] );
+       g_snprintf( msg->dls_shortname,   sizeof(msg->dls_shortname),   "%s", db->row[8] );
+       g_snprintf( msg->audio_profil,    sizeof(msg->audio_profil ),   "%s", db->row[10] );
+       g_snprintf( msg->tech_id,         sizeof(msg->tech_id      ),   "%s", db->row[11] );
+       g_snprintf( msg->acronyme,        sizeof(msg->acronyme     ),   "%s", db->row[12] );
        msg->id          = atoi(db->row[0]);
        msg->typologie   = atoi(db->row[2]);
        msg->sms_notification = atoi(db->row[6]);
-       msg->syn_id      = atoi(db->row[10]);
+       msg->syn_id      = atoi(db->row[9]);
      }
     return(msg);
   }

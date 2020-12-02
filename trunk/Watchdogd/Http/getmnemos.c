@@ -171,25 +171,22 @@
 	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
      }
     if ( ! strcasecmp ( classe, "MSG" ) )
-     { if ( Json_has_member ( request, "sms" ) && Json_has_member ( request, "libelle_sms" ) &&
-            Json_has_member ( request, "profil_audio" ) && Json_has_member ( request, "libelle_audio" )
+     { if ( Json_has_member ( request, "sms" ) &&
+            Json_has_member ( request, "audio_profil" ) && Json_has_member ( request, "audio_libelle" )
           )
         { gchar chaine[1024];
           gint sms    = Json_get_int ( request, "sms" );
-          gchar *libelle_sms   = Normaliser_chaine ( Json_get_string ( request, "libelle_sms" ) );
-          gchar *libelle_audio = Normaliser_chaine ( Json_get_string ( request, "libelle_audio" ) );
-          gchar *profil_audio  = Normaliser_chaine ( Json_get_string ( request, "profil_audio" ) );
-          g_snprintf( chaine, sizeof(chaine), "UPDATE msgs SET sms='%d', libelle_sms='%s', profil_audio='%s', libelle_audio='%s' "
+          gchar *audio_libelle = Normaliser_chaine ( Json_get_string ( request, "audio_libelle" ) );
+          gchar *audio_profil  = Normaliser_chaine ( Json_get_string ( request, "audio_profil" ) );
+          g_snprintf( chaine, sizeof(chaine), "UPDATE msgs SET sms='%d', audio_profil='%s', audio_libelle='%s' "
                                               "WHERE tech_id='%s' AND acronyme='%s'",
-                      sms, libelle_sms, profil_audio, libelle_audio, tech_id, acronyme );
+                      sms, audio_profil, audio_libelle, tech_id, acronyme );
           SQL_Write ( chaine );                                                   /* Qu'il existe ou non, ou met a jour la DB */
           Audit_log ( session, "Mnemos %s:%s -> SMS = '%d'", tech_id, acronyme, sms );
-          Audit_log ( session, "Mnemos %s:%s -> Libelle_SMS = '%s'", tech_id, acronyme, libelle_sms );
-          Audit_log ( session, "Mnemos %s:%s -> Profil_AUDIO = '%s'", tech_id, acronyme, profil_audio );
-          Audit_log ( session, "Mnemos %s:%s -> Libelle_AUDIO = '%s'", tech_id, acronyme, libelle_audio );
-          g_free(libelle_sms);
-          g_free(profil_audio);
-          g_free(libelle_audio);
+          Audit_log ( session, "Mnemos %s:%s -> Profil_AUDIO = '%s'", tech_id, acronyme, audio_profil );
+          Audit_log ( session, "Mnemos %s:%s -> Libelle_AUDIO = '%s'", tech_id, acronyme, audio_libelle );
+          g_free(audio_profil);
+          g_free(audio_libelle);
         }
 	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
      }

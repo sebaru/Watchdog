@@ -53,9 +53,8 @@
          tech_id  : selection.tech_id,
          acronyme : selection.acronyme,
          sms        : $('#idMSGSms'+acronyme).val(),
-         libelle_sms: $('#idMSGLibelleSms'+acronyme).val(),
-         profil_audio : $('#idMSGProfilAudio'+acronyme).val(),
-         libelle_audio: $('#idMSGLibelleAudio'+acronyme).val(),
+         audio_profil : $('#idMSGProfilAudio'+acronyme).val(),
+         audio_libelle: $('#idMSGLibelleAudio'+acronyme).val(),
        }
      );
 
@@ -257,7 +256,7 @@
                  { return("<input id='idMSGProfilAudio"+item.acronyme+"' class='form-control' "+
                           "placeholder='Profil audio' "+
                           "onchange=Mnemos_MSG_set('"+item.acronyme+"') "+
-                          "value='"+item.profil_audio+"'/>");
+                          "value='"+item.audio_profil+"'/>");
                  }
              },
              { "data": null, "title":"Libellé Audio", "className": "align-middle hidden-xs",
@@ -265,7 +264,7 @@
                  { return("<input id='idMSGLibelleAudio"+item.acronyme+"' class='form-control' "+
                           "placeholder='Libellé audio du message' "+
                           "onchange=Mnemos_MSG_set('"+item.acronyme+"') "+
-                          "value='"+item.libelle_audio+"'/>");
+                          "value='"+item.audio_libelle+"'/>");
                  }
              },
              { "data": null, "title":"SMS", "className": "align-middle ",
@@ -276,14 +275,6 @@
                           "<option value='1' "+(item.sms==1 ? "selected" : "")+">Oui</option>"+
                           "<option value='2' "+(item.sms==2 ? "selected" : "")+">GSM Only</option>"+
                           "<option value='3' "+(item.sms==3 ? "selected" : "")+">OVH Only</option>");
-                 }
-             },
-             { "data": null, "title":"Libellé SMS", "className": "align-middle hidden-xs",
-               "render": function (item)
-                 { return("<input id='idMSGLibelleSms"+item.acronyme+"' class='form-control' "+
-                          "placeholder='Libellé du SMS' "+
-                          "onchange=Mnemos_MSG_set('"+item.acronyme+"') "+
-                          "value='"+item.libelle_sms+"'/>");
                  }
              },
            ],

@@ -583,7 +583,6 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No libelle",
   `typologie` int(11) NOT NULL DEFAULT '0',
   `sms_notification` int(11) NOT NULL DEFAULT '0',
-  `sms_libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `audio_profil` VARCHAR(80) NOT NULL DEFAULT 'P_NONE',
   `audio_libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `etat` tinyint(1) NOT NULL DEFAULT '0',
