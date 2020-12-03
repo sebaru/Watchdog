@@ -142,7 +142,7 @@
           return;
         }
 
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                  "%s: SET_WATCHDOG from %s/%s to %s/%s : '%s:%s'+=%d", __func__,
                  zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
@@ -157,7 +157,7 @@
           return;
         }
 
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                  "%s: SET_AI from %s/%s to %s/%s : '%s:%s'=%f (range=%d)", __func__,
                  zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
@@ -170,7 +170,7 @@
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_CDE : wrong parameters from %s", __func__, zmq_src_instance );
           return;
         }
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                  "%s: SET_CDE=1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
                  zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
@@ -181,7 +181,7 @@
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_DI : wrong parameters from %s", __func__, zmq_src_instance );
           return;
         }
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                  "%s: SET_DI from %s/%s to %s/%s : '%s:%s'=%d", __func__,
                  zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), Json_get_bool ( request, "etat" ) );
