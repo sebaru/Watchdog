@@ -337,7 +337,6 @@
     gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( Json_get_string( infos->syn, "libelle" ) ) );
     gtk_widget_show_all( label );
     gint page_num = gtk_notebook_append_page( GTK_NOTEBOOK(page->client->Notebook), page->child, label );
-    gtk_notebook_set_current_page ( GTK_NOTEBOOK(page->client->Notebook), page_num );
     json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ),      Afficher_un_motif, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Afficher_un_commentaire, page );
@@ -345,6 +344,7 @@
     json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "visuels" ),     Initialiser_les_motifs, page );
     gtk_widget_show_all( page->child );
+    gtk_notebook_set_current_page ( GTK_NOTEBOOK(page->client->Notebook), page_num );
   }
 
 /******************************************************************************************************************************/
