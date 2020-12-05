@@ -631,12 +631,12 @@ reload:
           GSList *liste = Cfg_http.liste_http_clients;
           while(liste)
            { struct HTTP_CLIENT_SESSION *client = liste->data;
+             liste = g_slist_next ( liste );
              if (client->last_request + Cfg_http.wtd_session_expiry*10 < Partage->top )
               { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, client );
                 Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Session '%s' out of time", __func__, client->wtd_session );
                 g_free(client);
               }
-             liste = g_slist_next ( liste );
            }
         }
 
