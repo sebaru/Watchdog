@@ -123,20 +123,14 @@
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
-  { gsize taille_buf;
-
-    JsonBuilder *builder = Json_create ();
-    if (builder == NULL) return;
-    Json_add_string ( builder, "msg_type", "SET_CDE" );
+  { JsonBuilder *builder = Json_create ();
+    if (!builder) return;
+    Json_add_string ( builder, "ws_msg_type", "SET_CDE" );
     Json_add_string ( builder, "tech_id", trame_motif->motif->tech_id );
     Json_add_string ( builder, "acronyme", trame_motif->motif->acronyme );
     printf("%s: envoi SET_CDE '%s':'%s'\n", __func__,
            trame_motif->motif->tech_id, trame_motif->motif->acronyme );
-    gchar *buf = Json_get_buf (builder, &taille_buf);
-    GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
-    struct TYPE_INFO_SUPERVISION *infos = trame_motif->page->infos;
-    soup_websocket_connection_send_message (infos->ws_motifs, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
-    g_bytes_unref( gbytes );
+    Envoi_json_au_serveur ( trame_motif->page->client, "PUT", builder, "/syn/clic", NULL );
   }
 /******************************************************************************************************************************/
 /* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision                       */
@@ -228,8 +222,8 @@
  static void Updater_les_visuels( struct PAGE_NOTEBOOK *page, JsonNode *motif )
   { struct TYPE_INFO_SUPERVISION *infos = page->infos;
     gint cpt;
-    /*printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
-           Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );*/
+    printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
+           Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );
 
     GList *liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de la page */
     while (liste_motifs)
@@ -261,7 +255,7 @@
   { struct PAGE_NOTEBOOK *page = user_data;
     if (!page) return;
 
-    Updater_les_visuels ( page->infos, element );
+    Updater_les_visuels ( page, element );
   }
 /******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
@@ -338,8 +332,6 @@
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_get_horloge_synoptique), infos );
 
-    gtk_widget_show_all( page->child );
-
     label = gtk_event_box_new ();
     gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( Json_get_string( infos->syn, "libelle" ) ) );
     gtk_widget_show_all( label );
@@ -352,6 +344,7 @@
     json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "visuels" ),     Initialiser_les_motifs, page );
 printf("%s: fin chargement\n", __func__);
+    gtk_widget_show_all( page->child );
   }
 
 /******************************************************************************************************************************/
@@ -378,8 +371,7 @@ printf("%s: fin chargement\n", __func__);
 /* Sortie: un widget boite                                                                                                    */
 /******************************************************************************************************************************/
  static void Traiter_reception_ws_motifs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { struct PAGE_NOTEBOOK *page = user_data;
-    printf("%s\n", __func__ );
+  { printf("%s\n", __func__ );
   }
  static void Traiter_reception_ws_motifs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
   { printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
