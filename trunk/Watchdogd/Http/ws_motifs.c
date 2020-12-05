@@ -370,7 +370,8 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Http_Envoyer_les_cadrans ( void )
-  { GSList *clients = Cfg_http.liste_ws_motifs_clients;
+  { pthread_mutex_lock( &Cfg_http.lib->synchro );
+    GSList *clients = Cfg_http.liste_ws_motifs_clients;
     while (clients)
      { struct WS_CLIENT_SESSION *client = clients->data;
        if (client->http_session)
@@ -391,6 +392,7 @@
         }
        clients = g_slist_next(clients);
      }
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
   }
 /******************************************************************************************************************************/
 /* Http_ws_motifs_destroy_session: Supprime une session WS                                                                    */

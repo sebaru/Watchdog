@@ -108,7 +108,8 @@
 /******************************************************************************************************************************/
  void Trame_del_SVG ( struct TRAME_ITEM_SVG *trame_svg )
   { if (!trame_svg) return;
-    trame_svg->trame->Liste_timer = g_slist_remove ( trame_svg->trame->Liste_timer, trame_svg );/* Désactive la gestion clignotement */
+    if (trame_svg->trame->Liste_timer)                                                   /* Désactive la gestion clignotement */
+     { trame_svg->trame->Liste_timer = g_slist_remove ( trame_svg->trame->Liste_timer, trame_svg ); }
     g_free(trame_svg);
   }
 /******************************************************************************************************************************/

@@ -225,6 +225,7 @@
     printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
            Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );
 
+    printf("Infos->trame=%p\n", infos->Trame );
     GList *liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de la page */
     while (liste_motifs)
      { switch( *((gint *)liste_motifs->data) )
@@ -343,7 +344,6 @@
     json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "visuels" ),     Initialiser_les_motifs, page );
-printf("%s: fin chargement\n", __func__);
     gtk_widget_show_all( page->child );
   }
 
@@ -355,6 +355,7 @@ printf("%s: fin chargement\n", __func__);
  static void Traiter_reception_ws_motifs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
   { struct PAGE_NOTEBOOK *page = user_data;
     gsize taille;
+    if (!page) return;
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
     if (!Json_has_member(response, "ws_msg_type")) return;
@@ -374,14 +375,15 @@ printf("%s: fin chargement\n", __func__);
   { printf("%s\n", __func__ );
   }
  static void Traiter_reception_ws_motifs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
-  { printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
+  { struct PAGE_NOTEBOOK *page = user_data;
+    printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
   }
 /******************************************************************************************************************************/
 /* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
 /* Entrée: les variables traditionnelles de libsous                                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Traiter_connect_ws_motifs_CB (GObject *source_object, GAsyncResult *res, gpointer user_data )
+ static void Traiter_connect_ws_motifs_CB ( GObject *source_object, GAsyncResult *res, gpointer user_data )
   { struct PAGE_NOTEBOOK *page = user_data;
     struct TYPE_INFO_SUPERVISION *infos = page->infos;
     GError *error = NULL;
