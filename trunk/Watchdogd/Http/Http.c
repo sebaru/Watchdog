@@ -613,12 +613,7 @@ reload:
        Http_Envoyer_les_cadrans ();
 
        if ( Recv_zmq ( zmq_motifs, &visu, sizeof(struct DLS_VISUEL) ) == sizeof(struct DLS_VISUEL) && Cfg_http.liste_ws_motifs_clients )
-        { JsonBuilder *builder;
-          gsize taille_buf;
-          gchar *buf;
-          GSList *liste;
-
-          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Visuel %s:%s received", __func__, visu.tech_id, visu.acronyme );
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Visuel %s:%s received", __func__, visu.tech_id, visu.acronyme );
           Http_Envoyer_un_visuel ( &visu );
         }
 
@@ -659,9 +654,8 @@ reload:
     g_slist_free ( Cfg_http.liste_http_clients );
     Cfg_http.liste_http_clients = NULL;
 
-    g_slist_foreach ( Cfg_http.liste_ws_motifs_clients, (GFunc) g_free, NULL );
-    g_slist_free ( Cfg_http.liste_ws_motifs_clients );
-    Cfg_http.liste_ws_motifs_clients = NULL;
+    while ( Cfg_http.liste_ws_motifs_clients )
+     { Http_ws_motifs_destroy_session ( (struct WS_CLIENT_SESSION *)(Cfg_http.liste_ws_motifs_clients->data ) ); }
 
     g_slist_foreach ( Cfg_http.liste_ws_msgs_clients, (GFunc) g_free, NULL );
     g_slist_free ( Cfg_http.liste_ws_msgs_clients );

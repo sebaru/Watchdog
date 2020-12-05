@@ -373,22 +373,39 @@
   { GSList *clients = Cfg_http.liste_ws_motifs_clients;
     while (clients)
      { struct WS_CLIENT_SESSION *client = clients->data;
-       GSList *cadrans = client->Liste_bit_cadrans;
-       while (cadrans)
-        { struct WS_CADRAN *cadran = cadrans->data;
-          if (cadran->last_update +10 <= Partage->top)
-           { JsonBuilder *builder = Json_create();
-             if (builder)
-              { Json_add_string ( builder, "ws_msg_type", "update_cadran" );
-                WS_CADRAN_to_json ( builder, cadran );
-                Envoyer_ws_au_client ( client, builder );
+       if (client->http_session)
+        { GSList *cadrans = client->Liste_bit_cadrans;
+          while (cadrans)
+           { struct WS_CADRAN *cadran = cadrans->data;
+             if (cadran->last_update +10 <= Partage->top)
+              { JsonBuilder *builder = Json_create();
+                if (builder)
+                 { Json_add_string ( builder, "ws_msg_type", "update_cadran" );
+                   WS_CADRAN_to_json ( builder, cadran );
+                   Envoyer_ws_au_client ( client, builder );
+                 }
+                cadran->last_update = Partage->top;
               }
-             cadran->last_update = Partage->top;
+             cadrans = g_slist_next(cadrans);
            }
-          cadrans = g_slist_next(cadrans);
         }
        clients = g_slist_next(clients);
      }
+  }
+/******************************************************************************************************************************/
+/* Http_ws_motifs_destroy_session: Supprime une session WS                                                                    */
+/* Entrée: la WS                                                                                                              */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Http_ws_motifs_destroy_session ( struct WS_CLIENT_SESSION *client )
+  { pthread_mutex_lock( &Cfg_http.lib->synchro );
+    Cfg_http.liste_ws_motifs_clients = g_slist_remove ( Cfg_http.liste_ws_motifs_clients, client );
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Session closed !", __func__ );
+    g_object_unref(client->connexion);
+    g_slist_foreach ( client->Liste_bit_cadrans, (GFunc)g_free, NULL );
+    g_slist_free ( client->Liste_bit_visuels );
+    g_free(client);
   }
 /******************************************************************************************************************************/
 /* Http_ws_motifs_on_closed: Traite une deconnexion                                                                           */
@@ -397,12 +414,7 @@
 /******************************************************************************************************************************/
  static void Http_ws_motifs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
   { struct WS_CLIENT_SESSION *client = user_data;
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Close Connexion received !", __func__ );
-    g_object_unref(connexion);
-    g_slist_foreach ( client->Liste_bit_cadrans, (GFunc)g_free, NULL );
-    g_slist_free ( client->Liste_bit_visuels );
-    Cfg_http.liste_ws_motifs_clients = g_slist_remove ( Cfg_http.liste_ws_motifs_clients, client );
-    g_free(client);
+    Http_ws_motifs_destroy_session ( client );
   }
  static void Http_ws_motifs_on_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
@@ -427,7 +439,9 @@
     g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_motifs_on_closed), client );
     g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_motifs_on_error), client );
     /*soup_websocket_connection_send_text ( connexion, "Welcome on Watchdog WebSocket !" );*/
+    pthread_mutex_lock( &Cfg_http.lib->synchro );
     Cfg_http.liste_ws_motifs_clients = g_slist_prepend ( Cfg_http.liste_ws_motifs_clients, client );
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
     g_object_ref(connexion);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

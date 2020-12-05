@@ -125,5 +125,6 @@
      { Cfg_smsg.send_test = TRUE;
        soup_message_set_status (msg, SOUP_STATUS_OK);
      }
+    else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
