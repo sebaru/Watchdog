@@ -1,11 +1,4 @@
 
-/********************************************* Appeler quand l'utilisateur selectionne un motif *******************************/
- function Clic_sur_motif ( svg, event )
-  { console.log(" Clic sur motif " + svg.motif.libelle + " icone_id = " + svg.motif.icone +
-                "target techid/acro: " + svg.motif.clic_tech_id + ":" + svg.motif.clic_acronyme);
-    var json_request = JSON.stringify( { tech_id: svg.motif.clic_tech_id, acronyme: svg.motif.clic_acronyme } );
-    Send_to_API ( 'POST', "/api/syn/clic", json_request, null, null );
-  }
 /********************************************* Prepare un objet SVG et l'affiche sur la page **********************************/
  function Load_Gif_to_canvas ( Motif )
   {
@@ -129,9 +122,9 @@
     request.send(null);
   }
 /********************************************* Prepare un objet SVG et l'affiche sur la page **********************************/
- function Load_Passerelle_to_canvas ( Pass )
+ function Load_Passerelle_to_canvas ( mode_atelier, Passerelle )
   { var svg   = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
-    svg.passerelle = Pass;                                                             /* Sauvegarde du pointeur Motif source */
+    svg.passerelle = Passerelle;                                                       /* Sauvegarde du pointeur Motif source */
 
     var texte = document.createElementNS("http://www.w3.org/2000/svg", 'text');
     texte.setAttribute("x",svg.passerelle.posx);
@@ -151,7 +144,7 @@
     Motif.scale = 0.4;
     Motif.angle = 0;
     Motif.def_color = "#c8c8c8";
-    Load_Motif_to_canvas(Motif, 0, Motif.def_color, 0 );
+    Load_Motif_to_canvas( mode_atelier, Motif, 0, Motif.def_color, 0 );
 
     var Motif = new Object;
     Motif.forme="bouclier";
@@ -161,17 +154,18 @@
     Motif.scale = 0.4;
     Motif.angle = 0;
     Motif.def_color = "#c8c8c8";
-    Load_Motif_to_canvas(Motif, 0, Motif.def_color, 0 );
+    Load_Motif_to_canvas( mode_atelier, Motif, 0, Motif.def_color, 0 );
 
     if(svg.passerelle.angle == undefined) svg.passerelle.angle=0;
     svg.setAttribute("transform","rotate("+svg.passerelle.angle+" "+svg.passerelle.posx+" "+svg.passerelle.posy+")");
-    svg.addEventListener ( "click", function (event) { Charger_syn(this.passerelle.syn_cible_id); }, false);
+    if (mode_atelier==false)
+     { svg.addEventListener ( "click", function (event) { Redirect("/home/syn/"+this.passerelle.syn_cible_id); }, false); }
    /* svg.UpdateSVGMatrix();                     /* Mise a jour du SVG en fonction des parametres de positionnements Motif */
     console.debug(svg);
     $("#TopSVG").append(svg);                                                                 /* ajout du SVG dans le Top SVG */
   }
 /********************************************* Prepare un objet SVG et l'affiche sur la page **********************************/
- function Load_Lien_to_canvas ( Lien )
+ function Load_Lien_to_canvas ( mode_atelier, Lien )
   { var svg=document.createElementNS("http://www.w3.org/2000/svg", 'line');
     svg.lien = Lien;                                                                   /* Sauvegarde du pointeur Motif source */
     svg.setAttribute("id", "WTD-lien-"+svg.lien.id);
@@ -188,9 +182,10 @@
     console.log("Fin Traite Lien id: "+svg.lien.id);
   }
 /********************************************* Prepare un objet SVG et l'affiche sur la page **********************************/
- function Load_Rectangle_to_canvas ( Rectangle )
+ function Load_Rectangle_to_canvas ( mode_atelier, Rectangle )
   { var svg=document.createElementNS("http://www.w3.org/2000/svg", 'rect');
-    svg.rectangle = Rectangle;                                                                   /* Sauvegarde du pointeur Motif source */
+    console.debug(Rectangle);
+svg.rectangle = Rectangle;                                                                   /* Sauvegarde du pointeur Motif source */
     svg.setAttribute("id", "WTD-rectangle-"+svg.rectangle.id);
     svg.setAttribute("x", svg.rectangle.posx);
     svg.setAttribute("y", svg.rectangle.posy);
@@ -207,7 +202,7 @@
     console.log("Fin Traite Rectangle id: "+svg.rectangle.id);
   }
 /********************************************* Prepare un objet SVG et l'affiche sur la page **********************************/
- function Load_Comment_to_canvas ( Comment )
+ function Load_Comment_to_canvas ( mode_atelier, Comment )
   { var svg=document.createElementNS("http://www.w3.org/2000/svg", 'text');
     svg.comment = Comment;                                                             /* Sauvegarde du pointeur Motif source */
     svg.setAttribute( "id", "WTD-comment-"+svg.comment.id );
@@ -233,7 +228,7 @@
   }
 
 /********************************************* Créé un bouton bootstap sur SVG ************************************************/
- function New_svg_button( color, icon, x, y, texte, on_click )
+ function New_svg_button( mode_atelier, color, icon, x, y, texte, on_click )
   { var svg = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
     svg.setAttribute("x","0");
     svg.setAttribute("y","0");
@@ -250,19 +245,36 @@
 
 /********************************************* Appelé au chargement de la page ************************************************/
  function Init_syn ( mode_atelier, Response )
-  { for (var i = 0; i < Response.motifs.length; i++)                          /* Pour chacun des motifs, parsing un par un */
+  { for (var i = 0; i < Response.motifs.length; i++)                             /* Pour chacun des motifs, parsing un par un */
      { var motif = Response.motifs[i];
-       if (motif.icone==424)
-        { var button = New_svg_button ( "outline-primary", "volume-mute", motif.posx-27, motif.posy-12, "Stop", null );
+       if (motif.icone==218 || motif.icone==222 || motif.icone==221)
+        { }
+       else if (motif.icone==424)
+        { var button = New_svg_button ( mode_atelier, "outline-primary", "volume-mute", motif.posx-27, motif.posy-12, "Stop", null );
           $("#TopSVG").append(button);                                                     /* ajout du SVG dans le Top SVG */
         }
        else if (motif.icone==570)
-        { var button = New_svg_button ( "danger", "volume-up", motif.posx-32, motif.posy-12, "Panic", null );
+        { var button = New_svg_button ( mode_atelier, "danger", "volume-up", motif.posx-32, motif.posy-12, "Panic", null );
           $("#TopSVG").append(button);                                                     /* ajout du SVG dans le Top SVG */
+        }
+       else if (motif.icone==217)
+        { if (motif.angle==0)
+           { var rectangle = { id: motif.id, posx:motif.posx-8, posy:motif.posy-8, rx: 1.0, ry: 1.0, width: 60, height: 60,
+                               color: "none", stroke: "black", stroke_width: 5 };
+             Load_Rectangle_to_canvas( mode_atelier, rectangle );                             /* ajout du SVG dans le Top SVG */
+           }
+        }
+       else if (motif.icone==215)
+        { if (motif.angle==-180)
+           { var rectangle = { id: motif.id, posx:motif.posx-10, posy:motif.posy-10, rx: 1.0, ry: 1.0, width: 60, height: 60,
+                               color: "none", stroke: "black", stroke_width: 5 };
+             console.debug(rectangle);
+             Load_Rectangle_to_canvas( mode_atelier, rectangle );                             /* ajout du SVG dans le Top SVG */
+           }
         }
        else if (motif.forme=="none") Load_Gif_to_canvas ( motif );
        else
-        { for (var j = 0; j < Response.visuels.length; j++)                  /* Pour chacun des visuels, parsing un par un */
+        { for (var j = 0; j < Response.visuels.length; j++)                     /* Pour chacun des visuels, parsing un par un */
            { var visuel = Response.visuels[j];
              if (visuel.tech_id == motif.tech_id && visuel.acronyme==motif.acronyme)
               { Load_Motif_to_canvas ( mode_atelier, motif, visuel.mode, visuel.color, visuel.cligno ); break; }
@@ -275,35 +287,23 @@
     console.log("Traite Lien: "+Response.liens.length);
     for (var i = 0; i < Response.liens.length; i++)                            /* Pour chacun des liens, parsing un par un */
      { var lien = Response.liens[i];
-       Load_Lien_to_canvas(lien);
+       Load_Lien_to_canvas( mode_atelier, lien );
      }
     console.log("Traite Rectangle: "+Response.rectangles.length);
     for (var i = 0; i < Response.rectangles.length; i++)                            /* Pour chacun des liens, parsing un par un */
      { var rectangle = Response.rectangles[i];
-       Load_Rectangle_to_canvas(rectangle);
+       Load_Rectangle_to_canvas( mode_atelier, rectangle );
      }
 
-/*       var listpass = document.getElementById("liste_passerelles");                                 /* Pour chaque passerelle */
-/*       var button = document.createElement('button');
-       button.setAttribute( "class", "btn btn-primary" );
-       button.innerHTML = "Accueil";
-       button.onclick = function() { Charger_syn(1); }
-       listpass.appendChild(button);
-       for (var i = 0; i < Response.passerelles.length; i++)                       /* Pour chacun des motifs, parsing un par un */
-/*        { var passerelle = Response.passerelles[i];
-          var button = document.createElement('button');
-          button.setAttribute( "class", "btn btn-secondary" );
-          button.innerHTML = passerelle.page;
-          button.passerelle = passerelle;
-          button.onclick = function() { Charger_syn(this.passerelle.syn_cible_id); };
-          listpass.appendChild(button);
-          Load_Passerelle_to_canvas(passerelle);
-        }
-*/
+    for (var i = 0; i < Response.passerelles.length; i++)                       /* Pour chacun des motifs, parsing un par un */
+     { var passerelle = Response.passerelles[i];
+       Load_Passerelle_to_canvas( mode_atelier, passerelle );
+     }
+
     console.log("Traite Comments: "+Response.comments.length);
     for (var i = 0; i < Response.comments.length; i++)                            /* Pour chacun des liens, parsing un par un */
      { var comment = Response.comments[i];
-       Load_Comment_to_canvas(comment);
+       Load_Comment_to_canvas( mode_atelier, comment );
      }
   }
 
