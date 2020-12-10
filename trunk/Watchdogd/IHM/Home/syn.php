@@ -11,4 +11,5 @@
 
 </div>
 
+<script src="/js/graphique.js" type="text/javascript"></script>
 <script src="/js/home/syn.js" type="text/javascript"></script>

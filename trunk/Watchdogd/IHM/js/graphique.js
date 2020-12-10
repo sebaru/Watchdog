@@ -17,6 +17,7 @@
     svg.setAttribute("height", Motif.haut );
     svg.setAttribute("width", Motif.larg );
     svg.setAttribute("id","WTD-motif-"+Motif.id);
+    svg.setAttribute("preserveAspectRatio","none");
     svg.setAttribute( "class", "svg-button" );
     if (Motif.gestion==1) $("#TopSVG").prepend(svg);                                                                 /* ajout du SVG dans le Top SVG */
     else $("#TopSVG").append(svg);                                                                 /* ajout du SVG dans le Top SVG */

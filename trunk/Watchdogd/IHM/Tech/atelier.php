@@ -11,11 +11,15 @@
  </div>
 
 
-  			<div id="idTopDIV" class="row">
+			<div id="idTopDIV" class="row">
+  			<div id="idTopDIV" class="col-10 border border-success">
        <svg id="TopSVG" width="100%" viewBox="0 0 1200 600"
             style="background-color: #666"
             xmlns="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml"></svg>
 					</div>
+  			<div id="idTopDIV" class="col-2 border border-success">
+					</div>
+			</div>
 
 
 <!-- Container -->

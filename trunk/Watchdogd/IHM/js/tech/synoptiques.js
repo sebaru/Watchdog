@@ -92,15 +92,11 @@
  function Show_Modal_Del ( syn_id )
   { table = $('#idTableSyn').DataTable();
     selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
-    $('#idModalSynDelTitre').text ( "Détruire le synoptique ?" );
-    $('#idModalSynDelMessage').html("Etes-vous sur de vouloir supprimer le synoptique suivant "+
-                                    "et toutes ses dépendances (DLS, mnémoniques, ...) ?<hr>"+
-                                    "<strong>"+selection.page+" - "+selection.libelle+
-                                    "</strong>" );
-    $('#idModalSynDelValider').attr( "onclick", "Valide_del_synoptique("+syn_id+")" );
-    $('#idModalSynDel').modal("show");
+    Show_modal_del ( "Détruire le synoptique ?",
+                     "Etes-vous sur de vouloir supprimer le synoptique suivant et toutes ses dépendances (DLS, mnémoniques, ...) ?<hr>"+
+                     "<strong>"+selection.page+" - "+selection.libelle+"</strong>",
+                      "Valide_del_synoptique("+syn_id+")" );
   }
-
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_syn ()
   { console.log ("in load synoptique !");
@@ -122,13 +118,13 @@
             { "data": "ppage", "title": "Parent", "name": "ppage", "className": "hidden-xs" },
             { "data": null, "className": "align-middle hidden-xs",
               "render": function (item)
-                { return( Lien ( "/atelier/"+item.id, "Ouvrir Atelier", item.page ) );
+                { return( Lien ( "/tech/atelier/"+item.id, "Ouvrir Atelier", item.page ) );
                 },
               "title":"Page", "orderable": true
             },
             { "data": null, "className": "align-middle hidden-xs",
               "render": function (item)
-                { return( Lien ( "/atelier/"+item.id, "Ouvrir Atelier", item.libelle ) );
+                { return( Lien ( "/tech/atelier/"+item.id, "Ouvrir Atelier", item.libelle ) );
                 },
               "title":"Description", "orderable": true
             },
@@ -136,7 +132,7 @@
               "render": function (item)
                 { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"+
                          "    <button class='btn btn-outline-primary btn-sm' "+
-                                     "onclick=window.location.href='/atelier/"+item.id+"' "+
+                                     "onclick=window.location.href='/tech/atelier/"+item.id+"' "+
                                      "data-toggle='tooltip' title='Ouvrir Atelier'>"+
                                      "<i class='fas fa-image'></i></button>"+
                          "    <button class='btn btn-outline-secondary btn-sm' "+

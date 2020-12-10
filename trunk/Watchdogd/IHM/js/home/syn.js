@@ -7,22 +7,7 @@
     var json_request = JSON.stringify( { tech_id: svg.motif.clic_tech_id, acronyme: svg.motif.clic_acronyme } );
     Send_to_API ( 'POST', "/api/syn/clic", json_request, null, null );
   }
-/********************************************* Prepare un objet SVG et l'affiche sur la page **********************************/
- function Load_Gif_to_canvas ( Motif )
-  {
-    var svg = document.createElementNS("http://www.w3.org/2000/svg","image");
-    svg.setAttribute("xlink","http://www.w3.org/1999/xlink");
-    svg.setAttribute("href","https://icons.abls-habitat.fr/assets/gif/"+Motif.icone+".gif");
-    svg.setAttribute("x", Motif.posx - Motif.larg/2 );
-    svg.setAttribute("y", Motif.posy - Motif.haut/2 );
-    svg.setAttribute("height", Motif.haut );
-    svg.setAttribute("width", Motif.larg );
-    svg.setAttribute("id","WTD-motif-"+Motif.id);
-    svg.setAttribute( "class", "svg-button" );
-    if (Motif.gestion==1) $("#TopSVG").prepend(svg);                                                                 /* ajout du SVG dans le Top SVG */
-    else $("#TopSVG").append(svg);                                                                 /* ajout du SVG dans le Top SVG */
 
-  }
 /********************************************* Prepare un objet SVG et l'affiche sur la page **********************************/
  function Load_Motif_to_canvas ( Motif, init_mode, init_color, init_cligno )
   {
