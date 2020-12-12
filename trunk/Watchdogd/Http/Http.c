@@ -549,6 +549,9 @@ reload:
     soup_server_add_handler ( socket, "/api/syn/set",        Http_traiter_syn_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/clic",       Http_traiter_syn_clic, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/update_motifs", Http_traiter_syn_update_motifs, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/tableau/list",   Http_traiter_tableau_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/tableau/del",    Http_traiter_tableau_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/tableau/set",    Http_traiter_tableau_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/archive/get",    Http_traiter_archive_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/reload", Http_traiter_process_reload, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/start",  Http_traiter_process_start, NULL, NULL );
