@@ -14,7 +14,7 @@
 /************************************ Créé un nouveau tableau *****************************************************************/
  function Tableau_set ( id )
   { table = $('#idTableTableau').DataTable();
-    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==id } )[0];
+    selection = table.ajax.json().tableaux.filter( function(item) { return item.id==id } )[0];
     var json_request = JSON.stringify(
        { id: id,
          titre: $('#idTableauTitre_'+id).val(),
@@ -38,7 +38,7 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Tableau_Delete ( _id )
   { table = $('#idTableTableau').DataTable();
-    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==id } )[0];
+    selection = table.ajax.json().tableaux.filter( function(item) { return item.id==id } )[0];
     Show_modal_del ( "Détruire le tableau ?",
                      "Etes-vous sur de vouloir supprimer le tablea ?<hr>"+
                      "<strong>"+selection.titre+"</strong>",
@@ -59,7 +59,7 @@
             { "data": null, "title":"Level", "className": "align-middle hidden-xs text-center",
               "render": function (item)
                 { return( Select_Access_level ( "idTableauLevel_"+item.id,
-                                                "Tabelau_Set('"+item.id+"')",
+                                                "Tableau_Set('"+item.id+"')",
                                                 item.access_level )
                         );
                 }
@@ -76,6 +76,7 @@
             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "primary", "Editer les courbes", "Redirect", "/tech/tableau_map/"+item.id, "pen", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer ce tableau", "Tableau_Delete", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);

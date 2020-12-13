@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container">
 
  <div class="row m-2">
    <h3><i class="fas fa-chart-line text-primary"></i> Liste des Tableaux</strong></h3>
