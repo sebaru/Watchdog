@@ -132,18 +132,18 @@
  function Charger_une_courbe ( idChart, tech_id, acronyme, period )
   { if (localStorage.getItem("instance_is_master")!="true") return;
     var json_request = JSON.stringify(
-     { tech_id  : tech_id,
-       acronyme : acronyme,
+     { courbes: [ { tech_id  : tech_id, acronyme : acronyme, } ],
        period   : period
      });
 
     Send_to_API ( "PUT", "/api/archive/get", json_request, function(json)
      { var dates;
-       if (period=="HOUR") dates = json.enregs.map( function(item) { return item.date.split(' ')[1]; } );
-                      else dates = json.enregs.map( function(item) { return item.date; } );
-       var valeurs = json.enregs.map( function(item) { return item.moyenne; } );
+       if (period=="HOUR") dates = json.valeurs.map( function(item) { return item.date.split(' ')[1]; } );
+                      else dates = json.valeurs.map( function(item) { return item.date; } );
+       var valeurs = json.valeurs.map( function(item) { return item.moyenne1; } );
+console.debug(json.courbe1.libelle);
        var data = { labels: dates,
-                    datasets: [ { label: json.libelle,
+                    datasets: [ { label: json.courbe1.libelle,
                                   borderColor: "rgba(0, 100, 255, 1.0)",
                                   backgroundColor: "rgba(0, 100, 100, 0.1)",
                                   borderWidth: "1",
@@ -156,7 +156,7 @@
                   }
        var options = { maintainAspectRatio: false,
                        scales: { yAxes: [ { id: "B", type: "linear", position: "left",
-                                            scaleLabel: { display: true, labelString: json.unite }
+                                            scaleLabel: { display: true, labelString: json.courbe1.unite }
                                           }
                                         ]
                                }

@@ -40,9 +40,10 @@
 /******************************************************************************************************************************/
  void Http_traiter_archive_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
+  { gchar *buf, requete[1024], chaine[256], *interval, nom_courbe[12];
     gsize taille, taille_buf;
-    gchar *buf, requete[256];
+    GBytes *request_brute;
+    gint nbr;
 
     if (msg->method != SOUP_METHOD_PUT || Config.instance_is_master == FALSE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -60,66 +61,63 @@
        return;
      }
 
-    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
-            Json_has_member ( request, "period" ) ) )
+    if ( ! (Json_has_member ( request, "period" ) && Json_has_member ( request, "courbes" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-
-    gchar *tech_id  = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-    gchar *acronyme = Normaliser_chaine ( Json_get_string ( request, "acronyme" ) );
     gchar *period   = Normaliser_chaine ( Json_get_string ( request, "period" ) );
-    json_node_unref(request);
+    gint periode = 450;
+    interval = " ";
+         if (!strcasecmp(period, "HOUR"))  { periode = 450;   interval = " WHERE date_time>=NOW() - INTERVAL 4 HOUR"; }
+    else if (!strcasecmp(period, "DAY"))   { periode = 450;   interval = " WHERE date_time>=NOW() - INTERVAL 2 DAY"; }
+    else if (!strcasecmp(period, "WEEK"))  { periode = 3600;  interval = " WHERE date_time>=NOW() - INTERVAL 2 WEEK"; }
+    else if (!strcasecmp(period, "MONTH")) { periode = 43200; interval = " WHERE date_time>=NOW() - INTERVAL 9 WEEK"; }
+    else if (!strcasecmp(period, "YEAR"))  { periode = 86400; interval = " WHERE date_time>=NOW() - INTERVAL 13 MONTH"; }
+    g_free(period);
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       g_free(tech_id);
-       g_free(acronyme);
-       g_free(period);
+       json_node_unref(request);
        return;
      }
 
-    g_snprintf(requete, sizeof(requete), "SELECT * FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme );
-    if (SQL_Select_to_JSON ( builder, NULL, requete ) == FALSE)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
+    g_snprintf( requete, sizeof(requete), "SELECT * FROM ");
+
+    int nbr_courbe = json_array_get_length ( Json_get_array ( request, "courbes" ) );
+    for (nbr=0; nbr<nbr_courbe; nbr++)
+     { g_snprintf( nom_courbe, sizeof(nom_courbe), "courbe%d", nbr+1 );
+
+       JsonNode *courbe = json_array_get_element ( Json_get_array ( request, "courbes" ), nbr );
+       gchar *tech_id  = Normaliser_chaine ( Json_get_string ( courbe, "tech_id" ) );
+       gchar *acronyme = Normaliser_chaine ( Json_get_string ( courbe, "acronyme" ) );
+
+       if (nbr!=0) g_strlcat ( requete, "INNER JOIN ", sizeof(requete) );
+       g_snprintf( chaine, sizeof(chaine),
+                  "(SELECT FROM_UNIXTIME((UNIX_TIMESTAMP(date_time) DIV %d)*%d) AS date, COALESCE(ROUND(AVG(valeur),3),0) AS moyenne%d "
+                  " FROM histo_bit_%s_%s %s GROUP BY date ORDER BY date) AS %s ",
+                   periode, periode, nbr+1, tech_id, acronyme, interval, nom_courbe );
+       if (nbr!=0) g_strlcat ( chaine, "USING (date) ", sizeof(chaine) );
+       g_strlcat ( requete, chaine, sizeof(requete) );
+
+       Json_add_object ( builder, nom_courbe );
+       g_snprintf(chaine, sizeof(chaine), "SELECT * FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme );
+       SQL_Select_to_JSON ( builder, NULL, chaine );
+       Json_end_object ( builder );
+
        g_free(tech_id);
        g_free(acronyme);
-       g_free(period);
-       g_object_unref(builder);
-       return;
      }
-    gint periode = 450;
-         if (!strcasecmp(period, "DAY"))   periode = 450;
-    else if (!strcasecmp(period, "WEEK"))  periode = 3600;
-    else if (!strcasecmp(period, "MONTH")) periode = 43200;
-    else if (!strcasecmp(period, "YEAR"))  periode = 86400;
-    else if (!strcasecmp(period, "ALL"))   periode = 7*86400;
-    g_snprintf( requete, sizeof(requete),
-               "SELECT FROM_UNIXTIME((UNIX_TIMESTAMP(date_time) DIV %d)*%d) AS date, COALESCE(ROUND(AVG(valeur),3),0) AS moyenne "
-               "FROM histo_bit_%s_%s", periode, periode, tech_id, acronyme );
-    if (!strcasecmp(period, "HOUR"))  g_strlcat ( requete, " WHERE date_time>=NOW() - INTERVAL 4 HOUR", sizeof(requete) );
-    if (!strcasecmp(period, "DAY"))   g_strlcat ( requete, " WHERE date_time>=NOW() - INTERVAL 2 DAY", sizeof(requete) );
-    if (!strcasecmp(period, "WEEK"))  g_strlcat ( requete, " WHERE date_time>=NOW() - INTERVAL 2 WEEK", sizeof(requete) );
-    if (!strcasecmp(period, "MONTH")) g_strlcat ( requete, " WHERE date_time>=NOW() - INTERVAL 9 WEEK", sizeof(requete) );
-    if (!strcasecmp(period, "YEAR"))  g_strlcat ( requete, " WHERE date_time>=NOW() - INTERVAL 13 MONTH", sizeof(requete) );
-    if (!strcasecmp(period, "ALL"))   g_strlcat ( requete, "", sizeof(requete) );
 
-    g_strlcat ( requete, " GROUP BY date ORDER BY date", sizeof(requete) );
-
-    if (SQL_Arch_to_JSON ( builder, "enregs", requete ) == FALSE)
+    if (SQL_Arch_to_JSON ( builder, "valeurs", requete ) == FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
-       g_free(tech_id);
-       g_free(acronyme);
-       g_free(period);
+       json_node_unref(request);
        g_object_unref(builder);
        return;
      }
 
-    g_free(tech_id);
-    g_free(acronyme);
-    g_free(period);
+    json_node_unref(request);
 
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/

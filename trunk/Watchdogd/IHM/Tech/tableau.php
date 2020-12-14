@@ -4,7 +4,7 @@
    <h3><i class="fas fa-chart-line text-primary"></i> Liste des Tableaux</strong></h3>
 
    <div class ="ml-auto btn-group align-items-start">
-        <button type="button" onclick="Tableau_new()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
+        <button type="button" onclick="Tableau_New()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
    <!--     <button type="button" onclick="GSM_Sauver_parametre()" class="btn btn-outline-success"><i class="fas fa-save"></i> Sauvegarder</button>
         <button type="button" onclick="Redirect('/tech/smsg_map')" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
         <button type="button" onclick="GSM_Reload()" class="btn btn-outline-warning"><i class="fas fa-redo"></i> Reload</button>

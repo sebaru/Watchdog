@@ -1,7 +1,7 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /************************************ Créé un nouveau tableau *****************************************************************/
- function Tableau_new ( )
+ function Tableau_New ( )
   { var json_request = JSON.stringify(
        { titre: "Nouveau tableau",
          access_level: 0
@@ -12,7 +12,7 @@
      }, null );
   }
 /************************************ Créé un nouveau tableau *****************************************************************/
- function Tableau_set ( id )
+ function Tableau_Set ( id )
   { table = $('#idTableTableau').DataTable();
     selection = table.ajax.json().tableaux.filter( function(item) { return item.id==id } )[0];
     var json_request = JSON.stringify(
@@ -36,15 +36,15 @@
      }, null );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Tableau_Delete ( _id )
+ function Tableau_Delete ( id )
   { table = $('#idTableTableau').DataTable();
     selection = table.ajax.json().tableaux.filter( function(item) { return item.id==id } )[0];
     Show_modal_del ( "Détruire le tableau ?",
-                     "Etes-vous sur de vouloir supprimer le tablea ?<hr>"+
+                     "Etes-vous sur de vouloir supprimer le tableau suivant ?<hr>"+
                      "<strong>"+selection.titre+"</strong>",
                       "Tableau_Valide_delete("+id+")" );
   }
-  
+
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTableTableau').DataTable(
@@ -67,7 +67,7 @@
             { "data": null, "title":"Titre", "className": "align-middle hidden-xs",
               "render": function (item)
                 { return( Input ( "text", "idTableauTitre_"+item.id,
-                                  "Tableau_set('"+item.id+"')",
+                                  "Tableau_Set('"+item.id+"')",
                                   "Quel est le titre du tableau ?",
                                   item.titre )
                         );

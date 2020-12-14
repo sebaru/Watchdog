@@ -155,7 +155,7 @@
     else
      {
        g_snprintf( requete, sizeof(requete),
-                  "INSERT INTO tableau SET titre=CONCAT('%s','-',id), access_level='%d'",
+                  "INSERT INTO tableau SET titre='%s', access_level='%d'",
                    titre, access_level );
        Audit_log ( session, "tableau '%s' created", titre );
      }
