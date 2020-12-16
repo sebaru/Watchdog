@@ -61,7 +61,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s SET tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s'"
+                "INSERT INTO %s SET tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s',"
                 "typologie='%d',sms_notification='0' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), typologie=VALUES(typologie)", NOM_TABLE_MSG, msg->tech_id, msg->acronyme,
                 libelle, libelle, msg->typologie
