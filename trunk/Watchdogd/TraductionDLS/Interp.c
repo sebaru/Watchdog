@@ -901,11 +901,19 @@
                     "/*******************************************************/\n"
                     " gchar *version (void)\n"
                     "  { return(\"V%s - %s\"); \n  }\n", WTD_VERSION, date );
-          write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
           write( fd, Start_Go, strlen(Start_Go) );                                                 /* Ecriture de de l'entete */
 
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
+
+/*-------------------------------------------- Ecriture de la fin de fichier ------------------------------------*/
+          g_snprintf ( chaine, sizeof(chaine), "Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, !vars->bit_comm_out );\n"
+                                               "Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, vars->bit_comm_out );\n",
+                       Dls_plugin.tech_id, "MSG_COMM_OK", Dls_plugin.tech_id, "MSG_COMM_OK", "FALSE",
+                       Dls_plugin.tech_id, "MSG_COMM_HS", Dls_plugin.tech_id, "MSG_COMM_HS", "FALSE" );
+          write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
+
           write( fd, End_Go, strlen(End_Go) );
           close(fd);
         }
@@ -1003,6 +1011,23 @@
           liste = liste->next;
         }
 
+/*--------------------------------- Création des mnemoniques permanents -----------------------------------------*/
+       { struct CMD_TYPE_MESSAGE msg;
+         gint param;
+         g_snprintf( msg.tech_id,  sizeof(msg.tech_id),  "%s", Dls_plugin.tech_id );
+         g_snprintf( msg.acronyme, sizeof(msg.acronyme), "MSG_COMM_OK" );
+         g_snprintf( msg.libelle,  sizeof(msg.libelle),  "Communication OK" );
+         msg.typologie = MSG_ETAT;
+         Mnemo_auto_create_MSG ( &msg );
+
+         g_snprintf( msg.tech_id,  sizeof(msg.tech_id),  "%s", Dls_plugin.tech_id );
+         g_snprintf( msg.acronyme, sizeof(msg.acronyme), "MSG_COMM_HS" );
+         g_snprintf( msg.libelle,  sizeof(msg.libelle),  "Communication Hors Service" );
+         msg.typologie = MSG_DEFAUT;
+         Mnemo_auto_create_MSG ( &msg );
+        }
+                   
+/*--------------------------------- Suppression des mnemoniques non utilisés ------------------------------------*/
        if (Liste_acronyme)
         { g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_AI WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
           requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
