@@ -132,7 +132,7 @@
  function Charger_une_courbe ( idChart, tech_id, acronyme, period )
   { if (localStorage.getItem("instance_is_master")!="true") return;
     var json_request = JSON.stringify(
-     { courbes: [ { tech_id  : tech_id, acronyme : acronyme, } ],
+     { courbes: [ { tech_id : tech_id, acronyme : acronyme, } ],
        period   : period
      });
 
