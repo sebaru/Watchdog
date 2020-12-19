@@ -702,7 +702,8 @@
     alias->acronyme = g_strdup(acronyme);
     alias->classe = bit;
     alias->options  = options;
-    alias->used     = 0;
+    if (g_str_has_prefix( acronyme, "_" )) alias->used = 1;
+    else alias->used     = 0;
     Alias = g_slist_prepend( Alias, alias );
     return(TRUE);
   }
@@ -884,6 +885,9 @@
 
           write(fd, include, strlen(include));
 
+          New_alias ( Dls_plugin.tech_id, "_MSG_COMM_OK", MNEMO_MSG, NULL );
+          New_alias ( Dls_plugin.tech_id, "_MSG_COMM_HS", MNEMO_MSG, NULL );
+
           liste = Alias;
           while(liste)
            { alias = (struct ALIAS *)liste->data;
@@ -901,11 +905,19 @@
                     "/*******************************************************/\n"
                     " gchar *version (void)\n"
                     "  { return(\"V%s - %s\"); \n  }\n", WTD_VERSION, date );
-          write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
           write( fd, Start_Go, strlen(Start_Go) );                                                 /* Ecriture de de l'entete */
 
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
+
+/*----------------------------------------------- Ecriture de la fin de fichier ----------------------------------------------*/
+          nb_car = g_snprintf ( chaine, sizeof(chaine), "Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, !vars->bit_comm_out );\n"
+                                                        "Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, vars->bit_comm_out );\n",
+                                Dls_plugin.tech_id, "_MSG_COMM_OK", Dls_plugin.tech_id, "_MSG_COMM_OK", "FALSE",
+                                Dls_plugin.tech_id, "_MSG_COMM_HS", Dls_plugin.tech_id, "_MSG_COMM_HS", "FALSE" );
+          write(fd, chaine, nb_car );                                                          /* Ecriture du buffer resultat */
+
           write( fd, End_Go, strlen(End_Go) );
           close(fd);
         }
@@ -1003,6 +1015,22 @@
           liste = liste->next;
         }
 
+/*--------------------------------- Création des mnemoniques permanents -----------------------------------------*/
+       { struct CMD_TYPE_MESSAGE msg;
+         g_snprintf( msg.tech_id,  sizeof(msg.tech_id),  "%s", Dls_plugin.tech_id );
+         g_snprintf( msg.acronyme, sizeof(msg.acronyme), "_MSG_COMM_OK" );
+         g_snprintf( msg.libelle,  sizeof(msg.libelle),  "Communication OK" );
+         msg.typologie = MSG_ETAT;
+         Mnemo_auto_create_MSG ( &msg );
+
+         g_snprintf( msg.tech_id,  sizeof(msg.tech_id),  "%s", Dls_plugin.tech_id );
+         g_snprintf( msg.acronyme, sizeof(msg.acronyme), "_MSG_COMM_HS" );
+         g_snprintf( msg.libelle,  sizeof(msg.libelle),  "Communication Hors Service" );
+         msg.typologie = MSG_DEFAUT;
+         Mnemo_auto_create_MSG ( &msg );
+        }
+
+/*--------------------------------- Suppression des mnemoniques non utilisés ------------------------------------*/
        if (Liste_acronyme)
         { g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_AI WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
           requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );

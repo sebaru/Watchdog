@@ -90,6 +90,18 @@
     else soup_session_queue_message (client->connexion, msg, callback, client);
   }
 /******************************************************************************************************************************/
+/* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
+/* Entrée: des infos sur le paquet à envoyer                                                                                  */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Envoi_ws_au_serveur ( struct CLIENT *client, SoupWebsocketConnection *ws, JsonBuilder *builder )
+  { gsize taille_buf;
+    gchar *buf = Json_get_buf (builder, &taille_buf);
+    GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
+    soup_websocket_connection_send_message ( ws, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
+    g_bytes_unref( gbytes );
+  }
+/******************************************************************************************************************************/
 /* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
 /* Entrée: rien                                                                                                               */
 /* Sortie: un widget boite                                                                                                    */

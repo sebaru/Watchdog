@@ -139,7 +139,7 @@
      { gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &syn_id, -1 );                                        /* Recup du id */
 
-       Changer_vue_directe ( client, syn_id );
+       Demander_synoptique_supervision ( client, syn_id );
 
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;

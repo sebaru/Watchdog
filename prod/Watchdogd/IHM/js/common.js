@@ -4,7 +4,9 @@
  function Send_to_API ( method, URL, parametre, fonction_ok, fonction_nok )
   { var xhr = new XMLHttpRequest;
     $(".ClassLoadingSpinner").show();
-    xhr.open(method, URL, true);
+    if ( method == "GET" && parametre !== null )
+     { xhr.open(method, URL+"?"+parametre, true); }
+    else xhr.open(method, URL, true);
     if (method=="POST") { xhr.setRequestHeader('Content-type', 'application/json'); }
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
@@ -105,14 +107,16 @@
  function Select_Access_level ( id, fonction, selected )
   { retour = "<select id='"+id+"' class='custom-select'"+
              "onchange="+fonction+">";
-    for ( i=0; i<localStorage.getItem("access_level"); i++ )
+    for ( i=0; i<=localStorage.getItem("access_level"); i++ )
      { retour += "<option value='"+i+"' "+(selected==i ? "selected" : "")+">"+i+"</option>"; }
     retour +="</select>";
     return(retour);
   }
 /****************************************** Escape les " et ' *****************************************************************/
  function htmlEncode ( string )
-  { return ( string.replace(/'/g,'&#39').replace(/"/g,'&#34') ); }
+  { if (string===null) return("null");
+    return ( string.replace(/'/g,'&#39').replace(/"/g,'&#34') );
+  }
 /****************************************** Are you sure **********************************************************************/
  function Show_modal_del ( titre, message, fonction )
   { $('#idModalDelTitre').text ( htmlEncode(titre) );
@@ -132,31 +136,31 @@
  function Charger_une_courbe ( idChart, tech_id, acronyme, period )
   { if (localStorage.getItem("instance_is_master")!="true") return;
     var json_request = JSON.stringify(
-     { tech_id  : tech_id,
-       acronyme : acronyme,
+     { courbes: [ { tech_id : tech_id, acronyme : acronyme, } ],
        period   : period
      });
 
     Send_to_API ( "PUT", "/api/archive/get", json_request, function(json)
      { var dates;
-       if (period=="HOUR") dates = json.enregs.map( function(item) { return item.date.split(' ')[1]; } );
-                      else dates = json.enregs.map( function(item) { return item.date; } );
-       var valeurs = json.enregs.map( function(item) { return item.moyenne; } );
+       if (period=="HOUR") dates = json.valeurs.map( function(item) { return item.date.split(' ')[1]; } );
+                      else dates = json.valeurs.map( function(item) { return item.date; } );
+       var valeurs = json.valeurs.map( function(item) { return item.moyenne1; } );
+console.debug(json.courbe1.libelle);
        var data = { labels: dates,
-                    datasets: [ { label: json.libelle,
+                    datasets: [ { label: json.courbe1.libelle,
                                   borderColor: "rgba(0, 100, 255, 1.0)",
                                   backgroundColor: "rgba(0, 100, 100, 0.1)",
                                   borderWidth: "1",
                                   tension: "0.1",
                                   radius: "1",
                                   data: valeurs,
-                                   yAxisID: "B",
+                                  yAxisID: "B",
                                 },
                               ],
                   }
        var options = { maintainAspectRatio: false,
                        scales: { yAxes: [ { id: "B", type: "linear", position: "left",
-                                            scaleLabel: { display: true, labelString: json.unite }
+                                            scaleLabel: { display: true, labelString: json.courbe1.unite }
                                           }
                                         ]
                                }
@@ -170,3 +174,50 @@
     else setInterval( function() { window.location.reload(); }, 600000);
 	 }
 
+/********************************* Chargement d'une courbe dans u synoptique 1 au démrrage ************************************/
+ function Charger_plusieurs_courbes ( idChart, tableau_map, period )
+  { if (localStorage.getItem("instance_is_master")!="true") return;
+
+    if (period===undefined) period="HOUR";
+    var json_request = JSON.stringify(
+     { courbes: tableau_map.map( function (item)
+                                  { return( { tech_id: item.tech_id, acronyme: item.acronyme } ) } ),
+       period : period
+     });
+
+    Send_to_API ( "PUT", "/api/archive/get", json_request, function(Response)
+     { var dates;
+       if (period=="HOUR") dates = Response.valeurs.map( function(item) { return item.date.split(' ')[1]; } );
+                      else dates = Response.valeurs.map( function(item) { return item.date; } );
+       var data = { labels: dates,
+                    datasets: [],
+                  }
+       for (i=0; i<tableau_map.length; i++)
+        { data.datasets.push ( { label: tableau_map[i].libelle+ " ("+tableau_map[i].unite+")",
+                                 borderColor: tableau_map[i].color,
+                                 backgroundColor: "rgba(100, 100, 100, 0.0)",
+                                 /*backgroundColor: "rgba(100, 100, 100, 0.1)",*/
+                                 borderWidth: "1",
+                                 tension: "0.1",
+                                 radius: "1",
+                                 data: Response.valeurs.map( function(item) { return(item["moyenne"+(i+1)]); } ),
+                                 yAxisID: "B",
+                               });
+        }
+console.debug(data);
+       var options = { maintainAspectRatio: false,
+                       scales: { yAxes: [ { id: "B", type: "linear", position: "right",
+                                            scaleLabel: { display: false, labelString: tableau_map[0].unite }
+                                          },
+                                        ]
+                               }
+                     };
+       var ctx = document.getElementById(idChart).getContext('2d');
+       var myChart = new Chart(ctx, { type: 'line', data: data, options: options } );
+     });
+
+    if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
+    else if (period=="DAY")  setInterval( function() { window.location.reload(); }, 300000);
+    else setInterval( function() { window.location.reload(); }, 600000);
+	 }
+/*----------------------------------------------------------------------------------------------------------------------------*/

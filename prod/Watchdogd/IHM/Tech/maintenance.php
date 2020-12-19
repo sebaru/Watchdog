@@ -25,13 +25,6 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-4 col-form-label text-right">Compil All D.L.S Plugins</label>
-           <button type="button" onclick="Maintenance_Compiler_tous_dls()" class="col-3 btn btn-outline-warning"><i class="fas fa-code"></i> Tout Compiler</button>
-     					</div>
-  					</div>
-
-       <div class="col form-group">
-					     <div class="input-group">
 						     <label class="col-4 col-form-label text-right">Resetter le système</label>
            <button type="button" onclick="Maintenance_Reset_Instance()" class="col-3 btn btn-outline-danger"><i class="fas fa-power-off"></i> Reset Système</button>
      					</div>

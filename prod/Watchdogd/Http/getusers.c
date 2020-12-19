@@ -84,27 +84,18 @@
 /******************************************************************************************************************************/
  void Http_traiter_users_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille;
-
-    if (msg->method != SOUP_METHOD_POST)
+  { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 1 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "username" ) ) )
-     { if (request) json_node_unref(request);
+     { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -113,7 +104,9 @@
     g_snprintf ( chaine, sizeof(chaine), "UPDATE users SET date_modif=NOW()" );
 
     if ( Json_has_member ( request, "access_level" ) )
-     { g_snprintf( critere, sizeof(critere), ", access_level=%d", Json_get_int ( request, "access_level" ) );
+     { gint level = Json_get_int ( request, "access_level" );
+       if (level<1) level=1;
+       g_snprintf( critere, sizeof(critere), ", access_level=%d", Json_get_int ( request, "access_level" ) );
        g_strlcat ( chaine, critere, sizeof(chaine) );
      }
 
@@ -198,9 +191,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_users_add ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille;
-    gchar chaine[256];
+  { gchar chaine[256];
 
     if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -209,14 +200,8 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 1 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "email" ) &&
             Json_has_member ( request, "password" ) ) )
@@ -242,7 +227,7 @@
 
     gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
     gchar *email    = Normaliser_chaine ( Json_get_string ( request, "email" ) );
-    g_snprintf ( chaine, sizeof(chaine), "INSERT INTO users SET username='%s', email='%s', salt='%s', hash='%s'",
+    g_snprintf ( chaine, sizeof(chaine), "INSERT INTO users SET access_level=1, username='%s', email='%s', salt='%s', hash='%s'",
                  username, email, salt, hash );
     g_free(salt);
     g_free(hash);
@@ -264,27 +249,18 @@
 /******************************************************************************************************************************/
  void Http_traiter_users_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille;
-
-    if (msg->method != SOUP_METHOD_DELETE)
+  { if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 1 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "username" ) ) )
-     { if (request) json_node_unref(request);
+     { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -308,12 +284,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_users_kill ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
-  { JsonObject *object;
-    GBytes *request;
-    JsonNode *Query;
-    gchar * data;
-    gsize taille;
-
+  {
     if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -321,46 +292,22 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 1 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
-    g_object_get ( msg, "request-body-data", &request, NULL );
-    if (!request)
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
+    if ( ! (Json_has_member ( request, "wtd_session" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    data = g_bytes_unref_to_data ( request, &taille );                     /* Récupération du buffer et ajout d'un \0 d'arret */
-    data = g_try_realloc( data, taille + 1 );
-    data [taille] = 0;
-    Query = json_from_string ( data, NULL );
-    if (!Query)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: requete non Json '%s'", __func__, data );
-       g_free(data);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Wrong format");
-       return;
-     }
-    g_free(data);
-
-    object = json_node_get_object (Query);
-    if (!request)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
-       json_node_unref (Query);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Object");
-       return;
-     }
-
-    gchar *target_sid = json_object_get_string_member ( object, "wtd_session" );
-    if (!target_sid)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: tech_id non trouvé", __func__ );
-       json_node_unref (Query);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No target");
-       return;
-     }
+    gchar *target_sid = Json_get_string( request, "wtd_session" );
 
     GSList *liste = Cfg_http.liste_http_clients;
     while(liste)
      { struct HTTP_CLIENT_SESSION *target = liste->data;
        if ( !strcmp(target->wtd_session, target_sid) )
-        { if ( session->access_level > target->access_level || !strcmp(session->username,target->username))
+        { if ( session->access_level>target->access_level || !strcmp(session->username,target->username) )
            { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, target );
              Audit_log ( session, "Session of '%s' killed", target->username );
              g_free(target);
@@ -372,7 +319,7 @@
        liste = g_slist_next ( liste );
      }
 
-    json_node_unref (Query);
+    json_node_unref (request);
     if (!liste) soup_message_set_status_full (msg, SOUP_STATUS_NO_CONTENT, "Session not found" );
   }
 /******************************************************************************************************************************/
@@ -443,13 +390,15 @@
     GSList *liste = Cfg_http.liste_http_clients;
     while(liste)
      { struct HTTP_CLIENT_SESSION *sess = liste->data;
-       Json_add_object ( builder, NULL );
-       Json_add_string ( builder, "username", sess->username );
-       Json_add_string ( builder, "host", sess->host );
-       Json_add_string ( builder, "wtd_session", sess->wtd_session );
-       Json_add_int    ( builder, "access_level", sess->access_level );
-       Json_add_int    ( builder, "last_request", sess->last_request );
-       Json_end_object ( builder );
+       if (sess->access_level <= session->access_level)
+        { Json_add_object ( builder, NULL );
+          Json_add_string ( builder, "username", sess->username );
+          Json_add_string ( builder, "host", sess->host );
+          Json_add_string ( builder, "wtd_session", sess->wtd_session );
+          Json_add_int    ( builder, "access_level", sess->access_level );
+          Json_add_int    ( builder, "last_request", sess->last_request );
+          Json_end_object ( builder );
+        }
        liste = g_slist_next ( liste );
      }
     Json_end_array ( builder );
@@ -469,7 +418,6 @@
   { JsonBuilder *builder;
      GBytes *request_brute;
     gsize taille_buf;
-    gsize taille;
     gchar chaine[256];
 
     if (msg->method != SOUP_METHOD_PUT)
@@ -481,13 +429,11 @@
     if (!Http_check_session( msg, session, 0 )) return;
 
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
+
     if ( ! (Json_has_member ( request, "username" ) ) )
-     { if (request) json_node_unref(request);
+     { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -498,7 +444,7 @@
     builder = Json_create ();
     if (builder)
      { g_snprintf( chaine, sizeof(chaine), "SELECT id,access_level,username,email,enable,comment,notification,phone,xmpp "
-                                           "FROM users WHERE username='%s' and access_level<='%d'", username, session->access_level );
+                                           "FROM users WHERE username='%s' and access_level<'%d'", username, session->access_level );
        SQL_Select_to_JSON ( builder, NULL, chaine );
        gchar *buf = Json_get_buf ( builder, &taille_buf );
    	   soup_message_set_status (msg, SOUP_STATUS_OK);

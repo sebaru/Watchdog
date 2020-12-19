@@ -87,48 +87,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Http_traiter_log ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                SoupClientContext *client, gpointer user_data)
-  { GBytes *request_brute;
-    gsize taille;
-
-    if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
-
-    if ( ! Json_has_member ( request, "log_level" ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    gchar *log_level = Json_get_string ( request, "log_level" );
-         if ( ! g_ascii_strcasecmp ( log_level, "LOG_DEBUG"   ) ) { Info_change_log_level ( Config.log, LOG_DEBUG   ); }
-    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_NOTICE"  ) ) { Info_change_log_level ( Config.log, LOG_NOTICE  ); }
-    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_INFO"    ) ) { Info_change_log_level ( Config.log, LOG_INFO    ); }
-    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_WARNING" ) ) { Info_change_log_level ( Config.log, LOG_WARNING ); }
-    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_ERROR"   ) ) { Info_change_log_level ( Config.log, LOG_ERR     ); }
-	   else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais niveau de log");
-    json_node_unref(request);
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-  }
-/******************************************************************************************************************************/
 /* Http_redirect_to_slave: Proxifie une requete vers un slave                                                                 */
 /* Entrée : le message source, le nom de l'instance cible                                                                     */
 /* Sortie : le contenu de la reponse du slave                                                                                 */
@@ -230,19 +188,29 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION * session, gint min_access_level )
+ gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION *session, gint min_access_level )
   { if (!session)
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Not Connected");
        return(FALSE);
      }
 
     time(&session->last_request);
-    if (min_access_level == 0) return(TRUE);
-    if (session->access_level<min_access_level)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Level forbidden");
-       return(FALSE);
-     }
-    return(TRUE);
+    if (session->access_level>=min_access_level) return(TRUE);
+    soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Session Level forbidden");
+    return(FALSE);
+  }
+/******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ JsonNode *Http_Msg_to_Json ( SoupMessage *msg )
+  { GBytes *request_brute;
+    gsize taille;
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request) { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Not a JSON request"); }
+    return(request);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
@@ -589,12 +557,17 @@ reload:
     soup_server_add_handler ( socket, "/api/map/del",        Http_traiter_map_del, NULL, NULL );
     soup_server_add_handler ( socket, "/api/map/set",        Http_traiter_map_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/list",       Http_traiter_syn_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/show",       Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/del",        Http_traiter_syn_del, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/get",        Http_traiter_syn_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/set",        Http_traiter_syn_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/clic",       Http_traiter_syn_clic, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/update_motifs", Http_traiter_syn_update_motifs, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/tableau/list",   Http_traiter_tableau_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/tableau/del",    Http_traiter_tableau_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/tableau/set",    Http_traiter_tableau_set, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/tableau/map/list", Http_traiter_tableau_map_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/tableau/map/del",  Http_traiter_tableau_map_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/tableau/map/set",  Http_traiter_tableau_map_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/archive/get",    Http_traiter_archive_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/reload", Http_traiter_process_reload, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/start",  Http_traiter_process_start, NULL, NULL );
@@ -606,9 +579,9 @@ reload:
 /*    soup_server_add_handler ( socket, "/api/config/del",     Http_traiter_config_del, NULL, NULL );*/
     soup_server_add_handler ( socket, "/api/instance/list",  Http_traiter_instance_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/instance/reset", Http_traiter_instance_reset, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/instance/loglevel", Http_traiter_instance_loglevel, NULL, NULL );
     soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/api/log/get",        Http_traiter_log_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/log",            Http_traiter_log, NULL, NULL );
     soup_server_add_handler ( socket, "/api/install",        Http_traiter_install, NULL, NULL );
     soup_server_add_handler ( socket, "/api/bus",            Http_traiter_bus, NULL, NULL );
     soup_server_add_handler ( socket, "/api/ping",           Http_traiter_ping, NULL, NULL );
@@ -659,28 +632,8 @@ reload:
        Http_Envoyer_les_cadrans ();
 
        if ( Recv_zmq ( zmq_motifs, &visu, sizeof(struct DLS_VISUEL) ) == sizeof(struct DLS_VISUEL) && Cfg_http.liste_ws_motifs_clients )
-        { JsonBuilder *builder;
-          gsize taille_buf;
-          gchar *buf;
-          GSList *liste;
-
-          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Visuel %s:%s received",
-                    __func__, visu.tech_id, visu.acronyme );
-          builder = Json_create ();
-          if (builder == NULL)
-           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
-             continue;
-           }
-          Json_add_string ( builder, "msg_type", "update_motif" );
-          Dls_VISUEL_to_json ( builder, &visu );
-          buf = Json_get_buf ( builder, &taille_buf );
-          liste = Cfg_http.liste_ws_motifs_clients;
-          while (liste)
-           { struct WS_CLIENT_SESSION *client = liste->data;
-             soup_websocket_connection_send_text ( client->connexion, buf );
-             liste = g_slist_next(liste);
-           }
-          g_free(buf);
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Visuel %s:%s received", __func__, visu.tech_id, visu.acronyme );
+          Http_Envoyer_un_visuel ( &visu );
         }
 
        JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
@@ -720,9 +673,8 @@ reload:
     g_slist_free ( Cfg_http.liste_http_clients );
     Cfg_http.liste_http_clients = NULL;
 
-    g_slist_foreach ( Cfg_http.liste_ws_motifs_clients, (GFunc) g_free, NULL );
-    g_slist_free ( Cfg_http.liste_ws_motifs_clients );
-    Cfg_http.liste_ws_motifs_clients = NULL;
+    while ( Cfg_http.liste_ws_motifs_clients )
+     { Http_ws_motifs_destroy_session ( (struct WS_CLIENT_SESSION *)(Cfg_http.liste_ws_motifs_clients->data ) ); }
 
     g_slist_foreach ( Cfg_http.liste_ws_msgs_clients, (GFunc) g_free, NULL );
     g_slist_free ( Cfg_http.liste_ws_msgs_clients );

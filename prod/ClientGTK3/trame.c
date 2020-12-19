@@ -108,7 +108,8 @@
 /******************************************************************************************************************************/
  void Trame_del_SVG ( struct TRAME_ITEM_SVG *trame_svg )
   { if (!trame_svg) return;
-    trame_svg->trame->Liste_timer = g_slist_remove ( trame_svg->trame->Liste_timer, trame_svg );/* Désactive la gestion clignotement */
+    if (trame_svg->trame->Liste_timer)                                                   /* Désactive la gestion clignotement */
+     { trame_svg->trame->Liste_timer = g_slist_remove ( trame_svg->trame->Liste_timer, trame_svg ); }
     g_free(trame_svg);
   }
 /******************************************************************************************************************************/
@@ -292,6 +293,7 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
   { guint x, max, base;
     guchar *buffer;
 
+    /*printf("%s: %s:%s => %s\n", __func__, trame_motif->motif->tech_id, trame_motif->motif->acronyme, color );*/
     if (!(trame_motif && trame_motif->motif && trame_motif->image)) return;
     max = trame_motif->gif_largeur*trame_motif->gif_hauteur;
 
@@ -311,6 +313,9 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
     else if (!strcasecmp(color, "kaki"))      { rouge = 100; vert = 100; bleu = 100; }
     else if (!strcasecmp(color, "black"))     { rouge =   0; vert =   0; bleu =   0; }
     else if (!strcasecmp(color, "#000"))      { rouge =   0; vert =   0; bleu =   0; }
+    else if (!strcasecmp(color, "#4A4A4A"))   { rouge = 0x4A; vert = 0x4A; bleu = 0x4A; }
+    else if (!strcasecmp(color, "#4D4D4D"))   { rouge = 0x4D; vert = 0x4D; bleu = 0x4D; }
+    else if (!strcasecmp(color, "#A9A9A9"))   { rouge = 0xA9; vert = 0xA9; bleu = 0xA9; }
     else if (!strcasecmp(color, "#FFFFFF"))   { rouge = 255; vert = 255; bleu = 255; }
     else if (!strcasecmp(color, "#1A1A1A"))   { rouge = 0x1A; vert = 0x1A; bleu = 0x1A; }
     else if (!strcasecmp(color, "#7F7F7F"))   { rouge = 0x7F; vert = 0x7F; bleu = 0x7F; }

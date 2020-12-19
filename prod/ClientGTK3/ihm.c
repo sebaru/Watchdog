@@ -164,7 +164,7 @@
   { struct PAGE_NOTEBOOK *page;
     GSList *liste;
 
-printf("searching page %d %d\n", type, id );
+printf("searching page type %d id %d\n", type, id );
     liste = client->Liste_pages;
     while(liste)
      { page = (struct PAGE_NOTEBOOK *)liste->data;

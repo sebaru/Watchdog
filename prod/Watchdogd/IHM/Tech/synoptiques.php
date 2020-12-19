@@ -15,7 +15,7 @@
 
 <hr>
 
-<div class="table-responsive-lg">
+<div class="table-responsive">
   <table id="idTableSyn" class="table table-striped table-bordered table-hover">
     <thead class="thead-dark">
 				</thead>
@@ -85,24 +85,4 @@
   </div>
 </div>
 
-<div id="idModalSynDel" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content ">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title text-justify"><i class="fas fa-trash"></i> <span id="idModalSynDelTitre"></span></h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <p id="idModalSynDelMessage">Une erreur est survenue !</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
-        <button id="idModalSynDelValider" type="button" class="btn btn-danger" data-dismiss="modal"><i class="fas fa-trash"></i> Valider</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="/js/synoptiques.js" type="text/javascript"></script>
+<script src="/js/tech/synoptiques.js" type="text/javascript"></script>

@@ -47,15 +47,15 @@
                   "render": function (item)
                     { return ( Lien ("/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
                 },
-                { "data": "valeur", "title":"Valeur", "className": "align-middle text-center hidden-xs" },
-                { "data": "unite", "title":"Unité", "className": "align-middle text-center hidden-xs" },
+                { "data": "valeur", "title":"Valeur", "className": "align-middle text-center " },
+                { "data": "unite", "title":"Unité", "className": "align-middle text-center " },
                 { "data": null, "title":"in_range", "className": "align-middle",
                   "render": function (item)
                     { if (item.in_range==true) { return( Bouton ( "outline-success", "Dans les clous !", null, null, "Oui" ) );        }
                                           else { return( Bouton ( "warning", "Pb !", null, null, "Non" ) ); }
                     },
                 },
-                { "data": "last_arch", "title":"last_arch", "className": "align-middle text-center hidden-xs" },
+                { "data": "last_arch", "title":"last_arch", "className": "align-middle text-center " },
               ],
             /*order: [ [0, "desc"] ],*/
             responsive: true,
@@ -111,8 +111,8 @@
                     },
                 },
                 { "data": "valeur",     "title":"Valeur",     "className": "text-center align-middle" },
-                { "data": "multi",      "title":"Multiplicateur", "className": "text-center align-middle hidden-xs" },
-                { "data": "unite",      "title":"Unité", "className": "text-center align-middle hidden-xs" },
+                { "data": "multi",      "title":"Multiplicateur", "className": "text-center align-middle " },
+                { "data": "unite",      "title":"Unité", "className": "text-center align-middle " },
               ],
             /*order: [ [0, "desc"] ],*/
             responsive: true,
@@ -129,8 +129,8 @@
                   "render": function (item)
                     { return ( Lien ("/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
                 },
-                { "data": "valeur",     "title":"Valeur",   "className": "align-middle hidden-xs" },
-                { "data": "unite",      "title":"Unité",    "className": "align-middle hidden-xs" },
+                { "data": "valeur",     "title":"Valeur",   "className": "align-middle " },
+                { "data": "unite",      "title":"Unité",    "className": "align-middle " },
               ],
             /*order: [ [0, "desc"] ],*/
             responsive: true,
@@ -150,13 +150,13 @@
                                       else { return( Bouton ( "outline-secondary", "La tempo ne compte pas", null, null, "Stoppée" ) ); }
                     },
                 },
-                { "data": "status",     "title":"Status",   "className": "align-middle hidden-xs text-center" },
-                { "data": "daa",        "title":"daa",      "className": "align-middle hidden-xs text-center" },
-                { "data": "dma",        "title":"dma",      "className": "align-middle hidden-xs text-center" },
-                { "data": "dMa",        "title":"dMa",      "className": "align-middle hidden-xs text-center" },
-                { "data": "dad",        "title":"dad",      "className": "align-middle hidden-xs text-center" },
-                { "data": "date_on",    "title":"date_on",  "className": "align-middle hidden-xs text-center" },
-                { "data": "date_off",   "title":"date_off", "className": "align-middle hidden-xs text-center" },
+                { "data": "status",     "title":"Status",   "className": "align-middle  text-center" },
+                { "data": "daa",        "title":"daa",      "className": "align-middle  text-center" },
+                { "data": "dma",        "title":"dma",      "className": "align-middle  text-center" },
+                { "data": "dMa",        "title":"dMa",      "className": "align-middle  text-center" },
+                { "data": "dad",        "title":"dad",      "className": "align-middle  text-center" },
+                { "data": "date_on",    "title":"date_on",  "className": "align-middle  text-center" },
+                { "data": "date_off",   "title":"date_off", "className": "align-middle  text-center" },
               ],
             responsive: true,
           }

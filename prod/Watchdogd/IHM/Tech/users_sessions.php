@@ -12,7 +12,7 @@
 
 <hr>
 
-<div class="table-responsive-lg">
+<div class="table-responsive">
   <table id="idTableUsersSessions" class="table table-striped table-bordered table-hover">
     <thead class="thead-dark">
 				</thead>

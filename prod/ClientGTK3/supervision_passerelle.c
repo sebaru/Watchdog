@@ -32,19 +32,6 @@
  #include "protocli.h"
 
 /******************************************************************************************************************************/
-/* Changer_vue_directe: Demande au serveur une nouvelle vue                                                                   */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Changer_vue_directe ( struct CLIENT *client, guint num_syn )
-  { if (Chercher_page_notebook( client, TYPE_PAGE_SUPERVISION, num_syn, TRUE )) return;
-
-    JsonBuilder *builder = Json_create ();
-    if (builder == NULL) return;
-    Json_add_int ( builder, "syn_id", num_syn );
-    Envoi_json_au_serveur( client, "PUT", builder, "/api/syn/show", Creer_page_supervision_CB );
-  }
-/******************************************************************************************************************************/
 /* Changer_vue: Demande au serveur une nouvelle vue                                                                           */
 /* Entrée: une reference sur le message                                                                                       */
 /* Sortie: Néant                                                                                                              */
@@ -55,7 +42,7 @@
            event->type == GDK_BUTTON_PRESS)
        ) return(FALSE);
 
-    Changer_vue_directe ( trame_pass->page->client, trame_pass->pass->syn_cible_id );
+    Demander_synoptique_supervision ( trame_pass->page->client, trame_pass->pass->syn_cible_id );
     return(TRUE);
   }
 /*--------------------------------------------------------------------------------------------------------*/

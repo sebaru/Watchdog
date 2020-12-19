@@ -104,6 +104,8 @@
             g_snprintf( libelle, sizeof(libelle), "unknown" );
             break;
       }
+    printf("%s: update cadran %s:%s to %s\n", __func__,
+           trame_cadran->cadran->tech_id, trame_cadran->cadran->acronyme, libelle );
     g_object_set( trame_cadran->item_entry, "text", libelle, NULL );
   }
 /******************************************************************************************************************************/
@@ -111,8 +113,9 @@
 /* Entrée: une reference sur le cadran                                                                                        */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- void Updater_les_cadrans( struct TYPE_INFO_SUPERVISION *infos, JsonNode *cadran )
-  { GList *liste_cadrans;
+ void Updater_les_cadrans( struct PAGE_NOTEBOOK *page, JsonNode *cadran )
+  { struct TYPE_INFO_SUPERVISION *infos = page->infos;
+    GList *liste_cadrans;
     gint cpt;
 
     liste_cadrans = infos->Trame->trame_items;                                     /* On parcours tous les cadrans de la page */
@@ -124,9 +127,7 @@
              if ( (!strcmp( Json_get_string(cadran,"tech_id"), trame_cadran->cadran->tech_id) &&
                    !strcmp( Json_get_string(cadran,"acronyme"), trame_cadran->cadran->acronyme))
                 )
-              { Updater_un_cadran ( trame_cadran, cadran );
-                printf("%s: change cadran type %s:%s\n", __func__, trame_cadran->cadran->tech_id, trame_cadran->cadran->acronyme );
-              }
+              { Updater_un_cadran ( trame_cadran, cadran ); }
              break;
            }
           default: break;

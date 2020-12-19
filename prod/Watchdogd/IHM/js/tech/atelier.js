@@ -1,13 +1,5 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
-/********************************************* Appeler quand l'utilisateur selectionne un motif *******************************/
- function Clic_sur_motif ( svg, event )
-  { console.log(" Clic sur motif " + svg.motif.libelle + " icone_id = " + svg.motif.icone +
-                "target techid/acro: " + svg.motif.clic_tech_id + ":" + svg.motif.clic_acronyme);
-    var json_request = JSON.stringify( { tech_id: svg.motif.clic_tech_id, acronyme: svg.motif.clic_acronyme } );
-    Send_to_API ( 'POST', "/api/syn/clic", json_request, null, null );
-  }
-
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { console.log ("in load page !");
@@ -22,7 +14,6 @@
                                             ws_msg_type: "get_synoptique",
                                             syn_id : target }
                                         );
-       console.log("WSOpen" + json_request );
        this.send ( json_request );
      }
     WTDWebSocket.onerror = function (event)
@@ -38,8 +29,9 @@
        if (Response.ws_msg_type == "update_visuel")
         { Visuel_Set_State ( Response.tech_id, Response.acronyme, Response.mode, Response.color, Response.cligno ); }
        else if (Response.ws_msg_type == "init_syn")
-        { Init_syn ( false, Response ); }
+        { Init_syn ( true, Response ); }
        else console.log("ws_msg_type: " + Response.ws_msg_type + " not known");
      }
   }
-
+  
+/*----------------------------------------------------------------------------------------------------------------------------*/

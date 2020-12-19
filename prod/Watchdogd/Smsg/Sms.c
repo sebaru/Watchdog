@@ -221,7 +221,7 @@
 
     GSM_InitLocales(NULL);
    	memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
-    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "sms_libelle") );
+    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
 	  	EncodeUnicode( sms.Text, libelle, strlen(libelle));                                                /* Encode message text */
     EncodeUnicode( sms.Number, telephone, strlen(telephone));
 
@@ -336,7 +336,7 @@ end:
     json_builder_add_string_value( builder, telephone );
     Json_end_array ( builder );
     gchar libelle[128];
-    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "sms_libelle") );
+    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
     Json_add_string( builder, "message", libelle );
     gchar *body = Json_get_buf( builder, &taille_buf );
 
@@ -453,7 +453,7 @@ end:
 /******************************************************************************************************************************/
  static void Envoyer_smsg_ovh_text ( gchar *texte )
   { JsonBuilder *builder = Json_create();
-    Json_add_string ( builder, "sms_libelle", texte );
+    Json_add_string ( builder, "libelle", texte );
     Json_add_string ( builder, "dls_shortname", Cfg_smsg.tech_id );
     Json_add_int    ( builder, "sms_notification", MESSAGE_SMS_OVH_ONLY );
     JsonNode *msg = Json_end ( builder );
@@ -467,7 +467,7 @@ end:
 /******************************************************************************************************************************/
  static void Envoyer_smsg_gsm_text ( gchar *texte )
   { JsonBuilder *builder = Json_create();
-    Json_add_string ( builder, "sms_libelle", texte );
+    Json_add_string ( builder, "libelle", texte );
     Json_add_string ( builder, "dls_shortname", Cfg_smsg.tech_id );
     Json_add_int    ( builder, "sms_notification", MESSAGE_SMS_GSM_ONLY );
     JsonNode *msg = Json_end ( builder );
@@ -697,7 +697,7 @@ reload:
                Json_get_int  ( request, "sms_notification" ) != MESSAGE_SMS_NONE )
            { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s : Sending msg '%s:%s' (%s)", __func__,
                        Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
-                       Json_get_string ( request, "sms_libelle" ) );
+                       Json_get_string ( request, "libelle" ) );
 
 /*************************************************** Envoi en mode GSM ********************************************************/
              Smsg_send_to_all_authorized_recipients( request );

@@ -100,4 +100,53 @@
     json_node_unref(request);
     soup_message_set_status ( msg, SOUP_STATUS_OK );
   }
+/******************************************************************************************************************************/
+/* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Http_traiter_instance_loglevel ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                       SoupClientContext *client, gpointer user_data)
+  { if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
+
+    if ( Config.instance_is_master && Json_has_member ( request, "instance" ) &&
+         strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
+         strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
+     { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
+       json_node_unref(request);
+       return;
+     }
+
+    if ( ! Json_has_member ( request, "log_level" ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    gchar *log_level = Json_get_string ( request, "log_level" );
+    gint log_target = -1;
+         if ( ! g_ascii_strcasecmp ( log_level, "LOG_DEBUG"   ) ) log_target = LOG_DEBUG;
+    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_NOTICE"  ) ) log_target = LOG_NOTICE;
+    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_INFO"    ) ) log_target = LOG_INFO;
+    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_WARNING" ) ) log_target = LOG_WARNING;
+    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_ERROR"   ) ) log_target = LOG_ERR;
+	   else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais niveau de log");
+
+    if (log_target>=0)
+     { Info_change_log_level ( Config.log, log_target );
+       Modifier_configDB_int ( "msrv", "log_level", log_target );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogLevel set to '%s'", __func__, log_level );
+     }
+
+    json_node_unref(request);
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

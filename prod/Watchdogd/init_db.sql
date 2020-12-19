@@ -132,10 +132,10 @@ INSERT INTO `dls` (`id`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `com
 --
 
 CREATE TABLE IF NOT EXISTS `tableau` (
- `id` INT NOT NULL AUTO_INCREMENT ,
- `titre` VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
- `access_level` int(11) NOT NULL ,
- `date_create` DATETIME NOT NULL ,
+ `id` INT NOT NULL AUTO_INCREMENT,
+ `titre` VARCHAR(128) UNIQUE NOT NULL,
+ `access_level` int(11) NOT NULL DEFAULT 0 ,
+ `date_create` DATETIME NOT NULL DEFAULT NOW(),
  PRIMARY KEY (`id`)) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -144,12 +144,12 @@ CREATE TABLE IF NOT EXISTS `tableau` (
 -- Structure de la table `courbes`
 --
 
-CREATE TABLE IF NOT EXISTS `courbes` (
+CREATE TABLE IF NOT EXISTS `tableau_map` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `tableau_id` INT NOT NULL ,
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
-  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
-  `color` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `tech_id` varchar(32) NOT NULL,
+  `acronyme` VARCHAR(64) NOT NULL,
+  `color` varchar(32) NOT NULL DEFAULT "blue",
   PRIMARY KEY (`id`),
   INDEX (`tableau_id`),
   FOREIGN KEY (`tableau_id`) REFERENCES `tableau` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -583,7 +583,6 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No libelle",
   `typologie` int(11) NOT NULL DEFAULT '0',
   `sms_notification` int(11) NOT NULL DEFAULT '0',
-  `sms_libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `audio_profil` VARCHAR(80) NOT NULL DEFAULT 'P_NONE',
   `audio_libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `etat` tinyint(1) NOT NULL DEFAULT '0',

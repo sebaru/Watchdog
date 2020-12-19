@@ -73,6 +73,7 @@
  struct TYPE_INFO_SUPERVISION
   { SoupWebsocketConnection *ws_motifs;
     guint timer_id;                                    /* Id du timer pour l'animation des motifs sur la trame de supervision */
+    guint syn_id;                                                                /* Numéro du synoptique associé a cette page */
     gboolean timer_hidden;                                            /* Pour savoir si les motifs doivent etre allumé ou non */
     JsonNode *syn;                                                                       /* Id du synoptique en cours de visu */
     GtkWidget *Dialog_horloge;                                                  /* Boite de dialogue d'affichage des horloges */
@@ -178,6 +179,8 @@
  extern void Connecter ( struct CLIENT *Client );                                                           /* Dans connect.c */
  extern void Deconnecter ( struct CLIENT *Client );
  extern void Envoi_json_au_serveur ( struct CLIENT *client, gchar *methode, JsonBuilder *builder, gchar *URI, SoupSessionCallback callback );
+ extern void Envoi_ws_au_serveur ( struct CLIENT *client, SoupWebsocketConnection *ws, JsonBuilder *builder );
+
 #ifdef bouh
  extern gboolean Connecter_ssl ( void );
  extern gboolean Connecter_au_serveur ( void );
@@ -371,7 +374,6 @@
                                                                                                         /* Dans supervision.c */
  extern void Menu_want_supervision_accueil( struct CLIENT *client );
  extern void Demander_synoptique_supervision ( struct CLIENT *client, gint id );
- extern void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data);
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
  extern void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                           GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
@@ -400,7 +402,6 @@
 
 #endif
                                                                                              /* Dans supervision_passerelle.c */
- extern void Changer_vue_directe ( struct CLIENT *client, guint num_syn );
  extern gboolean Supervision_clic_passerelle (GooCanvasItem *canvasitem, GooCanvasItem *target,
                                               GdkEvent *event, struct TRAME_ITEM_PASS *trame_pass );
 #ifdef bouh
@@ -409,7 +410,7 @@
 
 #endif
                                                                                                  /* Dans supervision_cadran.c */
- extern void Updater_les_cadrans( struct TYPE_INFO_SUPERVISION *infos, JsonNode *cadran );
+ extern void Updater_les_cadrans( struct PAGE_NOTEBOOK *page, JsonNode *cadran );
  extern void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                            GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran );
 #ifdef bouh
