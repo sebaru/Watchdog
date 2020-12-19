@@ -35,7 +35,7 @@
        { id: map_id
        }
      );
-    Send_to_API ( "DELETE", "/api/tableau/map//del", json_request, function (Response)
+    Send_to_API ( "DELETE", "/api/tableau/map/del", json_request, function (Response)
      { $('#idTableTableauMap').DataTable().ajax.reload(null, false);
      }, null );
   }
@@ -93,16 +93,15 @@
                 }
             },
             { "data": "libelle", "title":"Libellé", "className": "align-middle text-center " },
-/*            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
+            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "primary", "Voir le tableau", "Redirect", "/home/tableau?id="+item.id, "chart-line", null );
-                  boutons += Bouton_actions_add ( "primary", "Editer les courbes", "Redirect", "/tech/tableau_map/"+item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer ce tableau", "Tableau_Map_Delete", item.id, "trash", null );
+                  boutons += Bouton_actions_add ( "primary", "Voir la courbe", "Redirect", "/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR", "chart-line", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer cette courbe", "Tableau_Map_Delete", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },
-            }*/
+            }
           ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,

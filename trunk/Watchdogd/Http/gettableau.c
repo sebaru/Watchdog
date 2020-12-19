@@ -225,8 +225,8 @@
     gint tableau_id = Json_get_int ( request, "id" );
     json_node_unref(request);
 
-    g_snprintf( chaine, sizeof(chaine), "DELETE FROM tableau_map AS tm INNER JOIN tableau AS t ON t.id=tm.tableau_id "
-                                        "WHERE id=%d AND t.access_level<='%d'", tableau_id, session->access_level );
+    g_snprintf( chaine, sizeof(chaine), "DELETE tm FROM tableau_map AS tm INNER JOIN tableau AS t ON t.id=tm.tableau_id "
+                                        "WHERE tm.id=%d AND t.access_level<='%d'", tableau_id, session->access_level );
     if (SQL_Write (chaine)==FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
        return;
