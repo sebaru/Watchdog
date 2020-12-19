@@ -105,14 +105,16 @@
  function Select_Access_level ( id, fonction, selected )
   { retour = "<select id='"+id+"' class='custom-select'"+
              "onchange="+fonction+">";
-    for ( i=0; i<localStorage.getItem("access_level"); i++ )
+    for ( i=0; i<=localStorage.getItem("access_level"); i++ )
      { retour += "<option value='"+i+"' "+(selected==i ? "selected" : "")+">"+i+"</option>"; }
     retour +="</select>";
     return(retour);
   }
 /****************************************** Escape les " et ' *****************************************************************/
  function htmlEncode ( string )
-  { return ( string.replace(/'/g,'&#39').replace(/"/g,'&#34') ); }
+  { if (string===null) return("null");
+    return ( string.replace(/'/g,'&#39').replace(/"/g,'&#34') );
+  }
 /****************************************** Are you sure **********************************************************************/
  function Show_modal_del ( titre, message, fonction )
   { $('#idModalDelTitre').text ( htmlEncode(titre) );

@@ -188,7 +188,7 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION * session, gint min_access_level )
+ gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION *session, gint min_access_level )
   { if (!session)
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Not Connected");
        return(FALSE);
@@ -196,8 +196,21 @@
 
     time(&session->last_request);
     if (session->access_level>=min_access_level) return(TRUE);
-    soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Level forbidden");
+    soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Session Level forbidden");
     return(FALSE);
+  }
+/******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ JsonNode *Http_Msg_to_Json ( SoupMessage *msg )
+  { GBytes *request_brute;
+    gsize taille;
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request) { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Not a JSON request"); }
+    return(request);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
@@ -552,6 +565,9 @@ reload:
     soup_server_add_handler ( socket, "/api/tableau/list",   Http_traiter_tableau_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/tableau/del",    Http_traiter_tableau_del, NULL, NULL );
     soup_server_add_handler ( socket, "/api/tableau/set",    Http_traiter_tableau_set, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/tableau/map/list", Http_traiter_tableau_map_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/tableau/map/del",  Http_traiter_tableau_map_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/tableau/map/set",  Http_traiter_tableau_map_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/archive/get",    Http_traiter_archive_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/reload", Http_traiter_process_reload, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/start",  Http_traiter_process_start, NULL, NULL );

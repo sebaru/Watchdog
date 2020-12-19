@@ -55,16 +55,13 @@
                },
          rowId: "id",
          columns:
-          [ { "data": "id", "title":"#", "className": "text-center hidden-xs" },
-            { "data": null, "title":"Level", "className": "align-middle hidden-xs text-center",
+          [ { "data": null, "title":"Level", "className": "align-middle ",
               "render": function (item)
-                { return( Select_Access_level ( "idTableauLevel_"+item.id,
-                                                "Tableau_Set('"+item.id+"')",
-                                                item.access_level )
+                { return( Select_Access_level ( "idTableauLevel_"+item.id, "Tableau_Set('"+item.id+"')", item.access_level )
                         );
                 }
             },
-            { "data": null, "title":"Titre", "className": "align-middle hidden-xs",
+            { "data": null, "title":"Titre", "className": "align-middle",
               "render": function (item)
                 { return( Input ( "text", "idTableauTitre_"+item.id,
                                   "Tableau_Set('"+item.id+"')",
@@ -85,7 +82,7 @@
             }
           ],
          /*order: [ [0, "desc"] ],*/
-         /*responsive: true,*/
+         responsive: true,
        }
      );
   }

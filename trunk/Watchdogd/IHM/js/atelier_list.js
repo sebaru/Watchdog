@@ -88,7 +88,7 @@ test = 0;    vars = window.location.pathname.split('/');
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          rowId: "id",
-         columns: [ { "data": "id", "title":"#", "className": "text-center hidden-xs" },
+         columns: [ { "data": "id", "title":"#", "className": "text-center " },
                     { "data": null, "title":"Visuel", "className": "text-center",
                       "render": function (item, type, row, meta)
                         { console.log("Datatable test="+test+" id="+item.id);

@@ -165,8 +165,8 @@
                },
          rowId: "id",
          columns:
-          [ { "data": "username",   "title":"Username",   "className": "align-middle text-center" },
-            { "data": null, "title":"Enable", "className": "align-middle hidden-xs text-center",
+          [ { "data": "username",   "title":"Username", "className": "align-middle text-center" },
+            { "data": null, "title":"Enable", "className": "align-middle  text-center",
               "render": function (item)
                 { if (item.enable==true)
                    { return( Bouton ( "success", "Désactiver cet utilisateur",
@@ -178,7 +178,7 @@
                    }
                 }
             },
-            { "data": null, "title":"Level", "className": "align-middle hidden-xs text-center",
+            { "data": null, "title":"Level", "className": "align-middle  text-center",
               "render": function (item)
                 { return( Select_Access_level ( "idUserLevel_"+item.username,
                                                 "User_set('"+item.username+"')",
@@ -186,7 +186,7 @@
                         );
                 }
             },
-            { "data": null, "title":"Notification/Cde", "className": "align-middle hidden-xs text-center",
+            { "data": null, "title":"Notification/Cde", "className": "align-middle  text-center",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
                   if (item.notification==true)
@@ -209,7 +209,7 @@
                   return(boutons);
                 }
             },
-            { "data": null, "title":"Adresse Mail", "className": "align-middle hidden-xs",
+            { "data": null, "title":"Adresse Mail", "className": "align-middle ",
               "render": function (item)
                 { return( Input ( "email", "idUserMail_"+item.username,
                                   "User_set('"+item.username+"')",
@@ -218,7 +218,7 @@
                         );
                 }
             },
-            { "data": null, "title":"Messagerie Instantanée", "className": "align-middle hidden-xs",
+            { "data": null, "title":"Messagerie Instantanée", "className": "align-middle ",
               "render": function (item)
                 { return( Input ( "email", "idUserXmpp_"+item.username,
                                   "User_set('"+item.username+"')",
@@ -227,7 +227,7 @@
                         );
                 }
             },
-            { "data": null, "title":"Téléphone", "className": "align-middle hidden-xs",
+            { "data": null, "title":"Téléphone", "className": "align-middle ",
               "render": function (item)
                 { return( Input ( "tel", "idUserPhone_"+item.username,
                                   "User_set('"+item.username+"')",
@@ -236,7 +236,7 @@
                         );
                 }
             },
-            { "data": null, "title":"Commentaire", "className": "align-middle hidden-xs",
+            { "data": null, "title":"Commentaire", "className": "align-middle ",
               "render": function (item)
                 { return( Input ( "text", "idUserComment_"+item.username,
                                   "User_set('"+item.username+"')",

@@ -33,7 +33,7 @@
  #include "Http.h"
  extern struct HTTP_CONFIG Cfg_http;
 /******************************************************************************************************************************/
-/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableauoptique                                                    */
+/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableau                                                   */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
@@ -68,15 +68,13 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableauoptique                                                    */
+/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableau                                                   */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Http_traiter_tableau_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
   { gchar chaine[256];
-    GBytes *request_brute;
-    gsize taille;
 
     if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -85,14 +83,8 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "id" ) ) )
      { json_node_unref(request);
@@ -121,9 +113,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_tableau_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gchar requete[256];
-    gsize taille;
+  { gchar requete[256];
 
     if ( msg->method != SOUP_METHOD_POST )
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -132,9 +122,8 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "titre" ) && Json_has_member ( request, "access_level" ) ) )
      { json_node_unref(request);
@@ -142,13 +131,12 @@
        return;
      }
 
-    gchar *titre       = Normaliser_chaine ( Json_get_string( request, "titre" ) );
-    gint  access_level = Json_get_int ( request, "access_level" );
-    if (access_level>session->access_level) access_level = session->access_level;
+    gint access_level = Json_get_int ( request, "access_level" );
+    gchar *titre      = Normaliser_chaine ( Json_get_string( request, "titre" ) );
 
     if ( Json_has_member ( request, "id" ) )                                                                       /* Edition */
      { g_snprintf( requete, sizeof(requete),
-                  "UPDATE tableau SET titre='%s', access_level='%d' WHERE id='%d' AND access_level<'%d'",
+                  "UPDATE tableau SET titre='%s', access_level='%d' WHERE id='%d' AND access_level<='%d'",
                    titre, access_level, Json_get_int(request,"id"), session->access_level );
        Audit_log ( session, "tableau '%s'(%d) created", titre, Json_get_int(request,"id") );
      }
@@ -156,13 +144,153 @@
      {
        g_snprintf( requete, sizeof(requete),
                   "INSERT INTO tableau SET titre='%s', access_level='%d'",
-                   titre, access_level );
+                   titre, session->access_level );
        Audit_log ( session, "tableau '%s' created", titre );
      }
     if (SQL_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
 
     g_free(titre);
+    json_node_unref(request);
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableauoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_tableau_map_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                   SoupClientContext *client, gpointer user_data )
+  { gchar *buf, chaine[256];
+    gsize taille_buf;
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+
+    gchar *tableau_id_string = g_hash_table_lookup ( query, "tableau_id" );
+    if (!tableau_id_string)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres tableau_id");
+       return;
+     }
+    gint tableau_id = atoi(tableau_id_string);
+
+    JsonBuilder *builder = Json_create ();
+    if (!builder)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT tm.*,dico.libelle FROM tableau_map AS tm INNER JOIN tableau AS t ON t.id=tm.tableau_id "
+                                       "LEFT JOIN dictionnaire AS dico ON tm.tech_id=dico.tech_id AND tm.acronyme=dico.acronyme "
+                                       "WHERE t.access_level<=%d AND t.id='%d'", session->access_level, tableau_id );
+    if (SQL_Select_to_JSON ( builder, "tableau_map", chaine ) == FALSE)
+     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
+       g_object_unref(builder);
+       return;
+     }
+
+    buf = Json_get_buf (builder, &taille_buf);
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableauoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_tableau_map_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                     SoupClientContext *client, gpointer user_data )
+  { gchar chaine[256];
+
+    if (msg->method != SOUP_METHOD_DELETE)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
+
+    if ( ! (Json_has_member ( request, "id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    gint tableau_id = Json_get_int ( request, "id" );
+    json_node_unref(request);
+
+    g_snprintf( chaine, sizeof(chaine), "DELETE FROM tableau_map AS tm INNER JOIN tableau AS t ON t.id=tm.tableau_id "
+                                        "WHERE id=%d AND t.access_level<='%d'", tableau_id, session->access_level );
+    if (SQL_Write (chaine)==FALSE)
+     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
+       return;
+     }
+
+/*************************************************** Envoi au client **********************************************************/
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    Audit_log ( session, "tableau '%d' deleted", tableau_id );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableauoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_tableau_map_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                     SoupClientContext *client, gpointer user_data )
+  { gchar requete[256];
+
+    if ( msg->method != SOUP_METHOD_POST )
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
+
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+            Json_has_member ( request, "color") ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    gchar *tech_id  = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *acronyme = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
+    gchar *color    = Normaliser_chaine ( Json_get_string( request, "color" ) );
+
+    if ( Json_has_member ( request, "id" ) )                                                                       /* Edition */
+     { gint id = Json_get_int(request,"id");
+       g_snprintf( requete, sizeof(requete),
+                  "UPDATE tableau_map AS tm INNER JOIN tableau AS t ON t.id=tm.tableau_id "
+                  " SET tech_id='%s', acronyme='%s', color='%s' WHERE tm.id='%d' AND t.access_level<='%d'",
+                   tech_id, acronyme, color, id, session->access_level );
+       Audit_log ( session, "tableau_map '%d' changed to '%s:%s", id, tech_id, acronyme );
+       if (SQL_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Update Error" );
+     }
+    else if ( Json_has_member ( request, "tableau_id" ) )
+     { gint tableau_id = Json_get_int ( request, "tableau_id" );
+       g_snprintf( requete, sizeof(requete),
+                  "INSERT INTO tableau_map "
+                  " SET tableau_id='%d', tech_id='%s', acronyme='%s', color='%s' ",
+                   tableau_id, tech_id, acronyme, color );
+       Audit_log ( session, "tableau_map: '%s:%s added to tableau '%d'", tech_id, acronyme, tableau_id );
+       if (SQL_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Insert Error" );
+     }
+    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Request Error" );
+
+    g_free(tech_id);
+    g_free(acronyme);
+    g_free(color);
     json_node_unref(request);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

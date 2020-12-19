@@ -10,7 +10,7 @@
 
 <hr>
 
-<div class="table-responsive-lg">
+<div>
   <table id="idTableTableau" class="table table-striped table-bordered table-hover">
     <thead class="thead-dark">
 				</thead>

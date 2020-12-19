@@ -654,7 +654,7 @@
 /******************************************************************************************************************************/
  static void Http_Dls_compil (void *user_data, struct PLUGIN_DLS *plugin)
   { struct HTTP_CLIENT_SESSION *session = user_data;
-    Compiler_source_dls( FALSE, plugin->plugindb.tech_id, NULL, 0 );
+    Compiler_source_dls( TRUE, plugin->plugindb.tech_id, NULL, 0 );
     Audit_log ( session, "DLS '%s' compilé", plugin->plugindb.tech_id );
   }
 /******************************************************************************************************************************/

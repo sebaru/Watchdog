@@ -90,9 +90,9 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "ppage", "title":"PPage", "className": "align-middle hidden-xs text-center" },
-            { "data": "page", "title":"Page", "className": "align-middle hidden-xs text-center" },
-            { "data": null, "title":"Started", "className": "align-middle hidden-xs text-center",
+          [ { "data": "ppage", "title":"PPage", "className": "align-middle  text-center" },
+            { "data": "page", "title":"Page", "className": "align-middle  text-center" },
+            { "data": null, "title":"Started", "className": "align-middle  text-center",
               "render": function (item)
                 { if (item.actif==true)
                    { return( Bouton ( "success", "Désactiver le plugin",
@@ -116,18 +116,18 @@
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) );
                 }
             },
-            { "data": "package", "title":"Package", "className": "align-middle hidden-xs" },
+            { "data": "package", "title":"Package", "className": "align-middle " },
             { "data": null, "title":"Nom court", "className": "align-middle",
               "render": function (item)
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.shortname ) );
                 }
             },
-            { "data": null, "title":"Libellé", "className": "align-middle hidden-xs",
+            { "data": null, "title":"Libellé", "className": "align-middle ",
               "render": function (item)
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.name ) );
                 }
             },
-            { "data": null, "title":"Compil", "className": "align-middle hidden-xs",
+            { "data": null, "title":"Compil", "className": "align-middle ",
               "render": function (item)
                 { return( Bouton ( compil_status[item.compil_status][1],
                                   "Statut de la compilation", null, null,
@@ -136,8 +136,8 @@
                         );
                 }
             },
-            { "data": "nbr_compil", "title":"Nbr Compil", "className": "align-middle text-center hidden-xs" },
-            { "data": "nbr_ligne", "title":"Nbr Lignes", "className": "align-middle text-center hidden-xs" },
+            { "data": "nbr_compil", "title":"Nbr Compil", "className": "align-middle text-center " },
+            { "data": "nbr_ligne", "title":"Nbr Lignes", "className": "align-middle text-center " },
             { "data": null, "title":"Actions", "orderable": false, "className": "align-middle",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
@@ -152,7 +152,7 @@
             }
           ],
          /*order: [ [0, "desc"] ],*/
-         /*responsive: true,*/
+         responsive: true,
        }
      );
 

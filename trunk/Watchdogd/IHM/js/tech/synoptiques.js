@@ -108,21 +108,21 @@
                },
          rowId: "id",
          columns:
-          [ { "data": "id", "title":"#", "className": "text-center hidden-xs" },
-            { "data": null, "className": "text-center align-middle hidden-xs",
+          [ { "data": "id", "title":"#", "className": "text-center " },
+            { "data": null, "className": "text-center align-middle ",
               "render": function (item)
                 { return( Badge ( (item.access_level>=6 ? "warning" : "info"), "Niveau de privilèges", item.access_level ) );
                 },
               "title":"Level", "orderable": true
             },
-            { "data": "ppage", "title": "Parent", "name": "ppage", "className": "hidden-xs" },
-            { "data": null, "className": "align-middle hidden-xs",
+            { "data": "ppage", "title": "Parent", "name": "ppage", "className": "" },
+            { "data": null, "className": "align-middle ",
               "render": function (item)
                 { return( Lien ( "/tech/atelier/"+item.id, "Ouvrir Atelier", item.page ) );
                 },
               "title":"Page", "orderable": true
             },
-            { "data": null, "className": "align-middle hidden-xs",
+            { "data": null, "className": "align-middle ",
               "render": function (item)
                 { return( Lien ( "/tech/atelier/"+item.id, "Ouvrir Atelier", item.libelle ) );
                 },

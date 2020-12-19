@@ -11,15 +11,13 @@
 
 <hr>
 
-<div class="table-responsive-lg">
+
   <table id="idTableTableau" class="table table-striped table-bordered table-hover">
     <thead class="thead-dark">
 				</thead>
 			 <tbody>
     </tbody>
   </table>
-</div>
-
 
 <!-- Container -->
 </div>

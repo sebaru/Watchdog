@@ -35,7 +35,7 @@
 <div class="tab-content">
 
 <!----------------------------------------------------------------------------------------------------------------------------->
-<div id="idTabEntreeTor" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+<div id="idTabEntreeTor" class="tab-pane fade in table-responsive mt-1" role="tabpanel">
 
  <div class="row m-2">
    <div class ="ml-auto btn-group">
@@ -51,7 +51,7 @@
 </div>
 
 <!----------------------------------------------------------------------------------------------------------------------------->
-<div id="idTabSortieTor" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+<div id="idTabSortieTor" class="tab-pane fade in table-responsive mt-1" role="tabpanel">
 
  <div class="row m-2">
    <div class ="ml-auto btn-group">
@@ -67,7 +67,7 @@
     </table>
 </div>
 <!----------------------------------------------------------------------------------------------------------------------------->
-<div id="idTabEntreeAna" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+<div id="idTabEntreeAna" class="tab-pane fade in table-responsive mt-1" role="tabpanel">
 
  <div class="row m-2">
    <div class ="ml-auto btn-group">
@@ -83,7 +83,7 @@
     </table>
 </div>
 <!----------------------------------------------------------------------------------------------------------------------------->
-<div id="idTabSortieAna" class="tab-pane fade in table-responsive-lg mt-1" role="tabpanel">
+<div id="idTabSortieAna" class="tab-pane fade in table-responsive mt-1" role="tabpanel">
  <div class="row m-2">
    <div class ="ml-auto btn-group">
         <button type="button" onclick="Show_Modal_Map_Edit_AO('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping AI</button>
