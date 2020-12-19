@@ -3,11 +3,16 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { vars = window.location.pathname.split('/');
-    console.debug(vars);
-    var json_request = JSON.stringify( { id : vars[3] } );
-    Send_to_API ( "PUT", "/api/tableau/map/get", json_request, function(Response)
-     { console.debug(Response);
+    Send_to_API ( "GET", "/api/tableau/list", null, function(Response)
+     { tableau = Response.tableaux.filter( function(item) { return item.id==vars[3] } )[0];
+       $('#idTableauTitle').text(tableau.titre);
      }, null );
+
+
+    Send_to_API ( "GET", "/api/tableau/map/list", "tableau_id="+vars[3], function(Response)
+     { Charger_plusieurs_courbes ( "idChart", Response.tableau_map, vars[4] );
+     }, null );
+
 /* Charger les tableaux */
 
 /*    $('#idTableTableau').DataTable(

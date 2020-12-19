@@ -4,7 +4,9 @@
  function Send_to_API ( method, URL, parametre, fonction_ok, fonction_nok )
   { var xhr = new XMLHttpRequest;
     $(".ClassLoadingSpinner").show();
-    xhr.open(method, URL, true);
+    if ( method == "GET" && parametre !== null )
+     { xhr.open(method, URL+"?"+parametre, true); }
+    else xhr.open(method, URL, true);
     if (method=="POST") { xhr.setRequestHeader('Content-type', 'application/json'); }
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
@@ -152,7 +154,7 @@ console.debug(json.courbe1.libelle);
                                   tension: "0.1",
                                   radius: "1",
                                   data: valeurs,
-                                   yAxisID: "B",
+                                  yAxisID: "B",
                                 },
                               ],
                   }
@@ -172,3 +174,50 @@ console.debug(json.courbe1.libelle);
     else setInterval( function() { window.location.reload(); }, 600000);
 	 }
 
+/********************************* Chargement d'une courbe dans u synoptique 1 au démrrage ************************************/
+ function Charger_plusieurs_courbes ( idChart, tableau_map, period )
+  { if (localStorage.getItem("instance_is_master")!="true") return;
+
+    if (period===undefined) period="HOUR";
+    var json_request = JSON.stringify(
+     { courbes: tableau_map.map( function (item)
+                                  { return( { tech_id: item.tech_id, acronyme: item.acronyme } ) } ),
+       period : period
+     });
+
+    Send_to_API ( "PUT", "/api/archive/get", json_request, function(Response)
+     { var dates;
+       if (period=="HOUR") dates = Response.valeurs.map( function(item) { return item.date.split(' ')[1]; } );
+                      else dates = Response.valeurs.map( function(item) { return item.date; } );
+       var data = { labels: dates,
+                    datasets: [],
+                  }
+       for (i=0; i<tableau_map.length; i++)
+        { data.datasets.push ( { label: tableau_map[i].libelle+ " ("+tableau_map[i].unite+")",
+                                 borderColor: tableau_map[i].color,
+                                 backgroundColor: "rgba(100, 100, 100, 0.0)",
+                                 /*backgroundColor: "rgba(100, 100, 100, 0.1)",*/
+                                 borderWidth: "1",
+                                 tension: "0.1",
+                                 radius: "1",
+                                 data: Response.valeurs.map( function(item) { return(item["moyenne"+(i+1)]); } ),
+                                 yAxisID: "B",
+                               });
+        }
+console.debug(data);
+       var options = { maintainAspectRatio: false,
+                       scales: { yAxes: [ { id: "B", type: "linear", position: "right",
+                                            scaleLabel: { display: false, labelString: tableau_map[0].unite }
+                                          },
+                                        ]
+                               }
+                     };
+       var ctx = document.getElementById(idChart).getContext('2d');
+       var myChart = new Chart(ctx, { type: 'line', data: data, options: options } );
+     });
+
+    if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
+    else if (period=="DAY")  setInterval( function() { window.location.reload(); }, 300000);
+    else setInterval( function() { window.location.reload(); }, 600000);
+	 }
+/*----------------------------------------------------------------------------------------------------------------------------*/

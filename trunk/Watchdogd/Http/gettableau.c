@@ -183,7 +183,7 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT tm.*,dico.libelle FROM tableau_map AS tm INNER JOIN tableau AS t ON t.id=tm.tableau_id "
+    g_snprintf(chaine, sizeof(chaine), "SELECT tm.*,dico.libelle,dico.unite FROM tableau_map AS tm INNER JOIN tableau AS t ON t.id=tm.tableau_id "
                                        "LEFT JOIN dictionnaire AS dico ON tm.tech_id=dico.tech_id AND tm.acronyme=dico.acronyme "
                                        "WHERE t.access_level<=%d AND t.id='%d'", session->access_level, tableau_id );
     if (SQL_Select_to_JSON ( builder, "tableau_map", chaine ) == FALSE)
