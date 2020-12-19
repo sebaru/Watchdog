@@ -135,6 +135,7 @@
 /********************************* Chargement d'une courbe dans u synoptique 1 au démrrage ************************************/
  function Charger_une_courbe ( idChart, tech_id, acronyme, period )
   { if (localStorage.getItem("instance_is_master")!="true") return;
+    if (period===undefined) period="HOUR";
     var json_request = JSON.stringify(
      { courbes: [ { tech_id : tech_id, acronyme : acronyme, } ],
        period   : period

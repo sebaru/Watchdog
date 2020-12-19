@@ -2,14 +2,8 @@
 
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { vars = window.location.pathname.split('/');
-    var json_request = JSON.stringify(
-     { search_for : vars[3],
-     });
-
-    Send_to_API ( "PUT", "/api/search", json_request, function(Response)
-     { $("#idSearch").val ( vars[3] );
-       $('#idTableSearchResults').DataTable(
+  { Send_to_API ( "GET", "/api/search", null, function(Response)
+     { $('#idTableSearchResults').DataTable(
           { pageLength : 50,
             fixedHeader: true,
             rowId: "id",
@@ -34,7 +28,8 @@
                      else return(item.acronyme);
                    }
                },
-               { "data": "libelle", "title":"libelle", "className": "align-middle  text-center" },
+               { "data": "libelle", "title":"Libelle", "className": "align-middle  text-center" },
+               { "data": "unite", "title":"Unité", "className": "align-middle  text-center" },
              ]
           }
        );
