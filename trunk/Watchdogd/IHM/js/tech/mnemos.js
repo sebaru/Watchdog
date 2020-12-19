@@ -241,6 +241,28 @@
        }
      );
 
+    $('#idTableCptH').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         ajax: {	url : "/api/mnemos/list",	type : "GET", data: { "classe": "CH", "tech_id": tech_id }, dataSrc: "CH",
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
+         rowId: "id",
+         columns:
+           [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
+             { "data": null, "title":"Etat", "className": "",
+               "render": function (item)
+                 { if (item.etat==true) { return( Bouton ( "success", "Activé", null, null, "Actif" ) );        }
+                                   else { return( Bouton ( "outline-secondary", "Désactivé", null, null, "Inactif" ) ); }
+                 },
+             },
+           ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
+
     $('#idTableMessage').DataTable(
        { pageLength : 50,
          fixedHeader: true,

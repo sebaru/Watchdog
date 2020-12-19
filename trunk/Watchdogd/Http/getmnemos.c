@@ -178,11 +178,11 @@
           gint sms    = Json_get_int ( request, "sms" );
           gchar *audio_libelle = Normaliser_chaine ( Json_get_string ( request, "audio_libelle" ) );
           gchar *audio_profil  = Normaliser_chaine ( Json_get_string ( request, "audio_profil" ) );
-          g_snprintf( chaine, sizeof(chaine), "UPDATE msgs SET sms='%d', audio_profil='%s', audio_libelle='%s' "
+          g_snprintf( chaine, sizeof(chaine), "UPDATE msgs SET sms_notification='%d', audio_profil='%s', audio_libelle='%s' "
                                               "WHERE tech_id='%s' AND acronyme='%s'",
                       sms, audio_profil, audio_libelle, tech_id, acronyme );
           SQL_Write ( chaine );                                                   /* Qu'il existe ou non, ou met a jour la DB */
-          Audit_log ( session, "Mnemos %s:%s -> SMS = '%d'", tech_id, acronyme, sms );
+          Audit_log ( session, "Mnemos %s:%s -> Sms_notification = '%d'", tech_id, acronyme, sms );
           Audit_log ( session, "Mnemos %s:%s -> Profil_AUDIO = '%s'", tech_id, acronyme, audio_profil );
           Audit_log ( session, "Mnemos %s:%s -> Libelle_AUDIO = '%s'", tech_id, acronyme, audio_libelle );
           g_free(audio_profil);
