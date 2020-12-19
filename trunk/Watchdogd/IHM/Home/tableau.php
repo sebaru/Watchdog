@@ -4,8 +4,15 @@
    <h3><i class="fas fa-chart-line text-primary"></i> Tableau: <strong id="idTableauTitle"></strong></h3>
 
    <div class ="ml-auto btn-group align-items-start">
-   <!--     <button type="button" onclick="Tableau_New()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
-        <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
+      <i class="fas fa-clock text-primary mt-2 mr-2"></i>
+        <select id='idTableauPeriod' class='custom-select' onchange="Tableau_Set_Period()">
+          <option value='HOUR'>Heure</option>
+          <option value='DAY'>Jour</option>
+          <option value='WEEK'>Semaine</option>
+          <option value='MONTH'>Mois</option>
+          <option value='YEAR'>Année</option>
+          <option value='ALL'>Tout</option>
+        </select>
    </div>
  </div>
 

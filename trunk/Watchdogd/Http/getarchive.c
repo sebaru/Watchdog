@@ -40,7 +40,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_archive_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
-  { gchar *buf, requete[1024], chaine[256], *interval, nom_courbe[12];
+  { gchar *buf, requete[4096], chaine[256], *interval, nom_courbe[12];
     gsize taille, taille_buf;
     GBytes *request_brute;
     gint nbr;

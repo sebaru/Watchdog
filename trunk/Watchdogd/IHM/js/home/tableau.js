@@ -1,6 +1,12 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /********************************************* Appelé au chargement de la page ************************************************/
+ function Tableau_Set_Period ()
+  { vars = window.location.pathname.split('/');
+    Redirect ( "/home/tableau/"+vars[3]+"/"+$("#idTableauPeriod").val() );
+  }
+
+/********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { vars = window.location.pathname.split('/');
     Send_to_API ( "GET", "/api/tableau/list", null, function(Response)
@@ -8,6 +14,9 @@
        $('#idTableauTitle').text(tableau.titre);
      }, null );
 
+    if (vars[4] != undefined)
+     { $("#idTableauPeriod").val(vars[4]); }
+    else { $("#idTableauPeriod").val("HOUR"); }
 
     Send_to_API ( "GET", "/api/tableau/map/list", "tableau_id="+vars[3], function(Response)
      { Charger_plusieurs_courbes ( "idChart", Response.tableau_map, vars[4] );
