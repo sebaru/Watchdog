@@ -168,12 +168,7 @@
         <span class="sr-only">Loading...</span>
       </div>
 
-      <div class ="nav-item ml-2">
-        <input id="idSearchFor" class="form-control mr-sm-2" type="search" placeholder="Rechercher" aria-label="Rechercher">
-      </div>
-      <div class ="nav-item ml-2">
-        <button class="btn btn-success rounded my-1 my-sm-0" onclick="Rechercher()">Search</button> <!--btn-outline-success-->
-      </div>
+      <a class="nav-link rounded" href="/tech/search"><i class="fas fa-search"></i> <span> Dictionnaire</span></a>
 
       <div class ="nav-item ml-2">
         <div class="input-group">

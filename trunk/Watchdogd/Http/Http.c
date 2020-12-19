@@ -434,11 +434,9 @@
 /******************************************************************************************************************************/
  void Http_traiter_search ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                             SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille_buf;
-    gsize taille;
+  { gsize taille_buf;
 
-    if (msg->method != SOUP_METHOD_PUT)
+    if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -446,43 +444,15 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 1 )) return;
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    if (!request_brute)
-     { soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
-       return;
-     }
-
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
-
-    if ( !(Json_has_member ( request, "search_for" ) ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    gchar chaine[256];
-    gchar *search = Normaliser_chaine ( Json_get_string(request, "search_for" ) );
-    json_node_unref(request);
-
     JsonBuilder *builder = Json_create ();
     if (!builder)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
-    if (search)
 
-     { g_snprintf ( chaine, sizeof (chaine), "SELECT * FROM dictionnaire WHERE tech_id LIKE '%s' OR acronyme LIKE '%s' OR libelle LIKE '%s'",
-                    search, search, search );
-       g_free(search);
-       if (SQL_Select_to_JSON ( builder, "results", chaine ))
-            { soup_message_set_status (msg, SOUP_STATUS_OK); }
-       else { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error"); }
-     }
-	   else soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
+    if (SQL_Select_to_JSON ( builder, "results", "SELECT * FROM dictionnaire" ))
+         { soup_message_set_status (msg, SOUP_STATUS_OK); }
+    else { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error"); }
 
     gchar *buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
