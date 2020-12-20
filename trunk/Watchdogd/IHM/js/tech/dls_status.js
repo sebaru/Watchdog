@@ -53,10 +53,10 @@
              { return( item.conso.toFixed(2) ); }
           },
           { "data": null, title:"Comm",  "className": "text-center align-middle", "render": function (item)
-            { if (item.bit_comm_out==true)
-               { return( Bouton ( "danger", "Communication perdue", null, null, "Hors Comm" ) ); }
-              else
+            { if (item.bit_comm==true)
                { return( Bouton ( "outline-success", "Communication OK", null, null, "OK" ) ); }
+              else
+               { return( Bouton ( "danger", "Communication perdue", null, null, "Hors Comm" ) ); }
             }
           },
           { "data": null, title:"Défaut",  "className": "text-center align-middle", "render": function (item)

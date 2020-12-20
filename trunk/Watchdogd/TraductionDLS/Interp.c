@@ -910,8 +910,8 @@
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
 
 /*----------------------------------------------- Ecriture de la fin de fichier ----------------------------------------------*/
-          nb_car = g_snprintf ( chaine, sizeof(chaine), "Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, !vars->bit_comm_out );\n"
-                                                        "Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, vars->bit_comm_out );\n",
+          nb_car = g_snprintf ( chaine, sizeof(chaine), "Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s,  vars->bit_comm );\n"
+                                                        "Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, !vars->bit_comm );\n",
                                 Dls_plugin.tech_id, "_MSG_COMM_OK", Dls_plugin.tech_id, "_MSG_COMM_OK", "FALSE",
                                 Dls_plugin.tech_id, "_MSG_COMM_HS", Dls_plugin.tech_id, "_MSG_COMM_HS", "FALSE" );
           write(fd, chaine, nb_car );                                                          /* Ecriture du buffer resultat */

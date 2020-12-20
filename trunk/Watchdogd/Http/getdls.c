@@ -59,7 +59,7 @@
 
     Json_add_double ( builder, "conso", dls->conso );
     Json_add_bool   ( builder, "debug",                dls->vars.debug );
-    Json_add_bool   ( builder, "bit_comm_out",         dls->vars.bit_comm_out );
+    Json_add_bool   ( builder, "bit_comm",             dls->vars.bit_comm );
     Json_add_bool   ( builder, "bit_defaut",           dls->vars.bit_defaut );
     Json_add_bool   ( builder, "bit_defaut_fixe",      dls->vars.bit_defaut_fixe );
     Json_add_bool   ( builder, "bit_alarme",           dls->vars.bit_alarme );
