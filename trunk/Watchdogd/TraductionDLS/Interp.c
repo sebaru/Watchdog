@@ -598,9 +598,7 @@
        default      : color="black";
      }
     g_snprintf( action->alors, taille,
-                "  if (vars->bit_comm_out) Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, 0, \"darkgreen\", 1 );"
-                " else Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, %d, \"%s\", %d );\n",
-                  alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
+                "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, %d, \"%s\", %d );\n",
                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno );
     return(action);
   }

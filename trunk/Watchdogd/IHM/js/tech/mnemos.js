@@ -223,7 +223,7 @@
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
              { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
-             { "data": null, "title":"Etat", "className": "",
+             { "data": null, "title":"Etat", "className": "align-middle text-center",
                "render": function (item)
                  { if (item.etat==true) { return( Bouton ( "success", "Activé", null, null, "Actif" ) );        }
                                    else { return( Bouton ( "outline-secondary", "Désactivé", null, null, "Inactif" ) ); }
@@ -257,6 +257,7 @@
                                    else { return( Bouton ( "outline-secondary", "Désactivé", null, null, "Inactif" ) ); }
                  },
              },
+             { "data": "valeur", "title":"Valeur", "className": "align-middle text-center" },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
