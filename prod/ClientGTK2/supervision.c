@@ -313,7 +313,7 @@ printf("New motif %s:%s\n", motif->tech_id, motif->acronyme);
  static void Changer_etat_passerelle( struct TRAME_ITEM_PASS *trame_pass, struct CMD_TYPE_SYN_VARS *vars )
   { printf("Changer_etat_passerelle syn %d!\n", vars->syn_id );
 
-    if (vars->bit_comm_out == TRUE)  /****************************  Vignette Activite *****************************************/
+    if (vars->bit_comm == FALSE)  /*******************************  Vignette Activite *****************************************/
      { Trame_set_svg ( trame_pass->item_1, "kaki", 0, TRUE ); }
     else if (vars->bit_alarme == TRUE)
      { Trame_set_svg ( trame_pass->item_1, "rouge", 0, TRUE ); }
@@ -327,7 +327,7 @@ printf("New motif %s:%s\n", motif->tech_id, motif->acronyme);
      { Trame_set_svg ( trame_pass->item_1, "vert", 0, FALSE ); }
 
 
-    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Personnes **************************/
+    if (vars->bit_comm == FALSE) /********************************** Vignette Securite des Personnes **************************/
      { Trame_set_svg ( trame_pass->item_2, "kaki", 0, TRUE ); }
     else if (vars->bit_alerte == TRUE)
      { Trame_set_svg ( trame_pass->item_2, "rouge", 0, TRUE ); }
@@ -340,7 +340,7 @@ printf("New motif %s:%s\n", motif->tech_id, motif->acronyme);
     else
      { Trame_set_svg ( trame_pass->item_2, "blanc", 0, FALSE ); }
 
-    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Biens ******************************/
+    if (vars->bit_comm == FALSE) /********************************** Vignette Securite des Biens ******************************/
      { Trame_set_svg ( trame_pass->item_3, "kaki", 0, TRUE ); }
     else if (vars->bit_danger == TRUE)
      { Trame_set_svg ( trame_pass->item_3, "rouge", 0, TRUE ); }
@@ -360,7 +360,7 @@ printf("New motif %s:%s\n", motif->tech_id, motif->acronyme);
 /******************************************************************************************************************************/
  static void Changer_etat_etiquette( struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_SYN_VARS *vars )
   { printf("Changer_etat_etiquette syn %d!\n", vars->syn_id );
-    if (vars->bit_comm_out == TRUE)  /****************************  Vignette Activite *****************************************/
+    if (vars->bit_comm == FALSE)  /*******************************  Vignette Activite *****************************************/
      { Trame_set_svg ( infos->Trame->Vignette_activite, "kaki", 0, TRUE ); }
     else if (vars->bit_alarme == TRUE)
      { Trame_set_svg ( infos->Trame->Vignette_activite, "rouge", 0, TRUE ); }
@@ -373,7 +373,7 @@ printf("New motif %s:%s\n", motif->tech_id, motif->acronyme);
     else
      { Trame_set_svg ( infos->Trame->Vignette_activite, "vert", 0, FALSE ); }
 
-    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Biens ******************************/
+    if (vars->bit_comm == FALSE) /********************************** Vignette Securite des Biens ******************************/
      { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "kaki", 0, TRUE ); }
     else if (vars->bit_alerte == TRUE)
      { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "rouge", 0, TRUE ); }
@@ -386,7 +386,7 @@ printf("New motif %s:%s\n", motif->tech_id, motif->acronyme);
     else
      { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "blanc", 0, FALSE ); }
 
-    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Personnes **************************/
+    if (vars->bit_comm == FALSE) /********************************** Vignette Securite des Personnes **************************/
      { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "kaki", 0, TRUE ); }
     else if (vars->bit_danger == TRUE)
      { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "rouge", 0, TRUE ); }
@@ -457,8 +457,8 @@ printf("Recu changement etat motif: %s:%s = %d color=%s\n", etat_motif->tech_id,
     GList *liste;
     gint cpt;
 
-printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d, der=%d, dan=%d\n",syn_vars->syn_id,
-                   syn_vars->bit_comm_out, syn_vars->bit_defaut, syn_vars->bit_alarme,
+printf("Recu set syn_vars %d  comm=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d, der=%d, dan=%d\n",syn_vars->syn_id,
+                   syn_vars->bit_comm, syn_vars->bit_defaut, syn_vars->bit_alarme,
                    syn_vars->bit_veille_partielle, syn_vars->bit_veille_totale, syn_vars->bit_alerte,
                    syn_vars->bit_derangement, syn_vars->bit_danger );
     cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */

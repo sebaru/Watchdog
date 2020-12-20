@@ -1,7 +1,7 @@
 <div class="container">
 
  <div class="row m-2">
-   <h3><i class="fas fa-eye text-primary"></i> Etat des bits pour le module - '<strong id="idTitle"></strong>'</h3>
+   <h3><i class="fas fa-eye text-primary"></i> Etat du module '<strong id="idTitle"></strong>'</h3>
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Go_to_mnemos()" class="btn btn-primary"><i class="fas fa-book"></i> Mnemos</button>

@@ -127,7 +127,7 @@
 
  struct CMD_TYPE_SYN_VARS
   { gint syn_id;
-    gboolean bit_comm_out;
+    gboolean bit_comm;
     gboolean bit_defaut;
     gboolean bit_defaut_fixe;
     gboolean bit_alarme;

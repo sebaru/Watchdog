@@ -118,7 +118,7 @@
                      else dls->start_date = 0;
     memset ( &dls->vars, 0, sizeof(dls->vars) );                                 /* Mise à zero de tous les bits de remontées */
     dls->vars.debug = dls->plugindb.debug;                         /* Recopie du champ de debug depuis la DB vers la zone RUN */
-  /*dls->vars.bit_comm_out = 1;                             /* Par construction, on considere que la comm est HS au démarrage */
+    dls->vars.bit_comm = TRUE;                              /* Par construction, on considere que la comm est OK au démarrage */
     return(TRUE);
   }
 /******************************************************************************************************************************/

@@ -2095,6 +2095,7 @@ fin:
        "SELECT 'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_R UNION "
        "SELECT 'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM syns_motifs UNION "
        "SELECT 'WATCHDOG' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_WATCHDOG UNION "
+       "SELECT 'TABLEAU' AS classe, -1 AS classe_int, '' AS tech_id, '' AS acronyme, titre AS libelle, 'none' as unite FROM tableau UNION "
        "SELECT 'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM msgs",
         MNEMO_ENTREE_ANA, MNEMO_ENTREE, MNEMO_SORTIE, MNEMO_SORTIE_ANA, MNEMO_CPTH, MNEMO_CPT_IMP, MNEMO_HORLOGE,
         MNEMO_TEMPO, MNEMO_REGISTRE, MNEMO_WATCHDOG, MNEMO_MSG

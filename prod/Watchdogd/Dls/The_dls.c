@@ -1374,6 +1374,8 @@ end:
       }
     else visu = (struct DLS_VISUEL *)*visu_p;
 
+    if (vars && vars->bit_comm==FALSE) { color = "darkgreen", cligno = TRUE; }
+
     if (visu->mode != mode || strcmp( visu->color, color ) || visu->cligno != cligno )
      { if ( visu->last_change + 50 <= Partage->top )                                 /* Si pas de change depuis plus de 5 sec */
         { visu->changes = 0; }
@@ -1393,7 +1395,8 @@ end:
           pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
           Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d",
+          Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG,
+                    "%s : Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d",
                     __func__, visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno );
         }
        visu->changes++;                                                                                /* Un change de plus ! */
@@ -1563,15 +1566,15 @@ end:
 /******************************************************************************************************************************/
  static void Dls_run_dls_tree ( struct DLS_TREE *dls_tree )
   { struct timeval tv_avant, tv_apres;
-    gboolean bit_comm_out, bit_defaut, bit_defaut_fixe, bit_alarme, bit_alarme_fixe;                              /* Activité */
+    gboolean bit_comm, bit_defaut, bit_defaut_fixe, bit_alarme, bit_alarme_fixe;                                  /* Activité */
     gboolean bit_veille_partielle, bit_veille_totale, bit_alerte, bit_alerte_fixe;             /* Synthese Sécurité des Biens */
     gboolean bit_alerte_fugitive;
     gboolean bit_derangement, bit_derangement_fixe, bit_danger, bit_danger_fixe;           /* synthèse Sécurité des Personnes */
     GSList *liste;
 
-    bit_comm_out = bit_defaut = bit_defaut_fixe = bit_alarme = bit_alarme_fixe = FALSE;
+    bit_defaut = bit_defaut_fixe = bit_alarme = bit_alarme_fixe = FALSE;
     bit_veille_partielle = FALSE;
-    bit_veille_totale = TRUE;
+    bit_comm = bit_veille_totale = TRUE;
     bit_alerte = bit_alerte_fixe = bit_alerte_fugitive = FALSE;
     bit_derangement = bit_derangement_fixe = bit_danger = bit_danger_fixe = FALSE;
 
@@ -1590,12 +1593,12 @@ end:
 
           plugin_actuel->vars.bit_acquit = 0;                                                 /* On arrete l'acquit du plugin */
                                                                                                   /* Bit de synthese activite */
-          bit_comm_out         |= plugin_actuel->vars.bit_comm_out;
+          bit_comm             &= plugin_actuel->vars.bit_comm;
           bit_defaut           |= plugin_actuel->vars.bit_defaut;
           bit_defaut_fixe      |= plugin_actuel->vars.bit_defaut_fixe;
           bit_alarme           |= plugin_actuel->vars.bit_alarme;
           bit_alarme_fixe      |= plugin_actuel->vars.bit_alarme_fixe;
-          plugin_actuel->vars.bit_activite_ok = !(bit_comm_out | bit_defaut | bit_defaut_fixe | bit_alarme | bit_alarme_fixe);
+          plugin_actuel->vars.bit_activite_ok = bit_comm && !(bit_defaut || bit_defaut_fixe || bit_alarme || bit_alarme_fixe);
 
           bit_veille_partielle |= plugin_actuel->vars.bit_veille;
           bit_veille_totale    &= plugin_actuel->vars.bit_veille;
@@ -1616,7 +1619,7 @@ end:
      { struct DLS_TREE *sub_tree;
        sub_tree = (struct DLS_TREE *)liste->data;
        Dls_run_dls_tree ( sub_tree );
-       bit_comm_out         |= sub_tree->syn_vars.bit_comm_out;
+       bit_comm             &= sub_tree->syn_vars.bit_comm;
        bit_defaut           |= sub_tree->syn_vars.bit_defaut;
        bit_defaut_fixe      |= sub_tree->syn_vars.bit_defaut_fixe;
        bit_alarme           |= sub_tree->syn_vars.bit_alarme;
@@ -1633,7 +1636,7 @@ end:
        liste = liste->next;
      }
 
-    if ( bit_comm_out         != dls_tree->syn_vars.bit_comm_out ||                              /* Detection des changements */
+    if ( bit_comm             != dls_tree->syn_vars.bit_comm ||                                  /* Detection des changements */
          bit_defaut           != dls_tree->syn_vars.bit_defaut ||
          bit_defaut_fixe      != dls_tree->syn_vars.bit_defaut_fixe ||
          bit_alarme           != dls_tree->syn_vars.bit_alarme ||
@@ -1647,7 +1650,7 @@ end:
          bit_derangement_fixe != dls_tree->syn_vars.bit_derangement_fixe ||
          bit_danger           != dls_tree->syn_vars.bit_danger ||
          bit_danger_fixe      != dls_tree->syn_vars.bit_danger_fixe )
-     { dls_tree->syn_vars.bit_comm_out         = bit_comm_out;                           /* Recopie et envoi aux threads SSRV */
+     { dls_tree->syn_vars.bit_comm             = bit_comm;                               /* Recopie et envoi aux threads SSRV */
        dls_tree->syn_vars.bit_defaut           = bit_defaut;
        dls_tree->syn_vars.bit_defaut_fixe      = bit_defaut_fixe;
        dls_tree->syn_vars.bit_alarme           = bit_alarme;

@@ -59,7 +59,7 @@
 
     Json_add_double ( builder, "conso", dls->conso );
     Json_add_bool   ( builder, "debug",                dls->vars.debug );
-    Json_add_bool   ( builder, "bit_comm_out",         dls->vars.bit_comm_out );
+    Json_add_bool   ( builder, "bit_comm",             dls->vars.bit_comm );
     Json_add_bool   ( builder, "bit_defaut",           dls->vars.bit_defaut );
     Json_add_bool   ( builder, "bit_defaut_fixe",      dls->vars.bit_defaut_fixe );
     Json_add_bool   ( builder, "bit_alarme",           dls->vars.bit_alarme );
@@ -654,7 +654,7 @@
 /******************************************************************************************************************************/
  static void Http_Dls_compil (void *user_data, struct PLUGIN_DLS *plugin)
   { struct HTTP_CLIENT_SESSION *session = user_data;
-    Compiler_source_dls( TRUE, plugin->plugindb.tech_id, NULL, 0 );
+    Compiler_source_dls( FALSE, plugin->plugindb.tech_id, NULL, 0 );                 /* Reset interdit sinon conflit de mutex */
     Audit_log ( session, "DLS '%s' compilé", plugin->plugindb.tech_id );
   }
 /******************************************************************************************************************************/

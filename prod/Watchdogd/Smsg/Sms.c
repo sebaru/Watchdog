@@ -690,7 +690,8 @@ reload:
         }
 /********************************************************* Envoi de SMS *******************************************************/
        JsonNode *request;
-       while ( (request=Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) )) != NULL)
+       while ( (lib->Thread_run == TRUE && lib->Thread_reload == FALSE) &&
+              (request=Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) )) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
