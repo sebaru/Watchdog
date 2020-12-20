@@ -725,7 +725,7 @@
     if ( (type=Rechercher_DICO_type ( tech_id, acronyme )) != -1 )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->classe = type;
+       alias->classe   = type;
      }
     else
      { g_free(alias);
