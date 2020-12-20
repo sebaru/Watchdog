@@ -905,23 +905,27 @@
                     "  { return(\"V%s - %s\"); \n  }\n", WTD_VERSION, date );
           write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
+/*----------------------------------------------- Ecriture de la fonction Go -------------------------------------------------*/
           write( fd, Start_Go, strlen(Start_Go) );                                                 /* Ecriture de de l'entete */
 
-          write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
-
-/*----------------------------------------------- Ecriture de la fin de fichier ----------------------------------------------*/
+/*----------------------------------------------- Ecriture du début fin de fichier -------------------------------------------*/
           nb_car = g_snprintf ( chaine, sizeof(chaine), "Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s,  vars->bit_comm );\n"
                                                         "Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, !vars->bit_comm );\n",
                                 Dls_plugin.tech_id, "_MSG_COMM_OK", Dls_plugin.tech_id, "_MSG_COMM_OK", "FALSE",
                                 Dls_plugin.tech_id, "_MSG_COMM_HS", Dls_plugin.tech_id, "_MSG_COMM_HS", "FALSE" );
           write(fd, chaine, nb_car );                                                          /* Ecriture du buffer resultat */
 
+/*----------------------------------------------- Ecriture du buffer C -------------------------------------------------------*/
+          write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
+
           write( fd, End_Go, strlen(End_Go) );
           close(fd);
         }
 
-       gchar *Liste_acronyme = NULL;
-       gchar *old_Liste_acronyme = NULL;
+       gchar *Liste_BOOL = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
+       gchar *Liste_TEMPO = NULL, *Liste_HORLOGE = NULL, *Liste_REGISTRE = NULL, *Liste_WATCHDOG = NULL, *Liste_MESSAGE = NULL;
+       gchar *Liste_CI = NULL, *Liste_CH = NULL;
+       gchar *old_liste = NULL;
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)
         { alias = (struct ALIAS *)liste->data;
@@ -934,52 +938,99 @@
            { gchar *libelle = Get_option_chaine( alias->options, T_LIBELLE );
              if (!libelle) libelle="no libelle";
 
-             if (!Liste_acronyme) Liste_acronyme = g_strconcat( "'", alias->acronyme, "'", NULL );
-             else
-              { old_Liste_acronyme = Liste_acronyme;
-                Liste_acronyme = g_strconcat ( Liste_acronyme, ", '", alias->acronyme, "'", NULL );
-                g_free(old_Liste_acronyme);
-              }
-
              switch(alias->classe)
               { case MNEMO_BUS:
                    break;
                 case MNEMO_BISTABLE:
                 case MNEMO_MONOSTABLE:
                  { Mnemo_auto_create_BOOL ( TRUE, alias->classe, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   if (!Liste_BOOL) Liste_BOOL = g_strconcat( "'", alias->acronyme, "'", NULL );
+                   else
+                    { old_liste = Liste_BOOL;
+                      Liste_BOOL = g_strconcat ( Liste_BOOL, ", '", alias->acronyme, "'", NULL );
+                      g_free(old_liste);
+                    }
                    break;
                  }
                 case MNEMO_ENTREE:
                  { Mnemo_auto_create_DI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   if (!Liste_DI) Liste_DI = g_strconcat( "'", alias->acronyme, "'", NULL );
+                   else
+                    { old_liste = Liste_DI;
+                      Liste_DI = g_strconcat ( Liste_DI, ", '", alias->acronyme, "'", NULL );
+                      g_free(old_liste);
+                    }
                    break;
                  }
                 case MNEMO_SORTIE:
                  { Mnemo_auto_create_DO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   if (!Liste_DO) Liste_DO = g_strconcat( "'", alias->acronyme, "'", NULL );
+                   else
+                    { old_liste = Liste_DO;
+                      Liste_DO = g_strconcat ( Liste_DO, ", '", alias->acronyme, "'", NULL );
+                      g_free(old_liste);
+                    }
                    break;
                  }
                 case MNEMO_SORTIE_ANA:
                  { Mnemo_auto_create_AO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   if (!Liste_AO) Liste_AO = g_strconcat( "'", alias->acronyme, "'", NULL );
+                   else
+                    { old_liste = Liste_AO;
+                      Liste_AO = g_strconcat ( Liste_AO, ", '", alias->acronyme, "'", NULL );
+                      g_free(old_liste);
+                    }
                    break;
                  }
                 case MNEMO_ENTREE_ANA:
                  { Mnemo_auto_create_AI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, NULL );
+                   if (!Liste_AI) Liste_AI = g_strconcat( "'", alias->acronyme, "'", NULL );
+                   else
+                    { old_liste = Liste_AI;
+                      Liste_AI = g_strconcat ( Liste_AI, ", '", alias->acronyme, "'", NULL );
+                      g_free(old_liste);
+                    }
                    break;
                  }
                 case MNEMO_TEMPO:
                  { Mnemo_auto_create_TEMPO ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                   if (!Liste_TEMPO) Liste_TEMPO = g_strconcat( "'", alias->acronyme, "'", NULL );
+                   else
+                    { old_liste = Liste_TEMPO;
+                      Liste_TEMPO = g_strconcat ( Liste_TEMPO, ", '", alias->acronyme, "'", NULL );
+                      g_free(old_liste);
+                    }
                    break;
                  }
                 case MNEMO_HORLOGE:
                  { Mnemo_auto_create_HORLOGE ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                   if (!Liste_HORLOGE) Liste_HORLOGE = g_strconcat( "'", alias->acronyme, "'", NULL );
+                   else
+                    { old_liste = Liste_HORLOGE;
+                      Liste_HORLOGE = g_strconcat ( Liste_HORLOGE, ", '", alias->acronyme, "'", NULL );
+                      g_free(old_liste);
+                    }
                    break;
                  }
                 case MNEMO_REGISTRE:
                  { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
                    Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle, unite );
+                   if (!Liste_REGISTRE) Liste_REGISTRE = g_strconcat( "'", alias->acronyme, "'", NULL );
+                   else
+                    { old_liste = Liste_REGISTRE;
+                      Liste_REGISTRE = g_strconcat ( Liste_REGISTRE, ", '", alias->acronyme, "'", NULL );
+                      g_free(old_liste);
+                    }
                    break;
                  }
                 case MNEMO_WATCHDOG:
                  { Mnemo_auto_create_WATCHDOG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   if (!Liste_WATCHDOG) Liste_WATCHDOG = g_strconcat( "'", alias->acronyme, "'", NULL );
+                   else
+                    { old_liste = Liste_WATCHDOG;
+                      Liste_WATCHDOG = g_strconcat ( Liste_WATCHDOG, ", '", alias->acronyme, "'", NULL );
+                      g_free(old_liste);
+                    }
                    break;
                  }
                 case MNEMO_MOTIF:
@@ -990,10 +1041,22 @@
                  }
                 case MNEMO_CPT_IMP:
                  { Mnemo_auto_create_CI ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                   if (!Liste_CI) Liste_CI = g_strconcat( "'", alias->acronyme, "'", NULL );
+                   else
+                    { old_liste = Liste_CI;
+                      Liste_CI = g_strconcat ( Liste_CI, ", '", alias->acronyme, "'", NULL );
+                      g_free(old_liste);
+                    }
                    break;
                  }
                 case MNEMO_CPTH:
                  { Mnemo_auto_create_CH ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                   if (!Liste_CH) Liste_CH = g_strconcat( "'", alias->acronyme, "'", NULL );
+                   else
+                    { old_liste = Liste_CH;
+                      Liste_CH = g_strconcat ( Liste_CH, ", '", alias->acronyme, "'", NULL );
+                      g_free(old_liste);
+                    }
                    break;
                  }
                 case MNEMO_MSG:
@@ -1006,6 +1069,12 @@
                    if (param!=-1) msg.typologie = param;
                              else msg.typologie = MSG_ETAT;
                    Mnemo_auto_create_MSG ( &msg );
+                   if (!Liste_MESSAGE) Liste_MESSAGE = g_strconcat( "'", alias->acronyme, "'", NULL );
+                   else
+                    { old_liste = Liste_MESSAGE;
+                      Liste_MESSAGE = g_strconcat ( Liste_MESSAGE, ", '", alias->acronyme, "'", NULL );
+                      g_free(old_liste);
+                    }
                    break;
                  }
               }
@@ -1029,69 +1098,77 @@
         }
 
 /*--------------------------------- Suppression des mnemoniques non utilisés ------------------------------------*/
-       if (Liste_acronyme)
-        { g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_AI WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
-          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
-          SQL_Write ( requete );
-          g_free(requete);
+       requete = g_strconcat ( "DELETE FROM mnemos_AI WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_AI?Liste_AI:"''") , ")", NULL );
+       if (Liste_AI) g_free(Liste_AI);
+       SQL_Write ( requete );
+       g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_AO WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
-          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
-          SQL_Write ( requete );
-          g_free(requete);
+       requete = g_strconcat ( "DELETE FROM mnemos_AO WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_AO?Liste_AO:"''") , ")", NULL );
+       if (Liste_AO) g_free(Liste_AO);
+       SQL_Write ( requete );
+       g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_DI WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
-          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
-          SQL_Write ( requete );
-          g_free(requete);
+       requete = g_strconcat ( "DELETE FROM mnemos_DI WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_DI?Liste_DI:"''") , ")", NULL );
+       if (Liste_DI) g_free(Liste_DI);
+       SQL_Write ( requete );
+       g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_DO WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
-          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
-          SQL_Write ( requete );
-          g_free(requete);
+       requete = g_strconcat ( "DELETE FROM mnemos_DO WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_DO?Liste_DO:"''") , ")", NULL );
+       if (Liste_DO) g_free(Liste_DO);
+       SQL_Write ( requete );
+       g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_R WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
-          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
-          SQL_Write ( requete );
-          g_free(requete);
+       requete = g_strconcat ( "DELETE FROM mnemos_R WHERE tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_REGISTRE?Liste_REGISTRE:"''") , ")", NULL );
+       if (Liste_REGISTRE) g_free(Liste_REGISTRE);
+       SQL_Write ( requete );
+       g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_BOOL WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
-          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
-          SQL_Write ( requete );
-          g_free(requete);
+       requete = g_strconcat ( "DELETE FROM mnemos_BOOL WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_BOOL?Liste_BOOL:"''") , ")", NULL );
+       if (Liste_BOOL) g_free(Liste_BOOL);
+       SQL_Write ( requete );
+       g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_Tempo WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
-          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
-          SQL_Write ( requete );
-          g_free(requete);
+       requete = g_strconcat ( "DELETE FROM mnemos_Tempo WHERE tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_TEMPO?Liste_TEMPO:"''") , ")", NULL );
+       if (Liste_TEMPO) g_free(Liste_TEMPO);
+       SQL_Write ( requete );
+       g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_CI WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
-          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
-          SQL_Write ( requete );
-          g_free(requete);
+       requete = g_strconcat ( "DELETE FROM mnemos_CI WHERE tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_CI?Liste_CI:"''") , ")", NULL );
+       if (Liste_CI) g_free(Liste_CI);
+       SQL_Write ( requete );
+       g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_CH WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
-          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
-          SQL_Write ( requete );
-          g_free(requete);
+       requete = g_strconcat ( "DELETE FROM mnemos_CH WHERE tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_CH?Liste_CH:"''") , ")", NULL );
+       if (Liste_CH) g_free(Liste_CH);
+       SQL_Write ( requete );
+       g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM msgs WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
-          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
-          SQL_Write ( requete );
-          g_free(requete);
+       requete = g_strconcat ( "DELETE FROM msgs WHERE tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_MESSAGE?Liste_MESSAGE:"''") , ")", NULL );
+       if (Liste_MESSAGE) g_free(Liste_MESSAGE);
+       SQL_Write ( requete );
+       g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_HORLOGE WHERE tech_id='%s' AND acronyme NOT IN ", tech_id );
-          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
-          SQL_Write ( requete );
-          g_free(requete);
+       requete = g_strconcat ( "DELETE FROM mnemos_HORLOGE WHERE tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_HORLOGE?Liste_HORLOGE:"''") , ")", NULL );
+       if (Liste_HORLOGE) g_free(Liste_HORLOGE);
+       SQL_Write ( requete );
+       g_free(requete);
 
-          g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_WATCHDOG WHERE deletable=1 AND tech_id='%s' AND acronyme NOT IN ", tech_id );
-          requete = g_strconcat ( chaine, "(", Liste_acronyme, ")", NULL );
-          SQL_Write ( requete );
-          g_free(requete);
-
-          g_free(Liste_acronyme);
-        }
+       requete = g_strconcat ( "DELETE FROM mnemos_WATCHDOG WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_WATCHDOG?Liste_WATCHDOG:"''") , ")", NULL );
+       if (Liste_WATCHDOG) g_free(Liste_WATCHDOG);
+       SQL_Write ( requete );
+       g_free(requete);
      }
     close(Id_log);
     Liberer_memoire();

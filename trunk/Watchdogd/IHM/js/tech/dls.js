@@ -20,7 +20,9 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Dls_Compiler_tous_dls ( )
   { var json_request = JSON.stringify( { compil_all: true } );
-    Send_to_API ( 'POST', "/api/dls/compil", json_request, null );
+    Send_to_API ( 'POST', "/api/dls/compil", json_request, function ()
+     { $('#idTableDLS').DataTable().ajax.reload();
+     }, null );
   }
 
 /******************************************************************************************************************************/
