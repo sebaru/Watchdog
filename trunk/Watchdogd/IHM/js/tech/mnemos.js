@@ -190,6 +190,22 @@
        }
      );
 
+    $('#idTableTempo').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         ajax: {	url : "/api/mnemos/list",	type : "GET", data: { "classe": "TEMPO", "tech_id": tech_id }, dataSrc: "TEMPO",
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
+         rowId: "id",
+         columns:
+           [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
+           ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
+
     $('#idTableRegistre').DataTable(
        { pageLength : 50,
          fixedHeader: true,
