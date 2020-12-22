@@ -578,6 +578,7 @@ CREATE TABLE IF NOT EXISTS `syns_rectangles` (
 
 CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deletable` tinyint(1) NOT NULL DEFAULT '1',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT,
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No libelle",

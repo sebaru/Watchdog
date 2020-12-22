@@ -47,7 +47,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
- gint Mnemo_auto_create_MSG ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gint typologie )
+ gint Mnemo_auto_create_MSG ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src, gint typologie )
   { gchar *libelle;
     gchar requete[2048];
     gboolean retour;
@@ -61,10 +61,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s SET tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s',"
+                "INSERT INTO %s SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s',"
                 "typologie='%d',sms_notification='0' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), typologie=VALUES(typologie)", NOM_TABLE_MSG,
-                tech_id, acronyme, libelle, libelle, typologie
+                deletable, tech_id, acronyme, libelle, libelle, typologie
               );
     g_free(libelle);
 

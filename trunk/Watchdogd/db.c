@@ -2061,6 +2061,11 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version <= 5222)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`");
+       Lancer_requete_SQL ( db, requete );
+     }
+
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

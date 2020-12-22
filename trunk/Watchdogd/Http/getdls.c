@@ -77,8 +77,8 @@
     Json_add_bool   ( builder, "bit_secu_pers_ok",     dls->vars.bit_secupers_ok );
 
     Json_add_bool   ( builder, "bit_acquit",           dls->vars.bit_acquit );
-    Json_add_array  ( builder, "bit_comms" );
-    GSList *liste = dls->Arbre_Comm;
+    Json_add_array  ( builder, "bit_IO_Comms" );
+    GSList *liste = dls->Arbre_IO_Comm;
     while(liste)
      { struct DLS_BOOL *bool = liste->data;
        Json_add_object ( builder, NULL );

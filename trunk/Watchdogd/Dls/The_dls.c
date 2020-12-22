@@ -1598,25 +1598,28 @@ end:
 
 /*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
           gboolean bit_comm_module = TRUE;
-          liste = plugin->Arbre_Comm;
+          liste = plugin->Arbre_IO_Comm;
           while ( liste )
            { struct DLS_BOOL *bool = liste->data;
              bit_comm_module &= bool->etat;
              liste = g_slist_next ( liste );
            }
           Dls_data_set_bool ( &plugin->vars, plugin->plugindb.tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
+          plugin->vars.bit_activite_ok = bit_comm_module && !(plugin->vars.bit_defaut || plugin->vars.bit_defaut_fixe ||
+                                                              plugin->vars.bit_alarme || plugin->vars.bit_alarme_fixe);
+          plugin->vars.bit_secupers_ok = !(plugin->vars.bit_derangement || plugin->vars.bit_derangement_fixe ||
+                                           plugin->vars.bit_danger || plugin->vars.bit_danger_fixe);
 
 /*----------------------------------------------- Ecriture du début fin de fichier -------------------------------------------*/
           Dls_data_set_MSG ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
           Dls_data_set_MSG ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
-                                                                                     /* Bit de synthese activite */
+
 /*----------------------------------------------- Calcul des synthèses -------------------------------------------------------*/
-          bit_comm             &= bit_comm_module;
+          bit_comm             &= bit_comm_module;                                                /* Bit de synthese activite */
           bit_defaut           |= plugin->vars.bit_defaut;
           bit_defaut_fixe      |= plugin->vars.bit_defaut_fixe;
           bit_alarme           |= plugin->vars.bit_alarme;
           bit_alarme_fixe      |= plugin->vars.bit_alarme_fixe;
-          plugin->vars.bit_activite_ok = bit_comm && !(bit_defaut || bit_defaut_fixe || bit_alarme || bit_alarme_fixe);
 
           bit_veille_partielle |= plugin->vars.bit_veille;
           bit_veille_totale    &= plugin->vars.bit_veille;
@@ -1628,7 +1631,6 @@ end:
           bit_derangement_fixe |= plugin->vars.bit_derangement_fixe;
           bit_danger           |= plugin->vars.bit_danger;
           bit_danger_fixe      |= plugin->vars.bit_danger_fixe;
-          plugin->vars.bit_secupers_ok = !(bit_derangement | bit_derangement_fixe | bit_danger | bit_danger_fixe);
         }
        liste = liste->next;
      }

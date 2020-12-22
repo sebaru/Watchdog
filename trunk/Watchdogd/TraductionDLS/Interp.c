@@ -723,19 +723,20 @@
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
- static gboolean New_alias_internal ( gchar *acronyme, gint bit, gchar *libelle )
+ static gboolean New_alias_permanent ( gchar *acronyme, gint bit, gchar *libelle )
   { struct ALIAS *alias;
 
     if (Get_alias_par_acronyme( Dls_plugin.tech_id, acronyme )) return(FALSE);                           /* ID deja definit ? */
 
     alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
     if (!alias) { return(FALSE); }
-    alias->tech_id  = g_strdup(Dls_plugin.tech_id);
-    alias->acronyme = g_strdup(acronyme);
-    alias->classe   = bit;
+    alias->tech_id   = g_strdup(Dls_plugin.tech_id);
+    alias->acronyme  = g_strdup(acronyme);
+    alias->classe    = bit;
     struct OPTION *option = New_option_chaine ( T_LIBELLE, strdup(libelle) );
-    alias->options  = g_list_append ( NULL, option );
-    alias->used     = 1;                                                       /* Un bit internal est obligatoirement utilisé */
+    alias->options   = g_list_append ( NULL, option );
+    alias->used      = 1;                                                      /* Un bit internal est obligatoirement utilisé */
+    alias->permanent = 1;                                                      /* Un bit internal est obligatoirement utilisé */
     Alias = g_slist_prepend( Alias, alias );
     return(TRUE);
   }
@@ -888,17 +889,21 @@
        setlocale(LC_ALL, "C");
 
 /*---------------------------------------- Création des mnemoniques permanents -----------------------------------------------*/
-       libelle = "Statut de la communication du module";
-       New_alias_internal ( "_COMM", MNEMO_MONOSTABLE, libelle );
-       Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, Dls_plugin.tech_id, "_COMM", libelle );
+       libelle = "Statut de la Communication de l'I/O Thread lié au module";
+       New_alias_permanent ( "IO_COMM", MNEMO_MONOSTABLE, libelle );
+       Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, Dls_plugin.tech_id, "IO_COMM", libelle );
+
+       libelle = "Statut de Synthèse de la communication du module";
+       New_alias_permanent ( "COMM", MNEMO_MONOSTABLE, libelle );
+       Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, Dls_plugin.tech_id, "COMM", libelle );
 
        libelle = "Communication OK";
-       New_alias_internal ( "_MSG_COMM_OK", MNEMO_MSG, libelle );
-       Mnemo_auto_create_MSG ( Dls_plugin.tech_id, "MSG_COMM_OK", libelle, MSG_ETAT );
+       New_alias_permanent ( "MSG_COMM_OK", MNEMO_MSG, libelle );
+       Mnemo_auto_create_MSG ( FALSE, Dls_plugin.tech_id, "MSG_COMM_OK", libelle, MSG_ETAT );
 
        libelle = "Communication Hors Service";
-       New_alias_internal ( "_MSG_COMM_HS", MNEMO_MSG, libelle );
-       Mnemo_auto_create_MSG ( Dls_plugin.tech_id, "MSG_COMM_HS", libelle, MSG_DEFAUT );
+       New_alias_permanent ( "MSG_COMM_HS", MNEMO_MSG, libelle );
+       Mnemo_auto_create_MSG ( FALSE, Dls_plugin.tech_id, "MSG_COMM_HS", libelle, MSG_DEFAUT );
 
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
@@ -974,8 +979,8 @@
            { Emettre_erreur_new( "Warning: %s not used", alias->acronyme );
              retour = TRAD_DLS_WARNING;
            }
-                                                                                               /* Alias Dynamiques uniquement */
-          if (!strcmp(alias->tech_id, Dls_plugin.tech_id) && alias->external == FALSE )
+                                                                       /* Alias Dynamiques, local et non permanent uniquement */
+          if (!strcmp(alias->tech_id, Dls_plugin.tech_id) && alias->external == FALSE && alias->permanent == FALSE)
            { gchar *libelle = Get_option_chaine( alias->options, T_LIBELLE );
              if (!libelle) libelle="no libelle";
 
@@ -1103,7 +1108,7 @@
                 case MNEMO_MSG:
                  { gint param;
                    param = Get_option_entier ( alias->options, T_TYPE );
-                   Mnemo_auto_create_MSG ( Dls_plugin.tech_id, alias->acronyme, libelle, (param!=-1 ? param : MSG_ETAT) );
+                   Mnemo_auto_create_MSG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, (param!=-1 ? param : MSG_ETAT) );
                    if (!Liste_MESSAGE) Liste_MESSAGE = g_strconcat( "'", alias->acronyme, "'", NULL );
                    else
                     { old_liste = Liste_MESSAGE;
@@ -1171,7 +1176,7 @@
        SQL_Write ( requete );
        g_free(requete);
 
-       requete = g_strconcat ( "DELETE FROM msgs WHERE tech_id='", tech_id, "' ",
+       requete = g_strconcat ( "DELETE FROM msgs WHERE deletable=1 AND tech_id='", tech_id, "' ",
                                " AND acronyme NOT IN (", (Liste_MESSAGE?Liste_MESSAGE:"''") , ")", NULL );
        if (Liste_MESSAGE) g_free(Liste_MESSAGE);
        SQL_Write ( requete );

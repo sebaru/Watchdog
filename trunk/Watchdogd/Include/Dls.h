@@ -43,7 +43,7 @@
     float conso;                                                                         /* Consommation temporelle du plugin */
     gchar *(*version)(void);                                                       /* Retourne le numéro de version du plugin */
     struct DLS_TO_PLUGIN vars;
-    GSList *Arbre_Comm;                         /* Liste tech_id des dependances du module pour le calcul de sa communication */
+    GSList *Arbre_IO_Comm;                      /* Liste tech_id des dependances du module pour le calcul de sa communication */
   };
 
  enum                                                                                  /* différent statut des temporisations */

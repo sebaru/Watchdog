@@ -91,9 +91,9 @@
        return;
      }
 
-    if (dls->Arbre_Comm)
-     { g_slist_free(dls->Arbre_Comm);
-       dls->Arbre_Comm = NULL;
+    if (dls->Arbre_IO_Comm)
+     { g_slist_free(dls->Arbre_IO_Comm);
+       dls->Arbre_IO_Comm = NULL;
      }
 /*---------------------------- On recherche tous les tech_id des thread de DigitalInput --------------------------------------*/
     g_snprintf( chaine, sizeof(chaine), "SELECT DISTINCT(map_tech_id) FROM mnemos_DI WHERE tech_id='%s'"
@@ -107,12 +107,15 @@
     while ( Recuperer_ligne_SQL ( db ) != NULL )
      { gpointer bool = NULL;
        if (db->row[0])
-        { Dls_data_get_bool ( db->row[0], "COMM", &bool );
-          if (bool) dls->Arbre_Comm = g_slist_prepend ( dls->Arbre_Comm, bool );
-          else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:COMM not found !", __func__, db->row[0] ); }
+        { Dls_data_get_bool ( db->row[0], "IO_COMM", &bool );
+          if (bool) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, bool );
+          else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, db->row[0] ); }
         }
      }
-
+    gpointer bool = NULL;                   /* Le bit de synthèse comm du module dépend aussi de l'io_comm du module lui-meme */
+    Dls_data_get_bool ( dls->plugindb.tech_id, "IO_COMM", &bool );
+    if (bool) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, bool );
+    else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, dls->plugindb.tech_id ); }
     Libere_DB_SQL ( &db );
   }
 /******************************************************************************************************************************/
@@ -163,6 +166,7 @@
                      else dls->start_date = 0;
     memset ( &dls->vars, 0, sizeof(dls->vars) );                                 /* Mise à zero de tous les bits de remontées */
     dls->vars.debug = dls->plugindb.debug;                         /* Recopie du champ de debug depuis la DB vers la zone RUN */
+    Dls_data_set_bool ( &dls->vars, dls->plugindb.tech_id, "IO_COMM", NULL, TRUE );  /* Par défaut, la io_comm local est TRUE */
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -264,7 +268,7 @@
                     dlerror(), plugin->plugindb.tech_id, plugin->plugindb.shortname );
         }
        dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
-       if (plugin->Arbre_Comm) g_slist_free(plugin->Arbre_Comm);
+       if (plugin->Arbre_IO_Comm) g_slist_free(plugin->Arbre_IO_Comm);
                                                                              /* Destruction de l'entete associé dans la GList */
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin '%s' unloaded (%s)", __func__,
                  plugin->plugindb.tech_id, plugin->plugindb.nom );

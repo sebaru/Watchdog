@@ -64,6 +64,7 @@
     GList *options;
     gint used;
     gboolean external;                 /* TRUE si le bit interne est externe au module (ie pas déclaré en tant qu'alias local */
+    gboolean permanent;                                                        /* TRUE si le bit interne est un bit permanent */
   };
 
 /****************************************************** Prototypes ************************************************************/
