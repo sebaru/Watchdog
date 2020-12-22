@@ -400,7 +400,7 @@ end:
 reload:
     memset( &Cfg_imsgs, 0, sizeof(Cfg_imsgs) );                                     /* Mise a zero de la structure de travail */
     Cfg_imsgs.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-IMSGS", lib, WTD_VERSION, "Manage Instant Messaging system (libstrophe)" );
+    Thread_init ( "W-IMSGS", "USER", lib, WTD_VERSION, "Manage Instant Messaging system (libstrophe)" );
     Imsgs_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
     Cfg_imsgs.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */

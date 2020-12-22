@@ -83,7 +83,7 @@
 /* Sortie: FALSE si problème                                                                                                  */
 /******************************************************************************************************************************/
  void Dls_plugin_recalculer_arbre_comm ( void *user_data, struct PLUGIN_DLS *dls )
-  { gchar chaine[128];
+  { gchar chaine[256];
 
     struct DB *db = Init_DB_SQL();
     if (!db)
@@ -96,9 +96,9 @@
        dls->Arbre_IO_Comm = NULL;
      }
 /*---------------------------- On recherche tous les tech_id des thread de DigitalInput --------------------------------------*/
-    g_snprintf( chaine, sizeof(chaine), "SELECT DISTINCT(map_tech_id) FROM mnemos_DI WHERE tech_id='%s'"
-                                        " AND map_tech_id IS NOT NULL"
-                                        " AND map_thread != 'SMSG'", dls->plugindb.tech_id );
+    g_snprintf( chaine, sizeof(chaine), "SELECT DISTINCT(map_tech_id) FROM mnemos_DI "
+                                        "INNER JOIN thread_classe AS tc ON map_thread = tc.thread "
+                                        " WHERE tech_id='%s' AND tc.classe='I/O'", dls->plugindb.tech_id );
     if (!Lancer_requete_SQL ( db, chaine ))
      { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB request failed", __func__ );
        return;

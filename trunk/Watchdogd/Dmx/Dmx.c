@@ -182,7 +182,7 @@
 reload:
     memset( &Cfg_dmx, 0, sizeof(Cfg_dmx) );                                         /* Mise a zero de la structure de travail */
     Cfg_dmx.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-DMX", lib, WTD_VERSION, "Manage Dmx System" );
+    Thread_init ( "W-DMX", "I/O", lib, WTD_VERSION, "Manage Dmx System" );
     Dmx_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
     Cfg_dmx.zmq_from_bus  = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );

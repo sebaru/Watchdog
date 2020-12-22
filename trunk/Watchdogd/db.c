@@ -2064,6 +2064,13 @@ encore:
     if (database_version <= 5222)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `deletable` tinyint(1) NOT NULL DEFAULT '1' AFTER `id`");
        Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `thread_classe` ("
+                                             "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                                             "`thread` varchar(32) COLLATE utf8_unicode_ci UNIQUE DEFAULT '',"
+                                             "`classe` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                                             "PRIMARY KEY (`id`)"
+                                             ") ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+       Lancer_requete_SQL ( db, requete );
      }
 
 fin:

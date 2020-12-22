@@ -310,10 +310,10 @@
                "render": function (item)
                  { return("<select id='idMSGSms"+item.acronyme+"' class='custom-select'"+
                           "onchange=Mnemos_MSG_set('"+item.acronyme+"')>"+
-                          "<option value='0' "+(item.sms==0 ? "selected" : "")+">Non</option>"+
-                          "<option value='1' "+(item.sms==1 ? "selected" : "")+">Oui</option>"+
-                          "<option value='2' "+(item.sms==2 ? "selected" : "")+">GSM Only</option>"+
-                          "<option value='3' "+(item.sms==3 ? "selected" : "")+">OVH Only</option>");
+                          "<option value='0' "+(item.sms_notification==0 ? "selected" : "")+">Non</option>"+
+                          "<option value='1' "+(item.sms_notification==1 ? "selected" : "")+">Oui</option>"+
+                          "<option value='2' "+(item.sms_notification==2 ? "selected" : "")+">GSM Only</option>"+
+                          "<option value='3' "+(item.sms_notification==3 ? "selected" : "")+">OVH Only</option>");
                  }
              },
            ],

@@ -170,7 +170,7 @@
 reload:
     memset( &Cfg_teleinfo, 0, sizeof(Cfg_teleinfo) );                               /* Mise a zero de la structure de travail */
     Cfg_teleinfo.lib = lib;                                        /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-TINFOEDF", lib, WTD_VERSION, "Manage TELEINFOEDF Sensors" );
+    Thread_init ( "W-TINFOEDF", "I/O", lib, WTD_VERSION, "Manage TELEINFOEDF Sensors" );
     Teleinfo_Lire_config ();                                                /* Lecture de la configuration logiciel du thread */
 
     Cfg_teleinfo.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );

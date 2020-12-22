@@ -663,7 +663,7 @@ end:
 reload:
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-SMSG", lib, WTD_VERSION, "Manage SMS system (libgammu)" );
+    Thread_init ( "W-SMSG", "USER", lib, WTD_VERSION, "Manage SMS system (libgammu)" );
     Smsg_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
     if (Dls_auto_create_plugin( Cfg_smsg.tech_id, "Gestion du GSM" ) == FALSE)
