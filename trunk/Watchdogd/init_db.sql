@@ -580,7 +580,7 @@ CREATE TABLE IF NOT EXISTS `thread_classe` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `thread` varchar(32) COLLATE utf8_unicode_ci UNIQUE DEFAULT "",
   `classe` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 
