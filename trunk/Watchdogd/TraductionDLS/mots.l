@@ -92,7 +92,6 @@ newline       [\n\r]+
 
 
  /**************************************************** Status des vignette ****************************************************/
-"_MEMSA_COMM"              { DlsScanner_lval.val = T_ACT_COMM;   return T_ACT_COMM;   }
 "_MEMSA_DEFAUT_FIXE"       { DlsScanner_lval.val = T_ACT_DEFF;   return T_ACT_DEFF;   }
 "_MEMSA_DEFAUT"            { DlsScanner_lval.val = T_ACT_DEF;    return T_ACT_DEF;    }
 "_MEMSA_ALARME_FIXE"       { DlsScanner_lval.val = T_ACT_ALAF;   return T_ACT_ALAF;   }

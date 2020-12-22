@@ -698,10 +698,44 @@
     if (!tech_id) alias->tech_id = g_strdup(Dls_plugin.tech_id);
              else alias->tech_id = g_strdup(tech_id);
     alias->acronyme = g_strdup(acronyme);
-    alias->classe = bit;
+    alias->classe   = bit;
     alias->options  = options;
-    if (g_str_has_prefix( acronyme, "_" )) alias->used = 1;
-    else alias->used     = 0;
+    alias->used     = 0;
+    Alias = g_slist_prepend( Alias, alias );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ struct OPTION *New_option_chaine( gint type, gchar *chaine )
+  { struct OPTION *option;
+    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
+    if (option)
+     { option->type   = type;
+       option->chaine = chaine;
+     }
+    return(option);
+  }
+/******************************************************************************************************************************/
+/* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
+/* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
+/* Sortie: False si il existe deja, true sinon                                                                                */
+/******************************************************************************************************************************/
+ static gboolean New_alias_internal ( gchar *acronyme, gint bit, gchar *libelle )
+  { struct ALIAS *alias;
+
+    if (Get_alias_par_acronyme( Dls_plugin.tech_id, acronyme )) return(FALSE);                           /* ID deja definit ? */
+
+    alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
+    if (!alias) { return(FALSE); }
+    alias->tech_id  = g_strdup(Dls_plugin.tech_id);
+    alias->acronyme = g_strdup(acronyme);
+    alias->classe   = bit;
+    struct OPTION *option = New_option_chaine ( T_LIBELLE, strdup(libelle) );
+    alias->options  = g_list_append ( NULL, option );
+    alias->used     = 1;                                                       /* Un bit internal est obligatoirement utilisé */
     Alias = g_slist_prepend( Alias, alias );
     return(TRUE);
   }
@@ -850,7 +884,22 @@
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR_NO_FILE;
     else
-     { setlocale(LC_ALL, "C");
+     { gchar *libelle;
+       setlocale(LC_ALL, "C");
+
+/*---------------------------------------- Création des mnemoniques permanents -----------------------------------------------*/
+       libelle = "Statut de la communication du module";
+       New_alias_internal ( "_COMM", MNEMO_MONOSTABLE, libelle );
+       Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, Dls_plugin.tech_id, "_COMM", libelle );
+
+       libelle = "Communication OK";
+       New_alias_internal ( "_MSG_COMM_OK", MNEMO_MSG, libelle );
+       Mnemo_auto_create_MSG ( Dls_plugin.tech_id, "MSG_COMM_OK", libelle, MSG_ETAT );
+
+       libelle = "Communication Hors Service";
+       New_alias_internal ( "_MSG_COMM_HS", MNEMO_MSG, libelle );
+       Mnemo_auto_create_MSG ( Dls_plugin.tech_id, "MSG_COMM_HS", libelle, MSG_DEFAUT );
+
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);
@@ -883,8 +932,6 @@
 
           write(fd, include, strlen(include));
 
-          New_alias ( Dls_plugin.tech_id, "_MSG_COMM_OK", MNEMO_MSG, NULL );
-          New_alias ( Dls_plugin.tech_id, "_MSG_COMM_HS", MNEMO_MSG, NULL );
 
           liste = Alias;
           while(liste)
@@ -908,16 +955,10 @@
 /*----------------------------------------------- Ecriture de la fonction Go -------------------------------------------------*/
           write( fd, Start_Go, strlen(Start_Go) );                                                 /* Ecriture de de l'entete */
 
-/*----------------------------------------------- Ecriture du début fin de fichier -------------------------------------------*/
-          nb_car = g_snprintf ( chaine, sizeof(chaine), "Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s,  vars->bit_comm );\n"
-                                                        "Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, !vars->bit_comm );\n",
-                                Dls_plugin.tech_id, "_MSG_COMM_OK", Dls_plugin.tech_id, "_MSG_COMM_OK", "FALSE",
-                                Dls_plugin.tech_id, "_MSG_COMM_HS", Dls_plugin.tech_id, "_MSG_COMM_HS", "FALSE" );
-          write(fd, chaine, nb_car );                                                          /* Ecriture du buffer resultat */
-
 /*----------------------------------------------- Ecriture du buffer C -------------------------------------------------------*/
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
 
+/*----------------------------------------------- Ecriture de la fin de fonction Go ------------------------------------------*/
           write( fd, End_Go, strlen(End_Go) );
           close(fd);
         }
@@ -1060,15 +1101,9 @@
                    break;
                  }
                 case MNEMO_MSG:
-                 { struct CMD_TYPE_MESSAGE msg;
-                   gint param;
-                   g_snprintf( msg.tech_id,  sizeof(msg.tech_id),  "%s", Dls_plugin.tech_id );
-                   g_snprintf( msg.acronyme, sizeof(msg.acronyme), "%s", alias->acronyme );
-                   g_snprintf( msg.libelle,  sizeof(msg.libelle),  "%s", libelle );
+                 { gint param;
                    param = Get_option_entier ( alias->options, T_TYPE );
-                   if (param!=-1) msg.typologie = param;
-                             else msg.typologie = MSG_ETAT;
-                   Mnemo_auto_create_MSG ( &msg );
+                   Mnemo_auto_create_MSG ( Dls_plugin.tech_id, alias->acronyme, libelle, (param!=-1 ? param : MSG_ETAT) );
                    if (!Liste_MESSAGE) Liste_MESSAGE = g_strconcat( "'", alias->acronyme, "'", NULL );
                    else
                     { old_liste = Liste_MESSAGE;
@@ -1081,23 +1116,7 @@
            }
           liste = liste->next;
         }
-
-/*--------------------------------- Création des mnemoniques permanents -----------------------------------------*/
-       { struct CMD_TYPE_MESSAGE msg;
-         g_snprintf( msg.tech_id,  sizeof(msg.tech_id),  "%s", Dls_plugin.tech_id );
-         g_snprintf( msg.acronyme, sizeof(msg.acronyme), "_MSG_COMM_OK" );
-         g_snprintf( msg.libelle,  sizeof(msg.libelle),  "Communication OK" );
-         msg.typologie = MSG_ETAT;
-         Mnemo_auto_create_MSG ( &msg );
-
-         g_snprintf( msg.tech_id,  sizeof(msg.tech_id),  "%s", Dls_plugin.tech_id );
-         g_snprintf( msg.acronyme, sizeof(msg.acronyme), "_MSG_COMM_HS" );
-         g_snprintf( msg.libelle,  sizeof(msg.libelle),  "Communication Hors Service" );
-         msg.typologie = MSG_DEFAUT;
-         Mnemo_auto_create_MSG ( &msg );
-        }
-
-/*--------------------------------- Suppression des mnemoniques non utilisés ------------------------------------*/
+/*--------------------------------------- Suppression des mnemoniques non utilisés -------------------------------------------*/
        requete = g_strconcat ( "DELETE FROM mnemos_AI WHERE deletable=1 AND tech_id='", tech_id, "' ",
                                " AND acronyme NOT IN (", (Liste_AI?Liste_AI:"''") , ")", NULL );
        if (Liste_AI) g_free(Liste_AI);

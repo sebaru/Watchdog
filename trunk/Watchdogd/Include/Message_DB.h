@@ -43,7 +43,7 @@
 /******************************************** Définitions des prototypes ******************************************************/
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_acronyme ( gchar *tech_id, gchar *acronyme );
  extern struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db );
- extern gint Mnemo_auto_create_MSG ( struct CMD_TYPE_MESSAGE *msg );
+ extern gint Mnemo_auto_create_MSG ( gchar *tech_id, gchar *acronyme, gchar *libelle, gint typologie );
  extern void Charger_confDB_MSG ( void );
  extern void Updater_confDB_MSG ( void );
  extern void Dls_MESSAGE_to_json ( JsonBuilder *builder, struct DLS_MESSAGES *bit );

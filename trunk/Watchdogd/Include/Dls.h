@@ -43,6 +43,7 @@
     float conso;                                                                         /* Consommation temporelle du plugin */
     gchar *(*version)(void);                                                       /* Retourne le numéro de version du plugin */
     struct DLS_TO_PLUGIN vars;
+    GSList *Arbre_Comm;                         /* Liste tech_id des dependances du module pour le calcul de sa communication */
   };
 
  enum                                                                                  /* différent statut des temporisations */
@@ -234,6 +235,7 @@
  extern gint Ajouter_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern gboolean Recuperer_plugins_dlsDB( struct DB **db );
  extern gboolean Recuperer_plugins_dlsDB_by_syn( struct DB **db_retour, gint syn_id );
+ extern void Dls_recalculer_arbre_comm ( void );
  extern struct CMD_TYPE_PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct DB **db );
  extern struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( gchar *tech_id_src );
  extern gboolean Modifier_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
@@ -244,7 +246,6 @@
 
  extern void Charger_plugins ( void );                                                                      /* Dans plugins.c */
  extern void Decharger_plugins ( void );
- extern void Decharger_plugin_by_id ( gint id );
  extern gint Compiler_source_dls( gboolean reset, gchar *tech_id, gchar *buffer, gint taille_buffer );
  extern void Debug_plugin ( gchar *tech_id, gboolean actif );
  extern void Activer_plugin ( gchar *tech_id, gboolean actif );

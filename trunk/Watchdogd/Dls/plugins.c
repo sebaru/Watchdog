@@ -78,6 +78,51 @@
      }
   }
 /******************************************************************************************************************************/
+/* Dls_plugin_recalcule_arbre_comm: Calcule l'arbre de communication du module                                                */
+/* Entrée: Le plugin D.L.S                                                                                                    */
+/* Sortie: FALSE si problème                                                                                                  */
+/******************************************************************************************************************************/
+ void Dls_plugin_recalculer_arbre_comm ( void *user_data, struct PLUGIN_DLS *dls )
+  { gchar chaine[128];
+
+    struct DB *db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return;
+     }
+
+    if (dls->Arbre_Comm)
+     { g_slist_free(dls->Arbre_Comm);
+       dls->Arbre_Comm = NULL;
+     }
+/*---------------------------- On recherche tous les tech_id des thread de DigitalInput --------------------------------------*/
+    g_snprintf( chaine, sizeof(chaine), "SELECT DISTINCT(map_tech_id) FROM mnemos_DI WHERE tech_id='%s'"
+                                        " AND map_tech_id IS NOT NULL"
+                                        " AND map_thread != 'SMSG'", dls->plugindb.tech_id );
+    if (!Lancer_requete_SQL ( db, chaine ))
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB request failed", __func__ );
+       return;
+     }
+
+    while ( Recuperer_ligne_SQL ( db ) != NULL )
+     { gpointer bool = NULL;
+       if (db->row[0])
+        { Dls_data_get_bool ( db->row[0], "COMM", &bool );
+          if (bool) dls->Arbre_Comm = g_slist_prepend ( dls->Arbre_Comm, bool );
+          else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:COMM not found !", __func__, db->row[0] ); }
+        }
+     }
+
+    Libere_DB_SQL ( &db );
+  }
+/******************************************************************************************************************************/
+/* Dls_plugin_recalcule_arbre_comm: Calcule l'arbre de communication du module                                                */
+/* Entrée: Le plugin D.L.S                                                                                                    */
+/* Sortie: FALSE si problème                                                                                                  */
+/******************************************************************************************************************************/
+ void Dls_recalculer_arbre_comm ( void )
+  { Dls_foreach ( NULL, Dls_plugin_recalculer_arbre_comm, NULL ); }
+/******************************************************************************************************************************/
 /* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                                              */
 /* Entrée: Le plugin D.L.S                                                                                                    */
 /* Sortie: FALSE si problème                                                                                                  */
@@ -118,7 +163,6 @@
                      else dls->start_date = 0;
     memset ( &dls->vars, 0, sizeof(dls->vars) );                                 /* Mise à zero de tous les bits de remontées */
     dls->vars.debug = dls->plugindb.debug;                         /* Recopie du champ de debug depuis la DB vers la zone RUN */
-    dls->vars.bit_comm = TRUE;                              /* Par construction, on considere que la comm est OK au démarrage */
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -210,52 +254,6 @@
 /* Entrée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Decharger_plugin_by_id_dls_tree ( gint id, struct DLS_TREE *dls_tree )
-  { GSList *liste;
-
-    liste = dls_tree->Liste_plugin_dls;
-    while(liste)                                                                            /* Liberation mémoire des modules */
-     { struct PLUGIN_DLS *plugin = liste->data;
-       if (plugin->plugindb.id == id)
-        { Reseter_all_bit_interne (plugin);
-          if (plugin->handle)
-           { if (dlclose( plugin->handle ))
-              { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for '%s' (%s)", __func__,
-                          dlerror(), plugin->plugindb.tech_id, plugin->plugindb.shortname );
-              }
-           }
-          dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
-                                                                            /* Destruction de l'entete associée dans la GList */
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin '%s' unloaded (%s)", __func__,
-                    plugin->plugindb.tech_id, plugin->plugindb.nom );
-          g_free( plugin );
-          return;
-        }
-       liste=liste->next;
-     }
-
-    liste = dls_tree->Liste_dls_tree;
-    while (liste)
-     { struct DLS_TREE *sub_dls_tree = liste->data;
-       Decharger_plugin_by_id_dls_tree ( id, sub_dls_tree );
-       liste=liste->next;
-     }
-  }
-/******************************************************************************************************************************/
-/* Decharger_plugins: Decharge tous les plugins DLS                                                                           */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- void Decharger_plugin_by_id ( gint id )
-  { pthread_mutex_lock( &Partage->com_dls.synchro );
-    Decharger_plugin_by_id_dls_tree ( id, Partage->com_dls.Dls_tree );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
-  }
-/******************************************************************************************************************************/
-/* Decharger_plugins: Decharge tous les plugins DLS                                                                           */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
  static void Decharger_plugins_dls_tree ( struct DLS_TREE *dls_tree )
   { struct PLUGIN_DLS *plugin;
 
@@ -266,6 +264,7 @@
                     dlerror(), plugin->plugindb.tech_id, plugin->plugindb.shortname );
         }
        dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
+       if (plugin->Arbre_Comm) g_slist_free(plugin->Arbre_Comm);
                                                                              /* Destruction de l'entete associé dans la GList */
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin '%s' unloaded (%s)", __func__,
                  plugin->plugindb.tech_id, plugin->plugindb.nom );
