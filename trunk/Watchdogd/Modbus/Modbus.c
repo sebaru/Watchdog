@@ -101,7 +101,7 @@
        goto end;
      }
 
-    if (database_version < 4920)
+    if (database_version < 1)
      { SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_EA`" );
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_E`" );
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `max_nbr_E`" );
@@ -109,12 +109,12 @@
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_AA`" );
      }
 
-    if (database_version < 5079)
+    if (database_version < 2)
      { SQL_Write ( "ALTER TABLE `modbus_modules` ADD `max_request_par_sec` int(11) NOT NULL DEFAULT 50" );
      }
-
+    database_version = 2;
 end:
-    Modifier_configDB ( "modbus", "database_version", WTD_DB_VERSION );
+    Modifier_configDB_int ( "modbus", "database_version", database_version );
   }
 /******************************************************************************************************************************/
 /* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                                  */

@@ -10,7 +10,6 @@ AC_INIT([Watchdog], [MAJOR_VERSION.MINOR_VERSION.SVN_VERSION],
 AC_DEFINE([WTD_MAJOR_VERSION], [MAJOR_VERSION], [Numéro de version majeure])
 AC_DEFINE([WTD_MINOR_VERSION], [MINOR_VERSION], [Numéro de version mineure])
 AC_DEFINE([WTD_SVN_VERSION],   [SVN_VERSION],   [Numéro de revision SVN])
-AC_DEFINE([WTD_DB_VERSION],    ["SVN_VERSION"], [Numéro de revision SVN])
 full_version=MAJOR_VERSION.MINOR_VERSION.SVN_VERSION
 AC_DEFINE_UNQUOTED([WTD_VERSION], "$full_version", [Numero de version])
 

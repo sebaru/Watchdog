@@ -93,9 +93,9 @@
                 "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                 "PRIMARY KEY (`id`)"
                 ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
-
+    database_version = 1;
 /*end:*/
-    Modifier_configDB ( NOM_THREAD, "database_version", WTD_DB_VERSION );
+    Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
   }
 /******************************************************************************************************************************/
 /* Recuperer_liste_id_MODULE_UPS: Recupération de la liste des ids des upss                                                   */

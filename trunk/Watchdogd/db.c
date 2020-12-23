@@ -2072,6 +2072,7 @@ encore:
                                              ") ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
        Lancer_requete_SQL ( db, requete );
      }
+    database_version = 5222;
 
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
@@ -2115,9 +2116,9 @@ fin:
     Lancer_requete_SQL ( db, requete );
     Libere_DB_SQL(&db);
 
-    if (Modifier_configDB ( "msrv", "database_version", WTD_DB_VERSION ))
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, WTD_DB_VERSION ); }
+    if (Modifier_configDB_int ( "msrv", "database_version", database_version ))
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, database_version ); }
     else
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s FAILED", __func__, WTD_DB_VERSION ); }
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s FAILED", __func__, database_version ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
