@@ -163,6 +163,7 @@
        switch( *((gint *)objet->data) )
         { case TYPE_MOTIF:
                trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
+               printf("Menu_enregistrer_synoptique def_color=%s\n", trame_motif->motif->def_color );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_MOTIF,
                               (gchar *)trame_motif->motif, sizeof(struct CMD_TYPE_MOTIF) );
                break;

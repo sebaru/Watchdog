@@ -1589,12 +1589,6 @@ end:
 
        if (plugin->plugindb.on && plugin->go)
         { GSList *liste;
-          gettimeofday( &tv_avant, NULL );
-          plugin->go( &plugin->vars );                                                                  /* On appel le plugin */
-          gettimeofday( &tv_apres, NULL );
-          plugin->conso+=Chrono( &tv_avant, &tv_apres );
-          plugin->vars.resetted = FALSE;
-          plugin->vars.bit_acquit = 0;                                                        /* On arrete l'acquit du plugin */
 
 /*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
           gboolean bit_comm_module = TRUE;
@@ -1613,6 +1607,14 @@ end:
 /*----------------------------------------------- Ecriture du début fin de fichier -------------------------------------------*/
           Dls_data_set_MSG ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
           Dls_data_set_MSG ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
+
+/*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
+          gettimeofday( &tv_avant, NULL );
+          plugin->go( &plugin->vars );                                                                  /* On appel le plugin */
+          gettimeofday( &tv_apres, NULL );
+          plugin->conso+=Chrono( &tv_avant, &tv_apres );
+          plugin->vars.resetted = FALSE;
+          plugin->vars.bit_acquit = 0;                                                        /* On arrete l'acquit du plugin */
 
 /*----------------------------------------------- Calcul des synthèses -------------------------------------------------------*/
           bit_comm             &= bit_comm_module;                                                /* Bit de synthese activite */

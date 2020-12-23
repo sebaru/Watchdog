@@ -333,7 +333,7 @@
                 Normaliser_as_ascii ( motif->tech_id ), Normaliser_as_ascii ( motif->acronyme ),
                 motif->position_x, motif->position_y, motif->largeur, motif->hauteur, motif->angle,
                 motif->type_dialog, motif->type_gestion,
-                Normaliser_as_ascii ( motif->def_color), motif->rafraich,
+                motif->def_color, motif->rafraich,
                 motif->layer, clic_tech_id, clic_acro,
                 motif->id );
     g_free(libelle);
