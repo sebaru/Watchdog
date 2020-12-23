@@ -109,7 +109,7 @@
        if (Dls_auto_create_plugin( Cfg_teleinfo.tech_id, "Gestion du compteur EDF" ) == FALSE)
         { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_teleinfo.tech_id ); }
 
-       Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_teleinfo.tech_id, "COMM", "Statut de la communication avec le compteur EDF" );
+       Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_teleinfo.tech_id, "IO_COMM", "Statut de la communication avec le compteur EDF" );
 
        Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "ADCO",  "N° d’identification du compteur", "numéro" );
        Mnemo_auto_create_AI ( FALSE, Cfg_teleinfo.tech_id, "ISOUS", "Intensité EDF souscrite ", "A" );
@@ -157,7 +157,7 @@
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     Cfg_teleinfo.last_view = Partage->top;
     if (!Partage->top % 300)
-     { Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", 400 ); }
+     { Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 400 ); }
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread Teleinfo                                                                               */
@@ -170,7 +170,7 @@
 reload:
     memset( &Cfg_teleinfo, 0, sizeof(Cfg_teleinfo) );                               /* Mise a zero de la structure de travail */
     Cfg_teleinfo.lib = lib;                                        /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-TINFOEDF", lib, WTD_VERSION, "Manage TELEINFOEDF Sensors" );
+    Thread_init ( "W-TINFOEDF", "I/O", lib, WTD_VERSION, "Manage TELEINFOEDF Sensors" );
     Teleinfo_Lire_config ();                                                /* Lecture de la configuration logiciel du thread */
 
     Cfg_teleinfo.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
@@ -198,7 +198,7 @@ reload:
                        "%s: Init TELEINFO failed. Re-trying in %ds", __func__, TINFO_RETRY_DELAI/10 );
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
-             Send_zmq_DI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", FALSE );
+             Send_zmq_DI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", FALSE );
            }
           else
            { Cfg_teleinfo.mode = TINFO_CONNECTED;
@@ -259,7 +259,7 @@ reload:
            { close(Cfg_teleinfo.fd);
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
-             Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "COMM", 0 );
+             Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 0 );
              Cfg_teleinfo.comm_status = FALSE;
            }
         }

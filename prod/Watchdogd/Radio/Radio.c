@@ -119,7 +119,7 @@
 reload:
     memset( &Cfg_radio, 0, sizeof(Cfg_radio) );                                     /* Mise a zero de la structure de travail */
     Cfg_radio.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-RADIO", lib, WTD_VERSION, "Manage RADIO Module" );
+    Thread_init ( "W-RADIO", "USER", lib, WTD_VERSION, "Manage RADIO Module" );
     Radio_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
     zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );

@@ -20,7 +20,7 @@
     Send_to_API ( "PUT", "/api/dls/run", json_request, function(Response)
      { $('#idTableEntreeTOR').DataTable(
           { pageLength : 50,
-            fixedHeader: true, paging: false, ordering: false, searching: false,
+            fixedHeader: true, paging: false, ordering: true, searching: true,
             data: Response.DI,
             rowId: "id",
             columns:
@@ -39,7 +39,7 @@
 
        $('#idTableEntreeANA').DataTable(
           { pageLength : 50,
-            fixedHeader: true, paging: false, ordering: false, searching: false,
+            fixedHeader: true, paging: false, ordering: true, searching: true,
             data: Response.AI,
                rowId: "id",
             columns:
@@ -64,7 +64,7 @@
 
        $('#idTableSortieTOR').DataTable(
           { pageLength : 50,
-            fixedHeader: true, paging: false, ordering: false, searching: false,
+            fixedHeader: true, paging: false, ordering: true, searching: true,
             data: Response.DO,
             rowId: "id",
             columns:
@@ -83,7 +83,7 @@
 
        $('#idTableSortieANA').DataTable(
           { pageLength : 50,
-            fixedHeader: true, paging: false, ordering: false, searching: false,
+            fixedHeader: true, paging: false, ordering: true, searching: true,
             data: Response.AO,
             rowId: "id",
             columns: [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
@@ -96,7 +96,7 @@
 
        $('#idTableCI').DataTable(
           { pageLength : 50,
-            fixedHeader: true, paging: false, ordering: false, searching: false,
+            fixedHeader: true, paging: false, ordering: true, searching: true,
             data: Response.CI,
             rowId: "id",
             columns:
@@ -121,7 +121,7 @@
 
        $('#idTableRegistre').DataTable(
           { pageLength : 50,
-            fixedHeader: true, paging: false, ordering: false, searching: false,
+            fixedHeader: true, paging: false, ordering: true, searching: true,
             data: Response.REGISTRE,
             rowId: "id",
             columns:
@@ -139,7 +139,7 @@
 
        $('#idTableTempo').DataTable(
           { pageLength : 50,
-            fixedHeader: true, paging: false, ordering: false, searching: false,
+            fixedHeader: true, paging: false, ordering: true, searching: true,
             data: Response.T,
             rowId: "id",
             columns:
@@ -164,7 +164,7 @@
 
        $('#idTableBool').DataTable(
           { pageLength : 50,
-            fixedHeader: true, paging: false, ordering: false, searching: false,
+            fixedHeader: true, paging: false, ordering: true, searching: true,
             data: Response.BOOL,
             rowId: "id",
             columns:
@@ -183,7 +183,7 @@
 
        $('#idTableVisuel').DataTable(
           { pageLength : 50,
-            fixedHeader: true, paging: false, ordering: false, searching: false,
+            fixedHeader: true, paging: false, ordering: true, searching: true,
             data: Response.VISUEL,
             rowId: "id",
             columns:
@@ -204,7 +204,7 @@
 
        $('#idTableWatchdog').DataTable(
           { pageLength : 50,
-            fixedHeader: true, paging: false, ordering: false, searching: false,
+            fixedHeader: true, paging: false, ordering: true, searching: true,
             data: Response.WATCHDOG,
             rowId: "id",
             columns:
@@ -224,7 +224,7 @@
 
        $('#idTableMessages').DataTable(
           { pageLength : 50,
-            fixedHeader: true, paging: false, ordering: false, searching: false,
+            fixedHeader: true, paging: false, ordering: true, searching: true,
             data: Response.MSG,
             rowId: "id",
             columns:

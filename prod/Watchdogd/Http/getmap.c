@@ -276,6 +276,7 @@
      }
     else
      {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
+    Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
 end:
     json_node_unref(request);
   }

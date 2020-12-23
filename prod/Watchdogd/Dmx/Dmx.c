@@ -149,7 +149,7 @@
        close(Cfg_dmx.fd);
        Cfg_dmx.fd = -1;
      }
-    Send_zmq_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, "tech_id", "COMM", 0 );
+    Send_zmq_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, "tech_id", "IO_COMM", 0 );
     Cfg_dmx.comm_status = FALSE;
   }
 /******************************************************************************************************************************/
@@ -182,7 +182,7 @@
 reload:
     memset( &Cfg_dmx, 0, sizeof(Cfg_dmx) );                                         /* Mise a zero de la structure de travail */
     Cfg_dmx.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-DMX", lib, WTD_VERSION, "Manage Dmx System" );
+    Thread_init ( "W-DMX", "I/O", lib, WTD_VERSION, "Manage Dmx System" );
     Dmx_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
     Cfg_dmx.zmq_from_bus  = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
@@ -191,7 +191,7 @@ reload:
     if (Dls_auto_create_plugin( Cfg_dmx.tech_id, "Gestion du DMX" ) == FALSE)
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", Cfg_dmx.tech_id ); }
 
-    Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_dmx.tech_id, "COMM", "Statut de la communication avec le token DMX" );
+    Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_dmx.tech_id, "IO_COMM", "Statut de la communication avec le token DMX" );
 
     Dmx_init();
     Envoyer_trame_dmx_request();
@@ -207,7 +207,7 @@ reload:
           break;
         }
 
-       if (!Partage->top%600) Send_zmq_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, Cfg_dmx.tech_id, "COMM", 900 );
+       if (!Partage->top%600) Send_zmq_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, Cfg_dmx.tech_id, "IO_COMM", 900 );
 
 /********************************************************* Envoi de SMS *******************************************************/
        JsonNode *request = Recv_zmq_with_json( Cfg_dmx.zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );

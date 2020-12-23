@@ -48,7 +48,7 @@
 
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_SBIEN_ALE_FUGITIVE T_TOP_ALERTE T_TOP_ALERTE_FUGITIVE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_SPERS_OK T_OSYN_ACQ
-%token <val>    T_ACT_COMM T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_OK
+%token <val>    T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_OK
 %token <val>    T_BUS T_HOST T_THREAD T_TAG T_PARAM1
 
 %token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
@@ -454,8 +454,6 @@ unite:          modulateur ENTIER HEURE ENTIER
                 {{ if ($1) $$ = g_strdup("!vars->bit_secupers_ok");
                       else $$ = g_strdup("vars->bit_secupers_ok");
                 }}
-                | barre T_ACT_COMM
-                  {{ $$=New_condition_vars( $1, "vars->bit_comm"); }}
                 | barre T_ACT_DEF
                   {{ $$=New_condition_vars( $1, "vars->bit_defaut"); }}
                 | barre T_ACT_DEFF
@@ -680,9 +678,7 @@ action:         action VIRGULE une_action
                 | une_action {{ $$=$1; }}
                 ;
 
-une_action:     T_ACT_COMM
-                  {{ $$=New_action_vars_mono("vars->bit_comm"); }}
-                | T_ACT_DEF
+une_action:     T_ACT_DEF
                   {{ $$=New_action_vars_mono("vars->bit_defaut"); }}
                 | T_ACT_DEFF
                   {{ $$=New_action_vars_mono("vars->bit_defaut_fixe"); }}

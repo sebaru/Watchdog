@@ -47,24 +47,24 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
- gint Mnemo_auto_create_MSG ( struct CMD_TYPE_MESSAGE *msg )
+ gint Mnemo_auto_create_MSG ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src, gint typologie )
   { gchar *libelle;
     gchar requete[2048];
     gboolean retour;
     struct DB *db;
     gint id;
 
-    libelle = Normaliser_chaine ( msg->libelle );                                            /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( libelle_src );                                             /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle impossible", __func__ );
        return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s SET tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s',"
+                "INSERT INTO %s SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s',"
                 "typologie='%d',sms_notification='0' "
-                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), typologie=VALUES(typologie)", NOM_TABLE_MSG, msg->tech_id, msg->acronyme,
-                libelle, libelle, msg->typologie
+                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), typologie=VALUES(typologie)", NOM_TABLE_MSG,
+                deletable, tech_id, acronyme, libelle, libelle, typologie
               );
     g_free(libelle);
 

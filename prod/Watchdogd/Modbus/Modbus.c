@@ -101,7 +101,7 @@
        goto end;
      }
 
-    if (database_version < 4920)
+    if (database_version < 1)
      { SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_EA`" );
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_E`" );
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `max_nbr_E`" );
@@ -109,12 +109,12 @@
        SQL_Write ( "ALTER TABLE `modbus_modules` DROP `map_AA`" );
      }
 
-    if (database_version < 5079)
+    if (database_version < 2)
      { SQL_Write ( "ALTER TABLE `modbus_modules` ADD `max_request_par_sec` int(11) NOT NULL DEFAULT 50" );
      }
-
+    database_version = 2;
 end:
-    Modifier_configDB ( "modbus", "database_version", WTD_DB_VERSION );
+    Modifier_configDB_int ( "modbus", "database_version", database_version );
   }
 /******************************************************************************************************************************/
 /* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                                  */
@@ -178,7 +178,7 @@ end:
     if (module->DI) g_free(module->DI);
     if (module->AI) g_free(module->AI);
     if (module->DO) g_free(module->DO);
-    Dls_data_set_bool ( NULL, module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
+    Dls_data_set_bool ( NULL, module->modbus.tech_id, "IO_COMM", &module->bit_comm, FALSE );
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module disconnected", __func__, module->modbus.tech_id );
   }
 /******************************************************************************************************************************/
@@ -771,7 +771,7 @@ end:
                       __func__, module->modbus.tech_id, map_tag );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    Dls_data_set_bool ( NULL, module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
+    Dls_data_set_bool ( NULL, module->modbus.tech_id, "IO_COMM", &module->bit_comm, FALSE );
 
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: '%s': Module '%s' : mapping done",
               __func__, module->modbus.tech_id, module->modbus.description );
@@ -792,7 +792,7 @@ end:
     else
      { int cpt_byte, cpt_poid, cpt;
        module->date_last_reponse = Partage->top;                                                   /* Estampillage de la date */
-       Dls_data_set_bool ( NULL, module->modbus.tech_id, "COMM", &module->bit_comm, TRUE );
+       Dls_data_set_bool ( NULL, module->modbus.tech_id, "IO_COMM", &module->bit_comm, TRUE );
        if (ntohs(module->response.transaction_id) != module->transaction_id)                              /* Mauvaise reponse */
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                    "%s: '%s': wrong transaction_id for module %d  attendu %d, recu %d", __func__, module->modbus.tech_id,
@@ -1017,7 +1017,7 @@ end:
 
     if (Dls_auto_create_plugin( module->modbus.tech_id, "Gestion du Wago" ) == FALSE)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->modbus.tech_id ); }
-    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, module->modbus.tech_id, "COMM", "Statut de la communication avec le wago" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, module->modbus.tech_id, "IO_COMM", "Statut de la communication avec le Wago" );
 
     while(Cfg_modbus.lib->Thread_run == TRUE && Cfg_modbus.lib->Thread_reload == FALSE)      /* On tourne tant que necessaire */
      { sched_yield();
@@ -1163,7 +1163,7 @@ end:
 reload:
     memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );                                   /* Mise a zero de la structure de travail */
     Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-MODBUS", lib, WTD_VERSION, "Manage Modbus System" );
+    Thread_init ( "W-MODBUS", "I/O", lib, WTD_VERSION, "Manage Modbus System" );
     Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
     if (Config.instance_is_master==FALSE)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,

@@ -49,15 +49,20 @@
 /* Entrée: Le nom du thread, son niveau de log                                                                                */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- void Thread_init ( gchar *pr_name, struct LIBRAIRIE *lib, gchar *version, gchar *description )
-  { prctl(PR_SET_NAME, pr_name, 0, 0, 0 );
+ void Thread_init ( gchar *pr_name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description )
+  { gchar chaine[128];
+    prctl(PR_SET_NAME, pr_name, 0, 0, 0 );
     lib->TID = pthread_self();                                                              /* Sauvegarde du TID pour le pere */
     lib->Thread_run = TRUE;                                                                             /* Le thread tourne ! */
     time ( &lib->start_time );
     g_snprintf( lib->version,      sizeof(lib->version),      version );
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   description );
     Modifier_configDB ( lib->admin_prompt, "thread_version", lib->version );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Démarrage . . . TID = %p", lib->admin_prompt, pthread_self() );
+    g_snprintf( chaine, sizeof(chaine), "INSERT INTO thread_classe SET thread=UPPER('%s'), classe=UPPER('%s') "
+                                        "ON DUPLICATE KEY UPDATE classe=VALUES(classe)", lib->admin_prompt, classe );
+    SQL_Write ( chaine );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Démarrage du thread '%s' de classe '%s' -> TID = %p", __func__,
+              lib->admin_prompt, classe, pthread_self() );
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */

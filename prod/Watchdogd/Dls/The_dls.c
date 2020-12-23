@@ -40,7 +40,7 @@
 
  #include "watchdogd.h"
 
- #define DLS_LIBRARY_VERSION  "20201113"
+ #define DLS_LIBRARY_VERSION  "20201222"
 
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
@@ -406,7 +406,11 @@ end:
        liste = g_slist_next(liste);
      }
 
-    if (!liste) return(FALSE);
+    if (!liste)                                                                  /* si n'existe pas, on le créé dans la liste */
+     { Dls_data_set_bool ( NULL, tech_id, acronyme, bool_p, FALSE );
+       return(FALSE);
+     }
+
     if (bool_p) *bool_p = (gpointer)bool;                                           /* Sauvegarde pour acceleration si besoin */
     return( bool->etat );
   }
@@ -1374,7 +1378,7 @@ end:
       }
     else visu = (struct DLS_VISUEL *)*visu_p;
 
-    if (vars && vars->bit_comm==FALSE) { color = "darkgreen", cligno = TRUE; }
+    if (vars && Dls_data_get_bool ( NULL, NULL, &vars->bit_comm )==FALSE) { color = "darkgreen", cligno = TRUE; }
 
     if (visu->mode != mode || strcmp( visu->color, color ) || visu->cligno != cligno )
      { if ( visu->last_change + 50 <= Partage->top )                                 /* Si pas de change depuis plus de 5 sec */
@@ -1580,37 +1584,53 @@ end:
 
     liste = dls_tree->Liste_plugin_dls;
     while(liste)                                                                     /* On execute tous les modules un par un */
-     { struct PLUGIN_DLS *plugin_actuel;
-       plugin_actuel = (struct PLUGIN_DLS *)liste->data;
+     { struct PLUGIN_DLS *plugin;
+       plugin = (struct PLUGIN_DLS *)liste->data;
 
-       if (plugin_actuel->plugindb.on && plugin_actuel->go)
-        { gettimeofday( &tv_avant, NULL );
-          Partage->top_cdg_plugin_dls = 0;                                                      /* On reset le cdg plugin DLS */
-          plugin_actuel->go( &plugin_actuel->vars );                                                    /* On appel le plugin */
+       if (plugin->plugindb.on && plugin->go)
+        { GSList *liste;
+          gettimeofday( &tv_avant, NULL );
+          plugin->go( &plugin->vars );                                                                  /* On appel le plugin */
           gettimeofday( &tv_apres, NULL );
-          plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
-          plugin_actuel->vars.resetted = FALSE;
+          plugin->conso+=Chrono( &tv_avant, &tv_apres );
+          plugin->vars.resetted = FALSE;
+          plugin->vars.bit_acquit = 0;                                                        /* On arrete l'acquit du plugin */
 
-          plugin_actuel->vars.bit_acquit = 0;                                                 /* On arrete l'acquit du plugin */
-                                                                                                  /* Bit de synthese activite */
-          bit_comm             &= plugin_actuel->vars.bit_comm;
-          bit_defaut           |= plugin_actuel->vars.bit_defaut;
-          bit_defaut_fixe      |= plugin_actuel->vars.bit_defaut_fixe;
-          bit_alarme           |= plugin_actuel->vars.bit_alarme;
-          bit_alarme_fixe      |= plugin_actuel->vars.bit_alarme_fixe;
-          plugin_actuel->vars.bit_activite_ok = bit_comm && !(bit_defaut || bit_defaut_fixe || bit_alarme || bit_alarme_fixe);
+/*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
+          gboolean bit_comm_module = TRUE;
+          liste = plugin->Arbre_IO_Comm;
+          while ( liste )
+           { struct DLS_BOOL *bool = liste->data;
+             bit_comm_module &= bool->etat;
+             liste = g_slist_next ( liste );
+           }
+          Dls_data_set_bool ( &plugin->vars, plugin->plugindb.tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
+          plugin->vars.bit_activite_ok = bit_comm_module && !(plugin->vars.bit_defaut || plugin->vars.bit_defaut_fixe ||
+                                                              plugin->vars.bit_alarme || plugin->vars.bit_alarme_fixe);
+          plugin->vars.bit_secupers_ok = !(plugin->vars.bit_derangement || plugin->vars.bit_derangement_fixe ||
+                                           plugin->vars.bit_danger || plugin->vars.bit_danger_fixe);
 
-          bit_veille_partielle |= plugin_actuel->vars.bit_veille;
-          bit_veille_totale    &= plugin_actuel->vars.bit_veille;
-          bit_alerte           |= plugin_actuel->vars.bit_alerte;
-          bit_alerte_fixe      |= plugin_actuel->vars.bit_alerte_fixe;
-          bit_alerte_fugitive  |= plugin_actuel->vars.bit_alerte_fugitive;
+/*----------------------------------------------- Ecriture du début fin de fichier -------------------------------------------*/
+          Dls_data_set_MSG ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
+          Dls_data_set_MSG ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
 
-          bit_derangement      |= plugin_actuel->vars.bit_derangement;
-          bit_derangement_fixe |= plugin_actuel->vars.bit_derangement_fixe;
-          bit_danger           |= plugin_actuel->vars.bit_danger;
-          bit_danger_fixe      |= plugin_actuel->vars.bit_danger_fixe;
-          plugin_actuel->vars.bit_secupers_ok = !(bit_derangement | bit_derangement_fixe | bit_danger | bit_danger_fixe);
+/*----------------------------------------------- Calcul des synthèses -------------------------------------------------------*/
+          bit_comm             &= bit_comm_module;                                                /* Bit de synthese activite */
+          bit_defaut           |= plugin->vars.bit_defaut;
+          bit_defaut_fixe      |= plugin->vars.bit_defaut_fixe;
+          bit_alarme           |= plugin->vars.bit_alarme;
+          bit_alarme_fixe      |= plugin->vars.bit_alarme_fixe;
+
+          bit_veille_partielle |= plugin->vars.bit_veille;
+          bit_veille_totale    &= plugin->vars.bit_veille;
+          bit_alerte           |= plugin->vars.bit_alerte;
+          bit_alerte_fixe      |= plugin->vars.bit_alerte_fixe;
+          bit_alerte_fugitive  |= plugin->vars.bit_alerte_fugitive;
+
+          bit_derangement      |= plugin->vars.bit_derangement;
+          bit_derangement_fixe |= plugin->vars.bit_derangement_fixe;
+          bit_danger           |= plugin->vars.bit_danger;
+          bit_danger_fixe      |= plugin->vars.bit_danger_fixe;
         }
        liste = liste->next;
      }
@@ -1691,6 +1711,8 @@ end:
         { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: update library error" ); }
      }
     Charger_plugins();                                                                          /* Chargement des modules dls */
+    Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
+
     Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
     Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
     Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
@@ -1791,9 +1813,11 @@ end:
        Set_edge();                                                                     /* Mise à zero des bit de egde up/down */
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
 
+       Partage->top_cdg_plugin_dls = 0;                                                         /* On reset le cdg plugin DLS */
        pthread_mutex_lock( &Partage->com_dls.synchro );
        Dls_run_dls_tree( Partage->com_dls.Dls_tree );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
+
        Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, FALSE );

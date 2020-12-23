@@ -576,8 +576,23 @@ CREATE TABLE IF NOT EXISTS `syns_rectangles` (
 -- Structure de la table `msgs`
 --
 
+CREATE TABLE IF NOT EXISTS `thread_classe` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `thread` varchar(32) COLLATE utf8_unicode_ci UNIQUE DEFAULT "",
+  `classe` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `msgs`
+--
+
 CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deletable` tinyint(1) NOT NULL DEFAULT '1',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT,
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No libelle",

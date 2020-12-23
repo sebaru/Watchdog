@@ -64,7 +64,7 @@
     if (retour)
      { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_DEL_PLUGIN_DLS_OK,
                      (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-       Decharger_plugin_by_id ( rezo_dls->id );
+       /*Decharger_plugin_by_id ( rezo_dls->id );*/
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
