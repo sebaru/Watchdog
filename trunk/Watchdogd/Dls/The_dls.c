@@ -1225,7 +1225,7 @@ end:
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MSG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
+ static void Dls_data_set_MSG_reel ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
   { struct DLS_MESSAGES *msg;
 
     if (!msg_p || !*msg_p)
@@ -1318,6 +1318,14 @@ end:
           Partage->audit_bit_interne_per_sec++;
         }
      }
+  }
+/******************************************************************************************************************************/
+/* Met à jour le message en parametre                                                                                         */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_MSG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
+  { if (vars && Dls_data_get_bool(NULL, NULL, &vars->bit_comm)==FALSE) etat = FALSE;
+    Dls_data_set_MSG_reel( vars, tech_id, acronyme, msg_p, update, etat );
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
@@ -1605,8 +1613,8 @@ end:
                                            plugin->vars.bit_danger || plugin->vars.bit_danger_fixe);
 
 /*----------------------------------------------- Ecriture du début fin de fichier -------------------------------------------*/
-          Dls_data_set_MSG ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
-          Dls_data_set_MSG ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
+          Dls_data_set_MSG_reel ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
+          Dls_data_set_MSG_reel ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
 
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
           gettimeofday( &tv_avant, NULL );
