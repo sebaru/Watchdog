@@ -772,7 +772,7 @@ end:
                 { ai->val_ech = (gfloat)(val_avant_ech/10.0);                                           /* Valeur à l'echelle */
                   ai->inrange = 1;
                 }
-               else ai->inrange = 0;
+               else { ai->val_ech = 0.0; ai->inrange = 0; }
                break;
           default:
                ai->val_ech = 0.0;
