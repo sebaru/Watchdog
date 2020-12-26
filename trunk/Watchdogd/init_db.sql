@@ -354,6 +354,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `access_level` INT(11) NOT NULL DEFAULT '0',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',

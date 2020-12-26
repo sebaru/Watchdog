@@ -118,7 +118,6 @@
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) );
                 }
             },
-            { "data": "package", "title":"Package", "className": "align-middle " },
             { "data": null, "title":"Nom court", "className": "align-middle",
               "render": function (item)
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.shortname ) );

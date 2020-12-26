@@ -532,6 +532,11 @@ reload:
     soup_server_add_handler ( socket, "/api/syn/set",        Http_traiter_syn_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/clic",       Http_traiter_syn_clic, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/update_motifs", Http_traiter_syn_update_motifs, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/horloge/list",   Http_traiter_horloge_list, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/horloge/set",    Http_traiter_horloge_set, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/horloge/ticks/set", Http_traiter_horloge_ticks_set, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/horloge/ticks/del", Http_traiter_horloge_ticks_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/horloge/ticks/list",Http_traiter_horloge_ticks_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/tableau/list",   Http_traiter_tableau_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/tableau/del",    Http_traiter_tableau_del, NULL, NULL );
     soup_server_add_handler ( socket, "/api/tableau/set",    Http_traiter_tableau_set, NULL, NULL );

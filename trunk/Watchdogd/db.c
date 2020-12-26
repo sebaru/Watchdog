@@ -2072,7 +2072,12 @@ encore:
                                              ") ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
        Lancer_requete_SQL ( db, requete );
      }
-    database_version = 5222;
+
+    if (database_version < 5232)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE ADD `access_level` INT(11) NOT NULL DEFAULT '0' AFTER `id`");
+       Lancer_requete_SQL ( db, requete );
+     }
+    database_version = 5232;
 
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
