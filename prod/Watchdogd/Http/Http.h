@@ -129,6 +129,16 @@
                                               SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_syn_clic ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                      SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_horloge_list  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                          SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_horloge_set  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                         SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_horloge_ticks_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                              SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_horloge_ticks_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                              SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_horloge_ticks_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                               SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_tableau_list  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                           SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_tableau_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,

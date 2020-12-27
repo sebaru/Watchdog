@@ -772,7 +772,7 @@ end:
                 { ai->val_ech = (gfloat)(val_avant_ech/10.0);                                           /* Valeur à l'echelle */
                   ai->inrange = 1;
                 }
-               else ai->inrange = 0;
+               else { ai->val_ech = 0.0; ai->inrange = 0; }
                break;
           default:
                ai->val_ech = 0.0;
@@ -1225,7 +1225,7 @@ end:
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MSG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
+ static void Dls_data_set_MSG_reel ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
   { struct DLS_MESSAGES *msg;
 
     if (!msg_p || !*msg_p)
@@ -1318,6 +1318,14 @@ end:
           Partage->audit_bit_interne_per_sec++;
         }
      }
+  }
+/******************************************************************************************************************************/
+/* Met à jour le message en parametre                                                                                         */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_MSG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
+  { if (vars && Dls_data_get_bool(NULL, NULL, &vars->bit_comm)==FALSE) etat = FALSE;
+    Dls_data_set_MSG_reel( vars, tech_id, acronyme, msg_p, update, etat );
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
@@ -1589,12 +1597,6 @@ end:
 
        if (plugin->plugindb.on && plugin->go)
         { GSList *liste;
-          gettimeofday( &tv_avant, NULL );
-          plugin->go( &plugin->vars );                                                                  /* On appel le plugin */
-          gettimeofday( &tv_apres, NULL );
-          plugin->conso+=Chrono( &tv_avant, &tv_apres );
-          plugin->vars.resetted = FALSE;
-          plugin->vars.bit_acquit = 0;                                                        /* On arrete l'acquit du plugin */
 
 /*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
           gboolean bit_comm_module = TRUE;
@@ -1611,8 +1613,16 @@ end:
                                            plugin->vars.bit_danger || plugin->vars.bit_danger_fixe);
 
 /*----------------------------------------------- Ecriture du début fin de fichier -------------------------------------------*/
-          Dls_data_set_MSG ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
-          Dls_data_set_MSG ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
+          Dls_data_set_MSG_reel ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
+          Dls_data_set_MSG_reel ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
+
+/*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
+          gettimeofday( &tv_avant, NULL );
+          plugin->go( &plugin->vars );                                                                  /* On appel le plugin */
+          gettimeofday( &tv_apres, NULL );
+          plugin->conso+=Chrono( &tv_avant, &tv_apres );
+          plugin->vars.resetted = FALSE;
+          plugin->vars.bit_acquit = 0;                                                        /* On arrete l'acquit du plugin */
 
 /*----------------------------------------------- Calcul des synthèses -------------------------------------------------------*/
           bit_comm             &= bit_comm_module;                                                /* Bit de synthese activite */
