@@ -376,6 +376,13 @@ CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE_ticks` (
   `heure` int(11) NOT NULL DEFAULT '0',
   `minute` int(11) NOT NULL DEFAULT '0',
   `lundi` tinyint(1) NOT NULL DEFAULT '0',
+  `mardi` tinyint(1) NOT NULL DEFAULT '0',
+  `mercredi` tinyint(1) NOT NULL DEFAULT '0',
+  `jeudi` tinyint(1) NOT NULL DEFAULT '0',
+  `vendredi` tinyint(1) NOT NULL DEFAULT '0',
+  `samedi` tinyint(1) NOT NULL DEFAULT '0',
+  `dimanche` tinyint(1) NOT NULL DEFAULT '0',
+  `date_modif` DATETIME NOT NULL DEFAULT NOW(),
   PRIMARY KEY (`id`),
   FOREIGN KEY (`horloge_id`) REFERENCES `mnemos_HORLOGE` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;

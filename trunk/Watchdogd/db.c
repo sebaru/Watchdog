@@ -2077,7 +2077,24 @@ encore:
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE ADD `access_level` INT(11) NOT NULL DEFAULT '0' AFTER `id`");
        Lancer_requete_SQL ( db, requete );
      }
-    database_version = 5232;
+
+    if (database_version < 5233)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE_ticks ADD `mardi` tinyint(1) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE_ticks ADD `mercredi` tinyint(1) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE_ticks ADD `jeudi` tinyint(1) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE_ticks ADD `vendredi` tinyint(1) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE_ticks ADD `samedi` tinyint(1) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE_ticks ADD `dimanche` tinyint(1) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE_ticks ADD `date_modif` DATETIME NOT NULL DEFAULT NOW()" );
+       Lancer_requete_SQL ( db, requete );
+     }
+    database_version = 5233;
 
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "

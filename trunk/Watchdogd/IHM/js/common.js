@@ -104,6 +104,15 @@
   }
 
 /********************************************* Renvoi un Select d'access Level ************************************************/
+ function Select ( id, fonction, array, selected )
+  { retour = "<select id='"+id+"' class='custom-select'"+
+             "onchange="+fonction+">";
+    for ( i=0; i<array.length; i++ )
+     { retour += "<option value='"+array[i]+"' "+(selected==array[i] ? "selected" : "")+">"+array[i]+"</option>"; }
+    retour +="</select>";
+    return(retour);
+  }
+/********************************************* Renvoi un Select d'access Level ************************************************/
  function Select_Access_level ( id, fonction, selected )
   { retour = "<select id='"+id+"' class='custom-select'"+
              "onchange="+fonction+">";
