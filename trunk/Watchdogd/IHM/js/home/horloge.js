@@ -6,13 +6,13 @@
     selection = table.ajax.json().horloge_ticks.filter( function(item) { return item.id==id } )[0];
     var json_request = JSON.stringify(
        { id: id,
-         lundi   : ($('#idHorlogeLundi_'+id).val() == "Oui" ? true : false),
-         mardi   : ($('#idHorlogeMardi_'+id).val() == "Oui" ? true : false),
-         mercredi: ($('#idHorlogeMercredi_'+id).val() == "Oui" ? true : false),
-         jeudi   : ($('#idHorlogeJeudi_'+id).val() == "Oui" ? true : false),
-         vendredi: ($('#idHorlogeVendredi_'+id).val() == "Oui" ? true : false),
-         samedi  : ($('#idHorlogeSamedi_'+id).val() == "Oui" ? true : false),
-         dimanche: ($('#idHorlogeDimanche_'+id).val() == "Oui" ? true : false),
+         lundi   : ($('#idHorlogeLundi_'+id).val() == "1" ? true : false),
+         mardi   : ($('#idHorlogeMardi_'+id).val() == "1" ? true : false),
+         mercredi: ($('#idHorlogeMercredi_'+id).val() == "1" ? true : false),
+         jeudi   : ($('#idHorlogeJeudi_'+id).val() == "1" ? true : false),
+         vendredi: ($('#idHorlogeVendredi_'+id).val() == "1" ? true : false),
+         samedi  : ($('#idHorlogeSamedi_'+id).val() == "1" ? true : false),
+         dimanche: ($('#idHorlogeDimanche_'+id).val() == "1" ? true : false),
          heure   : $('#idHorlogeHeure_'+id).text().split(':')[0],
          minute  : $('#idHorlogeHeure_'+id).text().split(':')[1],
        }
@@ -42,43 +42,43 @@
           [ { "data": null, "title":"Lundi", "className": "align-middle text-center",
               "render": function (item)
                 { return( Select ( "idHorlogeLundi_"+item.id, "Horloge_ticks_Set('"+item.id+"')",
-                                   ["Oui","Non"], (item.lundi=="1" ? "Oui" : "Non") ) );
+                                   ["Non","Oui"], (item.lundi=="1" ? 1 : 0) ) );
                 }
             },
             { "data": null, "title":"Mardi", "className": "align-middle text-center",
               "render": function (item)
                 { return( Select ( "idHorlogeMardi_"+item.id, "Horloge_ticks_Set('"+item.id+"')",
-                                   ["Oui","Non"], (item.mardi=="1" ? "Oui" : "Non") ) );
+                                   ["Non","Oui"], (item.mardi=="1" ? 1 : 0) ) );
                 }
             },
             { "data": null, "title":"Mercredi", "className": "align-middle text-center",
               "render": function (item)
                 { return( Select ( "idHorlogeMercredi_"+item.id, "Horloge_ticks_Set('"+item.id+"')",
-                                   ["Oui","Non"], (item.mercredi=="1" ? "Oui" : "Non") ) );
+                                   ["Non","Oui"], (item.mercredi=="1" ? 1 : 0) ) );
                 }
             },
             { "data": null, "title":"Jeudi", "className": "align-middle text-center",
               "render": function (item)
                 { return( Select ( "idHorlogeJeudi_"+item.id, "Horloge_ticks_Set('"+item.id+"')",
-                                   ["Oui","Non"], (item.jeudi=="1" ? "Oui" : "Non") ) );
+                                   ["Non","Oui"], (item.jeudi=="1" ? 1 : 0) ) );
                 }
             },
             { "data": null, "title":"Vendredi", "className": "align-middle text-center",
               "render": function (item)
                 { return( Select ( "idHorlogeVendredi_"+item.id, "Horloge_ticks_Set('"+item.id+"')",
-                                   ["Oui","Non"], (item.vendredi=="1" ? "Oui" : "Non") ) );
+                                   ["Non","Oui"], (item.vendredi=="1" ? 1 : 0) ) );
                 }
             },
             { "data": null, "title":"Samedi", "className": "align-middle text-center",
               "render": function (item)
                 { return( Select ( "idHorlogeSamedi_"+item.id, "Horloge_ticks_Set('"+item.id+"')",
-                                   ["Oui","Non"], (item.samedi=="1" ? "Oui" : "Non") ) );
+                                   ["Non","Oui"], (item.samedi=="1" ? 1 : 0) ) );
                 }
             },
             { "data": null, "title":"Dimanche", "className": "align-middle text-center",
               "render": function (item)
                 { return( Select ( "idHorlogeDimanche_"+item.id, "Horloge_ticks_Set('"+item.id+"')",
-                                   ["Oui","Non"], (item.dimanche=="1" ? "Oui" : "Non") ) );
+                                   ["Non","Oui"], item.dimanche ) );
                 }
             },
             { "data": null, "title":"Heure", "className": "align-middle text-center",

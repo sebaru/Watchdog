@@ -108,7 +108,7 @@
   { retour = "<select id='"+id+"' class='custom-select'"+
              "onchange="+fonction+">";
     for ( i=0; i<array.length; i++ )
-     { retour += "<option value='"+array[i]+"' "+(selected==array[i] ? "selected" : "")+">"+array[i]+"</option>"; }
+     { retour += "<option value='"+i+"' "+(selected==i ? "selected" : "")+">"+array[i]+"</option>"; }
     retour +="</select>";
     return(retour);
   }

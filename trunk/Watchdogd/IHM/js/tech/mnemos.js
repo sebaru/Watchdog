@@ -90,6 +90,20 @@
 
     Send_to_API ( 'POST', "/api/mnemos/set", json_request, null, null );
   }
+/******************************************************************************************************************************/
+ function Mnemos_HORLOGE_set ( acronyme )
+  { table = $('#idTableHorloge').DataTable();
+    selection = table.ajax.json().HORLOGE.filter( function(item) { return (item.acronyme==acronyme) } )[0];
+    var json_request = JSON.stringify(
+       { classe   : "HORLOGE",
+         tech_id  : selection.tech_id,
+         acronyme : selection.acronyme,
+         access_level : $('#idHORLOGELevel_'+acronyme).val(),
+       }
+     );
+
+    Send_to_API ( 'POST', "/api/mnemos/set", json_request, null, null );
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { vars = window.location.pathname.split('/');
@@ -300,20 +314,17 @@
              },
              { "data": null, "title":"Libellé Audio", "className": "align-middle ",
                "render": function (item)
-                 { return("<input id='idMSGLibelleAudio"+item.acronyme+"' class='form-control' "+
-                          "placeholder='Libellé audio du message' "+
-                          "onchange=Mnemos_MSG_set('"+item.acronyme+"') "+
-                          "value='"+item.audio_libelle+"'/>");
+                 { return( Input ( "text", "idMSGLibelleAudio"+item.acronyme,
+                                   "Mnemos_MSG_set('"+item.acronyme+"')",
+                                   "Libellé audio du message ?",
+                                   item.audio_libelle )
+                         );
                  }
              },
              { "data": null, "title":"SMS", "className": "align-middle ",
                "render": function (item)
-                 { return("<select id='idMSGSms"+item.acronyme+"' class='custom-select'"+
-                          "onchange=Mnemos_MSG_set('"+item.acronyme+"')>"+
-                          "<option value='0' "+(item.sms_notification==0 ? "selected" : "")+">Non</option>"+
-                          "<option value='1' "+(item.sms_notification==1 ? "selected" : "")+">Oui</option>"+
-                          "<option value='2' "+(item.sms_notification==2 ? "selected" : "")+">GSM Only</option>"+
-                          "<option value='3' "+(item.sms_notification==3 ? "selected" : "")+">OVH Only</option>");
+                 { array = [ "Non", "Oui", "GSM Only", "OVH Only" ];
+                   return( Select ( "idMSGSms"+item.acronyme, "Mnemos_MSG_set('"+item.acronyme, array, item.sms_notification ) );
                  }
              },
            ],
@@ -337,6 +348,44 @@
          responsive: true,
        }
      );
+
+
+    $('#idTableHorloge').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         ajax: {	url : "/api/mnemos/list",	type : "GET", data: { "classe": "HORLOGE", "tech_id": tech_id }, dataSrc: "HORLOGE",
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
+         rowId: "id",
+         columns:
+          [ { "data": null, "title":"Level", "className": "align-middle ",
+              "render": function (item)
+                { return( Select_Access_level ( "idHORLOGELevel_"+item.acronyme, "Mnemos_HORLOGE_set('"+item.acronyme+"')", item.access_level )
+                        );
+                }
+            },
+            { "data": null, "title":"Acronyme", "className": "align-middle",
+              "render": function (item)
+                { return( Lien ( "/home/horloge/"+item.id, "Editer les ticks", item.acronyme ) ); }
+            },
+            { "data": null, "title":"Libellé", "className": "align-middle",
+              "render": function (item)
+                { return( Lien ( "/home/horloge/"+item.id, "Editer les ticks", item.libelle ) ); }
+            },
+            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
+              "render": function (item)
+                { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "primary", "Editer les ticks", "Redirect", "/home/horloge/"+item.id, "pen", null );
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
+                },
+            }
+          ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
+
 
     $('#idTabEntreeTor').tab('show');
 

@@ -432,7 +432,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, g_get_host_name ); }
 
     g_snprintf(chaine, sizeof(chaine), "Statut de la communication avec le slave %s", g_get_host_name() );
-    Mnemo_auto_create_WATCHDOG ( FALSE, g_get_host_name(), "COMM", chaine );
+    Mnemo_auto_create_WATCHDOG ( FALSE, g_get_host_name(), "IO_COMM", chaine );
 
 /************************************************* Socket ZMQ interne *********************************************************/
     Partage->com_msrv.zmq_msg    = Bind_zmq ( ZMQ_PUB, "pub-int-msgs",  "inproc", ZMQUEUE_LIVE_MSGS, 0 );
@@ -488,7 +488,7 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Send_zmq_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "COMM", 900 );
+        { Send_zmq_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 900 );
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
@@ -498,6 +498,7 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
+    Send_zmq_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );
     Send_zmq_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_STOP", NULL );
 end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
