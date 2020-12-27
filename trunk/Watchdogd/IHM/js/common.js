@@ -107,8 +107,10 @@
  function Select ( id, fonction, array, selected )
   { retour = "<select id='"+id+"' class='custom-select'"+
              "onchange="+fonction+">";
-    for ( i=0; i<array.length; i++ )
-     { retour += "<option value='"+i+"' "+(selected==i ? "selected" : "")+">"+array[i]+"</option>"; }
+    valeur = array.map ( function(item) { return(item.valeur); } );
+    texte  = array.map ( function(item) { return(item.texte); } );
+    for ( i=0; i<valeur.length; i++ )
+     { retour += "<option value='"+valeur[i]+"' "+(selected==valeur[i] ? "selected" : "")+">"+texte[i]+"</option>"; }
     retour +="</select>";
     return(retour);
   }
