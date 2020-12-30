@@ -202,7 +202,6 @@
 
  extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION * session, gint min_access_level );
- extern JsonNode *Http_Msg_to_Json ( SoupMessage *msg );
  extern void Http_Envoyer_les_cadrans ( void );
  extern void Http_Envoyer_un_visuel ( struct DLS_VISUEL *visuel );
  extern void Http_redirect_to_slave ( SoupMessage *msg, gchar *target );

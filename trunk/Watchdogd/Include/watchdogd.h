@@ -162,5 +162,7 @@
 
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
 
+ extern JsonNode *Http_Msg_to_Json ( SoupMessage *msg );                                                       /* Dans http.c */
+
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

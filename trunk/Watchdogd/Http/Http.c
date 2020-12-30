@@ -200,19 +200,6 @@
     return(FALSE);
   }
 /******************************************************************************************************************************/
-/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
-/* Entrée: le messages                                                                                                        */
-/* Sortie: le Json                                                                                                            */
-/******************************************************************************************************************************/
- JsonNode *Http_Msg_to_Json ( SoupMessage *msg )
-  { GBytes *request_brute;
-    gsize taille;
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request) { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Not a JSON request"); }
-    return(request);
-  }
-/******************************************************************************************************************************/
 /* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */

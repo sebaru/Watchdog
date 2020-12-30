@@ -47,58 +47,83 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Smsg_Lire_config ( void )
-  { gchar *nom, *valeur;
+  { gchar *result, requete[256];
     struct DB *db;
 
-    Cfg_smsg.lib->Thread_debug = FALSE;
     Creer_configDB ( NOM_THREAD, "debug", "false" );
+    result = Recuperer_configDB_by_nom ( NOM_THREAD, "debug" );
+    Cfg_smsg.lib->Thread_debug = !strcasecmp(result, "true");
+    g_free(result);
 
-    g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "GSM01" );
-    Creer_configDB ( NOM_THREAD, "tech_id", Cfg_smsg.tech_id );
+    SQL_Write_new ( "INSERT IGNORE %s SET tech_id='DEFAULT', description='DEFAULT', ovh_service_name='DEFAULT', "
+                    "ovh_application_key='DEFAULT',ovh_application_secret='DEFAULT', ovh_consumer_key='DEFAULT', "
+                    "instance='%s'", NOM_THREAD, g_get_host_name() );
 
-    g_snprintf( Cfg_smsg.ovh_service_name, sizeof(Cfg_smsg.ovh_service_name), "sms-xx123456-1" );
-    Creer_configDB ( NOM_THREAD, "ovh_service_name", Cfg_smsg.ovh_service_name );
-
-    g_snprintf( Cfg_smsg.ovh_application_key, sizeof(Cfg_smsg.ovh_application_key), "AppKey" );
-    Creer_configDB ( NOM_THREAD, "ovh_application_key", Cfg_smsg.ovh_application_key );
-
-    g_snprintf( Cfg_smsg.ovh_application_secret, sizeof(Cfg_smsg.ovh_application_secret), "AppSecret" );
-    Creer_configDB ( NOM_THREAD, "ovh_application_secret", Cfg_smsg.ovh_application_secret );
-
-    g_snprintf( Cfg_smsg.ovh_consumer_key, sizeof(Cfg_smsg.ovh_consumer_key), "ConsumerKey" );
-    Creer_configDB ( NOM_THREAD, "ovh_consumer_key", Cfg_smsg.ovh_consumer_key );
-
-    g_snprintf( Cfg_smsg.description, sizeof(Cfg_smsg.description), "Ou est le téléphone ?" );
-    Creer_configDB ( NOM_THREAD, "description", Cfg_smsg.description );
-
-    Cfg_smsg.nbr_sms = 0;
-    Creer_configDB_int ( NOM_THREAD, "nbr_sms", Cfg_smsg.nbr_sms );
-
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
-     { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Database connexion failed.", __func__ );
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     {      if ( ! g_ascii_strcasecmp ( nom, "ovh_service_name" ) )
-        { g_snprintf( Cfg_smsg.ovh_service_name, sizeof(Cfg_smsg.ovh_service_name), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "ovh_application_key" ) )
-        { g_snprintf( Cfg_smsg.ovh_application_key, sizeof(Cfg_smsg.ovh_application_key), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "ovh_application_secret" ) )
-        { g_snprintf( Cfg_smsg.ovh_application_secret, sizeof(Cfg_smsg.ovh_application_secret), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "ovh_consumer_key" ) )
-        { g_snprintf( Cfg_smsg.ovh_consumer_key, sizeof(Cfg_smsg.ovh_consumer_key), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
-        { g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "nbr_sms" ) )
-        { Cfg_smsg.nbr_sms = atoi(valeur); }
-       else if ( ! g_ascii_strcasecmp ( nom, "description" ) )
-        { g_snprintf( Cfg_smsg.description, sizeof(Cfg_smsg.description), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_smsg.lib->Thread_debug = TRUE;  }
+    g_snprintf( requete, sizeof(requete),
+               "SELECT tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key, nbr_sms "
+               " FROM %s WHERE instance='%s' LIMIT 1", NOM_THREAD, g_get_host_name());
+    if (!Lancer_requete_SQL ( db, requete ))
+     { Libere_DB_SQL ( &db );
+       Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB Requete failed", __func__ );
+       return(FALSE);
      }
 
+    if (Recuperer_ligne_SQL ( db ))
+     { g_snprintf( Cfg_smsg.tech_id,                sizeof(Cfg_smsg.tech_id),                "%s", db->row[0] );
+       g_snprintf( Cfg_smsg.description,            sizeof(Cfg_smsg.description),            "%s", db->row[1] );
+       g_snprintf( Cfg_smsg.ovh_service_name,       sizeof(Cfg_smsg.ovh_service_name),       "%s", db->row[2] );
+       g_snprintf( Cfg_smsg.ovh_application_key,    sizeof(Cfg_smsg.ovh_application_key),    "%s", db->row[3] );
+       g_snprintf( Cfg_smsg.ovh_application_secret, sizeof(Cfg_smsg.ovh_application_secret), "%s", db->row[4] );
+       g_snprintf( Cfg_smsg.ovh_consumer_key,       sizeof(Cfg_smsg.ovh_consumer_key),       "%s", db->row[5] );
+       Cfg_smsg.nbr_sms = atoi ( db->row[6] );
+     }
+    else Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB Get Result failed", __func__ );
+    Libere_DB_SQL ( &db );
     return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Smsg_Creer_DB ( void )
+  { gint database_version;
+
+    gchar *database_version_string = Recuperer_configDB_by_nom( NOM_THREAD, "database_version" );
+    if (database_version_string)
+     { database_version = atoi( database_version_string );
+       g_free(database_version_string);
+     } else database_version=0;
+
+    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
+             "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, WTD_VERSION );
+
+    if (database_version==0)
+     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
+                       "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                       "`instance` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT 'localhost',"
+                       "`date_create` datetime NOT NULL DEFAULT NOW(),"
+                       "`tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                       "`description` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                       "`ovh_service_name` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                       "`ovh_application_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                       "`ovh_application_secret` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                       "`ovh_consumer_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                       "`nbr_sms` int(11) NOT NULL DEFAULT 0,"
+                       "PRIMARY KEY (`id`)"
+                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", NOM_THREAD );
+       goto end;
+     }
+
+    database_version = 1;
+end:
+    Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
   }
 /******************************************************************************************************************************/
 /* Recuperer_smsDB: récupère la liste des utilisateurs et de leur numéro de téléphone                                         */
@@ -661,10 +686,11 @@ end:
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct ZMQUEUE *zmq_from_bus;
 reload:
-    memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
-    Cfg_smsg.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
+    memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                       /* Mise a zero de la structure de travail */
+    Cfg_smsg.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
     Thread_init ( "W-SMSG", "USER", lib, WTD_VERSION, "Manage SMS system (libgammu)" );
-    Smsg_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
+    Smsg_Creer_DB ();                                                                       /* Création de la base de données */
+    Smsg_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
     if (Dls_auto_create_plugin( Cfg_smsg.tech_id, "Gestion du GSM" ) == FALSE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_smsg.tech_id ); }
@@ -713,7 +739,7 @@ reload:
     Close_zmq ( zmq_from_bus );
     Close_zmq ( Cfg_smsg.zmq_to_master );
 
-    Modifier_configDB_int ( NOM_THREAD, "nbr_sms", Cfg_smsg.nbr_sms );
+    SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE instance='%s'", NOM_THREAD, Cfg_smsg.nbr_sms, g_get_host_name() );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

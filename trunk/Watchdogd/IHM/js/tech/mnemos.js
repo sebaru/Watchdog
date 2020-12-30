@@ -118,21 +118,24 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          rowId: "id",
-         columns: [        { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-                    { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
-                    { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
-                    { "data": "map_tech_id","title":"map_tech_id","className": "align-middle " },
-                    { "data": "map_tag",    "title":"map_tag",   "className": "align-middle " },
-                    { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
-                      "render": function (item)
-                        { boutons = Bouton_actions_start ();
-                          boutons += Bouton_actions_add ( "outline-success", "Active cette entrée", "Mnemos_DI_set", item.acronyme, "power-off", null );
-                          boutons += Bouton_actions_add ( "outline-secondary", "Désactive cette entrée", "Mnemos_DI_reset", item.acronyme, "power-off", null );
-                          boutons += Bouton_actions_end ();
-                          return(boutons);
-                        },
-                    }
-                  ],
+         columns:
+           [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle ",
+               "render": function (item)
+                 { return(htmlEncode(item.libelle)); }
+             },                    { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
+             { "data": "map_tech_id","title":"map_tech_id","className": "align-middle " },
+             { "data": "map_tag",    "title":"map_tag",   "className": "align-middle " },
+             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
+               "render": function (item)
+                  { boutons = Bouton_actions_start ();
+                    boutons += Bouton_actions_add ( "outline-success", "Activer cette entrée", "Mnemos_DI_set", item.acronyme, "power-off", null );
+                    boutons += Bouton_actions_add ( "outline-secondary", "Désactiver cette entrée", "Mnemos_DI_reset", item.acronyme, "power-off", null );
+                    boutons += Bouton_actions_end ();
+                    return(boutons);
+                  },
+             }
+           ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
        }
@@ -145,19 +148,23 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          rowId: "id",
-         columns: [        { "data": null, "title":"Acronyme", "className": "align-middle text-center",
-                      "render": function (item)
-                       { return( Lien ( "/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir la courbe", item.acronyme ) ); }
-                    },
-                    { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
-                    { "data": "unite",   "title":"Unité",   "className": "align-middle " },
-                    { "data": "type",   "title":"Type",   "className": "align-middle " },
-                    { "data": "min", "title":"min", "className": "align-middle " },
-                    { "data": "max", "title":"max", "className": "align-middle " },
-                    { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
-                    { "data": "map_tech_id","title":"map_tech_id","className": "align-middle " },
-                    { "data": "map_tag",    "title":"map_tag",   "className": "align-middle " },
-                  ],
+         columns:
+           [ { "data": null, "title":"Acronyme", "className": "align-middle text-center",
+               "render": function (item)
+                 { return( Lien ( "/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir la courbe", item.acronyme ) ); }
+             },
+             { "data": null,    "title":"Libellé",    "className": "align-middle ",
+               "render": function (item)
+                 { return(htmlEncode(item.libelle)); }
+             },
+             { "data": "unite",   "title":"Unité",   "className": "align-middle " },
+             { "data": "type",   "title":"Type",   "className": "align-middle " },
+             { "data": "min", "title":"min", "className": "align-middle " },
+             { "data": "max", "title":"max", "className": "align-middle " },
+             { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
+             { "data": "map_tech_id","title":"map_tech_id","className": "align-middle " },
+             { "data": "map_tag",    "title":"map_tag",   "className": "align-middle " },
+           ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
        }
@@ -170,13 +177,17 @@
                },
 
          rowId: "id",
-         columns: [        { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-                    { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
+         columns:
+           [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+             { "data": null,    "title":"Libellé",    "className": "align-middle ",
+               "render": function (item)
+                 { return(htmlEncode(item.libelle)); }
+             },
                     { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
                     { "data": "map_tech_id","title":"map_tech_id","className": "align-middle " },
                     { "data": "map_tag",    "title":"map_tag",    "className": "align-middle " },
                     { "data": "dst_param1", "title":"dst_param1", "className": "align-middle " },
-                  ],
+           ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
        }
@@ -213,7 +224,10 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle ",
+               "render": function (item)
+                 { return(htmlEncode(item.libelle)); }
+             },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -229,7 +243,10 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle ",
+               "render": function (item)
+                 { return(htmlEncode(item.libelle)); }
+             },
              { "data": "unite",      "title":"Unité",    "className": "align-middle idden-xs" },
              { "data": null, "title":"Archivage", "className": "",
                "render": function (item)
@@ -252,7 +269,10 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle ",
+               "render": function (item)
+                 { return(htmlEncode(item.libelle)); }
+             },
              { "data": null, "title":"Etat", "className": "align-middle text-center",
                "render": function (item)
                  { if (item.etat==true) { return( Bouton ( "success", "Activé", null, null, "Actif" ) );        }
@@ -280,7 +300,10 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle ",
+               "render": function (item)
+                 { return(htmlEncode(item.libelle)); }
+             },
              { "data": null, "title":"Etat", "className": "",
                "render": function (item)
                  { if (item.etat==true) { return( Bouton ( "success", "Activé", null, null, "Actif" ) );        }
@@ -303,7 +326,10 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
+             { "data": null, "title":"Libellé",    "className": "align-middle ",
+               "render": function (item)
+                 { return(htmlEncode(item.libelle)); }
+             },
              { "data": null, "title":"Profil AUDIO", "className": "align-middle ",
                "render": function (item)
                  { return("<input id='idMSGProfilAudio"+item.acronyme+"' class='form-control' "+
@@ -342,8 +368,10 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "align-middle " },
-           ],
+             { "data": "libelle",    "title":"Libellé",    "className": "align-middle ",
+               "render": function (item)
+                 { return(htmlEncode(item.libelle)); }
+             },           ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
        }
