@@ -115,14 +115,16 @@
      }
     else if (!session && !strcasecmp( URI[1], "login"))
      { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/login.php", WTD_PKGDATADIR ); }
-    else
+    else if (!session)
      { g_strfreev(URI);
-       if (session && session->access_level >= 6)
-        { soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/tech/dashboard" ); }
-       else if (session && session->access_level < 6)
-        { soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/home/synmobile/1" ); }
-       else soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
+       soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
        return;
+     }
+    else
+     { g_snprintf ( header, sizeof(header), "%s/IHM/Home/header.php", WTD_PKGDATADIR );
+       g_snprintf ( footer, sizeof(footer), "%s/IHM/Home/footer.php", WTD_PKGDATADIR );
+       has_template = TRUE;
+       g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Home/index.php", WTD_PKGDATADIR );
      }
     g_strfreev(URI);
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s : Serving file %s", __func__, fichier );

@@ -1,7 +1,7 @@
 <div class="container-fluid">
 
  <div class="row m-2">
-   <h3><i class="fas fa-microchip text-primary"></i> Liste des Synoptiques</strong></h3>
+   <h3><i class="fas fa-mimage text-primary"></i> Liste des Synoptiques</strong></h3>
 
    <div class ="ml-auto btn-group align-items-start">
    <!--     <button type="button" onclick="GSM_Sauver_parametre()" class="btn btn-outline-success"><i class="fas fa-save"></i> Sauvegarder</button>
@@ -30,7 +30,7 @@
 
 
 <div id="idModalSynEdit" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered" role="document">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
         <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalSynEditTitre"></span></h5>
@@ -84,5 +84,45 @@
     </div>
   </div>
 </div>
+
+
+<div id="idModalAddDls" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content ">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span>Ajouter un module D.L.S</span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div class="form-group">
+					     <div class="input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text">TechID</span>
+						     </div>
+						     <input id="idModalAddDlsTechID" type="text" class="form-control" placeholder="TechID du module DLS">
+     					</div>
+        </div>
+
+        <div class="form-group">
+					     <div class="input-group">
+						     <div class="input-group-prepend">
+							     <span class="input-group-text">Description</span>
+						     </div>
+						     <input id="idModalAddDlsDescription" type="text" class="form-control" placeholder="Description du module D.L.S">
+     					</div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
+        <button id="idModalAddDlsValider" type="button" class="btn btn-primary" data-dismiss="modal"><i class="fas fa-save"></i> Valider</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script src="/js/tech/synoptiques.js" type="text/javascript"></script>

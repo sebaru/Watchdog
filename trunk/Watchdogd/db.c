@@ -2094,7 +2094,12 @@ encore:
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE_ticks ADD `date_modif` DATETIME NOT NULL DEFAULT NOW()" );
        Lancer_requete_SQL ( db, requete );
      }
-    database_version = 5233;
+
+    if (database_version < 5237)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns CHANGE `page` `page` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL");
+       Lancer_requete_SQL ( db, requete );
+     }
+    database_version = 5237;
 
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "

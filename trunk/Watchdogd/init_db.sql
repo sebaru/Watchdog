@@ -86,11 +86,11 @@ CREATE TABLE IF NOT EXISTS `icons` (
 -- Structure de la table `syns`
 --
 
-CREATE TABLE IF NOT EXISTS `syns` (
+CREATE TABLE IF NOT EXISTS `syns2` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) NOT NULL,
   `libelle` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
-  `page` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
+  `page` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`parent_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
