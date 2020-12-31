@@ -59,6 +59,7 @@
  extern void Print_SQL_status ( void );
  extern void Update_database_schema ( void );
  extern gboolean SQL_Select_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete );
+ extern gboolean SQL_Select_to_JSON_new ( JsonBuilder *builder, gchar *array_name, gchar *format, ... );
  extern gboolean SQL_Write ( gchar *requete );
  extern gboolean SQL_Writes ( gchar *requete );
  extern gboolean SQL_Write_new( gchar *format, ... );
