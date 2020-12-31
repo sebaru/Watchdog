@@ -140,7 +140,7 @@
 /****************************************** Escape les " et ' *****************************************************************/
  function htmlEncode ( string )
   { if (string===null) return("null");
-    return ( string.replace(/'/g,'&#39').replace(/"/g,'&#34') );
+    return ( string.replace(/'/g,'&#39').replace(/"/g,'&#34') ).replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 /****************************************** Are you sure **********************************************************************/
  function Show_modal_del ( titre, message, fonction )
