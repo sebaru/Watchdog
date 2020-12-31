@@ -37,8 +37,8 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_horloge_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                  SoupClientContext *client, gpointer user_data )
+ void Http_traiter_horloge_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                 SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
     gsize taille_buf;
     if (msg->method != SOUP_METHOD_GET)
@@ -50,6 +50,10 @@
     if (!Http_check_session( msg, session, 0 )) return;
 
     gpointer horloge_id_string = g_hash_table_lookup ( query, "horloge_id" );
+    if (!horloge_id_string)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
@@ -57,14 +61,10 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM mnemos_HORLOGE WHERE access_level<=%d", session->access_level);
-    if (horloge_id_string)
-     { gchar critere[128];
-       g_snprintf ( critere, sizeof(critere), " AND id=%d", atoi(horloge_id_string) );
-       g_strlcat ( chaine, critere, sizeof(chaine) );
-     }
+    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM mnemos_HORLOGE WHERE id=%d AND access_level<=%d",
+               atoi(horloge_id_string), session->access_level);
 
-    if (SQL_Select_to_JSON ( builder, "horloges", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, NULL, chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
@@ -74,47 +74,6 @@
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_get_horloge: Fourni une list JSON des elements d'un horlogeoptique                                                    */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Http_traiter_horloge_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                 SoupClientContext *client, gpointer user_data )
-  { gchar chaine[256];
-
-    if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 0 )) return;
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "id" ) ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    if ( ! (Json_has_member ( request, "access_level" ) ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    gint horloge_id = Json_get_int ( request, "id" );
-    gint level      = Json_get_int ( request, "access_level" );
-
-    g_snprintf( chaine, sizeof(chaine), "UPDATE mnemos_HORLOGE SET access_level=%d WHERE id=%d AND access_level<=%d",
-                level, horloge_id, session->access_level );
-
-    if (SQL_Write (chaine)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
-    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-    json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_horloge: Fourni une list JSON des elements d'un horloge                                                   */
@@ -228,7 +187,7 @@
        return;
      }
     else
-     { g_snprintf( chaine, sizeof(chaine), "INSERT INTO mnemos_HORLOGE_ticks AS t INNER JOIN mnemos_HORLOGE AS h ON t.horloge_id=h.id "
+     { g_snprintf( chaine, sizeof(chaine), "INSERT INTO mnemos_HORLOGE_ticks "
                                            "SET horloge_id=%d", Json_get_int ( request, "horloge_id" ) );
      }
 
@@ -273,11 +232,10 @@
        g_strlcat ( chaine, critere, sizeof(chaine) );
      }
 
-    g_snprintf( critere, sizeof(critere), " WHERE access_level <= %d", session->access_level );
-    g_strlcat ( chaine, critere, sizeof(chaine) );
-
     if ( Json_has_member ( request, "id" ) )                                                                       /* Edition */
-     { g_snprintf( critere, sizeof(critere), " AND t.id=%d", Json_get_int ( request, "id") );
+     { g_snprintf( critere, sizeof(critere), " WHERE access_level <= %d", session->access_level );
+       g_strlcat ( chaine, critere, sizeof(chaine) );
+       g_snprintf( critere, sizeof(critere), " AND t.id=%d", Json_get_int ( request, "id") );
        g_strlcat ( chaine, critere, sizeof(chaine) );
      }
 

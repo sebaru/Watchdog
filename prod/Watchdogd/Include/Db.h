@@ -61,6 +61,7 @@
  extern gboolean SQL_Select_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete );
  extern gboolean SQL_Write ( gchar *requete );
  extern gboolean SQL_Writes ( gchar *requete );
+ extern gboolean SQL_Write_new( gchar *format, ... );
  extern gboolean SQL_Arch_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete );
  extern gboolean SQL_Arch_Write ( gchar *requete );
  #endif

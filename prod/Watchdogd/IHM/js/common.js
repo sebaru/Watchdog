@@ -64,7 +64,7 @@
  function Bouton_actions_add ( color, tooltip, clic_func, key, icone, texte )
   { return( "<button "+
             "class='btn btn-"+color+" btn-sm' "+
-            "data-toggle='tooltip' title='"+tooltip+"' "+
+            "data-toggle='tooltip' title='"+htmlEncode(tooltip)+"' "+
             "onclick="+clic_func+"('"+key+"')>"+
             (icone!==null ? "<i class='fas fa-"+icone+"'></i> " : "") +
             (texte!==null ? texte : "") +
@@ -98,17 +98,33 @@
 
  function Badge ( color, tooltip, texte )
   { return("<span "+
-           "class='badge badge-pill badge-"+color+"' "+
+           "class='badge badge-"+color+"' "+
            "data-toggle='tooltip' title='"+tooltip+"'>"+texte+
            "</span>" );
+  }
+
+/********************************************* Renvoi un Badge d'access Level *************************************************/
+ function Badge_Access_level ( level )
+  { if (level == 1) return( Badge ( "info", "Accès de niveau 1", "1" ) );
+    if (level == 2) return( Badge ( "info", "Accès de niveau 2", "2" ) );
+    if (level == 3) return( Badge ( "info", "Accès de niveau 3", "3" ) );
+    if (level == 4) return( Badge ( "secondary", "Accès de niveau 4", "4" ) );
+    if (level == 5) return( Badge ( "primary", "Accès de niveau 5", "5" ) );
+    if (level == 6) return( Badge ( "warning", "Accès technicien 6", "6" ) );
+    if (level == 7) return( Badge ( "warning", "Accès technicien 7", "7" ) );
+    if (level == 8) return( Badge ( "warning", "Accès technicien 8", "8" ) );
+    if (level == 9) return( Badge ( "danger", "Accès technicien 9", "9" ) );
+    return( Badge ( "success", "Accès public", "0" ) );
   }
 
 /********************************************* Renvoi un Select d'access Level ************************************************/
  function Select ( id, fonction, array, selected )
   { retour = "<select id='"+id+"' class='custom-select'"+
              "onchange="+fonction+">";
-    for ( i=0; i<array.length; i++ )
-     { retour += "<option value='"+array[i]+"' "+(selected==array[i] ? "selected" : "")+">"+array[i]+"</option>"; }
+    valeur = array.map ( function(item) { return(item.valeur); } );
+    texte  = array.map ( function(item) { return(item.texte); } );
+    for ( i=0; i<valeur.length; i++ )
+     { retour += "<option value='"+valeur[i]+"' "+(selected==valeur[i] ? "selected" : "")+">"+texte[i]+"</option>"; }
     retour +="</select>";
     return(retour);
   }
@@ -134,11 +150,13 @@
     $('#idModalDel').modal("show");
   }
 /********************************************* Renvoi un input ****************************************************************/
- function Input ( type, id, change_fonction, place_holder, value )
+ function Input ( type, id, change_fonction, place_holder, value, controle_function )
   { retour = "<input id='"+id+"' class='form-control' type='"+type+"' "+
              "placeholder='"+htmlEncode(place_holder)+"' "+
-             "onchange="+change_fonction+" "+
-             "value='"+htmlEncode(value)+"'/>";
+             "onchange="+change_fonction+" ";
+    if (controle_function !== undefined)
+     { retour = retour + "oninput="+controle_function+" "; }
+    retour = retour + "value='"+htmlEncode(value)+"'/>";
     return(retour);
   }
 /********************************* Chargement d'une courbe dans u synoptique 1 au démrrage ************************************/

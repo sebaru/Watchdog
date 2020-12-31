@@ -250,6 +250,19 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* SQL_Write_new: Envoie une requete en parametre au serveur de base de données                                               */
+/* Entrée: le format de la requete, ainsi que tous les parametres associés                                                    */
+/******************************************************************************************************************************/
+ gboolean SQL_Write_new( gchar *format, ... )
+  { gchar chaine[1024];
+    va_list ap;
+
+    va_start( ap, format );
+    g_vsnprintf ( chaine, sizeof(chaine), format, ap );
+    va_end ( ap );
+    return(SQL_Write ( chaine ));
+  }
+/******************************************************************************************************************************/
 /* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
@@ -2094,7 +2107,12 @@ encore:
        g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE_ticks ADD `date_modif` DATETIME NOT NULL DEFAULT NOW()" );
        Lancer_requete_SQL ( db, requete );
      }
-    database_version = 5233;
+
+    if (database_version < 5237)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns CHANGE `page` `page` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL");
+       Lancer_requete_SQL ( db, requete );
+     }
+    database_version = 5237;
 
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "

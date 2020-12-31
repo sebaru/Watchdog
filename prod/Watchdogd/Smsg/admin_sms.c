@@ -74,20 +74,13 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Admin_json_smsg_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { GBytes *request_brute;
-    gsize taille;
-
-    if ( msg->method != SOUP_METHOD_POST )
+  { if ( msg->method != SOUP_METHOD_POST )
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "description" ) &&
             Json_has_member ( request, "ovh_service_name" ) && Json_has_member ( request, "ovh_application_key" ) &&
@@ -98,14 +91,24 @@
        return;
      }
 
-    Modifier_configDB ( NOM_THREAD, "tech_id", Json_get_string( request, "tech_id" ) );
-    Modifier_configDB ( NOM_THREAD, "description", Json_get_string( request, "description" ) );
-    Modifier_configDB ( NOM_THREAD, "ovh_service_name", Json_get_string( request, "ovh_service_name" ) );
-    Modifier_configDB ( NOM_THREAD, "ovh_application_key", Json_get_string( request, "ovh_application_key" ) );
-    Modifier_configDB ( NOM_THREAD, "ovh_application_secret", Json_get_string( request, "ovh_application_secret" ) );
-    Modifier_configDB ( NOM_THREAD, "ovh_consumer_key", Json_get_string( request, "ovh_consumer_key" ) );
-    json_node_unref(request);
+    gchar *tech_id                = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *description            = Normaliser_chaine ( Json_get_string( request, "description" ) );
+    gchar *ovh_service_name       = Normaliser_chaine ( Json_get_string( request, "ovh_service_name" ) );
+    gchar *ovh_application_key    = Normaliser_chaine ( Json_get_string( request, "ovh_application_key" ) );
+    gchar *ovh_application_secret = Normaliser_chaine ( Json_get_string( request, "ovh_application_secret" ) );
+    gchar *ovh_consumer_key       = Normaliser_chaine ( Json_get_string( request, "ovh_consumer_key" ) );
 
+    SQL_Write_new ( "UPDATE %s SET tech_id='%s', description='%s', ovh_service_name='%s', ovh_application_key='%s',"
+                    "ovh_application_secret='%s', ovh_consumer_key='%s' "
+                    "WHERE instance='%s'", NOM_THREAD,
+                    tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key, g_get_host_name() );
+    json_node_unref(request);
+    g_free(tech_id);
+    g_free(description);
+    g_free(ovh_service_name);
+    g_free(ovh_application_key);
+    g_free(ovh_application_secret);
+    g_free(ovh_consumer_key);
     soup_message_set_status (msg, SOUP_STATUS_OK);
     Lib->Thread_reload = TRUE;
   }

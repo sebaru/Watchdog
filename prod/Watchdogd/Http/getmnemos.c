@@ -170,7 +170,7 @@
         }
 	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
      }
-    if ( ! strcasecmp ( classe, "MSG" ) )
+    else if ( ! strcasecmp ( classe, "MSG" ) )
      { if ( Json_has_member ( request, "sms" ) &&
             Json_has_member ( request, "audio_profil" ) && Json_has_member ( request, "audio_libelle" )
           )
@@ -190,9 +190,17 @@
         }
 	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
      }
-    /*else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
-    else if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
-    else if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }*/
+    else if ( ! strcasecmp ( classe, "HORLOGE" ) )
+     { if ( Json_has_member ( request, "access_level" ) )
+        { gchar chaine[1024];
+          gint access_level = Json_get_int ( request, "access_level" );
+          g_snprintf( chaine, sizeof(chaine), "UPDATE mnemos_HORLOGE SET access_level=%d WHERE tech_id='%s' AND acronyme='%s'",
+                                              access_level, tech_id, acronyme );
+          SQL_Write ( chaine );                                                   /* Qu'il existe ou non, ou met a jour la DB */
+          Audit_log ( session, "Mnemos %s:%s -> access_level set to %d", tech_id, acronyme, access_level );
+        }
+	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
+     }
 /*************************************************** Envoi au client **********************************************************/
     json_node_unref(request);
   }
