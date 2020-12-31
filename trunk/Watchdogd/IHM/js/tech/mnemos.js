@@ -120,10 +120,11 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "align-middle ",
+             { "data": null, "title":"Libellé",    "className": "align-middle ",
                "render": function (item)
                  { return(htmlEncode(item.libelle)); }
-             },                    { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
+             },
+             { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
              { "data": "map_tech_id","title":"map_tech_id","className": "align-middle " },
              { "data": "map_tag",    "title":"map_tag",   "className": "align-middle " },
              { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
@@ -153,7 +154,7 @@
                "render": function (item)
                  { return( Lien ( "/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir la courbe", item.acronyme ) ); }
              },
-             { "data": null,    "title":"Libellé",    "className": "align-middle ",
+             { "data": null, "title":"Libellé",    "className": "align-middle ",
                "render": function (item)
                  { return(htmlEncode(item.libelle)); }
              },
@@ -179,7 +180,7 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": null,    "title":"Libellé",    "className": "align-middle ",
+             { "data": null, "title":"Libellé",    "className": "align-middle ",
                "render": function (item)
                  { return(htmlEncode(item.libelle)); }
              },
@@ -224,7 +225,7 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "align-middle ",
+             { "data": null, "title":"Libellé",    "className": "align-middle ",
                "render": function (item)
                  { return(htmlEncode(item.libelle)); }
              },
@@ -243,7 +244,7 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "align-middle ",
+             { "data": null, "title":"Libellé",    "className": "align-middle ",
                "render": function (item)
                  { return(htmlEncode(item.libelle)); }
              },
@@ -269,7 +270,7 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "align-middle ",
+             { "data": null, "title":"Libellé",    "className": "align-middle ",
                "render": function (item)
                  { return(htmlEncode(item.libelle)); }
              },
@@ -300,7 +301,7 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "align-middle ",
+             { "data": null, "title":"Libellé",    "className": "align-middle ",
                "render": function (item)
                  { return(htmlEncode(item.libelle)); }
              },
@@ -368,7 +369,7 @@
          rowId: "id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-             { "data": "libelle",    "title":"Libellé",    "className": "align-middle ",
+             { "data": null, "title":"Libellé",    "className": "align-middle ",
                "render": function (item)
                  { return(htmlEncode(item.libelle)); }
              },           ],
