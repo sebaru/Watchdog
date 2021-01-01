@@ -30,6 +30,34 @@
  #include "Sms.h"
  extern struct SMS_CONFIG Cfg_smsg;
 /******************************************************************************************************************************/
+/* Admin_json_smsg_list: Liste les parametres de bases de données associés au thread SMSG                                     */
+/* Entrée : Le message libsoup                                                                                                */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/******************************************************************************************************************************/
+ static void Admin_json_smsg_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { JsonBuilder *builder;
+    gsize taille_buf;
+    gchar *buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    SQL_Select_to_JSON_new ( builder, "gsms", "SELECT instance, tech_id, description FROM %s", NOM_THREAD );
+    buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
 /* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
 /* Entrée : un JSon Builder                                                                                                   */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
@@ -110,7 +138,6 @@
     g_free(ovh_application_secret);
     g_free(ovh_consumer_key);
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    Lib->Thread_reload = TRUE;
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
@@ -123,10 +150,26 @@
        return;
      }
          if (!strcasecmp(path, "/status"))   { Admin_json_smsg_status ( lib, msg ); }
+    else if (!strcasecmp(path, "/list"))     { Admin_json_smsg_list   ( lib, msg ); }
     else if (!strcasecmp(path, "/set"))      { Admin_json_smsg_set ( lib, msg ); }
     else if (!strcasecmp(path, "/send") && lib->Thread_run)
-     { Cfg_smsg.send_test = TRUE;
-       soup_message_set_status (msg, SOUP_STATUS_OK);
+     { if ( msg->method != SOUP_METHOD_PUT )
+        {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED); }
+       else
+        { JsonNode *request = Http_Msg_to_Json ( msg );
+          if (!request) return;
+          if ( !Json_has_member ( request, "mode" ) )
+           { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres"); }
+          else if (!strcasecmp ( Json_get_string ( request, "mode" ), "OVH" ))
+           { Cfg_smsg.send_test_OVH = TRUE;
+             soup_message_set_status (msg, SOUP_STATUS_OK);
+           }
+          else if (!strcasecmp ( Json_get_string ( request, "mode" ), "GSM" ))
+           { Cfg_smsg.send_test_GSM = TRUE;
+             soup_message_set_status (msg, SOUP_STATUS_OK);
+           }
+          json_node_unref(request);
+        }
      }
     else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }

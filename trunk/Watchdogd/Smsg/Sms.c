@@ -709,10 +709,13 @@ reload:
        Lire_sms_gsm();
 
 /****************************************************** SMS de test ! *********************************************************/
-       if (Cfg_smsg.send_test)
+       if (Cfg_smsg.send_test_OVH)
+        { Envoyer_smsg_ovh_text ( "Test SMS OVH OK !" );
+          Cfg_smsg.send_test_OVH = FALSE;
+        }
+       if (Cfg_smsg.send_test_GSM)
         { Envoyer_smsg_gsm_text ( "Test SMS GSM OK !" );
-          Envoyer_smsg_ovh_text ( "Test SMS OVH OK !" );
-          Cfg_smsg.send_test = FALSE;
+          Cfg_smsg.send_test_GSM = FALSE;
         }
 /********************************************************* Envoi de SMS *******************************************************/
        JsonNode *request;

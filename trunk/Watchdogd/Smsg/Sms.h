@@ -39,7 +39,8 @@
     gchar ovh_application_secret[33];                                                                         /* Clef API OVH */
     gchar ovh_consumer_key[33];                                                                               /* Clef API OVH */
     gboolean comm_status;
-    gboolean send_test;                                                  /* TRUE si une demande de test a été faite par l'IHM */
+    gboolean send_test_GSM;                                              /* TRUE si une demande de test a été faite par l'IHM */
+    gboolean send_test_OVH;                                              /* TRUE si une demande de test a été faite par l'IHM */
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
     guint nbr_sms;
   };
