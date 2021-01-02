@@ -51,48 +51,12 @@
      }, null);
   }
 /********************************************* Controle du saisie du modal ****************************************************/
- function GSMMap_Controle_saisie ()
-  { statut = true;
-    if ($('#idModalEditSelectTechID').val() !== null)
-     { $('#idModalEditRechercherTechID').removeClass("border-warning"); }
-    else
-     { $('#idModalEditRechercherTechID').addClass("border-warning"); statut=false; }
-
-    $('#idModalEditValider').prop("disabled", !statut);
-  }
-
-
-/********************************************* Controle du saisie du modal ****************************************************/
  function GSMMap_Update_Choix_Acronyme ()
-  { var json_request =
-     { tech_id    : $('#idModalEditSelectTechID').val().toUpperCase(),
-       acronyme   : '',
-       classe     : 'DI',
-     };
-
-    Send_to_API ( "PUT", "/api/mnemos/validate", JSON.stringify(json_request), function (Response)
-     { $('#idModalEditSelectAcronyme').empty();
-       $.each ( Response.acronymes_found, function ( i, item )
-        { $('#idModalEditSelectAcronyme').append("<option value='"+item.acronyme+"'>"+item.acronyme+"</option>"); } );
-     }, null );
-    GSMMap_Controle_saisie();
+  { Common_Updater_Choix_Acronyme ( 'idModalEdit', 'DI' );
   }
 /********************************************* Controle du saisie du modal ****************************************************/
- function GSMMap_Update_Choix_Tech_ID ()
-  {
-    var json_request =
-       { tech_id    : $('#idModalEditRechercherTechID').val().toUpperCase(),
-         acronyme   : '',
-         classe     : 'DI',
-       };
-
-    Send_to_API ( "PUT", "/api/mnemos/validate", JSON.stringify(json_request), function (Response)
-     { $('#idModalEditSelectTechID').empty();
-       $.each ( Response.tech_ids_found, function ( i, item )
-        { $('#idModalEditSelectTechID').append("<option value='"+item.tech_id+"'>"+item.tech_id+"</option>"); } );
-
-       GSMMap_Update_Choix_Acronyme();
-     }, null );
+ function GSMMap_Update_Choix_Tech_ID ( def_tech_id, def_acronyme )
+  { Common_Updater_Choix_TechID ( 'idModalEdit', 'DI', def_tech_id, def_acronyme );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Edit_DI ( id )
@@ -100,11 +64,8 @@
      { table = $('#idTableGSM').DataTable();
        selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
        $('#idModalEditDI #idModalEditTitre').text ( "Editer MAP GSM" );
-       $('#idModalEditRechercherTechID').val ( selection.tech_id );
-       GSMMap_Update_Choix_Tech_ID();
-       $('#idModalEditSelectTechID').val ( selection.tech_id );
-       $('#idModalEditSelectAcronyme').val ( selection.acronyme );
-       $('#idModalEditDI #idModalEditGSMTag').val     ( selection.map_tag );
+       GSMMap_Update_Choix_Tech_ID( selection.tech_id, selection.acronyme );
+       $('#idModalEditDI #idModalEditGSMTag').val  ( selection.map_tag );
        $('#idModalEditDI #idModalEditGSMTag').attr ( "readonly", false );
        $('#idModalEditDI #idModalEditValider').attr( "onclick", "Valider_Edit_DI()" );
        Send_to_API ( "GET", "/api/process/smsg/list", null, function (Response)
@@ -126,7 +87,7 @@
           $.each ( Response.gsms, function ( i, gsm )
            { $('#idModalEditGSMTechID').append("<option value='"+gsm.tech_id+"'>"+gsm.tech_id+ " (" +gsm.description+")</option>"); } );
         });
-       GSMMap_Update_Choix_Tech_ID();
+       GSMMap_Update_Choix_Tech_ID( null, null );
      }
     $('#idModalEditDI').modal("show");
   }
