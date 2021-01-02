@@ -143,9 +143,10 @@
     return ( string.replace(/'/g,'&#39').replace(/"/g,'&#34') ).replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 /****************************************** Are you sure **********************************************************************/
- function Show_modal_del ( titre, message, fonction )
+ function Show_modal_del ( titre, message, details, fonction )
   { $('#idModalDelTitre').text ( htmlEncode(titre) );
     $('#idModalDelMessage').html( htmlEncode(message) );
+    $('#idModalDelDetails').html( htmlEncode(details) );
     $('#idModalDelValider').attr( "onclick", fonction );
     $('#idModalDel').modal("show");
   }

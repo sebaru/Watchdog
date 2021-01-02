@@ -114,6 +114,8 @@
       </div>
       <div class="modal-body">
         <p id="idModalDelMessage"></p>
+       <hr>
+        <strong id="idModalDelDetails"></strong>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>

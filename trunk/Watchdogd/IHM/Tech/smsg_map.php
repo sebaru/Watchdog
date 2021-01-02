@@ -65,14 +65,14 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditSelectTechID" onchange="GSMMap_Update_Choix_Acronyme()" class="mr-1 col-9 custom-select"></select>
+						     <select id="idModalEditSelectTechID" onchange="GSMMap_Update_Choix_Acronyme()" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditSelectAcronyme" class="col-9 custom-select"></select>
+						     <select id="idModalEditSelectAcronyme" class="col-9 custom-select border-info "></select>
      					</div>
   					</div>
 

@@ -44,9 +44,9 @@
   { table = $('#idTableTableauMap').DataTable();
     selection = table.ajax.json().tableau_map.filter( function(item) { return item.id==map_id } )[0];
     Show_modal_del ( "Supprimer la courbe du tableau ?",
-                     "Etes-vous sur de vouloir supprimer la courbe suivante ?<hr>"+
-                     "<strong>"+selection.tech_id+":"+selection.acronyme+"</strong>",
-                      "Tableau_Map_Valide_delete("+map_id+")" );
+                     "Etes-vous sur de vouloir supprimer la courbe suivante ?",
+                     selection.tech_id+":"+selection.acronyme,
+                     "Tableau_Map_Valide_delete("+map_id+")" );
   }
 
 /********************************************* Appelé au chargement de la page ************************************************/

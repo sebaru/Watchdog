@@ -40,9 +40,9 @@
   { table = $('#idTableTableau').DataTable();
     selection = table.ajax.json().tableaux.filter( function(item) { return item.id==id } )[0];
     Show_modal_del ( "Détruire le tableau ?",
-                     "Etes-vous sur de vouloir supprimer le tableau suivant ?<hr>"+
-                     "<strong>"+selection.titre+"</strong>",
-                      "Tableau_Valide_delete("+id+")" );
+                     "Etes-vous sur de vouloir supprimer le tableau suivant ?",
+                     selection.titre,
+                     "Tableau_Valide_delete("+id+")" );
   }
 
 /********************************************* Appelé au chargement de la page ************************************************/

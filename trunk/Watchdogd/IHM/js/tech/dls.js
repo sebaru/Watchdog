@@ -82,6 +82,49 @@
      { $('#idTableDLS').DataTable().ajax.reload(null, false);
      }, null);
   }
+
+
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Synoptique_Dls_Add ( syn_id )
+  { table = $('#idTableSyn').DataTable();
+    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
+
+    var json_request =
+       { syn_id : selection.syn_id,
+         name   : $('#idModalDlsAddDescription').val(),
+         tech_id: $('#idModalDlsAddTechID').val().toUpperCase(),
+       };
+
+    Send_to_API ( "POST", "/api/dls/set", JSON.stringify(json_request), function(Response)
+     { $('#idTableSyn').DataTable().ajax.reload(null, false);
+     }, null );
+  }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function Dls_Add_controle_techid ( )
+  { table = $('#idTableDLS').DataTable();
+    if (table.ajax.json().plugins.filter ( function (item)
+                                            { return ( item.tech_id == $('#idModalDlsAddTechID').val().toUpperCase() ); } ).length!=0)
+     { $('#idModalDlsAddTechID').addClass("bg-danger");
+       $('#idModalDlsAddValider').attr( "disabled", true );
+     }
+    else
+     { $('#idModalDlsAddTechID').removeClass("bg-danger");
+       $('#idModalDlsAddValider').attr( "disabled", false );
+     }
+  }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function Show_Modal_Dls_Add ( syn_id )
+  { $('#idModalDlsAddTechID').val("").removeClass("bg-danger");
+    $('#idModalDlsAddTechID').attr("oninput", "Dls_Add_controle_techid()" );
+    $('#idModalDlsAddDescription').val("");
+    $('#idModalDlsAddValider').attr( "onclick", "Dls_Add("+syn_id+")" );
+    Send_to_API ( "GET", "/api/syn/list", null, function (Response)
+     { $('#idModalDlsAddPage').empty();
+       $.each ( Response.synoptiques, function ( i, item )
+        { $('#idModalDlsAddPage').append("<option value='"+item.id+"'>"+item.page+" - "+htmlEncode(item.libelle)+"</option>"); } );
+     }, null );
+    $('#idModalDlsAdd').modal("show");
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTableDLS').DataTable(
