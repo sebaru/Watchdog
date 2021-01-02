@@ -55,7 +55,7 @@
     Cfg_smsg.lib->Thread_debug = !strcasecmp(result, "true");
     g_free(result);
 
-    SQL_Write_new ( "INSERT IGNORE %s SET tech_id='DEFAULT', description='DEFAULT', ovh_service_name='DEFAULT', "
+    SQL_Write_new ( "INSERT IGNORE %s SET tech_id='GSM01', description='DEFAULT', ovh_service_name='DEFAULT', "
                     "ovh_application_key='DEFAULT',ovh_application_secret='DEFAULT', ovh_consumer_key='DEFAULT', "
                     "instance='%s'", NOM_THREAD, g_get_host_name() );
 
