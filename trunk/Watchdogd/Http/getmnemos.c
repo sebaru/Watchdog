@@ -256,7 +256,7 @@
        g_strlcat ( chaine, classe, sizeof(chaine) );
        g_strlcat ( chaine, "' ", sizeof(chaine) );
      }*/
-    g_strlcat ( chaine, " ORDER BY tech_id LIMIT 10", sizeof(chaine) );
+    g_strlcat ( chaine, " ORDER BY tech_id", sizeof(chaine) );
     SQL_Select_to_JSON ( builder, "tech_ids_found", chaine );
 
     g_snprintf(chaine, sizeof(chaine),
@@ -267,7 +267,7 @@
        g_strlcat ( chaine, classe, sizeof(chaine) );
        g_strlcat ( chaine, "' ", sizeof(chaine) );
      }
-    g_strlcat ( chaine, " ORDER BY acronyme LIMIT 10", sizeof(chaine) );
+    g_strlcat ( chaine, " ORDER BY acronyme", sizeof(chaine) );
     SQL_Select_to_JSON ( builder, "acronymes_found", chaine );
     json_node_unref(request);
 

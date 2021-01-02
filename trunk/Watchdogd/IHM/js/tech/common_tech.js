@@ -85,11 +85,8 @@
   {
 
     var json_request = { acronyme: '', classe: classe };
-    if (def_tech_id != null)
-     { $('#'+ids+'RechercherTechID').val( '' );
-       json_request.tech_id = def_tech_id;
-     }
-    else { json_request.tech_id = $('#'+ids+'RechercherTechID').val(); }
+    if (def_tech_id != null) { $('#'+ids+'RechercherTechID').val( '' ); }
+    json_request.tech_id = $('#'+ids+'RechercherTechID').val();
 
 
     Send_to_API ( "PUT", "/api/mnemos/validate", JSON.stringify(json_request), function (Response)
