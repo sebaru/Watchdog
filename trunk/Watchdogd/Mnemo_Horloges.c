@@ -84,7 +84,7 @@
 /* Sortie: Les horloges sont directement pilotée dans la structure DLS_DATA                                                   */
 /******************************************************************************************************************************/
  void Activer_horlogeDB ( void )
-  { gchar requete[512];
+  { gchar requete[1024];
     struct DB *db;
 
     db = Init_DB_SQL();

@@ -138,6 +138,8 @@
     g_free(ovh_application_secret);
     g_free(ovh_consumer_key);
     soup_message_set_status (msg, SOUP_STATUS_OK);
+    Lib->Thread_reload = TRUE;
+    while ( Lib->Thread_run == TRUE && Lib->Thread_reload == TRUE);                              /* Attente reboot du process */
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */

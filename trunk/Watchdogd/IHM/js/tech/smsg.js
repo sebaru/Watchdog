@@ -3,7 +3,7 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function SMS_Sauver_parametre ( )
   { var json_request = JSON.stringify(
-     { instance:      Get_target_instance(),
+     { instance:      $('#idTargetInstance2').val(),
        tech_id:       $('#idGSMTechID').val(),
        ovh_service_name: $('#idGSMOVHServiceName').val(),
        ovh_application_key: $('#idGSMOVHApplicationKey').val(),
@@ -11,11 +11,7 @@
        ovh_consumer_key: $('#idGSMOVHConsumerKey').val(),
        description:   $('#idGSMDescription').val(),
      });
-    Send_to_API ( 'POST', "/api/process/smsg/set", json_request, null );
-  }
-/************************************ Envoi les infos de modifications synoptique *********************************************/
- function SMS_Reload ( )
-  { Process_reload ( Get_target_instance(), "SMSG", false );
+    Send_to_API ( 'POST', "/api/process/smsg/set", json_request, function() { Load_page(); }, null );
   }
 /************************************ Demande l'envoi d'un SMS de test ********************************************************/
  function SMS_test ( target )
