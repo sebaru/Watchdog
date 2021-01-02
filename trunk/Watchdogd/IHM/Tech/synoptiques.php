@@ -58,11 +58,18 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-4 col-form-label text-right">Description du synnoptique</label>
+						     <label class="col-4 col-form-label text-right">Description du synoptique</label>
 						     <input id="idModalSynEditDescription" type="text" class="form-control" placeholder="Description du synoptique">
      					</div>
        </div>
 
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-4 col-form-label text-right">Image du synoptique</label>
+						     <input id="idModalSynEditImage" type="file" accept="image/jpg" class="form-control" placeholder="Choisissez une image">
+     					</div>
+       </div>
+       
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>

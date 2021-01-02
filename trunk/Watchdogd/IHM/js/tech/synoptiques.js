@@ -37,6 +37,19 @@
     Send_to_API ( "POST", "/api/syn/set", JSON.stringify(json_request), function(Response)
      { $('#idTableSyn').DataTable().ajax.reload(null, false);
      }, null );
+
+    fichierSelectionne = $('#idModalSynEditImage')[0].files[0];
+    if (syn_id>0 && fichierSelectionne != null)
+     { var reader = new FileReader();
+       reader.onloadend = function(File)
+        {
+          Send_to_API ( "POST", "/api/upload?filename=syn_"+syn_id+".jpg", file.result, function(Response)
+           { $('#idTableSyn').DataTable().ajax.reload(null, false);
+           }, null );
+        };
+       reader.readAsBinaryFile(fichierSelectionne);
+     }
+     
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Add ( syn_id )
@@ -112,7 +125,11 @@
                },
          rowId: "id",
          columns:
-          [ { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",
+          [ { "data": null, "title":"Aperçu", "className": "align-middle text-center",
+              "render": function (item)
+                { return( "<img src=/img/syn_"+item.id+".jpg style='width: 100px' alt='No Image !'>" ) ); }
+            },
+            { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",
               "render": function (item)
                 { return( Badge_Access_level ( item.access_level ) ); }
             },
