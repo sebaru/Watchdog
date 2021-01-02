@@ -84,7 +84,7 @@
 /* Sortie: Les horloges sont directement pilotée dans la structure DLS_DATA                                                   */
 /******************************************************************************************************************************/
  void Activer_horlogeDB ( void )
-  { gchar requete[512];
+  { gchar requete[1024];
     struct DB *db;
 
     db = Init_DB_SQL();
@@ -96,7 +96,17 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT m.tech_id, m.acronyme"
                 " FROM mnemos_HORLOGE as m INNER JOIN mnemos_HORLOGE_ticks as t ON m.id = t.horloge_id"
-                " WHERE CURTIME() LIKE CONCAT(LPAD(t.heure,2,'0'),':',LPAD(t.minute,2,'0'),':%%')" );
+                " WHERE CURTIME() LIKE CONCAT(LPAD(t.heure,2,'0'),':',LPAD(t.minute,2,'0'),':%%')"
+                " AND ("
+                 "(DAYNAME(CURRENT_DATE()) = 'Monday' AND t.lundi=1) OR "
+                 "(DAYNAME(CURRENT_DATE()) = 'Tuesday' AND t.mardi=1) OR "
+                 "(DAYNAME(CURRENT_DATE()) = 'Wednesday' AND t.mercredi=1) OR "
+                 "(DAYNAME(CURRENT_DATE()) = 'Thursday' AND t.jeudi=1) OR "
+                 "(DAYNAME(CURRENT_DATE()) = 'Friday' AND t.vendredi=1) OR "
+                 "(DAYNAME(CURRENT_DATE()) = 'Saturday' AND t.samedi=1) OR "
+                 "(DAYNAME(CURRENT_DATE()) = 'Sunday' AND t.dimanche=1) "
+                "     )"
+              );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);

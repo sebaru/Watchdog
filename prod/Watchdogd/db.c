@@ -184,6 +184,19 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* SQL_Write_new: Envoie une requete en parametre au serveur de base de données                                               */
+/* Entrée: le format de la requete, ainsi que tous les parametres associés                                                    */
+/******************************************************************************************************************************/
+ gboolean SQL_Select_to_JSON_new ( JsonBuilder *builder, gchar *array_name, gchar *format, ... )
+  { gchar chaine[1024];
+    va_list ap;
+
+    va_start( ap, format );
+    g_vsnprintf ( chaine, sizeof(chaine), format, ap );
+    va_end ( ap );
+    return(SQL_Select_to_JSON ( builder, array_name, chaine ));
+  }
+/******************************************************************************************************************************/
 /* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */

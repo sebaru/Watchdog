@@ -41,50 +41,33 @@
       </div>
       <div class="modal-body">
 
-       <div class="row">
-        <div class="col form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">GSM Tech_ID</span>
-						     </div>
+						     <label class="col-3 col-form-label text-right">GSM Tech_ID</label>
 						     <select id="idModalEditGSMTechID" class="custom-select"></select>
      					</div>
-   					</div>
   					</div>
 
-       <div class="row">
-        <div class="col form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Commande SMS</span>
-						     </div>
+						     <label class="col-3 col-form-label text-right">Commande SMS</label>
 						     <input id="idModalEditGSMTag" type="text" class="form-control" placeholder="Commande SMS">
      					</div>
-   					</div>
   					</div>
 
-       <div class="row">
-        <div class="col form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Target Tech_ID</span>
-						     </div>
-						     <input id="idModalEditTechID" oninput="Modal_Edit_Input_Changed('idModalEditDI')" type="text" class="form-control" placeholder="Tech_id du bit cible">
+						     <label class="col-3 col-form-label text-right">Rechercher une Target</label>
+						     <input id="idModalEditRechercherTechID" oninput="GSMMap_Update_Choix_Tech_ID()" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
      					</div>
-          <small id="idModalEditTechIDPropose"></small>
-   					</div>
   					</div>
 
-       <div class="row">
-        <div class="col form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Target Acronyme</span>
-						     </div>
-						     <input id="idModalEditAcronyme" oninput="Modal_Edit_Input_Changed('idModalEditDI')" type="text" class="form-control" placeholder="Acronyme cible">
+						     <label class="col-3 col-form-label text-right">TechID/Acronyme</label>
+						     <select id="idModalEditSelectTechID" onchange="GSMMap_Update_Choix_Acronyme()" class="mr-1 col-4 custom-select"></select>
+						     <select id="idModalEditSelectAcronyme" class="col-5 custom-select"></select>
      					</div>
-          <small id="idModalEditAcronymePropose"></small>
-        </div>
   					</div>
 
       </div>

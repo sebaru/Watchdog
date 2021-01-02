@@ -176,7 +176,7 @@
      }
 
     gchar *map_tech_id = Normaliser_as_ascii ( Json_get_string( request, "map_tech_id" ) );
-    gchar *map_tag     = Normaliser_as_ascii ( Json_get_string( request, "map_tag" ) );
+    gchar *map_tag     = Normaliser_chaine   ( Json_get_string( request, "map_tag" ) );
     gchar *tech_id     = Normaliser_as_ascii ( Json_get_string( request, "tech_id" ) );
     gchar *acronyme    = Normaliser_as_ascii ( Json_get_string( request, "acronyme" ) );
     gchar *thread      = Normaliser_as_ascii ( Json_get_string( request, "thread" ) );
@@ -278,6 +278,7 @@
      {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
     Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
 end:
+    g_free(map_tag);
     json_node_unref(request);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
