@@ -1,4 +1,4 @@
- document.addEventListener('DOMContentLoaded', Load_page, false);
+é&² document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_GSM_Del ( map_tech_id, map_tag )
@@ -43,7 +43,7 @@
          tech_id    : $('#idModalEditSelectTechID').val().toUpperCase(),
          acronyme   : $('#idModalEditSelectAcronyme').val().toUpperCase(),
          map_tech_id: $('#idModalEditGSMTechID').val().toUpperCase(),
-         map_tag    : $('#idModalEditGSMTag').val(),
+         map_tag    : $('#idModalEditGSMTag').val().toUpperCase(),
        }
      );
     Send_to_API ( 'POST', "/api/map/set", json_request, function ()
