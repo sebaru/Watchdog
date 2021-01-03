@@ -558,6 +558,7 @@ reload:
     soup_server_add_handler ( socket, "/api/users/sessions", Http_traiter_users_sessions, NULL, NULL );
     soup_server_add_handler ( socket, "/api/histo/alive",    Http_traiter_histo_alive, NULL, NULL );
     soup_server_add_handler ( socket, "/api/histo/ack",      Http_traiter_histo_ack, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/upload",         Http_traiter_upload, NULL, NULL );
     soup_server_add_handler ( socket, "/",                   Http_traiter_file, NULL, NULL );
     if (Config.instance_is_master==TRUE)
      { gchar *protocols[] = { "live-motifs", "live-msgs" };

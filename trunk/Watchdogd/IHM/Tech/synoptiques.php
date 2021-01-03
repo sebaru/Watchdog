@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container">
 
  <div class="row m-2">
    <h3><i class="fas fa-mimage text-primary"></i> Liste des Synoptiques</strong></h3>
@@ -66,10 +66,10 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-4 col-form-label text-right">Image du synoptique</label>
-						     <input id="idModalSynEditImage" type="file" accept="image/jpg" class="form-control" placeholder="Choisissez une image">
+						     <input id="idModalSynEditImage" type="file" accept="image/jpg" class="col-8 form-control-file" placeholder="Choisissez une image">
      					</div>
        </div>
-       
+
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>

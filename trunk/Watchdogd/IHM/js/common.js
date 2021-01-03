@@ -4,10 +4,17 @@
  function Send_to_API ( method, URL, parametre, fonction_ok, fonction_nok )
   { var xhr = new XMLHttpRequest;
     $(".ClassLoadingSpinner").show();
+
+    if (method=="POST" || method=="PUT") { ContentType = 'application/json'; }
+    else if (method=="POSTFILE") { ContentType = 'application/octet-stream'; method = "POST"; }
+    else ContentType = null;
+
     if ( method == "GET" && parametre !== null )
      { xhr.open(method, URL+"?"+parametre, true); }
     else xhr.open(method, URL, true);
-    if (method=="POST") { xhr.setRequestHeader('Content-type', 'application/json'); }
+
+    if (ContentType != null) { xhr.setRequestHeader('Content-type', ContentType ); }
+
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
        $(".ClassLoadingSpinner").hide();

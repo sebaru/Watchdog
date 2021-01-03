@@ -33,23 +33,21 @@
          access_level: $('#idModalSynEditAccessLevel').val()
        };
     if (syn_id>0) json_request.syn_id = syn_id;                                                         /* Ajout ou édition ? */
+    fichierSelectionne = $('#idModalSynEditImage')[0].files[0];
 
     Send_to_API ( "POST", "/api/syn/set", JSON.stringify(json_request), function(Response)
-     { $('#idTableSyn').DataTable().ajax.reload(null, false);
+     { if (fichierSelectionne == null) $('#idTableSyn').DataTable().ajax.reload(null, false);
      }, null );
 
-    fichierSelectionne = $('#idModalSynEditImage')[0].files[0];
     if (syn_id>0 && fichierSelectionne != null)
      { var reader = new FileReader();
-       reader.onloadend = function(File)
-        {
-          Send_to_API ( "POST", "/api/upload?filename=syn_"+syn_id+".jpg", file.result, function(Response)
+       reader.onloadend = function()
+        { Send_to_API ( "POSTFILE", "/api/upload?filename=syn_"+syn_id+".jpg&thumb=100", reader.result, function(Response)
            { $('#idTableSyn').DataTable().ajax.reload(null, false);
            }, null );
         };
-       reader.readAsBinaryFile(fichierSelectionne);
+       reader.readAsArrayBuffer(fichierSelectionne);
      }
-     
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Add ( syn_id )
@@ -72,6 +70,7 @@
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") );
     $('#idModalSynEditAccessLevel').val(0);
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('0')" );
+    $('#idModalSynEditImage').val('');
     $('#idModalSynEdit').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -96,6 +95,7 @@
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") );
     $('#idModalSynEditAccessLevel').val( selection.access_level );
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('"+selection.id+"')" );
+    $('#idModalSynEditImage').val('');
     $('#idModalSynEdit').modal("show");
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -127,7 +127,7 @@
          columns:
           [ { "data": null, "title":"Aperçu", "className": "align-middle text-center",
               "render": function (item)
-                { return( "<img src=/img/syn_"+item.id+".jpg style='width: 100px' alt='No Image !'>" ) ); }
+                { return( "<img src=/upload/syn_"+item.id+".jpg height=100px loading=lazy alt='No Image !' >" ); }
             },
             { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",
               "render": function (item)
@@ -145,7 +145,7 @@
               "render": function (item)
                 { return( Lien ( "/"+item.page, "Voir le synoptique "+item.libelle, item.libelle ) ); },
             },
-            { "data": null, "title":"Actions", "orderable": false, "className":"text-center",
+            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-primary", "Ouvrir l'atelier", "Redirect", '/tech/atelier/'+item.id, "image", null );
