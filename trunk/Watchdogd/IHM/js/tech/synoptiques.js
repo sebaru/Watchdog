@@ -14,14 +14,24 @@
   }
 /************************************ Controle de saisie avant envoi **********************************************************/
  function Synoptique_set_controle_edit_page ( page_initiale )
-  { input = $('#idModalSynEditPage');
-    if (table.ajax.json().synoptiques.filter( function(item)
-                                               { return item.page.toUpperCase()==input.val().toUpperCase() } )[0] === undefined ||
-        input.val() == page_initiale
+  { FormatPage = RegExp(/^[a-zA-Z0-9_]+$/);
+
+    input = $('#idModalSynEditPage');
+    if ( FormatPage.test(input.val())==false )
+     { input.addClass("bg-danger");    $('#idModalSynEditValider').attr("disabled", true);
+       Popover_show ( input, 'Caractères autorisés', 'lettres, chiffres et _' );
+     }
+    else if ( (table.ajax.json().synoptiques.filter( function(item)
+                                               { return item.page.toUpperCase()==input.val().toUpperCase() } )[0] !== undefined &&
+          input.val() != page_initiale )
        )
-     { input.removeClass("bg-danger"); $('#idModalSynEditValider').attr("disabled", false); }
+     { input.addClass("bg-danger");    $('#idModalSynEditValider').attr("disabled", true);
+       Popover_show ( input, 'Erreur !', 'Ce nom est déjà pris' );
+     }
     else
-     { input.addClass("bg-danger");    $('#idModalSynEditValider').attr("disabled", true); }
+     { input.removeClass("bg-danger"); $('#idModalSynEditValider').attr("disabled", false);
+       Popover_hide(input);
+     }
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Synoptique_set ( syn_id )

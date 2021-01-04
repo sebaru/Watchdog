@@ -32,7 +32,15 @@
      }
     xhr.send(parametre);
   }
-
+/********************************************* Gestion des popovers ***********************************************************/
+ function Popover_hide ( element )
+  { element.popover('dispose');
+  }
+ function Popover_show ( element, titre, content, place )
+  { Popover_hide ( element );
+    element.popover({ container: 'body', title: titre, content: content});
+    element.popover('show');
+  }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Load_common ()
   { if (document.getElementById("idUsername") !== null)
