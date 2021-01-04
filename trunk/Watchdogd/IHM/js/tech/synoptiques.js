@@ -127,7 +127,7 @@
          columns:
           [ { "data": null, "title":"Aperçu", "className": "align-middle text-center",
               "render": function (item)
-                { return( "<img src=/upload/syn_"+item.id+".jpg height=100px loading=lazy alt='No Image !' >" ); }
+                { return( "<a href='/"+item.page+"'><img src=/upload/syn_"+item.id+".jpg height=100px loading=lazy alt='No Image !' ></a>" ); }
             },
             { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",
               "render": function (item)
