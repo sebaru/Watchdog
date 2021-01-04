@@ -1,4 +1,4 @@
-é&² document.addEventListener('DOMContentLoaded', Load_page, false);
+document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_GSM_Del ( map_tech_id, map_tag )
