@@ -108,7 +108,7 @@
   }
 
  function Lien ( target, tooltip, texte )
-  { return( "<a href='"+target+"' data-toggle='tooltip' title='"+tooltip+"'>"+texte+"</a>" );
+  { return( "<a href='"+target+"' data-toggle='tooltip' title='"+htmlEncode(tooltip)+"'>"+texte+"</a>" );
   }
 
  function Badge ( color, tooltip, texte )

@@ -561,7 +561,7 @@
                                        "FROM dls AS d "
                                        "INNER JOIN syns as s ON d.syn_id=s.id "
                                        "INNER JOIN syns as ps ON s.parent_id = ps.id "
-                                       "WHERE s.access_level<'%d'", session->access_level );
+                                       "WHERE s.access_level<'%d' ORDER BY d.tech_id", session->access_level );
     if (SQL_Select_to_JSON ( builder, "plugins", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);

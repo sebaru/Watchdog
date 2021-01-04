@@ -1,21 +1,9 @@
  document.addEventListener('DOMContentLoaded', Load_syn, false);
 
 /************************************ Controle de saisie avant envoi **********************************************************/
- function Synoptique_set_controle_add_page ( )
-  { input = $('#idModalSynEditPage');
-    if (table.ajax.json().synoptiques.filter( function(item)
-                                               { return item.page.toUpperCase()==input.val().toUpperCase() } )[0] === undefined)
-     { input.removeClass("bg-danger"); $('#idModalSynEditValider').removeAttr("disabled"); }
-    else
-     { input.addClass("bg-danger");    $('#idModalSynEditValider').attr("disabled", "on");
-       return(false);
-     }
-    return(true);
-  }
-/************************************ Controle de saisie avant envoi **********************************************************/
- function Synoptique_set_controle_edit_page ( page_initiale )
+ function Synoptique_set_controle_page ( page_initiale )
   { FormatPage = RegExp(/^[a-zA-Z0-9_]+$/);
-
+    table = $('#idTableSyn').DataTable();
     input = $('#idModalSynEditPage');
     if ( FormatPage.test(input.val())==false )
      { input.addClass("bg-danger");    $('#idModalSynEditValider').attr("disabled", true);
@@ -23,7 +11,7 @@
      }
     else if ( (table.ajax.json().synoptiques.filter( function(item)
                                                { return item.page.toUpperCase()==input.val().toUpperCase() } )[0] !== undefined &&
-          input.val() != page_initiale )
+              (page_initiale == null || input.val() != page_initiale) )
        )
      { input.addClass("bg-danger");    $('#idModalSynEditValider').attr("disabled", true);
        Popover_show ( input, 'Erreur !', 'Ce nom est déjà pris' );
@@ -60,7 +48,7 @@
      }
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Add ( syn_id )
+ function Show_Modal_Syn_Add ( syn_id )
   { table = $('#idTableSyn').DataTable();
     selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
     $('#idModalSynEditTitre').text ( "Ajouter un synoptique" );
@@ -74,8 +62,8 @@
               { $('#idModalSynEditPPage').append("<option value='"+syn.id+"'>"+syn.page+"</option>"); } );
     if (syn_id>0) $('#idModalSynEditPPage').val ( syn_id );
     $('#idModalSynEditPage').val("");
-    $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_add_page()");
-    Synoptique_set_controle_add_page ( )
+    $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page(null)");
+    Synoptique_set_controle_page (null)
     $('#idModalSynEditDescription').val("");
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") );
     $('#idModalSynEditAccessLevel').val(0);
@@ -84,7 +72,7 @@
     $('#idModalSynEdit').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Edit ( syn_id )
+ function Show_Modal_Syn_Edit ( syn_id )
   { table = $('#idTableSyn').DataTable();
     selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
     $('#idModalSynEditTitre').text ( "Modifier le synoptique " + selection.page );
@@ -100,7 +88,8 @@
     if (syn_id==1) $('#idModalSynEditPPage').attr("disabled", true );
               else $('#idModalSynEditPPage').attr("disabled", false );
     $('#idModalSynEditPage').val( selection.page );
-    $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_edit_page('"+selection.page+"')");
+    $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page('"+selection.page+"')");
+    Synoptique_set_controle_page (selection.page)
     $('#idModalSynEditDescription').val( selection.libelle );
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") );
     $('#idModalSynEditAccessLevel').val( selection.access_level );
@@ -116,7 +105,7 @@
      }, null );;
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Del ( syn_id )
+ function Show_Modal_Syn_Del ( syn_id )
   { table = $('#idTableSyn').DataTable();
     selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
     Show_modal_del ( "Détruire le synoptique ?",
@@ -137,7 +126,7 @@
          columns:
           [ { "data": null, "title":"Aperçu", "className": "align-middle text-center",
               "render": function (item)
-                { return( "<a href='/"+item.page+"'><img src=/upload/syn_"+item.id+".jpg height=100px loading=lazy alt='No Image !' ></a>" ); }
+                { return( Lien( '/'+item.page, "Voir le synoptique", "<img src=/upload/syn_"+item.id+".jpg height=100px loading=lazy alt='No Image !' >" ) ); }
             },
             { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",
               "render": function (item)
@@ -159,9 +148,9 @@
               "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-primary", "Ouvrir l'atelier", "Redirect", '/tech/atelier/'+item.id, "image", null );
-                  boutons += Bouton_actions_add ( "outline-primary", "Configurer", "Show_Modal_Edit", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "outline-primary", "Ajouter un synoptique fils", "Show_Modal_Add", item.id, "plus", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer le synoptique", "Show_Modal_Del", item.id, "trash", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Configurer", "Show_Modal_Syn_Edit", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Ajouter un synoptique fils", "Show_Modal_Syn_Add", item.id, "plus", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer le synoptique", "Show_Modal_Syn_Del", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },

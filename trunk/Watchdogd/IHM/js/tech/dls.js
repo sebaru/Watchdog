@@ -65,13 +65,13 @@
  function Show_Modal_Dls_Del ( tech_id )
   { table = $('#idTableDLS').DataTable();
     selection = table.ajax.json().plugins.filter( function(item) { return item.tech_id==tech_id } )[0];
-    $('#idModalDelTitre').text ( "Détruire le module ?" );
-    $('#idModalDelMessage').html("Etes-vous sur de vouloir supprimer le module DLS "+
-                                 "et toutes ses dépendances (Mnémoniques, ...) ?<hr>"+
-                                 "<strong>"+selection.tech_id + " - " + selection.shortname + "</strong>" + "<br>" + selection.name
-                                );
-    $('#idModalDelValider').attr( "onclick", "Valider_Dls_Del('"+tech_id+"')" );
-    $('#idModalDel').modal("show");
+    if (selection.id==1)
+     { Show_Error ( "La suppression du DLS originel est interdite !" ); return; }
+
+    Show_modal_del ( "Détruire le module ?",
+                     "Etes-vous sur de vouloir supprimer le module DLS et toutes ses dépendances (Mnémoniques, ...) ?",
+                     selection.tech_id + " - " + selection.shortname + " - " + selection.name,
+                     "Valider_Dls_Del('"+tech_id+"')" );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Dls_compiler ( tech_id )
@@ -85,45 +85,75 @@
 
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function Synoptique_Dls_Add ( syn_id )
-  { table = $('#idTableSyn').DataTable();
-    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
-
-    var json_request =
-       { syn_id : selection.syn_id,
-         name   : $('#idModalDlsAddDescription').val(),
-         tech_id: $('#idModalDlsAddTechID').val().toUpperCase(),
+ function Dls_Set ( dls_id )
+  { var json_request =
+       { syn_id    : $('#idModalDlsEditPage').val(),
+         shortname : $('#idModalDlsEditShortname').val(),
+         name      : $('#idModalDlsEditDescription').val(),
+         tech_id   : $('#idModalDlsEditTechID').val().toUpperCase(),
        };
+    if (dls_id>0) json_request.id = dls_id;                                                             /* Ajout ou édition ? */
 
     Send_to_API ( "POST", "/api/dls/set", JSON.stringify(json_request), function(Response)
-     { $('#idTableSyn').DataTable().ajax.reload(null, false);
+     { $('#idTableDLS').DataTable().ajax.reload(null, false);
      }, null );
   }
-/********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Dls_Add_controle_techid ( )
-  { table = $('#idTableDLS').DataTable();
-    if (table.ajax.json().plugins.filter ( function (item)
-                                            { return ( item.tech_id == $('#idModalDlsAddTechID').val().toUpperCase() ); } ).length!=0)
-     { $('#idModalDlsAddTechID').addClass("bg-danger");
-       $('#idModalDlsAddValider').attr( "disabled", true );
+/************************************ Controle de saisie avant envoi **********************************************************/
+ function Dls_Set_controle_techid ( tech_id_initial )
+  { FormatPage = RegExp(/^[a-zA-Z0-9_]+$/);
+    table = $('#idTableDLS').DataTable();
+    input = $('#idModalDlsEditTechID');
+
+    if ( FormatPage.test(input.val())==false )
+     { input.addClass("bg-danger");    $('#idModalDlsEditValider').attr("disabled", true);
+       Popover_show ( input, 'Caractères autorisés', 'lettres, chiffres et _' );
+     }
+    else if ( (table.ajax.json().plugins.filter( function(item)
+                                               { return item.tech_id.toUpperCase()==input.val().toUpperCase() } )[0] !== undefined &&
+              (tech_id_initial == null || input.val().toUpperCase() != tech_id_initial) )
+       )
+     { input.addClass("bg-danger");    $('#idModalDlsEditValider').attr("disabled", true);
+       Popover_show ( input, 'Erreur !', 'Ce nom est déjà pris' );
      }
     else
-     { $('#idModalDlsAddTechID').removeClass("bg-danger");
-       $('#idModalDlsAddValider').attr( "disabled", false );
+     { input.removeClass("bg-danger"); $('#idModalDlsEditValider').attr("disabled", false);
+       Popover_hide(input);
      }
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Dls_Add ( syn_id )
-  { $('#idModalDlsAddTechID').val("").removeClass("bg-danger");
-    $('#idModalDlsAddTechID').attr("oninput", "Dls_Add_controle_techid()" );
-    $('#idModalDlsAddDescription').val("");
-    $('#idModalDlsAddValider').attr( "onclick", "Dls_Add("+syn_id+")" );
+ function Show_Modal_Dls_Add ( )
+  { $('#idModalDlsEditTitre').text("Ajouter un D.L.S");
+    $('#idModalDlsEditTechID').attr("oninput", "Dls_Set_controle_techid(null)" );
+    $('#idModalDlsEditTechID').val("");
+    Dls_Set_controle_techid ( null );
+    $('#idModalDlsEditShortname').val("");
+    $('#idModalDlsEditDescription').val("");
+    $('#idModalDlsEditValider').attr( "onclick", "Dls_Set(0)" );
     Send_to_API ( "GET", "/api/syn/list", null, function (Response)
-     { $('#idModalDlsAddPage').empty();
+     { $('#idModalDlsEditPage').empty();
        $.each ( Response.synoptiques, function ( i, item )
-        { $('#idModalDlsAddPage').append("<option value='"+item.id+"'>"+item.page+" - "+htmlEncode(item.libelle)+"</option>"); } );
+        { $('#idModalDlsEditPage').append("<option value='"+item.id+"'>"+item.page+" - "+htmlEncode(item.libelle)+"</option>"); } );
      }, null );
-    $('#idModalDlsAdd').modal("show");
+    $('#idModalDlsEdit').modal("show");
+  }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function Show_Modal_Dls_Edit ( tech_id )
+  { table = $('#idTableDLS').DataTable();
+    selection = table.ajax.json().plugins.filter( function(item) { return item.tech_id==tech_id } )[0];
+    $('#idModalDlsEditTitre').text("Modifier le D.L.S " + selection.tech_id );
+    $('#idModalDlsEditTechID').val(selection.tech_id);
+    $('#idModalDlsEditTechID').attr("oninput", "Dls_Set_controle_techid('"+tech_id+"')" );
+    Dls_Set_controle_techid ( tech_id );
+    $('#idModalDlsEditShortname').val(selection.shortname);
+    $('#idModalDlsEditDescription').val(selection.name);
+    $('#idModalDlsEditValider').attr( "onclick", "Dls_Set("+selection.id+")" );
+    Send_to_API ( "GET", "/api/syn/list", null, function (Response)
+     { $('#idModalDlsEditPage').empty();
+       $.each ( Response.synoptiques, function ( i, item )
+        { $('#idModalDlsEditPage').append("<option value='"+item.id+"'>"+item.page+" - "+htmlEncode(item.libelle)+"</option>"); } );
+       $('#idModalDlsEditPage').val(selection.syn_id);
+     }, null );
+    $('#idModalDlsEdit').modal("show");
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
@@ -187,6 +217,7 @@
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-primary", "Voir le code", "Redirect", "/tech/dls_source/"+item.tech_id, "code", null );
                   boutons += Bouton_actions_add ( "outline-primary", "Voir les mnemos", "Redirect", "/tech/mnemos/"+item.tech_id, "book", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer", "Show_Modal_Dls_Edit", item.tech_id, "pen", null );
                   boutons += Bouton_actions_add ( "outline-success", "Compiler le module", "Dls_compiler", item.tech_id, "coffee", null );
                   boutons += Bouton_actions_add ( "outline-primary", "Voir les RUN", "Redirect", "/tech/dls_run/"+item.tech_id, "eye", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer le plugin", "Show_Modal_Dls_Del", item.tech_id, "trash", null );

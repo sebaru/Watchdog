@@ -4,7 +4,7 @@
    <h3><i class="fas fa-mimage text-primary"></i> Liste des Synoptiques</strong></h3>
 
    <div class ="ml-auto btn-group align-items-start">
-        <button type="button" onclick="Show_Modal_Add(0)" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un Synoptique</button>
+        <button type="button" onclick="Show_Modal_Syn_Add(0)" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un Synoptique</button>
    </div>
  </div>
 
