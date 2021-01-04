@@ -86,7 +86,7 @@
 <div id="idTabSortieAna" class="tab-pane fade in table-responsive mt-1" role="tabpanel">
  <div class="row m-2">
    <div class ="ml-auto btn-group">
-        <button type="button" onclick="Show_Modal_Map_Edit_AO('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping AI</button>
+        <button type="button" onclick="Show_Modal_Map_Edit_AO('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping AO</button>
    </div>
  </div>
     <table id="idTableModbusMapAO" class="table table-striped table-bordered table-hover w-100">
@@ -116,14 +116,14 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Wago Tech_ID</label>
-						     <input id="idModalEditDIWagoTechID" type="text" class="form-control" placeholder="Module WAGO">
+						     <select id="idModalEditDIWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Wago DI</label>
-						     <input id="idModalEditDIWagoTag" type="text" class="form-control" placeholder="DIxx">
+						     <input id="idModalEditDIWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="DIxx">
      					</div>
   					</div>
 
@@ -137,14 +137,14 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditDISelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idModalEditDI', 'DI')" class="col-9  custom-select"></select>
+						     <select id="idModalEditDISelectTechID" required onchange="ModbusMap_Update_Choix_Acronyme('idModalEditDI', 'DI')" class="col-9  custom-select"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditDISelectAcronyme" class="col-9 custom-select"></select>
+						     <select id="idModalEditDISelectAcronyme" required class="col-9 custom-select"></select>
      					</div>
   					</div>
 
@@ -179,7 +179,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Wago DO</label>
-						     <input id="idModalEditDOWagoTag" type="text" class="form-control" placeholder="DOxx">
+						     <input id="idModalEditDOWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="DOxx">
      					</div>
   					</div>
 
@@ -235,7 +235,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Wago AI</label>
-						     <input id="idModalEditAIWagoTag" type="text" class="form-control" placeholder="AIxx">
+						     <input id="idModalEditAIWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="AIxx">
      					</div>
   					</div>
 
@@ -335,7 +335,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Wago AO</label>
-						     <input id="idModalEditAOWagoTag" type="text" class="form-control" placeholder="AOxx">
+						     <input id="idModalEditAOWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="AOxx">
      					</div>
   					</div>
 

@@ -82,12 +82,9 @@
   }
 /********************************************* Controle du saisie du modal ****************************************************/
  function Common_Updater_Choix_TechID ( ids, classe, def_tech_id, def_acronyme )
-  {
-
-    var json_request = { acronyme: '', classe: classe };
+  { var json_request = { acronyme: '', classe: classe };
     if (def_tech_id != null) { $('#'+ids+'RechercherTechID').val( '' ); }
     json_request.tech_id = $('#'+ids+'RechercherTechID').val();
-
 
     Send_to_API ( "PUT", "/api/mnemos/validate", JSON.stringify(json_request), function (Response)
      { $('#'+ids+'SelectTechID').empty();
