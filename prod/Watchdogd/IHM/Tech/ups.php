@@ -4,7 +4,7 @@
    <h3><img src="/img/onduleur.jpg" style="width:80px" alt="Onduleur 5PX">Liste des Onduleurs</h3>
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Show_Modal_Ups_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
-        <button type="button" onclick="Ups_refresh" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
+        <button type="button" onclick="Ups_refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
         <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
    </div>
  </div>
@@ -34,76 +34,41 @@
       </div>
       <div class="modal-body">
 
-        <div class="form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">TechID</span>
-						     </div>
-						     <input id="idModalUpsEditTechID" type="text" class="form-control" placeholder="Tech ID du module">
+						     <label class="col-3 col-form-label text-right">TechID</label>
+						     <input id="idModalUpsEditTechID" required type="text" class="form-control" placeholder="Tech ID de l'onduleur">
      					</div>
    					</div>
 
-        <div class="form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Name</span>
-						     </div>
-						     <input id="idModalUpsEditName" type="text" class="form-control" placeholder="Nom de l'onduleur">
+						     <label class="col-3 col-form-label text-right">UPS Name</label>
+						     <input id="idModalUpsEditName" required type="text" class="form-control" placeholder="Nom de l'onduleur">
      					</div>
    					</div>
 
-        <div class="form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Host</span>
-						     </div>
-						     <input id="idModalUpsEditHost" type="text" class="form-control" placeholder="@IP ou hostname de l'onduleur">
+						     <label class="col-3 col-form-label text-right">UPS Host</label>
+						     <input id="idModalUpsEditHost" required type="text" class="form-control" placeholder="@IP ou hostname de l'onduleur">
      					</div>
    					</div>
 
-        <div class="form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Admin Username</span>
-						     </div>
+						     <label class="col-3 col-form-label text-right">Admin Username</label>
 						     <input id="idModalUpsEditAdminUsername" type="text" class="form-control" placeholder="Username de connexion à l'UPS">
      					</div>
         </div>
 
-        <div class="form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Admin Password</span>
-						     </div>
+						     <label class="col-3 col-form-label text-right">Admin Password</label>
 						     <input id="idModalUpsEditAdminPassword" type="text" class="form-control" placeholder="Password de connexion à l'UPS">
      					</div>
         </div>
 
-<!--
-        <div class="form-group">
-					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Watchdog</span>
-						     </div>
-						     <input id="idModalUpsEditWatchdog" type="number" class="form-control" min=10 max=1200 placeholder="Nombre de 1/10 de secondes avant de couper les sorties">
-						     <div class="input-group-append">
-							     <span class="input-group-text">secondes</span>
-						     </div>
-     					</div>
-        </div>
-
-        <div class="form-group">
-					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Max Requetes/sec</span>
-						     </div>
-						     <input id="idModalUpsEditMaxRequestParSec" type="number" class="form-control" min=1 max=100 placeholder="Nombre de requetes max par seconde">
-						     <div class="input-group-append">
-							     <span class="input-group-text">par seconde</span>
-						     </div>
-     					</div>
-        </div>
--->
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>

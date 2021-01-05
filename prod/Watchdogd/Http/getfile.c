@@ -37,6 +37,64 @@
  extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
+/* Http_traiter_mnemos_validate: Valide la presence ou non d'un tech_id/acronyme dans le dico                                 */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_upload ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                            SoupClientContext *client, gpointer user_data )
+  { GBytes *request_brute;
+    gchar filename[80], chaine[256];
+    gsize taille;
+
+    if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    gpointer data = g_bytes_get_data ( request_brute, &taille );
+
+    gchar *filename_src = g_hash_table_lookup ( query, "filename" );
+    if (!filename_src) return;
+    if ( g_strrstr(filename_src, "..")) return;
+    if (!g_str_has_suffix(filename_src, ".jpg")) return;
+
+    gchar *filename_min = g_utf8_strdown ( filename_src, -1 );
+    g_strcanon ( filename_min, "0123456789abcdefghijklmnopqrstuvwxyz._", '_' );
+    g_snprintf ( filename, sizeof(filename), "Upload/%s", filename_min );
+    g_free(filename_min);
+
+    unlink(filename);
+    gint fd = open ( filename, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR );
+    if (fd==-1)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                 "%s: File '%s' upload failed '%s''", __func__, filename, strerror(errno) );
+       return;
+     }
+
+    write ( fd, data, taille );
+    close(fd);
+
+    gchar *thumb_src = g_hash_table_lookup ( query, "thumb" );
+    if (thumb_src)
+     { gint thumb=atoi(thumb_src);
+
+       if(20<thumb && thumb<200)
+        { g_snprintf( chaine, sizeof(chaine), "convert -thumbnail x%d %s %s", thumb, filename, filename );
+          system(chaine);
+        }
+     }
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+              "%s: File '%s' uploaded with size='%d'", __func__, filename, taille );
+
+    Audit_log ( session, "File '%s' uploaded (size=%d)", filename, taille );
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+/******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
@@ -54,6 +112,8 @@
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+
+    if (g_strrstr(path, "..")) return;
 
     g_strcanon ( path, "ABCDEFGIHJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz._/", '_' );
     gchar *path_to_lower = g_utf8_strdown ( path, -1 );
@@ -88,6 +148,8 @@
        soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
        return;
      }
+    else if (!strcasecmp( URI[1], "upload"))
+     { g_snprintf ( fichier, sizeof(fichier), "Upload/%s", URI[2] ); }
     else if (!strcasecmp( URI[1], "audio"))
      { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/audio/%s", WTD_PKGDATADIR, URI[2] ); }
     else if (!strcasecmp(URI[1], "tech"))

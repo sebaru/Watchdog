@@ -88,9 +88,9 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT syn.*, psyn.page as ppage, psyn.libelle AS plibelle FROM syns AS syn"
+    g_snprintf(chaine, sizeof(chaine), "SELECT syn.*, psyn.page as ppage, psyn.libelle AS plibelle, psyn.id AS pid FROM syns AS syn"
                                        " INNER JOIN syns as psyn ON psyn.id=syn.parent_id"
-                                       " WHERE syn.access_level<='%d'", session->access_level);
+                                       " WHERE syn.access_level<='%d' ORDER BY syn.page", session->access_level);
     if (SQL_Select_to_JSON ( builder, "synoptiques", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
@@ -196,7 +196,10 @@
                   "access_level='%d'", libelle, parent_id, page, access_level );
      }
 
-    if (SQL_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
+    if (SQL_Write (requete))
+     { soup_message_set_status (msg, SOUP_STATUS_OK);
+       Partage->com_dls.Thread_reload = TRUE;                                                                  /* Relance DLS */
+     }
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
 
     if ( Json_has_member ( request, "syn_id" ) )                                                                   /* Edition */
@@ -243,7 +246,7 @@
      }
 
     g_snprintf(chaine, sizeof(chaine), "SELECT s.*, ps.page AS ppage FROM syns AS s INNER JOIN syns AS ps ON s.parent_id = ps.id "
-                                       "WHERE s.id=%d AND s.access_level<=%d", syn_id, session->access_level );
+                                       "WHERE s.id=%d AND s.access_level<=%d ORDER BY s.page", syn_id, session->access_level );
     if (SQL_Select_to_JSON ( builder, NULL, chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);

@@ -1,72 +1,100 @@
  document.addEventListener('DOMContentLoaded', Load_syn, false);
 
 /************************************ Controle de saisie avant envoi **********************************************************/
- function Synoptique_set_controle_ppage ( )
-  { input = $('#idModalSynEditPPage');
-    if (table.ajax.json().synoptiques.filter( function(item) { return item.ppage==input.val() } )[0] !== undefined)
-     { input.removeClass("bg-danger"); $('#idModalSynEditValider').removeAttr("disabled"); }
-    else
-     { input.addClass("bg-danger");    $('#idModalSynEditValider').attr("disabled", "on");
-       return(false);
+ function Synoptique_set_controle_page ( page_initiale )
+  { FormatPage = RegExp(/^[a-zA-Z0-9_]+$/);
+    table = $('#idTableSyn').DataTable();
+    input = $('#idModalSynEditPage');
+    if ( FormatPage.test(input.val())==false )
+     { input.addClass("bg-danger");    $('#idModalSynEditValider').attr("disabled", true);
+       Popover_show ( input, 'Caractères autorisés', 'lettres, chiffres et _' );
      }
-    return(true);
+    else if ( (table.ajax.json().synoptiques.filter( function(item)
+                                               { return item.page.toUpperCase()==input.val().toUpperCase() } )[0] !== undefined &&
+              (page_initiale == null || input.val() != page_initiale) )
+       )
+     { input.addClass("bg-danger");    $('#idModalSynEditValider').attr("disabled", true);
+       Popover_show ( input, 'Erreur !', 'Ce nom est déjà pris' );
+     }
+    else
+     { input.removeClass("bg-danger"); $('#idModalSynEditValider').attr("disabled", false);
+       Popover_hide(input);
+     }
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Synoptique_set ( syn_id )
   {
-/*--------------------------------------------- Controle de saisie -----------------------------------------------------------*/
-    if (!Synoptique_set_controle_ppage()) return;
-
     var json_request =
-       { parent_id: table.ajax.json().synoptiques.filter( function(item)
-                                                           { return item.page.toUpper==$('#idModalSynEditPPage').val().toUpper } )[0].id,
-         page: $('#idModalSynEditPage').val(),
-         libelle: $('#idModalSynEditDescription').val(),
+       { parent_id: $('#idModalSynEditPPage').val(),
+         page     : $('#idModalSynEditPage').val(),
+         libelle  : $('#idModalSynEditDescription').val(),
          access_level: $('#idModalSynEditAccessLevel').val()
        };
     if (syn_id>0) json_request.syn_id = syn_id;                                                         /* Ajout ou édition ? */
+    fichierSelectionne = $('#idModalSynEditImage')[0].files[0];
 
     Send_to_API ( "POST", "/api/syn/set", JSON.stringify(json_request), function(Response)
-     { $('#idTableSyn').DataTable().ajax.reload(null, false);
-       $('#idToastStatus').toast('show');
+     { if (fichierSelectionne == null) $('#idTableSyn').DataTable().ajax.reload(null, false);
      }, null );
+
+    if (syn_id>0 && fichierSelectionne != null)
+     { var reader = new FileReader();
+       reader.onloadend = function()
+        { Send_to_API ( "POSTFILE", "/api/upload?filename=syn_"+syn_id+".jpg&thumb=100", reader.result, function(Response)
+           { $('#idTableSyn').DataTable().ajax.reload(null, false);
+           }, null );
+        };
+       reader.readAsArrayBuffer(fichierSelectionne);
+     }
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Add_Dls ( syn_id )
-  { table = $('#idTableSyn').DataTable();
-    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
-    $('#idModalAddDlsTechID').val("");
-    $('#idModalAddDlsTechID').attr("oninput", "Synoptique_Add_Dls_controle_techid()" );
-    $('#idModalAddDlsDescription').val("");
-    $('#idModalAddDlsValider').attr( "onclick", "Synoptique_Add_Dls()" );
-    $('#idModalAddDls').modal("show");
-  }
-/********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Add ( syn_id )
+ function Show_Modal_Syn_Add ( syn_id )
   { table = $('#idTableSyn').DataTable();
     selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
     $('#idModalSynEditTitre').text ( "Ajouter un synoptique" );
+    $('#idModalSynEditPPage').empty();
+    $.each ( table.ajax.json().synoptiques.sort( function(a, b)
+                                                  { if (a.page<b.page) return(-1);
+                                                    if (a.page>b.page) return(1);
+                                                    return(0);
+                                                  } ),
+             function ( i, syn )
+              { $('#idModalSynEditPPage').append("<option value='"+syn.id+"'>"+syn.page+"</option>"); } );
+    if (syn_id>0) $('#idModalSynEditPPage').val ( syn_id );
     $('#idModalSynEditPage').val("");
-    $('#idModalSynEditPPage').val ( selection.ppage );
-    $('#idModalSynEditPPage').attr("oninput", "Synoptique_set_controle_ppage()");
+    $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page(null)");
+    Synoptique_set_controle_page (null)
     $('#idModalSynEditDescription').val("");
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") );
     $('#idModalSynEditAccessLevel').val(0);
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('0')" );
+    $('#idModalSynEditImage').val('');
     $('#idModalSynEdit').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Edit ( syn_id )
+ function Show_Modal_Syn_Edit ( syn_id )
   { table = $('#idTableSyn').DataTable();
     selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
-    $('#idModalSynEditTitre').text ( "Modifier le synoptique" );
-    $('#idModalSynEditPPage').val ( selection.ppage );
-    $('#idModalSynEditPPage').attr("oninput", "Synoptique_set_controle_ppage()");
+    $('#idModalSynEditTitre').text ( "Modifier le synoptique " + selection.page );
+    $('#idModalSynEditPPage').empty();
+    $.each ( table.ajax.json().synoptiques.sort( function(a, b)
+                                                  { if (a.page<b.page) return(-1);
+                                                    if (a.page>b.page) return(1);
+                                                    return(0);
+                                                  } ),
+             function ( i, syn )
+              { $('#idModalSynEditPPage').append("<option value='"+syn.id+"'>"+syn.page+"</option>"); } );
+    $('#idModalSynEditPPage').val ( selection.pid );
+    if (syn_id==1) $('#idModalSynEditPPage').attr("disabled", true );
+              else $('#idModalSynEditPPage').attr("disabled", false );
     $('#idModalSynEditPage').val( selection.page );
+    $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page('"+selection.page+"')");
+    Synoptique_set_controle_page (selection.page)
     $('#idModalSynEditDescription').val( selection.libelle );
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") );
     $('#idModalSynEditAccessLevel').val( selection.access_level );
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('"+selection.id+"')" );
+    $('#idModalSynEditImage').val('');
     $('#idModalSynEdit').modal("show");
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -77,12 +105,12 @@
      }, null );;
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Del ( syn_id )
+ function Show_Modal_Syn_Del ( syn_id )
   { table = $('#idTableSyn').DataTable();
     selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
     Show_modal_del ( "Détruire le synoptique ?",
-                     "Etes-vous sur de vouloir supprimer le synoptique suivant et toutes ses dépendances (DLS, mnémoniques, ...) ?<hr>"+
-                     "<strong>"+selection.page+" - "+selection.libelle+"</strong>",
+                     "Etes-vous sur de vouloir supprimer le synoptique suivant et toutes ses dépendances (DLS, mnémoniques, ...) ?",
+                     selection.page+" - "+selection.libelle,
                       "Valide_del_synoptique("+syn_id+")" );
   }
 /********************************************* Appelé au chargement de la page ************************************************/
@@ -96,7 +124,11 @@
                },
          rowId: "id",
          columns:
-          [ { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",
+          [ { "data": null, "title":"Aperçu", "className": "align-middle text-center",
+              "render": function (item)
+                { return( Lien( '/'+item.page, "Voir le synoptique", "<img src=/upload/syn_"+item.id+".jpg height=100px loading=lazy alt='No Image !' >" ) ); }
+            },
+            { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",
               "render": function (item)
                 { return( Badge_Access_level ( item.access_level ) ); }
             },
@@ -112,14 +144,13 @@
               "render": function (item)
                 { return( Lien ( "/"+item.page, "Voir le synoptique "+item.libelle, item.libelle ) ); },
             },
-            { "data": null, "title":"Actions", "orderable": false, "className":"text-center",
+            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-primary", "Ouvrir l'atelier", "Redirect", '/tech/atelier/'+item.id, "image", null );
-                  boutons += Bouton_actions_add ( "outline-primary", "Configurer", "Show_Modal_Edit", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "outline-success", "Ajouter un synoptique fils", "Show_Modal_Add", item.id, "plus", null );
-                  boutons += Bouton_actions_add ( "outline-info", "Ajouter un module D.L.S", "Show_Modal_Add_Dls", item.id, "code", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer le synoptique", "Show_Modal_Del", item.id, "trash", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Configurer", "Show_Modal_Syn_Edit", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Ajouter un synoptique fils", "Show_Modal_Syn_Add", item.id, "plus", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer le synoptique", "Show_Modal_Syn_Del", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },

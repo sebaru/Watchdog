@@ -4,10 +4,17 @@
  function Send_to_API ( method, URL, parametre, fonction_ok, fonction_nok )
   { var xhr = new XMLHttpRequest;
     $(".ClassLoadingSpinner").show();
+
+    if (method=="POST" || method=="PUT") { ContentType = 'application/json'; }
+    else if (method=="POSTFILE") { ContentType = 'application/octet-stream'; method = "POST"; }
+    else ContentType = null;
+
     if ( method == "GET" && parametre !== null )
      { xhr.open(method, URL+"?"+parametre, true); }
     else xhr.open(method, URL, true);
-    if (method=="POST") { xhr.setRequestHeader('Content-type', 'application/json'); }
+
+    if (ContentType != null) { xhr.setRequestHeader('Content-type', ContentType ); }
+
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
        $(".ClassLoadingSpinner").hide();
@@ -25,7 +32,21 @@
      }
     xhr.send(parametre);
   }
-
+/************************************ Controle de saisie avant envoi **********************************************************/
+ function isNum ( id )
+  { FormatTag = RegExp(/^[0-9]+$/);
+    input = $('#'+id);
+    return ( FormatTag.test(input.val()) )
+  }
+/********************************************* Gestion des popovers ***********************************************************/
+ function Popover_hide ( element )
+  { element.popover('dispose');
+  }
+ function Popover_show ( element, titre, content, place )
+  { Popover_hide ( element );
+    element.popover({ container: 'body', title: titre, content: content});
+    element.popover('show');
+  }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Load_common ()
   { if (document.getElementById("idUsername") !== null)
@@ -93,7 +114,7 @@
   }
 
  function Lien ( target, tooltip, texte )
-  { return( "<a href='"+target+"' data-toggle='tooltip' title='"+tooltip+"'>"+texte+"</a>" );
+  { return( "<a href='"+target+"' data-toggle='tooltip' title='"+htmlEncode(tooltip)+"'>"+texte+"</a>" );
   }
 
  function Badge ( color, tooltip, texte )
@@ -103,6 +124,15 @@
            "</span>" );
   }
 
+/*****************************************Peuple un selecten fonction d'un retour API *****************************************/
+ function Select_from_api ( id, url, url_parameter, array_out, array_item, to_string, selected )
+  { $('#'+id).empty();
+    Send_to_API ( "GET", url, url_parameter, function(Response)
+     { $.each ( Response[array_out], function ( i, item )
+        { $('#'+id).append("<option value='"+item[array_item]+"'>"+to_string(item)+"</option>"); } );
+       if (selected!=null) $('#'+id).val(selected);
+     }, null );
+  }
 /********************************************* Renvoi un Badge d'access Level *************************************************/
  function Badge_Access_level ( level )
   { if (level == 1) return( Badge ( "info", "Accès de niveau 1", "1" ) );
@@ -143,9 +173,10 @@
     return ( string.replace(/'/g,'&#39').replace(/"/g,'&#34') ).replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 /****************************************** Are you sure **********************************************************************/
- function Show_modal_del ( titre, message, fonction )
+ function Show_modal_del ( titre, message, details, fonction )
   { $('#idModalDelTitre').text ( htmlEncode(titre) );
     $('#idModalDelMessage').html( htmlEncode(message) );
+    $('#idModalDelDetails').html( htmlEncode(details) );
     $('#idModalDelValider').attr( "onclick", fonction );
     $('#idModalDel').modal("show");
   }

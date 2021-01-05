@@ -5,6 +5,7 @@
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Show_Modal_Modbus_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
         <button type="button" onclick="window.location='/tech/modbus_map'" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
+        <button type="button" onclick="Modbus_refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
         <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
    </div>
  </div>
@@ -48,38 +49,30 @@
       </div>
       <div class="modal-body">
 
-        <div class="form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">TechID</span>
-						     </div>
-						     <input id="idModalModbusEditTechID" type="text" class="form-control" placeholder="Tech ID du module">
+						     <label class="col-3 col-form-label text-right">TechID</label>
+						     <input id="idModalModbusEditTechID" required type="text" class="form-control" placeholder="Tech ID du module">
      					</div>
    					</div>
 
-        <div class="form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Hostname</span>
-						     </div>
-						     <input id="idModalModbusEditHostname" type="text" class="form-control" placeholder="@IP ou hostname">
+						     <label class="col-3 col-form-label text-right">Hostname</label>
+						     <input id="idModalModbusEditHostname" required type="text" class="form-control" placeholder="@IP ou hostname">
      					</div>
    					</div>
 
-        <div class="form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Description</span>
-						     </div>
+						     <label class="col-3 col-form-label text-right">Description</label>
 						     <input id="idModalModbusEditDescription" type="text" class="form-control" placeholder="Ou est le module ?">
      					</div>
         </div>
 
-        <div class="form-group">
+       <div class="col form-group">
 					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Watchdog</span>
-						     </div>
+						     <label class="col-3 col-form-label text-right">Watchdog</label>
 						     <input id="idModalModbusEditWatchdog" type="number" class="form-control" min=10 max=1200 placeholder="Nombre de 1/10 de secondes avant de couper les sorties">
 						     <div class="input-group-append">
 							     <span class="input-group-text">secondes</span>
@@ -87,14 +80,12 @@
      					</div>
         </div>
 
-        <div class="form-group">
-					     <div class="input-group">
-						     <div class="input-group-prepend">
-							     <span class="input-group-text">Max Requetes/sec</span>
-						     </div>
+       <div class="col form-group">
+					     <div class="input-group align-items-center ">
+						     <label class="col-3 col-form-label text-right">Max Requetes/sec</label>
 						     <input id="idModalModbusEditMaxRequestParSec" type="number" class="form-control" min=1 max=100 placeholder="Nombre de requetes max par seconde">
 						     <div class="input-group-append">
-							     <span class="input-group-text">par seconde</span>
+							     <span class="input-group-text form-control">par seconde</span>
 						     </div>
      					</div>
         </div>

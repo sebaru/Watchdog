@@ -116,6 +116,11 @@
     chown ( chaine, pwd->pw_uid, pwd->pw_gid );
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Dls '%s' directory'", __func__, chaine );
 
+    g_snprintf( chaine, sizeof(chaine), "%s/Upload", home );
+    mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
+    chown ( chaine, pwd->pw_uid, pwd->pw_gid );
+    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Upload '%s' directory'", __func__, chaine );
+
 /******************************************* Test accès Database **************************************************************/
     gchar *DB_SCHEMA = "/usr/local/share/Watchdog/init_db.sql";
     if (stat ( DB_SCHEMA, &stat_buf)==-1)

@@ -121,8 +121,8 @@
   { table = $('#idTableUsers').DataTable();
     selection = table.ajax.json().users.filter( function(item) { return (item.username==username) } )[0];
     Show_modal_del ( "Supprimer cet utilisateur ?",
-                     "Etes-vous sur de vouloir supprimer l'utilisateur "+selection.username+ "? <hr>"+
-                     "<strong>"+selection.username + " - " + selection.comment + "</strong>",
+                     "Etes-vous sur de vouloir supprimer l'utilisateur "+selection.username+ "?",
+                      selection.username + " - " + selection.comment,
                      "User_Valider_user_del('"+username+"')" );
   }
 /******************************************************************************************************************************/

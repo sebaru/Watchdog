@@ -128,10 +128,8 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_run ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    GSList *liste;
+  { GSList *liste;
     gsize taille_buf;
-    gsize taille;
     gchar *buf;
 
     if (msg->method != SOUP_METHOD_PUT)
@@ -141,13 +139,8 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
@@ -344,8 +337,6 @@
                                 SoupClientContext *client, gpointer user_data )
   { gchar *buf, chaine[256];
     gsize taille_buf;
-    GBytes *request_brute;
-    gsize taille;
 
     if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -354,13 +345,8 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
@@ -399,22 +385,16 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_start ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille;
-    if (msg->method != SOUP_METHOD_POST)
+  { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
@@ -443,22 +423,16 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_stop ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                               SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille;
-    if (msg->method != SOUP_METHOD_POST)
+  { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
@@ -488,22 +462,16 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_debug ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille;
-    if (msg->method != SOUP_METHOD_POST)
+   { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
@@ -532,22 +500,16 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_undebug ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille;
-    if (msg->method != SOUP_METHOD_POST)
+  { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
@@ -599,7 +561,7 @@
                                        "FROM dls AS d "
                                        "INNER JOIN syns as s ON d.syn_id=s.id "
                                        "INNER JOIN syns as ps ON s.parent_id = ps.id "
-                                       "WHERE s.access_level<'%d'", session->access_level );
+                                       "WHERE s.access_level<'%d' ORDER BY d.tech_id", session->access_level );
     if (SQL_Select_to_JSON ( builder, "plugins", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
@@ -617,9 +579,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille;
-    gchar chaine[256];
+  { gchar chaine[256];
     if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -627,13 +587,8 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
@@ -643,19 +598,70 @@
 
     gchar *target = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
     json_node_unref(request);
-    if (!target)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Normalize Error");
-       return;
-     }
 
     Audit_log ( session, "DLS '%s' supprimé", target );
     g_snprintf(chaine, sizeof(chaine),  "DELETE FROM dls WHERE tech_id='%s'", target );
     g_free(target);
     if (SQL_Write (chaine)==FALSE)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
+       { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error"); }
+	   else soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_dls_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                             SoupClientContext *client, gpointer user_data )
+  { gchar requete[256];
+
+    if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
+
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "shortname" ) &&
+            Json_has_member ( request, "name" ) && Json_has_member ( request, "syn_id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
+
+    gchar *tech_id   = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
+    gchar *shortname = Normaliser_chaine ( Json_get_string ( request, "shortname" ) );
+    gchar *name      = Normaliser_chaine ( Json_get_string ( request, "name" ) );
+
+    if (Json_has_member ( request, "id" ) )
+     { g_snprintf( requete, sizeof(requete),
+                  "UPDATE dls SET syn_id='%d', tech_id='%s', shortname='%s', name='%s' WHERE id='%d'",
+                   Json_get_int ( request, "syn_id" ), tech_id, shortname, name, Json_get_int ( request, "id" ) );
+     }
+    else
+     { g_snprintf( requete, sizeof(requete),
+                  "INSERT INTO dls SET syn_id='%d', tech_id='%s', shortname='%s', name='%s'",
+                   Json_get_int ( request, "syn_id" ), tech_id, shortname, name );
+     }
+
+    if (SQL_Write (requete))
+     { soup_message_set_status (msg, SOUP_STATUS_OK);
+       Partage->com_dls.Thread_reload = TRUE;                                                                  /* Relance DLS */
+     }
+    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+
+    if (Json_has_member ( request, "id" ) )
+     { Audit_log ( session, "DLS '%s' changed to %d, %s, %s", tech_id, Json_get_int ( request, "syn_id" ), shortname, name ); }
+    else
+     { Audit_log ( session, "DLS '%s' created to %d, %s, %s, %s", tech_id, Json_get_int ( request, "syn_id" ), shortname, name ); }
+
+    json_node_unref(request);
+    g_free(name);
+    g_free(shortname);
+    g_free(tech_id);
   }
 /******************************************************************************************************************************/
 /* Http_Dls_compil: Compilation du plugin DLS fourni. Appellé récursivement pour compiler tous les plugins                    */

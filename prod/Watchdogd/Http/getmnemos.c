@@ -250,24 +250,24 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT DISTINCT(tech_id) FROM dictionnaire WHERE tech_id LIKE '%%%s%%'", tech_id);
-    if (classe)
+    g_snprintf(chaine, sizeof(chaine), "SELECT tech_id, name FROM dls WHERE tech_id LIKE '%%%s%%'", tech_id);
+/*    if (classe)
      { g_strlcat ( chaine,  " AND classe='", sizeof(chaine) );
        g_strlcat ( chaine, classe, sizeof(chaine) );
        g_strlcat ( chaine, "' ", sizeof(chaine) );
-     }
-    g_strlcat ( chaine, " ORDER BY tech_id LIMIT 10", sizeof(chaine) );
+     }*/
+    g_strlcat ( chaine, " ORDER BY tech_id", sizeof(chaine) );
     SQL_Select_to_JSON ( builder, "tech_ids_found", chaine );
 
     g_snprintf(chaine, sizeof(chaine),
-              "SELECT acronyme FROM dictionnaire WHERE tech_id='%s' AND acronyme LIKE '%%%s%%'",
+              "SELECT acronyme,libelle FROM dictionnaire WHERE tech_id='%s' AND acronyme LIKE '%%%s%%'",
                tech_id, acronyme );
     if (classe)
      { g_strlcat ( chaine, "AND classe='", sizeof(chaine) );
        g_strlcat ( chaine, classe, sizeof(chaine) );
        g_strlcat ( chaine, "' ", sizeof(chaine) );
      }
-    g_strlcat ( chaine, " ORDER BY acronyme LIMIT 10", sizeof(chaine) );
+    g_strlcat ( chaine, " ORDER BY acronyme", sizeof(chaine) );
     SQL_Select_to_JSON ( builder, "acronymes_found", chaine );
     json_node_unref(request);
 

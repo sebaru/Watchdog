@@ -1,5 +1,8 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
+ function SMS_refresh ( )
+  { Load_config_sms();
+  }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function SMS_Sauver_parametre ( )
   { var json_request = JSON.stringify(
