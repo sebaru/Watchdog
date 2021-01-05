@@ -1,5 +1,9 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
+ function Modbus_refresh ( )
+  { $('#idTableModbus').DataTable().ajax.reload(null, false);
+    $('#idTableModbusRun').DataTable().ajax.reload(null, false);
+  }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Modbus_enable_module ( tech_id )
   { var json_request = JSON.stringify( { tech_id : tech_id } );
