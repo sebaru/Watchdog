@@ -1,9 +1,9 @@
 
 <!-- Footer -->
-<footer class="page-footer bg-info mt-2 pt-0">
+<footer class="page-footer fixed-bottom bg-transparent">
 
   <!-- Copyright -->
-  <div class="footer-copyright text-center py-2"><span>© </span>
+  <div class="footer-copyright text-right"><span>© </span>
     <a href="https://ABLS-habitat.fr/">ABLS-Habitat.fr</a>
   </div>
   <!-- Copyright -->

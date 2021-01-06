@@ -351,7 +351,7 @@
     gchar *page_src = g_hash_table_lookup ( query, "page" );
     if (page_src)
      { gchar *temp = Normaliser_chaine ( page_src );
-       g_snprintf( page, sizeof(page), "'%s' ", temp );
+       g_snprintf( page, sizeof(page), "%s", temp );
        g_free(temp);
      }
 
@@ -404,7 +404,6 @@
        return;
      }
 
-    if(page_src) g_free(page);
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
