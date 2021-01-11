@@ -2125,7 +2125,12 @@ encore:
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns CHANGE `page` `page` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL");
        Lancer_requete_SQL ( db, requete );
      }
-    database_version = 5237;
+
+    if (database_version < 5265)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns ADD `image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'home' AFTER `id`");
+       Lancer_requete_SQL ( db, requete );
+     }
+    database_version = 5265;
 
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "

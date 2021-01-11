@@ -167,7 +167,9 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "libelle" ) && Json_has_member ( request, "page" ) &&
-            Json_has_member ( request, "parent_id" ) && Json_has_member ( request, "access_level" ) ) )
+            Json_has_member ( request, "parent_id" ) && Json_has_member ( request, "access_level" ) &&
+            Json_has_member ( request, "image" )
+           ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
@@ -182,18 +184,19 @@
     gint  parent_id    = Json_get_int ( request, "parent_id" );
     gchar *libelle     = Normaliser_chaine ( Json_get_string( request, "libelle" ) );
     gchar *page        = Normaliser_chaine ( Json_get_string( request, "page" ) );
+    gchar *image       = Normaliser_chaine ( Json_get_string( request, "image" ) );
 
     if ( Json_has_member ( request, "syn_id" ) )                                                                   /* Edition */
      { gint syn_id = Json_get_int(request,"syn_id");
        if (syn_id==1) parent_id = 1;                                                 /* On ne peut changer le parent du syn 1 */
        g_snprintf( requete, sizeof(requete),
-                  "UPDATE syns SET libelle='%s', page='%s', parent_id=%d, access_level='%d' WHERE id='%d' AND access_level<='%d'",
-                   libelle, page, parent_id, access_level, syn_id, session->access_level );
+                  "UPDATE syns SET libelle='%s', page='%s', parent_id=%d, image='%s', access_level='%d' WHERE id='%d' AND access_level<='%d'",
+                   libelle, page, parent_id, image, access_level, syn_id, session->access_level );
      }
     else
      { g_snprintf( requete, sizeof(requete),
-                  "INSERT INTO syns SET libelle='%s', parent_id=%d, page='%s', "
-                  "access_level='%d'", libelle, parent_id, page, access_level );
+                  "INSERT INTO syns SET libelle='%s', parent_id=%d, page='%s', image='%s', "
+                  "access_level='%d'", libelle, parent_id, page, image, access_level );
      }
 
     if (SQL_Write (requete))
@@ -208,6 +211,7 @@
      { Audit_log ( session, "Synoptique %s - '%s' created", page, libelle ); }
     g_free(libelle);
     g_free(page);
+    g_free(image);
     json_node_unref(request);
   }
 /******************************************************************************************************************************/
@@ -332,6 +336,31 @@
   }
 
 /******************************************************************************************************************************/
+/* Http_Dls_get_syn_vars: ajoute un objet dans le tableau des syn_vars pour l'enoyer au client                                */
+/* Entrées: le buuilder Json et la connexion Websocket                                                                         */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_Dls_get_syn_vars ( void *user_data, struct DLS_TREE *tree )
+  { JsonBuilder *builder = user_data;
+    Json_add_object ( builder, NULL );
+    Json_add_int  ( builder, "id", tree->syn_vars.syn_id );
+    Json_add_bool ( builder, "bit_comm", tree->syn_vars.bit_comm );
+    Json_add_bool ( builder, "bit_defaut", tree->syn_vars.bit_defaut );
+    Json_add_bool ( builder, "bit_defaut_fixe", tree->syn_vars.bit_defaut_fixe );
+    Json_add_bool ( builder, "bit_alarme", tree->syn_vars.bit_alarme );
+    Json_add_bool ( builder, "bit_alarme_fixe", tree->syn_vars.bit_alarme_fixe );
+    Json_add_bool ( builder, "bit_veille_partielle", tree->syn_vars.bit_veille_partielle );
+    Json_add_bool ( builder, "bit_veille_totale", tree->syn_vars.bit_veille_totale );
+    Json_add_bool ( builder, "bit_alerte", tree->syn_vars.bit_alerte );
+    Json_add_bool ( builder, "bit_alerte_fixe", tree->syn_vars.bit_alerte_fixe );
+    Json_add_bool ( builder, "bit_alerte_fugitive", tree->syn_vars.bit_alerte_fugitive );
+    Json_add_bool ( builder, "bit_derangement", tree->syn_vars.bit_derangement );
+    Json_add_bool ( builder, "bit_derangement_fixe", tree->syn_vars.bit_derangement_fixe );
+    Json_add_bool ( builder, "bit_danger", tree->syn_vars.bit_danger );
+    Json_add_bool ( builder, "bit_danger_fixe", tree->syn_vars.bit_danger_fixe );
+    Json_end_object ( builder );
+  }
+/******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
@@ -403,6 +432,10 @@
        g_object_unref(builder);
        return;
      }
+
+    Json_add_array ( builder, "syn_vars" );
+    Dls_foreach ( builder, NULL, Http_Dls_get_syn_vars );
+    Json_end_array ( builder );
 
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/

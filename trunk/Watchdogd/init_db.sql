@@ -86,10 +86,11 @@ CREATE TABLE IF NOT EXISTS `icons` (
 -- Structure de la table `syns`
 --
 
-CREATE TABLE IF NOT EXISTS `syns2` (
+CREATE TABLE IF NOT EXISTS `syns` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) NOT NULL,
   `libelle` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
+  `image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'home',
   `page` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),

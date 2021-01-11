@@ -31,7 +31,13 @@
          access_level: $('#idModalSynEditAccessLevel').val()
        };
     if (syn_id>0) json_request.syn_id = syn_id;                                                         /* Ajout ou édition ? */
-    fichierSelectionne = $('#idModalSynEditImage')[0].files[0];
+
+    fichierSelectionne = $('#idModalSynEditImageCustom')[0].files[0];
+
+    if (fichierSelectionne!=null)
+     { json_request.image = "custom"; }
+    else
+     { json_request.image = $('#idModalSynEditImageSelect').val(); }
 
     Send_to_API ( "POST", "/api/syn/set", JSON.stringify(json_request), function(Response)
      { if (fichierSelectionne == null) $('#idTableSyn').DataTable().ajax.reload(null, false);
@@ -40,7 +46,7 @@
     if (syn_id>0 && fichierSelectionne != null)
      { var reader = new FileReader();
        reader.onloadend = function()
-        { Send_to_API ( "POSTFILE", "/api/upload?filename=syn_"+syn_id+".jpg&thumb=100", reader.result, function(Response)
+        { Send_to_API ( "POSTFILE", "/api/upload?filename=syn_"+syn_id+"&type="+fichierSelectionne.type+"&thumb=100", reader.result, function(Response)
            { $('#idTableSyn').DataTable().ajax.reload(null, false);
            }, null );
         };
@@ -68,8 +74,22 @@
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") );
     $('#idModalSynEditAccessLevel').val(0);
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('0')" );
-    $('#idModalSynEditImage').val('');
+    $('#idModalSynEditImageSelect').val("home");
+    $('#idModalSynEditImage').attr("src", "/img/syn_home.png");
+    $('#idModalSynEditImage').css("max-width", "100px");
+    $('#idModalSynEditImageSelect').change ( function () { Select_image_changed(syn_id) } );
+    $('#idModalSynEditImageCustom').val('');
     $('#idModalSynEdit').modal("show");
+  }
+/******************************************************************************************************************************/
+ function Select_image_changed( syn_id )
+  { table = $('#idTableSyn').DataTable();
+    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
+    if ($('#idModalSynEditImageSelect').val() != "custom")
+     { $('#idModalSynEditImage').attr("src", "/img/syn_"+$('#idModalSynEditImageSelect').val()+".png"); }
+    else
+     { $('#idModalSynEditImage').attr("src", "/upload/syn_"+selection.id+".jpg"); }
+
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Syn_Edit ( syn_id )
@@ -94,7 +114,14 @@
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") );
     $('#idModalSynEditAccessLevel').val( selection.access_level );
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('"+selection.id+"')" );
-    $('#idModalSynEditImage').val('');
+    $('#idModalSynEditImageSelect').val(selection.image);
+    $('#idModalSynEditImageSelect').change ( function () { Select_image_changed(syn_id) } );
+    if (selection.image != "custom")
+     { $('#idModalSynEditImage').attr("src", "/img/syn_"+selection.image+".png"); }
+    else
+     { $('#idModalSynEditImage').attr("src", "/upload/syn_"+selection.id+".jpg"); }
+    $('#idModalSynEditImage').css("max-width", "100px");
+    $('#idModalSynEditImageCustom').val('');
     $('#idModalSynEdit').modal("show");
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -126,7 +153,9 @@
          columns:
           [ { "data": null, "title":"Aperçu", "className": "align-middle text-center",
               "render": function (item)
-                { return( Lien( '/'+item.page, "Voir le synoptique", "<img src=/upload/syn_"+item.id+".jpg height=100px loading=lazy alt='No Image !' >" ) ); }
+                { if(item.image=="custom") target="/upload/syn_"+item.id+".jpg";
+                  else target = "/img/syn_"+item.image+".png";
+                  return( Lien( '/'+item.page, "Voir le synoptique", "<img src='"+target+"' height=80px loading=lazy alt='No Image !' >" ) ); }
             },
             { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",
               "render": function (item)

@@ -18,20 +18,34 @@
                background-attachment: fixed;
                height: 100%;
                background-color: rgba(30,28,56,1.0);
-               padding-top: 80px;
+               padding-top: 90px;
+               overflow-y: scroll;
              }
 
-        @keyframes fadeInBody {
-             0% { opacity: 0; }
+        .wtd-cligno { animation-duration: 1.0s;
+                      animation-name: wtdClignoFrames;
+                      animation-iteration-count: infinite;
+                      animation-fill-mode: backwards;
+                      transition: none;
+                    }
+        @keyframes wtdClignoFrames
+         {   0% { opacity: 1; }
+            30% { opacity: 0; }
            100% { opacity: 1; }
          }
 
         .card { color: white; }
+
         .wtd-vignette { width: 30px;
                       }
 
         .wtd-synoptique { border-radius: 20%;
-                      }
+                          width: auto;
+                          height: auto;
+                          max-height: 128px;
+                          max-width: 128px;
+                          cursor: pointer;
+                        }
 
         input:focus { outline: 0 0 0 0  !important;
                       box-shadow: 0 0 0 0 !important;
@@ -96,7 +110,7 @@
 
 <header>
 	<nav class="navbar navbar-dark  navbar-expand-lg fixed-top shadow"> <!-- fixed-top -->
-  <a class="navbar-brand" href="/"><img src="/img/logo.svg" alt="Watchdog Logo" width=50></a>
+  <a class="navbar-brand" href="#" onclick="Change_page('')"><img src="/img/logo.svg" alt="Watchdog Logo" width=50></a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
