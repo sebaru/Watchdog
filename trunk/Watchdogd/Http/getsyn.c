@@ -334,32 +334,6 @@
 
     json_node_unref(request);
   }
-
-/******************************************************************************************************************************/
-/* Http_Dls_get_syn_vars: ajoute un objet dans le tableau des syn_vars pour l'enoyer au client                                */
-/* Entrées: le buuilder Json et la connexion Websocket                                                                         */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Http_Dls_get_syn_vars ( void *user_data, struct DLS_TREE *tree )
-  { JsonBuilder *builder = user_data;
-    Json_add_object ( builder, NULL );
-    Json_add_int  ( builder, "id", tree->syn_vars.syn_id );
-    Json_add_bool ( builder, "bit_comm", tree->syn_vars.bit_comm );
-    Json_add_bool ( builder, "bit_defaut", tree->syn_vars.bit_defaut );
-    Json_add_bool ( builder, "bit_defaut_fixe", tree->syn_vars.bit_defaut_fixe );
-    Json_add_bool ( builder, "bit_alarme", tree->syn_vars.bit_alarme );
-    Json_add_bool ( builder, "bit_alarme_fixe", tree->syn_vars.bit_alarme_fixe );
-    Json_add_bool ( builder, "bit_veille_partielle", tree->syn_vars.bit_veille_partielle );
-    Json_add_bool ( builder, "bit_veille_totale", tree->syn_vars.bit_veille_totale );
-    Json_add_bool ( builder, "bit_alerte", tree->syn_vars.bit_alerte );
-    Json_add_bool ( builder, "bit_alerte_fixe", tree->syn_vars.bit_alerte_fixe );
-    Json_add_bool ( builder, "bit_alerte_fugitive", tree->syn_vars.bit_alerte_fugitive );
-    Json_add_bool ( builder, "bit_derangement", tree->syn_vars.bit_derangement );
-    Json_add_bool ( builder, "bit_derangement_fixe", tree->syn_vars.bit_derangement_fixe );
-    Json_add_bool ( builder, "bit_danger", tree->syn_vars.bit_danger );
-    Json_add_bool ( builder, "bit_danger_fixe", tree->syn_vars.bit_danger_fixe );
-    Json_end_object ( builder );
-  }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -434,7 +408,7 @@
      }
 
     Json_add_array ( builder, "syn_vars" );
-    Dls_foreach ( builder, NULL, Http_Dls_get_syn_vars );
+    Dls_foreach ( builder, NULL, Dls_syn_vars_to_json );
     Json_end_array ( builder );
 
     buf = Json_get_buf (builder, &taille_buf);

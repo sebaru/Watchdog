@@ -149,6 +149,17 @@
     g_object_unref(gen);
     return(result);
   }
+ gchar *Json_node_get_buf ( JsonNode *RootNode, gsize *taille_buf_p )
+  { JsonGenerator *gen;
+    gchar *result;
+    gen = json_generator_new ();
+    json_generator_set_root ( gen, RootNode );
+    json_node_unref(RootNode);
+    json_generator_set_pretty ( gen, TRUE );
+    result = json_generator_to_data (gen, taille_buf_p);
+    g_object_unref(gen);
+    return(result);
+  }
 /******************************************************************************************************************************/
 /* Json_get_from_stirng: Recupere l'object de plus haut niveau dans une chaine JSON                                           */
 /* Entrée: la chaine de caractere                                                                                             */

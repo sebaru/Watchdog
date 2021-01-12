@@ -603,8 +603,9 @@ reload:
        JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-          if (!strcasecmp( zmq_tag, "DLS_HISTO" ))
-           { Http_msgs_send_histo_to_all( request ); }
+               if (!strcasecmp( zmq_tag, "DLS_HISTO" )) { Http_msgs_send_histo_to_all( request ); }
+          else if (!strcasecmp( zmq_tag, "SET_SYN_VARS" ))
+           { Http_ws_send_to_all( request ); }
           else json_node_unref ( request );
         }
 

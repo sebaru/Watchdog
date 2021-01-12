@@ -37,6 +37,7 @@
         .card { color: white; }
 
         .wtd-vignette { width: 30px;
+                        height: 30px;
                       }
 
         .wtd-synoptique { border-radius: 20%;
@@ -116,10 +117,10 @@
   </button>
 
   <div class="collapse navbar-collapse" id="navbar-toggled">
-    <ul class="ml-auto navbar-nav mr-auto">
-      <img class="wtd-vignette" src="/img/pignon.svg">
-      <img class="wtd-vignette" src="/img/pignon.svg">
-      <img class="wtd-vignette" src="/img/pignon.svg">
+    <ul class="ml-auto navbar-nav mr-auto align-items-center">
+      <img id="idMasterVignetteActivite" class="wtd-vignette" src="">
+      <img id="idMasterVignetteSecuBien" class="wtd-vignette" src="">
+      <img id="idMasterVignetteSecuPers" class="wtd-vignette" src="">
       <a class="nav-link rounded" href="#"> <span id="idPageTitle">Loading...</span></a>
     </ul>
     <ul class="navbar-nav">

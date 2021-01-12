@@ -263,6 +263,7 @@
  extern void Dls_foreach ( void *user_data,
                            void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
                            void (*do_tree)   (void *user_data, struct DLS_TREE *) );
+ extern void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_TREE *tree );
 
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */
  #endif

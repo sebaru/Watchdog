@@ -42,6 +42,22 @@
     g_error_free (error);
   }
 /******************************************************************************************************************************/
+/* Http_ws_send_to_all: Envoi d'un buffer a tous les clients connectés à la websocket                                         */
+/* Entrée: Le buffer                                                                                                          */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Http_ws_send_to_all ( JsonNode *node )
+  { gsize taille_buf;
+    gchar *buf = Json_node_get_buf ( node, &taille_buf );
+    GSList *liste = Cfg_http.liste_ws_msgs_clients;
+    while (liste)
+     { SoupWebsocketConnection *connexion = liste->data;
+       soup_websocket_connection_send_text ( connexion, buf );
+       liste = g_slist_next(liste);
+     }
+    g_free(buf);
+  }
+/******************************************************************************************************************************/
 /* Http_msgs_send_to_all: Envoi d'un buffer a tous les clients connectés à la websocket                                       */
 /* Entrée: Le buffer                                                                                                          */
 /* Sortie: néant                                                                                                              */

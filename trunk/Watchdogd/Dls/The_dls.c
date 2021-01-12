@@ -1571,6 +1571,32 @@ end:
     g_strlcat ( result, debut+2, sizeof(result) );
     return(g_strdup(result));
   }
+
+/******************************************************************************************************************************/
+/* Http_Dls_get_syn_vars: ajoute un objet dans le tableau des syn_vars pour l'enoyer au client                                */
+/* Entrées: le buuilder Json et la connexion Websocket                                                                         */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_TREE *tree )
+  { JsonBuilder *builder = user_data;
+    Json_add_object ( builder, NULL );
+    Json_add_int  ( builder, "id", tree->syn_vars.syn_id );
+    Json_add_bool ( builder, "bit_comm", tree->syn_vars.bit_comm );
+    Json_add_bool ( builder, "bit_defaut", tree->syn_vars.bit_defaut );
+    Json_add_bool ( builder, "bit_defaut_fixe", tree->syn_vars.bit_defaut_fixe );
+    Json_add_bool ( builder, "bit_alarme", tree->syn_vars.bit_alarme );
+    Json_add_bool ( builder, "bit_alarme_fixe", tree->syn_vars.bit_alarme_fixe );
+    Json_add_bool ( builder, "bit_veille_partielle", tree->syn_vars.bit_veille_partielle );
+    Json_add_bool ( builder, "bit_veille_totale", tree->syn_vars.bit_veille_totale );
+    Json_add_bool ( builder, "bit_alerte", tree->syn_vars.bit_alerte );
+    Json_add_bool ( builder, "bit_alerte_fixe", tree->syn_vars.bit_alerte_fixe );
+    Json_add_bool ( builder, "bit_alerte_fugitive", tree->syn_vars.bit_alerte_fugitive );
+    Json_add_bool ( builder, "bit_derangement", tree->syn_vars.bit_derangement );
+    Json_add_bool ( builder, "bit_derangement_fixe", tree->syn_vars.bit_derangement_fixe );
+    Json_add_bool ( builder, "bit_danger", tree->syn_vars.bit_danger );
+    Json_add_bool ( builder, "bit_danger_fixe", tree->syn_vars.bit_danger_fixe );
+    Json_end_object ( builder );
+  }
 /******************************************************************************************************************************/
 /* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
 /* Entrée : le Dls_tree correspondant                                                                                         */
@@ -1694,9 +1720,11 @@ end:
        dls_tree->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
        dls_tree->syn_vars.bit_danger           = bit_danger;
        dls_tree->syn_vars.bit_danger_fixe      = bit_danger_fixe;
-       Send_zmq_with_tag ( Partage->com_dls.zmq_to_master,
-                           NULL, "dls", "*", "ssrv", "SET_SYN_VARS",
-                          &dls_tree->syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
+       JsonBuilder *builder = Json_create ();
+       Json_add_array ( builder, "syn_vars" );
+       Dls_syn_vars_to_json ( builder, dls_tree );
+       Json_end_array ( builder );
+       Send_zmq_with_json( Partage->com_dls.zmq_to_master, "dls", "*", "*", "SET_SYN_VARS", builder );
      }
  }
 /******************************************************************************************************************************/

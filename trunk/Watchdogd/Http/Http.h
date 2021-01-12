@@ -210,6 +210,7 @@
  extern void Http_Envoyer_un_visuel ( struct DLS_VISUEL *visuel );
  extern void Http_redirect_to_slave ( SoupMessage *msg, gchar *target );
  extern void Http_ws_motifs_destroy_session ( struct WS_CLIENT_SESSION *client );
+ extern void Http_ws_send_to_all ( JsonNode *node );
  extern void Audit_log ( struct HTTP_CLIENT_SESSION *session, gchar *format, ... );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
