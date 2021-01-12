@@ -3,8 +3,8 @@
 <footer class="page-footer fixed-bottom bg-transparent">
 
   <!-- Copyright -->
-  <div class="footer-copyright text-right"><span>© </span>
-    <a href="https://ABLS-habitat.fr/">ABLS-Habitat.fr</a>
+  <div class="footer-copyright text-right m-1"><span class="text-white">© </span>
+    <a href="https://ABLS-habitat.fr/"><img src="/img/logo.svg" alt="Watchdog Logo" width=48"></a>
   </div>
   <!-- Copyright -->
 

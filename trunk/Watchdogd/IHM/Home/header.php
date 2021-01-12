@@ -36,9 +36,16 @@
 
         .card { color: white; }
 
-        .wtd-vignette { width: 30px;
-                        height: 30px;
+        .wtd-vignette { width: 32px;
+                        height: 32px;
                       }
+
+        .wtd-menu
+          { border-radius: 20%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+          }
 
         .wtd-synoptique { border-radius: 20%;
                           width: auto;
@@ -110,17 +117,20 @@
 </div>
 
 <header>
-	<nav class="navbar navbar-dark  navbar-expand-lg fixed-top shadow"> <!-- fixed-top -->
-  <a class="navbar-brand" href="#" onclick="Change_page('')"><img src="/img/logo.svg" alt="Watchdog Logo" width=50></a>
+	<nav class="navbar navbar-dark navbar-expand-md fixed-top shadow"> <!-- fixed-top -->
+  <a class="navbar-brand" href="#" onclick="Change_page('')">
+    <img src="/img/syn_home.png" alt="Accueil" class="wtd-menu">
+  </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
 
   <div class="collapse navbar-collapse" id="navbar-toggled">
-    <ul class="ml-auto navbar-nav mr-auto align-items-center">
-      <img id="idMasterVignetteActivite" class="wtd-vignette" src="">
-      <img id="idMasterVignetteSecuBien" class="wtd-vignette" src="">
-      <img id="idMasterVignetteSecuPers" class="wtd-vignette" src="">
+    <ul class="navbar-nav mr-auto align-items-center">
+      <img id="idMenuImgAccueil" src="" alt="Accueil" class="wtd-menu mr-1">
+      <img id="idMasterVignetteActivite" class="wtd-vignette mr-1" src="">
+      <img id="idMasterVignetteSecuBien" class="wtd-vignette mr-1" src="">
+      <img id="idMasterVignetteSecuPers" class="wtd-vignette mr-1" src="">
       <a class="nav-link rounded" href="#"> <span id="idPageTitle">Loading...</span></a>
     </ul>
     <ul class="navbar-nav">

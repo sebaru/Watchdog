@@ -384,7 +384,7 @@
                                           " WHERE s2.page='%s' AND s.access_level<='%d'", page, session->access_level);
      }
     else
-     { g_snprintf(chaine, sizeof(chaine), "SELECT * FROM syns WHERE parent_id=1 AND access_level<='%d'", session->access_level);
+     { g_snprintf(chaine, sizeof(chaine), "SELECT * FROM syns WHERE parent_id=1 AND id!=1 AND access_level<='%d'", session->access_level);
      }
 
     if (SQL_Select_to_JSON ( builder, "child_syns", chaine ) == FALSE)

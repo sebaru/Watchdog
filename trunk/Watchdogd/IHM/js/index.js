@@ -11,8 +11,8 @@
     else console.log( "Set_vignette : type inconnu" );
 
     if (src_actuelle != src_cible)
-     { $('#'+id).fadeOut("fast", function()
-         { $('#'+id).attr("src", src_cible).fadeIn("fast"); } );
+     { $('#'+id).fadeOut("slow", function()
+         { $('#'+id).attr("src", src_cible).fadeIn("slow"); } );
      }
     if (cligno) $('#'+id).addClass("wtd-cligno");
            else $('#'+id).removeClass("wtd-cligno");
@@ -63,6 +63,8 @@
                     }
                  );
           Set_syn_vars ( Response.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
+          if (Response.image=="custom") { $('#idMenuImgAccueil').attr("src", "/upload/syn_"+Response.id+".jpg"); }
+                                   else { $('#idMenuImgAccueil').attr("src", "/img/syn_"+Response.image+".png"); }
           $('#bodycard').fadeIn("slow");
         }, null );
      });
