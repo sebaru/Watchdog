@@ -1,6 +1,12 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
  var Synoptique;                                                     /* Toutes les données du synoptique en cours d'affichage */
+
+/********************************************* Affichage des vignettes ********************************************************/
+ function Changer_img_src ( id, target )
+  { $('#'+id).fadeOut("slow", function()
+     { $('#'+id).attr("src", target).fadeIn("slow"); } );
+  }
 /********************************************* Affichage des vignettes ********************************************************/
  function Set_vignette ( id, type, couleur, cligno )
   { var src_actuelle = $('#'+id).attr("src");
@@ -10,10 +16,7 @@
     else if (type == "secu_pers") { src_cible = "/img/croix_rouge_"+couleur+".svg"; }
     else console.log( "Set_vignette : type inconnu" );
 
-    if (src_actuelle != src_cible)
-     { $('#'+id).fadeOut("slow", function()
-         { $('#'+id).attr("src", src_cible).fadeIn("slow"); } );
-     }
+    if (src_actuelle != src_cible) { Changer_img_src ( id, src_cible ); }
     if (cligno) $('#'+id).addClass("wtd-cligno");
            else $('#'+id).removeClass("wtd-cligno");
   }
@@ -63,8 +66,8 @@
                     }
                  );
           Set_syn_vars ( Response.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
-          if (Response.image=="custom") { $('#idMenuImgAccueil').attr("src", "/upload/syn_"+Response.id+".jpg"); }
-                                   else { $('#idMenuImgAccueil').attr("src", "/img/syn_"+Response.image+".png"); }
+          if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg" ); }
+                                   else { Changer_img_src ( 'idMenuImgAccueil', "/img/syn_"+Response.image+".png" ); }
           $('#bodycard').fadeIn("slow");
         }, null );
      });
@@ -133,7 +136,8 @@
        console.debug(event);
      }
     WTDWebSocket.onclose = function (event)
-     { console.log("Close au websocket !");
+     { $('#idAlertConnexionLost').show();
+       console.log("Close au websocket !");
        console.debug(event);
      }
     WTDWebSocket.onmessage = function (event)

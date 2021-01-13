@@ -128,9 +128,9 @@
   <div class="collapse navbar-collapse" id="navbar-toggled">
     <ul class="navbar-nav mr-auto align-items-center">
       <img id="idMenuImgAccueil" src="" alt="Accueil" class="wtd-menu mr-1">
-      <img id="idMasterVignetteActivite" class="wtd-vignette mr-1" src="">
-      <img id="idMasterVignetteSecuBien" class="wtd-vignette mr-1" src="">
-      <img id="idMasterVignetteSecuPers" class="wtd-vignette mr-1" src="">
+      <img id="idMasterVignetteActivite" class="wtd-menu mr-1" src="">
+      <img id="idMasterVignetteSecuBien" class="wtd-menu mr-1" src="">
+      <img id="idMasterVignetteSecuPers" class="wtd-menu mr-1" src="">
       <a class="nav-link rounded" href="#"> <span id="idPageTitle">Loading...</span></a>
     </ul>
     <ul class="navbar-nav">
