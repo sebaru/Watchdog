@@ -323,26 +323,7 @@
        sleep(1);                                                                           /* lui laisse le temps de demarrer */
      }
     else
-     { GSList *liste;
-       liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
-       while(liste)
-        { struct LIBRAIRIE *lib = liste->data;
-          if ( ! strcasecmp( thread, lib->admin_prompt ) )
-           { if (lib->Thread_run == FALSE)
-              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                         "%s: reloading '%s' -> Library found but not started. Please Start '%s' before reload",
-                         __func__, thread, thread );
-              }
-             else
-              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                         "%s: reloading '%s' -> Library found. Sending Reload.", __func__, thread );
-                lib->Thread_reload = TRUE;
-                sleep(1);                                                                  /* lui laisse le temps de demarrer */
-              }
-           }
-          liste = g_slist_next(liste);
-        }
-     }
+     { Reload_librairie_par_prompt ( thread ); }
 /*************************************************** Envoi au client **********************************************************/
     Audit_log ( session, "Processus '%s' %s Reloaded", thread, (hard ? "Hard" : "Soft") );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);

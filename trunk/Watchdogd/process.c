@@ -109,7 +109,7 @@
   }
 /******************************************************************************************************************************/
 /* Stop_librairie: Arrete le thread en paremetre                                                                              */
-/* EntrÃée: La structure associÃée au thread                                                                                    */
+/* Entrée: La structure associée au thread                                                                                    */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Stop_librairie ( struct LIBRAIRIE *lib )
@@ -122,6 +122,35 @@
      }
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: thread %s stopped", __func__, lib->nom_fichier );
     return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Reload_librairie_par_prompt: Restart le thread en paremetre                                                               */
+/* Entrée: Le nom du thread                                                                                                   */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gboolean Reload_librairie_par_prompt ( gchar *prompt )
+  { gboolean found = FALSE;
+    GSList *liste;
+    liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
+    while(liste)
+     { struct LIBRAIRIE *lib = liste->data;
+       if ( ! strcasecmp( prompt, lib->admin_prompt ) )
+        { if (lib->Thread_run == FALSE)
+           { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                      "%s: reloading '%s' -> Library found but not started. Please Start '%s' before reload",
+                      __func__, lib->admin_prompt, lib->admin_prompt );
+             found = TRUE;
+           }
+          else
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                      "%s: reloading '%s' -> Library found. Sending Reload.", __func__, lib->admin_prompt );
+             lib->Thread_reload = TRUE;
+             sleep(1);                                                                  /* lui laisse le temps de demarrer */
+           }
+        }
+       liste = g_slist_next(liste);
+     }
+    return(found);
   }
 /******************************************************************************************************************************/
 /* Charger_librarie_par_fichier: Ouverture d'une librairie par son nom                                                        */

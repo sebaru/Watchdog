@@ -71,6 +71,51 @@
           $('#bodycard').fadeIn("slow");
         }, null );
      });
+
+    $('#idTableMessages').fadeOut("fast", function ()
+     { $('#idTableMessages').DataTable(
+        { pageLength : 25,
+          fixedHeader: true,
+          ajax: {	url : "/api/histo/alive",	type : "GET", dataSrc: "enregs", data: { page: page },
+                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+                },
+          rowId: "id",
+          columns:
+           [ { "data": "id", "title":"#", "className": "text-center " },
+             /*{ "data": null, "title":"Level", "className": "align-middle  text-center",
+               "render": function (item)
+                 { return( Select_Access_level ( "idTableauLevel_"+item.id,
+                                                 "Tableau_Set('"+item.id+"')",
+                                                 item.access_level )
+                         );
+                 }
+             },*/
+ /*            { "data": null, "title":"Titre", "className": "align-middle ",
+               "render": function (item)
+                 { return( Input ( "text", "idTableauTitre_"+item.id,
+                                   "Tableau_Set('"+item.id+"')",
+                                   "Quel est le titre du tableau ?",
+                                   item.titre )
+                         );
+                 }
+             },
+             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
+               "render": function (item)
+                 { boutons = Bouton_actions_start ();
+                   boutons += Bouton_actions_add ( "primary", "Voir le tableau", "Redirect", "/home/tableau?id="+item.id, "chart-line", null );
+                   boutons += Bouton_actions_add ( "primary", "Editer les courbes", "Redirect", "/tech/tableau_map/"+item.id, "pen", null );
+                   boutons += Bouton_actions_add ( "danger", "Supprimer ce tableau", "Tableau_Delete", item.id, "trash", null );
+                   boutons += Bouton_actions_end ();
+                   return(boutons);
+                 },
+             }*/
+           ],
+          /*order: [ [0, "desc"] ],*/
+          responsive: true,
+        });
+       $('#idTableMessages').fadeIn("slow");
+     }, null);
+
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Creer_card ( Response )

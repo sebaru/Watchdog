@@ -5,8 +5,16 @@
      <a href="/">Se reconnecter</a>
    </div>
 
-<div id="bodycard" class="row justify-content-center row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 row-cols-xl-6">
+<div id="bodycard" class="row justify-content-center row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 row-cols-xl-6"></div>
+<hr>
 
+<div>
+  <table id="idTableMessages" class="table">
+    <thead class="thead-transparent text-white">
+				</thead>
+			 <tbody>
+    </tbody>
+  </table>
 </div>
 
 </main>
