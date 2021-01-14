@@ -137,14 +137,14 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditDISelectTechID" required onchange="ModbusMap_Update_Choix_Acronyme('idModalEditDI', 'DI')" class="col-9  custom-select"></select>
+						     <select id="idModalEditDISelectTechID" required onchange="ModbusMap_Update_Choix_Acronyme('idModalEditDI', 'DI')" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditDISelectAcronyme" required class="col-9 custom-select"></select>
+						     <select id="idModalEditDISelectAcronyme" required class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
@@ -193,14 +193,14 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditDOSelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idModalEditDO', 'DO')" class="col-9 custom-select"></select>
+						     <select id="idModalEditDOSelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idModalEditDO', 'DO')" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditDOSelectAcronyme" class="col-9 custom-select"></select>
+						     <select id="idModalEditDOSelectAcronyme" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
@@ -242,7 +242,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Type de borne</label>
-						     <select id="idModalEditAIType" class="custom-select">
+						     <select id="idModalEditAIType" class="custom-select border-info">
              <option value="3">4/20 mA 750455</option>
              <option value="4">Pt-100 750461</option>
            </select>
@@ -280,14 +280,14 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditAISelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idModalEditAI', 'AI')" class="col-9 custom-select"></select>
+						     <select id="idModalEditAISelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idModalEditAI', 'AI')" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditAISelectAcronyme" class="col-9 custom-select"></select>
+						     <select id="idModalEditAISelectAcronyme" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
@@ -342,7 +342,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Type de Borne</label>
-						     <select id="idModalEditAOType" class="custom-select">
+						     <select id="idModalEditAOType" class="custom-select border-info">
              <option value="0">a definir</option>
              <option value="1">a definir</option>
            </select>
@@ -380,14 +380,14 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditAOSelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idModalEditAO', 'AO')" class="col-9 custom-select"></select>
+						     <select id="idModalEditAOSelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idModalEditAO', 'AO')" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditAOSelectAcronyme" class="col-9 custom-select"></select>
+						     <select id="idModalEditAOSelectAcronyme" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 

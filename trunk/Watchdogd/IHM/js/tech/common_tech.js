@@ -39,13 +39,12 @@
 
 /********************************************* Reload Process *****************************************************************/
  function Process_reload ( instance, thread, hard )
-  { var json_request = JSON.stringify(
-       { instance: instance,
-         thread  : thread,
+  { var json_request =
+       { thread  : thread,
          hard    : (hard === "true" ? true : false),
-       }
-     );
-    Send_to_API ( "POST", "/api/process/reload", json_request, null, null);
+       };
+    if(instance!=null) json_request.instance=instance;
+    Send_to_API ( "POST", "/api/process/reload", JSON.stringify(json_request), null, null);
   }
 /********************************************* Renvoi un Select d'archivage ***************************************************/
  function Bouton_Archivage ( id, fonction, selected )

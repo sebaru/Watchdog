@@ -193,10 +193,7 @@
                    "UPDATE mnemos_DI SET map_thread='%s', map_tech_id='%s', map_tag='%s' "
                    " WHERE tech_id='%s' AND acronyme='%s';", thread, map_tech_id, map_tag, tech_id, acronyme );
 
-       if (SQL_Write (requete))
-        { soup_message_set_status (msg, SOUP_STATUS_OK);
-          Reload_librairie_par_prompt ( thread );
-        }
+       if (SQL_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
     else if (! strcasecmp( classe, "AI" ) )
@@ -228,10 +225,7 @@
        g_free(unite);
        g_free(map_question_vocale);
        g_free(map_reponse_vocale);
-       if (SQL_Write (requete))
-        { soup_message_set_status (msg, SOUP_STATUS_OK);
-          Reload_librairie_par_prompt ( thread );
-        }
+       if (SQL_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
     else if (! strcasecmp( classe, "DO" ) )
@@ -277,15 +271,12 @@
        g_free(unite);
        g_free(map_question_vocale);
        g_free(map_reponse_vocale);
-       if (SQL_Write (requete))
-        { soup_message_set_status (msg, SOUP_STATUS_OK);
-          Reload_librairie_par_prompt ( thread );
-        }
+       if (SQL_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
     else
      {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
-    Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
+    Dls_recalculer_arbre_comm();/* Calcul de l'arbre de communication car il peut y avoir de nouvelles dependances sur les plugins */
 end:
     g_free(map_tag);
     json_node_unref(request);
