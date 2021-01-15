@@ -64,6 +64,7 @@
     guint nbr_compil;                                                                         /* Nombre de compilation totale */
     guint nbr_ligne;                                                                               /* Nombre de ligne de code */
     gboolean debug;                                                                                /* Nombre de ligne de code */
+    gboolean is_thread;                                                                            /* Nombre de ligne de code */
   };
 
  struct CMD_TYPE_SOURCE_DLS

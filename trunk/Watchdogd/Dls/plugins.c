@@ -112,10 +112,12 @@
           else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, db->row[0] ); }
         }
      }
-    gpointer wtd = NULL;                   /* Le bit de synthèse comm du module dépend aussi de l'io_comm du module lui-meme */
-    Dls_data_get_WATCHDOG ( dls->plugindb.tech_id, "IO_COMM", &wtd );
-    if (wtd) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, wtd );
-    else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, dls->plugindb.tech_id ); }
+    if (dls->plugindb.is_thread)
+     { gpointer wtd = NULL;/* Le bit de synthèse comm du module dépend aussi de l'io_comm du module lui-meme si dependance thread */
+       Dls_data_get_WATCHDOG ( dls->plugindb.tech_id, "IO_COMM", &wtd );
+       if (wtd) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, wtd );
+       else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, dls->plugindb.tech_id ); }
+     }
     Libere_DB_SQL ( &db );
   }
 /******************************************************************************************************************************/

@@ -2130,7 +2130,12 @@ encore:
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns ADD `image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'home' AFTER `id`");
        Lancer_requete_SQL ( db, requete );
      }
-    database_version = 5265;
+
+    if (database_version < 5274)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `is_thread` tinyint(1) NOT NULL DEFAULT '0' AFTER `id`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+    database_version = 5274;
 
 fin:
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "

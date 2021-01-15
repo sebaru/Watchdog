@@ -656,7 +656,7 @@
     if (Json_has_member ( request, "id" ) )
      { Audit_log ( session, "DLS '%s' changed to %d, %s, %s", tech_id, Json_get_int ( request, "syn_id" ), shortname, name ); }
     else
-     { Audit_log ( session, "DLS '%s' created to %d, %s, %s, %s", tech_id, Json_get_int ( request, "syn_id" ), shortname, name ); }
+     { Audit_log ( session, "DLS '%s' created to %d, %s, %s", tech_id, Json_get_int ( request, "syn_id" ), shortname, name ); }
 
     json_node_unref(request);
     g_free(name);

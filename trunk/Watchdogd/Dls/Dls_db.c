@@ -81,10 +81,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-               "INSERT INTO dls SET "
+               "INSERT INTO dls SET is_thread=1,"
                "tech_id=UPPER('%s'),shortname='%s',name='%s',package='custom',"
                "actif=0,syn_id=1,compil_status=0,sourcecode='/* Default ! */' "
-               "ON DUPLICATE KEY UPDATE shortname=VALUES(shortname),name=VALUES(name)", tech_id, tech_id, nom );
+               "ON DUPLICATE KEY UPDATE shortname=VALUES(shortname),name=VALUES(name),is_thread=1", tech_id, tech_id, nom );
     g_free(nom);
 
     db = Init_DB_SQL();
@@ -212,7 +212,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.package,dls.syn_id,parent_syn.page,syn.page,"
-                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne,debug"
+                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne,debug,is_thread"
                 " FROM dls INNER JOIN syns as syn ON dls.syn_id = syn.id "
                 " INNER JOIN syns AS parent_syn ON parent_syn.id=syn.parent_id"
                 " %s "
@@ -276,6 +276,7 @@
        dls->nbr_compil    = atoi(db->row[10]);
        dls->nbr_ligne     = atoi(db->row[12]);
        dls->debug         = atoi(db->row[13]);
+       dls->is_thread     = atoi(db->row[14]);
      }
     return( dls );
   }
