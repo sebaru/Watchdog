@@ -105,16 +105,16 @@
      }
 
     while ( Recuperer_ligne_SQL ( db ) != NULL )
-     { gpointer bool = NULL;
+     { gpointer wtd = NULL;
        if (db->row[0])
-        { Dls_data_get_bool ( db->row[0], "IO_COMM", &bool );
-          if (bool) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, bool );
+        { Dls_data_get_WATCHDOG ( db->row[0], "IO_COMM", &wtd );
+          if (wtd) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, wtd );
           else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, db->row[0] ); }
         }
      }
-    gpointer bool = NULL;                   /* Le bit de synthèse comm du module dépend aussi de l'io_comm du module lui-meme */
-    Dls_data_get_bool ( dls->plugindb.tech_id, "IO_COMM", &bool );
-    if (bool) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, bool );
+    gpointer wtd = NULL;                   /* Le bit de synthèse comm du module dépend aussi de l'io_comm du module lui-meme */
+    Dls_data_get_WATCHDOG ( dls->plugindb.tech_id, "IO_COMM", &wtd );
+    if (wtd) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, wtd );
     else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, dls->plugindb.tech_id ); }
     Libere_DB_SQL ( &db );
   }
@@ -125,6 +125,21 @@
 /******************************************************************************************************************************/
  void Dls_recalculer_arbre_comm ( void )
   { Dls_foreach ( NULL, Dls_plugin_recalculer_arbre_comm, NULL ); }
+/******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_stop_plugin_reel ( struct PLUGIN_DLS *plugin )
+  { gchar chaine[128];
+    plugin->plugindb.on = FALSE;
+    plugin->start_date = 0;
+    plugin->conso = 0.0;
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' stopped (%s)", __func__,
+              plugin->plugindb.tech_id, plugin->plugindb.nom );
+    g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET actif='0' WHERE tech_id = '%s'", plugin->plugindb.tech_id );
+    SQL_Write ( chaine );
+  }
 /******************************************************************************************************************************/
 /* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                                              */
 /* Entrée: Le plugin D.L.S                                                                                                    */
@@ -141,7 +156,8 @@
     if (!dls->handle)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                    "%s: Candidat '%s' dlopen failed (%s)", __func__, dls->plugindb.tech_id, dlerror() );
-       Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
+       Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_ERROR_NEED_RECOMPIL, "Function Missing" );
+       Dls_stop_plugin_reel ( dls );
        return(FALSE);
      }
 
@@ -149,8 +165,9 @@
     if (!dls->go)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                  "%s: Candidat '%s' failed sur absence GO", __func__, dls->plugindb.tech_id );
+       Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_ERROR_NEED_RECOMPIL, "Function Missing" );
+       Dls_stop_plugin_reel ( dls );
        dlclose( dls->handle );
-       Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
        dls->handle = NULL;
        return(FALSE);
      }
@@ -158,7 +175,10 @@
     if (!dls->version)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                 "%s: Candidat '%s' does not provide version function", __func__, dls->plugindb.tech_id );
-       Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
+       Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_ERROR_NEED_RECOMPIL, "Function Missing" );
+       Dls_stop_plugin_reel ( dls );
+       dlclose( dls->handle );
+       dls->handle = NULL;
      }
 
     dls->conso = 0.0;
@@ -356,7 +376,7 @@
 /******************************************************************************************************************************/
  static void Dls_start_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = (gchar *)user_data;
-    if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
+    if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) && plugin->plugindb.compil_status >= DLS_COMPIL_OK )
      { gchar chaine[128];
        plugin->plugindb.on = TRUE;
        plugin->conso = 0.0;
@@ -375,15 +395,7 @@
  static void Dls_stop_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
-     { gchar chaine[128];
-       plugin->plugindb.on = FALSE;
-       plugin->start_date = 0;
-       plugin->conso = 0.0;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' stopped (%s)", __func__,
-                 plugin->plugindb.tech_id, plugin->plugindb.nom );
-       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET actif='0' WHERE tech_id = '%s'", plugin->plugindb.tech_id );
-       SQL_Write ( chaine );
-     }
+     { Dls_stop_plugin_reel ( plugin ); }
   }
 /******************************************************************************************************************************/
 /* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */

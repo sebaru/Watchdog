@@ -111,8 +111,7 @@
  struct DLS_WATCHDOG
   { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gint    last_top;
-    gint    consigne;
+    gint    top;
   };
 
  struct DLS_BOOL

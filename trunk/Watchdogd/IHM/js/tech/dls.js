@@ -6,10 +6,9 @@
                        [ "Error loading log file", "outline-danger" ],
                        [ "Syntax error", "outline-danger" ],
                        [ "Error Fork GCC", "outline-danger" ],
-                       [ "Warnings", "outline-warning" ],
+                       [ "Error: Need compiling again", "outline-danger" ],
                        [ "OK", "success" ],
-                       [ "Functions are missing<br>Need compiling again", "outline-danger" ],
-                       [ "Error, plugin is setting bits he does not own", "outline-danger" ],
+                       [ "Warnings", "outline-warning" ],
                        [ "Error", "outline-danger" ]
                      ];
 

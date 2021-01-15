@@ -40,7 +40,7 @@
 
  #include "watchdogd.h"
 
- #define DLS_LIBRARY_VERSION  "20201222"
+ #define DLS_LIBRARY_VERSION  "20210115"
 
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
@@ -310,13 +310,10 @@
       }
     else wtd = (struct DLS_WATCHDOG *)*wtd_p;
 
-    if (wtd->last_top != Partage->top)
-     { wtd->last_top = Partage->top;
-       wtd->consigne = consigne;
-       Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_WATCHDOG '%s:%s'=%d",
-                 __func__, wtd->tech_id, wtd->acronyme, consigne );
-       Partage->audit_bit_interne_per_sec++;
-     }
+    wtd->top = Partage->top + consigne;
+    Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_WATCHDOG '%s:%s'=%d",
+              __func__, wtd->tech_id, wtd->acronyme, consigne );
+    Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_bool: Remonte l'etat d'un boolean                                                                             */
@@ -338,10 +335,14 @@
        liste = g_slist_next(liste);
      }
 
-    if (!liste) return(FALSE);
+    if (!liste)                                                                  /* si n'existe pas, on le créé dans la liste */
+     { Dls_data_set_WATCHDOG ( NULL, tech_id, acronyme, wtd_p, 0 );
+       return(FALSE);
+     }
+
     if (wtd_p) *wtd_p = (gpointer)wtd;                                           /* Sauvegarde pour acceleration si besoin */
 end:
-    return( Partage->top < wtd->last_top + wtd->consigne );
+    return( Partage->top < wtd->top );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_bool: Positionne un boolean                                                                                   */
@@ -1628,8 +1629,8 @@ end:
           gboolean bit_comm_module = TRUE;
           liste = plugin->Arbre_IO_Comm;
           while ( liste )
-           { struct DLS_BOOL *bool = liste->data;
-             bit_comm_module &= bool->etat;
+           { gpointer wtd = liste->data;
+             bit_comm_module &= Dls_data_get_WATCHDOG( NULL, NULL, &wtd );
              liste = g_slist_next ( liste );
            }
           Dls_data_set_bool ( &plugin->vars, plugin->plugindb.tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
@@ -1787,6 +1788,7 @@ end:
           Dls_Lire_config();
           Decharger_plugins();
           Charger_plugins();
+          Dls_recalculer_arbre_comm();                                                  /* Calcul de l'arbre de communication */
           Partage->com_dls.Thread_reload = FALSE;
         }
 
