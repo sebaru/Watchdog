@@ -59,7 +59,7 @@
 
     Json_add_double ( builder, "conso", dls->conso );
     Json_add_bool   ( builder, "debug",                dls->vars.debug );
-    Json_add_bool   ( builder, "bit_comm",             Dls_data_get_bool ( dls->plugindb.tech_id, "_COMM", &dls->vars.bit_comm ) );
+    Json_add_bool   ( builder, "bit_comm",             Dls_data_get_bool ( dls->plugindb.tech_id, "COMM", &dls->vars.bit_comm ) );
     Json_add_bool   ( builder, "bit_defaut",           dls->vars.bit_defaut );
     Json_add_bool   ( builder, "bit_defaut_fixe",      dls->vars.bit_defaut_fixe );
     Json_add_bool   ( builder, "bit_alarme",           dls->vars.bit_alarme );
@@ -80,9 +80,9 @@
     Json_add_array  ( builder, "bit_IO_Comms" );
     GSList *liste = dls->Arbre_IO_Comm;
     while(liste)
-     { struct DLS_BOOL *bool = liste->data;
+     { gpointer wtd = liste->data;
        Json_add_object ( builder, NULL );
-       Dls_BOOL_to_json ( builder, bool );
+       Dls_WATCHDOG_to_json ( builder, wtd );
        Json_end_object ( builder );
        liste = g_slist_next( liste );
      }
