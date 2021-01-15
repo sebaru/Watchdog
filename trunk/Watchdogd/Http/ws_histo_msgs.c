@@ -78,7 +78,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_histo_alive ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data)
-  { gchar chaine[512];
+  { gchar chaine[512], critere[80];
     gsize taille_buf;
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -86,6 +86,17 @@
      }
 
     Http_print_request ( server, msg, path, client );
+    gpointer page_src = g_hash_table_lookup ( query, "page" );
+    if (!page_src) g_snprintf( critere, sizeof(critere), "syn.id=1" );
+    else
+     { gchar *page = Normaliser_chaine ( page_src );
+       if(!page)
+        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+          return;
+        }
+       g_snprintf( critere, sizeof(critere), "syn.page='%s'",page );
+       g_free(page);
+     }
 
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonBuilder *builder = Json_create ();
@@ -103,7 +114,7 @@
                 " INNER JOIN dls as dls ON dls.tech_id = msg.tech_id"
                 " INNER JOIN syns as syn ON syn.id = dls.syn_id"
                 " INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id"
-                " WHERE alive = 1 ORDER BY histo.date_create" );
+                " WHERE alive = 1 AND %s ORDER BY histo.date_create DESC", critere );
     if (SQL_Select_to_JSON ( builder, "enregs", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);

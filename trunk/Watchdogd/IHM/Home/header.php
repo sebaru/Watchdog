@@ -36,9 +36,6 @@
 
         .card { color: white; }
 
-        .wtd-vignette { width: 32px;
-                        height: 32px;
-                      }
 
         .wtd-menu
           { border-radius: 20%;
@@ -50,10 +47,30 @@
         .wtd-synoptique { border-radius: 20%;
                           width: auto;
                           height: auto;
-                          max-height: 128px;
-                          max-width: 128px;
+                          max-height: 96px;
+                          max-width: 96px;
                           cursor: pointer;
                         }
+
+        .wtd-vignette
+          { width: 24px;
+            height: 24px;
+          }
+
+        @media (max-width: 600px)
+         { .wtd-synoptique
+            { max-height: 64px;
+              max-width: 64px;
+            }
+           .wtd-vignette
+            { width: 16px;
+              height: 16px;
+            }
+           .wtd-menu
+             { width: 48px;
+               height: 48px;
+             }
+         }
 
         input:focus { outline: 0 0 0 0  !important;
                       box-shadow: 0 0 0 0 !important;

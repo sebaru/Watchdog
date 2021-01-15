@@ -1,6 +1,7 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
  var Synoptique;                                                     /* Toutes les données du synoptique en cours d'affichage */
+ var Messages_loaded;                                                                      /* true si le datatable a été créé */
 
 /********************************************* Affichage des vignettes ********************************************************/
  function Changer_img_src ( id, target )
@@ -52,44 +53,45 @@
     if (syn_id == Synoptique.id)
      { Set_vignette ( "idMasterVignetteSecuPers", "secu_pers", secu_pers_coul, secu_pers_cligno ); }
   }
-/********************************************* Appelé au chargement de la page ************************************************/
- function Change_page ( page )
-  { $('#bodycard').fadeOut("fast", function ()
-     { $('#bodycard').empty();
-       Send_to_API ( "GET", "/api/syn/show", (page === "" ? null : "page="+page), function(Response)
-        { console.log(Response);
-          Synoptique = Response;
-          $('#idPageTitle').text(Response.libelle);
-          $.each ( Response.child_syns, function (i, syn)
-                    { $('#bodycard').append ( Creer_card ( syn ) );
-                      Set_syn_vars ( syn.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==syn.id } )[0] );
-                    }
-                 );
-          Set_syn_vars ( Response.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
-          if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg" ); }
-                                   else { Changer_img_src ( 'idMenuImgAccueil', "/img/syn_"+Response.image+".png" ); }
-          $('#bodycard').fadeIn("slow");
-        }, null );
-     });
 
-    $('#idTableMessages').fadeOut("fast", function ()
-     { $('#idTableMessages').DataTable(
+ function Charger_messages ( page )
+  { if (page == null || page == "") { param = ""; } else { param = "page="+page; }
+    if (Messages_loaded==true)
+     { $('#idTableMessages').DataTable().ajax.page = page;
+       $('#idTableMessages').DataTable().ajax.url("/api/histo/alive?"+param).load();
+     }
+    else $('#idTableMessages').DataTable(
         { pageLength : 25,
-          fixedHeader: true,
-          ajax: {	url : "/api/histo/alive",	type : "GET", dataSrc: "enregs", data: { page: page },
+          fixedHeader: true, searching: false, paging:false,
+          ajax: {	url: "/api/histo/alive?"+param, type : "GET", dataSrc: "enregs",
                   error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                 },
           rowId: "id",
           columns:
-           [ { "data": "id", "title":"#", "className": "text-center " },
-             /*{ "data": null, "title":"Level", "className": "align-middle  text-center",
+           [ { "data": null, "title":"Typologie", "className": "align-middle text-center bg-dark",
                "render": function (item)
-                 { return( Select_Access_level ( "idTableauLevel_"+item.id,
-                                                 "Tableau_Set('"+item.id+"')",
-                                                 item.access_level )
-                         );
+                 {      if (item.typologie==0) { cligno = false; img = "info.svg"; } /* etat */
+                   else if (item.typologie==1) { cligno = true;  img = "bouclier_rouge.svg"; } /* alerte */
+                   else if (item.typologie==2) { cligno = true;  img = "pignon_jaune.svg"; } /* defaut */
+                   else if (item.typologie==3) { cligno = true;  img = "pignon_orange.svg"; } /* alarme */
+                   else if (item.typologie==4) { cligno = false; img = "bouclier_vert.svg"; } /* veille */
+                   else if (item.typologie==5) { cligno = false; img = "info.svg"; } /* attente */
+                   else if (item.typologie==6) { cligno = true;  img = "croix_rouge_rouge.svg"; } /* danger */
+                   else if (item.typologie==7) { cligno = true;  img = "croix_rouge_orange.svg"; } /* derangement */
+                   else img = "info.svg";
+                   if (cligno==true) classe="wtd-cligno"; else classe="";
+                   return("<img class='wtd-vignette "+classe+"' src='/img/"+img+"'>");
                  }
-             },*/
+             },
+             { "data": "date_create", "title":"Apparition", "className": "text-center bg-dark" },
+             { "data": "dls_shortname", "title":"Objet", "className": "text-center bg-dark" },
+             { "data": "libelle", "title":"Message", "className": "text-center bg-dark" },
+             { "data": null, "title":"Acquit", "className": "align-middle text-center bg-dark",
+               "render": function (item)
+                 { if (item.nom_ack!="None") return(item.nom_ack);
+                   else return( Bouton ( "primary", "Acquitter le message", "Msg_acquitter", item.id, "Acquitter" ) );
+                 }
+             },
  /*            { "data": null, "title":"Titre", "className": "align-middle ",
                "render": function (item)
                  { return( Input ( "text", "idTableauTitre_"+item.id,
@@ -113,6 +115,30 @@
           /*order: [ [0, "desc"] ],*/
           responsive: true,
         });
+     Messages_loaded = true;
+  }
+/********************************************* Appelé au chargement de la page ************************************************/
+ function Change_page ( page )
+  { $('#bodycard').fadeOut("fast", function ()
+     { $('#bodycard').empty();
+       Send_to_API ( "GET", "/api/syn/show", (page === "" ? null : "page="+page), function(Response)
+        { console.log(Response);
+          Synoptique = Response;
+          $('#idPageTitle').text(Response.libelle);
+          $.each ( Response.child_syns, function (i, syn)
+                    { $('#bodycard').append ( Creer_card ( syn ) );
+                      Set_syn_vars ( syn.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==syn.id } )[0] );
+                    }
+                 );
+          Set_syn_vars ( Response.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
+          if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg" ); }
+                                   else { Changer_img_src ( 'idMenuImgAccueil', "/img/syn_"+Response.image+".png" ); }
+          $('#bodycard').fadeIn("slow");
+        }, null );
+     });
+
+    $('#idTableMessages').fadeOut("fast", function ()
+     { Charger_messages ( page );
        $('#idTableMessages').fadeIn("slow");
      }, null);
 
@@ -165,7 +191,7 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { vars = window.location.pathname.split('/');
-    Change_page( vars[1] );
+    Change_page ( vars[1] );
 
     var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/live-msgs", "live-msgs");
     WTDWebSocket.onopen = function (event)
