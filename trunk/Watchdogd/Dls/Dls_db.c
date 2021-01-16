@@ -53,7 +53,8 @@
                "INSERT INTO dls SET is_thread=1,"
                "tech_id=UPPER('%s'),shortname='%s',name='%s',package='custom',"
                "actif=0,syn_id=1,compil_status=0,sourcecode='/* Default ! */' "
-               "ON DUPLICATE KEY UPDATE shortname=VALUES(shortname),name=VALUES(name),is_thread=1", tech_id, tech_id, nom );
+               "ON DUPLICATE KEY UPDATE tech_id=VALUES(tech_id),shortname=VALUES(shortname),"
+               "name=VALUES(name),is_thread=1", tech_id, tech_id, nom );
     g_free(nom);
 
     db = Init_DB_SQL();
