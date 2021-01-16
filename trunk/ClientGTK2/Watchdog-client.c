@@ -68,8 +68,6 @@
  GnomeUIInfo Menu_admin[]=                                                           /*!< Définition du menu d'administration */
   { GNOMEUIINFO_ITEM_STOCK( N_("Adminis_tration"), N_("Administration"),
                             Menu_want_page_admin, GNOME_STOCK_PIXMAP_PROPERTIES ),
-    GNOMEUIINFO_ITEM_STOCK( N_("_D.L.S"), N_("Edit DLS plugins"),
-                            Menu_want_plugin_dls, GNOME_STOCK_PIXMAP_EXEC ),
     GNOMEUIINFO_ITEM_STOCK( N_("_Atelier"), N_("Edit synoptiques"),
                             Menu_want_synoptique, GNOME_STOCK_PIXMAP_INDEX ),
     GNOMEUIINFO_SEPARATOR,

@@ -32,10 +32,36 @@
 
  #define NOM_TABLE_DLS         "dls"
 
- #define NBR_BIT_BISTABLE_RESERVED     40                      /* Nombre de bits bistables reservés pour le système B00 - B39 */
+ enum                                                                                  /* Code retour de la compilation D.L.S */
+  { DLS_COMPIL_NEVER_COMPILED_YET,
+    DLS_COMPIL_EXPORT_DB_FAILED,
+    DLS_COMPIL_ERROR_LOAD_SOURCE,
+    DLS_COMPIL_ERROR_LOAD_LOG,
+    DLS_COMPIL_SYNTAX_ERROR,
+    DLS_COMPIL_ERROR_FORK_GCC,
+    DLS_COMPIL_ERROR_NEED_RECOMPIL,
+    DLS_COMPIL_OK,
+    DLS_COMPIL_OK_WITH_WARNINGS,
+    NBR_DLS_COMPIL_STATUS
+  };
 
  struct PLUGIN_DLS
-  { struct CMD_TYPE_PLUGIN_DLS plugindb;
+  { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
+    gchar shortname[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
+    gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar package[130];
+    gchar syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
+    gchar syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
+    guint syn_id;                                           /* Numéro du fichier syn correspondant(pas l'index dans la table) */
+    guint id;
+    gboolean on;
+    gchar compil_date[32];                                                                    /* Date de derniere compilation */
+    guint compil_status;                                                                    /* Statut de derniere compilation */
+    guint nbr_compil;                                                                         /* Nombre de compilation totale */
+    guint nbr_ligne;                                                                               /* Nombre de ligne de code */
+    gboolean debug;                                                                                /* Nombre de ligne de code */
+    gboolean is_thread;
+
     gchar nom_fichier[60];                                                                                  /* Nom du fichier */
     time_t start_date;                                                                  /* time_t date de demarrage du plugin */
     void *handle;                                                                              /* Handle du fichier librairie */
@@ -230,14 +256,11 @@
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/
- extern gboolean Retirer_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );                                    /* Dans Dls_db.c */
- extern gint Ajouter_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
- extern gboolean Recuperer_plugins_dlsDB( struct DB **db );
+ extern gboolean Recuperer_plugins_dlsDB( struct DB **db );                                                  /* Dans Dls_db.c */
  extern gboolean Recuperer_plugins_dlsDB_by_syn( struct DB **db_retour, gint syn_id );
  extern void Dls_recalculer_arbre_comm ( void );
- extern struct CMD_TYPE_PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct DB **db );
- extern struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( gchar *tech_id_src );
- extern gboolean Modifier_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
+ extern struct PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct DB **db );
+ extern struct PLUGIN_DLS *Rechercher_plugin_dlsDB( gchar *tech_id_src );
  extern gboolean Set_compil_status_plugin_dlsDB( gchar *tech_id_src, gint status, gchar *log_buffer );
  extern gboolean Get_source_dls_from_DB ( gchar *tech_id_src, gchar **result_buffer, gint *result_taille );
  extern gboolean Save_source_dls_to_DB( gchar *tech_id, gchar *buffer, gint taille );

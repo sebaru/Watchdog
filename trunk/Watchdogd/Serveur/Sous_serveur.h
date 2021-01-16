@@ -102,18 +102,6 @@
 
  extern void Client_mode ( struct CLIENT *client, gint mode );                                              /* Dans Serveur.c */
 
- extern void *Envoyer_plugins_dls_thread ( struct CLIENT *client );                                       /* Dans envoi_dls.c */
- extern void Proto_effacer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
- extern void Proto_ajouter_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
- extern void Proto_editer_source_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
- extern gboolean Envoyer_source_dls ( struct CLIENT *client );
- extern void Proto_valider_source_dls( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls,
-                                       gchar *buffer );
- extern void *Proto_compiler_source_dls_thread( struct CLIENT *client );
- extern void Proto_effacer_source_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls );
- extern void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
- extern void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
-
                                                                                                    /* Dans envoi_synoptique.c */
  extern void *Envoyer_synoptiques_thread ( struct CLIENT *client );
  extern void *Envoyer_synoptiques_pour_atelier_thread ( struct CLIENT *client );

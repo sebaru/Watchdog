@@ -1622,7 +1622,7 @@ end:
      { struct PLUGIN_DLS *plugin;
        plugin = (struct PLUGIN_DLS *)liste->data;
 
-       if (plugin->plugindb.on && plugin->go)
+       if (plugin->on && plugin->go)
         { GSList *liste;
 
 /*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
@@ -1633,15 +1633,15 @@ end:
              bit_comm_module &= Dls_data_get_WATCHDOG( NULL, NULL, &wtd );
              liste = g_slist_next ( liste );
            }
-          Dls_data_set_bool ( &plugin->vars, plugin->plugindb.tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
+          Dls_data_set_bool ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
           plugin->vars.bit_activite_ok = bit_comm_module && !(plugin->vars.bit_defaut || plugin->vars.bit_defaut_fixe ||
                                                               plugin->vars.bit_alarme || plugin->vars.bit_alarme_fixe);
           plugin->vars.bit_secupers_ok = !(plugin->vars.bit_derangement || plugin->vars.bit_derangement_fixe ||
                                            plugin->vars.bit_danger || plugin->vars.bit_danger_fixe);
 
 /*----------------------------------------------- Ecriture du début fin de fichier -------------------------------------------*/
-          Dls_data_set_MSG_reel ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
-          Dls_data_set_MSG_reel ( &plugin->vars, plugin->plugindb.tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
+          Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
+          Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
 
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
           gettimeofday( &tv_avant, NULL );

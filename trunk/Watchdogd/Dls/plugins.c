@@ -98,7 +98,7 @@
 /*---------------------------- On recherche tous les tech_id des thread de DigitalInput --------------------------------------*/
     g_snprintf( chaine, sizeof(chaine), "SELECT DISTINCT(map_tech_id) FROM mnemos_DI "
                                         "INNER JOIN thread_classe AS tc ON map_thread = tc.thread "
-                                        " WHERE tech_id='%s' AND tc.classe='I/O'", dls->plugindb.tech_id );
+                                        " WHERE tech_id='%s' AND tc.classe='I/O'", dls->tech_id );
     if (!Lancer_requete_SQL ( db, chaine ))
      { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB request failed", __func__ );
        return;
@@ -112,11 +112,11 @@
           else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, db->row[0] ); }
         }
      }
-    if (dls->plugindb.is_thread)
+    if (dls->is_thread)
      { gpointer wtd = NULL;/* Le bit de synthèse comm du module dépend aussi de l'io_comm du module lui-meme si dependance thread */
-       Dls_data_get_WATCHDOG ( dls->plugindb.tech_id, "IO_COMM", &wtd );
+       Dls_data_get_WATCHDOG ( dls->tech_id, "IO_COMM", &wtd );
        if (wtd) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, wtd );
-       else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, dls->plugindb.tech_id ); }
+       else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, dls->tech_id ); }
      }
     Libere_DB_SQL ( &db );
   }
@@ -134,12 +134,12 @@
 /******************************************************************************************************************************/
  static void Dls_stop_plugin_reel ( struct PLUGIN_DLS *plugin )
   { gchar chaine[128];
-    plugin->plugindb.on = FALSE;
+    plugin->on = FALSE;
     plugin->start_date = 0;
     plugin->conso = 0.0;
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' stopped (%s)", __func__,
-              plugin->plugindb.tech_id, plugin->plugindb.nom );
-    g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET actif='0' WHERE tech_id = '%s'", plugin->plugindb.tech_id );
+              plugin->tech_id, plugin->nom );
+    g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET actif='0' WHERE tech_id = '%s'", plugin->tech_id );
     SQL_Write ( chaine );
   }
 /******************************************************************************************************************************/
@@ -150,15 +150,15 @@
  static gboolean Charger_un_plugin ( struct PLUGIN_DLS *dls )
   { gchar nom_fichier_absolu[60];
 
-    if (Partage->com_dls.Compil_at_boot) Compiler_source_dls( FALSE, dls->plugindb.tech_id, NULL, 0 );
-    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%s.so", dls->plugindb.tech_id );
+    if (Partage->com_dls.Compil_at_boot) Compiler_source_dls( FALSE, dls->tech_id, NULL, 0 );
+    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%s.so", dls->tech_id );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
 
     dls->handle = dlopen( nom_fichier_absolu, RTLD_LOCAL | RTLD_NOW );                      /* Ouverture du fichier librairie */
     if (!dls->handle)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                   "%s: Candidat '%s' dlopen failed (%s)", __func__, dls->plugindb.tech_id, dlerror() );
-       Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_ERROR_NEED_RECOMPIL, "Function Missing" );
+                   "%s: Candidat '%s' dlopen failed (%s)", __func__, dls->tech_id, dlerror() );
+       Set_compil_status_plugin_dlsDB( dls->tech_id, DLS_COMPIL_ERROR_NEED_RECOMPIL, "Function Missing" );
        Dls_stop_plugin_reel ( dls );
        return(FALSE);
      }
@@ -166,8 +166,8 @@
     dls->go = dlsym( dls->handle, "Go" );                                                    /* Recherche de la fonction 'Go' */
     if (!dls->go)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                 "%s: Candidat '%s' failed sur absence GO", __func__, dls->plugindb.tech_id );
-       Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_ERROR_NEED_RECOMPIL, "Function Missing" );
+                 "%s: Candidat '%s' failed sur absence GO", __func__, dls->tech_id );
+       Set_compil_status_plugin_dlsDB( dls->tech_id, DLS_COMPIL_ERROR_NEED_RECOMPIL, "Function Missing" );
        Dls_stop_plugin_reel ( dls );
        dlclose( dls->handle );
        dls->handle = NULL;
@@ -176,19 +176,19 @@
     dls->version = dlsym( dls->handle, "version" );                                            /* Recherche de la fonction */
     if (!dls->version)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                "%s: Candidat '%s' does not provide version function", __func__, dls->plugindb.tech_id );
-       Set_compil_status_plugin_dlsDB( dls->plugindb.tech_id, DLS_COMPIL_ERROR_NEED_RECOMPIL, "Function Missing" );
+                "%s: Candidat '%s' does not provide version function", __func__, dls->tech_id );
+       Set_compil_status_plugin_dlsDB( dls->tech_id, DLS_COMPIL_ERROR_NEED_RECOMPIL, "Function Missing" );
        Dls_stop_plugin_reel ( dls );
        dlclose( dls->handle );
        dls->handle = NULL;
      }
 
     dls->conso = 0.0;
-    if (dls->plugindb.on) dls->start_date = time(NULL);
+    if (dls->on) dls->start_date = time(NULL);
                      else dls->start_date = 0;
     memset ( &dls->vars, 0, sizeof(dls->vars) );                                 /* Mise à zero de tous les bits de remontées */
-    dls->vars.debug = dls->plugindb.debug;                         /* Recopie du champ de debug depuis la DB vers la zone RUN */
-    Dls_data_set_bool ( &dls->vars, dls->plugindb.tech_id, "IO_COMM", NULL, TRUE );  /* Par défaut, la io_comm local est TRUE */
+    dls->vars.debug = dls->debug;                         /* Recopie du champ de debug depuis la DB vers la zone RUN */
+    Dls_data_set_bool ( &dls->vars, dls->tech_id, "IO_COMM", NULL, TRUE );  /* Par défaut, la io_comm local est TRUE */
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -202,26 +202,26 @@
     liste_bit = Partage->Dls_data_TEMPO;
     while(liste_bit)
      { struct DLS_TEMPO *tempo = liste_bit->data;
-       if (!strcmp(tempo->tech_id, plugin->plugindb.tech_id))
+       if (!strcmp(tempo->tech_id, plugin->tech_id))
         { tempo->status = DLS_TEMPO_NOT_COUNTING;                                           /* La tempo ne compte pas du tout */
           tempo->state  = FALSE;
           tempo->init   = FALSE;
         }
        liste_bit = g_slist_next(liste_bit);
      }
-    Charger_confDB_Registre ( plugin->plugindb.tech_id );
+    Charger_confDB_Registre ( plugin->tech_id );
     liste_bit = Partage->Dls_data_MSG;                                                /* Decharge tous les messages du module */
     while(liste_bit)
      { struct DLS_MESSAGES *msg = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
-       if (!strcmp(msg->tech_id, plugin->plugindb.tech_id))
+       if (!strcmp(msg->tech_id, plugin->tech_id))
         { Dls_data_set_MSG ( &plugin->vars, msg->tech_id, msg->acronyme, (gpointer *)&msg, FALSE, FALSE ); }
      }
     liste_bit = Partage->Dls_data_BOOL;                                               /* Decharge tous les booleens du module */
     while(liste_bit)
      { struct DLS_BOOL *bool = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
-       if (!strcmp(bool->tech_id, plugin->plugindb.tech_id))
+       if (!strcmp(bool->tech_id, plugin->tech_id))
         { Dls_data_set_bool ( &plugin->vars, bool->tech_id, bool->acronyme, (gpointer *)&bool, FALSE ); }
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
@@ -237,21 +237,21 @@
     liste = dls_tree->Liste_plugin_dls;
     while(liste)                                                                            /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)liste->data;
-       if ( ! strcasecmp(plugin->plugindb.tech_id, tech_id ) )
+       if ( ! strcasecmp(plugin->tech_id, tech_id ) )
         { Reseter_all_bit_interne ( plugin );
           if (plugin->handle)                                   /* Peut etre à 0 si changement de librairie et erreur de link */
            { if (dlclose( plugin->handle ))
               { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for '%s' (%s)", __func__,
-                          dlerror(), plugin->plugindb.tech_id, plugin->plugindb.shortname );
+                          dlerror(), plugin->tech_id, plugin->shortname );
               }
              plugin->handle = NULL;
              Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin '%s' (%s) unloaded", __func__,
-                       plugin->plugindb.tech_id, plugin->plugindb.shortname );
+                       plugin->tech_id, plugin->shortname );
            }
           Charger_un_plugin ( plugin );
           plugin->vars.resetted = TRUE;                                             /* au chargement, le bit de start vaut 1 ! */
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin '%s' (%s) loaded", __func__,
-                    plugin->plugindb.tech_id, plugin->plugindb.shortname );
+                    plugin->tech_id, plugin->shortname );
           return;
         }
        liste=liste->next;
@@ -287,13 +287,13 @@
      { plugin = (struct PLUGIN_DLS *)dls_tree->Liste_plugin_dls->data;
        if (plugin->handle && dlclose( plugin->handle ))
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for '%s' (%s)", __func__,
-                    dlerror(), plugin->plugindb.tech_id, plugin->plugindb.shortname );
+                    dlerror(), plugin->tech_id, plugin->shortname );
         }
        dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
        if (plugin->Arbre_IO_Comm) g_slist_free(plugin->Arbre_IO_Comm);
                                                                              /* Destruction de l'entete associé dans la GList */
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin '%s' unloaded (%s)", __func__,
-                 plugin->plugindb.tech_id, plugin->plugindb.nom );
+                 plugin->tech_id, plugin->nom );
        g_free( plugin );
      }
 
@@ -332,19 +332,10 @@
     dls_tree->syn_vars.syn_id = id;
 
     if ( Recuperer_plugins_dlsDB_by_syn( &db, id ) )
-     { struct CMD_TYPE_PLUGIN_DLS *plugindb;
-       while ( (plugindb = Recuperer_plugins_dlsDB_suite( &db )) != NULL )
-        { struct PLUGIN_DLS *dls;
-          dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
-          if (!dls)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: out of memory", __func__ );
-             g_free(plugindb);
-           }
-          else { memcpy( &dls->plugindb, plugindb, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-                 g_free(plugindb);
-                 Charger_un_plugin( dls );                                                            /* Chargement du plugin */
-                 dls_tree->Liste_plugin_dls = g_slist_append( dls_tree->Liste_plugin_dls, dls );
-               }
+     { struct PLUGIN_DLS *dls;
+       while ( (dls = Recuperer_plugins_dlsDB_suite( &db )) != NULL )
+        { Charger_un_plugin( dls );                                                                   /* Chargement du plugin */
+          dls_tree->Liste_plugin_dls = g_slist_append( dls_tree->Liste_plugin_dls, dls );
         }
      }
 
@@ -378,14 +369,14 @@
 /******************************************************************************************************************************/
  static void Dls_start_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = (gchar *)user_data;
-    if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) && plugin->plugindb.compil_status >= DLS_COMPIL_OK )
+    if ( ! strcasecmp ( plugin->tech_id, tech_id ) && plugin->compil_status >= DLS_COMPIL_OK )
      { gchar chaine[128];
-       plugin->plugindb.on = TRUE;
+       plugin->on = TRUE;
        plugin->conso = 0.0;
        plugin->start_date = time(NULL);
        plugin->vars.resetted = FALSE;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' started (%s)", __func__, plugin->plugindb.tech_id, plugin->plugindb.nom );
-       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET actif='1' WHERE tech_id = '%s'", plugin->plugindb.tech_id );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' started (%s)", __func__, plugin->tech_id, plugin->nom );
+       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET actif='1' WHERE tech_id = '%s'", plugin->tech_id );
        SQL_Write ( chaine );
      }
   }
@@ -396,7 +387,7 @@
 /******************************************************************************************************************************/
  static void Dls_stop_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = (gchar *)user_data;
-    if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
+    if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
      { Dls_stop_plugin_reel ( plugin ); }
   }
 /******************************************************************************************************************************/
@@ -415,12 +406,12 @@
 /******************************************************************************************************************************/
  static void Dls_debug_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = (gchar *)user_data;
-    if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
+    if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
      { gchar chaine[128];
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug started ('%s')", __func__,
-                 plugin->plugindb.tech_id, plugin->plugindb.nom );
+                 plugin->tech_id, plugin->nom );
        plugin->vars.debug = TRUE;
-       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET debug='1' WHERE tech_id = '%s'", plugin->plugindb.tech_id );
+       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET debug='1' WHERE tech_id = '%s'", plugin->tech_id );
        SQL_Write ( chaine );
      }
   }
@@ -431,12 +422,12 @@
 /******************************************************************************************************************************/
  static void Dls_undebug_plugin_dls_tree ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = (gchar *)user_data;
-    if ( ! strcasecmp ( plugin->plugindb.tech_id, tech_id ) )
+    if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
      { gchar chaine[128];
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug stopped ('%s')", __func__,
-                 plugin->plugindb.tech_id, plugin->plugindb.nom );
+                 plugin->tech_id, plugin->nom );
        plugin->vars.debug = FALSE;
-       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET debug='0' WHERE tech_id = '%s'", plugin->plugindb.tech_id );
+       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET debug='0' WHERE tech_id = '%s'", plugin->tech_id );
        SQL_Write ( chaine );
      }
   }

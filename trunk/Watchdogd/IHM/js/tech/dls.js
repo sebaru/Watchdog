@@ -109,7 +109,7 @@
      }
     else if ( (table.ajax.json().plugins.filter( function(item)
                                                { return item.tech_id.toUpperCase()==input.val().toUpperCase() } )[0] !== undefined &&
-              (tech_id_initial == null || input.val().toUpperCase() != tech_id_initial) )
+              (tech_id_initial == null || input.val().toUpperCase() != tech_id_initial.toUpperCase()) )
        )
      { input.addClass("bg-danger");    $('#idModalDlsEditValider').attr("disabled", true);
        Popover_show ( input, 'Erreur !', 'Ce nom est déjà pris' );

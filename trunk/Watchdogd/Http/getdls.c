@@ -48,18 +48,18 @@
           else { g_snprintf(date, sizeof(date), "Erreur"); }
 
     Json_add_object ( builder, NULL );
-    Json_add_int    ( builder, "id",        dls->plugindb.id );
-    Json_add_string ( builder, "tech_id",   dls->plugindb.tech_id );
-    Json_add_string ( builder, "shortname", dls->plugindb.shortname );
-    Json_add_string ( builder, "name" ,     dls->plugindb.nom );
+    Json_add_int    ( builder, "id",        dls->id );
+    Json_add_string ( builder, "tech_id",   dls->tech_id );
+    Json_add_string ( builder, "shortname", dls->shortname );
+    Json_add_string ( builder, "name" ,     dls->nom );
     if (dls->version) Json_add_string ( builder, "version", dls->version() );
                  else Json_add_string ( builder, "version", "Unknown" );
-    Json_add_bool   ( builder, "started",   dls->plugindb.on );
+    Json_add_bool   ( builder, "started",   dls->on );
     Json_add_string ( builder, "start_date", date );
 
     Json_add_double ( builder, "conso", dls->conso );
     Json_add_bool   ( builder, "debug",                dls->vars.debug );
-    Json_add_bool   ( builder, "bit_comm",             Dls_data_get_bool ( dls->plugindb.tech_id, "COMM", &dls->vars.bit_comm ) );
+    Json_add_bool   ( builder, "bit_comm",             Dls_data_get_bool ( dls->tech_id, "COMM", &dls->vars.bit_comm ) );
     Json_add_bool   ( builder, "bit_defaut",           dls->vars.bit_defaut );
     Json_add_bool   ( builder, "bit_defaut_fixe",      dls->vars.bit_defaut_fixe );
     Json_add_bool   ( builder, "bit_alarme",           dls->vars.bit_alarme );
@@ -670,8 +670,8 @@
 /******************************************************************************************************************************/
  static void Http_Dls_compil (void *user_data, struct PLUGIN_DLS *plugin)
   { struct HTTP_CLIENT_SESSION *session = user_data;
-    Compiler_source_dls( FALSE, plugin->plugindb.tech_id, NULL, 0 );                 /* Reset interdit sinon conflit de mutex */
-    Audit_log ( session, "DLS '%s' compilé", plugin->plugindb.tech_id );
+    Compiler_source_dls( FALSE, plugin->tech_id, NULL, 0 );                 /* Reset interdit sinon conflit de mutex */
+    Audit_log ( session, "DLS '%s' compilé", plugin->tech_id );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -778,9 +778,9 @@
 /******************************************************************************************************************************/
  static void Http_dls_acquitter_plugin ( void *user_data, struct PLUGIN_DLS *plugin )
   { gchar *tech_id = user_data;
-    if (!strcasecmp(tech_id, plugin->plugindb.tech_id))
+    if (!strcasecmp(tech_id, plugin->tech_id))
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Plugin '%s' acquitté", __func__,
-                 plugin->plugindb.tech_id );
+                 plugin->tech_id );
        plugin->vars.bit_acquit = TRUE;
      }
   }
