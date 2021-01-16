@@ -38,9 +38,9 @@
 /******************************************************************************************************************************/
  static void Proto_Acquitter_synoptique ( void *user_data, struct PLUGIN_DLS *plugin )
   { gint syn_id = *(gint *)user_data;
-    if (plugin->plugindb.syn_id == syn_id)
+    if (plugin->syn_id == syn_id)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Synoptique %d -> plugin %s acquitté", __func__,
-                 plugin->plugindb.syn_id, plugin->plugindb.nom );
+                 plugin->syn_id, plugin->nom );
        plugin->vars.bit_acquit = TRUE;
      }
   }
