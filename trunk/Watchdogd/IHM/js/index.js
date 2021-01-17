@@ -68,7 +68,7 @@
                 },
           rowId: "id",
           columns:
-           [ { "data": null, "title":"Typologie", "className": "align-middle text-center bg-dark",
+           [ { "data": null, "title":"Type", "className": "align-middle text-center bg-dark",
                "render": function (item)
                  {      if (item.typologie==0) { cligno = false; img = "info.svg"; } /* etat */
                    else if (item.typologie==1) { cligno = true;  img = "bouclier_rouge.svg"; } /* alerte */
@@ -83,10 +83,10 @@
                    return("<img class='wtd-vignette "+classe+"' src='/img/"+img+"'>");
                  }
              },
-             { "data": "date_create", "title":"Apparition", "className": "text-center bg-dark" },
-             { "data": "dls_shortname", "title":"Objet", "className": "text-center bg-dark" },
+             { "data": "date_create", "title":"Apparition", "className": "text-center bg-dark d-none d-sm-table-cell" },
+             { "data": "dls_shortname", "title":"Objet", "className": "text-center bg-dark d-none d-sm-table-cell" },
              { "data": "libelle", "title":"Message", "className": "text-center bg-dark" },
-             { "data": null, "title":"Acquit", "className": "align-middle text-center bg-dark",
+             { "data": null, "title":"Acquit", "className": "align-middle text-center bg-dark d-none d-sm-table-cell",
                "render": function (item)
                  { if (item.nom_ack!="None") return(item.nom_ack);
                    else return( Bouton ( "primary", "Acquitter le message", "Msg_acquitter", item.id, "Acquitter" ) );
@@ -113,7 +113,7 @@
              }*/
            ],
           /*order: [ [0, "desc"] ],*/
-          responsive: true,
+          responsive: false,
         });
      Messages_loaded = true;
   }

@@ -10,7 +10,7 @@
 <hr>
 
 <div>
-  <table id="idTableMessages" class="table table-dark table-bordered ">
+  <table id="idTableMessages" class="table table-dark table-bordered w-100">
     <thead class="">
 				</thead>
 			 <tbody>
