@@ -30,7 +30,7 @@
     var json_request = JSON.stringify(
        { horloge_id: target }
      );
-    Send_to_API ( "DELETE", "/api/horloge/ticks", json_request, function (Response)
+    Send_to_API ( "DELETE", "/api/horloge/ticks/del", json_request, function (Response)
      { $('#idTableHorloge').DataTable().ajax.reload(null, false);
      }, null );
   }
