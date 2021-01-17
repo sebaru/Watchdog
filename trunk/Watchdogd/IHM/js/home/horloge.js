@@ -23,6 +23,18 @@
      }, null );
   }
 /************************************ Créé un nouveau tableau *****************************************************************/
+ function Horloge_ticks_del (  )
+  { vars = window.location.pathname.split('/');
+    if ( vars[3] == undefined ) return; else target = vars[3];
+
+    var json_request = JSON.stringify(
+       { horloge_id: target }
+     );
+    Send_to_API ( "DELETE", "/api/horloge/ticks", json_request, function (Response)
+     { $('#idTableHorloge').DataTable().ajax.reload(null, false);
+     }, null );
+  }
+/************************************ Créé un nouveau tableau *****************************************************************/
  function Horloge_ticks_Set ( id )
   { table = $('#idTableHorloge').DataTable();
     selection = table.ajax.json().horloge_ticks.filter( function(item) { return item.id==id } )[0];
