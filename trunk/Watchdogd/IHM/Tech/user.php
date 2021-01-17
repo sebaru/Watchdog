@@ -5,7 +5,7 @@
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="User_sauver_parametre()" class="btn btn-outline-success"><i class="fas fa-save"></i> Sauvegarder</button>
-        <button type="button" onclick="Redirect('/home/users')" class="btn btn-primary"><i class="fas fa-users"></i> Tous les utilisateurs</button>
+        <button type="button" onclick="Redirect('/tech/users')" class="btn btn-primary"><i class="fas fa-users"></i> Tous les utilisateurs</button>
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>
@@ -71,4 +71,4 @@
 <!-- Container -->
 </div>
 
-<script src="/js/home/user.js" type="text/javascript"></script>
+<script src="/js/tech/user.js" type="text/javascript"></script>

@@ -203,12 +203,12 @@
        this.send ( json_request );
      }
     WTDWebSocket.onerror = function (event)
-     { console.log("Error au websocket !");
+     { $('#idAlertConnexionLost').show();
+       console.log("Error au websocket !");
        console.debug(event);
      }
     WTDWebSocket.onclose = function (event)
-     { $('#idAlertConnexionLost').show();
-       console.log("Close au websocket !");
+     { console.log("Close au websocket !");
        console.debug(event);
      }
     WTDWebSocket.onmessage = function (event)
