@@ -1226,7 +1226,7 @@ end:
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Dls_data_set_MSG_reel ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
+ void Dls_data_set_MSG_reel ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
   { struct DLS_MESSAGES *msg;
 
     if (!msg_p || !*msg_p)

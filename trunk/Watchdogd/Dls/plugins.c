@@ -189,6 +189,8 @@
     memset ( &dls->vars, 0, sizeof(dls->vars) );                                 /* Mise à zero de tous les bits de remontées */
     dls->vars.debug = dls->debug;                                  /* Recopie du champ de debug depuis la DB vers la zone RUN */
     Dls_data_set_WATCHDOG ( &dls->vars, dls->tech_id, "IO_COMM", NULL, 0 );         /* Par défaut, la io_comm local est FALSE */
+    Dls_data_set_MSG_reel ( &dls->vars, dls->tech_id, "MSG_COMM_OK", NULL, FALSE, FALSE );    /* Par défaut, le msg est FALSE */
+    Dls_data_set_MSG_reel ( &dls->vars, dls->tech_id, "MSG_COMM_HS", NULL, FALSE, FALSE );    /* Par défaut, le msg est FALSE */
     return(TRUE);
   }
 /******************************************************************************************************************************/
