@@ -28,7 +28,7 @@
     if ( vars[3] == undefined ) return; else target = vars[3];
 
     var json_request = JSON.stringify(
-       { horloge_id: target }
+       { id: target }
      );
     Send_to_API ( "DELETE", "/api/horloge/ticks/del", json_request, function (Response)
      { $('#idTableHorloge').DataTable().ajax.reload(null, false);
