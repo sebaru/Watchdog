@@ -67,6 +67,7 @@
      );
     Send_to_API ( 'POST', "/api/map/set", json_request, function ()
      { $('#idTableModbusMapDI').DataTable().ajax.reload(null, false);
+       Process_reload ( null, "MODBUS", false );
      });
     $('#idModalEditDI').modal("hide");
   }
@@ -87,6 +88,7 @@
      );
     Send_to_API ( 'POST', "/api/map/set", json_request, function ()
      { $('#idTableModbusMapDO').DataTable().ajax.reload(null, false);
+       Process_reload ( null, "MODBUS", false );
      });
     $('#idModalEditDO').modal("hide");
   }
@@ -112,6 +114,7 @@
      );
     Send_to_API ( 'POST', "/api/map/set", json_request, function ()
      { $('#idTableModbusMapAI').DataTable().ajax.reload(null, false);
+       Process_reload ( null, "MODBUS", false );
      });
     $('#idModalEditAI').modal("hide");
   }
@@ -137,6 +140,7 @@
      );
     Send_to_API ( 'POST', "/api/map/set", json_request, function ()
      { $('#idTableModbusMapAO').DataTable().ajax.reload(null, false);
+       Process_reload ( null, "MODBUS", false );
      });
     $('#idModalEditAO').modal("hide");
   }
@@ -257,39 +261,6 @@
        ModbusMap_Update_Choix_Tech_ID( 'idModalEditAO', 'AO', null, null );
      }
     $('#idModalEditAO').modal("show");
-  }
-/************************************ Envoi les infos de modifications synoptique *********************************************/
- function Valider_Modbus_Add ( )
-  { var xhr = new XMLHttpRequest;
-    xhr.open('POST', "/api/process/modbus/add" );
-    xhr.setRequestHeader('Content-type', 'application/json');
-    var json_request = JSON.stringify(
-       { tech_id :    $('#idModalModbusEditTechID').val(),
-         hostname:    $('#idModalModbusEditHostname').val(),
-         description: $('#idModalModbusEditDescription').val(),
-         watchdog:    $('#idModalModbusEditWatchdog').val(),
-       }
-     );
-    xhr.onreadystatechange = function( )
-     { if ( xhr.readyState != 4 ) return;
-       if (xhr.status == 200)
-        { $('#idTableModbusMap').DataTable().ajax.reload(null, false);
-          $('#idToastStatus').toast('show');
-        }
-       else { Show_Error( xhr.statusText ); }
-     };
-    xhr.send(json_request);
-  }
-/********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Modbus_Add ()
-  { $('#idModalModbusEditTitre').text ( "Ajouter un composant WAGO" );
-    $('#idModalModbusEditTechID').val ( "" );
-    $('#idModalModbusEditTechID').attr ( "readonly", false );
-    $('#idModalModbusEditHostname').val ( "" );
-    $('#idModalModbusEditDescription').val( "" );
-    $('#idModalModbusEditWatchdog').val( "" );
-    $('#idModalModbusEditValider').attr( "onclick", "Valider_Modbus_Add()" );
-    $('#idModalModbusEdit').modal("show");
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()

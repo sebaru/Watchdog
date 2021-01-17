@@ -64,25 +64,13 @@
     guint nbr_compil;                                                                         /* Nombre de compilation totale */
     guint nbr_ligne;                                                                               /* Nombre de ligne de code */
     gboolean debug;                                                                                /* Nombre de ligne de code */
+    gboolean is_thread;                                                                            /* Nombre de ligne de code */
   };
 
  struct CMD_TYPE_SOURCE_DLS
   { gint id;
     gchar tech_id[32];
     guint taille;                                                     /* Taille des données qui suivent dans le paquet reseau */
-  };
-
- enum                                                                                  /* Code retour de la compilation D.L.S */
-  { DLS_COMPIL_NEVER_COMPILED_YET,
-    DLS_COMPIL_EXPORT_DB_FAILED,
-    DLS_COMPIL_ERROR_LOAD_SOURCE,
-    DLS_COMPIL_ERROR_LOAD_LOG,
-    DLS_COMPIL_SYNTAX_ERROR,
-    DLS_COMPIL_ERROR_FORK_GCC,
-    DLS_COMPIL_OK_WITH_WARNINGS,
-    DLS_COMPIL_OK,
-    DLS_COMPIL_WARNING_FUNCTION_MISSING, // a virer
-    NBR_DLS_COMPIL_STATUS
   };
 
  enum

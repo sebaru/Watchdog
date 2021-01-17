@@ -196,7 +196,7 @@
 
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
               "%s: %s disconnected (host='%s')", __func__, ups->tech_id, ups->host );
-    Send_zmq_WATCHDOG_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "COMM", 0 );
+    Send_zmq_WATCHDOG_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "IO_COMM", 0 );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -283,7 +283,7 @@
        if (Dls_auto_create_plugin( ups->tech_id, "Gestion de l'onduleur" ) == FALSE)
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", ups->tech_id ); }
 
-       Mnemo_auto_create_WATCHDOG ( FALSE, ups->tech_id, "COMM", "Statut de la communication avec l'onduleur" );
+       Mnemo_auto_create_WATCHDOG ( FALSE, ups->tech_id, "IO_COMM", "Statut de la communication avec l'onduleur" );
        Mnemo_auto_create_DI ( FALSE, ups->tech_id, "OUTLET_1_STATUS", "Statut de la prise n°1" );
        Mnemo_auto_create_DI ( FALSE, ups->tech_id, "OUTLET_2_STATUS", "Statut de la prise n°2" );
        Mnemo_auto_create_DI ( FALSE, ups->tech_id, "UPS_ONLINE", "UPS Online" );
@@ -539,7 +539,7 @@
        Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_REPLACE_BATT", (g_strrstr(reponse, "RB")?TRUE:FALSE) );
        Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_ALARM",        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
      }
-    Send_zmq_WATCHDOG_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "COMM", 600 );
+    Send_zmq_WATCHDOG_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "IO_COMM", 600 );
     return(TRUE);
   }
 /******************************************************************************************************************************/

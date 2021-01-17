@@ -149,6 +149,7 @@
  extern void Decharger_librairies ( void );
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
+ extern gboolean Reload_librairie_par_prompt ( gchar *prompt );
  extern struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_fichier );
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
  extern void Thread_init ( gchar *pr_name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description );

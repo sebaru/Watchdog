@@ -6,10 +6,9 @@
                        [ "Error loading log file", "outline-danger" ],
                        [ "Syntax error", "outline-danger" ],
                        [ "Error Fork GCC", "outline-danger" ],
-                       [ "Warnings", "outline-warning" ],
+                       [ "Error: Need compiling again", "outline-danger" ],
                        [ "OK", "success" ],
-                       [ "Functions are missing<br>Need compiling again", "outline-danger" ],
-                       [ "Error, plugin is setting bits he does not own", "outline-danger" ],
+                       [ "Warnings", "outline-warning" ],
                        [ "Error", "outline-danger" ]
                      ];
 
@@ -110,7 +109,7 @@
      }
     else if ( (table.ajax.json().plugins.filter( function(item)
                                                { return item.tech_id.toUpperCase()==input.val().toUpperCase() } )[0] !== undefined &&
-              (tech_id_initial == null || input.val().toUpperCase() != tech_id_initial) )
+              (tech_id_initial == null || input.val().toUpperCase() != tech_id_initial.toUpperCase()) )
        )
      { input.addClass("bg-danger");    $('#idModalDlsEditValider').attr("disabled", true);
        Popover_show ( input, 'Erreur !', 'Ce nom est déjà pris' );

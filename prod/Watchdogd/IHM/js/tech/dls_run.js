@@ -211,8 +211,8 @@
               [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
                 { "data": null, "title":"Etat", "className": "align-middle ",
                   "render": function (item)
-                    { if (item.etat==false) { return( Bouton ( "success", "Le compteur décompte", null, null, "En décompte" ) );  }
-                                       else { return( Bouton ( "outline-warning", "Le compteur est échu", null, null, "échu" ) ); }
+                    { if (item.etat==true) { return( Bouton ( "success", "Le compteur décompte", null, null, "En décompte" ) );  }
+                                      else { return( Bouton ( "outline-warning", "Le compteur est échu", null, null, "échu" ) ); }
                     },
                 },
                 { "data": "decompte",   "title":"Reste en décompte", "className": "align-middle text-center" },

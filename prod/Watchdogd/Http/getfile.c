@@ -175,13 +175,8 @@
        has_template = TRUE;
        g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Home/%s.php", WTD_PKGDATADIR, URI[2] );
      }
-    else if (!session && !strcasecmp( URI[1], "login"))
-     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/login.php", WTD_PKGDATADIR ); }
     else if (!session)
-     { g_strfreev(URI);
-       soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
-       return;
-     }
+     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/login.php", WTD_PKGDATADIR ); }
     else
      { g_snprintf ( header, sizeof(header), "%s/IHM/Home/header.php", WTD_PKGDATADIR );
        g_snprintf ( footer, sizeof(footer), "%s/IHM/Home/footer.php", WTD_PKGDATADIR );

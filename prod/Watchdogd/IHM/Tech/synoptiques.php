@@ -64,9 +64,23 @@
        </div>
 
        <div class="col form-group">
+					     <div class="input-group align-items-center">
+						     <label class="col-4 col-form-label text-right">Image pré-établie</label>
+						     <select id="idModalSynEditImageSelect" class="col-6 form-control-file custom-select">
+             <option value='custom'>custom</option>
+             <option value='home'>Accueil</option>
+             <option value='comm'>Communications</option>
+             <option value='confort'>Confort</option>
+             <option value='cuisine'>Cuisine</option>
+           </select>
+           <img id="idModalSynEditImage" src='' class="ml-2 text-center col-2 border border-info">
+     					</div>
+       </div>
+
+       <div class="col form-group align-items-center">
 					     <div class="input-group">
 						     <label class="col-4 col-form-label text-right">Image du synoptique</label>
-						     <input id="idModalSynEditImage" type="file" accept="image/jpg" class="col-8 form-control-file" placeholder="Choisissez une image">
+						     <input id="idModalSynEditImageCustom" type="file" accept="image/jpg" class="col-8 form-control-file" placeholder="Choisissez une image">
      					</div>
        </div>
 

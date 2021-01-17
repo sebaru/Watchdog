@@ -167,7 +167,9 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "libelle" ) && Json_has_member ( request, "page" ) &&
-            Json_has_member ( request, "parent_id" ) && Json_has_member ( request, "access_level" ) ) )
+            Json_has_member ( request, "parent_id" ) && Json_has_member ( request, "access_level" ) &&
+            Json_has_member ( request, "image" )
+           ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
@@ -182,18 +184,19 @@
     gint  parent_id    = Json_get_int ( request, "parent_id" );
     gchar *libelle     = Normaliser_chaine ( Json_get_string( request, "libelle" ) );
     gchar *page        = Normaliser_chaine ( Json_get_string( request, "page" ) );
+    gchar *image       = Normaliser_chaine ( Json_get_string( request, "image" ) );
 
     if ( Json_has_member ( request, "syn_id" ) )                                                                   /* Edition */
      { gint syn_id = Json_get_int(request,"syn_id");
        if (syn_id==1) parent_id = 1;                                                 /* On ne peut changer le parent du syn 1 */
        g_snprintf( requete, sizeof(requete),
-                  "UPDATE syns SET libelle='%s', page='%s', parent_id=%d, access_level='%d' WHERE id='%d' AND access_level<='%d'",
-                   libelle, page, parent_id, access_level, syn_id, session->access_level );
+                  "UPDATE syns SET libelle='%s', page='%s', parent_id=%d, image='%s', access_level='%d' WHERE id='%d' AND access_level<='%d'",
+                   libelle, page, parent_id, image, access_level, syn_id, session->access_level );
      }
     else
      { g_snprintf( requete, sizeof(requete),
-                  "INSERT INTO syns SET libelle='%s', parent_id=%d, page='%s', "
-                  "access_level='%d'", libelle, parent_id, page, access_level );
+                  "INSERT INTO syns SET libelle='%s', parent_id=%d, page='%s', image='%s', "
+                  "access_level='%d'", libelle, parent_id, page, image, access_level );
      }
 
     if (SQL_Write (requete))
@@ -208,6 +211,7 @@
      { Audit_log ( session, "Synoptique %s - '%s' created", page, libelle ); }
     g_free(libelle);
     g_free(page);
+    g_free(image);
     json_node_unref(request);
   }
 /******************************************************************************************************************************/
@@ -330,7 +334,6 @@
 
     json_node_unref(request);
   }
-
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -351,7 +354,7 @@
     gchar *page_src = g_hash_table_lookup ( query, "page" );
     if (page_src)
      { gchar *temp = Normaliser_chaine ( page_src );
-       g_snprintf( page, sizeof(page), "'%s' ", temp );
+       g_snprintf( page, sizeof(page), "%s", temp );
        g_free(temp);
      }
 
@@ -381,7 +384,7 @@
                                           " WHERE s2.page='%s' AND s.access_level<='%d'", page, session->access_level);
      }
     else
-     { g_snprintf(chaine, sizeof(chaine), "SELECT * FROM syns WHERE parent_id=1 AND access_level<='%d'", session->access_level);
+     { g_snprintf(chaine, sizeof(chaine), "SELECT * FROM syns WHERE parent_id=1 AND id!=1 AND access_level<='%d'", session->access_level);
      }
 
     if (SQL_Select_to_JSON ( builder, "child_syns", chaine ) == FALSE)
@@ -404,7 +407,10 @@
        return;
      }
 
-    if(page_src) g_free(page);
+    Json_add_array ( builder, "syn_vars" );
+    Dls_foreach ( builder, NULL, Dls_syn_vars_to_json );
+    Json_end_array ( builder );
+
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);

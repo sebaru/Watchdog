@@ -34,37 +34,6 @@
 
  #include "watchdogd.h"
 /******************************************************************************************************************************/
-/* Retirer_dlsDB: Elimine un prg DLS dans la base de données                                                                  */
-/* Entrées: iune structure identifiant le plugin                                                                              */
-/* Sortie: true si pas de pb, false sinon                                                                                     */
-/******************************************************************************************************************************/
- gboolean Retirer_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls )
-  { gchar requete[200];
-    gboolean retour;
-    struct DB *db;
-
-    if (dls->id == 1) return(FALSE);                                                /* On ne peut pas effacer le plugin n°1 ! */
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    g_snprintf( (gchar *)requete, sizeof(requete),                                                             /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d",
-                NOM_TABLE_DLS, dls->id );
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-
-    Libere_DB_SQL(&db);
-
-    g_snprintf( (gchar *)requete, sizeof(requete), "Dls/%06d.dls", dls->id );
-    unlink( (gchar *)requete );
-    g_snprintf( (gchar *)requete, sizeof(requete), "Dls/libdls%06d.so", dls->id );
-    unlink( (gchar *)requete );
-    return(retour);
-  }
-/******************************************************************************************************************************/
 /* Dls_auto_create_plugin: Créé automatiquement le plugin en parametre (tech_id, nom)                                         */
 /* Entrées: le tech_id (unique) et le nom associé                                                                             */
 /* Sortie: -1 si pb, id sinon                                                                                                 */
@@ -81,10 +50,11 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-               "INSERT INTO dls SET "
+               "INSERT INTO dls SET is_thread=1,"
                "tech_id=UPPER('%s'),shortname='%s',name='%s',package='custom',"
                "actif=0,syn_id=1,compil_status=0,sourcecode='/* Default ! */' "
-               "ON DUPLICATE KEY UPDATE shortname=VALUES(shortname),name=VALUES(name)", tech_id, tech_id, nom );
+               "ON DUPLICATE KEY UPDATE tech_id=VALUES(tech_id),shortname=VALUES(shortname),"
+               "name=VALUES(name),is_thread=1", tech_id, tech_id, nom );
     g_free(nom);
 
     db = Init_DB_SQL();
@@ -96,103 +66,6 @@
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);
-  }
-/******************************************************************************************************************************/
-/* Ajouter_dlsDB: Ajout d'un programme DLS dans la base de données                                                            */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
-/* Sortie: -1 si pb, id sinon                                                                                                 */
-/******************************************************************************************************************************/
- static gint Ajouter_Modifier_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls, gint ajout )
-  { gchar *nom, *shortname, *tech_id, *package;
-    gchar requete[1024];
-    gboolean retour;
-    struct DB *db;
-    gint id;
-
-    nom = Normaliser_chaine ( dls->nom );                                                    /* Formatage correct des chaines */
-    if (!nom)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation nom impossible", __func__ );
-       return(-1);
-     }
-
-    shortname = Normaliser_chaine ( dls->shortname );                                        /* Formatage correct des chaines */
-    if (!shortname)
-     { g_free(nom);
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
-       return(-1);
-     }
-
-    tech_id = Normaliser_chaine ( dls->tech_id );                                            /* Formatage correct des chaines */
-    if (!tech_id)
-     { g_free(nom);
-       g_free(shortname);
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
-       return(-1);
-     }
-
-    package = Normaliser_chaine ( dls->package );                                            /* Formatage correct des chaines */
-    if (!package)
-     { g_free(nom);
-       g_free(shortname);
-       g_free(tech_id);
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation package impossible", __func__ );
-       return(-1);
-     }
-
-    if (ajout)
-     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s"
-                   "(name,shortname,package,tech_id,actif,syn_id,compil_date,compil_status,nbr_compil,sourcecode) "
-                   "VALUES ('%s','%s','%s','%s','%d','%d',NOW(),0,0,'/* Source Code */');",
-                   NOM_TABLE_DLS, nom, shortname, package, tech_id, dls->on, dls->syn_id );
-     }
-    else
-     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                  "UPDATE %s SET "
-                  "name='%s',shortname='%s',package='%s',tech_id='%s',actif='%d',syn_id=%d WHERE id=%d",
-                   NOM_TABLE_DLS, nom, shortname, package, tech_id, dls->on, dls->syn_id, dls->id );
-     }
-
-    g_free(nom);
-    g_free(shortname);
-    g_free(tech_id);
-    g_free(package);
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(-1);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (ajout)
-     { if ( retour == FALSE )
-            { id=-1; }
-       else { id = Recuperer_last_ID_SQL ( db ); }
-       Libere_DB_SQL(&db);
-       return(id);
-     }
-    Libere_DB_SQL(&db);
-    if (retour==FALSE) return(-1);
-    return(0);
-  }
-/******************************************************************************************************************************/
-/* Ajouter_dlsDB: Ajout d'un programme DLS dans la base de données                                                            */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
-/* Sortie: -1 si pb, id sinon                                                                                                 */
-/******************************************************************************************************************************/
- gint Ajouter_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls )
-  { return( Ajouter_Modifier_plugin_dlsDB ( dls, TRUE ) ); }
-/******************************************************************************************************************************/
-/* Modifier_plugin_dlsDB: Modification d'un plugin Watchdog                                                                   */
-/* Entrées: une structure decrivant le plugin a modifier                                                                      */
-/* Sortie: FALSE si pb                                                                                                        */
-/******************************************************************************************************************************/
- gboolean Modifier_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls )
-  { gint retour;
-    retour = Ajouter_Modifier_plugin_dlsDB ( dls, FALSE );
-    if (retour == -1) return(FALSE);
-    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Recuperer_plugins_dlsDB: Recuperation de tous les plugins D.L.S                                                            */
@@ -212,7 +85,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.package,dls.syn_id,parent_syn.page,syn.page,"
-                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne,debug"
+                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne,debug,is_thread"
                 " FROM dls INNER JOIN syns as syn ON dls.syn_id = syn.id "
                 " INNER JOIN syns AS parent_syn ON parent_syn.id=syn.parent_id"
                 " %s "
@@ -246,8 +119,8 @@
 /* Entrées: une base de données                                                                                               */
 /* Sortie: une structure plugindls, ou null si erreur ou fin de requete                                                       */
 /******************************************************************************************************************************/
- struct CMD_TYPE_PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct DB **db_orig )
-  { struct CMD_TYPE_PLUGIN_DLS *dls;
+ struct PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct DB **db_orig )
+  { struct PLUGIN_DLS *dls;
     struct DB *db;
 
     db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
@@ -258,7 +131,7 @@
        return(NULL);
      }
 
-    dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+    dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
     if (!dls) Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
                        "%s: Erreur allocation mémoire", __func__ );
     else
@@ -276,6 +149,7 @@
        dls->nbr_compil    = atoi(db->row[10]);
        dls->nbr_ligne     = atoi(db->row[12]);
        dls->debug         = atoi(db->row[13]);
+       dls->is_thread     = atoi(db->row[14]);
      }
     return( dls );
   }
@@ -284,8 +158,8 @@
 /* Entrées: un id plugin DLS                                                                                                  */
 /* Sortie: une structure PLUGIN_DLS, ou null si erreur                                                                        */
 /******************************************************************************************************************************/
- struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( gchar *tech_id_src )
-  { struct CMD_TYPE_PLUGIN_DLS *dls;
+ struct PLUGIN_DLS *Rechercher_plugin_dlsDB( gchar *tech_id_src )
+  { struct PLUGIN_DLS *dls;
     gchar requete[512], *tech_id;
     struct DB *db;
 
@@ -297,7 +171,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.package,dls.syn_id,parent_syn.page,syn.page,"
-                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne"
+                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne,is_thread"
                 " FROM %s as dls INNER JOIN %s as syn ON dls.syn_id = syn.id "
                 " INNER JOIN %s AS parent_syn ON parent_syn.id=syn.parent_id"
                 " WHERE dls.tech_id = '%s'",

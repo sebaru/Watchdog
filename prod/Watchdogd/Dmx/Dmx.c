@@ -149,7 +149,7 @@
        close(Cfg_dmx.fd);
        Cfg_dmx.fd = -1;
      }
-    Send_zmq_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, "tech_id", "IO_COMM", 0 );
+    Send_zmq_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, Cfg_dmx.tech_id, "IO_COMM", 0 );
     Cfg_dmx.comm_status = FALSE;
   }
 /******************************************************************************************************************************/

@@ -44,7 +44,7 @@
  static gint Buffer_used=0, Buffer_taille=0;
  static int Id_log;                                                                     /* Pour la creation du fichier de log */
  static int nbr_erreur;
- static struct CMD_TYPE_PLUGIN_DLS Dls_plugin;
+ static struct PLUGIN_DLS Dls_plugin;
 
 /******************************************************************************************************************************/
 /* New_chaine: Alloue une certaine quantité de mémoire pour utiliser des chaines de caractères                                */
@@ -843,7 +843,7 @@
 /******************************************************************************************************************************/
  gint Traduire_DLS( gchar *tech_id )
   { gchar source[80], cible[80], log[80], *requete;
-    struct CMD_TYPE_PLUGIN_DLS *plugin;
+    struct PLUGIN_DLS *plugin;
     struct ALIAS *alias;
     GSList *liste;
     gint retour, nb_car;
@@ -854,7 +854,7 @@
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: plugin '%s' not found.", __func__, tech_id );
        return (TRAD_DLS_ERROR_NO_FILE);
      }
-    memcpy ( &Dls_plugin, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+    memcpy ( &Dls_plugin, plugin, sizeof(struct PLUGIN_DLS) );
     g_free(plugin);
 
     Buffer_taille = 1024;

@@ -44,7 +44,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">GSM Tech_ID</label>
-						     <select id="idModalEditGSMTechID" class="custom-select"></select>
+						     <select id="idModalEditGSMTechID" class="custom-select border-info"></select>
      					</div>
   					</div>
 
@@ -72,7 +72,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-3 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditSelectAcronyme" class="col-9 custom-select border-info "></select>
+						     <select id="idModalEditSelectAcronyme" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
