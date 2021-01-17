@@ -311,7 +311,7 @@
     else wtd = (struct DLS_WATCHDOG *)*wtd_p;
 
     wtd->top = Partage->top + consigne;
-    Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_WATCHDOG '%s:%s'=%d",
+    Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_WATCHDOG '%s:%s'=%d",
               __func__, wtd->tech_id, wtd->acronyme, consigne );
     Partage->audit_bit_interne_per_sec++;
   }
@@ -379,7 +379,7 @@ end:
     else bool = (struct DLS_BOOL *)*bool_p;
 
     if (bool->etat != valeur)
-     { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
+     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
                  __func__, bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
        if (valeur == TRUE) Partage->com_dls.Set_Dls_Bool_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_up, bool );
                       else Partage->com_dls.Set_Dls_Bool_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_down, bool );
@@ -498,7 +498,7 @@ end:
     else di = (struct DLS_DI *)*di_p;
 
     if (di->etat != valeur)
-     { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_DI '%s:%s'=%d up %d down %d",
+     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_DI '%s:%s'=%d up %d down %d",
                  __func__, di->tech_id, di->acronyme, valeur, di->edge_up, di->edge_down );
        if (valeur == TRUE) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up, di );
                       else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, di );
@@ -637,7 +637,7 @@ end:
     else dout = (struct DLS_DO *)*dout_p;
 
     if (dout->etat != etat)
-     { Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_DO '%s:%s'=%d ",
+     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_DO '%s:%s'=%d ",
                  __func__, dout->tech_id, dout->acronyme );
        if (etat)
         { pthread_mutex_lock( &Partage->com_msrv.synchro );
@@ -873,7 +873,7 @@ end:
        pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
        Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_AO '%s:%s'=%f/%f",
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_AO '%s:%s'=%f/%f",
                  __func__, ao->tech_id, ao->acronyme, ao->val_avant_ech, ao->val_ech );
      }
     else if ( ao->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
@@ -937,7 +937,7 @@ end:
            { cpt_imp->valeur++;
              cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
              need_arch = TRUE;
-             Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_CI '%s:%s'=%d",
+             Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_CI '%s:%s'=%d",
                        __func__, cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
            }
         }
@@ -1038,7 +1038,7 @@ end:
           if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
            { cpt_h->valeur++;
              cpt_h->old_top = new_top;
-             Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_CH '%s:%s'=%d",
+             Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_CH '%s:%s'=%d",
                        __func__, cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
              Partage->audit_bit_interne_per_sec++;
            }
@@ -1312,7 +1312,7 @@ end:
              pthread_mutex_unlock( &Partage->com_msrv.synchro );
            }
 
-          Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_MSG '%s:%s'=%d",
+          Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_MSG '%s:%s'=%d",
                     __func__, msg->tech_id, msg->acronyme, msg->etat );
           msg->changes++;
           msg->last_change = Partage->top;
@@ -1408,7 +1408,7 @@ end:
           pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
           Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG,
+          Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                     "%s : Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d",
                     __func__, visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno );
         }
@@ -1480,7 +1480,7 @@ end:
     if (valeur != reg->valeur)
      { reg->valeur = valeur;
        need_arch = TRUE;
-       Info_new( Config.log, (vars ? vars->debug : Partage->com_dls.Thread_debug), LOG_DEBUG, "%s : Changing DLS_REGISTRE '%s:%s'=%f",
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_REGISTRE '%s:%s'=%f",
                  __func__, reg->tech_id, reg->acronyme, reg->valeur );
        Partage->audit_bit_interne_per_sec++;
      }
