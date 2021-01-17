@@ -188,9 +188,6 @@
                      else dls->start_date = 0;
     memset ( &dls->vars, 0, sizeof(dls->vars) );                                 /* Mise à zero de tous les bits de remontées */
     dls->vars.debug = dls->debug;                                  /* Recopie du champ de debug depuis la DB vers la zone RUN */
-    Dls_data_set_WATCHDOG ( &dls->vars, dls->tech_id, "IO_COMM", NULL, 0 );         /* Par défaut, la io_comm local est FALSE */
-    Dls_data_set_MSG_reel ( &dls->vars, dls->tech_id, "MSG_COMM_OK", NULL, FALSE, FALSE );    /* Par défaut, le msg est FALSE */
-    Dls_data_set_MSG_reel ( &dls->vars, dls->tech_id, "MSG_COMM_HS", NULL, FALSE, FALSE );    /* Par défaut, le msg est FALSE */
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -217,7 +214,7 @@
      { struct DLS_MESSAGES *msg = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(msg->tech_id, plugin->tech_id))
-        { Dls_data_set_MSG ( &plugin->vars, msg->tech_id, msg->acronyme, (gpointer *)&msg, FALSE, FALSE ); }
+        { Dls_data_set_MSG_reel ( &plugin->vars, msg->tech_id, msg->acronyme, (gpointer *)&msg, FALSE, FALSE ); }
      }
     liste_bit = Partage->Dls_data_BOOL;                                               /* Decharge tous les booleens du module */
     while(liste_bit)
@@ -225,6 +222,13 @@
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(bool->tech_id, plugin->tech_id))
         { Dls_data_set_bool ( &plugin->vars, bool->tech_id, bool->acronyme, (gpointer *)&bool, FALSE ); }
+     }
+    liste_bit = Partage->Dls_data_WATCHDOG;                                          /* Decharge tous les watchdogs du module */
+    while(liste_bit)
+     { struct DLS_WATCHDOG *wtd = liste_bit->data;
+       liste_bit = g_slist_next(liste_bit);
+       if (!strcmp(wtd->tech_id, plugin->tech_id))
+        { Dls_data_set_bool ( &plugin->vars, wtd->tech_id, wtd->acronyme, (gpointer *)&wtd, FALSE ); }
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }
