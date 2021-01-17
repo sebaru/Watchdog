@@ -296,7 +296,7 @@
        if (!liste)
         { wtd = g_try_malloc0 ( sizeof(struct DLS_WATCHDOG) );
           if (!wtd)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( wtd->acronyme, sizeof(wtd->acronyme), "%s", acronyme );
@@ -304,14 +304,14 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_WATCHDOG = g_slist_prepend ( Partage->Dls_data_WATCHDOG, wtd );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding DLS_WATCHDOG '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_WATCHDOG '%s:%s'", __func__, tech_id, acronyme );
         }
        if (wtd_p) *wtd_p = (gpointer)wtd;                                        /* Sauvegarde pour acceleration si besoin */
       }
     else wtd = (struct DLS_WATCHDOG *)*wtd_p;
 
     wtd->top = Partage->top + consigne;
-    Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_WATCHDOG '%s:%s'=%d",
+    Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_WATCHDOG '%s:%s'=%d",
               __func__, wtd->tech_id, wtd->acronyme, consigne );
     Partage->audit_bit_interne_per_sec++;
   }
@@ -364,7 +364,7 @@ end:
        if (!liste)
         { bool = g_try_malloc0 ( sizeof(struct DLS_BOOL) );
           if (!bool)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( bool->acronyme, sizeof(bool->acronyme), "%s", acronyme );
@@ -372,14 +372,14 @@ end:
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding DLS_BOOL '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_BOOL '%s:%s'", __func__, tech_id, acronyme );
         }
        if (bool_p) *bool_p = (gpointer)bool;                                        /* Sauvegarde pour acceleration si besoin */
       }
     else bool = (struct DLS_BOOL *)*bool_p;
 
     if (bool->etat != valeur)
-     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_BOOL '%s:%s'=%d up %d down %d",
+     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_BOOL '%s:%s'=%d up %d down %d",
                  __func__, bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
        if (valeur == TRUE) Partage->com_dls.Set_Dls_Bool_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_up, bool );
                       else Partage->com_dls.Set_Dls_Bool_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_down, bool );
@@ -483,7 +483,7 @@ end:
        if (!liste)
         { di = g_try_malloc0 ( sizeof(struct DLS_DI) );
           if (!di)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( di->acronyme, sizeof(di->acronyme), "%s", acronyme );
@@ -491,14 +491,14 @@ end:
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_DI = g_slist_prepend ( Partage->Dls_data_DI, di );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding DLS_DI '%s:%s'=%d", __func__, tech_id, acronyme, valeur );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_DI '%s:%s'=%d", __func__, tech_id, acronyme, valeur );
         }
        if (di_p) *di_p = (gpointer)di;                                              /* Sauvegarde pour acceleration si besoin */
       }
     else di = (struct DLS_DI *)*di_p;
 
     if (di->etat != valeur)
-     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_DI '%s:%s'=%d up %d down %d",
+     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_DI '%s:%s'=%d up %d down %d",
                  __func__, di->tech_id, di->acronyme, valeur, di->edge_up, di->edge_down );
        if (valeur == TRUE) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up, di );
                       else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, di );
@@ -622,7 +622,7 @@ end:
        if (!liste)
         { dout = g_try_malloc0 ( sizeof(struct DLS_DO) );
           if (!dout)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( dout->acronyme, sizeof(dout->acronyme), "%s", acronyme );
@@ -630,14 +630,14 @@ end:
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_DO = g_slist_prepend ( Partage->Dls_data_DO, dout );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding DLS_DO '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_DO '%s:%s'", __func__, tech_id, acronyme );
         }
        if (dout_p) *dout_p = (gpointer)dout;                                              /* Sauvegarde pour acceleration si besoin */
       }
     else dout = (struct DLS_DO *)*dout_p;
 
     if (dout->etat != etat)
-     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_DO '%s:%s'=%d ",
+     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_DO '%s:%s'=%d ",
                  __func__, dout->tech_id, dout->acronyme );
        if (etat)
         { pthread_mutex_lock( &Partage->com_msrv.synchro );
@@ -717,7 +717,7 @@ end:
        if (!liste)
         { ai = g_try_malloc0 ( sizeof(struct DLS_AI) );
           if (!ai)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( ai->acronyme, sizeof(ai->acronyme), "%s", acronyme );
@@ -725,7 +725,7 @@ end:
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding AI '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding AI '%s:%s'", __func__, tech_id, acronyme );
         }
        if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -809,7 +809,7 @@ end:
        if (!liste)
         { ao = g_try_malloc0 ( sizeof(struct DLS_AO) );
           if (!ao)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( ao->acronyme, sizeof(ao->acronyme), "%s", acronyme );
@@ -817,7 +817,7 @@ end:
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AO = g_slist_prepend ( Partage->Dls_data_AO, ao );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding AO '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding AO '%s:%s'", __func__, tech_id, acronyme );
         }
        if (ao_p) *ao_p = (gpointer)ao;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -873,7 +873,7 @@ end:
        pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
        Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_AO '%s:%s'=%f/%f",
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_AO '%s:%s'=%f/%f",
                  __func__, ao->tech_id, ao->acronyme, ao->val_avant_ech, ao->val_ech );
      }
     else if ( ao->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
@@ -905,7 +905,7 @@ end:
        if (!liste)
         { cpt_imp = g_try_malloc0 ( sizeof(struct DLS_CI) );
           if (!cpt_imp)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( cpt_imp->acronyme, sizeof(cpt_imp->acronyme), "%s", acronyme );
@@ -913,7 +913,7 @@ end:
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_CI = g_slist_prepend ( Partage->Dls_data_CI, cpt_imp );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding CI '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding CI '%s:%s'", __func__, tech_id, acronyme );
           Charger_conf_CI ( cpt_imp );                                     /* Chargement des valeurs en base pour ce compteur */
         }
        if (cpt_imp_p) *cpt_imp_p = (gpointer)cpt_imp;                   /* Sauvegarde pour acceleration si besoin */
@@ -937,7 +937,7 @@ end:
            { cpt_imp->valeur++;
              cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
              need_arch = TRUE;
-             Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_CI '%s:%s'=%d",
+             Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_CI '%s:%s'=%d",
                        __func__, cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
            }
         }
@@ -1005,7 +1005,7 @@ end:
        if (!liste)
         { cpt_h = g_try_malloc0 ( sizeof(struct DLS_CH) );
           if (!cpt_h)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( cpt_h->acronyme, sizeof(cpt_h->acronyme), "%s", acronyme );
@@ -1013,7 +1013,7 @@ end:
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_CH = g_slist_prepend ( Partage->Dls_data_CH, cpt_h );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding CH '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding CH '%s:%s'", __func__, tech_id, acronyme );
           Charger_conf_CH ( cpt_h );                                       /* Chargement des valeurs en base pour ce compteur */
         }
        if (cpt_h_p) *cpt_h_p = (gpointer)cpt_h;                                     /* Sauvegarde pour acceleration si besoin */
@@ -1038,7 +1038,7 @@ end:
           if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
            { cpt_h->valeur++;
              cpt_h->old_top = new_top;
-             Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_CH '%s:%s'=%d",
+             Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_CH '%s:%s'=%d",
                        __func__, cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
              Partage->audit_bit_interne_per_sec++;
            }
@@ -1157,7 +1157,7 @@ end:
        if (!liste)
         { tempo = g_try_malloc0 ( sizeof(struct DLS_TEMPO) );
           if (!tempo)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( tempo->acronyme, sizeof(tempo->acronyme), "%s", acronyme );
@@ -1166,7 +1166,7 @@ end:
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_TEMPO = g_slist_prepend ( Partage->Dls_data_TEMPO, tempo );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding TEMPO '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding TEMPO '%s:%s'", __func__, tech_id, acronyme );
         }
        if (tempo_p) *tempo_p = (gpointer)tempo;                                     /* Sauvegarde pour acceleration si besoin */
       }
@@ -1179,7 +1179,7 @@ end:
        tempo->delai_off = delai_off;
        tempo->random    = random;
        tempo->init      = TRUE;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : Initializing TEMPO '%s:%s'", __func__, tech_id, acronyme );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Initializing TEMPO '%s:%s'", __func__, tech_id, acronyme );
      }
     ST_local ( tempo, etat );                                                                     /* Recopie dans la variable */
   }
@@ -1242,7 +1242,7 @@ end:
        if (!liste)
         { msg = g_try_malloc0 ( sizeof(struct DLS_MESSAGES) );
           if (!msg)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( msg->acronyme, sizeof(msg->acronyme), "%s", acronyme );
@@ -1250,7 +1250,7 @@ end:
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_MSG = g_slist_prepend ( Partage->Dls_data_MSG, msg );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding MSG '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_MSG '%s:%s'", __func__, tech_id, acronyme );
         }
        if (msg_p) *msg_p = (gpointer)msg;                                           /* Sauvegarde pour acceleration si besoin */
       }
@@ -1264,7 +1264,7 @@ end:
           event = (struct DLS_MESSAGES_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGES_EVENT) );
           if (!event)
            { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
-                      "%s: malloc Event failed. Memory error for Updating MSG'%s:%s'", __func__, msg->tech_id, msg->acronyme );
+                      "%s: malloc Event failed. Memory error for Updating DLS_MSG'%s:%s'", __func__, msg->tech_id, msg->acronyme );
            }
           else
            { event->etat = FALSE;                                                       /* Recopie de l'état dans l'evenement */
@@ -1276,7 +1276,7 @@ end:
           event = (struct DLS_MESSAGES_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGES_EVENT) );
           if (!event)
            { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
-                      "%s: malloc Event failed. Memory error for Updating MSG'%s:%s'", __func__, msg->tech_id, msg->acronyme );
+                      "%s: malloc Event failed. Memory error for Updating DLS_MSG'%s:%s'", __func__, msg->tech_id, msg->acronyme );
            }
           else
            { event->etat = TRUE;                                                        /* Recopie de l'état dans l'evenement */
@@ -1294,7 +1294,7 @@ end:
        if ( msg->last_change + 10 <= Partage->top ) { msg->changes = 0; }            /* Si pas de change depuis plus de 1 sec */
 
        if ( msg->changes > 5 && !(Partage->top % 50) )              /* Si persistence d'anomalie on prévient toutes les 5 sec */
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: last_change trop tot for MSG '%s':'%s' !", __func__,
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: last_change trop tot for DLS_MSG '%s:%s' !", __func__,
                     msg->tech_id, msg->acronyme );
         }
        else
@@ -1312,7 +1312,7 @@ end:
              pthread_mutex_unlock( &Partage->com_msrv.synchro );
            }
 
-          Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_MSG '%s:%s'=%d",
+          Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_MSG '%s:%s'=%d",
                     __func__, msg->tech_id, msg->acronyme, msg->etat );
           msg->changes++;
           msg->last_change = Partage->top;
@@ -1373,7 +1373,7 @@ end:
        if (!liste)
         { visu = g_try_malloc0 ( sizeof(struct DLS_VISUEL) );
           if (!visu)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( visu->acronyme, sizeof(visu->acronyme), "%s", acronyme );
@@ -1381,7 +1381,7 @@ end:
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_VISUEL = g_slist_prepend ( Partage->Dls_data_VISUEL, visu );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : adding VISUEL '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding VISUEL '%s:%s'", __func__, tech_id, acronyme );
         }
        if (visu_p) *visu_p = (gpointer)visu;                                        /* Sauvegarde pour acceleration si besoin */
       }
@@ -1409,7 +1409,7 @@ end:
           Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "%s : Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d",
+                    "%s: Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d",
                     __func__, visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno );
         }
        visu->changes++;                                                                                /* Un change de plus ! */
@@ -1461,7 +1461,7 @@ end:
         { reg = g_try_malloc0 ( sizeof(struct DLS_REGISTRE) );
           if (!reg)
            { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
-                       "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+                       "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( reg->acronyme, sizeof(reg->acronyme), "%s", acronyme );
@@ -1470,7 +1470,7 @@ end:
           Partage->Dls_data_REGISTRE = g_slist_prepend ( Partage->Dls_data_REGISTRE, reg );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
-                    "%s : adding DLS_REGISTRE '%s:%s'", __func__, tech_id, acronyme );
+                    "%s: adding DLS_REGISTRE '%s:%s'", __func__, tech_id, acronyme );
         }
        if (r_p) *r_p = (gpointer)reg;                                               /* Sauvegarde pour acceleration si besoin */
       }
@@ -1480,7 +1480,7 @@ end:
     if (valeur != reg->valeur)
      { reg->valeur = valeur;
        need_arch = TRUE;
-       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s : Changing DLS_REGISTRE '%s:%s'=%f",
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_REGISTRE '%s:%s'=%f",
                  __func__, reg->tech_id, reg->acronyme, reg->valeur );
        Partage->audit_bit_interne_per_sec++;
      }

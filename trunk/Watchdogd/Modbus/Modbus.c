@@ -771,8 +771,6 @@ end:
                       __func__, module->modbus.tech_id, map_tag );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    Dls_data_set_WATCHDOG ( NULL, module->modbus.tech_id, "IO_COMM", &module->bit_comm, 0 );
-
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: '%s': Module '%s' : mapping done",
               __func__, module->modbus.tech_id, module->modbus.description );
   }

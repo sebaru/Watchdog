@@ -187,8 +187,8 @@
     if (dls->on) dls->start_date = time(NULL);
                      else dls->start_date = 0;
     memset ( &dls->vars, 0, sizeof(dls->vars) );                                 /* Mise à zero de tous les bits de remontées */
-    dls->vars.debug = dls->debug;                         /* Recopie du champ de debug depuis la DB vers la zone RUN */
-    Dls_data_set_bool ( &dls->vars, dls->tech_id, "IO_COMM", NULL, TRUE );  /* Par défaut, la io_comm local est TRUE */
+    dls->vars.debug = dls->debug;                                  /* Recopie du champ de debug depuis la DB vers la zone RUN */
+    Dls_data_set_WATCHDOG ( &dls->vars, dls->tech_id, "IO_COMM", NULL, 0 );         /* Par défaut, la io_comm local est FALSE */
     return(TRUE);
   }
 /******************************************************************************************************************************/
