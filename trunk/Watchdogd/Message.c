@@ -172,7 +172,7 @@
      }
 
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { Dls_data_set_MSG ( NULL, db->row[0], db->row[1], NULL, FALSE, atoi(db->row[2]) );
+     { Dls_data_set_MSG_init ( db->row[0], db->row[1], atoi(db->row[2]) );
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: MSG '%s:%s'=%d loaded", __func__,
                  db->row[0], db->row[1], atoi(db->row[2]) );
      }

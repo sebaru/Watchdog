@@ -1226,7 +1226,39 @@ end:
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MSG_reel ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
+ void Dls_data_set_MSG_init ( gchar *tech_id, gchar *acronyme, gboolean etat )
+  { struct DLS_MESSAGES *msg;
+
+    GSList *liste;
+    if ( !(acronyme && tech_id) ) return;
+    liste = Partage->Dls_data_MSG;
+    while (liste)
+     { msg = (struct DLS_MESSAGES *)liste->data;
+       if ( !strcasecmp ( msg->acronyme, acronyme ) && !strcasecmp( msg->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste)
+     { msg = g_try_malloc0 ( sizeof(struct DLS_MESSAGES) );
+       if (!msg)
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+          return;
+        }
+       g_snprintf( msg->acronyme, sizeof(msg->acronyme), "%s", acronyme );
+       g_snprintf( msg->tech_id,  sizeof(msg->tech_id),  "%s", tech_id );
+       pthread_mutex_lock( &Partage->com_dls.synchro_data );
+       Partage->Dls_data_MSG = g_slist_prepend ( Partage->Dls_data_MSG, msg );
+       pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_MSG '%s:%s'", __func__, tech_id, acronyme );
+     }
+    msg->etat = etat;
+  }
+/******************************************************************************************************************************/
+/* Met à jour le message en parametre                                                                                         */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_MSG_reel ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p,
+                              gboolean update, gboolean etat )
   { struct DLS_MESSAGES *msg;
 
     if (!msg_p || !*msg_p)
@@ -1639,7 +1671,7 @@ end:
           plugin->vars.bit_secupers_ok = !(plugin->vars.bit_derangement || plugin->vars.bit_derangement_fixe ||
                                            plugin->vars.bit_danger || plugin->vars.bit_danger_fixe);
 
-/*----------------------------------------------- Ecriture du début fin de fichier -------------------------------------------*/
+/*----------------------------------------------- Mise a jour des messages de comm -------------------------------------------*/
           Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
           Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
 
