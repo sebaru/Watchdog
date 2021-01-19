@@ -53,7 +53,7 @@
     if (syn_id == Synoptique.id)
      { Set_vignette ( "idMasterVignetteSecuPers", "secu_pers", secu_pers_coul, secu_pers_cligno ); }
   }
-
+/******************************************************************************************************************************/
  function Charger_messages ( page )
   { if (page == null || page == "") { param = ""; } else { param = "page="+page; }
     if (Messages_loaded==true)
@@ -195,11 +195,7 @@
 
     var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/live-msgs", "live-msgs");
     WTDWebSocket.onopen = function (event)
-     { var json_request = JSON.stringify( { wtd_session: localStorage.getItem("wtd_session"),
-                                            ws_msg_type: "connect"
-                                          }
-                                        );
-       console.log("WSOpen" + json_request );
+     { var json_request = JSON.stringify( { wtd_session: localStorage.getItem("wtd_session") } );
        this.send ( json_request );
      }
     WTDWebSocket.onerror = function (event)
@@ -215,9 +211,12 @@
      { var Response = JSON.parse(event.data);                                               /* Pointe sur <synoptique a=1 ..> */
        console.debug (Response);
        if (!Synoptique) return;
-       if (Response.zmq_tag == "SET_SYN_VARS")
-        { $.each ( Response.syn_vars, function (i, item) { Set_syn_vars ( item.id, item ); } );
+            if (Response.zmq_tag == "DLS_HISTO")
+        { if (Response.syn_id == Synoptique.id)                                     /* S'agit-il d'un message de notre page ? */
+           { Charger_messages ( Synoptique.syn_page ); }
         }
+       else if (Response.zmq_tag == "SET_SYN_VARS")
+        { $.each ( Response.syn_vars, function (i, item) { Set_syn_vars ( item.id, item ); } ); }
        else console.log("zmq_tag: " + Response.zmq_tag + " not known");
      }
 

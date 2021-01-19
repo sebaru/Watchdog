@@ -85,7 +85,7 @@
 /******************************************************************************************************************************/
  static void Gerer_arrive_MSG_event_dls_off ( struct DLS_MESSAGES *msg )
   { struct CMD_TYPE_MESSAGE *message;
-    gchar chaine[80], *date_fin;
+    gchar chaine[256], *date_fin;
     struct CMD_TYPE_HISTO histo;
     struct timeval tv;
     struct tm *temps;
@@ -104,8 +104,13 @@
     g_snprintf( histo.date_fin, sizeof(histo.date_fin), "%s.%02d", date_fin, (gint)tv.tv_usec/10000 );
     g_free( date_fin );
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
-    Json_add_string ( builder, "tech_id", message->tech_id );
-    Json_add_string ( builder, "acronyme", message->acronyme );
+    g_snprintf( chaine, sizeof(chaine),
+               "SELECT msgs.*, syn.id as syn_id, syn.page as syn_page "
+               "FROM msgs "
+               "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
+               "INNER JOIN syns as syn ON syn.id = dls.syn_id "
+               "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme );
+    SQL_Select_to_JSON ( builder, NULL, chaine );
     Json_add_bool   ( builder, "alive", FALSE );
     Json_add_string ( builder, "date_fin", histo.date_fin );
 
