@@ -296,7 +296,7 @@
      }
     Json_end_array( builder );
 /*----------------------------------------------- Registre -------------------------------------------------------------------*/
-    Json_add_array ( builder, "R" );
+    Json_add_array ( builder, "REGISTRE" );
     liste = Partage->Dls_data_REGISTRE;
     while(liste)
      { struct DLS_REGISTRE *bit=liste->data;
