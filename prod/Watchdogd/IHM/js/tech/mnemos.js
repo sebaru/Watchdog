@@ -350,8 +350,9 @@
              },
              { "data": null, "title":"SMS", "className": "align-middle ",
                "render": function (item)
-                 { array = [ "Non", "Oui", "GSM Only", "OVH Only" ];
-                   return( Select ( "idMSGSms"+item.acronyme, "Mnemos_MSG_set('"+item.acronyme, array, item.sms_notification ) );
+                 { array = [ { valeur: 0, texte: "Non", }, { valeur: 1, texte: "Oui", },
+                             { valeur: 2, texte: "GSM Only", }, { valeur: 3, texte: "OVH Only" } ];
+                   return( Select ( "idMSGSms"+item.acronyme, "Mnemos_MSG_set('"+item.acronyme+"')", array, item.sms_notification ) );
                  }
              },
            ],

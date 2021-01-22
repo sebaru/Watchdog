@@ -188,6 +188,9 @@
                      else dls->start_date = 0;
     memset ( &dls->vars, 0, sizeof(dls->vars) );                                 /* Mise à zero de tous les bits de remontées */
     dls->vars.debug = dls->debug;                                  /* Recopie du champ de debug depuis la DB vers la zone RUN */
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE,
+             "%s: Candidat '%s' loaded (%s)", __func__, dls->tech_id, dls->shortname );
+
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -256,8 +259,6 @@
            }
           Charger_un_plugin ( plugin );
           plugin->vars.resetted = TRUE;                                             /* au chargement, le bit de start vaut 1 ! */
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin '%s' (%s) loaded", __func__,
-                    plugin->tech_id, plugin->shortname );
           return;
         }
        liste=liste->next;
@@ -416,7 +417,7 @@
      { gchar chaine[128];
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug started ('%s')", __func__,
                  plugin->tech_id, plugin->nom );
-       plugin->vars.debug = TRUE;
+       plugin->debug = plugin->vars.debug = TRUE;
        g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET debug='1' WHERE tech_id = '%s'", plugin->tech_id );
        SQL_Write ( chaine );
      }
@@ -432,7 +433,7 @@
      { gchar chaine[128];
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug stopped ('%s')", __func__,
                  plugin->tech_id, plugin->nom );
-       plugin->vars.debug = FALSE;
+       plugin->debug = plugin->vars.debug = FALSE;
        g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET debug='0' WHERE tech_id = '%s'", plugin->tech_id );
        SQL_Write ( chaine );
      }

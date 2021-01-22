@@ -5,7 +5,7 @@
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Users_Show_add_user()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un utilisateur</button>
-        <button type="button" onclick="Redirect('/home/user')" class="btn btn-primary"><i class="fas fa-user"></i> Mon profil</button>
+        <button type="button" onclick="Redirect('/tech/user')" class="btn btn-primary"><i class="fas fa-user"></i> Mon profil</button>
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>
@@ -70,4 +70,4 @@
 </div>
 
 
-<script src="/js/home/users.js" type="text/javascript"></script>
+<script src="/js/tech/users.js" type="text/javascript"></script>

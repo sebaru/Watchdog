@@ -638,7 +638,7 @@ end:
 
     if (dout->etat != etat)
      { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_DO '%s:%s'=%d ",
-                 __func__, dout->tech_id, dout->acronyme );
+                 __func__, dout->tech_id, dout->acronyme, etat );
        if (etat)
         { pthread_mutex_lock( &Partage->com_msrv.synchro );
           Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, dout );

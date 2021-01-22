@@ -51,7 +51,6 @@
  function Load_common ()
   { if (document.getElementById("idUsername") !== null)
      { document.getElementById("idUsername").innerHTML = localStorage.getItem("username");
-       document.getElementById("idHrefUsername").href = "/home/user/"+localStorage.getItem("username");
      }
    /* else
      { document.getElementById("idUsername").innerHTML = "Se connecter";
@@ -75,7 +74,7 @@
 
 /********************************************* Redirige la page ***************************************************************/
  function Redirect ( url )
-  { window.location = url;
+  { /*$('body').fadeOut("high", function () { */ window.location = url; /* } );*/
   }
 
 /********************************************* Barre de boutons ***************************************************************/

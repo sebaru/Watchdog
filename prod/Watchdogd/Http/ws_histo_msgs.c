@@ -187,31 +187,14 @@
 /* Entrée: La base de données de travail                                                                                      */
 /* Sortie: False si probleme                                                                                                  */
 /******************************************************************************************************************************/
- void Http_msgs_send_histo_to_all ( JsonNode *histo )
+ void Http_ws_send_pulse_to_all ( void )
   { gsize taille_buf;
     JsonBuilder *builder = Json_create ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
        return;
      }
-    Json_add_string( builder, "zmq_type", "update_histo" );
-    Json_add_node ( builder, "histo", histo );
-    gchar *buf = Json_get_buf ( builder, &taille_buf );
-    Http_msgs_send_to_all ( buf );
-  }
-/******************************************************************************************************************************/
-/* Recuperer_histo_msgsDB_alive: Recupération de l'ensemble des messages encore Alive dans le BDD                             */
-/* Entrée: La base de données de travail                                                                                      */
-/* Sortie: False si probleme                                                                                                  */
-/******************************************************************************************************************************/
- void Http_msgs_send_pulse_to_all ( void )
-  { gsize taille_buf;
-    JsonBuilder *builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
-       return;
-     }
-    Json_add_string( builder, "zmq_type", "pulse" );
+    Json_add_string( builder, "zmq_tag", "pulse" );
     gchar *buf = Json_get_buf ( builder, &taille_buf );
     Http_msgs_send_to_all ( buf );
   }

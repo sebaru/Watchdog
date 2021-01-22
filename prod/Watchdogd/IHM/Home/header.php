@@ -22,6 +22,10 @@
                overflow-y: scroll;
              }
 
+        .nav-link:hover { color: white !important;
+                          background-color: #48BBC0;
+                        }
+
         .wtd-cligno { animation-duration: 1.0s;
                       animation-name: wtdClignoFrames;
                       animation-iteration-count: infinite;
@@ -57,7 +61,7 @@
             height: 24px;
           }
 
-        @media (max-width: 600px)
+        @media (max-width: 768px)
          { .wtd-synoptique
             { max-height: 64px;
               max-width: 64px;
@@ -67,8 +71,8 @@
               height: 16px;
             }
            .wtd-menu
-             { width: 48px;
-               height: 48px;
+             { width: 32px;
+               height: 32px;
              }
          }
 
@@ -80,7 +84,6 @@
         .navbar { background-color: rgba(30,28,56,0.8);
                 }
 
-        .nav-link {
         .nav-link {
                   }
 
@@ -138,21 +141,23 @@
   <a class="navbar-brand" href="#" onclick="Change_page('')">
     <img src="/img/syn_home.png" alt="Accueil" class="wtd-menu">
   </a>
+
+      <a class="nav-item"><img id="idMenuImgAccueil" src="" alt="Accueil" class="wtd-menu mr-1"></a>
+      <a class="nav-item"><img id="idMasterVignetteActivite" class="wtd-menu mr-1" src=""></a>
+      <a class="nav-item"><img id="idMasterVignetteSecuBien" class="wtd-menu mr-1" src=""></a>
+      <a class="nav-item"><img id="idMasterVignetteSecuPers" class="wtd-menu mr-1" src=""></a>
+    <ul class="navbar-nav">
+      <a class="nav-link rounded d-none d-sm-inline" href="#"> <span id="idPageTitle">Loading...</span></a>
+    </ul>
+
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
 
   <div class="collapse navbar-collapse" id="navbar-toggled">
-    <ul class="navbar-nav mr-auto align-items-center">
-      <img id="idMenuImgAccueil" src="" alt="Accueil" class="wtd-menu mr-1">
-      <img id="idMasterVignetteActivite" class="wtd-menu mr-1" src="">
-      <img id="idMasterVignetteSecuBien" class="wtd-menu mr-1" src="">
-      <img id="idMasterVignetteSecuPers" class="wtd-menu mr-1" src="">
-      <a class="nav-link rounded" href="#"> <span id="idPageTitle">Loading...</span></a>
-    </ul>
-    <ul class="navbar-nav">
+    <ul class="navbar-nav ml-auto">
       <li class="nav-item dropdown">
-        <a class="nav-link rounded dropdown-toggle ml-2" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link rounded dropdown-toggle" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-user text-white"></i> <span id="idUsername">-</span>
         </a>
 
@@ -169,8 +174,8 @@
         </div>
       </li>
     </ul>
-
   </div>
+
 </nav>
 </header>
 

@@ -148,6 +148,8 @@
        soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
        return;
      }
+    else if (!session)
+     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/login.php", WTD_PKGDATADIR ); }
     else if (!strcasecmp( URI[1], "upload"))
      { g_snprintf ( fichier, sizeof(fichier), "Upload/%s", URI[2] ); }
     else if (!strcasecmp( URI[1], "audio"))
@@ -155,7 +157,7 @@
     else if (!strcasecmp(URI[1], "tech"))
      { if (!Http_check_session( msg, session, 6 ))
         { g_strfreev(URI);
-          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
+          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/" );
           return;
         }
        g_snprintf ( header, sizeof(header), "%s/IHM/Tech/header.php", WTD_PKGDATADIR );
@@ -165,18 +167,11 @@
 
      }
     else if (!strcasecmp(URI[1], "home" ))
-     { if ( !Http_check_session( msg, session, 0 ))
-        { g_strfreev(URI);
-          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
-          return;
-        }
-       g_snprintf ( header, sizeof(header), "%s/IHM/Home/header.php", WTD_PKGDATADIR );
+     { g_snprintf ( header, sizeof(header), "%s/IHM/Home/header.php", WTD_PKGDATADIR );
        g_snprintf ( footer, sizeof(footer), "%s/IHM/Home/footer.php", WTD_PKGDATADIR );
        has_template = TRUE;
        g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Home/%s.php", WTD_PKGDATADIR, URI[2] );
      }
-    else if (!session)
-     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/login.php", WTD_PKGDATADIR ); }
     else
      { g_snprintf ( header, sizeof(header), "%s/IHM/Home/header.php", WTD_PKGDATADIR );
        g_snprintf ( footer, sizeof(footer), "%s/IHM/Home/footer.php", WTD_PKGDATADIR );
