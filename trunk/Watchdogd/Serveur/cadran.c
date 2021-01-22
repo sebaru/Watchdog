@@ -63,7 +63,7 @@
           return( cadran->valeur != valeur );
         }
        case MNEMO_REGISTRE:
-        { gint valeur;
+        { gfloat valeur;
           valeur = Dls_data_get_R ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
           return( cadran->valeur != valeur );
         }
