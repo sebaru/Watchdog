@@ -32,6 +32,33 @@
  #include "watchdogd.h"
  #include "Http.h"
  extern struct HTTP_CONFIG Cfg_http;
+#ifdef bouh
+/******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_Acquitter_synoptique_reel ( gpointer user_data, struct DLS_SYN *dls_syn )
+  { gint syn_id = GPOINTER_TO_INT(user_data);
+    if (dls_syn->syn_vars.syn_id == syn_id)
+     { GSList *liste = dls_syn->Dls_plugins;
+       while (liste)
+        { struct DLS_PLUGIN *plugin = liste->data;
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Synoptique %d -> plugin '%s' (%s) acquitté", __func__,
+                    plugin->syn_id, plugin->tech_id, plugin->shortname );
+          plugin->vars.bit_acquit = TRUE;
+          liste = g_slist_next( liste );
+        }
+     }
+  }
+/******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Http_Acquitter_synoptique ( gint id )
+  { Dls_foreach_syns ( GINT_TO_POINTER(id), Http_Acquitter_synoptique_reel ); }
+#endif
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
 /* Entrées: la connexion Websocket                                                                                            */

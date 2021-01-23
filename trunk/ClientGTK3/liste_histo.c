@@ -336,14 +336,14 @@ again:
   { gsize taille;
     struct CLIENT *client = user_data;
     printf("%s\n", __func__ );
-    /*printf("Recu MSGS: %s %p\n", g_bytes_get_data ( message_brut, &taille ), client );*/
+    printf("Recu MSGS: %s %p\n", g_bytes_get_data ( message_brut, &taille ), client );
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
 
-    gchar *zmq_type = Json_get_string( response, "zmq_type" );
-    if (zmq_type)
-     {      if(!strcmp(zmq_type,"update_histo")) { Updater_histo( client, Json_get_object_as_node ( response, "histo" ) ); }
-       else if(!strcmp(zmq_type,"pulse"))        { Set_progress_pulse( client ); }
+    gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
+    if (zmq_tag)
+     {      if(!strcmp(zmq_tag,"DLS_HISTO")) { Updater_histo( client, response ); }
+       else if(!strcmp(zmq_tag,"pulse"))     { Set_progress_pulse( client ); }
      }
     json_node_unref(response);
   }

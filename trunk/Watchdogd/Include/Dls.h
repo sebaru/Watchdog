@@ -271,11 +271,12 @@
  extern void Debug_plugin ( gchar *tech_id, gboolean actif );
  extern void Activer_plugin ( gchar *tech_id, gboolean actif );
  extern void Reseter_un_plugin ( gchar *tech_id );
- extern void Dls_foreach_plugins ( void *user_data, void (*do_plugin) (void *user_data, struct DLS_PLUGIN *) );
- extern void Dls_foreach_syns ( void *user_data, void (*do_syn)(void *user_data, struct DLS_SYN *) );
+ extern void Dls_foreach_plugins ( gpointer user_data, void (*do_plugin) (gpointer user_data, struct DLS_PLUGIN *) );
+ extern void Dls_foreach_syns ( gpointer user_data, void (*do_syn)(gpointer user_data, struct DLS_SYN *) );
  extern void Dls_recalculer_arbre_comm ( void );
  extern void Dls_arbre_dls_syn_erase ( void );
  extern void Dls_recalculer_arbre_dls_syn ( void );
+ extern void Dls_acquitter_plugin ( gchar *tech_id );
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
  extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech, gboolean in_range );
