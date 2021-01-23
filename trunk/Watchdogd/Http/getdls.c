@@ -38,7 +38,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Http_dls_do_plugin ( void *user_data, struct PLUGIN_DLS *dls )
+ static void Http_dls_do_plugin ( void *user_data, struct DLS_PLUGIN *dls )
   { JsonBuilder *builder = user_data;
     struct tm *temps;
     gchar date[80];
@@ -113,7 +113,7 @@
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping dlslist ----------------------------------------------------*/
     Json_add_array ( builder, "plugins" );
-    Dls_foreach ( builder, Http_dls_do_plugin, NULL );
+    Dls_foreach_plugins ( builder, Http_dls_do_plugin );
     Json_end_array ( builder );
 
     buf = Json_get_buf ( builder, &taille_buf );
@@ -668,7 +668,7 @@
 /* Entrées: la session utilisateur et le plugin                                                                               */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Http_Dls_compil (void *user_data, struct PLUGIN_DLS *plugin)
+ static void Http_Dls_compil (void *user_data, struct DLS_PLUGIN *plugin)
   { struct HTTP_CLIENT_SESSION *session = user_data;
     Compiler_source_dls( FALSE, plugin->tech_id, NULL, 0 );                 /* Reset interdit sinon conflit de mutex */
     Audit_log ( session, "DLS '%s' compilé", plugin->tech_id );
@@ -699,7 +699,7 @@
      }
 
     if ( Json_has_member ( request, "compil_all" ) && Json_get_bool ( request, "compil_all" ) == TRUE )
-     { Dls_foreach ( session, Http_Dls_compil, NULL );
+     { Dls_foreach_plugins ( session, Http_Dls_compil );
        json_node_unref(request);
        soup_message_set_status(msg, SOUP_STATUS_OK);
        return;
@@ -776,7 +776,7 @@
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Http_dls_acquitter_plugin ( void *user_data, struct PLUGIN_DLS *plugin )
+ static void Http_dls_acquitter_plugin ( void *user_data, struct DLS_PLUGIN *plugin )
   { gchar *tech_id = user_data;
     if (!strcasecmp(tech_id, plugin->tech_id))
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Plugin '%s' acquitté", __func__,
@@ -814,7 +814,7 @@
        return;
      }
 
-    Dls_foreach ( Json_get_string ( request, "tech_id" ), Http_dls_acquitter_plugin, NULL );
+    Dls_foreach_plugins ( Json_get_string ( request, "tech_id" ), Http_dls_acquitter_plugin );
     Audit_log ( session, "DLS '%s' acquitté", Json_get_string ( request, "tech_id" ) );
     json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);

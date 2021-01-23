@@ -408,7 +408,7 @@
      }
 
     Json_add_array ( builder, "syn_vars" );
-    Dls_foreach ( builder, NULL, Dls_syn_vars_to_json );
+    Dls_foreach_syns ( builder, Dls_syn_vars_to_json );
     Json_end_array ( builder );
 
     buf = Json_get_buf (builder, &taille_buf);
