@@ -4,7 +4,6 @@
   { var json_request = JSON.stringify( { tech_id : tech_id } );
     Send_to_API ( 'POST', "/api/dls/start", json_request, function ()
      { $('#idTableRunDLS').DataTable().ajax.reload();
-       $('#idToastStatus').toast('show');
      });
   }
 
@@ -12,7 +11,6 @@
   { var json_request = JSON.stringify( { tech_id : tech_id } );
     Send_to_API ( 'POST', "/api/dls/stop", json_request, function ()
      { $('#idTableRunDLS').DataTable().ajax.reload();
-       $('#idToastStatus').toast('show');
      });
   }
 
@@ -20,7 +18,6 @@
   { var json_request = JSON.stringify( { tech_id : tech_id } );
     Send_to_API ( 'POST', "/api/dls/acquitter", json_request, function ()
      { $('#idTableRunDLS').DataTable().ajax.reload();
-       $('#idToastStatus').toast('show');
      });
   }
 /********************************************* Appelé au chargement de la page ************************************************/

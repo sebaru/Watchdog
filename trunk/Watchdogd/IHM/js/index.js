@@ -4,9 +4,17 @@
  var Messages_loaded;                                                                      /* true si le datatable a été créé */
 
 /********************************************* Affichage des vignettes ********************************************************/
- function Changer_img_src ( id, target )
-  { $('#'+id).fadeOut("slow", function()
-     { $('#'+id).attr("src", target).fadeIn("slow"); } );
+ function Msg_acquitter ( id )
+  { table = $('#idTableMessages').DataTable();
+    selection = table.ajax.json().enregs.filter( function(item) { return (item.id==id) } )[0];
+    var json_request = JSON.stringify(
+       { tech_id  : selection.tech_id,
+         acronyme : selection.acronyme,
+       }
+     );
+    Send_to_API ( 'POST', "/api/histo/ack", json_request, function ()
+     { $('#idTableMessages').DataTable().ajax.reload( null, false );
+     }, null);
   }
 /********************************************* Affichage des vignettes ********************************************************/
  function Set_vignette ( id, type, couleur, cligno )
@@ -211,9 +219,9 @@
      { var Response = JSON.parse(event.data);                                               /* Pointe sur <synoptique a=1 ..> */
        console.debug (Response);
        if (!Synoptique) return;
-            if (Response.zmq_tag == "DLS_HISTO")
+            if (Response.zmq_tag == "DLS_HISTO" && Messages_loaded==true)
         { if (Response.syn_id == Synoptique.id)                                     /* S'agit-il d'un message de notre page ? */
-           { Charger_messages ( Synoptique.syn_page ); }
+           { $('#idTableMessages').DataTable().ajax.reload( null, false ); }
         }
        else if (Response.zmq_tag == "SET_SYN_VARS")
         { $.each ( Response.syn_vars, function (i, item) { Set_syn_vars ( item.id, item ); } ); }
