@@ -269,6 +269,13 @@
        if (!strcmp(wtd->tech_id, plugin->tech_id))
         { Dls_data_set_bool ( &plugin->vars, wtd->tech_id, wtd->acronyme, (gpointer *)&wtd, FALSE ); }
      }
+    liste_bit = Partage->Dls_data_VISUEL;                                              /* Decharge tous les visuels du module */
+    while(liste_bit)
+     { struct DLS_VISUEL *visu = liste_bit->data;
+       liste_bit = g_slist_next(liste_bit);
+       if (!strcmp(visu->tech_id, plugin->tech_id))
+        { Dls_data_set_VISUEL ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&visu, 0, "black", FALSE ); }
+     }
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }
 /******************************************************************************************************************************/
@@ -276,7 +283,7 @@
 /* Entrée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Reseter_plugin_dls_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
+ static void Dls_Reseter_plugin_dls_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { gchar *tech_id = user_data;
     if ( ! strcasecmp(plugin->tech_id, tech_id ) )
      { Reseter_all_bit_interne ( plugin );
@@ -301,7 +308,7 @@
 /******************************************************************************************************************************/
  void Reseter_un_plugin ( gchar *tech_id )
   { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: Reset plugin '%s' en cours", __func__, tech_id );
-    Dls_foreach_plugins ( tech_id, Reseter_plugin_dls_reel );
+    Dls_foreach_plugins ( tech_id, Dls_Reseter_plugin_dls_reel );
   }
 /******************************************************************************************************************************/
 /* Decharger_plugins: Decharge tous les plugins DLS                                                                           */
@@ -326,11 +333,11 @@
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
-/* Dls_add_plugin_to_dls_syn: Ajoute les dependances du syn en parametre                                                      */
+/* Dls_Add_plugin_to_dls_syn: Ajoute les dependances du syn en parametre                                                      */
 /* Entrée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Dls_add_plugin_to_dls_syn ( gpointer user_data, struct DLS_PLUGIN *plugin )
+ static void Dls_Add_plugin_to_dls_syn ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { struct DLS_SYN *dls_syn = user_data;
     if (plugin->syn_id == dls_syn->syn_vars.syn_id)
      { dls_syn->Dls_plugins = g_slist_append( dls_syn->Dls_plugins, plugin ); }
@@ -350,7 +357,7 @@
      }
     dls_syn->syn_vars.syn_id = id;
 
-    Dls_foreach_plugins ( dls_syn, Dls_add_plugin_to_dls_syn );
+    Dls_foreach_plugins ( dls_syn, Dls_Add_plugin_to_dls_syn );
 
     if ( ! Recuperer_synoptiqueDB_enfant( &db, id ) ) return(dls_syn);                             /* Si pas de connexion DB */
     struct CMD_TYPE_SYNOPTIQUE *syn;
@@ -421,7 +428,7 @@
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Dls_debug_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
+ static void Dls_Debug_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
      { gchar chaine[128];
@@ -437,7 +444,7 @@
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Dls_undebug_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
+ static void Dls_Undebug_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
      { gchar chaine[128];
@@ -454,8 +461,8 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Debug_plugin ( gchar *tech_id, gboolean actif )
-  { if (actif) Dls_foreach_plugins ( tech_id, Dls_debug_plugin_reel );
-          else Dls_foreach_plugins ( tech_id, Dls_undebug_plugin_reel );
+  { if (actif) Dls_foreach_plugins ( tech_id, Dls_Debug_plugin_reel );
+          else Dls_foreach_plugins ( tech_id, Dls_Undebug_plugin_reel );
   }
 /******************************************************************************************************************************/
 /* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
