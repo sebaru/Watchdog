@@ -150,6 +150,11 @@
      }
     else if (!session)
      { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/login.php", WTD_PKGDATADIR ); }
+    else if (session && !strcasecmp( URI[1], "login"))
+     { g_strfreev(URI);
+       soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/" );
+       return;
+     }
     else if (!strcasecmp( URI[1], "upload"))
      { g_snprintf ( fichier, sizeof(fichier), "Upload/%s", URI[2] ); }
     else if (!strcasecmp( URI[1], "audio"))

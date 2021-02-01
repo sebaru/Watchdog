@@ -2,40 +2,11 @@
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Load_common_tech ()
-  { $('#idTargetInstance').empty();
-    if (localStorage.getItem("instance_is_master")=="true")
-     { Send_to_API ( "GET", "/api/instance/list", null, function (Response)
-        { $('#idTargetInstance').append("<option value='MASTER'>MASTER</option>");
-
-          $.each ( Response.instances, function ( i, instance )
-           { $('#idTargetInstance').append("<option value='"+instance.instance_id+"'"+
-                                             (instance.instance_id == Get_target_instance() ? "selected" : "")+">"+
-                                             instance.instance_id+"</option>"); } );
-          $('#idTitleInstance').text(Get_target_instance());
-        }, null);
-     }
+  { if (localStorage.getItem("instance_is_master")=="true")
+     { $('#idAlertNotMaster').hide(); }
     else
-     { $('#idAlertNotMaster').show();
-       if (localStorage.getItem("instance") === null) { localStorage.setItem("instance", "LOCAL" ); }
-       localStorage.setItem ( "TargetInstance", localStorage.getItem("instance") );
-       $('#idTargetInstance').append("<option value='"+localStorage.getItem("instance")+"'>"+localStorage.getItem("instance")+"</option>");
-     }
+     { $('#idAlertNotMaster').show(); }
   }
-/********************************************* Redirige la page ***************************************************************/
- function Get_target_instance ( )
-  { instance = localStorage.getItem ( "TargetInstance" );
-    if (instance == null) { instance=localStorage.getItem("instance"); }
-    return(instance);
-  }
-
-/********************************************* Redirige la page ***************************************************************/
- function Set_target_instance ( instance )
-  { localStorage.setItem ( "TargetInstance", instance );
-    window.location.reload();
-  }
-/**************************** Appeller par le navigateur lors du changement d'instance dans le select *************************/
- function Change_target_instance ( instance )
-  { Set_target_instance ( $('#idTargetInstance').val() ); }
 
 /********************************************* Reload Process *****************************************************************/
  function Process_reload ( instance, thread, hard )
