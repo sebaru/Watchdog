@@ -421,14 +421,14 @@
      }
 
     if (page_src)
-     { g_snprintf(chaine, sizeof(chaine), "SELECT tech_id, shortname, name FROM dls INNER JOIN syns ON dls.syn_id = syns.id "
-                                          "WHERE syns.page='%s' AND syns.access_level<=%d", page, session->access_level);
+     { g_snprintf(chaine, sizeof(chaine), "SELECT sm.* FROM syns_motifs AS sm INNER JOIN syns ON syns.id = sm.syn_id "
+                                          "WHERE sm.auto_create=1 AND syns.page='%s' AND syns.access_level<=%d", page, session->access_level);
      }
     else
-     { g_snprintf(chaine, sizeof(chaine), "SELECT tech_id, shortname, name FROM dls INNER JOIN syns ON dls.syn_id = syns.id "
-                                          "WHERE syns.id='1' AND syns.access_level<=%d", session->access_level);
+     { g_snprintf(chaine, sizeof(chaine), "SELECT sm.* FROM syns_motifs AS sm INNER JOIN syns ON syns.id = sm.syn_id "
+                                          "WHERE sm.auto_create=1 AND syns.id='1' AND syns.access_level<=%d", session->access_level);
      }
-    if (SQL_Select_to_JSON ( builder, "child_dls", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, "motifs", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;

@@ -40,7 +40,7 @@
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
- gboolean Synoptique_auto_create_VISUEL ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *forme_src )
+ gboolean Synoptique_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *libelle_src, gchar *forme_src )
   { gchar *acro, *libelle, *forme;
     gchar requete[1024];
     gboolean retour;
@@ -82,16 +82,16 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT IGNORE INTO %s SET "
-                "syn_id=(SELECT syns.id FROM dls INNER JOIN syns ON dls.syn_id = syns.id WHERE dls.tech_id='%s'), "
-                "tech_id='%s', acronyme='%s', forme='%s', icone='-1', libelle='%s', access_level=0, "
-                "posx='150', posy='150', larg='-1', haut='-1', angle='0', auto_create=1 ",
-                NOM_TABLE_MOTIF, tech_id, tech_id, acro, forme, libelle );
+                "auto_create=1, syn_id=%d, tech_id='%s', acronyme='%s', forme='%s', icone='-1', libelle='%s', access_level=0, "
+                "posx='150', posy='150', larg='-1', haut='-1', angle='0', auto_create=1 "
+                "ON DUPLICATE KEY UPDATE forme=VALUES(forme), libelle=VALUES(libelle)",
+                NOM_TABLE_MOTIF, plugin->syn_id, plugin->tech_id, acro, forme, libelle );
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET forme='%s', libelle='%s' "
                 "WHERE tech_id='%s' AND acronyme='%s';",
-                NOM_TABLE_MOTIF, forme, libelle, tech_id, acro );
+                NOM_TABLE_MOTIF, forme, libelle, plugin->tech_id, acro );
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
 
     g_free(forme);
@@ -210,7 +210,7 @@
                 "dialog,gestion,def_color,rafraich,layer,"
                 "sm.clic_tech_id, sm.clic_acronyme"
                 " FROM syns_motifs AS sm"
-                " WHERE syn_id='%d' ORDER BY layer", id_syn );
+                " WHERE syn_id='%d' AND auto_create IS NULL ORDER BY layer", id_syn );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
@@ -357,8 +357,8 @@
  void Dls_VISUEL_to_json ( JsonBuilder *builder, struct DLS_VISUEL *bit )
   { Json_add_string ( builder, "tech_id",   bit->tech_id );
     Json_add_string ( builder, "acronyme",  bit->acronyme );
-    Json_add_int    ( builder, "mode",   bit->mode  );
-    Json_add_string ( builder, "color",  bit->color );
-    Json_add_bool   ( builder, "cligno", bit->cligno );
+    Json_add_int    ( builder, "mode",      bit->mode  );
+    Json_add_string ( builder, "color",     bit->color );
+    Json_add_bool   ( builder, "cligno",    bit->cligno );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
