@@ -1,15 +1,19 @@
 <div class="container">
 
  <div class="row m-2">
-   <div class="col-auto"><h3><i class="fas fa-crown text-danger"></i> Statut du Processus MSRV sur</h3> </div>
-  	<div class="col-auto">
-     <select id='idTargetInstance' onchange="MSRV_Load_config()" class="custom-select border-info"></select>
-   </div>
-
+   <div class="col-auto"><h3><i class="fas fa-crown text-danger"></i> Statut des Processus MSRV</h3> </div>
  </div>
 
 <hr>
        <div class="alert alert-danger">Attention, la modification des données ci dessous peuvent déconnecter l'instance !</div>
+
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Choix de l'instance</label>
+           <select id="idTargetInstance" class="custom-select border-info" onchanged="MSRV_Load_config()"></select>
+     					</div>
+  					</div>
+
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-danger text-right">Instance is Master</label>
