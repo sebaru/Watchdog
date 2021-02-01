@@ -60,8 +60,7 @@
   }
 /************************ Appelé quand l'utilisateur change la target instance dans le select *********************************/
  function Process_change_target_instance()
-  { console.debug( $('#idTableProcess').DataTable().ajax );
-    $('#idTableProcess').DataTable().ajax.url("/api/process/list?instance="+$('#idTargetInstance').val());
+  { $('#idTableProcess').DataTable().ajax.url("/api/process/list?instance="+$('#idTargetInstance').val());
     $('#idTableProcess').DataTable().ajax.reload();
   }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
