@@ -85,11 +85,11 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": null, "title":"Thread", "className": "text-center",
+          [ { "data": null, "title":"Thread", "className": "align-middle text-center",
               "render": function (item)
                 { return( Lien ( "/tech/"+item.thread, "Voir la conf du thread "+item.thread, item.thread ) ); }
             },
-            { "data": null, "title":"Started",
+            { "data": null, "title":"Started", "className": "align-middle text-center",
               "render": function (item)
                 { if (item.started==true)
                    { return( Bouton ( "success", "Désactiver le process",
@@ -101,7 +101,7 @@
                    }
                 },
             },
-            { "data": null, "title":"Debug", "className": "hidden-xs",
+            { "data": null, "title":"Debug", "className": "align-middle text-center",
               "render": function (item)
                 { if (item.debug==true)
                    { return( Bouton ( "warning", "Désactiver le debug",
@@ -113,8 +113,8 @@
                    }
                 }
             },
-            { "data": "version", "title":"Version", "className": "text-center hidden-xs" },
-            { "data": null, "title":"Start Time", "className": "text-center hidden-xs",
+            { "data": "version", "title":"Version", "className": "align-middle text-center", },
+            { "data": null, "title":"Start Time", "className": "align-middle text-center",
               "render": function (item)
                 { if(item.start_time == 0) return("--");
                   var myDate = new Date( item.start_time *1000 );
@@ -122,15 +122,15 @@
                 },
 
             },
-            { "data": "objet", "title":"Description", "className": "hidden-xs" },
-            { "data": null, "title":"Documentation", "className": "hidden-xs",
+            { "data": "objet", "title":"Description", "className": "align-middle" },
+            { "data": null, "title":"Documentation", "className": "align-middle",
               "render": function (item)
                 { return("<a href='https://wiki.abls-habitat.fr/index.php?title=WatchdogServer_"+item.thread.toUpperCase()+"_Thread'>"+
                          "<span class='label label-info'>Voir le wiki "+item.thread.toUpperCase()+"</span></a>" );
                 },
 
             },
-            { "data": null, "title":"Actions", "orderable": false, "className":"text-right",
+            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-right",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-info", "Recharger le thread", "Process_clic_soft_reload", item.thread, "redo", "Soft Reload" );
@@ -141,7 +141,7 @@
             }
           ],
          //order: [ [0, "desc"] ],
-         /*responsive: true,*/
+         responsive: true,
        }
      );
   }

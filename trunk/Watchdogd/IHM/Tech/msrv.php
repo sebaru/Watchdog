@@ -12,7 +12,7 @@
        <div class="alert alert-danger">Attention, la modification des données ci dessous peuvent déconnecter l'instance !</div>
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-danger text-right">Instance is Master</label>
+						     <label class="col-5 col-sm-4 col-form-label text-danger text-right">Instance is Master</label>
 						       <select id="idMSRVIsMaster" class="custom-select border-info">
                <option value="true" selected>Oui</option>
                <option value="false">Non</option>
@@ -22,14 +22,14 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-danger text-right">Master_Host</label>
+						     <label class="col-5 col-sm-4 col-form-label text-danger text-right">Master_Host</label>
 						     <input id="idMSRVMasterHost" type="text" class="form-control" placeholder="Hostname du master si cette instance est un slave">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Description de l'instance</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Description de l'instance</label>
 						     <input id="idMSRVDescription" type="text" class="form-control" placeholder="Nom de l'habitat par exemple">
      					</div>
   					</div>
