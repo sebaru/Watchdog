@@ -165,7 +165,7 @@
 
     <ul class="navbar-nav">
 
-      <div class="mt-1 spinner-border text-primary ClassLoadingSpinner" role="status">
+      <div class="mt-1 spinner-border text-primary ClassLoadingSpinner" style="display:none" role="status">
         <span class="sr-only">Loading...</span>
       </div>
 
