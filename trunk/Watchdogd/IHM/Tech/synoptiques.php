@@ -72,6 +72,7 @@
              <option value='comm'>Communications</option>
              <option value='confort'>Confort</option>
              <option value='cuisine'>Cuisine</option>
+             <option value='ampoule'>Eclairage</option>
            </select>
            <img id="idModalSynEditImage" src='' class="ml-2 text-center col-2 border border-info">
      					</div>
