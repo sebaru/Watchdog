@@ -154,9 +154,8 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarINSTANCE">
           <a class="dropdown-item" href="/tech/process"><i class="fas fa-microchip text-primary"></i> <span>Liste des Processus</span></a>
-          <a class="dropdown-item" href="/tech/msrv"><i class="fas fa-crown text-danger"></i> <span>Master Server</span></a>
+          <a class="dropdown-item" href="/tech/msrv"><i class="fas fa-crown text-danger"></i> <span>Maintenance</span></a>
           <a class="dropdown-item" href="/tech/archive"><i class="fas fa-database text-secondary"></i> <span>Archivage</span></a>
-          <a class="dropdown-item" href="/tech/maintenance"><i class="fas fa-wrench text-warning"></i> <span>Maintenance</span></a>
         </div>
       </li>
 
