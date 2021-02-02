@@ -103,7 +103,7 @@
                        "`date_create` datetime NOT NULL DEFAULT NOW(),"
                        "`tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                        "`description` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`port` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                       "`port` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "PRIMARY KEY (`id`)"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", NOM_THREAD );
        goto end;

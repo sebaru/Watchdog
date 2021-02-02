@@ -72,6 +72,6 @@ systemctl daemon-reload
 
     echo "La base de données 'WatchdogDB' a été crée, ainsi que l'utilisateur 'watchdog'."
     echo "Son mot de passe est "$NEWPASSWORD
-    echo "Le point d'accès pour poursuivre l'installation est http://"`hostname`":5560/install"
+    echo "Le point d'accès pour poursuivre l'installation est https://"`hostname`":5560/install"
 
 systemctl enable Watchdogd --now
