@@ -603,8 +603,8 @@ CREATE TABLE IF NOT EXISTS `thread_classe` (
 CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `deletable` tinyint(1) NOT NULL DEFAULT '1',
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
-  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT,
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No libelle",
   `typologie` int(11) NOT NULL DEFAULT '0',
   `sms_notification` int(11) NOT NULL DEFAULT '0',

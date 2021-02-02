@@ -380,9 +380,8 @@
   { if(dls_syn->Dls_plugins) g_slist_free( dls_syn->Dls_plugins );
     while (dls_syn->Dls_sub_syns)
      { struct DLS_SYN *sub_syn = dls_syn->Dls_sub_syns->data;
-       Dls_arbre_dls_syn_erase_syn ( sub_syn );
        dls_syn->Dls_sub_syns = g_slist_remove ( dls_syn->Dls_sub_syns, sub_syn );
-       g_free(sub_syn);
+       Dls_arbre_dls_syn_erase_syn ( sub_syn );
      }
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Arbre syn '%d' erased", dls_syn->syn_vars.syn_id );
     g_free(dls_syn);
