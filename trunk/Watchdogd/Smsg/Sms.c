@@ -118,10 +118,11 @@
                        "`nbr_sms` int(11) NOT NULL DEFAULT 0,"
                        "PRIMARY KEY (`id`)"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", NOM_THREAD );
+       goto end;
      }
 
-    database_version = 1;
 end:
+    database_version = 1;
     Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
   }
 /******************************************************************************************************************************/
