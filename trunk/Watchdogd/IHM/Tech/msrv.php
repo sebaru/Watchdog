@@ -17,11 +17,11 @@
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Log Level</label>
 						     <select id="idMSRVLogLevel" class="custom-select" onchange="MSRV_Set_Log_Level()">
-             <option value="LOG_DEBUG">Debug</option>
-             <option value="LOG_INFO">Info</option>
-             <option value="LOG_NOTICE">Notice</option>
-             <option value="LOG_WARNING">Warning</option>
-             <option value="LOG_ERROR">Error</option>
+             <option value="7">Debug</option>
+             <option value="6">Info</option>
+             <option value="5">Notice</option>
+             <option value="4">Warning</option>
+             <option value="3">Error</option>
            </select>
      					</div>
   					</div>

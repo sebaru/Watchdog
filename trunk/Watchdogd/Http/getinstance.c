@@ -94,20 +94,16 @@
        return;
      }
 
-    gchar *log_level = Json_get_string ( request, "log_level" );
-    gint log_target = -1;
-         if ( ! g_ascii_strcasecmp ( log_level, "LOG_DEBUG"   ) ) log_target = LOG_DEBUG;
-    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_NOTICE"  ) ) log_target = LOG_NOTICE;
-    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_INFO"    ) ) log_target = LOG_INFO;
-    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_WARNING" ) ) log_target = LOG_WARNING;
-    else if ( ! g_ascii_strcasecmp ( log_level, "LOG_ERROR"   ) ) log_target = LOG_ERR;
-	   else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais niveau de log");
-
-    if (log_target>=0)
-     { Info_change_log_level ( Config.log, log_target );
-       Modifier_configDB_int ( "msrv", "log_level", log_target );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogLevel set to '%s'", __func__, log_level );
+    gint log_target = Json_get_int ( request, "log_level" );
+    if (log_target<3 || log_target>7)
+     { json_node_unref(request);
+	      soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais niveau de log");
+       return;
      }
+
+    Info_change_log_level ( Config.log, log_target );
+    Modifier_configDB_int ( "msrv", "log_level", log_target );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogLevel set to '%s'", __func__, log_target );
 
     json_node_unref(request);
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
