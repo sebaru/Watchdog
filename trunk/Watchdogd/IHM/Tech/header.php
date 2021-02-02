@@ -183,8 +183,6 @@
           <a class="dropdown-item" href="/tech/users_sessions"><i class="fas fa-list text-info"></i> <span>Sessions</span></a>
           <a class="dropdown-item" href="/tech/log"><i class="fas fa-binoculars text-warning"></i> <span>Audit Log</span></a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="/"><i class="fas fa-home text-primary"></i> <span>Mode Client</span> </a>
-          <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" onclick="Logout()"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
         </div>
       </li>

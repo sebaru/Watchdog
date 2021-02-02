@@ -142,20 +142,21 @@
     <img src="/img/syn_home.png" alt="Accueil" class="wtd-menu">
   </a>
 
-      <a class="nav-item"><img id="idMenuImgAccueil" src="" alt="Accueil" class="wtd-menu mr-1"></a>
-      <a class="nav-item"><img id="idMasterVignetteActivite" class="wtd-menu mr-1" src=""></a>
-      <a class="nav-item"><img id="idMasterVignetteSecuBien" class="wtd-menu mr-1" src=""></a>
-      <a class="nav-item"><img id="idMasterVignetteSecuPers" class="wtd-menu mr-1" src=""></a>
-    <ul class="navbar-nav">
-      <a class="nav-link rounded d-none d-sm-inline" href="#"> <span id="idPageTitle">Loading...</span></a>
-    </ul>
+  <a class="nav-item"><img id="idMenuImgAccueil" src="" alt="Accueil" class="wtd-menu mr-1"></a>
+  <a class="nav-item"><img id="idMasterVignetteActivite" class="wtd-menu mr-1" src=""></a>
+  <a class="nav-item"><img id="idMasterVignetteSecuBien" class="wtd-menu mr-1" src=""></a>
+  <a class="nav-item"><img id="idMasterVignetteSecuPers" class="wtd-menu mr-1" src=""></a>
+  <ul class="navbar-nav">
+    <a class="nav-link rounded d-none d-sm-inline" href="#"> <span id="idPageTitle">Loading...</span></a>
+  </ul>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
 
   <div class="collapse navbar-collapse" id="navbar-toggled">
-    <ul class="navbar-nav ml-auto">
+    <ul class="navbar-nav  ml-auto">
+      <a class="nav-link rounded" href="/tech/dashboard"><i class="fas fa-tachometer-alt"></i> <span>Mode Technicien</span></a>
       <li class="nav-item dropdown">
         <a class="nav-link rounded dropdown-toggle" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-user text-white"></i> <span id="idUsername">-</span>
@@ -166,9 +167,6 @@
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="/home/users"><i class="fas fa-users-cog text-info"></i> <span>Utilisateurs</span></a>
           <a class="dropdown-item" href="/tech/users_sessions"><i class="fas fa-list text-info"></i> <span>Sessions</span></a>
-          <a class="dropdown-item" href="/tech/log"><i class="fas fa-database text-warning"></i> <span>Audit Log</span></a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="/tech/dashboard"><i class="fas fa-tachometer-alt text-primary"></i> <span>Mode Technicien</span> </a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" onclick="Logout()"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
         </div>

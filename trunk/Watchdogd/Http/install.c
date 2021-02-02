@@ -122,43 +122,51 @@
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Upload '%s' directory'", __func__, chaine );
 
 /******************************************* Test accès Database **************************************************************/
+    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Loading DB Schema'", __func__ );
     gchar *DB_SCHEMA = "/usr/local/share/Watchdog/init_db.sql";
     if (stat ( DB_SCHEMA, &stat_buf)==-1)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Stat DB Schema Error" );
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Stat DB Schema Error" );
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Stat DB Schema Error", __func__ );
        return;
      }
 
     gchar *db_schema = g_try_malloc0 ( stat_buf.st_size+1 );
     if (!db_schema)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Memory DB Schema Error" );
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory DB Schema Error" );
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Memory DB Schema Error", __func__ );
        return;
      }
 
     gint fd = open ( DB_SCHEMA, O_RDONLY );
     if (!fd)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Open DB Schema Error" );
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Open DB Schema Error" );
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Open DB Schema Error", __func__ );
        g_free(db_schema);
        return;
      }
     if (read ( fd, db_schema, stat_buf.st_size ) != stat_buf.st_size)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Read DB Schema Error" );
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Read DB Schema Error" );
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Read DB Schema Error", __func__ );
        g_free(db_schema);
        return;
      }
     close(fd);
 
+    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema Loaded. Connecting to DB.'", __func__ );
     struct DB *db = Init_DB_SQL_with ( Json_get_string(request, "db_hostname"), Json_get_string(request, "db_username"),
                                        Json_get_string(request, "db_password"), Json_get_string(request, "db_database"),
                                        Json_get_int(request, "db_port" ), TRUE );
 
     if (!db)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "DB Connect Error");
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Connect Error", __func__ );
        g_free(db_schema);
        return;
      }
     Lancer_requete_SQL ( db, db_schema );                                                               /* Création du schéma */
     g_free(db_schema);
     Liberer_resultat_SQL ( db );
+    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema OK. Starting update.", __func__ );
 
     g_snprintf( chaine, sizeof(chaine),
                "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"

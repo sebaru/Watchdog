@@ -52,6 +52,8 @@
   { if (document.getElementById("idUsername") !== null)
      { document.getElementById("idUsername").innerHTML = localStorage.getItem("username");
      }
+    if (localStorage.getItem("access_level")>=6) { $('#idMenuTechnicien').show(); }
+                                            else { $('#idMenuTechnicien').hide(); }
    /* else
      { document.getElementById("idUsername").innerHTML = "Se connecter";
        document.getElementById("idHrefUsername").href = "/login";
