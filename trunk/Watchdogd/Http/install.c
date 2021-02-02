@@ -177,7 +177,7 @@
                "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
                "nom='description',valeur='%s' ", g_get_host_name(), description );
     Lancer_requete_SQL ( db, chaine );
-    g_snprintf( chaine, sizeof(chaine), "UPDATE syns SET page='%s' WHERE id='1'", description );
+    g_snprintf( chaine, sizeof(chaine), "UPDATE syns SET libelle='%s' WHERE id='1'", description );
     Lancer_requete_SQL ( db, chaine );
     g_free(description);
 

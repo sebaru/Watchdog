@@ -2,23 +2,16 @@
 
 /************************************ Controle de saisie avant envoi **********************************************************/
  function Synoptique_set_controle_page ( page_initiale )
-  { FormatPage = RegExp(/^[a-zA-Z0-9_]+$/);
+  { FormatPage = RegExp(/^[a-zA-Z0-9_ ]+$/);
     table = $('#idTableSyn').DataTable();
     input = $('#idModalSynEditPage');
     if ( FormatPage.test(input.val())==false )
      { input.addClass("bg-danger");    $('#idModalSynEditValider').attr("disabled", true);
-       Popover_show ( input, 'Caractères autorisés', 'lettres, chiffres et _' );
-     }
-    else if ( (table.ajax.json().synoptiques.filter( function(item)
-                                               { return item.page.toUpperCase()==input.val().toUpperCase() } )[0] !== undefined &&
-              (page_initiale == null || input.val() != page_initiale) )
-       )
-     { input.addClass("bg-danger");    $('#idModalSynEditValider').attr("disabled", true);
-       Popover_show ( input, 'Erreur !', 'Ce nom est déjà pris' );
+       Popover_show ( input, 'Caractères autorisés', 'lettres, chiffres, espaces et _' );
      }
     else
      { input.removeClass("bg-danger"); $('#idModalSynEditValider').attr("disabled", false);
-       Popover_hide(input);
+       Popover_hide( input );
      }
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
