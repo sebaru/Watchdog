@@ -421,6 +421,7 @@
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
     Partage->com_dls.Compil_at_boot = FALSE;/* Apres le chargement initial, on considere que la recompil n'est pas necessaire */
+    Modifier_configDB ( "dls", "compil_at_boot", "false" );
   }
 /******************************************************************************************************************************/
 /* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
