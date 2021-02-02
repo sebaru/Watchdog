@@ -6,7 +6,6 @@
         <button type="button" onclick="Show_Modal_Modbus_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
         <button type="button" onclick="window.location='/tech/modbus_map'" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
         <button type="button" onclick="Modbus_refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
-        <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
    </div>
  </div>
 

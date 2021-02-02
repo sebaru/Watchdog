@@ -50,23 +50,11 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static gboolean Modbus_Lire_config ( void )
-  { gchar *nom, *valeur;
-    struct DB *db;
-
+  { gchar *result;
     Creer_configDB ( NOM_THREAD, "debug", "false" );
-    Cfg_modbus.lib->Thread_debug = FALSE;                                                      /* Settings default parameters */
-
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                "%s: Database connexion failed. Using Default Parameters", __func__ );
-       return(FALSE);
-     }
-
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur );
-            if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_modbus.lib->Thread_debug = TRUE;  }
-     }
+    result = Recuperer_configDB_by_nom ( NOM_THREAD, "debug" );
+    Cfg_modbus.lib->Thread_debug = !g_ascii_strcasecmp(result, "true");
+    g_free(result);
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -112,8 +100,8 @@
     if (database_version < 2)
      { SQL_Write ( "ALTER TABLE `modbus_modules` ADD `max_request_par_sec` int(11) NOT NULL DEFAULT 50" );
      }
-    database_version = 2;
 end:
+    database_version = 2;
     Modifier_configDB_int ( "modbus", "database_version", database_version );
   }
 /******************************************************************************************************************************/

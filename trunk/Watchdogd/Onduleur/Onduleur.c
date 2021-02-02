@@ -44,25 +44,12 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Ups_Lire_config ( void )
-  { gchar *nom, *valeur;
-    struct DB *db;
-
-    Cfg_ups.lib->Thread_debug = FALSE;                                                         /* Settings default parameters */
+ static gboolean Ups_Lire_config ( void )
+  { gchar *result;
     Creer_configDB ( NOM_THREAD, "debug", "false" );
-
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "%s: Database connexion failed. Using Default Parameters", __func__ );
-       return(FALSE);
-     }
-
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,                                             /* Print Config */
-                "Ups_Lire_config: '%s' = %s", nom, valeur );
-            if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_ups.lib->Thread_debug = TRUE;  }
-     }
+    result = Recuperer_configDB_by_nom ( NOM_THREAD, "debug" );
+    Cfg_ups.lib->Thread_debug = !g_ascii_strcasecmp(result, "true");
+    g_free(result);
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -82,19 +69,22 @@
     Info_new( Config.log, Config.log_db, LOG_NOTICE,
              "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, WTD_VERSION );
 
-    SQL_Write ( "CREATE TABLE IF NOT EXISTS `ups` ("
-                "`id` int(11) NOT NULL AUTO_INCREMENT,"
-                "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
-                "`enable` TINYINT(1) NOT NULL DEFAULT '0',"
-                "`host` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-                "`name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-                "`admin_username` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-                "`admin_password` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-                "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                "PRIMARY KEY (`id`)"
-                ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
+    if (database_version==0)
+     { SQL_Write ( "CREATE TABLE IF NOT EXISTS `ups` ("
+                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                   "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
+                   "`enable` TINYINT(1) NOT NULL DEFAULT '0',"
+                   "`host` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+                   "`name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+                   "`admin_username` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+                   "`admin_password` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+                   "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                   "PRIMARY KEY (`id`)"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
+       goto end;
+     }
+end:
     database_version = 1;
-/*end:*/
     Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
   }
 /******************************************************************************************************************************/

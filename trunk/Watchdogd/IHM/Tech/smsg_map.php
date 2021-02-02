@@ -5,8 +5,7 @@
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Show_Modal_Map_Edit_DI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping GSM</button>
-        <button type="button" onclick="Redirect('/tech/smsg')" class="btn btn-primary"><i class="fas fa-list"></i> Config GSM</button>
-        <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
+        <button type="button" onclick="Redirect('/tech/smsg')" class="btn btn-primary"><i class="fas fa-list"></i> Liste des GSM</button>
    </div>
  </div>
 

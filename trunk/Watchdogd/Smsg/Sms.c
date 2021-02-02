@@ -52,7 +52,7 @@
 
     Creer_configDB ( NOM_THREAD, "debug", "false" );
     result = Recuperer_configDB_by_nom ( NOM_THREAD, "debug" );
-    Cfg_smsg.lib->Thread_debug = !strcasecmp(result, "true");
+    Cfg_smsg.lib->Thread_debug = !g_ascii_strcasecmp(result, "true");
     g_free(result);
 
     SQL_Write_new ( "INSERT IGNORE %s SET tech_id='GSM01', description='DEFAULT', ovh_service_name='DEFAULT', "
@@ -118,7 +118,6 @@
                        "`nbr_sms` int(11) NOT NULL DEFAULT 0,"
                        "PRIMARY KEY (`id`)"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", NOM_THREAD );
-       goto end;
      }
 
     database_version = 1;
