@@ -36,7 +36,7 @@
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Proto_Acquitter_synoptique ( void *user_data, struct PLUGIN_DLS *plugin )
+ static void Proto_Acquitter_synoptique ( void *user_data, struct DLS_PLUGIN *plugin )
   { gint syn_id = *(gint *)user_data;
     if (plugin->syn_id == syn_id)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Synoptique %d -> plugin %s acquitté", __func__,
@@ -162,7 +162,7 @@
        case SSTAG_CLIENT_ACQ_SYN:
              { gint syn_id;
                syn_id = *(gint *)connexion->donnees;
-               Dls_foreach ( &syn_id, Proto_Acquitter_synoptique, NULL );
+               Dls_foreach_plugins ( GINT_TO_POINTER(syn_id), Proto_Acquitter_synoptique );
              }
             break;
        case SSTAG_CLIENT_SET_BIT_INTERNE:

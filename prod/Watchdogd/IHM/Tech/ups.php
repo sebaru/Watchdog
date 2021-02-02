@@ -3,9 +3,8 @@
  <div class="row m-2">
    <h3><img src="/img/onduleur.jpg" style="width:80px" alt="Onduleur 5PX">Liste des Onduleurs</h3>
    <div class ="ml-auto btn-group align-items-start">
-        <button type="button" onclick="Show_Modal_Ups_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
+        <button type="button" onclick="Show_Modal_Ups_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un UPS</button>
         <button type="button" onclick="Ups_refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
-        <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
    </div>
  </div>
 

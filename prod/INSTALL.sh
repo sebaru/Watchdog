@@ -8,7 +8,7 @@ if [ "$SOCLE" = "fedora" ]
  then
   echo "Installing Fedora dependencies"
   dnf update -y
-  dnf install -y subversion libtool automake autoconf gcc gcc-c++ redhat-rpm-config
+  dnf install -y subversion libtool automake autoconf gcc gcc-c++ redhat-rpm-config openssl
   dnf install -y glib2-devel bison flex readline-devel giflib-devel libgcrypt-devel
   dnf install -y libcurl-devel nut-devel mariadb-devel zeromq-devel libuuid-devel
   dnf install -y gtk3-devel goocanvas2-devel popt-devel libsoup-devel
@@ -38,7 +38,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
     apt install -y gcc-8-base
   fi
 
-  apt install -y subversion libtool automake autoconf gcc git cmake
+  apt install -y subversion libtool automake autoconf gcc git cmake openssl
   apt install -y libglib2.0-dev bison flex libreadline-dev libgif-dev libgcrypt20-dev
   apt install -y libupsclient-dev libcurl4-gnutls-dev libssl-dev default-libmysqlclient-dev libstrophe-dev libgammu-dev
   apt install -y liblircclient-dev libpopt-dev libssl-dev libmariadbclient-dev libzmq3-dev
@@ -72,6 +72,6 @@ systemctl daemon-reload
 
     echo "La base de données 'WatchdogDB' a été crée, ainsi que l'utilisateur 'watchdog'."
     echo "Son mot de passe est "$NEWPASSWORD
-    echo "Le point d'accès pour poursuivre l'installation est http://"`hostname`":5560/install"
+    echo "Le point d'accès pour poursuivre l'installation est https://"`hostname`":5560/install"
 
 systemctl enable Watchdogd --now

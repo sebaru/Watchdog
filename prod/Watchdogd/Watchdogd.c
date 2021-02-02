@@ -399,6 +399,7 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
+    if (!Config.installed) { sleep(2); }              /* Laisse le temps au thread HTTP de repondre OK au client avant reboot */
     Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
@@ -518,12 +519,10 @@ end:
 /* Entrée: argc, argv                                                                                                         */
 /* Sortie: -1 si erreur, 0 si ok                                                                                              */
 /******************************************************************************************************************************/
- static gboolean Lire_ligne_commande( int argc, char *argv[] )
-  { gint help = 0, log_level = -1, fg = 0, single = 0, version = 0;
+ static void Lire_ligne_commande( int argc, char *argv[] )
+  { gint help = 0, log_level = -1, single = 0, version = 0;
     struct poptOption Options[]=
-     { { "foreground", 'f', POPT_ARG_NONE,
-         &fg,               0, "Run in foreground", NULL },
-       { "version",    'v', POPT_ARG_NONE,
+     { { "version",    'v', POPT_ARG_NONE,
          &version,          0, "Display Version Number", NULL },
        { "debug",      'd', POPT_ARG_INT,
          &log_level,      0, "Debug level", "LEVEL" },
@@ -560,7 +559,6 @@ end:
     if (single)          Config.single      = TRUE;                                            /* Demarrage en mode single ?? */
     if (log_level!=-1)   Config.log_level   = log_level;
     fflush(0);
-    return(fg);
   }
 /******************************************************************************************************************************/
 /* Drop_privileges: Passe sous un autre user que root                                                                         */
@@ -624,7 +622,6 @@ end:
     gchar strpid[12];
     gint fd_lock;
     pthread_t TID;
-    gboolean fg;
 
     umask(022);                                                                              /* Masque de creation de fichier */
 
@@ -634,20 +631,7 @@ end:
 
     if (Config.installed) { Drop_privileges(); }
 
-    fg = Lire_ligne_commande( argc, argv );                                       /* Lecture du fichier conf et des arguments */
-
-    if (fg == FALSE)                                                                       /* On tourne en tant que daemon ?? */
-     { gint pid;
-       pid = fork();
-       if (pid<0) { printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                                           /* On daemonize */
-       if (pid>0) exit(EXIT_OK);                                                                           /* On kill le père */
-
-       pid = fork();
-       if (pid<0) { printf("Fork 2 failed\n"); exit(EXIT_ERREUR); }                         /* Evite des pb (linuxmag 44 p78) */
-       if (pid>0) exit(EXIT_OK);                                                                           /* On kill le père */
-
-       setsid();                                                                                 /* Indépendance du processus */
-     }
+    Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
                                                                                       /* Verification de l'unicité du process */
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );
     if (fd_lock<0)

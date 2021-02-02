@@ -41,7 +41,7 @@
  void Http_traiter_archive_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
   { gchar *buf, requete[4096], chaine[256], *interval, nom_courbe[12];
-    gsize taille, taille_buf;
+    gsize taille_buf;
     gint nbr;
 
     if (msg->method != SOUP_METHOD_PUT || Config.instance_is_master == FALSE)

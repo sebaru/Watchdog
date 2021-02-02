@@ -30,7 +30,6 @@
 
  #define NOM_THREAD                       "teleinfo"
 
- #define DEFAUT_PORT_TELEINFO             "/dev/watchdog_TELEINFO"
  #define TAILLE_BUFFER_TELEINFO           25
  #define TINFO_RETRY_DELAI                600                               /* Une minute avant de se reconnecter si probleme */
 

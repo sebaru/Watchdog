@@ -4,11 +4,9 @@
    <h3><i class="fas fa-database text-secondary"></i> Paramétrage des Archives</h3>
 
    <div class ="ml-auto btn-group align-items-start">
-        <button type="button" onclick="Archive_sauver_parametre()" class="btn btn-outline-success"><i class="fas fa-save"></i> Sauvegarder</button>
         <button type="button" onclick="Archive_testdb()" class="btn btn-outline-info"><i class="fas fa-question"></i> TestDB</button>
         <button type="button" onclick="Archive_purge()" class="btn btn-outline-warning"><i class="fas fa-history"></i> Purge</button>
         <button type="button" onclick="Archive_clear()" class="btn btn-outline-danger"><i class="fas fa-eraser"></i> Clear</button>
-        <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
    </div>
  </div>
 
@@ -73,6 +71,12 @@
 						     </div>
      					</div>
   					</div>
+
+   <div class ="row">
+     <div class ="ml-auto btn-group align-items-start">
+        <button type="button" onclick="Archive_sauver_parametre()" class="btn btn-outline-success"><i class="fas fa-save"></i> Sauvegarder</button>
+     </div>
+   </div>
 
 <hr>
 

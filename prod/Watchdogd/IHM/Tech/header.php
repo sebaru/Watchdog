@@ -8,9 +8,9 @@
         <meta name="google" content="notranslate">
         <meta name="robots" content="noindex, nofollow">
         <link rel="icon" href="/img/logo.svg">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.21/fh-3.1.7/r-2.2.5/datatables.min.css"/>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/codemirror.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.2/codemirror.min.css">
         <style>
         input:focus { outline: 0 0 0 0  !important;
                       box-shadow: 0 0 0 0 !important;
@@ -154,9 +154,8 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarINSTANCE">
           <a class="dropdown-item" href="/tech/process"><i class="fas fa-microchip text-primary"></i> <span>Liste des Processus</span></a>
-          <a class="dropdown-item" href="/tech/msrv"><i class="fas fa-crown text-danger"></i> <span>Master Server</span></a>
+          <a class="dropdown-item" href="/tech/msrv"><i class="fas fa-crown text-danger"></i> <span>Maintenance</span></a>
           <a class="dropdown-item" href="/tech/archive"><i class="fas fa-database text-secondary"></i> <span>Archivage</span></a>
-          <a class="dropdown-item" href="/tech/maintenance"><i class="fas fa-wrench text-warning"></i> <span>Maintenance</span></a>
         </div>
       </li>
 
@@ -171,12 +170,6 @@
       </div>
 
       <a class="nav-link rounded" href="/tech/search"><i class="fas fa-search"></i> <span> Dictionnaire</span></a>
-
-      <div class ="nav-item ml-2">
-        <div class="input-group">
-  		      <select onchange="Change_target_instance()" id="idTargetInstance" class="custom-select text-info"></select>
-					   </div>
-      </div>
 
       <li class="nav-item dropdown">
         <a class="nav-link rounded dropdown-toggle ml-2" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

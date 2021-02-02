@@ -166,6 +166,11 @@
     retour +="</select>";
     return(retour);
   }
+/********************************************* Affichage des vignettes ********************************************************/
+ function Changer_img_src ( id, target )
+  { $('#'+id).fadeOut("slow", function()
+     { $('#'+id).attr("src", target).fadeIn("slow"); } );
+  }
 /****************************************** Escape les " et ' *****************************************************************/
  function htmlEncode ( string )
   { if (string===null) return("null");

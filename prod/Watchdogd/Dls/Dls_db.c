@@ -119,8 +119,8 @@
 /* Entrées: une base de données                                                                                               */
 /* Sortie: une structure plugindls, ou null si erreur ou fin de requete                                                       */
 /******************************************************************************************************************************/
- struct PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct DB **db_orig )
-  { struct PLUGIN_DLS *dls;
+ struct DLS_PLUGIN *Recuperer_plugins_dlsDB_suite( struct DB **db_orig )
+  { struct DLS_PLUGIN *dls;
     struct DB *db;
 
     db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
@@ -131,7 +131,7 @@
        return(NULL);
      }
 
-    dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
+    dls = (struct DLS_PLUGIN *)g_try_malloc0( sizeof(struct DLS_PLUGIN) );
     if (!dls) Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
                        "%s: Erreur allocation mémoire", __func__ );
     else
@@ -156,10 +156,10 @@
 /******************************************************************************************************************************/
 /* Rechercher_plugin_dlsDB: Recuperation du plugin en parametre                                                               */
 /* Entrées: un id plugin DLS                                                                                                  */
-/* Sortie: une structure PLUGIN_DLS, ou null si erreur                                                                        */
+/* Sortie: une structure DLS_PLUGIN, ou null si erreur                                                                        */
 /******************************************************************************************************************************/
- struct PLUGIN_DLS *Rechercher_plugin_dlsDB( gchar *tech_id_src )
-  { struct PLUGIN_DLS *dls;
+ struct DLS_PLUGIN *Rechercher_plugin_dlsDB( gchar *tech_id_src )
+  { struct DLS_PLUGIN *dls;
     gchar requete[512], *tech_id;
     struct DB *db;
 

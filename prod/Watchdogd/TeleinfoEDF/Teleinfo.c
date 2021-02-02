@@ -44,38 +44,74 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Teleinfo_Lire_config ( void )
-  { gchar *nom, *valeur;
+  { gchar *result, requete[256];
     struct DB *db;
 
-    Cfg_teleinfo.lib->Thread_debug = FALSE;                                                    /* Settings default parameters */
     Creer_configDB ( NOM_THREAD, "debug", "false" );
+    result = Recuperer_configDB_by_nom ( NOM_THREAD, "debug" );
+    Cfg_teleinfo.lib->Thread_debug = !g_ascii_strcasecmp(result, "true");
+    g_free(result);
 
-    g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port), "%s", DEFAUT_PORT_TELEINFO );
-    Creer_configDB ( NOM_THREAD, "port", Cfg_teleinfo.port );
+    SQL_Write_new ( "INSERT IGNORE %s SET tech_id='EDF01', description='DEFAULT', port='/dev/null', "
+                    "instance='%s'", NOM_THREAD, g_get_host_name() );
 
-    g_snprintf( Cfg_teleinfo.tech_id, sizeof(Cfg_teleinfo.tech_id), "%s", "EDF" );
-    Creer_configDB ( NOM_THREAD, "tech_id", Cfg_teleinfo.tech_id );
-
-    g_snprintf( Cfg_teleinfo.description, sizeof(Cfg_teleinfo.description), "Compteur EDF" );
-    Creer_configDB ( NOM_THREAD, "description", Cfg_teleinfo.description );
-
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
-     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_WARNING,
-                "%s: Database connexion failed. Using Default Parameters", __func__ );
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,                                        /* Print Config */
-                "%s: '%s' = %s", __func__, nom, valeur );
-            if ( ! g_ascii_strcasecmp ( nom, "port" ) )
-        { g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
-        { g_snprintf( Cfg_teleinfo.tech_id, sizeof(Cfg_teleinfo.tech_id), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_teleinfo.lib->Thread_debug = TRUE;  }
+    g_snprintf( requete, sizeof(requete),
+               "SELECT tech_id, description, port "
+               " FROM %s WHERE instance='%s' LIMIT 1", NOM_THREAD, g_get_host_name());
+    if (!Lancer_requete_SQL ( db, requete ))
+     { Libere_DB_SQL ( &db );
+       Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB Requete failed", __func__ );
+       return(FALSE);
      }
+
+    if (Recuperer_ligne_SQL ( db ))
+     { g_snprintf( Cfg_teleinfo.tech_id,     sizeof(Cfg_teleinfo.tech_id),     "%s", db->row[0] );
+       g_snprintf( Cfg_teleinfo.description, sizeof(Cfg_teleinfo.description), "%s", db->row[1] );
+       g_snprintf( Cfg_teleinfo.port,        sizeof(Cfg_teleinfo.port),        "%s", db->row[2] );
+     }
+    else Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB Get Result failed", __func__ );
+    Libere_DB_SQL ( &db );
     return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Teleinfo_Creer_DB ( void )
+  { gint database_version;
+
+    gchar *database_version_string = Recuperer_configDB_by_nom( NOM_THREAD, "database_version" );
+    if (database_version_string)
+     { database_version = atoi( database_version_string );
+       g_free(database_version_string);
+     } else database_version=0;
+
+    Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
+             "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, WTD_VERSION );
+
+    if (database_version==0)
+     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
+                       "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                       "`instance` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT 'localhost',"
+                       "`date_create` datetime NOT NULL DEFAULT NOW(),"
+                       "`tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                       "`description` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                       "`port` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                       "PRIMARY KEY (`id`)"
+                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", NOM_THREAD );
+       goto end;
+     }
+
+end:
+    database_version = 1;
+    Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
   }
 /******************************************************************************************************************************/
 /* Init_teleinfo: Initialisation de la ligne TELEINFO                                                                         */
@@ -171,6 +207,7 @@ reload:
     memset( &Cfg_teleinfo, 0, sizeof(Cfg_teleinfo) );                               /* Mise a zero de la structure de travail */
     Cfg_teleinfo.lib = lib;                                        /* Sauvegarde de la structure pointant sur cette librairie */
     Thread_init ( "W-TINFOEDF", "I/O", lib, WTD_VERSION, "Manage TELEINFOEDF Sensors" );
+    Teleinfo_Creer_DB ();                                                                   /* Création de la base de données */
     Teleinfo_Lire_config ();                                                /* Lecture de la configuration logiciel du thread */
 
     Cfg_teleinfo.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );

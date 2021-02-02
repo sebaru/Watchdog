@@ -107,7 +107,7 @@
 /* Entrée: Le client destinataire et les tags reseaux                                                                         */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Envoyer_bit_init_pass ( void *user_data, struct DLS_TREE *dls_tree )
+ static void Envoyer_bit_init_pass ( void *user_data, struct DLS_SYN *dls_tree )
   { struct CLIENT *client = user_data;
 
     if( g_slist_find( client->Liste_pass, GINT_TO_POINTER(dls_tree->syn_vars.syn_id) ) )
@@ -155,6 +155,6 @@
        g_free(pass);
      }
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-    Dls_foreach ( client, NULL, Envoyer_bit_init_pass );
+    Dls_foreach_syns ( client, Envoyer_bit_init_pass );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

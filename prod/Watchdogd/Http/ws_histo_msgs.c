@@ -132,18 +132,15 @@
 /******************************************************************************************************************************/
  void Http_traiter_histo_ack ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                SoupClientContext *client, gpointer user_data)
-  { GBytes *request_brute;
-    gsize taille;
-    if (msg->method != SOUP_METHOD_POST)
+  { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 0 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     gchar *tech_id  = Json_get_string( request, "tech_id" );
     gchar *acronyme = Json_get_string( request, "acronyme" );
@@ -159,6 +156,7 @@
        g_free( temp_date_fixe );
 
        Acquitter_histo_msgsDB ( tech_id, acronyme, session->username, date_fixe );
+       Dls_acquitter_plugin(tech_id);
 
        JsonBuilder *builder = Json_create ();
        if (builder == NULL)
@@ -167,13 +165,11 @@
         }
        else
         { gsize taille_buf;
-          Json_add_string ( builder, "zmq_type", "update_histo" );
-          Json_add_object ( builder, "histo" );
+          Json_add_string ( builder, "zmq_tag", "DLS_HISTO" );
           Json_add_string ( builder, "tech_id", tech_id );
           Json_add_string ( builder, "acronyme", acronyme );
           Json_add_string ( builder, "nom_ack", session->username );
           Json_add_string ( builder, "date_fixe", date_fixe );
-          Json_end_object ( builder );
           gchar *buf = Json_get_buf ( builder, &taille_buf );
           Http_msgs_send_to_all ( buf );
           soup_message_set_status (msg, SOUP_STATUS_OK);

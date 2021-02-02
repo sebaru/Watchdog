@@ -80,14 +80,14 @@
 /* Sortie: TRUE ou FALSe                                                                                                      */
 /******************************************************************************************************************************/
  gboolean Dls_get_top_alerte ( void )
-  { return( Partage->com_dls.Dls_tree->syn_vars.bit_alerte ); }
+  { return( Partage->com_dls.Dls_syns->syn_vars.bit_alerte ); }
 /******************************************************************************************************************************/
 /* Dls_get_top_alerte_fugitive: Remonte la valeur du plus haut bit d'alerte fugitive dans l'arbre DLS                         */
 /* Entrée: Rien                                                                                                               */
 /* Sortie: TRUE ou FALSe                                                                                                      */
 /******************************************************************************************************************************/
  gboolean Dls_get_top_alerte_fugitive ( void )
-  { return( Partage->com_dls.Dls_tree->syn_vars.bit_alerte_fugitive ); }
+  { return( Partage->com_dls.Dls_syns->syn_vars.bit_alerte_fugitive ); }
 /******************************************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                                        */
 /* Entrée: le temps avant, et le temps apres l'action                                                                         */
@@ -1610,24 +1610,24 @@ end:
 /* Entrées: le buuilder Json et la connexion Websocket                                                                         */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_TREE *tree )
+ void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_SYN *dls_syn )
   { JsonBuilder *builder = user_data;
     Json_add_object ( builder, NULL );
-    Json_add_int  ( builder, "id", tree->syn_vars.syn_id );
-    Json_add_bool ( builder, "bit_comm", tree->syn_vars.bit_comm );
-    Json_add_bool ( builder, "bit_defaut", tree->syn_vars.bit_defaut );
-    Json_add_bool ( builder, "bit_defaut_fixe", tree->syn_vars.bit_defaut_fixe );
-    Json_add_bool ( builder, "bit_alarme", tree->syn_vars.bit_alarme );
-    Json_add_bool ( builder, "bit_alarme_fixe", tree->syn_vars.bit_alarme_fixe );
-    Json_add_bool ( builder, "bit_veille_partielle", tree->syn_vars.bit_veille_partielle );
-    Json_add_bool ( builder, "bit_veille_totale", tree->syn_vars.bit_veille_totale );
-    Json_add_bool ( builder, "bit_alerte", tree->syn_vars.bit_alerte );
-    Json_add_bool ( builder, "bit_alerte_fixe", tree->syn_vars.bit_alerte_fixe );
-    Json_add_bool ( builder, "bit_alerte_fugitive", tree->syn_vars.bit_alerte_fugitive );
-    Json_add_bool ( builder, "bit_derangement", tree->syn_vars.bit_derangement );
-    Json_add_bool ( builder, "bit_derangement_fixe", tree->syn_vars.bit_derangement_fixe );
-    Json_add_bool ( builder, "bit_danger", tree->syn_vars.bit_danger );
-    Json_add_bool ( builder, "bit_danger_fixe", tree->syn_vars.bit_danger_fixe );
+    Json_add_int  ( builder, "id", dls_syn->syn_vars.syn_id );
+    Json_add_bool ( builder, "bit_comm", dls_syn->syn_vars.bit_comm );
+    Json_add_bool ( builder, "bit_defaut", dls_syn->syn_vars.bit_defaut );
+    Json_add_bool ( builder, "bit_defaut_fixe", dls_syn->syn_vars.bit_defaut_fixe );
+    Json_add_bool ( builder, "bit_alarme", dls_syn->syn_vars.bit_alarme );
+    Json_add_bool ( builder, "bit_alarme_fixe", dls_syn->syn_vars.bit_alarme_fixe );
+    Json_add_bool ( builder, "bit_veille_partielle", dls_syn->syn_vars.bit_veille_partielle );
+    Json_add_bool ( builder, "bit_veille_totale", dls_syn->syn_vars.bit_veille_totale );
+    Json_add_bool ( builder, "bit_alerte", dls_syn->syn_vars.bit_alerte );
+    Json_add_bool ( builder, "bit_alerte_fixe", dls_syn->syn_vars.bit_alerte_fixe );
+    Json_add_bool ( builder, "bit_alerte_fugitive", dls_syn->syn_vars.bit_alerte_fugitive );
+    Json_add_bool ( builder, "bit_derangement", dls_syn->syn_vars.bit_derangement );
+    Json_add_bool ( builder, "bit_derangement_fixe", dls_syn->syn_vars.bit_derangement_fixe );
+    Json_add_bool ( builder, "bit_danger", dls_syn->syn_vars.bit_danger );
+    Json_add_bool ( builder, "bit_danger_fixe", dls_syn->syn_vars.bit_danger_fixe );
     Json_end_object ( builder );
   }
 /******************************************************************************************************************************/
@@ -1635,9 +1635,8 @@ end:
 /* Entrée : le Dls_tree correspondant                                                                                         */
 /* Sortie : rien                                                                                                              */
 /******************************************************************************************************************************/
- static void Dls_run_dls_tree ( struct DLS_TREE *dls_tree )
-  { struct timeval tv_avant, tv_apres;
-    gboolean bit_comm, bit_defaut, bit_defaut_fixe, bit_alarme, bit_alarme_fixe;                                  /* Activité */
+ static void Dls_run_syn ( gpointer user_data, struct DLS_SYN *dls_syn )
+  { gboolean bit_comm, bit_defaut, bit_defaut_fixe, bit_alarme, bit_alarme_fixe;                                  /* Activité */
     gboolean bit_veille_partielle, bit_veille_totale, bit_alerte, bit_alerte_fixe;             /* Synthese Sécurité des Biens */
     gboolean bit_alerte_fugitive;
     gboolean bit_derangement, bit_derangement_fixe, bit_danger, bit_danger_fixe;           /* synthèse Sécurité des Personnes */
@@ -1649,117 +1648,120 @@ end:
     bit_alerte = bit_alerte_fixe = bit_alerte_fugitive = FALSE;
     bit_derangement = bit_derangement_fixe = bit_danger = bit_danger_fixe = FALSE;
 
-    liste = dls_tree->Liste_plugin_dls;
+    liste = dls_syn->Dls_plugins;
     while(liste)                                                                     /* On execute tous les modules un par un */
-     { struct PLUGIN_DLS *plugin;
-       plugin = (struct PLUGIN_DLS *)liste->data;
-
-       if (plugin->on && plugin->go)
-        { GSList *liste;
-
-/*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
-          gboolean bit_comm_module = TRUE;
-          liste = plugin->Arbre_IO_Comm;
-          while ( liste )
-           { gpointer wtd = liste->data;
-             bit_comm_module &= Dls_data_get_WATCHDOG( NULL, NULL, &wtd );
-             liste = g_slist_next ( liste );
-           }
-          Dls_data_set_bool ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
-          plugin->vars.bit_activite_ok = bit_comm_module && !(plugin->vars.bit_defaut || plugin->vars.bit_defaut_fixe ||
-                                                              plugin->vars.bit_alarme || plugin->vars.bit_alarme_fixe);
-          plugin->vars.bit_secupers_ok = !(plugin->vars.bit_derangement || plugin->vars.bit_derangement_fixe ||
-                                           plugin->vars.bit_danger || plugin->vars.bit_danger_fixe);
-
-/*----------------------------------------------- Mise a jour des messages de comm -------------------------------------------*/
-          Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
-          Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
-
-/*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
-          gettimeofday( &tv_avant, NULL );
-          plugin->go( &plugin->vars );                                                                  /* On appel le plugin */
-          gettimeofday( &tv_apres, NULL );
-          plugin->conso+=Chrono( &tv_avant, &tv_apres );
-          plugin->vars.resetted = FALSE;
-          plugin->vars.bit_acquit = 0;                                                        /* On arrete l'acquit du plugin */
-
+     { struct DLS_PLUGIN *plugin = liste->data;
 /*----------------------------------------------- Calcul des synthèses -------------------------------------------------------*/
-          bit_comm             &= bit_comm_module;                                                /* Bit de synthese activite */
-          bit_defaut           |= plugin->vars.bit_defaut;
-          bit_defaut_fixe      |= plugin->vars.bit_defaut_fixe;
-          bit_alarme           |= plugin->vars.bit_alarme;
-          bit_alarme_fixe      |= plugin->vars.bit_alarme_fixe;
+       bit_comm             &= Dls_data_get_bool ( plugin->tech_id, "COMM", &plugin->vars.bit_comm );                                                /* Bit de synthese activite */
+       bit_defaut           |= plugin->vars.bit_defaut;
+       bit_defaut_fixe      |= plugin->vars.bit_defaut_fixe;
+       bit_alarme           |= plugin->vars.bit_alarme;
+       bit_alarme_fixe      |= plugin->vars.bit_alarme_fixe;
 
-          bit_veille_partielle |= plugin->vars.bit_veille;
-          bit_veille_totale    &= plugin->vars.bit_veille;
-          bit_alerte           |= plugin->vars.bit_alerte;
-          bit_alerte_fixe      |= plugin->vars.bit_alerte_fixe;
-          bit_alerte_fugitive  |= plugin->vars.bit_alerte_fugitive;
+       bit_veille_partielle |= plugin->vars.bit_veille;
+       bit_veille_totale    &= plugin->vars.bit_veille;
+       bit_alerte           |= plugin->vars.bit_alerte;
+       bit_alerte_fixe      |= plugin->vars.bit_alerte_fixe;
+       bit_alerte_fugitive  |= plugin->vars.bit_alerte_fugitive;
 
-          bit_derangement      |= plugin->vars.bit_derangement;
-          bit_derangement_fixe |= plugin->vars.bit_derangement_fixe;
-          bit_danger           |= plugin->vars.bit_danger;
-          bit_danger_fixe      |= plugin->vars.bit_danger_fixe;
-        }
+       bit_derangement      |= plugin->vars.bit_derangement;
+       bit_derangement_fixe |= plugin->vars.bit_derangement_fixe;
+       bit_danger           |= plugin->vars.bit_danger;
+       bit_danger_fixe      |= plugin->vars.bit_danger_fixe;
        liste = liste->next;
      }
-    liste = dls_tree->Liste_dls_tree;
+    liste = dls_syn->Dls_sub_syns;
     while (liste)
-     { struct DLS_TREE *sub_tree;
-       sub_tree = (struct DLS_TREE *)liste->data;
-       Dls_run_dls_tree ( sub_tree );
-       bit_comm             &= sub_tree->syn_vars.bit_comm;
-       bit_defaut           |= sub_tree->syn_vars.bit_defaut;
-       bit_defaut_fixe      |= sub_tree->syn_vars.bit_defaut_fixe;
-       bit_alarme           |= sub_tree->syn_vars.bit_alarme;
-       bit_alarme_fixe      |= sub_tree->syn_vars.bit_alarme_fixe;
-       bit_veille_partielle |= sub_tree->syn_vars.bit_veille_partielle;
-       bit_veille_totale    &= sub_tree->syn_vars.bit_veille_totale;
-       bit_alerte           |= sub_tree->syn_vars.bit_alerte;
-       bit_alerte_fixe      |= sub_tree->syn_vars.bit_alerte_fixe;
-       bit_alerte_fugitive  |= sub_tree->syn_vars.bit_alerte_fugitive;
-       bit_derangement      |= sub_tree->syn_vars.bit_derangement;
-       bit_derangement_fixe |= sub_tree->syn_vars.bit_derangement_fixe;
-       bit_danger           |= sub_tree->syn_vars.bit_danger;
-       bit_danger_fixe      |= sub_tree->syn_vars.bit_danger_fixe;
+     { struct DLS_SYN *sub_syn = liste->data;
+       Dls_run_syn ( NULL, sub_syn );
+       bit_comm             &= sub_syn->syn_vars.bit_comm;
+       bit_defaut           |= sub_syn->syn_vars.bit_defaut;
+       bit_defaut_fixe      |= sub_syn->syn_vars.bit_defaut_fixe;
+       bit_alarme           |= sub_syn->syn_vars.bit_alarme;
+       bit_alarme_fixe      |= sub_syn->syn_vars.bit_alarme_fixe;
+       bit_veille_partielle |= sub_syn->syn_vars.bit_veille_partielle;
+       bit_veille_totale    &= sub_syn->syn_vars.bit_veille_totale;
+       bit_alerte           |= sub_syn->syn_vars.bit_alerte;
+       bit_alerte_fixe      |= sub_syn->syn_vars.bit_alerte_fixe;
+       bit_alerte_fugitive  |= sub_syn->syn_vars.bit_alerte_fugitive;
+       bit_derangement      |= sub_syn->syn_vars.bit_derangement;
+       bit_derangement_fixe |= sub_syn->syn_vars.bit_derangement_fixe;
+       bit_danger           |= sub_syn->syn_vars.bit_danger;
+       bit_danger_fixe      |= sub_syn->syn_vars.bit_danger_fixe;
        liste = liste->next;
      }
 
-    if ( bit_comm             != dls_tree->syn_vars.bit_comm ||                                  /* Detection des changements */
-         bit_defaut           != dls_tree->syn_vars.bit_defaut ||
-         bit_defaut_fixe      != dls_tree->syn_vars.bit_defaut_fixe ||
-         bit_alarme           != dls_tree->syn_vars.bit_alarme ||
-         bit_alarme_fixe      != dls_tree->syn_vars.bit_alarme_fixe ||
-         bit_veille_partielle != dls_tree->syn_vars.bit_veille_partielle ||
-         bit_veille_totale    != dls_tree->syn_vars.bit_veille_totale ||
-         bit_alerte           != dls_tree->syn_vars.bit_alerte ||
-         bit_alerte_fixe      != dls_tree->syn_vars.bit_alerte_fixe ||
-         bit_alerte_fugitive  != dls_tree->syn_vars.bit_alerte_fugitive ||
-         bit_derangement      != dls_tree->syn_vars.bit_derangement ||
-         bit_derangement_fixe != dls_tree->syn_vars.bit_derangement_fixe ||
-         bit_danger           != dls_tree->syn_vars.bit_danger ||
-         bit_danger_fixe      != dls_tree->syn_vars.bit_danger_fixe )
-     { dls_tree->syn_vars.bit_comm             = bit_comm;                               /* Recopie et envoi aux threads SSRV */
-       dls_tree->syn_vars.bit_defaut           = bit_defaut;
-       dls_tree->syn_vars.bit_defaut_fixe      = bit_defaut_fixe;
-       dls_tree->syn_vars.bit_alarme           = bit_alarme;
-       dls_tree->syn_vars.bit_alarme_fixe      = bit_alarme_fixe;
-       dls_tree->syn_vars.bit_veille_partielle = bit_veille_partielle;
-       dls_tree->syn_vars.bit_veille_totale    = bit_veille_totale;
-       dls_tree->syn_vars.bit_alerte           = bit_alerte;
-       dls_tree->syn_vars.bit_alerte_fixe      = bit_alerte_fixe;
-       dls_tree->syn_vars.bit_alerte_fugitive  = bit_alerte_fugitive;
-       dls_tree->syn_vars.bit_derangement      = bit_derangement;
-       dls_tree->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
-       dls_tree->syn_vars.bit_danger           = bit_danger;
-       dls_tree->syn_vars.bit_danger_fixe      = bit_danger_fixe;
+    if ( bit_comm             != dls_syn->syn_vars.bit_comm ||                                  /* Detection des changements */
+         bit_defaut           != dls_syn->syn_vars.bit_defaut ||
+         bit_defaut_fixe      != dls_syn->syn_vars.bit_defaut_fixe ||
+         bit_alarme           != dls_syn->syn_vars.bit_alarme ||
+         bit_alarme_fixe      != dls_syn->syn_vars.bit_alarme_fixe ||
+         bit_veille_partielle != dls_syn->syn_vars.bit_veille_partielle ||
+         bit_veille_totale    != dls_syn->syn_vars.bit_veille_totale ||
+         bit_alerte           != dls_syn->syn_vars.bit_alerte ||
+         bit_alerte_fixe      != dls_syn->syn_vars.bit_alerte_fixe ||
+         bit_alerte_fugitive  != dls_syn->syn_vars.bit_alerte_fugitive ||
+         bit_derangement      != dls_syn->syn_vars.bit_derangement ||
+         bit_derangement_fixe != dls_syn->syn_vars.bit_derangement_fixe ||
+         bit_danger           != dls_syn->syn_vars.bit_danger ||
+         bit_danger_fixe      != dls_syn->syn_vars.bit_danger_fixe )
+     { dls_syn->syn_vars.bit_comm             = bit_comm;                               /* Recopie et envoi aux threads SSRV */
+       dls_syn->syn_vars.bit_defaut           = bit_defaut;
+       dls_syn->syn_vars.bit_defaut_fixe      = bit_defaut_fixe;
+       dls_syn->syn_vars.bit_alarme           = bit_alarme;
+       dls_syn->syn_vars.bit_alarme_fixe      = bit_alarme_fixe;
+       dls_syn->syn_vars.bit_veille_partielle = bit_veille_partielle;
+       dls_syn->syn_vars.bit_veille_totale    = bit_veille_totale;
+       dls_syn->syn_vars.bit_alerte           = bit_alerte;
+       dls_syn->syn_vars.bit_alerte_fixe      = bit_alerte_fixe;
+       dls_syn->syn_vars.bit_alerte_fugitive  = bit_alerte_fugitive;
+       dls_syn->syn_vars.bit_derangement      = bit_derangement;
+       dls_syn->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
+       dls_syn->syn_vars.bit_danger           = bit_danger;
+       dls_syn->syn_vars.bit_danger_fixe      = bit_danger_fixe;
        JsonBuilder *builder = Json_create ();
        Json_add_array ( builder, "syn_vars" );
-       Dls_syn_vars_to_json ( builder, dls_tree );
+       Dls_syn_vars_to_json ( builder, dls_syn );
        Json_end_array ( builder );
        Send_zmq_with_json( Partage->com_dls.zmq_to_master, "dls", "*", "*", "SET_SYN_VARS", builder );
      }
  }
+/******************************************************************************************************************************/
+/* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
+/* Entrée : le Dls_tree correspondant                                                                                         */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_run_plugin ( gpointer user_data, struct DLS_PLUGIN *plugin )
+  { struct timeval tv_avant, tv_apres;
+
+    if (!(plugin->on && plugin->go)) return;
+/*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
+    gboolean bit_comm_module = TRUE;
+    GSList *liste = plugin->Arbre_IO_Comm;
+    while ( liste )
+     { gpointer wtd = liste->data;
+       bit_comm_module &= Dls_data_get_WATCHDOG( NULL, NULL, &wtd );
+       liste = g_slist_next ( liste );
+     }
+    Dls_data_set_bool ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
+    plugin->vars.bit_activite_ok = bit_comm_module && !(plugin->vars.bit_defaut || plugin->vars.bit_defaut_fixe ||
+                                                        plugin->vars.bit_alarme || plugin->vars.bit_alarme_fixe);
+    plugin->vars.bit_secupers_ok = !(plugin->vars.bit_derangement || plugin->vars.bit_derangement_fixe ||
+                                     plugin->vars.bit_danger || plugin->vars.bit_danger_fixe);
+
+/*----------------------------------------------- Mise a jour des messages de comm -------------------------------------------*/
+    Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
+    Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
+
+/*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
+    gettimeofday( &tv_avant, NULL );
+    plugin->go( &plugin->vars );                                                                     /* On appel le plugin */
+    gettimeofday( &tv_apres, NULL );
+    plugin->conso+=Chrono( &tv_avant, &tv_apres );
+    plugin->vars.resetted = FALSE;
+    plugin->vars.bit_acquit = 0;                                                           /* On arrete l'acquit du plugin */
+
+  }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du DLS                                                                                           */
 /******************************************************************************************************************************/
@@ -1781,8 +1783,9 @@ end:
        else
         { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: update library error" ); }
      }
-    Charger_plugins();                                                                          /* Chargement des modules dls */
+    Dls_Charger_plugins();                                                                      /* Chargement des modules dls */
     Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
+    Dls_recalculer_arbre_dls_syn();
 
     Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
     Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
@@ -1818,9 +1821,10 @@ end:
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
           Dls_Lire_config();
-          Decharger_plugins();
-          Charger_plugins();
+          Dls_Decharger_plugins();
+          Dls_Charger_plugins();
           Dls_recalculer_arbre_comm();                                                  /* Calcul de l'arbre de communication */
+          Dls_recalculer_arbre_dls_syn();
           Partage->com_dls.Thread_reload = FALSE;
         }
 
@@ -1886,9 +1890,8 @@ end:
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
 
        Partage->top_cdg_plugin_dls = 0;                                                         /* On reset le cdg plugin DLS */
-       pthread_mutex_lock( &Partage->com_dls.synchro );
-       Dls_run_dls_tree( Partage->com_dls.Dls_tree );
-       pthread_mutex_unlock( &Partage->com_dls.synchro );
+       Dls_foreach_plugins ( NULL, Dls_run_plugin );
+       Dls_foreach_syns    ( NULL, Dls_run_syn );
 
        Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, FALSE );
        Dls_data_set_bool ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, FALSE );
@@ -1904,7 +1907,8 @@ end:
        usleep(Partage->com_dls.temps_sched);
        sched_yield();
      }
-    Decharger_plugins();                                                                      /* Dechargement des modules DLS */
+    Dls_arbre_dls_syn_erase();
+    Dls_Decharger_plugins();                                                                      /* Dechargement des modules DLS */
     Close_zmq(Partage->com_dls.zmq_to_master);
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */

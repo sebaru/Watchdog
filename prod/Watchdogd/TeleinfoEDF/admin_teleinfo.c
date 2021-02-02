@@ -30,6 +30,34 @@
  #include "Teleinfo.h"
  extern struct TELEINFO_CONFIG Cfg_teleinfo;
 /******************************************************************************************************************************/
+/* Admin_json_smsg_list: Liste les parametres de bases de données associés au thread SMSG                                     */
+/* Entrée : Le message libsoup                                                                                                */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/******************************************************************************************************************************/
+ static void Admin_json_tinfo_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { JsonBuilder *builder;
+    gsize taille_buf;
+    gchar *buf;
+
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    SQL_Select_to_JSON_new ( builder, "tinfos", "SELECT instance, tech_id, description FROM %s", NOM_THREAD );
+    buf = Json_get_buf ( builder, &taille_buf );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+  }
+/******************************************************************************************************************************/
 /* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
 /* Entrée : un JSon Builder                                                                                                   */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
@@ -59,8 +87,8 @@
 				   Json_add_string ( builder, "description", Cfg_teleinfo.description );
 				   Json_add_bool   ( builder, "comm_status", Cfg_teleinfo.comm_status );
 				   switch ( Cfg_teleinfo.mode )
-        { case TINFO_WAIT_BEFORE_RETRY: Json_add_string ( builder, "mode", "WAIT_BEFORE_RETRY" ); break;
-          case TINFO_RETRING          : Json_add_string ( builder, "mode", "TINFO_RETRING" ); break;
+        { case TINFO_WAIT_BEFORE_RETRY: Json_add_string ( builder, "mode", "TINFO_WAIT_BEFORE_RETRY" ); break;
+          case TINFO_RETRING          : Json_add_string ( builder, "mode", "TINFO_RETRYING" ); break;
           case TINFO_CONNECTED        : Json_add_string ( builder, "mode", "TINFO_CONNECTED" ); break;
           default: Json_add_string ( builder, "mode", "UNKNOWN" ); break;
         }
@@ -78,20 +106,13 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Admin_json_tinfo_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { GBytes *request_brute;
-    gsize taille;
-
-    if ( msg->method != SOUP_METHOD_POST )
+  { if ( msg->method != SOUP_METHOD_POST )
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) &&
             Json_has_member ( request, "port" ) && Json_has_member ( request, "description" ) ) )
@@ -100,13 +121,20 @@
        return;
      }
 
-    Modifier_configDB( NOM_THREAD, "tech_id",     Json_get_string( request, "tech_id" ) );
-    Modifier_configDB( NOM_THREAD, "description", Json_get_string( request, "description" ) );
-    Modifier_configDB( NOM_THREAD, "port",        Json_get_string( request, "port" ) );
+    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
+    gchar *port        = Normaliser_chaine ( Json_get_string( request, "port" ) );
+
+    SQL_Write_new ( "UPDATE %s SET tech_id='%s', description='%s', port='%s' "
+                    "WHERE instance='%s'", NOM_THREAD, tech_id, description, port, g_get_host_name() );
     json_node_unref(request);
+    g_free(tech_id);
+    g_free(description);
+    g_free(port);
 
     soup_message_set_status (msg, SOUP_STATUS_OK);
     Lib->Thread_reload = TRUE;
+    while ( Lib->Thread_run == TRUE && Lib->Thread_reload == TRUE);                              /* Attente reboot du process */
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
@@ -118,7 +146,9 @@
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
+
          if (!strcasecmp(path, "/status"))   { Admin_json_tinfo_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/set"))      { Admin_json_tinfo_set ( lib, msg ); }
+    else if (!strcasecmp(path, "/list"))     { Admin_json_tinfo_list   ( lib, msg ); }
+    else if (!strcasecmp(path, "/set"))      { Admin_json_tinfo_set    ( lib, msg ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

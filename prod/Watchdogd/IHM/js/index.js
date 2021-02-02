@@ -4,9 +4,17 @@
  var Messages_loaded;                                                                      /* true si le datatable a été créé */
 
 /********************************************* Affichage des vignettes ********************************************************/
- function Changer_img_src ( id, target )
-  { $('#'+id).fadeOut("slow", function()
-     { $('#'+id).attr("src", target).fadeIn("slow"); } );
+ function Msg_acquitter ( id )
+  { table = $('#idTableMessages').DataTable();
+    selection = table.ajax.json().enregs.filter( function(item) { return (item.id==id) } )[0];
+    var json_request = JSON.stringify(
+       { tech_id  : selection.tech_id,
+         acronyme : selection.acronyme,
+       }
+     );
+    Send_to_API ( 'POST', "/api/histo/ack", json_request, function ()
+     { $('#idTableMessages').DataTable().ajax.reload( null, false );
+     }, null);
   }
 /********************************************* Affichage des vignettes ********************************************************/
  function Set_vignette ( id, type, couleur, cligno )
@@ -88,8 +96,9 @@
              { "data": "libelle", "title":"Message", "className": "text-center bg-dark" },
              { "data": null, "title":"Acquit", "className": "align-middle text-center bg-dark d-none d-sm-table-cell",
                "render": function (item)
-                 { if (item.nom_ack!="None") return(item.nom_ack);
-                   else return( Bouton ( "primary", "Acquitter le message", "Msg_acquitter", item.id, "Acquitter" ) );
+                 { if (item.typologie==0) return("-");                                                      /* Si INFO, pas de ACK */
+                   if (item.nom_ack!="None") return(item.nom_ack);
+                   return( Bouton ( "primary", "Acquitter le message", "Msg_acquitter", item.id, "Acquitter" ) );
                  }
              },
  /*            { "data": null, "title":"Titre", "className": "align-middle ",
@@ -147,44 +156,47 @@
  function Creer_card ( Response )
   {
 
-    var card = $('<div></div>');
-    card.addClass("card bg-transparent m-1");
+   /* var card = $('<div></div>').addClass("row bg-transparent m-1 p-1 border border-info")
+               .append( $('<div></div>').addClass("col-auto text-center text-white")
+                        .append($('<img>').attr("id", "idVignetteActivite_"+Response.id).addClass("wtd-vignette") )
+                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette") )
+                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette") )
+                        .append( " "+Response.page )
+                      )
+               .append( $('<div></div>').addClass("w-100") )
+               .append( $('<div></div>').addClass("col-4 text-center")
+                        .append( $('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
+                                                                                  : "/img/syn_"+Response.image+".png") )
+                                           .attr("onclick", "Change_page('"+Response.page+"')")
+                                           .addClass("wtd-synoptique")
+                               )
+                      )
+               .append( $('<div></div>').addClass("col-8 text-white text-center align-self-center")
+/*                        .append( $('<div></div>').addClass("row")
+                                 .append ( $('<div></div>').addClass("col text-left text-white")
+                                           .append( " "+Response.page )
+                                         )
+                               )
+                        .append( Response.libelle )
+                      );*/
 
-    var card_header = $('<div></div>');
-    card_header.addClass("card-header text-center");
-
-    var activite = $('<img>');
-    activite.attr("id", "idVignetteActivite_"+Response.id);
-    activite.addClass("wtd-vignette");
-    card_header.append(activite);
-    card.append(card_header);
-
-    var secu_bien = $('<img>');
-    secu_bien.attr("id", "idVignetteSecuBien_"+Response.id);
-    secu_bien.addClass("wtd-vignette");
-    card_header.append(secu_bien);
-
-    var secu_pers = $('<img>');
-    secu_pers.attr("id", "idVignetteSecuPers_"+Response.id);
-    secu_pers.addClass("wtd-vignette");
-    card_header.append(secu_pers);
-    card_header.append(" "+Response.page);
-
-    var card_body = $('<div></div>');
-    card_body.addClass("card-body text-center");
-
-    var img = $('<img>');
-    if (Response.image=="custom") { img.attr("src", "/upload/syn_"+Response.id+".jpg"); }
-                             else { img.attr("src", "/img/syn_"+Response.image+".png"); }
-    img.attr("onclick", "Change_page('"+Response.page+"')");
-    img.addClass("wtd-synoptique");
-    card_body.append(img);
-    card.append(card_body);
-
-    var card_footer = $('<div></div>');
-    card_footer.addClass("card-footer text-center");
-    card_footer.append("<p>"+Response.libelle+"</p>");
-    card.append(card_footer);
+    var card = $('<div></div>').addClass("card bg-transparent m-1")
+               .append( $('<div></div>').addClass("card-header text-center")
+                        .append($('<img>').attr("id", "idVignetteActivite_"+Response.id).addClass("wtd-vignette") )
+                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette") )
+                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette") )
+                        .append( " "+Response.page )
+                      )
+               .append( $('<div></div>').addClass("card-body text-center")
+                        .append( $('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
+                                                                                  : "/img/syn_"+Response.image+".png") )
+                                 .attr("onclick", "Change_page('"+Response.page+"')")
+                                 .addClass("wtd-synoptique")
+                               )
+                      )
+               .append( $('<div></div>').addClass("card-footer text-center")
+                        .append( "<p>"+Response.libelle+"</p>" )
+                      );
 
     return(card);
   }
@@ -211,9 +223,9 @@
      { var Response = JSON.parse(event.data);                                               /* Pointe sur <synoptique a=1 ..> */
        console.debug (Response);
        if (!Synoptique) return;
-            if (Response.zmq_tag == "DLS_HISTO")
+            if (Response.zmq_tag == "DLS_HISTO" && Messages_loaded==true)
         { if (Response.syn_id == Synoptique.id)                                     /* S'agit-il d'un message de notre page ? */
-           { Charger_messages ( Synoptique.syn_page ); }
+           { $('#idTableMessages').DataTable().ajax.reload( null, false ); }
         }
        else if (Response.zmq_tag == "SET_SYN_VARS")
         { $.each ( Response.syn_vars, function (i, item) { Set_syn_vars ( item.id, item ); } ); }

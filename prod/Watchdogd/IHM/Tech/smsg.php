@@ -1,12 +1,11 @@
 <div class="container">
 
  <div class="row m-2">
-   <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Configuration du GSM</h3>
+   <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Configuration des GSM</h3>
 
    <div class ="ml-auto btn-group align-items-center">
         <button type="button" onclick="Redirect('/tech/smsg_map')" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
-        <button type="button" onclick="SMS_refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
-        <button type="button" onclick="Redirect('/tech/process')" class="btn btn-secondary"><i class="fas fa-microchip"></i> Processus</button>
+        <button type="button" onclick="SMS_Load_config()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
         <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
  </div>
@@ -23,34 +22,35 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Choix du GSM</label>
-           <select id="idTargetInstance2" class="custom-select border-info" onchanged="Load_config_sms()"></select>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Choix du GSM</label>
+           <select id="idTargetInstance" class="custom-select border-info" onchanged="SMS_Load_config()"></select>
      					</div>
   					</div>
+
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">GSM Tech_ID</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">GSM Tech_ID</label>
 						     <input id="idGSMTechID" type="text" class="form-control" placeholder="Tech_ID du GSM">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">GSM Description</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">GSM Description</label>
 						     <input id="idGSMDescription" type="text" class="form-control" placeholder="Description du téléphone et/ou sa position">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">GSM Communication</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">GSM Communication</label>
 						     <input id="idGSMComm" type="text" class="form-control" placeholder="Communication" disabled>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Nombre de SMS envoyés</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Nombre de SMS envoyés</label>
 						     <input id="idGSMNbrSMS" disabled type="number" class="form-control" placeholder="Nombre de SMS envoyés">
      					</div>
   					</div>
@@ -67,7 +67,7 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">OVH Service Name</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">OVH Service Name</label>
 						     <input id="idGSMOVHServiceName" type="text" class="form-control" placeholder="OVH Service Name (sms-xxxxxx-1)">
            <a target="_blank" href="https://eu.api.ovh.com/createToken/index.cgi?GET=/sms&GET=/sms/*/jobs&POST=/sms/*/jobs" class="col-2 col-form-label">Creer un token</a>
      					</div>
@@ -75,21 +75,21 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">OVH Application Key</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">OVH Application Key</label>
 						     <input id="idGSMOVHApplicationKey" type="text" class="form-control" placeholder="OVH Application Key">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">OVH Application Secret</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">OVH Application Secret</label>
 						     <input id="idGSMOVHApplicationSecret" type="text" class="form-control" placeholder="OVH Application Secret">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">OVH Consumer Key</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">OVH Consumer Key</label>
 						     <input id="idGSMOVHConsumerKey" type="text" class="form-control" placeholder="OVH Consumer Key">
      					</div>
   					</div>

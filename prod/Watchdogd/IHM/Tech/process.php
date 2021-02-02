@@ -1,8 +1,10 @@
 <div class="container-fluid">
 
  <div class="row m-2">
-   <h3><i class="fas fa-microchip text-primary"></i> Liste des Processus sur <strong id='idTitleInstance'></strong></h3>
-
+   <div class="col-auto"> <h3><i class="fas fa-microchip text-primary"></i> Liste des Processus sur</h3> </div>
+  	<div class="col-auto">
+     <select id='idTargetInstance' onchange="Process_change_target_instance()" class="custom-select border-info"></select>
+   </div>
  </div>
 
 <hr>

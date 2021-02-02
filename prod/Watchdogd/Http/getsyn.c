@@ -32,6 +32,33 @@
  #include "watchdogd.h"
  #include "Http.h"
  extern struct HTTP_CONFIG Cfg_http;
+#ifdef bouh
+/******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_Acquitter_synoptique_reel ( gpointer user_data, struct DLS_SYN *dls_syn )
+  { gint syn_id = GPOINTER_TO_INT(user_data);
+    if (dls_syn->syn_vars.syn_id == syn_id)
+     { GSList *liste = dls_syn->Dls_plugins;
+       while (liste)
+        { struct DLS_PLUGIN *plugin = liste->data;
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Synoptique %d -> plugin '%s' (%s) acquitté", __func__,
+                    plugin->syn_id, plugin->tech_id, plugin->shortname );
+          plugin->vars.bit_acquit = TRUE;
+          liste = g_slist_next( liste );
+        }
+     }
+  }
+/******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Http_Acquitter_synoptique ( gint id )
+  { Dls_foreach_syns ( GINT_TO_POINTER(id), Http_Acquitter_synoptique_reel ); }
+#endif
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -394,21 +421,21 @@
      }
 
     if (page_src)
-     { g_snprintf(chaine, sizeof(chaine), "SELECT tech_id, shortname, name FROM dls INNER JOIN syns ON dls.syn_id = syns.id "
-                                          "WHERE syns.page='%s' AND syns.access_level<=%d", page, session->access_level);
+     { g_snprintf(chaine, sizeof(chaine), "SELECT sm.* FROM syns_motifs AS sm INNER JOIN syns ON syns.id = sm.syn_id "
+                                          "WHERE sm.auto_create=1 AND syns.page='%s' AND syns.access_level<=%d", page, session->access_level);
      }
     else
-     { g_snprintf(chaine, sizeof(chaine), "SELECT tech_id, shortname, name FROM dls INNER JOIN syns ON dls.syn_id = syns.id "
-                                          "WHERE syns.id='1' AND syns.access_level<=%d", session->access_level);
+     { g_snprintf(chaine, sizeof(chaine), "SELECT sm.* FROM syns_motifs AS sm INNER JOIN syns ON syns.id = sm.syn_id "
+                                          "WHERE sm.auto_create=1 AND syns.id='1' AND syns.access_level<=%d", session->access_level);
      }
-    if (SQL_Select_to_JSON ( builder, "child_dls", chaine ) == FALSE)
+    if (SQL_Select_to_JSON ( builder, "motifs", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
      }
 
     Json_add_array ( builder, "syn_vars" );
-    Dls_foreach ( builder, NULL, Dls_syn_vars_to_json );
+    Dls_foreach_syns ( builder, Dls_syn_vars_to_json );
     Json_end_array ( builder );
 
     buf = Json_get_buf (builder, &taille_buf);

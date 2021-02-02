@@ -16,16 +16,10 @@
 
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Del ( type, selection )
-  { $('#idModalModbusDelTitre').text ( "Détruire le mapping ?" );
-    $('#idModalModbusDelMessage').html("Etes-vous sur de vouloir supprimer ce mapping ?"+
-                                    "<hr>"+
-                                    "<strong>"+selection.map_tech_id+":"+selection.map_tag +
-                                    " <-> " + selection.tech_id + ":" + selection.acronyme + "</strong>" +
-                                    "<br>" + selection.libelle
-                                   );
-    $('#idModalModbusDelValider').attr( "onclick",
-                                        "Valider_Modbus_Del('"+type+"','"+selection.map_tech_id+"','"+selection.map_tag+"')" );
-    $('#idModalModbusDel').modal("show");
+  { Show_modal_del ( "Détruire le mapping ?", "Etes-vous sur de vouloir supprimer ce mapping ?",
+                     selection.map_tech_id+":"+selection.map_tag +
+                     " <-> " + selection.tech_id + ":" + selection.acronyme + " - " +
+                     selection.libelle, "Valider_Modbus_Del('"+type+"','"+selection.map_tech_id+"','"+selection.map_tag+"')" );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Del_DI ( id )
