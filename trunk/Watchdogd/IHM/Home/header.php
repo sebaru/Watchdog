@@ -43,8 +43,8 @@
 
         .wtd-menu
           { border-radius: 20%;
-            width: 48px;
-            height: 48px;
+            max-width: 48px;
+            max-height: 48px;
             cursor: pointer;
           }
 
@@ -67,12 +67,12 @@
               max-width: 64px;
             }
            .wtd-vignette
-            { width: 16px;
-              height: 16px;
+            { max-width: 16px;
+              max-height: 16px;
             }
            .wtd-menu
-             { width: 32px;
-               height: 32px;
+             { max-width: 32px;
+               max-height: 32px;
              }
          }
 
