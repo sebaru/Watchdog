@@ -51,7 +51,7 @@
 
 
 <div class="position-fixed" style="bottom: 3rem; right: 3rem; z-index:9999">
-  <div id="idToastStatus" data-delay="3000" class="toast bg-success" role="status">
+  <div id="idToastStatus" data-delay="3000" class="toast hide bg-success" role="status">
    <div class="toast-header">
      <strong class="mr-auto"> Résultat de la commande</strong>
      <!--<small>11 mins ago</small>-->
