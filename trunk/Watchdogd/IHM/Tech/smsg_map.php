@@ -1,11 +1,11 @@
 <div class="container-fluid">
 
  <div class="row m-2">
-   <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Mapping des Entrées SMS via GSM</h3>
+   <h3><img src="/img/sms.jpg" style="width:80px" alt="Commancol-5 col-sm-4  SMS">Mapping col-5 col-sm-4  Entrées SMS via GSM</h3>
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Show_Modal_Map_Edit_DI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping GSM</button>
-        <button type="button" onclick="Redirect('/tech/smsg')" class="btn btn-primary"><i class="fas fa-list"></i> Liste des GSM</button>
+        <button type="button" onclick="Redirect('/tech/smsg')" class="btn btn-primary"><i class="fas fa-list"></i> Liste col-5 col-sm-4  GSM</button>
    </div>
  </div>
 

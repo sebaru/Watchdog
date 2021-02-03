@@ -35,35 +35,35 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">TechID</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">TechID</label>
 						     <input id="idModalUpsEditTechID" required type="text" class="form-control" placeholder="Tech ID de l'onduleur">
      					</div>
    					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">UPS Name</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">UPS Name</label>
 						     <input id="idModalUpsEditName" required type="text" class="form-control" placeholder="Nom de l'onduleur">
      					</div>
    					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">UPS Host</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">UPS Host</label>
 						     <input id="idModalUpsEditHost" required type="text" class="form-control" placeholder="@IP ou hostname de l'onduleur">
      					</div>
    					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Admin Username</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Admin Username</label>
 						     <input id="idModalUpsEditAdminUsername" type="text" class="form-control" placeholder="Username de connexion à l'UPS">
      					</div>
         </div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Admin Password</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Admin Password</label>
 						     <input id="idModalUpsEditAdminPassword" type="text" class="form-control" placeholder="Password de connexion à l'UPS">
      					</div>
         </div>
