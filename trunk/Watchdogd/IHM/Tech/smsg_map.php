@@ -1,11 +1,11 @@
 <div class="container-fluid">
 
  <div class="row m-2">
-   <h3><img src="/img/sms.jpg" style="width:80px" alt="Commancol-5 col-sm-4  SMS">Mapping col-5 col-sm-4  Entrées SMS via GSM</h3>
+   <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Mapping des Entrées SMS via GSM</h3>
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Show_Modal_Map_Edit_DI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping GSM</button>
-        <button type="button" onclick="Redirect('/tech/smsg')" class="btn btn-primary"><i class="fas fa-list"></i> Liste col-5 col-sm-4  GSM</button>
+        <button type="button" onclick="Redirect('/tech/smsg')" class="btn btn-primary"><i class="fas fa-list"></i> Liste des GSM</button>
    </div>
  </div>
 
@@ -42,35 +42,35 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">GSM Tech_ID</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">GSM Tech_ID</label>
 						     <select id="idModalEditGSMTechID" class="custom-select border-info"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Commande SMS</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Commande SMS</label>
 						     <input id="idModalEditGSMTag" type="text" class="form-control" placeholder="Commande SMS">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Rechercher une Target</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
 						     <input id="idModalEditRechercherTechID" oninput="GSMMap_Update_Choix_Tech_ID()" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Target TechID</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
 						     <select id="idModalEditSelectTechID" onchange="GSMMap_Update_Choix_Acronyme()" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Target Acronyme</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
 						     <select id="idModalEditSelectAcronyme" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
