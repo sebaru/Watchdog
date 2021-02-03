@@ -107,7 +107,7 @@
     { result =  "<button "+
                 "class='btn btn-"+color+" btn-block btn-sm' "+
                 "data-toggle='tooltip' title='"+tooltip+"' "+
-                ">"+texte+
+                "disabled>"+texte+
                 "</button>";
     }
    return( result );
