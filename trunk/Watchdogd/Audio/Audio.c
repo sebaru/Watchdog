@@ -160,6 +160,7 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct ZMQUEUE *zmq_from_bus;
+    struct ZMQUEUE *zmq_to_master;
 
 reload:
     memset( &Cfg_audio, 0, sizeof(Cfg_audio) );                                     /* Mise a zero de la structure de travail */
@@ -175,9 +176,14 @@ reload:
      }
 
     zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Send_zmq_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 900 );
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { gchar buffer[1024];
+
+       if (!(Partage->top % 600))
+        { Send_zmq_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 900 ); }
 
        JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
        if (request)
@@ -231,7 +237,9 @@ reload:
           json_node_unref ( request );
         }
      }
+    Send_zmq_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 0 );
     Close_zmq ( zmq_from_bus );
+    Close_zmq ( zmq_to_master );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
