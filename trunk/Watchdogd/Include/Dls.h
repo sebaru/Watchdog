@@ -277,6 +277,7 @@
  extern void Dls_arbre_dls_syn_erase ( void );
  extern void Dls_recalculer_arbre_dls_syn ( void );
  extern void Dls_acquitter_plugin ( gchar *tech_id );
+ extern struct DLS_SYN *Dls_search_syn ( gint id );
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
  extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech, gboolean in_range );

@@ -62,16 +62,14 @@
      { Set_vignette ( "idMasterVignetteSecuPers", "secu_pers", secu_pers_coul, secu_pers_cligno ); }
   }
 /******************************************************************************************************************************/
- function Charger_messages ( page )
-  { if (page == null || page == "") { param = ""; } else { param = "page="+page; }
-    if (Messages_loaded==true)
-     { $('#idTableMessages').DataTable().ajax.page = page;
-       $('#idTableMessages').DataTable().ajax.url("/api/histo/alive?"+param).load();
+ function Charger_messages ( syn_id )
+  { if (Messages_loaded==true)
+     { $('#idTableMessages').DataTable().ajax.url("/api/histo/alive?syn_id="+syn_id).load();
      }
     else $('#idTableMessages').DataTable(
         { pageLength : 25,
           fixedHeader: true, searching: false, paging:false,
-          ajax: {	url: "/api/histo/alive?"+param, type : "GET", dataSrc: "enregs",
+          ajax: {	url: "/api/histo/alive?syn_id="+syn_id, type : "GET", dataSrc: "enregs",
                   error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                 },
           rowId: "id",
@@ -127,10 +125,10 @@
      Messages_loaded = true;
   }
 /********************************************* Appelé au chargement de la page ************************************************/
- function Change_page ( page )
+ function Change_page ( syn_id )
   { $('#bodycard').fadeOut("fast", function ()
      { $('#bodycard').empty();
-       Send_to_API ( "GET", "/api/syn/show", (page === "" ? null : "page="+page), function(Response)
+       Send_to_API ( "GET", "/api/syn/show", "syn_id="+syn_id, function(Response)
         { console.log(Response);
           Synoptique = Response;
           $('#idPageTitle').text(Response.libelle);
@@ -142,45 +140,27 @@
           Set_syn_vars ( Response.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
           if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg" ); }
                                    else { Changer_img_src ( 'idMenuImgAccueil', "/img/syn_"+Response.image+".png" ); }
+          $.each ( Response.visuels, function (i, visuel)
+                    { $('#bodycard').append ( Creer_visuel ( visuel ) );
+                    }
+                 );
+          $.each ( Response.etat_visuels, function (i, etat_visuel)
+                    { Changer_etat_visuel ( etat_visuel );
+                    }
+                 );
           $('#bodycard').fadeIn("slow");
         }, null );
      });
 
     $('#idTableMessages').fadeOut("fast", function ()
-     { Charger_messages ( page );
+     { Charger_messages ( syn_id );
        $('#idTableMessages').fadeIn("slow");
      }, null);
 
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Creer_card ( Response )
-  {
-
-   /* var card = $('<div></div>').addClass("row bg-transparent m-1 p-1 border border-info")
-               .append( $('<div></div>').addClass("col-auto text-center text-white")
-                        .append($('<img>').attr("id", "idVignetteActivite_"+Response.id).addClass("wtd-vignette") )
-                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette") )
-                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette") )
-                        .append( " "+Response.page )
-                      )
-               .append( $('<div></div>').addClass("w-100") )
-               .append( $('<div></div>').addClass("col-4 text-center")
-                        .append( $('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
-                                                                                  : "/img/syn_"+Response.image+".png") )
-                                           .attr("onclick", "Change_page('"+Response.page+"')")
-                                           .addClass("wtd-synoptique")
-                               )
-                      )
-               .append( $('<div></div>').addClass("col-8 text-white text-center align-self-center")
-/*                        .append( $('<div></div>').addClass("row")
-                                 .append ( $('<div></div>').addClass("col text-left text-white")
-                                           .append( " "+Response.page )
-                                         )
-                               )
-                        .append( Response.libelle )
-                      );*/
-
-    var card = $('<div></div>').addClass("card bg-transparent m-1")
+  { var card = $('<div></div>').addClass("card bg-transparent m-1")
                .append( $('<div></div>').addClass("card-header text-center")
                         .append($('<img>').attr("id", "idVignetteActivite_"+Response.id).addClass("wtd-vignette") )
                         .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette") )
@@ -190,7 +170,7 @@
                .append( $('<div></div>').addClass("card-body text-center")
                         .append( $('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
                                                                                   : "/img/syn_"+Response.image+".png") )
-                                 .attr("onclick", "Change_page('"+Response.page+"')")
+                                 .attr("onclick", "Change_page("+Response.id+")")
                                  .addClass("wtd-synoptique")
                                )
                       )
@@ -201,9 +181,49 @@
     return(card);
   }
 /********************************************* Appelé au chargement de la page ************************************************/
+ function Changer_etat_visuel ( etat )
+  { if (Synoptique==null) return;
+    var idvisuel = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme;
+    var idimage  = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme+"-img";
+    visuels = Synoptique.visuels.filter( function (item) { return(item.tech_id==etat.tech_id && item.acronyme==etat.acronyme); });
+    if (visuels.length!=1) return;
+    visuel = visuels[0];
+    if (visuel.mode_affichage == "cadre")
+     { Changer_img_src ( idimage, "/img/"+visuel.forme+"."+visuel.extension);
+       style = "none";
+       if (etat.color=="darkgreen") style="dotted";
+       $("#"+idvisuel).css("border", "medium "+style+" "+etat.color );
+     }
+    if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
+                else $("#"+idimage).removeClass("wtd-cligno");
+    $("#"+idvisuel).css("border-radius", "30px" );
+  }
+/********************************************* Appelé au chargement de la page ************************************************/
+ function Creer_visuel ( Response )
+  { var id = "wtd-visu-"+Response.tech_id+"-"+Response.acronyme;
+    var card = $('<div></div>').addClass("row bg-transparent m-1")
+               .append( $('<div></div>').addClass("col m-1 text-center text-white")
+                        .append( Response.dls_shortname )
+                      )
+               .append( $('<div></div>').addClass("w-100") )
+               .append( $('<div></div>').addClass("col text-center")
+                        .append( $('<img>') /*.attr("src", "/img/"+Response.forme+"."+Response.extension)*/
+                                 /*.attr("onclick", "Change_page('"+Response.page+"')")*/
+                                 .addClass("wtd-visuel")
+                                 /*.addClass("wtd-cligno")*/
+                                 .attr ( "id", id+"-img" )
+                               )
+                      )
+               .append( $('<div></div>').addClass("w-100") )
+               .append( $('<div></div>').addClass("col m-1 text-center text-white")
+                        .append( Response.libelle )
+                      )
+               .attr ( "id", id );
+    return(card);
+  }
+/********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { vars = window.location.pathname.split('/');
-    Change_page ( vars[1] );
+  { Change_page (1);
 
     var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/live-msgs", "live-msgs");
     WTDWebSocket.onopen = function (event)
@@ -221,7 +241,6 @@
      }
     WTDWebSocket.onmessage = function (event)
      { var Response = JSON.parse(event.data);                                               /* Pointe sur <synoptique a=1 ..> */
-       console.debug (Response);
        if (!Synoptique) return;
             if (Response.zmq_tag == "DLS_HISTO" && Messages_loaded==true)
         { if (Response.syn_id == Synoptique.id)                                     /* S'agit-il d'un message de notre page ? */
@@ -229,6 +248,8 @@
         }
        else if (Response.zmq_tag == "SET_SYN_VARS")
         { $.each ( Response.syn_vars, function (i, item) { Set_syn_vars ( item.id, item ); } ); }
+       else if (Response.zmq_tag == "pulse")
+        { }
        else console.log("zmq_tag: " + Response.zmq_tag + " not known");
      }
 

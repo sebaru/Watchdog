@@ -19,16 +19,16 @@
           <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#idTabEntreeTor">
                   <img style="width: 30px" data-toggle="tooltip" title="Entrées TOR"
-                       src="https://icons.abls-habitat.fr/assets/gif/Entree.png" />Entrées TOR</a></li>
+                       src="/img/Entree.png" />Entrées TOR</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabEntreeAna">
                   <img style="width: 30px" data-toggle="tooltip" title="Entrées ANA"
-                       src="https://icons.abls-habitat.fr/assets/gif/Entree_Analogique.png" />Entrées ANA</a></li>
+                       src="/img/Entree_Analogique.png" />Entrées ANA</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieTor">
                   <img style="width: 30px" data-toggle="tooltip" title="Sorties TOR"
-                       src="https://icons.abls-habitat.fr/assets/gif/Sortie.png" />Sorties TOR</a></li>
+                       src="/img/Sortie.png" />Sorties TOR</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieAna">
                   <img style="width: 30px" data-toggle="tooltip" title="Sorties ANA"
-                       src="https://icons.abls-habitat.fr/assets/gif/Sortie_Analogique.png" />Sorties ANA</a></li>
+                       src="/img/Sortie_Analogique.png" />Sorties ANA</a></li>
           </ul>
 
 <div class="tab-content">

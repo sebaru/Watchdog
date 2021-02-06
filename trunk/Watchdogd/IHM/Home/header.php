@@ -56,6 +56,14 @@
                           cursor: pointer;
                         }
 
+        .wtd-visuel { border-radius: 20%;
+                      width: auto;
+                      height: auto;
+                      max-height: 96px;
+                      max-width: 96px;
+                      cursor: pointer;
+                    }
+
         .wtd-vignette
           { width: 24px;
             height: 24px;
@@ -71,6 +79,10 @@
               max-height: 16px;
             }
            .wtd-menu
+             { max-width: 32px;
+               max-height: 32px;
+             }
+           .wtd-visuel
              { max-width: 32px;
                max-height: 32px;
              }
