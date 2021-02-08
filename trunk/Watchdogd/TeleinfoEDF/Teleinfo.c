@@ -192,8 +192,6 @@ end:
      { Send_AI_to_master ( "PAPP", Cfg_teleinfo.buffer + 5 ); }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     Cfg_teleinfo.last_view = Partage->top;
-    if (!Partage->top % 300)
-     { Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 400 ); }
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread Teleinfo                                                                               */
@@ -260,6 +258,8 @@ reload:
                 Processer_trame();
                 nbr_octet_lu = 0;
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
+                if (!(Partage->top % 300))
+                 { Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 400 ); }
               }
              else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO)                        /* Encore en dessous de la limite ? */
               { /* Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
