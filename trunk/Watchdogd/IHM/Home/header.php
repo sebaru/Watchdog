@@ -150,7 +150,7 @@
 
 <header>
 	<nav class="navbar navbar-dark navbar-expand-md fixed-top shadow"> <!-- fixed-top -->
-  <a class="navbar-brand" href="#" onclick="Change_page('')">
+  <a class="navbar-brand" href="#" onclick="Change_page('1')">
     <img src="/img/syn_home.png" alt="Accueil" class="wtd-menu">
   </a>
 

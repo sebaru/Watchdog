@@ -2149,6 +2149,21 @@ encore:
     database_version = 5336;
 
 fin:
+    g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
+    Lancer_requete_SQL ( db, requete );
+
+    g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `icone` ("
+                                          "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                                          "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
+                                          "`mode_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
+                                          "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
+                                          "PRIMARY KEY (`id`)"
+                                          ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
+    Lancer_requete_SQL ( db, requete );
+
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='wago_750342', mode_affichage='cadre', extension='webp'" );
+    Lancer_requete_SQL ( db, requete );
+
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
                                           "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "

@@ -74,7 +74,7 @@
                 },
           rowId: "id",
           columns:
-           [ { "data": null, "title":"Type", "className": "align-middle text-center bg-dark",
+           [ { "data": null, "title":"-", "className": "align-middle text-center bg-dark",
                "render": function (item)
                  {      if (item.typologie==0) { cligno = false; img = "info.svg"; } /* etat */
                    else if (item.typologie==1) { cligno = true;  img = "bouclier_rouge.svg"; } /* alerte */
@@ -90,7 +90,7 @@
                  }
              },
              { "data": "date_create", "title":"Apparition", "className": "text-center bg-dark d-none d-sm-table-cell" },
-             { "data": "dls_shortname", "title":"Objet", "className": "text-center bg-dark d-none d-sm-table-cell" },
+             { "data": "dls_shortname", "title":"Objet", "className": "text-center bg-dark " },
              { "data": "libelle", "title":"Message", "className": "text-center bg-dark" },
              { "data": null, "title":"Acquit", "className": "align-middle text-center bg-dark d-none d-sm-table-cell",
                "render": function (item)
@@ -185,14 +185,25 @@
   { if (Synoptique==null) return;
     var idvisuel = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme;
     var idimage  = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme+"-img";
+    var idheader = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme+"-header-text";
+    var idfooter = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme+"-footer-text";
     visuels = Synoptique.visuels.filter( function (item) { return(item.tech_id==etat.tech_id && item.acronyme==etat.acronyme); });
     if (visuels.length!=1) return;
     visuel = visuels[0];
-    if (visuel.mode_affichage == "cadre")
+/*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
+         if (etat.color=="darkgreen")
+     { Changer_img_src ( idimage, "/img/"+visuel.forme+"."+visuel.extension);
+       $("#"+idvisuel).css("border", "medium dashed darkgreen" );
+       $("#"+idheader).css("background-color", "darkgreen" );
+       $("#"+idfooter).css("background-color", "darkgreen" );
+     }
+/*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
+    else if (visuel.mode_affichage=="cadre")
      { Changer_img_src ( idimage, "/img/"+visuel.forme+"."+visuel.extension);
        style = "none";
-       if (etat.color=="darkgreen") style="dotted";
-       $("#"+idvisuel).css("border", "medium "+style+" "+etat.color );
+       $("#"+idvisuel).css("border", "medium solid "+etat.color );
+       $("#"+idheader).css("background-color", "transparent" );
+       $("#"+idfooter).css("background-color", "transparent" );
      }
     if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
                 else $("#"+idimage).removeClass("wtd-cligno");
@@ -202,8 +213,10 @@
  function Creer_visuel ( Response )
   { var id = "wtd-visu-"+Response.tech_id+"-"+Response.acronyme;
     var card = $('<div></div>').addClass("row bg-transparent m-1")
-               .append( $('<div></div>').addClass("col m-1 text-center text-white")
-                        .append( Response.dls_shortname )
+               .append( $('<div></div>').addClass("col mt-2 text-center text-white")
+                        .append( $('<p></p>').text (Response.dls_shortname )
+                                 .attr ( "id", id+"-header-text" )
+                               )
                       )
                .append( $('<div></div>').addClass("w-100") )
                .append( $('<div></div>').addClass("col text-center")
@@ -215,8 +228,10 @@
                                )
                       )
                .append( $('<div></div>').addClass("w-100") )
-               .append( $('<div></div>').addClass("col m-1 text-center text-white")
-                        .append( Response.libelle )
+               .append( $('<div></div>').addClass("col mt-2 text-center text-white")
+                        .append( $('<p></p>').text(Response.libelle)
+                                 .attr ( "id", id+"-footer-text" )
+                               )
                       )
                .attr ( "id", id );
     return(card);
