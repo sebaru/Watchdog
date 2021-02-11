@@ -205,8 +205,8 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Activer_plugin ( gchar *tech_id, gboolean actif )
-  { if (actif) Dls_foreach_plugins ( tech_id, Dls_stop_plugin_reel );
-          else Dls_foreach_plugins ( tech_id, Dls_start_plugin_reel );
+  { if (actif) Dls_foreach_plugins ( tech_id, Dls_start_plugin_reel );
+          else Dls_foreach_plugins ( tech_id, Dls_stop_plugin_reel );
   }
 /******************************************************************************************************************************/
 /* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                                              */
