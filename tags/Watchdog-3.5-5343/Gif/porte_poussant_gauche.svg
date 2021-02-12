@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="100"
+   height="100"
+   viewBox="0 0 26.458333 26.458335"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="porte_poussant_gauche.svg"
+   inkscape:version="0.92+devel unknown"
+   onclick="mouse_click(evt)">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="5.6"
+     inkscape:cx="57.339229"
+     inkscape:cy="37.584555"
+     inkscape:document-units="px"
+     inkscape:current-layer="Layer 1"
+     inkscape:document-rotation="0"
+     showgrid="true"
+     units="px"
+     objecttolerance="10000"
+     guidetolerance="10000"
+     inkscape:window-width="1871"
+     inkscape:window-height="1008"
+     inkscape:window-x="49"
+     inkscape:window-y="48"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4267"
+       originx="0.13229166"
+       originy="260.0906" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="Layer 1">
+    <rect
+       class="WTD-ActiveFillColor"
+       style="fill:#c8c8c8;stroke:#000000;stroke-width:0.26458332;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="Dormant_g"
+       width="5.2916665"
+       height="5.2916665"
+       x="0.14174107"
+       y="1.5875001" />
+    <rect
+       class="WTD-ActiveFillColor"
+       style="fill:#c8c8c8;stroke:#000000;stroke-width:0.26458332;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="Dormant_d"
+       width="5.2916665"
+       height="5.2916665"
+       x="21.141741"
+       y="1.5875001" />
+    <rect
+       style="fill:#c8c8c8;stroke:#000000;stroke-width:0.25876632;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="porte"
+       width="15.708332"
+       height="2.6458509"
+       x="5.4334078"
+       y="4.2333159"
+       inkscape:transform-center-x="-7.8850836"
+       inkscape:transform-center-y="-2.8852345"
+       class="WTD-ActiveFillColor WTD-StateEvent">
+      <animateTransform
+         attributeName="transform"
+         attributeType="XML"
+         type="rotate"
+         from="0, 21.134346, 8.3356247"
+         to="-50, 21.134346, 8.3356247"
+         begin="state_1"
+         dur="0.5s"
+         fill="freeze" />
+      <animateTransform
+         attributeName="transform"
+         attributeType="XML"
+         type="rotate"
+         from="-50, 21.134346, 8.3356247"
+         to="0, 21.134346, 8.3356247"
+         begin="state_0"
+         dur="0.5s"
+         fill="freeze" />
+    </rect>
+    <circle
+       style="fill:#c8c8c8;stroke:#000000;stroke-width:0.26458332;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="gond"
+       cx="21.134346"
+       cy="8.3356247"
+       r="1.3229166"
+       class="WTD-ActiveFillColor" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 6.8413658,6.9023388 c 0,1.32292 2.6458315,1.32292 2.6458315,1.32292"
+       id="poigne"
+       inkscape:connector-curvature="0"
+       class="WTD-StateEvent">
+      <animateTransform
+         attributeName="transform"
+         attributeType="XML"
+         type="rotate"
+         from="0, 21.134346, 8.3356247"
+         to="-50, 21.134346, 8.3356247"
+         begin="state_1"
+         dur="0.5s"
+         fill="freeze" />
+      <animateTransform
+         attributeName="transform"
+         attributeType="XML"
+         type="rotate"
+         from="-50, 21.134346, 8.3356247"
+         to="0, 21.134346, 8.3356247"
+         begin="state_0"
+         dur="0.5s"
+         fill="freeze" />
+    </path>
+  </g>
+</svg>
