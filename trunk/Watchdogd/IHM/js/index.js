@@ -70,7 +70,7 @@
         { pageLength : 25,
           fixedHeader: true, searching: false, paging:false,
           ajax: {	url: "/api/histo/alive?syn_id="+syn_id, type : "GET", dataSrc: "enregs",
-                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+                  error: function ( xhr, status, error ) { /*Show_Error(xhr.statusText);*/ }
                 },
           rowId: "id",
           columns:
