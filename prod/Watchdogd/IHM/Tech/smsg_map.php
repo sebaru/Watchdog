@@ -42,35 +42,35 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">GSM Tech_ID</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">GSM Tech_ID</label>
 						     <select id="idModalEditGSMTechID" class="custom-select border-info"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Commande SMS</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Commande SMS</label>
 						     <input id="idModalEditGSMTag" type="text" class="form-control" placeholder="Commande SMS">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Rechercher une Target</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
 						     <input id="idModalEditRechercherTechID" oninput="GSMMap_Update_Choix_Tech_ID()" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Target TechID</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
 						     <select id="idModalEditSelectTechID" onchange="GSMMap_Update_Choix_Acronyme()" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Target Acronyme</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
 						     <select id="idModalEditSelectAcronyme" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>

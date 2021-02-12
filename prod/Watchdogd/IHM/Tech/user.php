@@ -14,56 +14,56 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Username</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Username</label>
 						     <input id="idUserUsername" type="text" disabled class="form-control" placeholder="Mon login">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Adresse mail</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Adresse mail</label>
 						     <input id="idUserEmail" type="text" class="form-control" placeholder="Mon adresse mail">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Adresse messagerie instantanée</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Adresse messagerie instantanée</label>
 						     <input id="idUserXMPP" type="text" class="form-control" placeholder="Mon adresse de messagerie instantanée">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Téléphone</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Téléphone</label>
 						     <input id="idUserPhone" type="text" class="form-control" placeholder="Mon numéro de téléphone">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Commentaire</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Commentaire</label>
 						     <input id="idUserComment" type="text" class="form-control" placeholder="Qui suis-je ?">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Notification ?</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Notification ?</label>
 						     <input id="idUserNotification" type="checkbox" class="form-check" placeholder="Suis-je notifié ?">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Nouveau Mot de passe</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Nouveau Mot de passe</label>
 						     <input id="idUserPassword1" type="password" class="form-control" placeholder="Mon nouveau mot de passe">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Controle du nouveau<br>Mot de passe</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Controle du nouveau<br>Mot de passe</label>
 						     <input id="idUserPassword2" type="password" class="form-control" placeholder="Controle du nouveau mot de passe">
      					</div>
   					</div>

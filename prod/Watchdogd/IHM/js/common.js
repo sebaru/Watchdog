@@ -4,7 +4,6 @@
  function Send_to_API ( method, URL, parametre, fonction_ok, fonction_nok )
   { var xhr = new XMLHttpRequest;
     $(".ClassLoadingSpinner").show();
-
     if (method=="POST" || method=="PUT") { ContentType = 'application/json'; }
     else if (method=="POSTFILE") { ContentType = 'application/octet-stream'; method = "POST"; }
     else ContentType = null;
@@ -52,6 +51,8 @@
   { if (document.getElementById("idUsername") !== null)
      { document.getElementById("idUsername").innerHTML = localStorage.getItem("username");
      }
+    if (localStorage.getItem("access_level")>=6) { $('#idMenuTechnicien').show(); }
+                                            else { $('#idMenuTechnicien').hide(); }
    /* else
      { document.getElementById("idUsername").innerHTML = "Se connecter";
        document.getElementById("idHrefUsername").href = "/login";
@@ -106,7 +107,7 @@
     { result =  "<button "+
                 "class='btn btn-"+color+" btn-block btn-sm' "+
                 "data-toggle='tooltip' title='"+tooltip+"' "+
-                ">"+texte+
+                "disabled>"+texte+
                 "</button>";
     }
    return( result );

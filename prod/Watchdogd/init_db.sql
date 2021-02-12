@@ -50,34 +50,16 @@ CREATE TABLE IF NOT EXISTS `cameras` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
--- --------------------------------------------------------
-
 --
--- Structure de la table `class`
+-- Structure de la table `icone`
 --
 
-CREATE TABLE IF NOT EXISTS `class` (
+CREATE TABLE IF NOT EXISTS `icone` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `date_create` datetime NOT NULL DEFAULT NOW(),
-  `libelle` varchar(241) COLLATE utf8_unicode_ci NOT NULL,
+  `forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
+  `extension` VARCHAR(4) NOT NULL DEFAULT 'svg',
+  `mode_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',
   PRIMARY KEY (`id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `icons`
---
-
-CREATE TABLE IF NOT EXISTS `icons` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `type` varchar(4) NOT NULL DEFAULT 'svg',
-  `date_create` datetime NOT NULL DEFAULT NOW(),
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `id_classe` int(11) NOT NULL DEFAULT '0',
-  `nbr_matrice` INT(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`id_classe`) REFERENCES `class` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
 
 -- --------------------------------------------------------

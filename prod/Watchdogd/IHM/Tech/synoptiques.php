@@ -37,41 +37,42 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-4 col-form-label text-right">Page du Parent</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Page du Parent</label>
 						     <select id="idModalSynEditPPage" class="col-9 custom-select border-info"></select>
      					</div>
        </div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-4 col-form-label text-right">Nom de la Page</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Nom de la Page</label>
 						     <input id="idModalSynEditPage" type="text" class="form-control" placeholder="Titre du synoptique">
      					</div>
        </div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-4 col-form-label text-right"><i class="fas fa-star"></i> Level</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right"><i class="fas fa-star"></i> Level</label>
 						     <input id="idModalSynEditAccessLevel" type="number" class="form-control" min=0 max=9 placeholder="Level">
      					</div>
        </div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-4 col-form-label text-right">Description du synoptique</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Description du synoptique</label>
 						     <input id="idModalSynEditDescription" type="text" class="form-control" placeholder="Description du synoptique">
      					</div>
        </div>
 
        <div class="col form-group">
 					     <div class="input-group align-items-center">
-						     <label class="col-4 col-form-label text-right">Image pré-établie</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Image pré-établie</label>
 						     <select id="idModalSynEditImageSelect" class="col-6 form-control-file custom-select">
              <option value='custom'>custom</option>
              <option value='home'>Accueil</option>
              <option value='comm'>Communications</option>
              <option value='confort'>Confort</option>
              <option value='cuisine'>Cuisine</option>
+             <option value='ampoule'>Eclairage</option>
            </select>
            <img id="idModalSynEditImage" src='' class="ml-2 text-center col-2 border border-info">
      					</div>
@@ -79,7 +80,7 @@
 
        <div class="col form-group align-items-center">
 					     <div class="input-group">
-						     <label class="col-4 col-form-label text-right">Image du synoptique</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Image du synoptique</label>
 						     <input id="idModalSynEditImageCustom" type="file" accept="image/jpg" class="col-8 form-control-file" placeholder="Choisissez une image">
      					</div>
        </div>

@@ -594,7 +594,7 @@
        case ORANGE  : color="orange"; break;
        case BLANC   : color="white"; break;
        case GRIS    : color="lightgray"; break;
-       case KAKI    : color="brown"; break;
+       case KAKI    : color="darkgreen"; break;
        default      : color="black";
      }
     g_snprintf( action->alors, taille,

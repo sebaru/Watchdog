@@ -368,7 +368,8 @@
 /******************************************************************************************************************************/
  void Http_traiter_syn_show ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                               SoupClientContext *client, gpointer user_data )
-  { gchar *buf, chaine[256], page[33];
+  { gchar *buf, chaine[512];
+    gint syn_id;
     gsize taille_buf;
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -378,12 +379,9 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 0 )) return;
 
-    gchar *page_src = g_hash_table_lookup ( query, "page" );
-    if (page_src)
-     { gchar *temp = Normaliser_chaine ( page_src );
-       g_snprintf( page, sizeof(page), "%s", temp );
-       g_free(temp);
-     }
+    gchar *syn_id_src = g_hash_table_lookup ( query, "syn_id" );
+    if (syn_id_src) { syn_id = atoi (syn_id_src); }
+                 else syn_id=1;
 
     JsonBuilder *builder = Json_create ();
     if (!builder)
@@ -391,14 +389,8 @@
        return;
      }
 
-    if (page_src)
-     { g_snprintf(chaine, sizeof(chaine), "SELECT * FROM syns"
-                                          " WHERE page='%s' AND access_level<='%d'", page, session->access_level);
-     }
-    else
-     { g_snprintf(chaine, sizeof(chaine), "SELECT * FROM syns"
-                                          " WHERE id='1' AND access_level<='%d'", session->access_level);
-     }
+    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM syns"
+                                       " WHERE id='%d' AND access_level<='%d'", syn_id, session->access_level);
 
     if (SQL_Select_to_JSON ( builder, NULL, chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
@@ -406,13 +398,9 @@
        return;
      }
 
-    if (page_src)
-     { g_snprintf(chaine, sizeof(chaine), "SELECT s.* FROM syns AS s INNER JOIN syns as s2 ON s.parent_id=s2.id"
-                                          " WHERE s2.page='%s' AND s.access_level<='%d'", page, session->access_level);
-     }
-    else
-     { g_snprintf(chaine, sizeof(chaine), "SELECT * FROM syns WHERE parent_id=1 AND id!=1 AND access_level<='%d'", session->access_level);
-     }
+/*-------------------------------------------------- Envoi les data des synoptiques fils -------------------------------------*/
+    g_snprintf(chaine, sizeof(chaine), "SELECT s.* FROM syns AS s INNER JOIN syns as s2 ON s.parent_id=s2.id"
+                                       " WHERE s2.id='%d' AND s.id!=1 AND s.access_level<='%d'", syn_id, session->access_level);
 
     if (SQL_Select_to_JSON ( builder, "child_syns", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
@@ -420,23 +408,45 @@
        return;
      }
 
-    if (page_src)
-     { g_snprintf(chaine, sizeof(chaine), "SELECT sm.* FROM syns_motifs AS sm INNER JOIN syns ON syns.id = sm.syn_id "
-                                          "WHERE sm.auto_create=1 AND syns.page='%s' AND syns.access_level<=%d", page, session->access_level);
-     }
-    else
-     { g_snprintf(chaine, sizeof(chaine), "SELECT sm.* FROM syns_motifs AS sm INNER JOIN syns ON syns.id = sm.syn_id "
-                                          "WHERE sm.auto_create=1 AND syns.id='1' AND syns.access_level<=%d", session->access_level);
-     }
-    if (SQL_Select_to_JSON ( builder, "motifs", chaine ) == FALSE)
+/*-------------------------------------------------- Envoi les syn_vars ------------------------------------------------------*/
+    Json_add_array ( builder, "syn_vars" );
+    Dls_foreach_syns ( builder, Dls_syn_vars_to_json );
+    Json_end_array ( builder );
+
+/*-------------------------------------------------- Envoi les visuels de la page --------------------------------------------*/
+    g_snprintf(chaine, sizeof(chaine), "SELECT visu.*,i.*,dls.shortname AS dls_shortname FROM syns_motifs AS visu "
+                                       "INNER JOIN dls on dls.tech_id=visu.tech_id "
+                                       "INNER JOIN icone AS i ON i.forme=visu.forme "
+                                       "INNER JOIN syns AS s ON dls.syn_id=s.id "
+                                       "WHERE visu.auto_create=1 AND s.id='%d' AND s.access_level<=%d", syn_id, session->access_level);
+    if (SQL_Select_to_JSON ( builder, "visuels", chaine ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        g_object_unref(builder);
        return;
      }
 
-    Json_add_array ( builder, "syn_vars" );
-    Dls_foreach_syns ( builder, Dls_syn_vars_to_json );
-    Json_end_array ( builder );
+    struct DLS_SYN *dls_syn = Dls_search_syn ( syn_id );
+    if (dls_syn)
+     { GSList *liste_visu;
+       Json_add_array ( builder, "etat_visuels" );
+       liste_visu = Partage->Dls_data_VISUEL;
+       while(liste_visu)
+        { struct DLS_VISUEL *bit=liste_visu->data;
+          GSList *liste_plugin = dls_syn->Dls_plugins;
+          while (liste_plugin)
+           { struct DLS_PLUGIN *plugin = liste_plugin->data;
+             if (!strcasecmp(bit->tech_id, plugin->tech_id))
+              { Json_add_object ( builder, NULL );
+                Dls_VISUEL_to_json ( builder, bit );
+                Json_end_object( builder );
+              }
+             liste_plugin = g_slist_next(liste_plugin);
+           }
+          liste_visu = g_slist_next(liste_visu);
+        }
+       Json_end_array( builder );
+     }
+
 
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/

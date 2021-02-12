@@ -19,42 +19,42 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Database Server Hostname</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Database Server Hostname</label>
 						     <input id="idArchiveDBHostname" type="text" class="form-control" placeholder="ArchiveDB Server">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Database Port</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Database Port</label>
 						     <input id="idArchiveDBPort" type="number" min="0" max="65535" class="form-control" placeholder="ArchiveDB Port">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Database Name</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Database Name</label>
 						     <input id="idArchiveDBDatabase" type="text" class="form-control" placeholder="ArchiveDB Name">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Database Username</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Database Username</label>
 						     <input id="idArchiveDBUsername" type="text" class="form-control" placeholder="ArchiveDB Username">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Database Password</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Database Password</label>
 						     <input id="idArchiveDBPassword" type="password" class="form-control" placeholder="Laissez vide pour ne pas changer de password">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Durée de retention</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Durée de retention</label>
 						     <input id="idArchiveDBRetention" type="number" min="1" class="form-control" placeholder="Nombre de jours">
 						     <div class="input-group-append">
 							     <span class="input-group-text">jours</span>
@@ -64,7 +64,7 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-3 col-form-label text-right">Taille du tampon</label>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Taille du tampon</label>
 						     <input id="idArchiveDBBufferSize" type="number" min="100" class="form-control" placeholder="Nombre d'enregistrements">
 						     <div class="input-group-append">
 							     <span class="input-group-text">enregistrements</span>

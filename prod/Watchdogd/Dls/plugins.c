@@ -84,6 +84,36 @@
      }
   }
 /******************************************************************************************************************************/
+/* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */
+/* Entrée : le Dls_tree et les fonctions a appliquer                                                                          */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ static struct DLS_SYN *Dls_search_syn_reel ( struct DLS_SYN *syn_tree, gint id )
+  { GSList *liste;
+    if (syn_tree->syn_vars.syn_id == id) return(syn_tree);
+
+    liste = syn_tree->Dls_sub_syns;
+    while (liste)
+     { struct DLS_SYN *sub_tree = liste->data;
+       struct DLS_SYN *result = Dls_search_syn_reel( sub_tree, id );
+       if (result) return(result);
+       liste = liste->next;
+     }
+    return(NULL);
+  }
+/******************************************************************************************************************************/
+/* Dls_foreach: Parcours l'arbre DLS et execute des commandes en parametres                                                   */
+/* Entrée : les fonctions a appliquer                                                                                         */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ struct DLS_SYN *Dls_search_syn ( gint id )
+  { if (!Partage->com_dls.Dls_syns) return(NULL);
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    struct DLS_SYN *result = Dls_search_syn_reel( Partage->com_dls.Dls_syns, id );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+    return(result);
+  }
+/******************************************************************************************************************************/
 /* Dls_plugin_recalcule_arbre_comm: Calcule l'arbre de communication du module                                                */
 /* Entrée: Le plugin D.L.S                                                                                                    */
 /* Sortie: FALSE si problème                                                                                                  */
@@ -175,8 +205,8 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Activer_plugin ( gchar *tech_id, gboolean actif )
-  { if (actif) Dls_foreach_plugins ( tech_id, Dls_stop_plugin_reel );
-          else Dls_foreach_plugins ( tech_id, Dls_start_plugin_reel );
+  { if (actif) Dls_foreach_plugins ( tech_id, Dls_start_plugin_reel );
+          else Dls_foreach_plugins ( tech_id, Dls_stop_plugin_reel );
   }
 /******************************************************************************************************************************/
 /* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                                              */
@@ -421,6 +451,7 @@
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
     Partage->com_dls.Compil_at_boot = FALSE;/* Apres le chargement initial, on considere que la recompil n'est pas necessaire */
+    Modifier_configDB ( "dls", "compil_at_boot", "false" );
   }
 /******************************************************************************************************************************/
 /* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */

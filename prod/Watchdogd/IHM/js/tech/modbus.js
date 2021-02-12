@@ -32,14 +32,10 @@
  function Show_Modal_Modbus_Del ( tech_id )
   { table = $('#idTableModbus').DataTable();
     selection = table.ajax.json().modules.filter( function(item) { return item.tech_id==tech_id } )[0];
-    $('#idModalModbusDelTitre').text ( "Détruire le module ?" );
-    $('#idModalModbusDelMessage').html("Etes-vous sur de vouloir supprimer ce module ?"+
-                                    "<hr>"+
-                                    "<strong>"+selection.tech_id + " - " + selection.hostname + "</strong>" +
-                                    "<br>" + selection.description
-                                   );
-    $('#idModalModbusDelValider').attr( "onclick", "Valider_Modbus_Del('"+tech_id+"')" );
-    $('#idModalModbusDel').modal("show");
+    Show_modal_del ( "Détruire le module "+tech_id+" ?",
+                     "Etes-vous sur de vouloir supprimer ce module ?",
+                      selection.tech_id + " - " + selection.hostname + " - " + selection.description,
+                     "Valider_Modbus_Del('"+tech_id+"')" );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Modbus_Edit ( tech_id )

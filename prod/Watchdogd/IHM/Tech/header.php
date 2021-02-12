@@ -51,7 +51,7 @@
 
 
 <div class="position-fixed" style="bottom: 3rem; right: 3rem; z-index:9999">
-  <div id="idToastStatus" data-delay="3000" class="toast bg-success" role="status">
+  <div id="idToastStatus" data-delay="3000" class="toast hide bg-success" role="status">
    <div class="toast-header">
      <strong class="mr-auto"> Résultat de la commande</strong>
      <!--<small>11 mins ago</small>-->
@@ -165,7 +165,7 @@
 
     <ul class="navbar-nav">
 
-      <div class="mt-1 spinner-border text-primary ClassLoadingSpinner" role="status">
+      <div class="mt-1 spinner-border text-primary ClassLoadingSpinner" style="display:none" role="status">
         <span class="sr-only">Loading...</span>
       </div>
 
@@ -182,8 +182,6 @@
           <a class="dropdown-item" href="/tech/users"><i class="fas fa-users-cog text-info"></i> <span>Utilisateurs</span></a>
           <a class="dropdown-item" href="/tech/users_sessions"><i class="fas fa-list text-info"></i> <span>Sessions</span></a>
           <a class="dropdown-item" href="/tech/log"><i class="fas fa-binoculars text-warning"></i> <span>Audit Log</span></a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="/"><i class="fas fa-home text-primary"></i> <span>Mode Client</span> </a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" onclick="Logout()"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
         </div>

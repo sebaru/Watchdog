@@ -78,8 +78,8 @@
      					</div>
   					</div>
 
-   <div class ="row">
-     <div class ="ml-auto">
+   <div class="row m-2">
+     <div class="ml-auto">
         <button type="button" onclick="TINFO_Sauver_parametre()" class="btn btn-outline-success"><i class="fas fa-save"></i> Sauvegarder</button>
 			  </div>
 			</div>

@@ -2135,9 +2135,39 @@ encore:
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `is_thread` tinyint(1) NOT NULL DEFAULT '0' AFTER `id`" );
        Lancer_requete_SQL ( db, requete );
      }
-    database_version = 5274;
+
+    if (database_version < 5336)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `icone` ("
+                                             "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                                             "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
+                                             "`mode_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
+                                             "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
+                                             "PRIMARY KEY (`id`)"
+                                             ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
+       Lancer_requete_SQL ( db, requete );
+     }
+    database_version = 5336;
 
 fin:
+    g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
+    Lancer_requete_SQL ( db, requete );
+
+    g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `icone` ("
+                                          "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                                          "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
+                                          "`mode_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
+                                          "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
+                                          "PRIMARY KEY (`id`)"
+                                          ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
+    Lancer_requete_SQL ( db, requete );
+
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='wago_750342', mode_affichage='cadre', extension='webp'" );
+    Lancer_requete_SQL ( db, requete );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='satellite', mode_affichage='cadre', extension='svg'" );
+    Lancer_requete_SQL ( db, requete );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='sms', mode_affichage='cadre', extension='jpg'" );
+    Lancer_requete_SQL ( db, requete );
+
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
                                           "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "
