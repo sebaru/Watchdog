@@ -2165,6 +2165,8 @@ fin:
     Lancer_requete_SQL ( db, requete );
     g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='satellite', mode_affichage='cadre', extension='svg'" );
     Lancer_requete_SQL ( db, requete );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='sms', mode_affichage='cadre', extension='jpg'" );
+    Lancer_requete_SQL ( db, requete );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
