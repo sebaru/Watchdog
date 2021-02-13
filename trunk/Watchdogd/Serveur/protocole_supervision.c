@@ -37,7 +37,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Proto_Acquitter_synoptique ( void *user_data, struct DLS_PLUGIN *plugin )
-  { gint syn_id = *(gint *)user_data;
+  { gint syn_id = GPOINTER_TO_INT(user_data);
     if (plugin->syn_id == syn_id)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Synoptique %d -> plugin %s acquitté", __func__,
                  plugin->syn_id, plugin->nom );
