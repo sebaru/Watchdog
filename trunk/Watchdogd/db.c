@@ -2146,8 +2146,18 @@ encore:
                                              ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
        Lancer_requete_SQL ( db, requete );
      }
-    database_version = 5336;
 
+
+    if (database_version < 5349)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE histo_msgs ADD `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE histo_msgs INNER JOIN msgs ON msgs.id = histo_msgs.id_msg SET histo_msgs.libelle = msgs.libelle");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "DELETE histo_msgs FROM histo_msgs LEFT JOIN msgs ON histo_msgs.id_msg = msgs.id WHERE msgs.id IS NULL");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5349;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

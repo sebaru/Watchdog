@@ -58,7 +58,7 @@
        gpointer dls_data_p = NULL;
        g_snprintf( result, sizeof(result), "%s", prefixe );                                                       /* Prologue */
        gint type = Rechercher_DICO_type ( tech_id, acronyme );
-       if (type == MNEMO_ENTREE_ANA) 
+       if (type == MNEMO_ENTREE_ANA)
         { Dls_data_get_AI ( tech_id, acronyme, &dls_data_p );
           struct DLS_AI *ai = dls_data_p;
           if (ai)
@@ -93,6 +93,7 @@
     * */
      }
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Message parsé final: %s", __func__, libelle );
+    g_snprintf( histo.msg.libelle, sizeof(histo.msg.libelle), "%s", libelle );                /* Ecrasement libelle d'origine */
 /***************************************** Création de la structure interne de stockage ***************************************/
     histo.alive = TRUE;
     gettimeofday( &tv, NULL );
