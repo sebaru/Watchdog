@@ -102,7 +102,6 @@
     date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
     g_snprintf( histo.date_create, sizeof(histo.date_create), "%s.%02d", date_create, (gint)tv.tv_usec/10000 );
     g_free( date_create );
-    g_snprintf( histo.nom_ack, sizeof(histo.nom_ack), "None" );
     Ajouter_histo_msgsDB( &histo );                                                                    /* Si ajout dans DB OK */
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
     JsonBuilder *builder = Json_create ();
@@ -115,9 +114,9 @@
                "INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id "
                "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme );
     SQL_Select_to_JSON ( builder, NULL, chaine );
-    Json_add_bool   ( builder, "alive",            TRUE );
-    Json_add_string ( builder, "date_create",      histo.date_create );
-    Json_add_string ( builder, "nom_ack",          histo.nom_ack );
+    Json_add_bool   ( builder, "alive",       TRUE );
+    Json_add_string ( builder, "date_create", histo.date_create );
+    Json_add_string ( builder, "libelle",     histo.msg.libelle );
 
     Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_slave, Partage->com_msrv.zmq_to_bus,
                                 "msrv", "*", "*","DLS_HISTO", builder );

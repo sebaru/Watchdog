@@ -174,7 +174,7 @@
        while ( (db->row = mysql_fetch_row(db->result)) != NULL )
         { if (array_name) Json_add_object ( builder, NULL );
           for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
-           { Json_add_string( builder, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
+           { if (db->row[cpt]) Json_add_string( builder, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
           if (array_name) Json_end_object ( builder );
         }
        if (array_name) Json_end_array ( builder );
@@ -2154,6 +2154,8 @@ encore:
        g_snprintf( requete, sizeof(requete), "UPDATE histo_msgs INNER JOIN msgs ON msgs.id = histo_msgs.id_msg SET histo_msgs.libelle = msgs.libelle");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "DELETE histo_msgs FROM histo_msgs LEFT JOIN msgs ON histo_msgs.id_msg = msgs.id WHERE msgs.id IS NULL");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE histo_msgs SET nom_ack = NULL WHERE nom_ack='None'");
        Lancer_requete_SQL ( db, requete );
      }
 
