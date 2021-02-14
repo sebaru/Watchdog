@@ -29,17 +29,12 @@
  #include <sys/prctl.h>
  #include <string.h>
  #include <unistd.h>
- #include <gammu.h>
- #include <curl/curl.h>
+
 
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sms.h"
 
- static gboolean sending_is_disabled = FALSE;                      /* Variable permettant d'interdire l'envoi de sms si panic */
- static GSM_Error sms_send_status;
- static GSM_StateMachine *s=NULL;
- static INI_Section *cfg=NULL;
  struct SMS_CONFIG Cfg_smsg;
 /******************************************************************************************************************************/
 /* Smsg_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
@@ -227,8 +222,88 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Smsg_Send_CB (GSM_StateMachine *sm, int status, int MessageReference, void * user_data)
-  {	if (status==0) {	sms_send_status = ERR_NONE; }
-    else sms_send_status = ERR_UNKNOWN;
+  {	if (status==0) {	Cfg_smsg.gammu_send_status = ERR_NONE; }
+    else Cfg_smsg.gammu_send_status = ERR_UNKNOWN;
+  }
+/******************************************************************************************************************************/
+/* Smsg_disconnect: Se deconnecte du telephone ou de la clef 3G                                                               */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Smsg_disconnect ( void )
+  { GSM_Error error;
+    if (GSM_IsConnected(Cfg_smsg.gammu_machine))
+   	 { error = GSM_TerminateConnection(Cfg_smsg.gammu_machine);                                       /* Terminate connection */
+	      if (error != ERR_NONE)
+        { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
+                   "%s: TerminateConnection Failed (%s)", __func__, GSM_ErrorString(error) );
+        }
+     }
+    GSM_FreeStateMachine(Cfg_smsg.gammu_machine);                                                     	/* Free up used memory */
+    Cfg_smsg.gammu_machine = NULL;
+    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Disconnected", __func__ );
+    Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", 0 );
+    Cfg_smsg.comm_status = FALSE;
+  }
+/******************************************************************************************************************************/
+/* smsg_connect: Ouvre une connexion vers le téléphone ou la clef 3G                                                          */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static gboolean Smsg_connect ( void )
+  { GSM_Error error;
+
+    GSM_InitLocales(NULL);
+    if ( (Cfg_smsg.gammu_machine = GSM_AllocStateMachine()) == NULL )                              /* Allocates state machine */
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: AllocStateMachine Error", __func__ );
+       return(FALSE);
+     }
+
+	   error = GSM_FindGammuRC(&Cfg_smsg.gammu_cfg, NULL);
+	   if (error != ERR_NONE)
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: FindGammuRC Failed (%s)", __func__, GSM_ErrorString(error) );
+   	   Smsg_disconnect();
+       return(FALSE);
+     }
+
+   	error = GSM_ReadConfig(Cfg_smsg.gammu_cfg, GSM_GetConfig(Cfg_smsg.gammu_machine, 0), 0);
+	   if (error != ERR_NONE)
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
+                "%s: ReadConfig Failed (%s)", __func__, GSM_ErrorString(error) );
+   	   Smsg_disconnect();
+       return(FALSE);
+     }
+
+   	INI_Free(Cfg_smsg.gammu_cfg);
+   	GSM_SetConfigNum(Cfg_smsg.gammu_machine, 1);
+
+   	error = GSM_InitConnection(Cfg_smsg.gammu_machine, 1);
+	   if (error != ERR_NONE)
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: InitConnection Failed (%s)", __func__, GSM_ErrorString(error) );
+   	   Smsg_disconnect();
+       return(FALSE);
+     }
+    GSM_SetSendSMSStatusCallback(Cfg_smsg.gammu_machine, Smsg_Send_CB, NULL);
+
+    gchar constructeur[64];
+    error = GSM_GetManufacturer(Cfg_smsg.gammu_machine, constructeur);
+	   if (error != ERR_NONE)
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: GSM_GetManufacturer Failed (%s)", __func__, GSM_ErrorString(error) );
+   	   Smsg_disconnect();
+       return(FALSE);
+     }
+
+    gchar model[64];
+    error = GSM_GetModel(Cfg_smsg.gammu_machine, model);
+	   if (error != ERR_NONE)
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: GSM_GetModel Failed (%s)", __func__, GSM_ErrorString(error) );
+   	   Smsg_disconnect();
+       return(FALSE);
+     }
+
+    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Connection OK with '%s/%s'", __func__, constructeur, model );
+    Cfg_smsg.comm_status = TRUE;
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Envoi_sms_gsm: Envoi un sms par le gsm                                                                                     */
@@ -236,15 +311,13 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean Envoi_sms_gsm ( JsonNode *msg, gchar *telephone )
-  { GSM_StateMachine *s;
-    GSM_SMSMessage sms;
+  { GSM_SMSMessage sms;
     GSM_SMSC PhoneSMSC;
     gchar libelle[256];
-    INI_Section *cfg;
     GSM_Error error;
-    gint wait;
 
-    GSM_InitLocales(NULL);
+    if (Cfg_smsg.comm_status == FALSE) return(FALSE);
+
    	memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
     g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
 	  	EncodeUnicode( sms.Text, libelle, strlen(libelle));                                                /* Encode message text */
@@ -252,92 +325,43 @@ end:
 
 	   sms.PDU = SMS_Submit;                                                                        /* We want to submit message */
 	   sms.UDH.Type = UDH_NoUDH;                                                                 /* No UDH, just a plain message */
-	   sms.Coding = SMS_Coding_Default_No_Compression;                                        /* We used default coding for text */
+	   sms.Coding = SMS_Coding_Unicode_No_Compression;                                        /* We used unicode coding for text */
    	sms.Class = 1;                                                                                /* Class 1 message (normal) */
-
-
-	   if ( (s = GSM_AllocStateMachine()) == NULL )                                                   /* Allocates state machine */
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: AllocStateMachine Error", __func__ );
-       return(FALSE);
-     }
 
 	/*debug_info = GSM_GetDebug(s);
 	GSM_SetDebugGlobal(FALSE, debug_info);
 	GSM_SetDebugFileDescriptor(stderr, TRUE, debug_info);
 	GSM_SetDebugLevel("textall", debug_info);*/
 
-	   error = GSM_FindGammuRC(&cfg, NULL);
-	   if (error != ERR_NONE)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                "%s: FindGammuRC Failed (%s)", __func__, GSM_ErrorString(error) );
-       if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
-       goto end;
-     }
-
-   	error = GSM_ReadConfig(cfg, GSM_GetConfig(s, 0), 0);
-	   if (error != ERR_NONE)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                "%s: ReadConfig Failed (%s)", __func__, GSM_ErrorString(error) );
-       if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
-       goto end;
-     }
-
-   	INI_Free(cfg);
-   	GSM_SetConfigNum(s, 1);
-
-   	error = GSM_InitConnection(s, 3);
-	   if (error != ERR_NONE)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                "%s: InitConnection Failed (%s)", __func__, GSM_ErrorString(error) );
-       if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
-       goto end;
-     }
-
-    GSM_SetSendSMSStatusCallback(s, Smsg_Send_CB, NULL);
-
 	   PhoneSMSC.Location = 1;                                                                   	/* We need to know SMSC number */
-   	error = GSM_GetSMSC(s, &PhoneSMSC);
+   	error = GSM_GetSMSC(Cfg_smsg.gammu_machine, &PhoneSMSC);
 	   if (error != ERR_NONE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                 "%s: GetSMSC Failed (%s)", __func__, GSM_ErrorString(error) );
-       if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
-       goto end;
+       Smsg_disconnect ();
+       return(FALSE);
      }
 
 	   CopyUnicodeString(sms.SMSC.Number, PhoneSMSC.Number);                                       /* Set SMSC number in message */
 
-   	sms_send_status = ERR_TIMEOUT;
-	   error = GSM_SendSMS(s, &sms); 	                                                                           /* Send message */
+   	Cfg_smsg.gammu_send_status = ERR_TIMEOUT;
+	   error = GSM_SendSMS(Cfg_smsg.gammu_machine, &sms); 	                                                      /* Send message */
 	   if (error != ERR_NONE)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                "%s: SendSMS Failed (%s)", __func__, GSM_ErrorString(error) );
-       if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
-       goto end;
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: SendSMS Failed (%s)", __func__, GSM_ErrorString(error) );
+       Smsg_disconnect();
+       return(FALSE);
      }
 
-    wait = Partage->top; 	                                                                          /* Wait for network reply */
-	   while ( (Partage->top < wait+150) && sms_send_status == ERR_TIMEOUT )
-     {	GSM_ReadDevice(s, TRUE); }
+	   while ( Cfg_smsg.gammu_send_status == ERR_TIMEOUT ) {	GSM_ReadDevice(Cfg_smsg.gammu_machine, TRUE); }
 
-    if (sms_send_status == ERR_NONE)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,
-                "%s: Envoi SMS Ok to %s (%s)", __func__, telephone, libelle );
+    if (Cfg_smsg.gammu_send_status == ERR_NONE)
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Envoi SMS Ok to %s (%s)", __func__, telephone, libelle );
+       Cfg_smsg.nbr_sms++;
+       return(TRUE);
      }
-    else
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
-                "%s: Envoi SMS Nok to %s (error '%s')", __func__, telephone, GSM_ErrorString(error) ); }
-
-   	error = GSM_TerminateConnection(s); 	                                                             /* Terminate connection */
-	   if (error != ERR_NONE)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                "%s: TerminateConnection Failed (%s)", __func__, GSM_ErrorString(error) );
-       if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
-     }
-
-end:
-	   GSM_FreeStateMachine(s);                                                                          	/* Free up used memory */
-    if (sms_send_status == ERR_NONE) { Cfg_smsg.nbr_sms++; return(TRUE); }
-    else return(FALSE);
+    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
+             "%s: Envoi SMS Nok to %s (error '%s')", __func__, telephone, GSM_ErrorString(error) );
+    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* Envoi_sms_smsbox: Envoi un sms par SMSBOX                                                                                  */
@@ -426,7 +450,7 @@ end:
   { struct SMSDB *sms;
     struct DB *db;
 
-    if (sending_is_disabled == TRUE)                                   /* Si envoi désactivé, on sort de suite de la fonction */
+    if (Cfg_smsg.sending_is_disabled == TRUE)                                   /* Si envoi désactivé, on sort de suite de la fonction */
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Sending is disabled. Dropping message", __func__ );
        return;
      }
@@ -450,13 +474,8 @@ end:
         { case MESSAGE_SMS_YES:
                if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
                 { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                            "%s: First Error sending with GSM. Trying another one in 5 sec", __func__ );
-                  sleep(5);
-                  if ( Envoi_sms_gsm ( msg, sms->user_phone ) == FALSE )
-                   { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                               "%s: Second Error sending with GSM. Falling back to OVH", __func__ );
-                     Envoi_sms_ovh( msg, sms->user_phone );
-                   }
+                            "%s: Second Error sending with GSM. Falling back to OVH", __func__ );
+                  Envoi_sms_ovh( msg, sms->user_phone );
                 }
                break;
           case MESSAGE_SMS_GSM_ONLY:
@@ -466,9 +485,7 @@ end:
                Envoi_sms_ovh( msg, sms->user_phone );
                break;
         }
-       /*sleep(5);*/
      }
-
     Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
@@ -524,7 +541,7 @@ end:
      }
 
     if ( ! strcasecmp( texte, "smsoff" ) )                                                                      /* Smspanic ! */
-     { sending_is_disabled = TRUE;
+     { Cfg_smsg.sending_is_disabled = TRUE;
        Envoyer_smsg_gsm_text ( "Sending SMS is off !" );
        Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is DISABLED by '%s'", __func__, from );
        return;
@@ -533,7 +550,7 @@ end:
     if ( ! strcasecmp( texte, "smson" ) )                                                                       /* Smspanic ! */
      { Envoyer_smsg_gsm_text ( "Sending SMS is on !" );
        Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is ENABLED by '%s'", __func__, from );
-       sending_is_disabled = FALSE;
+       Cfg_smsg.sending_is_disabled = FALSE;
        return;
      }
 
@@ -557,126 +574,48 @@ end:
     Envoyer_smsg_gsm_text ( chaine );
   }
 /******************************************************************************************************************************/
-/* Smsg_disconnect: Se deconnecte du telephone ou de la clef 3G                                                               */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Smsg_disconnect ( void )
-  { GSM_Error error;
-   	error = GSM_TerminateConnection(s); 	                                                             /* Terminate connection */
-	   if (error != ERR_NONE)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                "%s: TerminateConnection Failed (%s)", __func__, GSM_ErrorString(error) );
-     }
-    GSM_FreeStateMachine(s);                                                                          	/* Free up used memory */
-    s = NULL;
-    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Disconnected", __func__ );
-  }
-/******************************************************************************************************************************/
-/* smsg_connect: Ouvre une connexion vers le téléphone ou la clef 3G                                                          */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static gboolean Smsg_connect ( void )
-  { GSM_Error error;
-
-    GSM_InitLocales(NULL);
-    if ( (s = GSM_AllocStateMachine()) == NULL )                                                   /* Allocates state machine */
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: AllocStateMachine Error", __func__ );
-       return(FALSE);
-     }
-
-	   error = GSM_FindGammuRC(&cfg, NULL);
-	   if (error != ERR_NONE)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                "%s: FindGammuRC Failed (%s)", __func__, GSM_ErrorString(error) );
-       if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
-   	   Smsg_disconnect();
-       sleep(2);
-       return(FALSE);
-     }
-
-   	error = GSM_ReadConfig(cfg, GSM_GetConfig(s, 0), 0);
-	   if (error != ERR_NONE)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                "%s: ReadConfig Failed (%s)", __func__, GSM_ErrorString(error) );
-       if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
-   	   Smsg_disconnect();
-       sleep(2);
-       return(FALSE);
-     }
-
-   	INI_Free(cfg);
-   	GSM_SetConfigNum(s, 1);
-
-   	error = GSM_InitConnection(s, 1);
-	   if (error != ERR_NONE)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                "%s: InitConnection Failed (%s)", __func__, GSM_ErrorString(error) );
-       if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
-   	   Smsg_disconnect();
-       sleep(2);
-       return(FALSE);
-     }
-    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Connection OK", __func__ );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                                               */
 /* Entrée: Rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Lire_sms_gsm ( void )
+ static gboolean Lire_sms_gsm ( void )
   { gchar from[80], texte[180];
     GSM_MultiSMSMessage sms;
-    gboolean found = FALSE;
     GSM_Error error;
 
    	memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
 
-    if (Smsg_connect()==FALSE) return;
 /* Read all messages */
    	error = ERR_NONE;
 	   sms.Number = 0;
 	   sms.SMS[0].Location = 0;
 	   sms.SMS[0].Folder = 0;
-    error = GSM_GetNextSMS(s, &sms, TRUE);
+    error = GSM_GetNextSMS(Cfg_smsg.gammu_machine, &sms, TRUE);
     if (error == ERR_NONE)
      { gint i;
        for (i = 0; i < sms.Number; i++)
 			     { g_snprintf( from, sizeof(from), "%s", DecodeUnicodeConsole(sms.SMS[i].Number) );
           g_snprintf( texte, sizeof(texte), "%s", DecodeUnicodeConsole(sms.SMS[i].Text) );
           sms.SMS[0].Folder = 0;/* https://github.com/gammu/gammu/blob/ed2fec4a382e7ac4b5dfc92f5b10811f76f4817e/gammu/message.c */
-          error = GSM_DeleteSMS( s, &sms.SMS[i] );
+          if (sms.SMS[i].State == SMS_UnRead)                                /* Pour tout nouveau message, nous le processons */
+           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
+                      "%s: Recu '%s' from '%s' Location %d/%d Folder %d !", __func__,
+                       texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder );
+             Traiter_commande_sms ( from, texte );
+           }
+          error = GSM_DeleteSMS( Cfg_smsg.gammu_machine, &sms.SMS[i] );
           if (error != ERR_NONE)
            { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                       "%s: Delete '%s' from '%s' Location %d/%d Folder %d Failed ('%s')!", __func__,
                        texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder, GSM_ErrorString(error) );
            }
-          else
-           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG,
-                      "%s: Delete '%s' from '%s' Location %d/%d Folder %d OK !", __func__,
-                       texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder );
-           }
-          if (sms.SMS[i].State == SMS_UnRead)                                /* Pour tout nouveau message, nous le processons */
-           { found = TRUE; break; }
          }
 	     }
      else if (error != ERR_EMPTY)
-      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                  "%s: No sms received ('%s')!", __func__, GSM_ErrorString(error) );
+      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error Reading SMS: '%s' !", __func__, GSM_ErrorString(error) );
       }
-    Smsg_disconnect();                                                                                	/* Free up used memory */
-    if (found) Traiter_commande_sms ( from, texte );
-
-    if ( (error == ERR_NONE) || (error == ERR_EMPTY) )
-     { Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", 600 );
-       Cfg_smsg.comm_status = TRUE;
-     }
-    else
-     { Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", 0 );
-       Cfg_smsg.comm_status = FALSE;
-     }
+    if ( (error == ERR_NONE) || (error == ERR_EMPTY) ) { return(TRUE); }
+    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -700,13 +639,14 @@ reload:
     zmq_from_bus           = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     Cfg_smsg.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
-    Envoyer_smsg_gsm_text ( "SMS System is running" );
-    sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
+    /*Envoyer_smsg_gsm_text ( "SMS System is running" );*/
+    Cfg_smsg.sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
+    gint next_try = 0;
+
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { gchar buffer[1024];
-
-/****************************************************** Lecture de SMS ********************************************************/
-       Lire_sms_gsm();
+       usleep(100000);
+       sched_yield();
 
 /****************************************************** SMS de test ! *********************************************************/
        if (Cfg_smsg.send_test_OVH)
@@ -717,10 +657,21 @@ reload:
         { Envoyer_smsg_gsm_text ( "Test SMS GSM OK !" );
           Cfg_smsg.send_test_GSM = FALSE;
         }
+/****************************************************** Tentative de connexion ************************************************/
+       if (Cfg_smsg.comm_status == FALSE && Partage->top >= next_try )
+        { if (Smsg_connect ()==FALSE) { next_try = Partage->top + 300; } }
+
+/****************************************************** Lecture de SMS ********************************************************/
+       if (Cfg_smsg.comm_status == TRUE)
+        { if (Cfg_smsg.comm_status == TRUE && Cfg_smsg.comm_next_update < Partage->top)
+           { Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", SMSG_TEMPS_UPDATE_COMM+200 );
+             Cfg_smsg.comm_next_update = Partage->top + SMSG_TEMPS_UPDATE_COMM;
+           }
+          if (Lire_sms_gsm()==FALSE) { Smsg_disconnect(); }
+        }
 /********************************************************* Envoi de SMS *******************************************************/
        JsonNode *request;
-       while ( (lib->Thread_run == TRUE && lib->Thread_reload == FALSE) &&
-              (request=Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) )) != NULL)
+       if ( (request=Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) )) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
@@ -737,8 +688,7 @@ reload:
           json_node_unref(request);
         }
      }
-
-    Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", 0 );
+	   Smsg_disconnect();
     Close_zmq ( zmq_from_bus );
     Close_zmq ( Cfg_smsg.zmq_to_master );
 

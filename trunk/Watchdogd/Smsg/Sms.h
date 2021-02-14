@@ -28,10 +28,18 @@
 #ifndef _SMSG_H_
  #define _SMSG_H_
 
+ #include <gammu.h>
+ #include <curl/curl.h>
+
  #define NOM_THREAD                    "smsg"
+ #define SMSG_TEMPS_UPDATE_COMM        300
 
  struct SMS_CONFIG
   { struct LIBRAIRIE *lib;
+    gboolean sending_is_disabled;                                  /* Variable permettant d'interdire l'envoi de sms si panic */
+    GSM_Error gammu_send_status;
+    GSM_StateMachine *gammu_machine;
+    INI_Section *gammu_cfg;
     gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];                                                       /* Tech_id du téléphone */
     gchar description[80];                                         /* Une description du téléphone ou sa position par exemple */
     gchar ovh_service_name[16];                                                                     /* Login de connexion OVH */
@@ -39,6 +47,7 @@
     gchar ovh_application_secret[33];                                                                         /* Clef API OVH */
     gchar ovh_consumer_key[33];                                                                               /* Clef API OVH */
     gboolean comm_status;
+    gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
     gboolean send_test_GSM;                                              /* TRUE si une demande de test a été faite par l'IHM */
     gboolean send_test_OVH;                                              /* TRUE si une demande de test a été faite par l'IHM */
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */

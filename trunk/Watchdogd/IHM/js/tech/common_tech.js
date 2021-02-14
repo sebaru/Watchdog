@@ -12,7 +12,7 @@
  function Process_reload ( instance, thread, hard )
   { var json_request =
        { thread  : thread,
-         hard    : (hard === "true" ? true : false),
+         hard    : hard,
        };
     if(instance!=null) json_request.instance=instance;
     Send_to_API ( "POST", "/api/process/reload", JSON.stringify(json_request), null, null);

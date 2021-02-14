@@ -95,7 +95,7 @@
              { "data": null, "title":"Acquit", "className": "align-middle text-center bg-dark d-none d-sm-table-cell",
                "render": function (item)
                  { if (item.typologie==0) return("-");                                                      /* Si INFO, pas de ACK */
-                   if (item.nom_ack!="None") return(item.nom_ack);
+                   if (item.nom_ack!=null) return(item.nom_ack);
                    return( Bouton ( "primary", "Acquitter le message", "Msg_acquitter", item.id, "Acquitter" ) );
                  }
              },
