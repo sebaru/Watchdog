@@ -53,7 +53,7 @@
     g_snprintf ( libelle, sizeof(libelle), "%s", message->libelle );
     memset ( suffixe, 0, sizeof(suffixe) );
 /************************************* Conversation du lessage dynalique ******************************************************/
-    while ( sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128c", prefixe, tech_id, acronyme, suffixe ) == 4 )
+    while ( sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe ) == 4 )
      { gchar result[128];
        gpointer dls_data_p = NULL;
        g_snprintf( result, sizeof(result), "%s", prefixe );                                                       /* Prologue */
