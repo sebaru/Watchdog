@@ -151,7 +151,7 @@
 /******************************************************************************************************************************/
  gboolean Json_has_member ( JsonNode *query, gchar *chaine )
   { JsonObject *object = json_node_get_object (query);
-    return(json_object_has_member ( object, chaine ));
+    return( json_object_has_member ( object, chaine ) && !json_object_get_null_member ( object, chaine ) );
   }
 /******************************************************************************************************************************/
 /* Json_get_int: Recupere l'entier dont le nom est en parametre                                                               */

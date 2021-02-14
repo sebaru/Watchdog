@@ -77,27 +77,27 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  static gboolean Modifier_Ajouter_histo_msgsDB ( gboolean ajout, struct CMD_TYPE_HISTO *histo )
-  { gchar *nom_ack;
-    gchar requete[1024];
+  { gchar requete[1024];
     gboolean retour;
     struct DB *db;
 
     if (ajout == TRUE)
-     { nom_ack = Normaliser_chaine ( histo->nom_ack );                                       /* Formatage correct des chaines */
-       if (!nom_ack)
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+     { gchar *libelle = Normaliser_chaine ( histo->msg.libelle );                            /* Formatage correct des chaines */
+       if (!libelle)
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle impossible", __func__ );
           return(FALSE);
         }
 
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s(alive,id_msg,nom_ack,date_create)"
+                   "INSERT INTO %s(alive,id_msg,date_create,libelle)"
                    " VALUES ('%d','%d','%s','%s') ON DUPLICATE KEY UPDATE date_create=VALUES(`date_create`)",
-                   NOM_TABLE_HISTO_MSGS, TRUE, histo->msg.id, nom_ack, histo->date_create );
+                   NOM_TABLE_HISTO_MSGS, TRUE, histo->msg.id, histo->date_create, libelle );
+       g_free(libelle);
      }
     else
      {
        if (histo->alive == TRUE)
-        { nom_ack = Normaliser_chaine ( histo->nom_ack );                                    /* Formatage correct des chaines */
+        { gchar *nom_ack = Normaliser_chaine ( histo->nom_ack );                             /* Formatage correct des chaines */
           if (!nom_ack)
            { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
              return(FALSE);
@@ -152,7 +152,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.libelle, msg.typologie, dls.syn_id,"
+                "SELECT histo.id, histo.alive, histo.libelle, msg.typologie, dls.syn_id,"
                 "parent_syn.page, syn.page, histo.nom_ack, histo.date_create,"
                 "histo.date_fixe, histo.date_fin, dls.shortname, msg.id, msg.tech_id, msg.acronyme"
                 " FROM %s as histo"
@@ -186,7 +186,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.libelle, msg.typologie, dls.syn_id,"
+                "SELECT histo.id, histo.alive, histo.libelle, msg.typologie, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create,"
                 "histo.date_fixe, histo.date_fin, dls.shortname, msg.id, msg.tech_id, msg.acronyme"
                 " FROM %s as histo"
@@ -265,14 +265,14 @@
     Json_add_string ( builder, "date_fin",        Json_get_string( histo, "date_fin") );
     Json_add_string ( builder, "tech_id",         Json_get_string( histo, "tech_id") );
     Json_add_string ( builder, "acronyme",        Json_get_string( histo, "acronyme") );
-    Json_add_int    ( builder, "typologie",       Json_get_int( histo, "typologie") );
+    Json_add_int    ( builder, "typologie",       Json_get_int   ( histo, "typologie") );
     Json_add_string ( builder, "dls_shortname",   Json_get_string( histo, "dls_shortname") );
     Json_add_string ( builder, "libelle",         Json_get_string( histo, "libelle") );
-    Json_add_int    ( builder, "syn_id",          Json_get_int( histo, "syn_id") );
+    Json_add_int    ( builder, "syn_id",          Json_get_int   ( histo, "syn_id") );
     Json_add_string ( builder, "syn_parent_page", Json_get_string( histo, "syn_parent_page") );
     Json_add_string ( builder, "syn_page",        Json_get_string( histo, "syn_page") );
     Json_add_string ( builder, "syn_libelle",     Json_get_string( histo, "syn_libelle") );
-    Json_add_int    ( builder, "sms",             Json_get_int( histo, "sms") );
+    Json_add_int    ( builder, "sms",             Json_get_int   ( histo, "sms") );
     Json_add_string ( builder, "audio_libelle",   Json_get_string( histo, "audio_libelle") );
     Json_add_string ( builder, "audio_profil",    Json_get_string( histo, "audio_profil") );
   }

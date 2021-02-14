@@ -47,7 +47,6 @@
     COLONNE_SYN_ID,
     COLONNE_DATE_CREATE,
     COLONNE_DLS_SHORTNAME,
-    COLONNE_ACK,
     COLONNE_LIBELLE,
     COLONNE_COULEUR_FOND,
     COLONNE_COULEUR_TEXTE,
@@ -80,12 +79,10 @@
  extern struct CLIENT Client;                                                        /* Identifiant de l'utilisateur en cours */
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 
- static void Menu_acquitter_histo ( void );
  static void Menu_go_to_syn ( void );
 
  static GnomeUIInfo Menu_popup[]=
-  { GNOMEUIINFO_ITEM_STOCK ( N_("Acknowledge"), NULL, Menu_acquitter_histo, GNOME_STOCK_PIXMAP_CLEAR ),
-    GNOMEUIINFO_ITEM_STOCK ( N_("Go to Syn"), NULL, Menu_go_to_syn, GNOME_STOCK_PIXMAP_SEARCH ),
+  { GNOMEUIINFO_ITEM_STOCK ( N_("Go to Syn"), NULL, Menu_go_to_syn, GNOME_STOCK_PIXMAP_SEARCH ),
     GNOMEUIINFO_END
   };
 
@@ -106,33 +103,6 @@
        case MSG_DERANGEMENT : return( _("Derangement (DE)") );
      }
     return( _("Unknown") );
-  }
-/**********************************************************************************************************/
-/* Menu_acquitter_histo: Acquittement d'un des messages histo                                             */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Menu_acquitter_histo ( void )
-  { GtkTreeSelection *selection;
-    struct CMD_TYPE_HISTO histo;
-    GtkTreeModel *store;
-    GtkTreeIter iter;
-    GList *lignes;
-
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );
-    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_histo) );
-
-    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    while ( lignes )
-     { gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_ID, &histo.id, -1 );                      /* Recup du id */
-
-       Envoi_serveur( TAG_HISTO, SSTAG_CLIENT_ACK_HISTO, (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
-       gtk_tree_selection_unselect_iter( selection, &iter );
-       lignes = lignes->next;
-     }
-    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
   }
 /**********************************************************************************************************/
 /* Menu_go_to_syn: Affiche les synoptiques associés aux messages histo                                    */
@@ -206,14 +176,9 @@
 /**********************************************************************************************************/
  static void Rafraichir_visu_histo( GtkTreeIter *iter, struct CMD_TYPE_HISTO *histo )
   { GtkTreeModel *store;
-    gchar ack[128], groupe_page[512];
+    gchar groupe_page[512];
 
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", histo->msg.syn_parent_page, histo->msg.syn_page );
-
-    if (strlen(histo->date_fixe))
-     { g_snprintf( ack, sizeof(ack), "%s (%s)", histo->date_fixe, histo->nom_ack ); }
-    else
-     { g_snprintf( ack, sizeof(ack), "(%s)", histo->nom_ack ); }
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) );               /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
@@ -225,7 +190,6 @@
                          COLONNE_TYPE, Type_vers_string(histo->msg.typologie),
                          COLONNE_DATE_CREATE, histo->date_create,
                          COLONNE_DLS_SHORTNAME, histo->msg.dls_shortname,
-                         COLONNE_ACK, ack,
                          COLONNE_LIBELLE, histo->msg.libelle,
                          COLONNE_COULEUR_FOND, &COULEUR_FOND[histo->msg.typologie],
                          COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[histo->msg.typologie],
@@ -334,7 +298,6 @@ again:
                                               G_TYPE_STRING,                                                   /* Date create */
                                               G_TYPE_STRING,                                                 /* DLS Shortname */
                                               G_TYPE_STRING,
-                                              G_TYPE_STRING,
                                               GDK_TYPE_COLOR,                          /* Couleur de fond de l'enregistrement */
                                               GDK_TYPE_COLOR                          /* Couleur du texte de l'enregistrement */
                                );
@@ -377,14 +340,6 @@ again:
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_DLS_SHORTNAME);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
-    g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Ack"), renderer,
-                                                         "text", COLONNE_ACK,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_ACK);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
-
     renderer = gtk_cell_renderer_text_new();                                        /* Colonne du libelle */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Message"), renderer,
                                                          "text", COLONNE_LIBELLE,
@@ -400,11 +355,6 @@ again:
     boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
-/*    bouton = Bobouton( Verte, Vmask, _("Acknowledge") );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect( G_OBJECT(bouton), "clicked",
-                      G_CALLBACK(Menu_acquitter_histo), NULL );
-*/
     gtk_widget_show_all( hboite );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Messages") ) );
   }

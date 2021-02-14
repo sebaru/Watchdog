@@ -252,12 +252,11 @@ again:
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s",
                 Json_get_string(element, "syn_parent_page"), Json_get_string(element, "syn_page") );
 
-    if (Json_has_member(element, "nom_ack"))
+    if (!Json_has_member(element, "nom_ack"))
+     { gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, "None", -1 ); }
+    else
      { gchar ack[128];
-       if (strcmp(Json_get_string(element, "nom_ack"),"None"))
-        { g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") ); }
-       else
-        { g_snprintf( ack, sizeof(ack), "(%s)", Json_get_string(element, "nom_ack" ) ); }
+       g_snprintf( ack, sizeof(ack), "%s (%s)", Json_get_string(element, "date_fixe"), Json_get_string(element, "nom_ack") );
        gtk_list_store_set ( GTK_LIST_STORE(store), &iter, COLONNE_ACK, ack, -1 );
      }
 

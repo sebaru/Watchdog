@@ -103,7 +103,7 @@
 
     Info_change_log_level ( Config.log, log_target );
     Modifier_configDB_int ( "msrv", "log_level", log_target );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogLevel set to '%s'", __func__, log_target );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogLevel set to '%d'", __func__, log_target );
 
     json_node_unref(request);
 	   soup_message_set_status (msg, SOUP_STATUS_OK);

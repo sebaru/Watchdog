@@ -99,13 +99,13 @@
   }
 /************************************ Controle de saisie avant envoi **********************************************************/
  function Dls_Set_controle_techid ( tech_id_initial )
-  { FormatPage = RegExp(/^[a-zA-Z0-9_]+$/);
+  { FormatPage = RegExp(/^[a-zA-Z0-9_\.]+$/);
     table = $('#idTableDLS').DataTable();
     input = $('#idModalDlsEditTechID');
 
     if ( FormatPage.test(input.val())==false )
      { input.addClass("bg-danger");    $('#idModalDlsEditValider').attr("disabled", true);
-       Popover_show ( input, 'Caractères autorisés', 'lettres, chiffres et _' );
+       Popover_show ( input, 'Caractères autorisés', 'lettres, chiffres, _ et .' );
      }
     else if ( (table.ajax.json().plugins.filter( function(item)
                                                { return item.tech_id.toUpperCase()==input.val().toUpperCase() } )[0] !== undefined &&
