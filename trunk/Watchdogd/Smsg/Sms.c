@@ -319,14 +319,14 @@ end:
     if (Cfg_smsg.comm_status == FALSE) return(FALSE);
 
    	memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
-    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
-	  	EncodeUnicode( sms.Text, libelle, strlen(libelle));                                                /* Encode message text */
-    EncodeUnicode( sms.Number, telephone, strlen(telephone));
-
 	   sms.PDU = SMS_Submit;                                                                        /* We want to submit message */
 	   sms.UDH.Type = UDH_NoUDH;                                                                 /* No UDH, just a plain message */
-	   sms.Coding = SMS_Coding_Unicode_No_Compression;                                        /* We used unicode coding for text */
+	   sms.Coding = SMS_Coding_Default_No_Compression;                                        /* We used default coding for text */
    	sms.Class = 1;                                                                                /* Class 1 message (normal) */
+    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
+    EncodeUnicode( sms.Text, libelle, strlen(libelle) );                                               /* Encode message text */
+    EncodeUnicode( sms.Number, telephone, strlen(telephone) );
+
 
 	/*debug_info = GSM_GetDebug(s);
 	GSM_SetDebugGlobal(FALSE, debug_info);
