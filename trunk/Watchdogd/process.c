@@ -61,8 +61,8 @@
     g_snprintf( chaine, sizeof(chaine), "INSERT INTO thread_classe SET thread=UPPER('%s'), classe=UPPER('%s') "
                                         "ON DUPLICATE KEY UPDATE classe=VALUES(classe)", lib->admin_prompt, classe );
     SQL_Write ( chaine );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Démarrage du thread '%s' de classe '%s' -> TID = %p", __func__,
-              lib->admin_prompt, classe, pthread_self() );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Démarrage du thread '%s' (v%s) de classe '%s' -> TID = %p", __func__,
+              lib->admin_prompt, lib->version, classe, pthread_self() );
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
@@ -70,7 +70,7 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  void Thread_end ( struct LIBRAIRIE *lib )
-  { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", lib->admin_prompt, pthread_self() );
+  { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: v%s Down . . . TID = %p", lib->admin_prompt, lib->version, pthread_self() );
     lib->Thread_run = FALSE;                                                                    /* Le thread ne tourne plus ! */
     lib->TID = 0;                                                             /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
