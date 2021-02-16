@@ -57,7 +57,8 @@
 /******************************************************************************************************************************/
  void Json_add_string ( JsonBuilder *builder, gchar *name, gchar *chaine )
   { json_builder_set_member_name  ( builder, name );
-    json_builder_add_string_value ( builder, chaine );
+    if (chaine) json_builder_add_string_value ( builder, chaine );
+           else json_builder_add_null_value ( builder );
   }
 /******************************************************************************************************************************/
 /* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
@@ -149,12 +150,12 @@
     g_object_unref(gen);
     return(result);
   }
- gchar *Json_node_get_buf ( JsonNode *RootNode, gsize *taille_buf_p )
+
+ gchar *Json_node_to_string ( JsonNode *RootNode, gsize *taille_buf_p )
   { JsonGenerator *gen;
     gchar *result;
     gen = json_generator_new ();
     json_generator_set_root ( gen, RootNode );
-    json_node_unref(RootNode);
     json_generator_set_pretty ( gen, TRUE );
     result = json_generator_to_data (gen, taille_buf_p);
     g_object_unref(gen);
