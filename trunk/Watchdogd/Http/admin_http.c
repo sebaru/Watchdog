@@ -60,7 +60,6 @@
        Json_add_string ( builder, "ssl_private_key_filepath", Cfg_http.ssl_private_key_filepath );
        pthread_mutex_lock( &Cfg_http.lib->synchro );
        Json_add_int    ( builder, "Abonnes_motifs",           g_slist_length (Cfg_http.liste_ws_motifs_clients) );
-       Json_add_int    ( builder, "Abonnes_msgs",             g_slist_length (Cfg_http.liste_ws_msgs_clients) );
        Json_add_int    ( builder, "nbr_sessions",             g_slist_length (Cfg_http.liste_http_clients ) );
        pthread_mutex_unlock( &Cfg_http.lib->synchro );
      }

@@ -62,7 +62,6 @@
     gchar ssl_cert_filepath[80];
     gchar ssl_private_key_filepath[80];
     GSList *liste_ws_motifs_clients;
-    GSList *liste_ws_msgs_clients;
     GSList *liste_http_clients;
     gint wtd_session_expiry;
  };
@@ -169,8 +168,6 @@
                                            SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_users_sessions ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                            SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_open_websocket_msgs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
-                                                   SoupClientContext *client, gpointer user_data);
  extern void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
                                                      SoupClientContext *client, gpointer user_data);
  extern void Http_traiter_histo_ack ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
@@ -203,9 +200,9 @@
  extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION * session, gint min_access_level );
  extern void Http_Envoyer_les_cadrans ( void );
- extern void Http_Envoyer_un_visuel ( struct DLS_VISUEL *visuel );
+ extern void Http_Envoyer_un_visuel ( JsonNode *visuel );
  extern void Http_redirect_to_slave ( SoupMessage *msg, gchar *target );
- extern void Http_ws_motifs_destroy_session ( struct WS_CLIENT_SESSION *client );
+ extern void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client );
  extern void Http_ws_send_to_all ( JsonNode *node );
  extern void Http_ws_send_pulse_to_all ( void );
  extern void Audit_log ( struct HTTP_CLIENT_SESSION *session, gchar *format, ... );

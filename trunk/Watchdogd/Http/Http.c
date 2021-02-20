@@ -560,9 +560,8 @@ reload:
     soup_server_add_handler ( socket, "/api/upload",         Http_traiter_upload, NULL, NULL );
     soup_server_add_handler ( socket, "/",                   Http_traiter_file, NULL, NULL );
     if (Config.instance_is_master==TRUE)
-     { gchar *protocols[] = { "live-motifs", "live-msgs" };
+     { gchar *protocols[] = { "live-motifs" };
        soup_server_add_websocket_handler ( socket, "/api/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
-       soup_server_add_websocket_handler ( socket, "/api/live-msgs",   NULL, protocols, Http_traiter_open_websocket_msgs_CB, NULL, NULL );
      }
 
     if (!soup_server_listen_all (socket, Cfg_http.tcp_port, (Cfg_http.ssl_enable ? SOUP_SERVER_LISTEN_HTTPS : 0), &error))
@@ -582,8 +581,7 @@ reload:
     Cfg_http.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { struct DLS_VISUEL visu;
-       gchar buffer[2048];
+     { gchar buffer[2048];
        usleep(1000);
        sched_yield();
 
@@ -594,15 +592,11 @@ reload:
 
        Http_Envoyer_les_cadrans ();
 
-       if ( Recv_zmq ( zmq_motifs, &visu, sizeof(struct DLS_VISUEL) ) == sizeof(struct DLS_VISUEL) && Cfg_http.liste_ws_motifs_clients )
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Visuel %s:%s received", __func__, visu.tech_id, visu.acronyme );
-          Http_Envoyer_un_visuel ( &visu );
-        }
-
        JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
                if (!strcasecmp( zmq_tag, "DLS_HISTO" ))    { Http_ws_send_to_all( request ); }
+          else if (!strcasecmp( zmq_tag, "DLS_VISUEL" ))   { Http_ws_send_to_all( request ); }
           else if (!strcasecmp( zmq_tag, "SET_SYN_VARS" )) { Http_ws_send_to_all( request ); }
           else json_node_unref ( request );
         }
@@ -637,11 +631,7 @@ reload:
     Cfg_http.liste_http_clients = NULL;
 
     while ( Cfg_http.liste_ws_motifs_clients )
-     { Http_ws_motifs_destroy_session ( (struct WS_CLIENT_SESSION *)(Cfg_http.liste_ws_motifs_clients->data ) ); }
-
-    g_slist_foreach ( Cfg_http.liste_ws_msgs_clients, (GFunc) g_free, NULL );
-    g_slist_free ( Cfg_http.liste_ws_msgs_clients );
-    Cfg_http.liste_ws_msgs_clients = NULL;
+     { Http_ws_destroy_session ( (struct WS_CLIENT_SESSION *)(Cfg_http.liste_ws_motifs_clients->data ) ); }
 
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)

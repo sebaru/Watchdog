@@ -48,7 +48,7 @@
 /* Entrée: des infos sur le paquet à envoyer                                                                                  */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Envoyer_ws_au_client ( struct WS_CLIENT_SESSION *client, JsonBuilder *builder )
+ static void Envoyer_ws_au_client ( struct WS_CLIENT_SESSION *client, JsonBuilder *builder )
   { gsize taille_buf;
     gchar *buf = Json_get_buf (builder, &taille_buf);
     GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
@@ -60,18 +60,49 @@
 /* Entrée: une reference sur la session en cours, et le cadran a envoyer                                                      */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Envoyer_un_visuel ( struct DLS_VISUEL *visuel )
-  { GSList *liste = Cfg_http.liste_ws_motifs_clients;
+ void Http_Envoyer_un_visuel ( JsonNode *visuel )
+  { gsize taille_buf;
+    gchar *buf = Json_node_to_string ( visuel, &taille_buf );
+    json_node_unref ( visuel );
+    GSList *liste = Cfg_http.liste_ws_motifs_clients;
     while (liste)
      { struct WS_CLIENT_SESSION *client = liste->data;
-       JsonBuilder *builder = Json_create ();
-       if (builder)
-        { Json_add_string ( builder, "ws_msg_type", "update_visuel" );
-          Dls_VISUEL_to_json ( builder, visuel );
-          Envoyer_ws_au_client ( client, builder );
-        }
+       soup_websocket_connection_send_text ( client->connexion, buf );
        liste = g_slist_next(liste);
      }
+    g_free(buf);
+  }
+/******************************************************************************************************************************/
+/* Http_ws_send_to_all: Envoi d'un buffer a tous les clients connectés à la websocket                                         */
+/* Entrée: Le buffer                                                                                                          */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Http_ws_send_to_all ( JsonNode *node )
+  { gsize taille_buf;
+    gchar *buf = Json_node_to_string ( node, &taille_buf );
+    json_node_unref ( node );
+    GSList *liste = Cfg_http.liste_ws_motifs_clients;
+    while (liste)
+     { struct WS_CLIENT_SESSION *client = liste->data;
+       soup_websocket_connection_send_text ( client->connexion, buf );
+       liste = g_slist_next(liste);
+     }
+    g_free(buf);
+  }
+/******************************************************************************************************************************/
+/* Recuperer_histo_msgsDB_alive: Recupération de l'ensemble des messages encore Alive dans le BDD                             */
+/* Entrée: La base de données de travail                                                                                      */
+/* Sortie: False si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ void Http_ws_send_pulse_to_all ( void )
+  { JsonBuilder *builder = Json_create ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
+       return;
+     }
+    Json_add_string( builder, "zmq_tag", "pulse" );
+    JsonNode *node = Json_end ( builder );
+    Http_ws_send_to_all ( node );
   }
 /******************************************************************************************************************************/
 /* Formater_cadran: Formate la structure dédiée cadran pour envoi au client                                                   */
@@ -395,11 +426,11 @@
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
   }
 /******************************************************************************************************************************/
-/* Http_ws_motifs_destroy_session: Supprime une session WS                                                                    */
+/* Http_ws_destroy_session: Supprime une session WS                                                                           */
 /* Entrée: la WS                                                                                                              */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Http_ws_motifs_destroy_session ( struct WS_CLIENT_SESSION *client )
+ void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client )
   { pthread_mutex_lock( &Cfg_http.lib->synchro );
     Cfg_http.liste_ws_motifs_clients = g_slist_remove ( Cfg_http.liste_ws_motifs_clients, client );
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
@@ -416,7 +447,7 @@
 /******************************************************************************************************************************/
  static void Http_ws_motifs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
   { struct WS_CLIENT_SESSION *client = user_data;
-    Http_ws_motifs_destroy_session ( client );
+    Http_ws_destroy_session ( client );
   }
  static void Http_ws_motifs_on_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );

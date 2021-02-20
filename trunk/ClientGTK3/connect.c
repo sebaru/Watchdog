@@ -183,7 +183,7 @@
     Log(client, chaine);
     json_node_unref(response);
     Envoi_json_au_serveur( client, "GET", NULL, "/api/histo/alive", Afficher_histo_alive_CB );
-    g_snprintf(chaine, sizeof(chaine), "wss://%s:5560/api/live-msgs", client->hostname );
+    g_snprintf(chaine, sizeof(chaine), "wss://%s:5560/api/live-motifs", client->hostname );
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
                                            NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
   }
