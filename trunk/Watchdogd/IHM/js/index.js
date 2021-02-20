@@ -139,7 +139,7 @@
                  );
           Set_syn_vars ( Response.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
           if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg" ); }
-                                   else { Changer_img_src ( 'idMenuImgAccueil', "/img/syn_"+Response.image+".png" ); }
+                                   else { Changer_img_src ( 'idMenuImgAccueil', "/img/"+Response.image ); }
           $.each ( Response.visuels, function (i, visuel)
                     { $('#bodycard').append ( Creer_visuel ( visuel ) );
                     }
@@ -169,7 +169,7 @@
                       )
                .append( $('<div></div>').addClass("card-body text-center")
                         .append( $('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
-                                                                                  : "/img/syn_"+Response.image+".png") )
+                                                                                  : "/img/"+Response.image) )
                                  .attr("onclick", "Change_page("+Response.id+")")
                                  .addClass("wtd-synoptique")
                                )
@@ -240,7 +240,7 @@
  function Load_page ()
   { Change_page (1);
 
-    var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/live-msgs", "live-msgs");
+    var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/live-motifs", "live-motifs");
     WTDWebSocket.onopen = function (event)
      { var json_request = JSON.stringify( { wtd_session: localStorage.getItem("wtd_session") } );
        this.send ( json_request );
