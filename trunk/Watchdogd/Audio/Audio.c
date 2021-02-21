@@ -182,8 +182,10 @@ reload:
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { gchar buffer[1024];
 
-       if (!(Partage->top % 600))
-        { Send_zmq_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 900 ); }
+       if (Cfg_audio.lib->comm_next_update < Partage->top)
+        { Send_zmq_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 900 );
+          Cfg_audio.lib->comm_next_update = Partage->top + 600;
+        }
 
        JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
        if (request)

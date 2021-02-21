@@ -243,7 +243,7 @@ end:
     Cfg_smsg.gammu_machine = NULL;
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Disconnected", __func__ );
     Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", 0 );
-    Cfg_smsg.comm_status = FALSE;
+    Cfg_smsg.lib->comm_status = FALSE;
   }
 /******************************************************************************************************************************/
 /* smsg_connect: Ouvre une connexion vers le téléphone ou la clef 3G                                                          */
@@ -302,7 +302,7 @@ end:
      }
 
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Connection OK with '%s/%s'", __func__, constructeur, model );
-    Cfg_smsg.comm_status = TRUE;
+    Cfg_smsg.lib->comm_status = TRUE;
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -316,7 +316,7 @@ end:
     gchar libelle[256];
     GSM_Error error;
 
-    if (Cfg_smsg.comm_status == FALSE)
+    if (Cfg_smsg.lib->comm_status == FALSE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: COMM is FALSE", __func__ );
        return(FALSE);
      }
@@ -662,14 +662,14 @@ reload:
           Cfg_smsg.send_test_GSM = FALSE;
         }
 /****************************************************** Tentative de connexion ************************************************/
-       if (Cfg_smsg.comm_status == FALSE && Partage->top >= next_try )
+       if (Cfg_smsg.lib->comm_status == FALSE && Partage->top >= next_try )
         { if (Smsg_connect ()==FALSE) { next_try = Partage->top + 300; } }
 
 /****************************************************** Lecture de SMS ********************************************************/
-       if (Cfg_smsg.comm_status == TRUE)
-        { if (Cfg_smsg.comm_status == TRUE && Cfg_smsg.comm_next_update < Partage->top)
+       if (Cfg_smsg.lib->comm_status == TRUE)
+        { if (Cfg_smsg.lib->comm_status == TRUE && Cfg_smsg.lib->comm_next_update < Partage->top)
            { Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", SMSG_TEMPS_UPDATE_COMM+200 );
-             Cfg_smsg.comm_next_update = Partage->top + SMSG_TEMPS_UPDATE_COMM;
+             Cfg_smsg.lib->comm_next_update = Partage->top + SMSG_TEMPS_UPDATE_COMM;
            }
           if (Lire_sms_gsm()==FALSE) { Smsg_disconnect(); }
         }

@@ -88,7 +88,7 @@
        Json_add_string ( builder, "ovh_application_secret", Cfg_smsg.ovh_application_secret );
        Json_add_string ( builder, "ovh_consumer_key", Cfg_smsg.ovh_consumer_key );
        Json_add_string ( builder, "description", Cfg_smsg.description );
-       Json_add_bool   ( builder, "comm_status", Cfg_smsg.comm_status );
+       Json_add_bool   ( builder, "comm_status", Cfg_smsg.lib->comm_status );
        Json_add_int    ( builder, "nbr_sms", Cfg_smsg.nbr_sms );
      }
     buf = Json_get_buf ( builder, &taille_buf );
