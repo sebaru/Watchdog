@@ -149,10 +149,9 @@
 
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
  extern GtkWidget *Creer_page_histo( struct CLIENT *Client );                                           /* Dans liste_histo.c */
- extern void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data );
  extern void Reset_page_histo( struct CLIENT *client );
  extern void Afficher_histo_alive_CB (SoupSession *session, SoupMessage *msg, gpointer user_data);
-// extern void Acquitter_histo ( struct CLIENT *Client );
+ extern void Updater_histo ( struct CLIENT *client, JsonNode *element );
 
  extern gboolean Timer ( gpointer data );                                                                     /* Dans timer.c */
 

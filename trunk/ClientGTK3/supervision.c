@@ -348,7 +348,7 @@
   }
 
 /******************************************************************************************************************************/
-/* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MOTIF                                 */
+/* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MOTIF                                 */
 /* Entrée: les parametres libsoup                                                                                             */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -367,7 +367,7 @@
     json_node_unref(response);
   }
 /******************************************************************************************************************************/
-/* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
+/* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
 /* Entrée: rien                                                                                                               */
 /* Sortie: un widget boite                                                                                                    */
 /******************************************************************************************************************************/

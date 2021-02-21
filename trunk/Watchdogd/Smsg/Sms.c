@@ -649,7 +649,7 @@ reload:
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { gchar buffer[1024];
-       usleep(100000);
+       usleep(10000);
        sched_yield();
 
 /****************************************************** SMS de test ! *********************************************************/

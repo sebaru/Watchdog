@@ -59,7 +59,7 @@
     gint network_size_to_send;
     gint access_level;
     SoupSession *connexion;
-    SoupWebsocketConnection *ws_msgs;
+    SoupWebsocketConnection *websocket;
     gchar hostname[32];                                                             /* Nom du serveur sur lequel se connecter */
     gchar username[32];
     gchar password[32];
