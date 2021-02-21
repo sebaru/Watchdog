@@ -100,7 +100,7 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
        return;
      }
-    Json_add_string( builder, "zmq_tag", "pulse" );
+    Json_add_string( builder, "zmq_tag", "PULSE" );
     JsonNode *node = Json_end ( builder );
     Http_ws_send_to_all ( node );
   }
@@ -230,7 +230,7 @@
     JsonBuilder *builder = Json_create ();
     if (!builder) return;
 
-    Json_add_string ( builder, "ws_msg_type", "init_syn" );
+    Json_add_string ( builder, "zmq_tag", "INIT_SYN" );
 
     g_snprintf(chaine, sizeof(chaine), "SELECT * from syns WHERE id=%d", syn_id );
     if (SQL_Select_to_JSON ( builder, NULL, chaine ) == FALSE)
@@ -366,14 +366,14 @@
        return;
      }
 
-    if (!Json_has_member ( response, "ws_msg_type" ))
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (no 'ws_msg_type') !", __func__ );
+    if (!Json_has_member ( response, "zmq_tag" ))
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (no 'zmq_tag') !", __func__ );
        json_node_unref(response);
        return;
      }
-    gchar *ws_msg_type = Json_get_string( response, "ws_msg_type" );
+    gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
 
-    if(!strcmp(ws_msg_type,"get_synoptique"))
+    if(!strcasecmp(zmq_tag,"GET_SYNOPTIQUE"))
      { if ( ! (Json_has_member( response, "wtd_session") && Json_has_member ( response, "syn_id" ) ))
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket 'Send_wtd_session' without wtd_session !", __func__ ); }
        else
@@ -412,7 +412,7 @@
              if (cadran->last_update +10 <= Partage->top)
               { JsonBuilder *builder = Json_create();
                 if (builder)
-                 { Json_add_string ( builder, "ws_msg_type", "update_cadran" );
+                 { Json_add_string ( builder, "zmq_tag", "DLS_CADRAN" );
                    WS_CADRAN_to_json ( builder, cadran );
                    Envoyer_ws_au_client ( client, builder );
                  }

@@ -125,7 +125,7 @@
  static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
   { JsonBuilder *builder = Json_create ();
     if (!builder) return;
-    Json_add_string ( builder, "ws_msg_type", "SET_CDE" );
+    Json_add_string ( builder, "zmq_tag", "SET_CDE" );
     Json_add_string ( builder, "tech_id", trame_motif->motif->tech_id );
     Json_add_string ( builder, "acronyme", trame_motif->motif->acronyme );
     printf("%s: envoi SET_CDE '%s':'%s'\n", __func__,
@@ -226,6 +226,7 @@
            Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );
 
     printf("Infos->trame=%p\n", infos->Trame );
+    if (!infos->Trame) return;
     GList *liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de la page */
     while (liste_motifs)
      { switch( *((gint *)liste_motifs->data) )
@@ -358,12 +359,14 @@
     if (!page) return;
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
-    if (!Json_has_member(response, "ws_msg_type")) return;
-    gchar *ws_msg_type = Json_get_string(response,"ws_msg_type");
 
-         if ( !strcmp ( ws_msg_type, "update_cadran" ) ) { Updater_les_cadrans ( page, response ); }
-    else if ( !strcmp ( ws_msg_type, "update_visuel" ) ) { Updater_les_visuels  ( page, response ); }
-    else if ( !strcmp ( ws_msg_type, "init_syn" ) )      { Creer_page_supervision ( page, response ); }
+    if (!Json_has_member(response, "zmq_tag")) return;
+    gchar *zmq_tag = Json_get_string(response,"zmq_tag");
+
+         if ( !strcasecmp ( zmq_tag, "DLS_CADRAN" ) ) { Updater_les_cadrans ( page, response ); }
+    else if ( !strcasecmp ( zmq_tag, "DLS_VISUEL" ) ) { Updater_les_visuels  ( page, response ); }
+    else if ( !strcasecmp ( zmq_tag, "INIT_SYN" ) )   { Creer_page_supervision ( page, response ); }
+    else printf("%s: zmq_tag unknown\n", __func__, zmq_tag );
     json_node_unref(response);
   }
 /******************************************************************************************************************************/
@@ -403,7 +406,7 @@
     JsonBuilder *builder = Json_create ();
     if (builder == NULL) return;
 
-    Json_add_string ( builder, "ws_msg_type", "get_synoptique" );
+    Json_add_string ( builder, "zmq_tag", "GET_SYNOPTIQUE" );
     Json_add_int    ( builder, "syn_id",   infos->syn_id );
     Json_add_string ( builder, "wtd_session", page->client->wtd_session );
     Envoi_ws_au_serveur ( page->client, infos->ws_motifs, builder );
