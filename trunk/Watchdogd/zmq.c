@@ -280,13 +280,11 @@
     Json_add_string ( builder, "zmq_src_thread", zmq_src_thread );
     Json_add_string ( builder, "zmq_tag", zmq_tag );
 
-    if (zmq_dst_instance)
-         { Json_add_string ( builder, "zmq_dst_instance", zmq_dst_instance ); }
-    else { Json_add_string ( builder, "zmq_dst_instance", "*" ); }
+    if (!zmq_dst_instance) zmq_dst_instance="*";
+    Json_add_string ( builder, "zmq_dst_instance", zmq_dst_instance );
 
-    if (zmq_dst_thread)
-         { Json_add_string ( builder, "zmq_dst_thread", zmq_dst_thread ); }
-    else { Json_add_string ( builder, "zmq_dst_thread", "*" ); }
+    if (!zmq_dst_thread)   zmq_dst_thread  ="*";
+    Json_add_string ( builder, "zmq_dst_thread",   zmq_dst_thread );
 
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/%s", __func__,
               zmq1->name, zmq1->endpoint, g_get_host_name(), zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
@@ -363,21 +361,8 @@
        return(NULL);
      }
 
-    if (!Json_has_member( request, "zmq_tag"))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_tag'. Dropping.", __func__ );
-       json_node_unref(request);
-       return(NULL);
-     }
-
     if (!Json_has_member( request, "zmq_dst_instance"))
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_dst_instance'. Dropping.", __func__ );
-       json_node_unref(request);
-       return(NULL);
-     }
-
-    gchar *zmq_dst_instance = Json_get_string(request,"zmq_dst_instance");
-    if ( strcasecmp( zmq_dst_instance, "*" ) && strcasecmp ( zmq_dst_instance, g_get_host_name() ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s'. Dropping", __func__, zmq_dst_instance );
        json_node_unref(request);
        return(NULL);
      }
@@ -388,17 +373,34 @@
        return(NULL);
      }
 
-    gchar *zmq_dst_thread = Json_get_string(request,"zmq_dst_thread");
-    if ( strcasecmp( zmq_dst_thread, "*" ) && thread && strcasecmp ( zmq_dst_thread, thread ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s/%s'. Dropping", __func__, zmq_dst_instance, zmq_dst_thread );
+    if (!Json_has_member( request, "zmq_tag"))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_tag'. Dropping.", __func__ );
        json_node_unref(request);
        return(NULL);
      }
 
+    gchar *zmq_dst_instance = Json_get_string(request,"zmq_dst_instance");
+    gchar *zmq_dst_thread   = Json_get_string(request,"zmq_dst_thread");
+    gchar *zmq_tag          = Json_get_string(request,"zmq_tag");
+
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
               "%s: '%s' ('%s') : %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
              Json_get_string(request,"zmq_src_instance"), Json_get_string(request,"zmq_src_thread"),
-             zmq_dst_instance, zmq_dst_thread, Json_get_string(request,"zmq_tag") );
+             zmq_dst_instance, zmq_dst_thread, zmq_tag );
+
+    if ( strcasecmp( zmq_dst_instance, "*" ) && strcasecmp ( zmq_dst_instance, g_get_host_name() ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s'. Dropping", __func__, zmq_dst_instance );
+       json_node_unref(request);
+       return(NULL);
+     }
+
+    if ( strcasecmp( zmq_dst_thread, "*" ) && thread && strcasecmp ( zmq_dst_thread, thread ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s/%s'. Dropping",
+                 __func__, zmq_dst_instance, zmq_dst_thread );
+       json_node_unref(request);
+       return(NULL);
+     }
+
     return(request);
   }
 /******************************************************************************************************************************/
