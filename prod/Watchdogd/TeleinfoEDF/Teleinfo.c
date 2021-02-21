@@ -233,7 +233,6 @@ reload:
                        "%s: Init TELEINFO failed. Re-trying in %ds", __func__, TINFO_RETRY_DELAI/10 );
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
-             Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 600 );
            }
           else
            { Cfg_teleinfo.mode = TINFO_CONNECTED;

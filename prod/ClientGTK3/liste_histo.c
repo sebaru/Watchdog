@@ -341,8 +341,8 @@ again:
 
     gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
     if (zmq_tag)
-     {      if(!strcmp(zmq_tag,"DLS_HISTO")) { Updater_histo( client, response ); }
-       else if(!strcmp(zmq_tag,"pulse"))     { Set_progress_pulse( client ); }
+     {      if(!strcasecmp(zmq_tag,"DLS_HISTO")) { Updater_histo( client, response ); }
+       else if(!strcasecmp(zmq_tag,"PULSE"))     { Set_progress_pulse( client ); }
      }
     json_node_unref(response);
   }

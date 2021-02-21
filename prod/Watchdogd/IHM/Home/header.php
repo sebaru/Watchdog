@@ -71,8 +71,8 @@
 
         @media (max-width: 768px)
          { .wtd-synoptique
-            { max-height: 64px;
-              max-width: 64px;
+            { max-height: 128px;
+              max-width: 128px;
             }
            .wtd-vignette
             { max-width: 16px;
@@ -151,7 +151,7 @@
 <header>
 	<nav class="navbar navbar-dark navbar-expand-md fixed-top shadow"> <!-- fixed-top -->
   <a class="navbar-brand" href="#" onclick="Change_page('1')">
-    <img src="/img/syn_home.png" alt="Accueil" class="wtd-menu">
+    <img src="/img/syn_accueil.png" alt="Accueil" class="wtd-menu">
   </a>
 
   <a class="nav-item"><img id="idMenuImgAccueil" src="" alt="Accueil" class="wtd-menu mr-1"></a>

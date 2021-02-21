@@ -68,7 +68,7 @@
     $('#idModalSynEditAccessLevel').val(0);
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('0')" );
     $('#idModalSynEditImageSelect').val("home");
-    $('#idModalSynEditImage').attr("src", "/img/syn_home.png");
+    $('#idModalSynEditImage').attr("src", "/img/syn_accueil.png");
     $('#idModalSynEditImage').css("max-width", "100px");
     $('#idModalSynEditImageSelect').change ( function () { Select_image_changed(syn_id) } );
     $('#idModalSynEditImageCustom').val('');
@@ -79,7 +79,7 @@
   { table = $('#idTableSyn').DataTable();
     selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
     if ($('#idModalSynEditImageSelect').val() != "custom")
-     { $('#idModalSynEditImage').attr("src", "/img/syn_"+$('#idModalSynEditImageSelect').val()+".png"); }
+     { $('#idModalSynEditImage').attr("src", "/img/"+$('#idModalSynEditImageSelect').val()); }
     else
      { $('#idModalSynEditImage').attr("src", "/upload/syn_"+selection.id+".jpg"); }
 
@@ -110,7 +110,7 @@
     $('#idModalSynEditImageSelect').val(selection.image);
     $('#idModalSynEditImageSelect').change ( function () { Select_image_changed(syn_id) } );
     if (selection.image != "custom")
-     { $('#idModalSynEditImage').attr("src", "/img/syn_"+selection.image+".png"); }
+     { $('#idModalSynEditImage').attr("src", "/img/"+selection.image); }
     else
      { $('#idModalSynEditImage').attr("src", "/upload/syn_"+selection.id+".jpg"); }
     $('#idModalSynEditImage').css("max-width", "100px");
@@ -147,7 +147,7 @@
           [ { "data": null, "title":"Aperçu", "className": "align-middle text-center",
               "render": function (item)
                 { if(item.image=="custom") target="/upload/syn_"+item.id+".jpg";
-                  else target = "/img/syn_"+item.image+".png";
+                  else target = "/img/"+item.image;
                   return( Lien( '/'+item.page, "Voir le synoptique", "<img src='"+target+"' height=80px loading=lazy alt='No Image !' >" ) ); }
             },
             { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",

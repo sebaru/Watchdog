@@ -16,6 +16,16 @@
      { $('#idTableMessages').DataTable().ajax.reload( null, false );
      }, null);
   }
+/********************************************* Clic sur visuel ****************************************************************/
+ function Envoyer_clic_visuel ( tech_id, acronyme )
+  { console.log ("Envoyer_clic_visuel: "+tech_id+":"+acronyme );
+    var json_request = JSON.stringify(
+       { tech_id  : tech_id,
+         acronyme : acronyme,
+       }
+     );
+    Send_to_API ( 'POST', "/api/syn/clic", json_request, null, null );
+  }
 /********************************************* Affichage des vignettes ********************************************************/
  function Set_vignette ( id, type, couleur, cligno )
   { var src_actuelle = $('#'+id).attr("src");
@@ -139,7 +149,7 @@
                  );
           Set_syn_vars ( Response.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
           if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg" ); }
-                                   else { Changer_img_src ( 'idMenuImgAccueil', "/img/syn_"+Response.image+".png" ); }
+                                   else { Changer_img_src ( 'idMenuImgAccueil', "/img/"+Response.image ); }
           $.each ( Response.visuels, function (i, visuel)
                     { $('#bodycard').append ( Creer_visuel ( visuel ) );
                     }
@@ -169,7 +179,7 @@
                       )
                .append( $('<div></div>').addClass("card-body text-center")
                         .append( $('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
-                                                                                  : "/img/syn_"+Response.image+".png") )
+                                                                                  : "/img/"+Response.image) )
                                  .attr("onclick", "Change_page("+Response.id+")")
                                  .addClass("wtd-synoptique")
                                )
@@ -180,7 +190,9 @@
 
     return(card);
   }
-/********************************************* Appelé au chargement de la page ************************************************/
+/******************************************************************************************************************************/
+/* Changer_etat_visuel: Appeler par la websocket pour changer un visuel d'etat                                                */
+/******************************************************************************************************************************/
  function Changer_etat_visuel ( etat )
   { if (Synoptique==null) return;
     var idvisuel = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme;
@@ -190,6 +202,8 @@
     visuels = Synoptique.visuels.filter( function (item) { return(item.tech_id==etat.tech_id && item.acronyme==etat.acronyme); });
     if (visuels.length!=1) return;
     visuel = visuels[0];
+    console.log("Changer_etat_visuel " + etat.tech_id + ":" + etat.acronyme + " -> mode ="+etat.mode +" couleur="+etat.color );
+    console.debug(visuel);
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
          if (etat.color=="darkgreen")
      { Changer_img_src ( idimage, "/img/"+visuel.forme+"."+visuel.extension);
@@ -200,18 +214,44 @@
 /*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
     else if (visuel.mode_affichage=="cadre")
      { Changer_img_src ( idimage, "/img/"+visuel.forme+"."+visuel.extension);
-       style = "none";
        $("#"+idvisuel).css("border", "medium solid "+etat.color );
        $("#"+idheader).css("background-color", "transparent" );
        $("#"+idfooter).css("background-color", "transparent" );
      }
+/*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
+    else if (visuel.mode_affichage=="2_modes_1_action")
+     { if (etat.mode>0) { target = "/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension; }
+                  else  { target = "/img/"+visuel.forme+"."+visuel.extension; }
+       Changer_img_src ( idimage, target );
+       $("#"+idvisuel).css("border", "medium none none" );
+       $("#"+idheader).css("background-color", "transparent" );
+       $("#"+idfooter).css("background-color", "transparent" );
+     }
+/*-------------------------------------------------- Visuel commun -----------------------------------------------------------*/
     if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
                 else $("#"+idimage).removeClass("wtd-cligno");
     $("#"+idvisuel).css("border-radius", "30px" );
   }
-/********************************************* Appelé au chargement de la page ************************************************/
+/******************************************************************************************************************************/
+/* Création d'un visuel sur la page de travail                                                                                */
+/******************************************************************************************************************************/
  function Creer_visuel ( Response )
   { var id = "wtd-visu-"+Response.tech_id+"-"+Response.acronyme;
+    var contenu;
+/*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
+         if (Response.mode_affichage=="cadre")
+     { contenu = $('<img>').addClass("wtd-visuel").attr ( "id", id+"-img" ); }
+/*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
+    else if (Response.mode_affichage=="2_modes_1_action")
+     { contenu = $('<img>');
+       $(contenu).addClass("wtd-visuel")
+                 .attr ( "id", id+"-img" )
+                 .attr ( "src", "/img/"+Response.forme+"."+Response.extension )
+                 .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
+     }
+    else
+     { contenu = $('<img>').addClass("wtd-visuel").attr ( "id", id+"-img" ); }
+
     var card = $('<div></div>').addClass("row bg-transparent m-1")
                .append( $('<div></div>').addClass("col mt-2 text-center text-white")
                         .append( $('<p></p>').text (Response.dls_shortname )
@@ -220,12 +260,7 @@
                       )
                .append( $('<div></div>').addClass("w-100") )
                .append( $('<div></div>').addClass("col text-center")
-                        .append( $('<img>') /*.attr("src", "/img/"+Response.forme+"."+Response.extension)*/
-                                 /*.attr("onclick", "Change_page('"+Response.page+"')")*/
-                                 .addClass("wtd-visuel")
-                                 /*.addClass("wtd-cligno")*/
-                                 .attr ( "id", id+"-img" )
-                               )
+                        .append( contenu )
                       )
                .append( $('<div></div>').addClass("w-100") )
                .append( $('<div></div>').addClass("col mt-2 text-center text-white")
@@ -236,11 +271,13 @@
                .attr ( "id", id );
     return(card);
   }
-/********************************************* Appelé au chargement de la page ************************************************/
+/******************************************************************************************************************************/
+/* Load_page: Appelé au chargement de la page                                                                                 */
+/******************************************************************************************************************************/
  function Load_page ()
   { Change_page (1);
 
-    var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/live-msgs", "live-msgs");
+    var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/live-motifs", "live-motifs");
     WTDWebSocket.onopen = function (event)
      { var json_request = JSON.stringify( { wtd_session: localStorage.getItem("wtd_session") } );
        this.send ( json_request );
@@ -263,6 +300,8 @@
         }
        else if (Response.zmq_tag == "SET_SYN_VARS")
         { $.each ( Response.syn_vars, function (i, item) { Set_syn_vars ( item.id, item ); } ); }
+       else if (Response.zmq_tag == "DLS_VISUEL")
+        { Changer_etat_visuel ( Response ); }
        else if (Response.zmq_tag == "pulse")
         { }
        else console.log("zmq_tag: " + Response.zmq_tag + " not known");

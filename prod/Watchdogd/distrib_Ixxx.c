@@ -53,6 +53,9 @@
                  visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno, reste
                );
        Send_zmq_as_raw ( Partage->com_msrv.zmq_motif, visu, sizeof(struct DLS_VISUEL) );
+       JsonBuilder *builder = Json_create ();
+       Dls_VISUEL_to_json ( builder, visu );
+       Send_zmq_with_json ( Partage->com_msrv.zmq_to_bus, "msrv", "*", "*","DLS_VISUEL", builder );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

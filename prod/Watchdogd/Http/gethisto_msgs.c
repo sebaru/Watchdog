@@ -31,47 +31,6 @@
  extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
- static void Http_ws_msgs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Close Connexion received !", __func__ );
-    g_object_unref(connexion);
-    Cfg_http.liste_ws_msgs_clients = g_slist_remove ( Cfg_http.liste_ws_msgs_clients, connexion );
-  }
- static void Http_ws_msgs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
-  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Error '%s' Connexion received !",
-              __func__, error->message );
-    g_error_free (error);
-  }
-/******************************************************************************************************************************/
-/* Http_ws_send_to_all: Envoi d'un buffer a tous les clients connectés à la websocket                                         */
-/* Entrée: Le buffer                                                                                                          */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Http_ws_send_to_all ( JsonNode *node )
-  { gsize taille_buf;
-    gchar *buf = Json_node_get_buf ( node, &taille_buf );
-    GSList *liste = Cfg_http.liste_ws_msgs_clients;
-    while (liste)
-     { SoupWebsocketConnection *connexion = liste->data;
-       soup_websocket_connection_send_text ( connexion, buf );
-       liste = g_slist_next(liste);
-     }
-    g_free(buf);
-  }
-/******************************************************************************************************************************/
-/* Http_msgs_send_to_all: Envoi d'un buffer a tous les clients connectés à la websocket                                       */
-/* Entrée: Le buffer                                                                                                          */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_msgs_send_to_all ( gchar *buf )
-  { GSList *liste = Cfg_http.liste_ws_msgs_clients;
-    while (liste)
-     { SoupWebsocketConnection *connexion = liste->data;
-       soup_websocket_connection_send_text ( connexion, buf );
-       liste = g_slist_next(liste);
-     }
-    g_free(buf);
-  }
-/******************************************************************************************************************************/
 /* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
@@ -156,48 +115,16 @@
           soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
         }
        else
-        { gsize taille_buf;
-          Json_add_string ( builder, "zmq_tag", "DLS_HISTO" );
+        { Json_add_string ( builder, "zmq_tag", "DLS_HISTO" );
           Json_add_string ( builder, "tech_id", tech_id );
           Json_add_string ( builder, "acronyme", acronyme );
           Json_add_string ( builder, "nom_ack", session->username );
           Json_add_string ( builder, "date_fixe", date_fixe );
-          gchar *buf = Json_get_buf ( builder, &taille_buf );
-          Http_msgs_send_to_all ( buf );
+          Http_ws_send_to_all ( Json_end ( builder ) );
           soup_message_set_status (msg, SOUP_STATUS_OK);
         }
      }
     else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
     json_node_unref(request);
-  }
-/******************************************************************************************************************************/
-/* Recuperer_histo_msgsDB_alive: Recupération de l'ensemble des messages encore Alive dans le BDD                             */
-/* Entrée: La base de données de travail                                                                                      */
-/* Sortie: False si probleme                                                                                                  */
-/******************************************************************************************************************************/
- void Http_ws_send_pulse_to_all ( void )
-  { gsize taille_buf;
-    JsonBuilder *builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
-       return;
-     }
-    Json_add_string( builder, "zmq_tag", "pulse" );
-    gchar *buf = Json_get_buf ( builder, &taille_buf );
-    Http_msgs_send_to_all ( buf );
-  }
-/******************************************************************************************************************************/
-/* Http_traiter_websocket: Traite une requete websocket                                                                       */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_traiter_open_websocket_msgs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
-                                            SoupClientContext *client, gpointer user_data)
-  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: MSGS WebSocket Opened %p state %d!", __func__, connexion,
-              soup_websocket_connection_get_state (connexion) );
-    g_signal_connect ( connexion, "closed", G_CALLBACK(Http_ws_msgs_on_closed), NULL );
-    g_signal_connect ( connexion, "error",  G_CALLBACK(Http_ws_msgs_on_error),  NULL );
-    Cfg_http.liste_ws_msgs_clients = g_slist_prepend ( Cfg_http.liste_ws_msgs_clients, connexion );
-    g_object_ref(connexion);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

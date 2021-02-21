@@ -174,7 +174,7 @@
        while ( (db->row = mysql_fetch_row(db->result)) != NULL )
         { if (array_name) Json_add_object ( builder, NULL );
           for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
-           { if (db->row[cpt]) Json_add_string( builder, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
+           { Json_add_string( builder, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
           if (array_name) Json_end_object ( builder );
         }
        if (array_name) Json_end_array ( builder );
@@ -2178,6 +2178,8 @@ fin:
     g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='satellite', mode_affichage='cadre', extension='svg'" );
     Lancer_requete_SQL ( db, requete );
     g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='sms', mode_affichage='cadre', extension='jpg'" );
+    Lancer_requete_SQL ( db, requete );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='ampoule', mode_affichage='2_modes_1_action', extension='png'" );
     Lancer_requete_SQL ( db, requete );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
