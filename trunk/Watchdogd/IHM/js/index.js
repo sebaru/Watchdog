@@ -202,7 +202,7 @@
     visuels = Synoptique.visuels.filter( function (item) { return(item.tech_id==etat.tech_id && item.acronyme==etat.acronyme); });
     if (visuels.length!=1) return;
     visuel = visuels[0];
-    console.log("Changer_etat_visuel " + etat.tech_id + ":" + etat.acronyme);
+    console.log("Changer_etat_visuel " + etat.tech_id + ":" + etat.acronyme + " -> mode ="+etat.mode +" couleur="+etat.color );
     console.debug(visuel);
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
          if (etat.color=="darkgreen")
@@ -222,7 +222,6 @@
     else if (visuel.mode_affichage=="2_modes_1_action")
      { if (etat.mode>0) { target = "/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension; }
                   else  { target = "/img/"+visuel.forme+"."+visuel.extension; }
-       console.log("2modes1action");
        Changer_img_src ( idimage, target );
        $("#"+idvisuel).css("border", "medium none none" );
        $("#"+idheader).css("background-color", "transparent" );
@@ -233,7 +232,9 @@
                 else $("#"+idimage).removeClass("wtd-cligno");
     $("#"+idvisuel).css("border-radius", "30px" );
   }
-/********************************************* Appelé au chargement de la page ************************************************/
+/******************************************************************************************************************************/
+/* Création d'un visuel sur la page de travail                                                                                */
+/******************************************************************************************************************************/
  function Creer_visuel ( Response )
   { var id = "wtd-visu-"+Response.tech_id+"-"+Response.acronyme;
     var contenu;
