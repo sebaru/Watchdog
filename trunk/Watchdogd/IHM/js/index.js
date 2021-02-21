@@ -245,7 +245,7 @@
      { contenu = $('<img>');
        $(contenu).addClass("wtd-visuel")
                  .attr ( "id", id+"-img" )
-                 .attr ( "img", "/img/"+Response.forme+Response.extension )
+                 .attr ( "src", "/img/"+Response.forme+"."+Response.extension )
                  .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
      }
     else
