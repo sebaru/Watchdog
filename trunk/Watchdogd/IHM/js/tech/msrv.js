@@ -28,11 +28,18 @@
        $('#idMSRVMasterHost').val( parametre.master_host );
        $('#idMSRVDescription').val( parametre.description );
        $('#idMSRVLogLevel').val( parametre.log_level );
+       $('#idMSRVLogDB').val( parametre.log_db );
+       $('#idMSRVLogZMQ').val( parametre.log_zmq );
      }, null);
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function MSRV_Set_Log_Level ( )
-  { var json_request = JSON.stringify( { instance: $('#idTargetInstance').val(), log_level: $("#idMSRVLogLevel").val() } );
+  { var json_request = JSON.stringify(
+     { instance: $('#idTargetInstance').val(),
+       log_level: $("#idMSRVLogLevel").val()
+       log_db   : $("#idMSRVLogDB").val()
+       log_zmq  : $("#idMSRVLogZMQ").val()
+     } );
     Send_to_API ( 'POST', "/api/instance/loglevel", json_request, null );
   }
 /********************************************* Appelé au chargement de la page ************************************************/

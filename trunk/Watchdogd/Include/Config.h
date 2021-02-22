@@ -53,6 +53,7 @@
     gboolean log_msrv;                                                                                /* TRUE si log_override */
     gboolean log_arch;                                                                                /* TRUE si log_override */
     gboolean log_db;                                                                              /* TRUE si log des acces DB */
+    gboolean log_zmq;                                                                            /* TRUE si log des acces ZMQ */
     struct LOG *log;                                                         /* Pour l'affichage des logs */
     gint single;                                                                /* Demarrage des thread ? */
   };

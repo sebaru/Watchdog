@@ -684,17 +684,21 @@ end:
            }
         }
 
-       gchar *database_debug = Recuperer_configDB_by_nom( "db", "debug" );            /* Récupération d'une config dans la DB */
+       gchar *database_debug = Recuperer_configDB_by_nom( "msrv", "log_db" );         /* Récupération d'une config dans la DB */
        if (database_debug)
-        { if (!strcasecmp(database_debug,"true")) { Config.log_db = TRUE; }
-                                            else  { Config.log_db = FALSE; }
+        { Config.log_db = !strcasecmp(database_debug,"true");
           g_free(database_debug);
+        }
+
+       gchar *zmq_debug = Recuperer_configDB_by_nom( "msrv", "log_zmq" );             /* Récupération d'une config dans la DB */
+       if (zmq_debug)
+        { Config.log_zmq = !strcasecmp(zmq_debug,"true");
+          g_free(zmq_debug);
         }
 
        gchar *msrv_debug = Recuperer_configDB_by_nom( "msrv", "debug" );              /* Récupération d'une config dans la DB */
        if (msrv_debug)
-        { if (!strcasecmp(msrv_debug,"true")) { Config.log_msrv = TRUE; }
-                                        else  { Config.log_msrv = FALSE; }
+        { Config.log_msrv = !strcasecmp(msrv_debug,"true");
           g_free(msrv_debug);
         }
 
