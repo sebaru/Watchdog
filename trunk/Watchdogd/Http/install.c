@@ -194,8 +194,13 @@
                "nom='subdir',valeur='%s' ", g_get_host_name(), (Json_get_int(request,"use_subdir") ? "true" : "false") );
     Lancer_requete_SQL ( db, chaine );
     g_snprintf( chaine, sizeof(chaine),
-               "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
-               "nom='log_level',valeur='6' ", g_get_host_name() );
+               "INSERT INTO config SET instance_id='%s',nom_thread='msrv',nom='log_level',valeur='6' ", g_get_host_name() );
+    Lancer_requete_SQL ( db, chaine );
+    g_snprintf( chaine, sizeof(chaine),
+               "INSERT INTO config SET instance_id='%s',nom_thread='msrv',nom='log_db',valeur='0' ", g_get_host_name() );
+    Lancer_requete_SQL ( db, chaine );
+    g_snprintf( chaine, sizeof(chaine),
+               "INSERT INTO config SET instance_id='%s',nom_thread='msrv',nom='log_zmq',valeur='0' ", g_get_host_name() );
     Lancer_requete_SQL ( db, chaine );
     Libere_DB_SQL ( &db );
 /******************************************* Création fichier de config *******************************************************/
