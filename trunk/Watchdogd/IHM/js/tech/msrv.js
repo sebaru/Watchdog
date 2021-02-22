@@ -36,8 +36,8 @@
  function MSRV_Set_Log_Level ( )
   { var json_request = JSON.stringify(
      { instance: $('#idTargetInstance').val(),
-       log_level: $("#idMSRVLogLevel").val()
-       log_db   : $("#idMSRVLogDB").val()
+       log_level: $("#idMSRVLogLevel").val(),
+       log_db   : $("#idMSRVLogDB").val(),
        log_zmq  : $("#idMSRVLogZMQ").val()
      } );
     Send_to_API ( 'POST', "/api/instance/loglevel", json_request, null );
