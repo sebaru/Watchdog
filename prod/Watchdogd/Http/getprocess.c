@@ -96,15 +96,6 @@
     Json_add_string ( builder, "objet",   "Archivage" );
     Json_end_object ( builder );                                                                              /* End Document */
 
-    Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
-    Json_add_string ( builder, "thread",  "db" );
-    Json_add_bool   ( builder, "debug",   Config.log_db );
-    Json_add_bool   ( builder, "started", TRUE );
-    Json_add_string ( builder, "version", WTD_VERSION );
-    Json_add_int    ( builder, "start_time", Partage->start_time );
-    Json_add_string ( builder, "objet",   "Database Access" );
-    Json_end_object ( builder );                                                                              /* End Document */
-
     liste = Partage->com_msrv.Librairies;                                                /* Parcours de toutes les librairies */
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
@@ -173,7 +164,6 @@
 
          if ( ! strcasecmp ( thread, "archive" ) ) { Config.log_arch = status; }
     else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
-    else if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
     else if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }
     else
      { GSList *liste;
@@ -244,9 +234,6 @@
     if ( ! strcasecmp ( thread, "dls"  ) )
      { if (status==FALSE) { Partage->com_dls.Thread_run  = FALSE; }
        else Demarrer_dls();                                                                               /* Démarrage D.L.S. */
-     }
-    if ( ! strcasecmp ( thread, "db"  ) )
-     {                                                                                    /* Le thread DB ne peut etre arreté */
      }
     else
      { GSList *liste;

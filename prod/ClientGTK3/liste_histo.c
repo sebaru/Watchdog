@@ -207,9 +207,9 @@
   { GtkTreeModel *store;
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_histo) );
     gtk_list_store_clear( GTK_LIST_STORE(store) );
-    if (client->ws_msgs)
-     { soup_websocket_connection_close ( client->ws_msgs, 0, "Thanks" );
-       client->ws_msgs = NULL;
+    if (client->websocket)
+     { soup_websocket_connection_close ( client->websocket, 0, "Thanks" );
+       client->websocket = NULL;
      }
   }
 /******************************************************************************************************************************/
@@ -294,7 +294,7 @@ again:
 /* Entrée: les parametres libsoup                                                                                             */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Updater_histo ( struct CLIENT *client, JsonNode *element )
+ void Updater_histo ( struct CLIENT *client, JsonNode *element )
   { GtkTreeIter iter;
 
     gchar *acronyme_recu = Json_get_string ( element, "acronyme" );
@@ -325,26 +325,6 @@ again:
        valide = gtk_tree_model_iter_next( store, &iter );
      }
     if (!found) Afficher_un_histo( NULL, 0, element, client );                    /* Sinon on en affiche un nouveau complet ! */
-  }
-/******************************************************************************************************************************/
-/* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
-/* Entrée: rien                                                                                                               */
-/* Sortie: un widget boite                                                                                                    */
-/******************************************************************************************************************************/
- void Traiter_reception_ws_msgs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
-  { gsize taille;
-    struct CLIENT *client = user_data;
-    printf("%s\n", __func__ );
-    printf("Recu MSGS: %s %p\n", g_bytes_get_data ( message_brut, &taille ), client );
-    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
-    if (!response) return;
-
-    gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
-    if (zmq_tag)
-     {      if(!strcasecmp(zmq_tag,"DLS_HISTO")) { Updater_histo( client, response ); }
-       else if(!strcasecmp(zmq_tag,"PULSE"))     { Set_progress_pulse( client ); }
-     }
-    json_node_unref(response);
   }
 /******************************************************************************************************************************/
 /* Afficher_histo_alive_CB: appeler par libsoup lorsque la requete de recuperation des histo alive a terminé                  */

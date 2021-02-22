@@ -15,6 +15,13 @@
 
        <div class="col form-group">
 					     <div class="input-group">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Description de l'instance</label>
+						     <input id="idMSRVDescription" type="text" class="form-control" placeholder="Nom de l'habitat par exemple">
+     					</div>
+  					</div>
+
+       <div class="col form-group">
+					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Log Level</label>
 						     <select id="idMSRVLogLevel" class="custom-select" onchange="MSRV_Set_Log_Level()">
              <option value="7">Debug</option>
@@ -22,6 +29,26 @@
              <option value="5">Notice</option>
              <option value="4">Warning</option>
              <option value="3">Error</option>
+           </select>
+     					</div>
+  					</div>
+
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Log DB</label>
+						     <select id="idMSRVLogDB" class="custom-select" onchange="MSRV_Set_Log_Level()">
+             <option value="0">Désactivé</option>
+             <option value="1">Activé</option>
+           </select>
+     					</div>
+  					</div>
+
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Log ZMQ</label>
+						     <select id="idMSRVLogZMQ" class="custom-select" onchange="MSRV_Set_Log_Level()">
+             <option value="0">Désactivé</option>
+             <option value="1">Activé</option>
            </select>
      					</div>
   					</div>
@@ -42,13 +69,6 @@
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-danger text-right">Master_Host</label>
 						     <input id="idMSRVMasterHost" type="text" class="form-control" placeholder="Hostname du master si cette instance est un slave">
-     					</div>
-  					</div>
-
-       <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Description de l'instance</label>
-						     <input id="idMSRVDescription" type="text" class="form-control" placeholder="Nom de l'habitat par exemple">
      					</div>
   					</div>
 

@@ -102,14 +102,34 @@
     g_bytes_unref( gbytes );
   }
 /******************************************************************************************************************************/
-/* Traiter_reception_ws_msgs_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
+/* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
 /* Entrée: rien                                                                                                               */
 /* Sortie: un widget boite                                                                                                    */
 /******************************************************************************************************************************/
- static void Traiter_reception_ws_msgs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
+ void Traiter_reception_ws_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
+  { gsize taille;
+    struct CLIENT *client = user_data;
+    printf("%s: Recu WS: %s %p\n", __func__, g_bytes_get_data ( message_brut, &taille ), client );
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    if (!response) return;
+
+    gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
+    if (zmq_tag)
+     {      if(!strcasecmp(zmq_tag,"DLS_HISTO")) { Updater_histo( client, response ); }
+       else if(!strcasecmp(zmq_tag,"PULSE"))     { Set_progress_pulse( client ); }
+       else printf("%s: tag '%s' inconnu\n", __func__, zmq_tag );
+     }
+    json_node_unref(response);
+  }
+/******************************************************************************************************************************/
+/* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
+/* Entrée: rien                                                                                                               */
+/* Sortie: un widget boite                                                                                                    */
+/******************************************************************************************************************************/
+ static void Traiter_reception_ws_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
   { printf("%s\n", __func__ );
   }
- static void Traiter_reception_ws_msgs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
+ static void Traiter_reception_ws_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
   { struct CLIENT *client = user_data;
     printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
     Log( client, error->message );
@@ -123,12 +143,12 @@
   { struct CLIENT *client = user_data;
     GError *error = NULL;
     printf("%s\n", __func__ );
-    client->ws_msgs = soup_session_websocket_connect_finish ( client->connexion, res, &error );
-    if (client->ws_msgs)                                                                   /* No limit on incoming packet ! */
-     { g_object_set ( G_OBJECT(client->ws_msgs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
-       g_signal_connect ( client->ws_msgs, "message", G_CALLBACK(Traiter_reception_ws_msgs_CB), client );
-       g_signal_connect ( client->ws_msgs, "closed",  G_CALLBACK(Traiter_reception_ws_msgs_on_closed), client );
-       g_signal_connect ( client->ws_msgs, "error",   G_CALLBACK(Traiter_reception_ws_msgs_on_error), client );
+    client->websocket = soup_session_websocket_connect_finish ( client->connexion, res, &error );
+    if (client->websocket)                                                                   /* No limit on incoming packet ! */
+     { g_object_set ( G_OBJECT(client->websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
+       g_signal_connect ( client->websocket, "message", G_CALLBACK(Traiter_reception_ws_CB), client );
+       g_signal_connect ( client->websocket, "closed",  G_CALLBACK(Traiter_reception_ws_on_closed), client );
+       g_signal_connect ( client->websocket, "error",   G_CALLBACK(Traiter_reception_ws_on_error), client );
      }
     else { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
            g_error_free (error);

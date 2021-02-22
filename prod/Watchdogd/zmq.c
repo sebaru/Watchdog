@@ -75,7 +75,7 @@
   { struct ZMQUEUE *zmq;
     zmq = (struct ZMQUEUE *)g_try_malloc0( sizeof(struct ZMQUEUE) );
     if (!zmq)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: New ZMQ Socket '%s' Failed. Memory Error (%s)",
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: New ZMQ Socket '%s' Failed. Memory Error (%s)",
                  __func__, name, zmq_strerror(errno) );
        return(NULL);
      }
@@ -83,10 +83,10 @@
     zmq->pattern = pattern;
     g_snprintf( zmq->name, sizeof(zmq->name), "%s", name );
     if ( (zmq->socket = zmq_socket ( Partage->zmq_ctx, pattern )) == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
                  "%s: New ZMQ Socket '%s' Failed (%s)", __func__, name, zmq_strerror(errno) );
      }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: New ZMQ Socket '%s' OK", __func__, name );
+    else Info_new( Config.log, Config.log_zmq, LOG_DEBUG, "%s: New ZMQ Socket '%s' OK", __func__, name );
     return(zmq);
   }
 /******************************************************************************************************************************/
@@ -96,11 +96,11 @@
 /******************************************************************************************************************************/
  static gboolean Subscribe_zmq ( struct ZMQUEUE *zmq )
   { if ( zmq_setsockopt ( zmq->socket, ZMQ_SUBSCRIBE, NULL, 0 ) == -1 )                          /* Subscribe to all messages */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: ZMQ subscript to all for '%s' failed (%s)",
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: ZMQ subscript to all for '%s' failed (%s)",
                  __func__, zmq->name, zmq_strerror(errno) );
        return(FALSE);
      }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ subscribe for '%s' OK", __func__, zmq->name );
+    else Info_new( Config.log, Config.log_zmq, LOG_DEBUG, "%s: ZMQ subscribe for '%s' OK", __func__, zmq->name );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -112,7 +112,7 @@
   { struct ZMQUEUE *zmq;
     zmq = (struct ZMQUEUE *)g_try_malloc0( sizeof(struct ZMQUEUE) );
     if (!zmq)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: New ZMQ Socket '%s' Failed. Memory Error (%s)",
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: New ZMQ Socket '%s' Failed. Memory Error (%s)",
                  __func__, name, zmq_strerror(errno) );
        return(NULL);
      }
@@ -120,7 +120,7 @@
     zmq->pattern = pattern;
     g_snprintf( zmq->name, sizeof(zmq->name), "%s", name );
     if ( (zmq->socket = zmq_socket ( Partage->zmq_ctx, pattern )) == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
                  "%s: New ZMQ Socket '%s' Failed (%s)", __func__, name, zmq_strerror(errno) );
        g_free(zmq);
        return(NULL);
@@ -129,12 +129,12 @@
     if (port) g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s:%d", type, endpoint, port );
          else g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s", type, endpoint );
     if ( zmq_bind (zmq->socket, zmq->endpoint) == -1 )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
                  "%s: ZMQ Bind '%s' to '%s' Failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
        g_free(zmq);
        return(NULL);
      }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ Bind '%s' to '%s' OK", __func__, zmq->name, zmq->endpoint );
+    else Info_new( Config.log, Config.log_zmq, LOG_DEBUG, "%s: ZMQ Bind '%s' to '%s' OK", __func__, zmq->name, zmq->endpoint );
     if (zmq->pattern == ZMQ_SUB) Subscribe_zmq(zmq);
     return(zmq);
   }
@@ -147,7 +147,7 @@
   { struct ZMQUEUE *zmq;
     zmq = (struct ZMQUEUE *)g_try_malloc0( sizeof(struct ZMQUEUE) );
     if (!zmq)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: New ZMQ Socket '%s' Failed. Memory Error (%s)",
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: New ZMQ Socket '%s' Failed. Memory Error (%s)",
                  __func__, name, zmq_strerror(errno) );
        return(NULL);
      }
@@ -155,7 +155,7 @@
     zmq->pattern = pattern;
     g_snprintf( zmq->name, sizeof(zmq->name), "%s", name );
     if ( (zmq->socket = zmq_socket ( Partage->zmq_ctx, pattern )) == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
                  "%s: New ZMQ Socket '%s' Failed (%s)", __func__, name, zmq_strerror(errno) );
        g_free(zmq);
        return(NULL);
@@ -164,12 +164,12 @@
     if (port) g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s:%d", type, endpoint, port );
          else g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s", type, endpoint );
     if ( zmq_connect (zmq->socket, zmq->endpoint) == -1 )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
                  "%s: ZMQ Connect '%s' to '%s' Failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
        g_free(zmq);
        return(NULL);
      }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ Connect '%s' to '%s' OK", __func__, zmq->name, zmq->endpoint );
+    else Info_new( Config.log, Config.log_zmq, LOG_DEBUG, "%s: ZMQ Connect '%s' to '%s' OK", __func__, zmq->name, zmq->endpoint );
     if (zmq->pattern == ZMQ_SUB) Subscribe_zmq(zmq);
     return(zmq);
   }
@@ -180,7 +180,7 @@
 /******************************************************************************************************************************/
  void Close_zmq ( struct ZMQUEUE *zmq )
   { if (!zmq) return;
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ closing '%s'", __func__, zmq->name );
+    Info_new( Config.log, Config.log_zmq, LOG_DEBUG, "%s: ZMQ closing '%s'", __func__, zmq->name );
     zmq_close ( zmq->socket );
     g_free(zmq);
   }
@@ -192,11 +192,11 @@
  gboolean Send_zmq_as_raw ( struct ZMQUEUE *zmq, void *buf, gint taille )
   { if (!zmq) return(FALSE);
     if (zmq_send( zmq->socket, buf, taille, 0 ) == -1)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
                 "%s: Send to ZMQ '%s' ('%s') failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
        return(FALSE);
      }
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+    Info_new( Config.log, Config.log_zmq, LOG_DEBUG,
              "%s: Send to ZMQ '%s' ('%s') %d bytes", __func__, zmq->name, zmq->endpoint, taille );
     return(TRUE);
   }
@@ -216,7 +216,7 @@
     if (taille==-1) taille = strlen(source)+1;
     buffer = g_try_malloc( taille + sizeof(struct ZMQ_TARGET) );
     if (!buffer)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
                 "%s: Send to ZMQ '%s' ('%s') failed (Memory Error)", __func__, zmq->name, zmq->endpoint );
        return(FALSE);
      }
@@ -238,13 +238,13 @@
     retour = Send_zmq_as_raw( zmq, buffer, taille + sizeof(struct ZMQ_TARGET) );
     g_free(buffer);
     if (retour==FALSE)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
                 "%s: '%s' ('%s') : ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
                  event.src_instance, event.src_thread, event.dst_instance, event.dst_thread, event.tag );
        return(FALSE);
      }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+     { Info_new( Config.log, Config.log_zmq, LOG_DEBUG,
                 "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
                  event.src_instance, event.src_thread, event.dst_instance, event.dst_thread, event.tag );
      }
@@ -270,7 +270,7 @@
   { if (!zmq1) return(FALSE);
     if(!builder) builder = Json_create();
     if(!builder)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
                 "%s: '%s' ('%s') : MEMORY ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq1->name, zmq1->endpoint,
                  g_get_host_name, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
        return(FALSE);
@@ -280,15 +280,13 @@
     Json_add_string ( builder, "zmq_src_thread", zmq_src_thread );
     Json_add_string ( builder, "zmq_tag", zmq_tag );
 
-    if (zmq_dst_instance)
-         { Json_add_string ( builder, "zmq_dst_instance", zmq_dst_instance ); }
-    else { Json_add_string ( builder, "zmq_dst_instance", "*" ); }
+    if (!zmq_dst_instance) zmq_dst_instance="*";
+    Json_add_string ( builder, "zmq_dst_instance", zmq_dst_instance );
 
-    if (zmq_dst_thread)
-         { Json_add_string ( builder, "zmq_dst_thread", zmq_dst_thread ); }
-    else { Json_add_string ( builder, "zmq_dst_thread", "*" ); }
+    if (!zmq_dst_thread)   zmq_dst_thread  ="*";
+    Json_add_string ( builder, "zmq_dst_thread",   zmq_dst_thread );
 
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/%s", __func__,
+    Info_new( Config.log, Config.log_zmq, LOG_DEBUG, "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/%s", __func__,
               zmq1->name, zmq1->endpoint, g_get_host_name(), zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
     gsize taille_buf;
     gboolean retour;
@@ -297,7 +295,7 @@
     if (zmq2) Send_zmq_as_raw( zmq2, buf, taille_buf );
     g_free(buf);
     if (retour==FALSE)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
                 "%s: '%s' ('%s') : ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq1->name, zmq1->endpoint,
                  g_get_host_name(), zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
        return(FALSE);
@@ -327,7 +325,7 @@
      { *event = buf;
        if (Zmq_instance_is_target ( *event ) && Zmq_thread_is_target ( *event, thread ) )
         { *payload = buf+sizeof(struct ZMQ_TARGET);
-          Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+          Info_new( Config.log, Config.log_zmq, LOG_DEBUG,
                    "%s: '%s' ('%s') : %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
                    (*event)->src_instance, (*event)->src_thread, (*event)->dst_instance, (*event)->dst_thread, (*event)->tag );
           ((gchar *)buf)[byte] = 0;                                                                       /* Caractere nul d'arret forcé */
@@ -347,58 +345,62 @@
     byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
     if (byte<0) return(NULL);
     if (byte>=taille_buf)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Received %d bytes. Message too long. Dropping.", __func__, byte );
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: Received %d bytes. Message too long. Dropping.", __func__, byte );
        return(NULL);
      }
     buf[byte]=0;                                                                                     /* Caractere nul d'arret */
     JsonNode *request = Json_get_from_string ( buf );
     if (!request)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Received %d bytes but this is not JSON", __func__, byte );
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: Received %d bytes but this is not JSON", __func__, byte );
        return(NULL);
      }
 
     if (!Json_has_member( request, "zmq_src_instance") && !Json_has_member( request, "zmq_src_thread"))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_src'. Dropping.", __func__ );
-       json_node_unref(request);
-       return(NULL);
-     }
-
-    if (!Json_has_member( request, "zmq_tag"))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_tag'. Dropping.", __func__ );
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_src'. Dropping.", __func__ );
        json_node_unref(request);
        return(NULL);
      }
 
     if (!Json_has_member( request, "zmq_dst_instance"))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_dst_instance'. Dropping.", __func__ );
-       json_node_unref(request);
-       return(NULL);
-     }
-
-    gchar *zmq_dst_instance = Json_get_string(request,"zmq_dst_instance");
-    if ( strcasecmp( zmq_dst_instance, "*" ) && strcasecmp ( zmq_dst_instance, g_get_host_name() ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s'. Dropping", __func__, zmq_dst_instance );
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_dst_instance'. Dropping.", __func__ );
        json_node_unref(request);
        return(NULL);
      }
 
     if (!Json_has_member( request, "zmq_dst_thread"))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: No 'zmq_dst_thread'. Dropping.", __func__ );
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_dst_thread'. Dropping.", __func__ );
        json_node_unref(request);
        return(NULL);
      }
 
-    gchar *zmq_dst_thread = Json_get_string(request,"zmq_dst_thread");
-    if ( strcasecmp( zmq_dst_thread, "*" ) && thread && strcasecmp ( zmq_dst_thread, thread ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Pas pour nous, pour '%s/%s'. Dropping", __func__, zmq_dst_instance, zmq_dst_thread );
+    if (!Json_has_member( request, "zmq_tag"))
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_tag'. Dropping.", __func__ );
        json_node_unref(request);
        return(NULL);
      }
 
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+    gchar *zmq_dst_instance = Json_get_string(request,"zmq_dst_instance");
+    gchar *zmq_dst_thread   = Json_get_string(request,"zmq_dst_thread");
+    gchar *zmq_tag          = Json_get_string(request,"zmq_tag");
+
+    Info_new( Config.log, Config.log_zmq, LOG_DEBUG,
               "%s: '%s' ('%s') : %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
              Json_get_string(request,"zmq_src_instance"), Json_get_string(request,"zmq_src_thread"),
-             zmq_dst_instance, zmq_dst_thread, Json_get_string(request,"zmq_tag") );
+             zmq_dst_instance, zmq_dst_thread, zmq_tag );
+
+    if ( strcasecmp( zmq_dst_instance, "*" ) && strcasecmp ( zmq_dst_instance, g_get_host_name() ) )
+     { Info_new( Config.log, Config.log_zmq, LOG_DEBUG, "%s: Pas pour nous, pour '%s'. Dropping", __func__, zmq_dst_instance );
+       json_node_unref(request);
+       return(NULL);
+     }
+
+    if ( strcasecmp( zmq_dst_thread, "*" ) && thread && strcasecmp ( zmq_dst_thread, thread ) )
+     { Info_new( Config.log, Config.log_zmq, LOG_DEBUG, "%s: Pas pour nous, pour '%s/%s'. Dropping",
+                 __func__, zmq_dst_instance, zmq_dst_thread );
+       json_node_unref(request);
+       return(NULL);
+     }
+
     return(request);
   }
 /******************************************************************************************************************************/

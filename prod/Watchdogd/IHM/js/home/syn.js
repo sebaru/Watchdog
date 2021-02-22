@@ -19,7 +19,7 @@
     var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/live-motifs", "live-motifs");
     WTDWebSocket.onopen = function (event)
      { var json_request = JSON.stringify( { wtd_session: localStorage.getItem("wtd_session"),
-                                            ws_msg_type: "get_synoptique",
+                                            zmq_tag: "GET_SYNOPTIQUE",
                                             syn_id : target }
                                         );
        console.log("WSOpen" + json_request );
@@ -35,11 +35,11 @@
      }
     WTDWebSocket.onmessage = function (event)
      { var Response = JSON.parse(event.data);                                               /* Pointe sur <synoptique a=1 ..> */
-       if (Response.ws_msg_type == "update_visuel")
+       if (Response.zmq_tag == "DLS_VISUEL")
         { Visuel_Set_State ( Response.tech_id, Response.acronyme, Response.mode, Response.color, Response.cligno ); }
-       else if (Response.ws_msg_type == "init_syn")
+       else if (Response.zmq_tag == "INIT_SYN")
         { Init_syn ( false, Response ); }
-       else console.log("ws_msg_type: " + Response.ws_msg_type + " not known");
+       else console.log("zmq_tag: " + Response.zmq_tag + " not known");
      }
   }
 

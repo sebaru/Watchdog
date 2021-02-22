@@ -88,7 +88,9 @@
        return;
      }
 
-    if ( ! Json_has_member ( request, "log_level" ) )
+    if ( ! (Json_has_member ( request, "log_level" ) && Json_has_member ( request, "log_db" ) &&
+            Json_has_member ( request, "log_zmq" ))
+       )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
@@ -104,6 +106,15 @@
     Info_change_log_level ( Config.log, log_target );
     Modifier_configDB_int ( "msrv", "log_level", log_target );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogLevel set to '%d'", __func__, log_target );
+
+    Config.log_db = Json_get_int ( request, "log_db" );
+    Modifier_configDB_int ( "msrv", "log_db", Config.log_db );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogDB set to '%d'", __func__, Config.log_db );
+
+    Config.log_zmq = Json_get_int ( request, "log_zmq" );
+    Modifier_configDB_int ( "msrv", "log_zmq", Config.log_zmq );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogZMQ set to '%d'", __func__, Config.log_zmq );
+
 
     json_node_unref(request);
 	   soup_message_set_status (msg, SOUP_STATUS_OK);

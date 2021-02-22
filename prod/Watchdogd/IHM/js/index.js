@@ -136,7 +136,8 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Change_page ( syn_id )
-  { $('#bodycard').fadeOut("fast", function ()
+  { window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    $('#bodycard').fadeOut("fast", function ()
      { $('#bodycard').empty();
        Send_to_API ( "GET", "/api/syn/show", "syn_id="+syn_id, function(Response)
         { console.log(Response);
