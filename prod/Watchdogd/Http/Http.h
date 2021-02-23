@@ -61,7 +61,7 @@
     gboolean ssl_enable;                                                                             /* TRUE si connexion SSL */
     gchar ssl_cert_filepath[80];
     gchar ssl_private_key_filepath[80];
-    GSList *liste_ws_motifs_clients;
+    GSList *liste_ws_clients;
     GSList *liste_http_clients;
     gint wtd_session_expiry;
  };

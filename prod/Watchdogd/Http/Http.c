@@ -630,8 +630,8 @@ reload:
     g_slist_free ( Cfg_http.liste_http_clients );
     Cfg_http.liste_http_clients = NULL;
 
-    while ( Cfg_http.liste_ws_motifs_clients )
-     { Http_ws_destroy_session ( (struct WS_CLIENT_SESSION *)(Cfg_http.liste_ws_motifs_clients->data ) ); }
+    while ( Cfg_http.liste_ws_clients )
+     { Http_ws_destroy_session ( (struct WS_CLIENT_SESSION *)(Cfg_http.liste_ws_clients->data ) ); }
 
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)

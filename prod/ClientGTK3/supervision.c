@@ -125,12 +125,11 @@
  static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
   { JsonBuilder *builder = Json_create ();
     if (!builder) return;
-    Json_add_string ( builder, "zmq_tag", "SET_CDE" );
-    Json_add_string ( builder, "tech_id", trame_motif->motif->tech_id );
-    Json_add_string ( builder, "acronyme", trame_motif->motif->acronyme );
-    printf("%s: envoi SET_CDE '%s':'%s'\n", __func__,
-           trame_motif->motif->tech_id, trame_motif->motif->acronyme );
-    Envoi_json_au_serveur ( trame_motif->page->client, "PUT", builder, "/syn/clic", NULL );
+    Json_add_string ( builder, "tech_id", trame_motif->motif->clic_tech_id );
+    Json_add_string ( builder, "acronyme", trame_motif->motif->clic_acronyme );
+    printf("%s: envoi syn_clic '%s':'%s'\n", __func__,
+           trame_motif->motif->clic_tech_id, trame_motif->motif->clic_acronyme );
+    Envoi_json_au_serveur ( trame_motif->page->client, "POST", builder, "/api/syn/clic", NULL );
   }
 /******************************************************************************************************************************/
 /* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision                       */
@@ -253,26 +252,115 @@
 /* Entrée: une reference sur le message                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Initialiser_les_motifs (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+ static void Updater_les_visuels_by_array (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct PAGE_NOTEBOOK *page = user_data;
     if (!page) return;
 
     Updater_les_visuels ( page, element );
   }
 /******************************************************************************************************************************/
+/* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MOTIF                                 */
+/* Entrée: les parametres libsoup                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Traiter_visuel_ws_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
+  { struct PAGE_NOTEBOOK *page = user_data;
+    gsize taille;
+    if (!page) return;
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    if (!response) return;
+
+    if (!Json_has_member(response, "zmq_tag")) return;
+    gchar *zmq_tag = Json_get_string(response,"zmq_tag");
+
+         if ( !strcasecmp ( zmq_tag, "DLS_CADRAN" ) ) { Updater_les_cadrans ( page, response ); }
+    else if ( !strcasecmp ( zmq_tag, "DLS_VISUEL" ) ) { Updater_les_visuels  ( page, response ); }
+    else printf("%s: zmq_tag '%s' unknown\n", __func__, zmq_tag );
+    json_node_unref(response);
+  }
+/******************************************************************************************************************************/
+/* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
+/* Entrée: rien                                                                                                               */
+/* Sortie: un widget boite                                                                                                    */
+/******************************************************************************************************************************/
+ static void Traiter_visuel_ws_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
+  { printf("%s\n", __func__ );
+  }
+ static void Traiter_visuel_ws_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
+  { struct PAGE_NOTEBOOK *page = user_data;
+    printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
+  }
+/******************************************************************************************************************************/
+/* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
+/* Entrée: les variables traditionnelles de libsous                                                                           */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Traiter_visuel_ws_on_connect ( GObject *source_object, GAsyncResult *res, gpointer user_data )
+  { struct PAGE_NOTEBOOK *page = user_data;
+    struct TYPE_INFO_SUPERVISION *infos = page->infos;
+    GError *error = NULL;
+    printf("%s\n", __func__ );
+
+    infos->ws_motifs = soup_session_websocket_connect_finish ( page->client->connexion, res, &error );
+    if (!infos->ws_motifs)                                                                    /* No limit on incoming packet ! */
+     { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
+       g_error_free (error);
+       return;
+     }
+    g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
+    g_signal_connect ( infos->ws_motifs, "message", G_CALLBACK(Traiter_visuel_ws_CB), page );
+    g_signal_connect ( infos->ws_motifs, "closed",  G_CALLBACK(Traiter_visuel_ws_on_closed), page );
+    g_signal_connect ( infos->ws_motifs, "error",   G_CALLBACK(Traiter_visuel_ws_on_error), page );
+
+    JsonBuilder *builder = Json_create ();
+    if (builder == NULL) return;
+
+    Json_add_string ( builder, "zmq_tag", "SET_ABONNEMENT" );
+    Json_add_int    ( builder, "syn_id",   infos->syn_id );
+    Json_add_string ( builder, "wtd_session", page->client->wtd_session );
+    Envoi_ws_au_serveur ( page->client, infos->ws_motifs, builder );
+  }
+/******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
 /* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Creer_page_supervision ( struct PAGE_NOTEBOOK *page, JsonNode *Syn )
+ static void Creer_page_supervision_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
   { GtkWidget *bouton, *boite, *hboite, *scroll, *frame, *label;
-    struct TYPE_INFO_SUPERVISION *infos = page->infos;
+    struct CLIENT *client = user_data;
+    struct TYPE_INFO_SUPERVISION *infos;
+    struct PAGE_NOTEBOOK *page;
+    GBytes *response_brute;
+    gchar *reason_phrase;
     GtkAdjustment *adj;
+    gint status_code;
+    gsize taille;
 
-    page->client->Liste_pages  = g_slist_append( page->client->Liste_pages, page );
-    printf("---- chargement id %d \n", Json_get_int ( Syn, "id" ));
-    infos->syn = json_node_copy(Syn);
+    g_object_get ( msg, "response-body-data", &response_brute, NULL );
+    printf("%s: Recu SYNS: %s %p\n", __func__, (gchar *)g_bytes_get_data ( response_brute, &taille ), client );
+
+    g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
+    if (status_code != 200)
+     { gchar chaine[256];
+       g_snprintf(chaine, sizeof(chaine), "Error loading synoptique: Code %d - %s", status_code, reason_phrase );
+       Log(client, chaine);
+       return;
+     }
+
+    page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
+    if (!page) return;
+    page->client = client;
+
+    infos = page->infos = (struct TYPE_INFO_SUPERVISION *)g_try_malloc0( sizeof(struct TYPE_INFO_SUPERVISION) );
+    if (!page->infos) { g_free(page); return; }
+
+    page->type   = TYPE_PAGE_SUPERVISION;
+    client->Liste_pages  = g_slist_append( client->Liste_pages, page );
+    g_object_get ( msg, "response-body-data", &response_brute, NULL );
+    infos->syn = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
+    infos->syn_id = Json_get_int ( infos->syn, "id" );
     infos->timer_id = g_timeout_add( 500, Timer, page );
+    printf("---- chargement id %d \n", infos->syn_id );
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     page->child = hboite;
@@ -338,78 +426,18 @@
     gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( Json_get_string( infos->syn, "libelle" ) ) );
     gtk_widget_show_all( label );
     gint page_num = gtk_notebook_append_page( GTK_NOTEBOOK(page->client->Notebook), page->child, label );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ),      Afficher_un_motif, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Afficher_un_commentaire, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "visuels" ),     Initialiser_les_motifs, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "visuels" ),      Afficher_un_motif, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ),  Afficher_une_passerelle, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),     Afficher_un_commentaire, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),      Afficher_une_camera, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),      Afficher_un_cadran, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "etat_visuels" ), Updater_les_visuels_by_array, page );
     gtk_widget_show_all( page->child );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(page->client->Notebook), page_num );
-  }
-
-/******************************************************************************************************************************/
-/* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MOTIF                                 */
-/* Entrée: les parametres libsoup                                                                                             */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Traiter_reception_ws_motifs_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
-  { struct PAGE_NOTEBOOK *page = user_data;
-    gsize taille;
-    if (!page) return;
-    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
-    if (!response) return;
-
-    if (!Json_has_member(response, "zmq_tag")) return;
-    gchar *zmq_tag = Json_get_string(response,"zmq_tag");
-
-         if ( !strcasecmp ( zmq_tag, "DLS_CADRAN" ) ) { Updater_les_cadrans ( page, response ); }
-    else if ( !strcasecmp ( zmq_tag, "DLS_VISUEL" ) ) { Updater_les_visuels  ( page, response ); }
-    else if ( !strcasecmp ( zmq_tag, "INIT_SYN" ) )   { Creer_page_supervision ( page, response ); }
-    else printf("%s: zmq_tag unknown\n", __func__, zmq_tag );
-    json_node_unref(response);
-  }
-/******************************************************************************************************************************/
-/* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
-/* Entrée: rien                                                                                                               */
-/* Sortie: un widget boite                                                                                                    */
-/******************************************************************************************************************************/
- static void Traiter_reception_ws_motifs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { printf("%s\n", __func__ );
-  }
- static void Traiter_reception_ws_motifs_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
-  { struct PAGE_NOTEBOOK *page = user_data;
-    printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
-  }
-/******************************************************************************************************************************/
-/* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
-/* Entrée: les variables traditionnelles de libsous                                                                           */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Traiter_connect_ws_motifs_CB ( GObject *source_object, GAsyncResult *res, gpointer user_data )
-  { struct PAGE_NOTEBOOK *page = user_data;
-    struct TYPE_INFO_SUPERVISION *infos = page->infos;
-    GError *error = NULL;
-    printf("%s\n", __func__ );
-
-    infos->ws_motifs = soup_session_websocket_connect_finish ( page->client->connexion, res, &error );
-    if (!infos->ws_motifs)                                                                    /* No limit on incoming packet ! */
-     { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
-       g_error_free (error);
-       return;
-     }
-    g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
-    g_signal_connect ( infos->ws_motifs, "message", G_CALLBACK(Traiter_reception_ws_motifs_CB), page );
-    g_signal_connect ( infos->ws_motifs, "closed",  G_CALLBACK(Traiter_reception_ws_motifs_on_closed), page );
-    g_signal_connect ( infos->ws_motifs, "error",   G_CALLBACK(Traiter_reception_ws_motifs_on_error), page );
-
-    JsonBuilder *builder = Json_create ();
-    if (builder == NULL) return;
-
-    Json_add_string ( builder, "zmq_tag", "GET_SYNOPTIQUE" );
-    Json_add_int    ( builder, "syn_id",   infos->syn_id );
-    Json_add_string ( builder, "wtd_session", page->client->wtd_session );
-    Envoi_ws_au_serveur ( page->client, infos->ws_motifs, builder );
+    gchar chaine[256];
+    g_snprintf(chaine, sizeof(chaine), "wss://%s:5560/api/live-motifs", client->hostname );
+    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
+                                           NULL, NULL, g_cancellable_new(), Traiter_visuel_ws_on_connect, page );
   }
 
 #ifdef bouh
@@ -574,24 +602,12 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
 /* Entrée/Sortie: l'instance cliente, l'id du synoptique a demander                                                           */
 /******************************************************************************************************************************/
  void Demander_synoptique_supervision ( struct CLIENT *client, gint id )
-  { struct TYPE_INFO_SUPERVISION *infos;
-    struct PAGE_NOTEBOOK *page;
-    gchar chaine[128];
+  { gchar chaine[128];
 
     if (Chercher_page_notebook( client, TYPE_PAGE_SUPERVISION, id, TRUE )) return;
-    page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
-    if (!page) return;
 
-    page->client = client;
-    infos = page->infos = (struct TYPE_INFO_SUPERVISION *)g_try_malloc0( sizeof(struct TYPE_INFO_SUPERVISION) );
-    if (!page->infos) { g_free(page); return; }
-
-    page->type    = TYPE_PAGE_SUPERVISION;
-    infos->syn_id = id;
-
-    g_snprintf(chaine, sizeof(chaine), "wss://%s:5560/api/live-motifs", client->hostname );
-    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
-                                           NULL, NULL, g_cancellable_new(), Traiter_connect_ws_motifs_CB, page );
+    g_snprintf(chaine, sizeof(chaine), "/api/syn/show?full=true&syn_id=%d", id );
+    Envoi_json_au_serveur( client, "GET", NULL, chaine, Creer_page_supervision_CB );
   }
 /******************************************************************************************************************************/
 /* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                                                 */

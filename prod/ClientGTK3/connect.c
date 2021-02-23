@@ -102,59 +102,6 @@
     g_bytes_unref( gbytes );
   }
 /******************************************************************************************************************************/
-/* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
-/* Entrée: rien                                                                                                               */
-/* Sortie: un widget boite                                                                                                    */
-/******************************************************************************************************************************/
- void Traiter_reception_ws_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
-  { gsize taille;
-    struct CLIENT *client = user_data;
-    printf("%s: Recu WS: %s %p\n", __func__, g_bytes_get_data ( message_brut, &taille ), client );
-    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
-    if (!response) return;
-
-    gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
-    if (zmq_tag)
-     {      if(!strcasecmp(zmq_tag,"DLS_HISTO")) { Updater_histo( client, response ); }
-       else if(!strcasecmp(zmq_tag,"PULSE"))     { Set_progress_pulse( client ); }
-       else printf("%s: tag '%s' inconnu\n", __func__, zmq_tag );
-     }
-    json_node_unref(response);
-  }
-/******************************************************************************************************************************/
-/* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
-/* Entrée: rien                                                                                                               */
-/* Sortie: un widget boite                                                                                                    */
-/******************************************************************************************************************************/
- static void Traiter_reception_ws_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { printf("%s\n", __func__ );
-  }
- static void Traiter_reception_ws_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
-  { struct CLIENT *client = user_data;
-    printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
-    Log( client, error->message );
-  }
-/******************************************************************************************************************************/
-/* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
-/* Entrée: les variables traditionnelles de libsous                                                                           */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Traiter_connect_ws_CB (GObject *source_object, GAsyncResult *res, gpointer user_data )
-  { struct CLIENT *client = user_data;
-    GError *error = NULL;
-    printf("%s\n", __func__ );
-    client->websocket = soup_session_websocket_connect_finish ( client->connexion, res, &error );
-    if (client->websocket)                                                                   /* No limit on incoming packet ! */
-     { g_object_set ( G_OBJECT(client->websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
-       g_signal_connect ( client->websocket, "message", G_CALLBACK(Traiter_reception_ws_CB), client );
-       g_signal_connect ( client->websocket, "closed",  G_CALLBACK(Traiter_reception_ws_on_closed), client );
-       g_signal_connect ( client->websocket, "error",   G_CALLBACK(Traiter_reception_ws_on_error), client );
-     }
-    else { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
-           g_error_free (error);
-         }
-  }
-/******************************************************************************************************************************/
 /* Connecter_au_serveur_CB: Traite la reponse du serveur a la demande de connexionen                                          */
 /* Entrée: les variables traditionnelles de libsous                                                                           */
 /* Sortie: l'ihm est mise a jour et les ws sont activées                                                                      */
@@ -203,9 +150,6 @@
     Log(client, chaine);
     json_node_unref(response);
     Envoi_json_au_serveur( client, "GET", NULL, "/api/histo/alive", Afficher_histo_alive_CB );
-    g_snprintf(chaine, sizeof(chaine), "wss://%s:5560/api/live-motifs", client->hostname );
-    soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
-                                           NULL, NULL, g_cancellable_new(), Traiter_connect_ws_CB, client );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */

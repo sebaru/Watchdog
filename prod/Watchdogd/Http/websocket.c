@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Http/ws_motifs.c        Gestion des echanges des elements visuels de watchdog                                    */
+/* Watchdogd/Http/ws.c        Gestion des echanges des elements visuels de watchdog                                    */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    06.05.2020 09:53:41 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * ws_motifs.c
+ * ws.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre
@@ -64,7 +64,7 @@
   { gsize taille_buf;
     gchar *buf = Json_node_to_string ( visuel, &taille_buf );
     json_node_unref ( visuel );
-    GSList *liste = Cfg_http.liste_ws_motifs_clients;
+    GSList *liste = Cfg_http.liste_ws_clients;
     while (liste)
      { struct WS_CLIENT_SESSION *client = liste->data;
        soup_websocket_connection_send_text ( client->connexion, buf );
@@ -81,7 +81,7 @@
   { gsize taille_buf;
     gchar *buf = Json_node_to_string ( node, &taille_buf );
     json_node_unref ( node );
-    GSList *liste = Cfg_http.liste_ws_motifs_clients;
+    GSList *liste = Cfg_http.liste_ws_clients;
     while (liste)
      { struct WS_CLIENT_SESSION *client = liste->data;
        soup_websocket_connection_send_text ( client->connexion, buf );
@@ -194,168 +194,82 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_ws_motifs_send_synoptique ( struct WS_CLIENT_SESSION *client, gint syn_id )
+ void Http_ws_set_abonnement ( struct WS_CLIENT_SESSION *client, gint syn_id )
   { gchar chaine[256];
 
-    struct DB *db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: DB connexion failed for user '%s'", __func__, client->http_session->username );
-       return;
-     }
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT access_level FROM syns WHERE id=%d", syn_id );
-    if ( Lancer_requete_SQL ( db, chaine ) == FALSE )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: DB request failed for user '%s'",__func__, client->http_session->username );
-       return;
-     }
-
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Syn '%d' unknown", __func__, syn_id );
-       return;
-     }
-    gint syn_access_level = atoi(db->row[0]);
-    Liberer_resultat_SQL (db);
-    Libere_DB_SQL( &db );
-
-    if (client->http_session->access_level < syn_access_level )
-     { Audit_log ( client->http_session, "Access to '%d' forbidden", syn_id );
-       return;
-     }
-
+/*-------------------------------------------------- Test autorisation d'accès -----------------------------------------------*/
     JsonBuilder *builder = Json_create ();
     if (!builder) return;
 
-    Json_add_string ( builder, "zmq_tag", "INIT_SYN" );
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns WHERE id=%d", syn_id );
-    if (SQL_Select_to_JSON ( builder, NULL, chaine ) == FALSE)
-     { g_object_unref(builder);
+    SQL_Select_to_JSON_new ( builder, NULL, "SELECT access_level,libelle FROM syns WHERE id=%d", syn_id );
+    JsonNode *result = Json_end ( builder );
+    if ( !(Json_has_member ( result, "access_level" ) && Json_has_member ( result, "libelle" )) )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Syn '%d' unknown", __func__, syn_id );
+       json_node_unref ( result );
        return;
      }
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_motifs WHERE syn_id=%d", syn_id );
-    if (SQL_Select_to_JSON ( builder, "motifs", chaine ) == FALSE)
-     { g_object_unref(builder);
+    if (client->http_session->access_level < Json_get_int ( result, "access_level" ))
+     { Audit_log ( client->http_session, "Access to synoptique '%s' (id '%d') forbidden",
+                   Json_get_string ( result, "libelle" ), syn_id );
+       json_node_unref ( result );
        return;
      }
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT sp.*,syn.page,syn.libelle FROM syns_pass as sp "
-                                       "INNER JOIN syns as syn ON sp.syn_cible_id=syn.id "
-                                       "WHERE sp.syn_id=%d AND syn.access_level<=%d", syn_id, client->http_session->access_level );
-    if (SQL_Select_to_JSON ( builder, "passerelles", chaine ) == FALSE)
-     { g_object_unref(builder);
-       return;
-     }
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_liens WHERE syn_id=%d", syn_id );
-    if (SQL_Select_to_JSON ( builder, "liens", chaine ) == FALSE)
-     { g_object_unref(builder);
-       return;
-     }
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_rectangles WHERE syn_id=%d", syn_id );
-    if (SQL_Select_to_JSON ( builder, "rectangles", chaine ) == FALSE)
-     { g_object_unref(builder);
-       return;
-     }
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT * from syns_comments WHERE syn_id=%d", syn_id );
-    if (SQL_Select_to_JSON ( builder, "comments", chaine ) == FALSE)
-     { g_object_unref(builder);
-       return;
-     }
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT *,src.location,src.libelle from syns_camerasup AS cam "
-                                       "INNER JOIN cameras AS src ON cam.camera_src_id=src.id WHERE syn_id=%d", syn_id );
-    if (SQL_Select_to_JSON ( builder, "cameras", chaine ) == FALSE)
-     { g_object_unref(builder);
-       return;
-     }
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT syns_cadrans.* FROM syns_cadrans WHERE syn_id=%d", syn_id );
-    if (SQL_Select_to_JSON ( builder, "cadrans", chaine ) == FALSE)
-     { g_object_unref(builder);
-       return;
-     }
+    else Audit_log ( client->http_session, "Envoi du synoptique '%s' (id '%d')", Json_get_string ( result, "libelle" ), syn_id );
+    json_node_unref ( result );
 
 /*----------------------------------------------- Visuels --------------------------------------------------------------------*/
-    Json_add_array ( builder, "visuels" );
-    db = Init_DB_SQL();
-    if (db)
-     { g_snprintf(chaine, sizeof(chaine), "SELECT tech_id, acronyme FROM syns_motifs WHERE syn_id=%d", syn_id );
-       Lancer_requete_SQL ( db, chaine );                                                      /* Execution de la requete SQL */
-       while(Recuperer_ligne_SQL(db))                                                      /* Chargement d'une ligne resultat */
-        { gchar *tech_id  = db->row[0];
-          gchar *acronyme = db->row[1];
-          struct DLS_VISUEL *visuel = NULL;
-          Dls_data_get_VISUEL ( tech_id, acronyme, (gpointer)&visuel );
-          if ( visuel && !g_slist_find ( client->Liste_bit_visuels, visuel ) )
-           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au VISUEL %s:%s", __func__,
-                       client->http_session->username, visuel->tech_id, visuel->acronyme );
-             Json_add_object ( builder, NULL );
-             Dls_VISUEL_to_json ( builder, visuel );
-             Json_end_object ( builder );
-           }
+    struct DB *db = Init_DB_SQL();
+    if (!db) return;
+
+    g_snprintf(chaine, sizeof(chaine), "SELECT tech_id, acronyme FROM syns_motifs WHERE syn_id=%d", syn_id );
+    Lancer_requete_SQL ( db, chaine );                                                      /* Execution de la requete SQL */
+    while(Recuperer_ligne_SQL(db))                                                      /* Chargement d'une ligne resultat */
+     { gchar *tech_id  = db->row[0];
+       gchar *acronyme = db->row[1];
+       struct DLS_VISUEL *visuel = NULL;
+       Dls_data_get_VISUEL ( tech_id, acronyme, (gpointer)&visuel );
+       if ( visuel && !g_slist_find ( client->Liste_bit_visuels, visuel ) )
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au VISUEL %s:%s", __func__,
+                    client->http_session->username, visuel->tech_id, visuel->acronyme );
           client->Liste_bit_visuels = g_slist_prepend( client->Liste_bit_visuels, visuel );
         }
-       Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
      }
-    Json_end_array ( builder );
 
-/*----------------------------------------------- Cadrans --------------------------------------------------------------------*/
-    Json_add_array ( builder, "cadrans" );
-    db = Init_DB_SQL();
-    if (db)
-     { g_snprintf(chaine, sizeof(chaine), "SELECT tech_id,acronyme FROM syns_cadrans WHERE syn_id=%d", syn_id );
-       Lancer_requete_SQL ( db, chaine );                                                      /* Execution de la requete SQL */
-       while(Recuperer_ligne_SQL(db))                                                      /* Chargement d'une ligne resultat */
-        { gchar *tech_id  = db->row[0];
-          gchar *acronyme = db->row[1];
-          GSList *liste = client->Liste_bit_cadrans;
-          while(liste)
-           { struct WS_CADRAN *cadran=liste->data;
-             if ( !strcasecmp( tech_id, cadran->tech_id ) && !strcasecmp( acronyme, cadran->acronyme ) ) break;
-             liste = g_slist_next(liste);
-           }
-          if (!liste)                                       /* si le cadran n'est pas trouvé, on l'ajoute a la liste d'abonné */
-           { struct WS_CADRAN *ws_cadran;
-             ws_cadran = (struct WS_CADRAN *)g_try_malloc0(sizeof(struct WS_CADRAN));
-             if (ws_cadran)
-              { g_snprintf( ws_cadran->tech_id,  sizeof(ws_cadran->tech_id),  "%s", tech_id  );
-                g_snprintf( ws_cadran->acronyme, sizeof(ws_cadran->acronyme), "%s", acronyme );
-                ws_cadran->type = Rechercher_DICO_type ( ws_cadran->tech_id, ws_cadran->acronyme );
-                if (ws_cadran->type!=-1)
-                 { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au CADRAN %s:%s", __func__,
-                             client->http_session->username, ws_cadran->tech_id, ws_cadran->acronyme );
-                   Json_add_object ( builder, NULL );
-                   WS_CADRAN_to_json ( builder, ws_cadran );
-                   Json_end_object ( builder );
-                   client->Liste_bit_cadrans = g_slist_prepend( client->Liste_bit_cadrans, ws_cadran );
-                 }
-                else { g_free(ws_cadran); }                                                               /* Si pas trouvé... */
+    g_snprintf(chaine, sizeof(chaine), "SELECT tech_id,acronyme FROM syns_cadrans WHERE syn_id=%d", syn_id );
+    Lancer_requete_SQL ( db, chaine );                                                         /* Execution de la requete SQL */
+    while(Recuperer_ligne_SQL(db))                                                         /* Chargement d'une ligne resultat */
+     { gchar *tech_id  = db->row[0];
+       gchar *acronyme = db->row[1];
+       GSList *liste = client->Liste_bit_cadrans;                                    /* Le cadran est-il déjà dans la liste ? */
+       while(liste)
+        { struct WS_CADRAN *cadran=liste->data;
+          if ( !strcasecmp( tech_id, cadran->tech_id ) && !strcasecmp( acronyme, cadran->acronyme ) ) break;
+          liste = g_slist_next(liste);
+        }
+       if (!liste)                                          /* si le cadran n'est pas trouvé, on l'ajoute a la liste d'abonné */
+        { struct WS_CADRAN *ws_cadran;
+          ws_cadran = (struct WS_CADRAN *)g_try_malloc0(sizeof(struct WS_CADRAN));
+          if (ws_cadran)
+           { g_snprintf( ws_cadran->tech_id,  sizeof(ws_cadran->tech_id),  "%s", tech_id  );
+             g_snprintf( ws_cadran->acronyme, sizeof(ws_cadran->acronyme), "%s", acronyme );
+             ws_cadran->type = Rechercher_DICO_type ( ws_cadran->tech_id, ws_cadran->acronyme );
+             if (ws_cadran->type!=-1)
+              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au CADRAN %s:%s", __func__,
+                          client->http_session->username, ws_cadran->tech_id, ws_cadran->acronyme );
+                client->Liste_bit_cadrans = g_slist_prepend( client->Liste_bit_cadrans, ws_cadran );
               }
+             else { g_free(ws_cadran); }                                                                  /* Si pas trouvé... */
            }
         }
-       Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
      }
-    Json_end_array ( builder );
-
-    Envoyer_ws_au_client ( client, builder );
-    Audit_log ( client->http_session, "Synoptique '%d' sent", syn_id );
+    Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
-/* Http_ws_motifs_on_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket                              */
+/* Http_ws_on_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket                              */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Http_ws_motifs_on_message ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
+ static void Http_ws_on_message ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
   { struct WS_CLIENT_SESSION *client = user_data;
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Message received !", __func__ );
     gsize taille;
@@ -373,9 +287,9 @@
      }
     gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
 
-    if(!strcasecmp(zmq_tag,"GET_SYNOPTIQUE"))
+    if(!strcasecmp(zmq_tag,"SET_ABONNEMENT"))
      { if ( ! (Json_has_member( response, "wtd_session") && Json_has_member ( response, "syn_id" ) ))
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket 'Send_wtd_session' without wtd_session !", __func__ ); }
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket without wtd_session !", __func__ ); }
        else
         { gchar *wtd_session = Json_get_string ( response, "wtd_session");
           GSList *liste = Cfg_http.liste_http_clients;
@@ -384,7 +298,7 @@
              if (!strcmp(http_session->wtd_session, wtd_session))
               { client->http_session = http_session;
                 Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: session found for '%s' !", __func__, http_session->username );
-                Http_ws_motifs_send_synoptique ( client, Json_get_int ( response, "syn_id" ) );
+                Http_ws_set_abonnement ( client, Json_get_int ( response, "syn_id" ) );
                 break;
               }
              liste = g_slist_next ( liste );
@@ -402,7 +316,7 @@
 /******************************************************************************************************************************/
  void Http_Envoyer_les_cadrans ( void )
   { pthread_mutex_lock( &Cfg_http.lib->synchro );
-    GSList *clients = Cfg_http.liste_ws_motifs_clients;
+    GSList *clients = Cfg_http.liste_ws_clients;
     while (clients)
      { struct WS_CLIENT_SESSION *client = clients->data;
        if (client->http_session)
@@ -432,7 +346,7 @@
 /******************************************************************************************************************************/
  void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client )
   { pthread_mutex_lock( &Cfg_http.lib->synchro );
-    Cfg_http.liste_ws_motifs_clients = g_slist_remove ( Cfg_http.liste_ws_motifs_clients, client );
+    Cfg_http.liste_ws_clients = g_slist_remove ( Cfg_http.liste_ws_clients, client );
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Session closed !", __func__ );
     g_object_unref(client->connexion);
@@ -441,15 +355,15 @@
     g_free(client);
   }
 /******************************************************************************************************************************/
-/* Http_ws_motifs_on_closed: Traite une deconnexion                                                                           */
+/* Http_ws_on_closed: Traite une deconnexion                                                                           */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Http_ws_motifs_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
+ static void Http_ws_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
   { struct WS_CLIENT_SESSION *client = user_data;
     Http_ws_destroy_session ( client );
   }
- static void Http_ws_motifs_on_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
+ static void Http_ws_on_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
   { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
   }
 /******************************************************************************************************************************/
@@ -468,12 +382,12 @@
      }
     client->connexion = connexion;
     client->context = context;
-    g_signal_connect ( connexion, "message", G_CALLBACK(Http_ws_motifs_on_message), client );
-    g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_motifs_on_closed), client );
-    g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_motifs_on_error), client );
+    g_signal_connect ( connexion, "message", G_CALLBACK(Http_ws_on_message), client );
+    g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_on_closed), client );
+    g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_on_error), client );
     /*soup_websocket_connection_send_text ( connexion, "Welcome on Watchdog WebSocket !" );*/
     pthread_mutex_lock( &Cfg_http.lib->synchro );
-    Cfg_http.liste_ws_motifs_clients = g_slist_prepend ( Cfg_http.liste_ws_motifs_clients, client );
+    Cfg_http.liste_ws_clients = g_slist_prepend ( Cfg_http.liste_ws_clients, client );
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
     g_object_ref(connexion);
   }
