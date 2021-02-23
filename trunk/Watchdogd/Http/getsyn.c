@@ -385,7 +385,30 @@
 
     gchar *full_syn = g_hash_table_lookup ( query, "full" );
 
+/*-------------------------------------------------- Test autorisation d'accès -----------------------------------------------*/
     JsonBuilder *builder = Json_create ();
+    if (!builder)
+     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+    SQL_Select_to_JSON_new ( builder, NULL, "SELECT access_level,libelle FROM syns WHERE id=%d", syn_id );
+    JsonNode *result = Json_end ( builder );
+    if ( !(Json_has_member ( result, "access_level" ) && Json_has_member ( result, "libelle" )) )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Syn '%d' unknown", __func__, syn_id );
+       soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Syn not found");
+       json_node_unref ( result );
+       return;
+     }
+    if (session->access_level < Json_get_int ( result, "access_level" ))
+     { Audit_log ( session, "Access to synoptique '%s' (id '%d') forbidden",
+                   Json_get_string ( result, "libelle" ), syn_id );
+       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Access Denied");
+       json_node_unref ( result );
+       return;
+     }
+    json_node_unref ( result );
+/*---------------------------------------------- Envoi les données -----------------------------------------------------------*/
+    builder = Json_create ();
     if (!builder)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        return;
@@ -398,7 +421,6 @@
        g_object_unref(builder);
        return;
      }
-
 /*-------------------------------------------------- Envoi les data des synoptiques fils -------------------------------------*/
     g_snprintf(chaine, sizeof(chaine), "SELECT s.* FROM syns AS s INNER JOIN syns as s2 ON s.parent_id=s2.id"
                                        " WHERE s2.id='%d' AND s.id!=1 AND s.access_level<='%d'", syn_id, session->access_level);
@@ -493,13 +515,13 @@
        g_object_unref(builder);
        return;
      }
-
-    struct DLS_SYN *dls_syn = Dls_search_syn ( syn_id );
+/*------------------------------------------------- Envoi l'état de tous les visuels du synoptique ---------------------------*/
+    struct DLS_SYN *dls_syn = Dls_search_syn ( syn_id );                                            /* Récupère le synoptique */
     if (dls_syn)
      { GSList *liste_visu;
        Json_add_array ( builder, "etat_visuels" );
        liste_visu = Partage->Dls_data_VISUEL;
-       while(liste_visu)
+       while(liste_visu)                    /* Parcours tous les visuels et envoie ceux relatifs aux DLS du synoptique chargé */
         { struct DLS_VISUEL *visuel=liste_visu->data;
           GSList *liste_plugin = dls_syn->Dls_plugins;
           while (liste_plugin)
@@ -508,16 +530,6 @@
               { Json_add_object ( builder, NULL );
                 Dls_VISUEL_to_json ( builder, visuel );
                 Json_end_object( builder );
-#ifdef bouh
-          if ( visuel && !g_slist_find ( client->Liste_bit_visuels, visuel ) )
-           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au VISUEL %s:%s", __func__,
-                       client->http_session->username, visuel->tech_id, visuel->acronyme );
-             Json_add_object ( builder, NULL );
-             Dls_VISUEL_to_json ( builder, visuel );
-             Json_end_object ( builder );
-           }
-          client->Liste_bit_visuels = g_slist_prepend( client->Liste_bit_visuels, visuel );
-#endif
               }
              liste_plugin = g_slist_next(liste_plugin);
            }
@@ -525,7 +537,6 @@
         }
        Json_end_array( builder );
      }
-
 
     buf = Json_get_buf (builder, &taille_buf);
 /*************************************************** Envoi au client **********************************************************/

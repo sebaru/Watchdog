@@ -125,10 +125,10 @@
  static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
   { JsonBuilder *builder = Json_create ();
     if (!builder) return;
-    Json_add_string ( builder, "tech_id", trame_motif->motif->tech_id );
-    Json_add_string ( builder, "acronyme", trame_motif->motif->acronyme );
+    Json_add_string ( builder, "tech_id", trame_motif->motif->clic_tech_id );
+    Json_add_string ( builder, "acronyme", trame_motif->motif->clic_acronyme );
     printf("%s: envoi syn_clic '%s':'%s'\n", __func__,
-           trame_motif->motif->tech_id, trame_motif->motif->acronyme );
+           trame_motif->motif->clic_tech_id, trame_motif->motif->clic_acronyme );
     Envoi_json_au_serveur ( trame_motif->page->client, "POST", builder, "/api/syn/clic", NULL );
   }
 /******************************************************************************************************************************/
@@ -315,7 +315,7 @@
     JsonBuilder *builder = Json_create ();
     if (builder == NULL) return;
 
-    Json_add_string ( builder, "zmq_tag", "GET_SYNOPTIQUE" );
+    Json_add_string ( builder, "zmq_tag", "SET_ABONNEMENT" );
     Json_add_int    ( builder, "syn_id",   infos->syn_id );
     Json_add_string ( builder, "wtd_session", page->client->wtd_session );
     Envoi_ws_au_serveur ( page->client, infos->ws_motifs, builder );

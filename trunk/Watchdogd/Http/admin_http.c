@@ -59,7 +59,7 @@
        Json_add_string ( builder, "ssl_cert_filepath",        Cfg_http.ssl_cert_filepath );
        Json_add_string ( builder, "ssl_private_key_filepath", Cfg_http.ssl_private_key_filepath );
        pthread_mutex_lock( &Cfg_http.lib->synchro );
-       Json_add_int    ( builder, "Abonnes_motifs",           g_slist_length (Cfg_http.liste_ws_motifs_clients) );
+       Json_add_int    ( builder, "Abonnes_motifs",           g_slist_length (Cfg_http.liste_ws_clients) );
        Json_add_int    ( builder, "nbr_sessions",             g_slist_length (Cfg_http.liste_http_clients ) );
        pthread_mutex_unlock( &Cfg_http.lib->synchro );
      }
@@ -71,7 +71,7 @@
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelÃ© par le thread http lors d'une requete /run/                                                  */
 /* EntrÃ©e : les adresses d'un buffer json et un entier pour sortir sa taille                                                 */
-/* Sortie : les parametres d'entrée sont mis Ã  jour                                                                          */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  void Admin_json ( struct LIBRAIRIE *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
   { if (access_level < 6)
