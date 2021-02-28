@@ -831,12 +831,6 @@
     Alias = NULL;
   }
 /******************************************************************************************************************************/
-/* Trad_dls_set_debug: Positionne le flag de debug Bison/Flex                                                                 */
-/* Entrée : TRUE ou FALSE                                                                                                     */
-/******************************************************************************************************************************/
- void Trad_dls_set_debug ( gboolean actif )
-  { DlsScanner_debug = actif; }                                                                   /* Debug de la traduction ?? */
-/******************************************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
 /* Entrée: l'id du modul                                                                                                      */
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */
@@ -905,6 +899,7 @@
        New_alias_permanent ( "MSG_COMM_HS", MNEMO_MSG, libelle );
        Mnemo_auto_create_MSG ( FALSE, Dls_plugin.tech_id, "MSG_COMM_HS", libelle, MSG_DEFAUT );
 
+       DlsScanner_debug = Partage->com_dls.Thread_debug;
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);

@@ -692,6 +692,8 @@ une_action:     T_ACT_DEF
                   {{ $$=New_action_vars_mono("vars->bit_alerte"); }}
                 | T_SBIEN_ALEF
                   {{ $$=New_action_vars_mono("vars->bit_alerte_fixe"); }}
+                | T_SBIEN_ALE_FUGITIVE
+                  {{ $$=New_action_vars_mono("vars->bit_alerte_fugitive"); }}
                 | T_SPERS_DER
                   {{ $$=New_action_vars_mono("vars->bit_derangement"); }}
                 | T_SPERS_DERF
