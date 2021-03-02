@@ -297,7 +297,7 @@
      { struct DLS_WATCHDOG *wtd = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(wtd->tech_id, plugin->tech_id))
-        { Dls_data_set_bool ( &plugin->vars, wtd->tech_id, wtd->acronyme, (gpointer *)&wtd, FALSE ); }
+        { Dls_data_set_WATCHDOG ( &plugin->vars, wtd->tech_id, wtd->acronyme, (gpointer *)&wtd, FALSE ); }
      }
     liste_bit = Partage->Dls_data_VISUEL;                                              /* Decharge tous les visuels du module */
     while(liste_bit)
