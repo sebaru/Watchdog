@@ -501,11 +501,9 @@
     taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
-    action->sinon = New_chaine( taille );
+    action->sinon = NULL;
 
-    g_snprintf( action->alors, taille, "   Dls_data_set_bool ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
-                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-    g_snprintf( action->sinon, taille, "   Dls_data_set_bool ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
+    g_snprintf( action->alors, taille, "   Dls_data_set_MONO ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
     return(action);
   }
@@ -674,11 +672,11 @@
     action = New_action();
     action->alors = New_chaine( taille );
     if (barre)
-     { g_snprintf( action->alors, taille, "   Dls_data_set_bool ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
+     { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( action->alors, taille, "   Dls_data_set_bool ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
+     { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     return(action);

@@ -42,7 +42,7 @@
      { case MNEMO_ENTREE:
        case MNEMO_BISTABLE:
         { gboolean valeur;
-          valeur = Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+          valeur = Dls_data_get_BI ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
           return( cadran->valeur != valeur );
         }
        case MNEMO_TEMPO:
@@ -88,7 +88,7 @@
     switch(cadran->type)
      { case MNEMO_BISTABLE:
             cadran->in_range = TRUE;
-            cadran->valeur = 1.0 * Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+            cadran->valeur = 1.0 * Dls_data_get_BI ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
             break;
        case MNEMO_ENTREE:
             cadran->in_range = TRUE;

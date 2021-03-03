@@ -40,7 +40,7 @@
 
  #include "watchdogd.h"
 
- #define DLS_LIBRARY_VERSION  "20210115"
+ #define DLS_LIBRARY_VERSION  "20210303"
 
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
@@ -275,9 +275,30 @@
        di->edge_down = FALSE;
      }
   }
+/******************************************************************************************************************************/
+/* Dls_set_all_bool : positionne les nouvelles valeur des bits internes                                                       */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Dls_set_all_bool ( void )
+  { GSList *liste = Partage->Dls_data_BOOL;
+     while ( liste )
+      { struct DLS_BOOL *bool = liste->data;
+        if (bool->etat != bool->next_etat)
+         { if (bool->next_etat == TRUE)
+            { Partage->com_dls.Set_Dls_Bool_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_up, bool ); }
+           else
+            { Partage->com_dls.Set_Dls_Bool_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_down, bool ); }
+           Partage->audit_bit_interne_per_sec++;
+           bool->etat = bool->next_etat;
+           if (bool->type == MNEMO_MONOSTABLE) bool->next_etat = FALSE;
+         }
+        liste = g_slist_next(liste);
+      }
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 /******************************************************************************************************************************/
-/* Dls_data_set_bool: Positionne un boolean                                                                                   */
+/* Dls_data_set_WATCHDOG: Positionne un watchdog en fonction de la valeur en parametre                                        */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
  void Dls_data_set_WATCHDOG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *wtd_p, gint consigne )
@@ -345,10 +366,10 @@ end:
     return( Partage->top < wtd->top );
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_bool: Positionne un boolean                                                                                   */
+/* Dls_data_set_BI: Positionne un bistable                                                                                    */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- void Dls_data_set_bool ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur )
+ void Dls_data_set_BI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur )
   { struct DLS_BOOL *bool;
 
     if (!bool_p || !*bool_p)
@@ -364,34 +385,79 @@ end:
        if (!liste)
         { bool = g_try_malloc0 ( sizeof(struct DLS_BOOL) );
           if (!bool)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_ERR,
+                       "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( bool->acronyme, sizeof(bool->acronyme), "%s", acronyme );
           g_snprintf( bool->tech_id,  sizeof(bool->tech_id),  "%s", tech_id );
+          bool->type = MNEMO_BISTABLE;
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_BOOL '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_INFO,
+                    "%s: adding DLS_BOOL BI '%s:%s'", __func__, tech_id, acronyme );
         }
        if (bool_p) *bool_p = (gpointer)bool;                                        /* Sauvegarde pour acceleration si besoin */
       }
     else bool = (struct DLS_BOOL *)*bool_p;
 
-    if (bool->etat != valeur)
+    if (bool->next_etat != valeur)
      { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_BOOL '%s:%s'=%d up %d down %d",
                  __func__, bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
-       if (valeur == TRUE) Partage->com_dls.Set_Dls_Bool_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_up, bool );
-                      else Partage->com_dls.Set_Dls_Bool_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_down, bool );
        Partage->audit_bit_interne_per_sec++;
+       bool->next_etat = valeur;
      }
-    bool->etat = valeur;
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_bool: Remonte l'etat d'un boolean                                                                             */
+/* Dls_data_set_MONO: Positionne un monostable                                                                                */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_bool ( gchar *tech_id, gchar *acronyme, gpointer *bool_p )
+ void Dls_data_set_MONO ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur )
+  { struct DLS_BOOL *bool;
+
+    if (!bool_p || !*bool_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_BOOL;
+       while (liste)
+        { bool = (struct DLS_BOOL *)liste->data;
+          if ( !strcasecmp ( bool->acronyme, acronyme ) && !strcasecmp( bool->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+
+       if (!liste)
+        { bool = g_try_malloc0 ( sizeof(struct DLS_BOOL) );
+          if (!bool)
+           { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_ERR,
+                       "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( bool->acronyme, sizeof(bool->acronyme), "%s", acronyme );
+          g_snprintf( bool->tech_id,  sizeof(bool->tech_id),  "%s", tech_id );
+          bool->type = MNEMO_MONOSTABLE;
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_INFO,
+                    "%s: adding DLS_BOOL MONO '%s:%s'", __func__, tech_id, acronyme );
+        }
+       if (bool_p) *bool_p = (gpointer)bool;                                        /* Sauvegarde pour acceleration si besoin */
+      }
+    else bool = (struct DLS_BOOL *)*bool_p;
+
+    if (bool->next_etat != valeur)
+     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_BOOL '%s:%s'=%d up %d down %d",
+                 __func__, bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
+       Partage->audit_bit_interne_per_sec++;
+       bool->next_etat = valeur;
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_BI: Remonte l'etat d'un bistable                                                                             */
+/* Sortie : TRUE sur le boolean est UP                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_BI ( gchar *tech_id, gchar *acronyme, gpointer *bool_p )
   { struct DLS_BOOL *bool;
     GSList *liste;
     if (bool_p && *bool_p)                                                           /* Si pointeur d'acceleration disponible */
@@ -408,7 +474,35 @@ end:
      }
 
     if (!liste)                                                                  /* si n'existe pas, on le créé dans la liste */
-     { Dls_data_set_bool ( NULL, tech_id, acronyme, bool_p, FALSE );
+     { Dls_data_set_BI ( NULL, tech_id, acronyme, bool_p, FALSE );
+       return(FALSE);
+     }
+
+    if (bool_p) *bool_p = (gpointer)bool;                                           /* Sauvegarde pour acceleration si besoin */
+    return( bool->etat );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_MONO: Remonte l'etat d'un monostable                                                                          */
+/* Sortie : TRUE sur le boolean est UP                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_MONO ( gchar *tech_id, gchar *acronyme, gpointer *bool_p )
+  { struct DLS_BOOL *bool;
+    GSList *liste;
+    if (bool_p && *bool_p)                                                           /* Si pointeur d'acceleration disponible */
+     { bool = (struct DLS_BOOL *)*bool_p;
+       return( bool->etat );
+     }
+    if (!tech_id || !acronyme) return(FALSE);
+
+    liste = Partage->Dls_data_BOOL;
+    while (liste)
+     { bool = (struct DLS_BOOL *)liste->data;
+       if ( !strcasecmp ( bool->acronyme, acronyme ) && !strcasecmp( bool->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste)                                                                  /* si n'existe pas, on le créé dans la liste */
+     { Dls_data_set_MONO ( NULL, tech_id, acronyme, bool_p, FALSE );
        return(FALSE);
      }
 
@@ -464,7 +558,7 @@ end:
     return( bool->edge_down );
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_bool: Positionne un boolean                                                                                   */
+/* Dls_data_set_DI: Positionne une DigitalInput                                                                               */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
  void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur )
@@ -1213,7 +1307,7 @@ end:
 /******************************************************************************************************************************/
  void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
                          gchar *host, gchar *thread, gchar *tag, gchar *param1)
-  { Dls_data_set_bool ( NULL, tech_id, acronyme, bus_p, etat );                                   /* Utilisation d'un boolean */
+  { Dls_data_set_BI ( NULL, tech_id, acronyme, bus_p, etat );                                   /* Utilisation d'un boolean */
     if (Dls_data_get_bool_up(tech_id, acronyme, bus_p))
      { if (param1)
         { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
@@ -1357,7 +1451,7 @@ end:
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_data_set_MSG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
-  { if (vars && Dls_data_get_bool(NULL, NULL, &vars->bit_comm)==FALSE) etat = FALSE;
+  { if (vars && Dls_data_get_MONO(NULL, NULL, &vars->bit_comm)==FALSE) etat = FALSE;
     Dls_data_set_MSG_reel( vars, tech_id, acronyme, msg_p, update, etat );
   }
 /******************************************************************************************************************************/
@@ -1419,7 +1513,7 @@ end:
       }
     else visu = (struct DLS_VISUEL *)*visu_p;
 
-    if (vars && Dls_data_get_bool ( NULL, NULL, &vars->bit_comm )==FALSE) { color = "darkgreen", cligno = TRUE; }
+    if (vars && Dls_data_get_MONO ( NULL, NULL, &vars->bit_comm )==FALSE) { color = "darkgreen", cligno = TRUE; }
 
     if (visu->mode != mode || strcmp( visu->color, color ) || visu->cligno != cligno )
      { if ( visu->last_change + 50 <= Partage->top )                                 /* Si pas de change depuis plus de 5 sec */
@@ -1652,7 +1746,7 @@ end:
     while(liste)                                                                     /* On execute tous les modules un par un */
      { struct DLS_PLUGIN *plugin = liste->data;
 /*----------------------------------------------- Calcul des synthèses -------------------------------------------------------*/
-       bit_comm             &= Dls_data_get_bool ( plugin->tech_id, "COMM", &plugin->vars.bit_comm );                                                /* Bit de synthese activite */
+       bit_comm             &= Dls_data_get_MONO ( plugin->tech_id, "COMM", &plugin->vars.bit_comm );                                                /* Bit de synthese activite */
        bit_defaut           |= plugin->vars.bit_defaut;
        bit_defaut_fixe      |= plugin->vars.bit_defaut_fixe;
        bit_alarme           |= plugin->vars.bit_alarme;
@@ -1743,7 +1837,7 @@ end:
        bit_comm_module &= Dls_data_get_WATCHDOG( NULL, NULL, &wtd );
        liste = g_slist_next ( liste );
      }
-    Dls_data_set_bool ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
+    Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
     plugin->vars.bit_activite_ok = bit_comm_module && !(plugin->vars.bit_defaut || plugin->vars.bit_defaut_fixe ||
                                                         plugin->vars.bit_alarme || plugin->vars.bit_alarme_fixe);
     plugin->vars.bit_secupers_ok = !(plugin->vars.bit_derangement || plugin->vars.bit_derangement_fixe ||
@@ -1829,21 +1923,21 @@ end:
         }
 
        if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
-        { Dls_data_set_bool ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, TRUE );
-          Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz,
-                              !Dls_data_get_bool ( "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz) );
+        { Dls_data_set_BI ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, TRUE );
+          Dls_data_set_BI ( NULL, "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz,
+                           !Dls_data_get_BI ( "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz) );
           last_top_5hz = Partage->top;
         }
        if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
-        { Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
-          Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz,
-                              !Dls_data_get_bool ( "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz) );
+        { Dls_data_set_BI ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
+          Dls_data_set_BI ( NULL, "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz,
+                           !Dls_data_get_BI ( "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz) );
           last_top_2hz = Partage->top;
         }
        if (Partage->top-last_top_1sec>=10)                                                             /* Toutes les secondes */
-        { Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
-          Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec,
-                              !Dls_data_get_bool ( "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec) );
+        { Dls_data_set_BI ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
+          Dls_data_set_BI ( NULL, "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec,
+                           !Dls_data_get_BI ( "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec) );
           last_top_1sec = Partage->top;
 
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
@@ -1862,20 +1956,20 @@ end:
           Dls_data_set_AI ( "SYS", "DLS_WAIT", &dls_wait, Partage->com_dls.temps_sched, TRUE );                 /* historique */
         }
        if (Partage->top-last_top_2sec>=20)                                                             /* Toutes les secondes */
-        { Dls_data_set_bool ( NULL, "SYS", "FLIPFLOP_2SEC", &dls_flipflop_2sec,
-                              !Dls_data_get_bool ( "SYS", "FLIPFLOP_2SEC", &dls_flipflop_2sec) );
+        { Dls_data_set_BI ( NULL, "SYS", "FLIPFLOP_2SEC", &dls_flipflop_2sec,
+                           !Dls_data_get_BI ( "SYS", "FLIPFLOP_2SEC", &dls_flipflop_2sec) );
           last_top_2sec = Partage->top;
         }
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
-        { Dls_data_set_bool ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, TRUE );
+        { Dls_data_set_BI ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, TRUE );
           last_top_5sec = Partage->top;
         }
        if (Partage->top-last_top_10sec>=100)                                                              /* Toutes les secondes */
-        { Dls_data_set_bool ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, TRUE );
+        { Dls_data_set_BI ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, TRUE );
           last_top_10sec = Partage->top;
         }
        if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
-        { Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
+        { Dls_data_set_BI ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
           Dls_data_set_AI ( "SYS", "NBR_MSG_QUEUE", &dls_nbr_msg_queue, g_slist_length(Partage->com_msrv.liste_msg), TRUE );
           Dls_data_set_AI ( "SYS", "NBR_VISUEL_QUEUE", &dls_nbr_visuel_queue, g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
           last_top_1min = Partage->top;
@@ -1893,15 +1987,16 @@ end:
        Dls_foreach_plugins ( NULL, Dls_run_plugin );
        Dls_foreach_syns    ( NULL, Dls_run_syn );
 
-       Dls_data_set_bool ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, FALSE );
-       Dls_data_set_bool ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, FALSE );
-       Dls_data_set_bool ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, FALSE );
-       Dls_data_set_bool ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, FALSE );
-       Dls_data_set_bool ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, FALSE );
-       Dls_data_set_bool ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, FALSE );
+       Dls_data_set_BI ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, FALSE );
+       Dls_data_set_BI ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, FALSE );
+       Dls_data_set_BI ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, FALSE );
+       Dls_data_set_BI ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, FALSE );
+       Dls_data_set_BI ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, FALSE );
+       Dls_data_set_BI ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, FALSE );
        Partage->com_dls.Top_check_horaire = FALSE;                         /* Cotrole horaire effectué un fois par minute max */
        Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
+       Dls_set_all_bool ();                      /* Positionne les booleans (mono/bi) selon la valeur calculé par les modules */
        Partage->audit_tour_dls_per_sec++;                                   /* Gestion de l'audit nbr de tour DLS par seconde */
 /******************************************** Gestion des 1000 tours DLS par seconde ******************************************/
        usleep(Partage->com_dls.temps_sched);
