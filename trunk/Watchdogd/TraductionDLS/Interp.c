@@ -186,7 +186,7 @@
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( result, taille, "%sDls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( result, taille, "%sDls_data_get_BI ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     return(result);
@@ -323,10 +323,10 @@
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
     if ( (!barre) )
-         { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
+         { g_snprintf( result, taille, "Dls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
-    else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
+    else { g_snprintf( result, taille, "!Dls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
    return(result);
