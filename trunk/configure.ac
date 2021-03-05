@@ -89,7 +89,7 @@ LEXLIB=
 AC_SUBST(LEXLIB)
 
 dnl parametres par defaut
-CFLAGS="-Wall -Wno-unused-result -Wno-comment -Wno-pointer-sign -Wno-discarded-qualifiers -pipe -g -ggdb -D_GNU_SOURCE -fdiagnostics-color"
+CFLAGS="-Wall -Wno-unused-result -Wno-comment -Wno-pointer-sign -Wno-discarded-qualifiers -pipe -g -ggdb -fdiagnostics-color"
 
 LIBW_MAJOR_VERSION=6
 LIBW_MINOR_VERSION=0

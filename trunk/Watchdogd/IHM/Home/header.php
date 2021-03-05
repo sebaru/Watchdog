@@ -51,8 +51,8 @@
         .wtd-synoptique { border-radius: 20%;
                           width: auto;
                           height: auto;
-                          max-height: 96px;
-                          max-width: 96px;
+                          max-height: 128px;
+                          max-width: 128px;
                           cursor: pointer;
                         }
 
@@ -151,7 +151,7 @@
 <header>
 	<nav class="navbar navbar-dark navbar-expand-md fixed-top shadow"> <!-- fixed-top -->
   <a class="navbar-brand" href="#" onclick="Change_page('1')">
-    <img src="/img/syn_accueil.png" alt="Accueil" class="wtd-menu">
+    <img src="/img/syn_maison.png" alt="Accueil" class="wtd-menu">
   </a>
 
   <a class="nav-item"><img id="idMenuImgAccueil" src="" alt="Accueil" class="wtd-menu mr-1"></a>
