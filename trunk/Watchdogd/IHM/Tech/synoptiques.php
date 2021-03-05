@@ -68,18 +68,25 @@
 						     <label class="col-5 col-sm-4 col-form-label text-right">Image pré-établie</label>
 						     <select id="idModalSynEditImageSelect" class="col-6 form-control-file custom-select">
              <option value='custom'>custom</option>
-             <option value='syn_accueil.png'>Accueil</option>
+             <option value='syn_maison.png'>Accueil</option>
              <option value='syn_buanderie.png'>Buanderie</option>
+             <option value='syn_camera.png'>Camera</option>
              <option value='syn_chambre_double.png'>Chambre 2p</option>
              <option value='syn_chambre_simple.png'>Chambre 1p</option>
-             <option value='syn_comm.png'>Communications</option>
+             <option value='syn_communication.png'>Communications</option>
              <option value='syn_confort.png'>Confort</option>
              <option value='syn_cuisine.png'>Cuisine</option>
              <option value='syn_ampoule.png'>Eclairage</option>
+             <option value='syn_energie.png'>Energie</option>
+             <option value='syn_electricite.png'>Electricité</option>
              <option value='syn_garage.png'>Garage</option>
              <option value='syn_jardin.png'>Jardin</option>
+             <option value='syn_luminaires.png'>Luminaires</option>
+             <option value='syn_panneau_solaire.png'>Panneaux Solaires</option>
              <option value='syn_salle_de_bain.png'>Salle de bain</option>
+             <option value='syn_jeux.png'>Salle de jeux</option>
              <option value='syn_salon.png'>Salon</option>
+             <option value='syn_volets.png'>Volets Roulants</option>
            </select>
            <img id="idModalSynEditImage" src='' class="ml-2 text-center col-2 border border-info">
      					</div>
