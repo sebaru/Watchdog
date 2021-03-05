@@ -10,11 +10,10 @@ Watchdog_client_gtk2_SOURCES = Watchdog-client.c connect.c ihm.c \
                           protocole.c protocole_gtk_message.c \
                           protocole_mnemonique.c \
                           protocole_connexion.c \
-                          protocole_supervision.c protocole_histo.c \
+                          protocole_supervision.c \
                           protocole_atelier.c \
 			  protocole_synoptique.c protocole_admin.c \
                           menu.c timer.c admin.c \
-			  liste_histo.c \
 			  liste_synoptique.c ajout_synoptique.c \
 			  liste_mnemonique.c ajout_mnemonique.c option_entreeana.c option_cpt_imp.c \
 			  option_registre.c \
