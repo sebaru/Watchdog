@@ -72,8 +72,8 @@
   }
 
 /******************************************************************************************************************************/
-/* Modifier_Ajouter_histo_msgsDB: Ajout ou modifier un enregistrement MSGS de la base de données                              */
-/* Entrée: un flag d'ajout et un enregistrement à modifier                                                                    */
+/* Ajouter_histo_msgsDB: Ajoute un enregistrement MSGS de la base de données                                                  */
+/* Entrée: la structure Json representant l'histo                                                                             */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Ajouter_histo_msgsDB ( JsonNode *histo )
@@ -90,6 +90,20 @@
     g_free(libelle);
     /* Json_node_add_bool ( histo, "sql_last_id", Recuperer_last_ID_SQL ( db ); */
     return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Retirer_histo_msgsDB: Retire un enregistrement MSGS de la base de données                                                  */
+/* Entrée: la structure Json representant l'histo                                                                             */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gboolean Retirer_histo_msgsDB ( JsonNode *histo )
+  {
+    return( SQL_Write_new ( "UPDATE histo_msgs AS histo SET histo.alive=NULL,histo.date_fin='%s' "
+                            "INNER JOIN msgs ON msgs.id = histo.id_msg "
+                            "WHERE histo.alive=1 AND msgs.tech_id='%s' AND msgs.acronyme='%s' ",
+                            Json_get_string ( histo, "date_fin" ),
+                            Json_get_string ( histo, "tech_id" ), Json_get_string ( histo, "acronyme" ) )
+          );
   }
 /******************************************************************************************************************************/
 /* Recuperer_histo_msgsDB_alive: Recupération de l'ensemble des messages encore Alive dans le BDD                             */

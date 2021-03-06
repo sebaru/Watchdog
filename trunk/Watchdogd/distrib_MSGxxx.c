@@ -40,8 +40,7 @@
  static void Gerer_arrive_MSG_event_dls_on ( struct DLS_MESSAGES *msg )
   { gchar libelle[128], chaine[512], date_create[128];
     gchar prefixe[128], tech_id[32], acronyme[64], suffixe[128];
-
-   struct timeval tv;
+    struct timeval tv;
     struct tm *temps;
 
     JsonBuilder *builder = Json_create ();
@@ -54,8 +53,8 @@
                             "INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id "
                             "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme            /* Where */
                            );
-    JsonNode *message = Json_end ( builder );
-    if (!message) return;
+    JsonNode *histo = Json_end ( builder );
+    if (!histo) return;
 
     gettimeofday( &tv, NULL );
     temps = localtime( (time_t *)&tv.tv_sec );
@@ -64,9 +63,9 @@
     g_snprintf( date_create, sizeof(date_create), "%s.%02d", date_utf8, (gint)tv.tv_usec/10000 );
     g_free( date_utf8 );
 
-    g_snprintf ( libelle, sizeof(libelle), "%s", Json_get_string(message, "libelle") );
+    g_snprintf ( libelle, sizeof(libelle), "%s", Json_get_string(histo, "libelle") );
     memset ( suffixe, 0, sizeof(suffixe) );
-/************************************* Converstion du message dynamique *******************************************************/
+/************************************* Converstion du histo dynamique *******************************************************/
     while ( sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe ) == 4 )
      { gchar result[128];
        gpointer dls_data_p = NULL;
@@ -108,14 +107,14 @@
      }
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Message parsé final: %s", __func__, libelle );
 /***************************************** Création de la structure interne de stockage ***************************************/
-    Json_node_add_string ( message, "libelle", libelle );                                     /* Ecrasement libelle d'origine */
-    Json_node_add_string ( message, "date_create", date_create );                             /* Ecrasement libelle d'origine */
-    Json_node_add_bool   ( message, "alive", TRUE );
-    Ajouter_histo_msgsDB( message );                                                                   /* Si ajout dans DB OK */
-/******************************************************* Envoi du message aux librairies abonnées *****************************/
-    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*","DLS_HISTO", message );
-    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*","DLS_HISTO", message );
-    json_node_unref( message );                                                        /* On a plus besoin de cette reference */
+    Json_node_add_string ( histo, "libelle", libelle );                                       /* Ecrasement libelle d'origine */
+    Json_node_add_string ( histo, "date_create", date_create );                               /* Ecrasement libelle d'origine */
+    Json_node_add_bool   ( histo, "alive", TRUE );
+    Ajouter_histo_msgsDB( histo );                                                                     /* Si ajout dans DB OK */
+/******************************************************* Envoi du histo aux librairies abonnées *******************************/
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*","DLS_HISTO", histo );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*","DLS_HISTO", histo );
+    json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
@@ -143,14 +142,12 @@
 
     Json_add_string ( builder, "date_fin", date_fin );
     Json_add_bool   ( builder, "alive", FALSE );
-
-/******************************************************* Envoi du message aux librairies abonnées *****************************/
-    SQL_Write_new ( "UPDATE %s as histo SET histo.alive=NULL,histo.date_fin='%s' "
-                    "INNER JOIN msgs ON msgs.id = histo.id_msg "
-                    "WHERE histo.alive=1 AND msgs.tech_id='%s' AND msgs.acronyme='%s' ",
-                    NOM_TABLE_HISTO_MSGS, date_fin, msg->tech_id, msg->acronyme );
-    Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_slave, Partage->com_msrv.zmq_to_bus,
-                                "msrv", "*", "*","DLS_HISTO", builder );
+    JsonNode *histo = Json_end ( builder );
+    Retirer_histo_msgsDB( histo );
+/******************************************************* Envoi du histo aux librairies abonnées *******************************/
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*","DLS_HISTO", histo );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*","DLS_HISTO", histo );
+    json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */

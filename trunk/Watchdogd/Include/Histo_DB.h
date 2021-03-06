@@ -37,6 +37,7 @@
 /*********************************************** Définitions des prototypes ***************************************************/
  extern gboolean Acquitter_histo_msgsDB ( gchar *tech_id, gchar *acronyme, gchar *username, gchar *date_fixe );
  extern gboolean Ajouter_histo_msgsDB ( JsonNode *histo );
+ extern gboolean Retirer_histo_msgsDB ( JsonNode *histo );
  extern void Histo_msg_print_to_JSON ( JsonBuilder *builder, JsonNode *histo );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
