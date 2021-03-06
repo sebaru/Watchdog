@@ -140,11 +140,11 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Send_zmq_with_tag: Envoie un message dans la socket avec le tag en prefixe                                                 */
+/* Zmq_Send_with_tag: Envoie un message dans la socket avec le tag en prefixe                                                 */
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Send_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_src_thread,
+ gboolean Zmq_Send_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_src_thread,
                                const gchar *zmq_dst_instance, const gchar *zmq_dst_thread,
                                const gchar *zmq_tag, JsonBuilder *builder )
   { JsonNode *body = Json_end ( builder );
@@ -153,7 +153,7 @@
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Send_zmq_with_tag: Envoie un message dans la socket avec le tag en prefixe                                                 */
+/* Zmq_Send_with_tag: Envoie un message dans la socket avec le tag en prefixe                                                 */
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
@@ -270,63 +270,59 @@
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Send_zmq_DI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gboolean etat )
-  { JsonBuilder *builder;
-
-    if (!zmq) return;
-    builder = Json_create ();
-    if(!builder) return;
-    Json_add_string ( builder, "tech_id",  tech_id );
-    Json_add_string ( builder, "acronyme", acronyme );
-    Json_add_bool   ( builder, "etat", etat );
-    Send_zmq_with_json ( zmq, thread, "*", "msrv", "SET_DI", builder );
+ void Zmq_Send_DI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gboolean etat )
+  { if (!zmq) return;
+    JsonNode *body = Json_node_create ();
+    if(!body) return;
+    Json_node_add_string ( body, "tech_id",  tech_id );
+    Json_node_add_string ( body, "acronyme", acronyme );
+    Json_node_add_bool   ( body, "etat", etat );
+    Zmq_Send_json_node ( zmq, thread, "*", "msrv", "SET_DI", body );
+    json_node_unref(body);
   }
 /******************************************************************************************************************************/
 /* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Send_zmq_AI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range)
-  { JsonBuilder *builder;
-
-    if (!zmq) return;
-    builder = Json_create ();
-    if(!builder) return;
-    Json_add_string ( builder, "tech_id",  tech_id );
-    Json_add_string ( builder, "acronyme", acronyme );
-    Json_add_double ( builder, "valeur", valeur );
-    Json_add_bool   ( builder, "in_range", in_range );
-    Send_zmq_with_json ( zmq, thread, "*", "msrv", "SET_AI", builder );
+ void Zmq_Send_AI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range)
+  { if (!zmq) return;
+    JsonNode *body = Json_node_create ();
+    if(!body) return;
+    Json_node_add_string ( body, "tech_id",  tech_id );
+    Json_node_add_string ( body, "acronyme", acronyme );
+    Json_node_add_double ( body, "valeur", valeur );
+    Json_node_add_bool   ( body, "in_range", in_range );
+    Zmq_Send_json_node ( zmq, thread, "*", "msrv", "SET_AI", body );
+    json_node_unref(body);
   }
 /******************************************************************************************************************************/
 /* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Send_zmq_CDE_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme )
-  { JsonBuilder *builder;
-
-    if (!zmq) return;
-    builder = Json_create ();
-    if(!builder) return;
-    Json_add_string ( builder, "tech_id",  tech_id );
-    Json_add_string ( builder, "acronyme", acronyme );
-    Send_zmq_with_json ( zmq, thread, "*", "msrv", "SET_CDE", builder );
+ void Zmq_Send_CDE_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme )
+  { if (!zmq) return;
+    JsonNode *body = Json_node_create ();
+    if(!body) return;
+    Json_node_add_string ( body, "tech_id",  tech_id );
+    Json_node_add_string ( body, "acronyme", acronyme );
+    Zmq_Send_json_node ( zmq, thread, "*", "msrv", "SET_CDE", body );
+    json_node_unref(body);
   }
 /******************************************************************************************************************************/
 /* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Send_zmq_WATCHDOG_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gint consigne )
-  { JsonBuilder *builder;
-
-    if (!zmq) return;
-    builder = Json_create ();
-    if(!builder) return;
-    Json_add_string ( builder, "tech_id",  tech_id );
-    Json_add_string ( builder, "acronyme", acronyme );
-    Json_add_int    ( builder, "consigne", consigne );
-    Send_zmq_with_json ( zmq, thread, "*", "msrv", "SET_WATCHDOG", builder );
+ void Zmq_Send_WATCHDOG_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gint consigne )
+  { if (!zmq) return;
+    JsonNode *body = Json_node_create ();
+    if(!body) return;
+    Json_node_add_string ( body, "tech_id",  tech_id );
+    Json_node_add_string ( body, "acronyme", acronyme );
+    Json_node_add_int    ( body, "consigne", consigne );
+    Zmq_Send_json_node ( zmq, thread, "*", "msrv", "SET_WATCHDOG", body );
+    json_node_unref(body);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

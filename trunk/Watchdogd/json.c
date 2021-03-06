@@ -33,6 +33,17 @@
 /* Entrée: néant                                                                                                              */
 /* Sortie: NULL si erreur                                                                                                     */
 /******************************************************************************************************************************/
+ JsonNode *Json_node_create ( void )
+  { JsonNode *RootNode;
+    RootNode = json_node_alloc();
+    json_node_take_object ( RootNode, json_object_new() );
+    return(RootNode);
+  }
+/******************************************************************************************************************************/
+/* Json_create: Prepare un builder pour creer un nouveau buffer json                                                          */
+/* Entrée: néant                                                                                                              */
+/* Sortie: NULL si erreur                                                                                                     */
+/******************************************************************************************************************************/
  JsonBuilder *Json_create ( void )
   { JsonBuilder *builder;
     builder = json_builder_new();
@@ -78,6 +89,24 @@
  void Json_node_add_bool ( JsonNode *RootNode, gchar *name, gboolean valeur )
   { JsonObject *object = json_node_get_object (RootNode);
     json_object_set_boolean_member ( object, name, valeur );
+  }
+/******************************************************************************************************************************/
+/* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
+/* Entrée: le builder, le nom du parametre, la valeur                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_node_add_double ( JsonNode *RootNode, gchar *name, gdouble valeur )
+  { JsonObject *object = json_node_get_object (RootNode);
+    json_object_set_double_member ( object, name, valeur );
+  }
+/******************************************************************************************************************************/
+/* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
+/* Entrée: le builder, le nom du parametre, la valeur                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_node_add_int ( JsonNode *RootNode, gchar *name, gint64 valeur )
+  { JsonObject *object = json_node_get_object (RootNode);
+    json_object_set_int_member ( object, name, valeur );
   }
 /******************************************************************************************************************************/
 /* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */

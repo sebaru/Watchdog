@@ -200,7 +200,7 @@
           JsonBuilder *builder = Json_create ();
           if (builder)
            { Dls_AO_to_json( builder, ao );
-             Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", zmq_src_instance, "*", "SET_AO", builder );
+             Zmq_Send_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", zmq_src_instance, "*", "SET_AO", builder );
            }
           liste = g_slist_next(liste);
         }
@@ -223,9 +223,9 @@
           result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_ENTREE_ANA, tech_id, acronyme, &ai_p );
           Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
                     event->src_instance, result_string );
-          Send_zmq_with_json ( Partage->com_msrv.zmq_to_bus, "msrv", event->src_instance,
+          Zmq_Send_with_json ( Partage->com_msrv.zmq_to_bus, "msrv", event->src_instance,
                               "audio", "play_google", result_string, strlen(result_string)+1 );
-          Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
+          Zmq_Send_with_json ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
                               "audio", "play_google", result_string, strlen(result_string)+1 );
           g_free(result_string);
         }
@@ -242,9 +242,9 @@
           result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_REGISTRE, tech_id, acronyme, &reg_p );
           Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
                     event->src_instance, result_string );
-          Send_zmq_with_json ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
+          Zmq_Send_with_json ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
                               "audio", "play_google", result_string, strlen(result_string)+1 );
-          Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
+          Zmq_Send_with_json ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
                               "audio", "play_google", result_string, strlen(result_string)+1 );
           g_free(result_string);
         }
@@ -378,7 +378,7 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "msrv", "ping", NULL );
+        { Zmq_Send_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "msrv", "ping", NULL );
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
@@ -451,7 +451,7 @@
 
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
-    Send_zmq_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_START", NULL );
+    Zmq_Send_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_START", NULL );
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
      { gchar buffer[2048];
        JsonNode *request;
@@ -477,7 +477,7 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Send_zmq_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 900 );
+        { Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 900 );
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
@@ -487,8 +487,8 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
-    Send_zmq_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );
-    Send_zmq_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_STOP", NULL );
+    Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );
+    Zmq_Send_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_STOP", NULL );
 end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */

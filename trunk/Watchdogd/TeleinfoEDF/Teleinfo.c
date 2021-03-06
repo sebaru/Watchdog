@@ -166,7 +166,7 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Send_AI_to_master ( gchar *name, gchar *chaine )                                      /* Envoi au master via ZMQ */
-  { Send_zmq_AI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, name, atof( chaine ), TRUE );
+  { Zmq_Send_AI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, name, atof( chaine ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
@@ -258,7 +258,7 @@ reload:
                 nbr_octet_lu = 0;
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
                 if (!(Partage->top % 300))
-                 { Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 400 ); }
+                 { Zmq_Send_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 400 ); }
               }
              else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO)                        /* Encore en dessous de la limite ? */
               { /* Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
@@ -295,7 +295,7 @@ reload:
            { close(Cfg_teleinfo.fd);
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
-             Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 0 );
+             Zmq_Send_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 0 );
              Cfg_teleinfo.comm_status = FALSE;
            }
         }

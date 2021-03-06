@@ -149,7 +149,7 @@
        close(Cfg_dmx.fd);
        Cfg_dmx.fd = -1;
      }
-    Send_zmq_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, Cfg_dmx.tech_id, "IO_COMM", 0 );
+    Zmq_Send_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, Cfg_dmx.tech_id, "IO_COMM", 0 );
     Cfg_dmx.comm_status = FALSE;
   }
 /******************************************************************************************************************************/
@@ -207,7 +207,7 @@ reload:
           break;
         }
 
-       if (!Partage->top%600) Send_zmq_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, Cfg_dmx.tech_id, "IO_COMM", 900 );
+       if (!Partage->top%600) Zmq_Send_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, Cfg_dmx.tech_id, "IO_COMM", 900 );
 
 /********************************************************* Envoi de SMS *******************************************************/
        JsonNode *request = Recv_zmq_with_json( Cfg_dmx.zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );

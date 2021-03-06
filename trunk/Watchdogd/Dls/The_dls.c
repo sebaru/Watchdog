@@ -1311,9 +1311,9 @@ end:
 #ifdef bouh
     if (Dls_data_get_bool_up(tech_id, acronyme, bus_p))
      { if (param1)
-        { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
+        { Zmq_Send_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
        else
-        { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, NULL, 0 ); }
+        { Zmq_Send_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, NULL, 0 ); }
      }
 #endif
     if (param1) g_free(param1);                                       /* Param1 est issu d'un g_strdup ou d'un Dls_dyn_string */
@@ -1819,7 +1819,7 @@ end:
        Json_add_array ( builder, "syn_vars" );
        Dls_syn_vars_to_json ( builder, dls_syn );
        Json_end_array ( builder );
-       Send_zmq_with_json( Partage->com_dls.zmq_to_master, "dls", "*", "*", "SET_SYN_VARS", builder );
+       Zmq_Send_with_json( Partage->com_dls.zmq_to_master, "dls", "*", "*", "SET_SYN_VARS", builder );
      }
  }
 /******************************************************************************************************************************/

@@ -48,12 +48,12 @@
  extern void Zmq_Close ( struct ZMQUEUE *zmq );
  extern gboolean Zmq_Send_as_raw ( struct ZMQUEUE *zmq, void *buf, gint taille );
  extern gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
- extern void Send_zmq_DI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gboolean etat );
- extern void Send_zmq_AI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range);
- extern void Send_zmq_CDE_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme );
- extern void Send_zmq_WATCHDOG_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gint consigne );
+ extern void Zmq_Send_DI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gboolean etat );
+ extern void Zmq_Send_AI_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range);
+ extern void Zmq_Send_CDE_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme );
+ extern void Zmq_Send_WATCHDOG_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gint consigne );
  extern JsonNode *Recv_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *thread, gchar *buf, gint taille_buf );
- extern gboolean Send_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_source_thread,
+ extern gboolean Zmq_Send_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_source_thread,
                                       const gchar *zmq_target_instance, const gchar *zmq_target_thread,
                                       const gchar *zmq_tag, JsonBuilder *builder );
  extern gboolean Zmq_Send_json_node ( struct ZMQUEUE *zmq, const gchar *zmq_src_thread,

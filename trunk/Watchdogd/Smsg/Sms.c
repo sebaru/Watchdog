@@ -242,7 +242,7 @@ end:
     GSM_FreeStateMachine(Cfg_smsg.gammu_machine);                                                     	/* Free up used memory */
     Cfg_smsg.gammu_machine = NULL;
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Disconnected", __func__ );
-    Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", 0 );
+    Zmq_Send_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", 0 );
     Cfg_smsg.lib->comm_status = FALSE;
   }
 /******************************************************************************************************************************/
@@ -569,7 +569,7 @@ end:
        if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
         { Envoyer_commande_dls_data ( tech_id, acro ); }
        else /* Envoi au master via thread HTTP */
-        { Send_zmq_CDE_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, tech_id, acro ); }
+        { Zmq_Send_CDE_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, tech_id, acro ); }
      }
 
     if (found)
@@ -668,7 +668,7 @@ reload:
 /****************************************************** Lecture de SMS ********************************************************/
        if (Cfg_smsg.lib->comm_status == TRUE)
         { if (Cfg_smsg.lib->comm_status == TRUE && Cfg_smsg.lib->comm_next_update < Partage->top)
-           { Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", SMSG_TEMPS_UPDATE_COMM+200 );
+           { Zmq_Send_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", SMSG_TEMPS_UPDATE_COMM+200 );
              Cfg_smsg.lib->comm_next_update = Partage->top + SMSG_TEMPS_UPDATE_COMM;
            }
           if (Lire_sms_gsm()==FALSE) { Smsg_disconnect(); }
