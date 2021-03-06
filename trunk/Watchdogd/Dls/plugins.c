@@ -290,7 +290,7 @@
      { struct DLS_BOOL *bool = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(bool->tech_id, plugin->tech_id))
-        { bool->etat=FALSE; }
+        { bool->etat=bool->next_etat=FALSE; }
      }
     liste_bit = Partage->Dls_data_WATCHDOG;                                          /* Decharge tous les watchdogs du module */
     while(liste_bit)
