@@ -40,8 +40,8 @@
  static void Gerer_arrive_MSG_event_dls_on ( struct DLS_MESSAGES *msg )
   { gchar libelle[128], chaine[512], date_create[128];
     gchar prefixe[128], tech_id[32], acronyme[64], suffixe[128];
-    JsonNode *message;
-    struct timeval tv;
+
+   struct timeval tv;
     struct tm *temps;
 
     JsonBuilder *builder = Json_create ();
@@ -52,9 +52,9 @@
                             "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
                             "INNER JOIN syns as syn ON syn.id = dls.syn_id "
                             "INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id "
-                            "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", tech_id, acronyme                      /* Where */
+                            "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme            /* Where */
                            );
-    message = Json_end ( builder );
+    JsonNode *message = Json_end ( builder );
     if (!message) return;
 
     gettimeofday( &tv, NULL );
@@ -145,9 +145,9 @@
     Json_add_bool   ( builder, "alive", FALSE );
 
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
-    SQL_Write_new ( "UPDATE %s as histo SET histo.alive=NULL,histo.date_fin='%s'"
+    SQL_Write_new ( "UPDATE %s as histo SET histo.alive=NULL,histo.date_fin='%s' "
                     "INNER JOIN msgs ON msgs.id = histo.id_msg "
-                    " WHERE histo.alive=1 AND msgs.tech_id='%s' AND msgs.acronyme='%s' ",
+                    "WHERE histo.alive=1 AND msgs.tech_id='%s' AND msgs.acronyme='%s' ",
                     NOM_TABLE_HISTO_MSGS, date_fin, msg->tech_id, msg->acronyme );
     Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_slave, Partage->com_msrv.zmq_to_bus,
                                 "msrv", "*", "*","DLS_HISTO", builder );
