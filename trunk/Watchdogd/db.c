@@ -201,6 +201,65 @@
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
+ static gboolean SQL_Select_to_json_node_reel ( JsonNode *RootNode, gchar *array_name, gchar *requete )
+  { struct DB *db = Init_DB_SQL ();
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
+       return(FALSE);
+     }
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
+       Libere_DB_SQL ( &db );
+       return(FALSE);
+     }
+    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
+
+    db->result = mysql_store_result ( db->mysql );
+    if ( ! db->result )
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: store_result failed (%s)", __func__, (char *) mysql_error(db->mysql) );
+       db->nbr_result = 0;
+     }
+    if (array_name)
+     { gchar chaine[80];
+       g_snprintf(chaine, sizeof(chaine), "nbr_%s", array_name );
+       Json_node_add_int ( RootNode, chaine, mysql_num_rows ( db->result ));
+       JsonArray *array = Json_node_add_array( RootNode, array_name );
+       while ( (db->row = mysql_fetch_row(db->result)) != NULL )
+        { JsonNode *element = Json_node_create();
+          for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
+           { Json_node_add_string( element, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
+          Json_array_add_element ( array, element );
+        }
+     }
+    else 
+     { while ( (db->row = mysql_fetch_row(db->result)) != NULL )
+        { for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
+           { Json_node_add_string( RootNode, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
+        }
+     }
+    mysql_free_result( db->result );
+    Libere_DB_SQL( &db );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* SQL_Write_new: Envoie une requete en parametre au serveur de base de données                                               */
+/* Entrée: le format de la requete, ainsi que tous les parametres associés                                                    */
+/******************************************************************************************************************************/
+ gboolean SQL_Select_to_json_node ( JsonNode *RootNode, gchar *array_name, gchar *format, ... )
+  { gchar chaine[1024];
+    va_list ap;
+
+    va_start( ap, format );
+    g_vsnprintf ( chaine, sizeof(chaine), format, ap );
+    va_end ( ap );
+    return(SQL_Select_to_json_node_reel ( RootNode, array_name, chaine ));
+  }
+/******************************************************************************************************************************/
+/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
+/* Entrée: La DB, la requete                                                                                                  */
+/* Sortie: TRUE si pas de souci                                                                                               */
+/******************************************************************************************************************************/
  gboolean SQL_Arch_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete )
   { struct DB *db = Init_ArchDB_SQL ();
     if (!db)
@@ -2159,7 +2218,16 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5349;
+    if (database_version < 5397)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE tableau DROP `access_level`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE tableau ADD `syn_id` INT(11) NOT NULL DEFAULT 1");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE tableau ADD FOREIGN KEY fk_syn_id (`syn_id`) REFERENCES syns(`id`) ON DELETE CASCADE ON UPDATE CASCADE ");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5397;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

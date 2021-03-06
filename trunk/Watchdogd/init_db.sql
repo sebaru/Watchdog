@@ -118,9 +118,11 @@ INSERT INTO `dls` (`id`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `com
 CREATE TABLE IF NOT EXISTS `tableau` (
  `id` INT NOT NULL AUTO_INCREMENT,
  `titre` VARCHAR(128) UNIQUE NOT NULL,
- `access_level` int(11) NOT NULL DEFAULT 0 ,
+ `syn_id` int(11) NOT NULL,
  `date_create` DATETIME NOT NULL DEFAULT NOW(),
- PRIMARY KEY (`id`)) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+ PRIMARY KEY (`id`)
+ FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+ ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 

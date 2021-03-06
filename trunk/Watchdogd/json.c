@@ -113,6 +113,24 @@
 /* Entrée: le builder, le nom du parametre, la valeur                                                                         */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
+ JsonArray *Json_node_add_array ( JsonNode *RootNode, gchar *name )
+  { JsonObject *object = json_node_get_object (RootNode);
+    JsonArray *tableau = json_array_new();
+    json_object_set_array_member ( object, name, tableau );
+    return(tableau);
+  }
+/******************************************************************************************************************************/
+/* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
+/* Entrée: le builder, le nom du parametre, la valeur                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_array_add_element ( JsonArray *array, JsonNode *element )
+  { json_array_add_element ( array, element ); }
+/******************************************************************************************************************************/
+/* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
+/* Entrée: le builder, le nom du parametre, la valeur                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Json_add_node ( JsonBuilder *builder, gchar *name, JsonNode *node )
   { if (name) json_builder_set_member_name  ( builder, name );
     json_builder_add_value ( builder, node );
