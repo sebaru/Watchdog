@@ -79,7 +79,6 @@
       case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( connexion ); break;
       case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( connexion ); break;
       case TAG_SUPERVISION : Gerer_protocole_supervision  ( connexion ); break;
-      case TAG_HISTO       : Gerer_protocole_histo        ( connexion ); break;
       case TAG_ATELIER     : Gerer_protocole_atelier      ( connexion ); break;
       case TAG_LOWLEVEL      : Gerer_protocole_lowlevel     ( connexion ); break;
       case TAG_ADMIN       : Gerer_protocole_admin        ( connexion ); break;

@@ -394,7 +394,7 @@ end:
 /* Main: Fonction principale du thread Imsg                                                                                   */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct ZMQUEUE *zmq_msg;
+  { struct ZMQUEUE *zmq_from_bus;
     gint retour;
 
 reload:
@@ -404,7 +404,7 @@ reload:
     Imsgs_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
     Cfg_imsgs.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
-    zmq_msg = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+    zmq_from_bus           = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
 reconnect:
     Cfg_imsgs.signed_off = FALSE;
     xmpp_initialize();
@@ -429,19 +429,28 @@ reconnect:
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Connexion to '%s' in progress.", __func__, Cfg_imsgs.username ); }
 
     while(lib->Thread_run == TRUE && Cfg_imsgs.signed_off == FALSE && lib->Thread_reload == FALSE)/* On tourne tant que necessaire */
-     { struct CMD_TYPE_HISTO *histo, histo_buf;
+     { gchar buffer[1024];
        /*g_usleep(200000);*/
        sched_yield();
 
        xmpp_run_once ( Cfg_imsgs.ctx, 500 ); /* En milliseconde */
 
-       if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
-        { histo = &histo_buf;
-          gchar chaine[256];
-          if (histo->alive)
-           { g_snprintf( chaine, sizeof(chaine), "%s : %s", histo->msg.dls_shortname, histo->msg.libelle );
+/********************************************************* Envoi de SMS *******************************************************/
+       JsonNode *request;
+       while ( (request=Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) )) != NULL)
+        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
+          if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
+               Json_get_bool ( request, "alive" ) == TRUE )
+           { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s : Sending msg '%s:%s' (%s)", __func__,
+                       Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
+                       Json_get_string ( request, "libelle" ) );
+             gchar chaine[256];
+             g_snprintf( chaine, sizeof(chaine), "%s : %s", Json_get_string ( request, "dls_shortname" ), Json_get_string ( request, "libelle" ) );
              Imsgs_Envoi_message_to_all_available ( chaine );
            }
+          else
+           { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG, "%s : zmq_tag '%s' not for this thread", __func__, zmq_tag ); }
+          json_node_unref(request);
         }
      }                                                                                         /* Fin du while partage->arret */
     xmpp_disconnect(Cfg_imsgs.conn);
@@ -460,7 +469,7 @@ reconnect:
        goto reconnect;
      }
 
-    Close_zmq ( zmq_msg );
+    Close_zmq ( zmq_from_bus );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

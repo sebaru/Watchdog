@@ -186,7 +186,7 @@
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( result, taille, "%sDls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( result, taille, "%sDls_data_get_BI ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     return(result);
@@ -323,10 +323,10 @@
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
     if ( (!barre) )
-         { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
+         { g_snprintf( result, taille, "Dls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
-    else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
+    else { g_snprintf( result, taille, "!Dls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
    return(result);
@@ -501,11 +501,9 @@
     taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
-    action->sinon = New_chaine( taille );
+    action->sinon = NULL;
 
-    g_snprintf( action->alors, taille, "   Dls_data_set_bool ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
-                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-    g_snprintf( action->sinon, taille, "   Dls_data_set_bool ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
+    g_snprintf( action->alors, taille, "   Dls_data_set_MONO ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
     return(action);
   }
@@ -674,11 +672,11 @@
     action = New_action();
     action->alors = New_chaine( taille );
     if (barre)
-     { g_snprintf( action->alors, taille, "   Dls_data_set_bool ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
+     { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( action->alors, taille, "   Dls_data_set_bool ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
+     { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     return(action);
@@ -831,12 +829,6 @@
     Alias = NULL;
   }
 /******************************************************************************************************************************/
-/* Trad_dls_set_debug: Positionne le flag de debug Bison/Flex                                                                 */
-/* Entrée : TRUE ou FALSE                                                                                                     */
-/******************************************************************************************************************************/
- void Trad_dls_set_debug ( gboolean actif )
-  { DlsScanner_debug = actif; }                                                                   /* Debug de la traduction ?? */
-/******************************************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
 /* Entrée: l'id du modul                                                                                                      */
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */
@@ -905,6 +897,7 @@
        New_alias_permanent ( "MSG_COMM_HS", MNEMO_MSG, libelle );
        Mnemo_auto_create_MSG ( FALSE, Dls_plugin.tech_id, "MSG_COMM_HS", libelle, MSG_DEFAUT );
 
+       DlsScanner_debug = Partage->com_dls.Thread_debug;
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);

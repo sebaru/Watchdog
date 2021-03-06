@@ -33,6 +33,8 @@
 /************************************************ Définitions des prototypes **************************************************/
  extern JsonBuilder *Json_create ( void );
  extern JsonNode *Json_end ( JsonBuilder *builder );
+ extern void Json_node_add_string ( JsonNode *RootNode, gchar *name, gchar *chaine );
+ extern void Json_node_add_bool ( JsonNode *RootNode, gchar *name, gboolean valeur );
  extern void Json_add_node ( JsonBuilder *builder, gchar *name, JsonNode *node );
  extern void Json_add_string ( JsonBuilder *builder, gchar *name, gchar *chaine );
  extern void Json_add_int ( JsonBuilder *builder, gchar *name, gint valeur );
@@ -43,7 +45,7 @@
  extern void Json_add_array ( JsonBuilder *builder, gchar *name );
  extern void Json_end_array ( JsonBuilder *builder );
  extern gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p );
- extern gchar *Json_node_to_string ( JsonNode *RootNode, gsize *taille_buf_p );
+ extern gchar *Json_node_to_string ( JsonNode *RootNode );
  extern JsonNode *Json_get_from_string ( gchar *chaine );
  extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );
  extern gfloat Json_get_float ( JsonNode *query, gchar *chaine );

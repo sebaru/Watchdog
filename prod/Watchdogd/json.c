@@ -65,6 +65,25 @@
 /* Entrée: le builder, le nom du parametre, la valeur                                                                         */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
+ void Json_node_add_string ( JsonNode *RootNode, gchar *name, gchar *chaine )
+  { JsonObject *object = json_node_get_object (RootNode);
+    if (chaine) json_object_set_string_member ( object, name, chaine );
+           else json_object_set_null_member   ( object, name );
+  }
+/******************************************************************************************************************************/
+/* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
+/* Entrée: le builder, le nom du parametre, la valeur                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_node_add_bool ( JsonNode *RootNode, gchar *name, gboolean valeur )
+  { JsonObject *object = json_node_get_object (RootNode);
+    json_object_set_boolean_member ( object, name, valeur );
+  }
+/******************************************************************************************************************************/
+/* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
+/* Entrée: le builder, le nom du parametre, la valeur                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Json_add_node ( JsonBuilder *builder, gchar *name, JsonNode *node )
   { if (name) json_builder_set_member_name  ( builder, name );
     json_builder_add_value ( builder, node );
@@ -150,16 +169,13 @@
     g_object_unref(gen);
     return(result);
   }
-
- gchar *Json_node_to_string ( JsonNode *RootNode, gsize *taille_buf_p )
-  { JsonGenerator *gen;
-    gchar *result;
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, RootNode );
-    json_generator_set_pretty ( gen, TRUE );
-    result = json_generator_to_data (gen, taille_buf_p);
-    g_object_unref(gen);
-    return(result);
+/******************************************************************************************************************************/
+/* Json_node_to_string: transforme un JsonNode en string                                                                      */
+/* Entrée: le JsonNode a convertir                                                                                            */
+/* Sortie: un nouveau buffer                                                                                                  */
+/******************************************************************************************************************************/
+ gchar *Json_node_to_string ( JsonNode *RootNode )
+  { return ( json_to_string ( RootNode, TRUE ) );
   }
 /******************************************************************************************************************************/
 /* Json_get_from_stirng: Recupere l'object de plus haut niveau dans une chaine JSON                                           */

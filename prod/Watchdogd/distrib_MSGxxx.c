@@ -38,21 +38,34 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  static void Gerer_arrive_MSG_event_dls_on ( struct DLS_MESSAGES *msg )
-  { gchar libelle[128], chaine[512], *date_create;
+  { gchar libelle[128], chaine[512], date_create[128];
     gchar prefixe[128], tech_id[32], acronyme[64], suffixe[128];
-    struct CMD_TYPE_MESSAGE *message;
-    struct CMD_TYPE_HISTO histo;
     struct timeval tv;
     struct tm *temps;
 
-    message = Rechercher_messageDB_par_acronyme ( msg->tech_id, msg->acronyme );
-    if (!message) return;
-    memset ( &histo, 0, sizeof(struct CMD_TYPE_HISTO) );
-    memcpy( &histo.msg, message, sizeof(struct CMD_TYPE_MESSAGE) );                                       /* Ajout dans la DB */
+    JsonBuilder *builder = Json_create ();
+    SQL_Select_to_JSON_new ( builder, NULL,
+                            "SELECT msgs.*,dls.shortname as dls_shortname, dls.syn_id,"
+                            "parent_syn.page as syn_parent_page, syn.page as syn_page "
+                            "FROM msgs "
+                            "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
+                            "INNER JOIN syns as syn ON syn.id = dls.syn_id "
+                            "INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id "
+                            "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme            /* Where */
+                           );
+    JsonNode *histo = Json_end ( builder );
+    if (!histo) return;
 
-    g_snprintf ( libelle, sizeof(libelle), "%s", message->libelle );
+    gettimeofday( &tv, NULL );
+    temps = localtime( (time_t *)&tv.tv_sec );
+    strftime( chaine, sizeof(chaine), "%F %T", temps );
+    gchar *date_utf8 = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
+    g_snprintf( date_create, sizeof(date_create), "%s.%02d", date_utf8, (gint)tv.tv_usec/10000 );
+    g_free( date_utf8 );
+
+    g_snprintf ( libelle, sizeof(libelle), "%s", Json_get_string(histo, "libelle") );
     memset ( suffixe, 0, sizeof(suffixe) );
-/************************************* Conversation du lessage dynalique ******************************************************/
+/************************************* Converstion du histo dynamique *******************************************************/
     while ( sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe ) == 4 )
      { gchar result[128];
        gpointer dls_data_p = NULL;
@@ -93,77 +106,48 @@
     * */
      }
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Message parsé final: %s", __func__, libelle );
-    g_snprintf( histo.msg.libelle, sizeof(histo.msg.libelle), "%s", libelle );                /* Ecrasement libelle d'origine */
 /***************************************** Création de la structure interne de stockage ***************************************/
-    histo.alive = TRUE;
-    gettimeofday( &tv, NULL );
-    temps = localtime( (time_t *)&tv.tv_sec );
-    strftime( chaine, sizeof(chaine), "%F %T", temps );
-    date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-    g_snprintf( histo.date_create, sizeof(histo.date_create), "%s.%02d", date_create, (gint)tv.tv_usec/10000 );
-    g_free( date_create );
-    Ajouter_histo_msgsDB( &histo );                                                                    /* Si ajout dans DB OK */
-/******************************************************* Envoi du message aux librairies abonnées *****************************/
-    JsonBuilder *builder = Json_create ();
-    g_snprintf( chaine, sizeof(chaine),
-               "SELECT msgs.*,dls.shortname as dls_shortname, dls.syn_id,"
-               "parent_syn.page as syn_parent_page, syn.page as syn_page "
-               "FROM msgs "
-               "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
-               "INNER JOIN syns as syn ON syn.id = dls.syn_id "
-               "INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id "
-               "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme );
-    SQL_Select_to_JSON ( builder, NULL, chaine );
-    Json_add_bool   ( builder, "alive",       TRUE );
-    Json_add_string ( builder, "date_create", histo.date_create );
-    Json_add_string ( builder, "libelle",     histo.msg.libelle );
-
-    Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_slave, Partage->com_msrv.zmq_to_bus,
-                                "msrv", "*", "*","DLS_HISTO", builder );
-    Send_zmq_as_raw ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );      /* Pour thread SSRV uniquement */
-    g_free( message );                                                                 /* On a plus besoin de cette reference */
+    Json_node_add_string ( histo, "libelle", libelle );                                       /* Ecrasement libelle d'origine */
+    Json_node_add_string ( histo, "date_create", date_create );                               /* Ecrasement libelle d'origine */
+    Json_node_add_bool   ( histo, "alive", TRUE );
+    Ajouter_histo_msgsDB( histo );                                                                     /* Si ajout dans DB OK */
+/******************************************************* Envoi du histo aux librairies abonnées *******************************/
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*","DLS_HISTO", histo );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*","DLS_HISTO", histo );
+    json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  static void Gerer_arrive_MSG_event_dls_off ( struct DLS_MESSAGES *msg )
-  { struct CMD_TYPE_MESSAGE *message;
-    gchar chaine[256], *date_fin;
-    struct CMD_TYPE_HISTO histo;
+  { gchar chaine[256], date_fin[128];
     struct timeval tv;
     struct tm *temps;
 
-    message = Rechercher_messageDB_par_acronyme ( msg->tech_id, msg->acronyme );
-    if (!message) return;
-
-    memset ( &histo, 0, sizeof(struct CMD_TYPE_HISTO) );
-    memcpy( &histo.msg, message, sizeof(struct CMD_TYPE_MESSAGE) );                                       /* Ajout dans la DB */
-    JsonBuilder *builder = Json_create ();
-    histo.alive  = FALSE;
     gettimeofday( &tv, NULL );
     temps = localtime( (time_t *)&tv.tv_sec );
     strftime( chaine, sizeof(chaine), "%F %T", temps );
-    date_fin = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-    g_snprintf( histo.date_fin, sizeof(histo.date_fin), "%s.%02d", date_fin, (gint)tv.tv_usec/10000 );
-    g_free( date_fin );
-/******************************************************* Envoi du message aux librairies abonnées *****************************/
-    g_snprintf( chaine, sizeof(chaine),
-               "SELECT msgs.*, syn.id as syn_id, syn.page as syn_page "
-               "FROM msgs "
-               "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
-               "INNER JOIN syns as syn ON syn.id = dls.syn_id "
-               "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme );
-    SQL_Select_to_JSON ( builder, NULL, chaine );
+    gchar *date_utf8 = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
+    g_snprintf( date_fin, sizeof(date_fin), "%s.%02d", date_utf8, (gint)tv.tv_usec/10000 );
+    g_free( date_utf8 );
+
+    JsonBuilder *builder = Json_create ();
+    SQL_Select_to_JSON_new ( builder, NULL,
+                            "SELECT msgs.*, syn.id as syn_id, syn.page as syn_page "
+                            "FROM msgs "
+                            "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
+                            "INNER JOIN syns as syn ON syn.id = dls.syn_id "
+                            "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme );
+
+    Json_add_string ( builder, "date_fin", date_fin );
     Json_add_bool   ( builder, "alive", FALSE );
-    Json_add_string ( builder, "date_fin", histo.date_fin );
-
-    Modifier_histo_msgsDB ( &histo );
-    Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_slave, Partage->com_msrv.zmq_to_bus,
-                                "msrv", "*", "*","DLS_HISTO", builder );
-
-    Send_zmq_as_raw ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
-    g_free( message );                                                                 /* On a plus besoin de cette reference */
+    JsonNode *histo = Json_end ( builder );
+    Retirer_histo_msgsDB( histo );
+/******************************************************* Envoi du histo aux librairies abonnées *******************************/
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*","DLS_HISTO", histo );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*","DLS_HISTO", histo );
+    json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */

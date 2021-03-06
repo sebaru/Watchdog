@@ -28,9 +28,19 @@
 #ifndef _MESSAGE_DB_H_
  #define _MESSAGE_DB_H_
 
- #include "Reseaux.h"
-
  #define NOM_TABLE_MSG       "msgs"
+
+ enum
+  { MSG_ETAT,                                                        /* Definitions des types de messages */
+    MSG_ALERTE,
+    MSG_DEFAUT,
+    MSG_ALARME,
+    MSG_VEILLE,
+    MSG_ATTENTE,
+    MSG_DANGER,
+    MSG_DERANGEMENT,
+    NBR_TYPE_MSG
+  };
 
  enum
   { MESSAGE_SMS_NONE,
@@ -41,8 +51,7 @@
   };
 
 /******************************************** Définitions des prototypes ******************************************************/
- extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_acronyme ( gchar *tech_id, gchar *acronyme );
- extern struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db );
+ extern JsonNode *Rechercher_messageDB_par_acronyme ( gchar *tech_id, gchar *acronyme );
  extern gint Mnemo_auto_create_MSG ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle, gint typologie );
  extern void Charger_confDB_MSG ( void );
  extern void Updater_confDB_MSG ( void );

@@ -280,18 +280,9 @@
     gchar *zmq_dst_instance = Json_get_string ( request, "zmq_dst_instance" );
     gchar *zmq_dst_thread   = Json_get_string ( request, "zmq_dst_thread" );
 
-         if ( !strcasecmp( zmq_tag, "ping") )
+         if ( !strcasecmp( zmq_tag, "PING") )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src_instance );
      }
-#ifdef bouh
-
-    else if ( !strcasecmp( zmq_tag, "histo") )
-     { if (Send_zmq( Partage->com_msrv.zmq_msg, payload, sizeof(struct CMD_TYPE_HISTO)) == -1)
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
-                      __func__, Partage->com_msrv.zmq_msg->name, zmq_strerror(errno) );
-          }
-     }
-#endif
     else if ( !strcasecmp( zmq_tag, "SUDO") )
      { gchar chaine[80];
        if (! (Json_has_member ( request, "commande" ) ) )
@@ -376,8 +367,8 @@
            { Handle_zmq_for_master( request ); }
           else
            { gint taille = strlen(buffer);
-             Send_zmq_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                  /* Sinon on envoi aux threads */
-             Send_zmq_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                  /* Sinon on envoi aux slave */
+             Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                  /* Sinon on envoi aux threads */
+             Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                  /* Sinon on envoi aux slave */
            }
           json_node_unref ( request );
         }
@@ -474,14 +465,14 @@
         { if (!strcasecmp( Json_get_string ( request, "zmq_dst_thread" ), "msrv"))
            { Handle_zmq_for_slave( request ); }
           else
-           { Send_zmq_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );          /* Sinon on envoi aux threads */
+           { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );          /* Sinon on envoi aux threads */
            }
           json_node_unref ( request );
         }
                                                 /* Si reception depuis un thread, report vers le master et les autres threads */
        if ( (byte=Recv_zmq( zmq_from_bus, &buffer, sizeof(buffer) )) > 0 )
-        { Send_zmq_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, byte );
-          Send_zmq_as_raw ( Partage->com_msrv.zmq_to_master, buffer, byte );
+        { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, byte );
+          Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_master, buffer, byte );
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */

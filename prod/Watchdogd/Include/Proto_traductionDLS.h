@@ -69,7 +69,6 @@
 
 /****************************************************** Prototypes ************************************************************/
  extern gint Traduire_DLS( gchar *tech_id );                                                                 /* Dans Interp.c */
- extern void Trad_dls_set_debug ( gboolean actif );
  extern char *New_chaine( int longueur );
  extern void Emettre( char *chaine );
  extern void Emettre_erreur_new( gchar *format, ... );

@@ -170,7 +170,9 @@
 /********************************************* Affichage des vignettes ********************************************************/
  function Changer_img_src ( id, target )
   { $('#'+id).fadeOut("slow", function()
-     { $('#'+id).attr("src", target).fadeIn("slow"); } );
+     { $('#'+id).on("load", function() { $('#'+id).fadeIn("slow"); } );
+       $('#'+id).attr("src", target);
+     } );
   }
 /****************************************** Escape les " et ' *****************************************************************/
  function htmlEncode ( string )

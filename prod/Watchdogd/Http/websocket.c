@@ -61,8 +61,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void Http_Envoyer_un_visuel ( JsonNode *visuel )
-  { gsize taille_buf;
-    gchar *buf = Json_node_to_string ( visuel, &taille_buf );
+  { gchar *buf = Json_node_to_string ( visuel );
     json_node_unref ( visuel );
     GSList *liste = Cfg_http.liste_ws_clients;
     while (liste)
@@ -78,8 +77,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Http_ws_send_to_all ( JsonNode *node )
-  { gsize taille_buf;
-    gchar *buf = Json_node_to_string ( node, &taille_buf );
+  { gchar *buf = Json_node_to_string ( node );
     json_node_unref ( node );
     GSList *liste = Cfg_http.liste_ws_clients;
     while (liste)
@@ -115,7 +113,7 @@
     switch(cadran->type)
      { /*case MNEMO_BISTABLE:
             cadran->in_range = TRUE;
-            cadran->valeur = 1.0 * Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+            cadran->valeur = 1.0 * Dls_data_get_BI/MONO ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
             break;
        case MNEMO_ENTREE:
             cadran->in_range = TRUE;

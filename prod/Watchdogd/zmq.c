@@ -189,7 +189,7 @@
 /* Entrée: la socket, le message, sa longueur                                                                                 */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Send_zmq_as_raw ( struct ZMQUEUE *zmq, void *buf, gint taille )
+ gboolean Zmq_Send_as_raw ( struct ZMQUEUE *zmq, void *buf, gint taille )
   { if (!zmq) return(FALSE);
     if (zmq_send( zmq->socket, buf, taille, 0 ) == -1)
      { Info_new( Config.log, Config.log_zmq, LOG_ERR,
@@ -235,7 +235,7 @@
 
     memcpy ( buffer, &event, sizeof(struct ZMQ_TARGET) );                                                   /* Recopie entete */
     memcpy ( buffer + sizeof(struct ZMQ_TARGET), source, taille );                                  /* Recopie buffer payload */
-    retour = Send_zmq_as_raw( zmq, buffer, taille + sizeof(struct ZMQ_TARGET) );
+    retour = Zmq_Send_as_raw( zmq, buffer, taille + sizeof(struct ZMQ_TARGET) );
     g_free(buffer);
     if (retour==FALSE)
      { Info_new( Config.log, Config.log_zmq, LOG_ERR,
@@ -291,12 +291,47 @@
     gsize taille_buf;
     gboolean retour;
     gchar *buf = Json_get_buf (builder, &taille_buf);
-    retour  = Send_zmq_as_raw( zmq1, buf, taille_buf );
-    if (zmq2) Send_zmq_as_raw( zmq2, buf, taille_buf );
+    retour  = Zmq_Send_as_raw( zmq1, buf, taille_buf );
+    if (zmq2) Zmq_Send_as_raw( zmq2, buf, taille_buf );
     g_free(buf);
     if (retour==FALSE)
      { Info_new( Config.log, Config.log_zmq, LOG_ERR,
                 "%s: '%s' ('%s') : ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq1->name, zmq1->endpoint,
+                 g_get_host_name(), zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
+       return(FALSE);
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Send_zmq_with_tag: Envoie un message dans la socket avec le tag en prefixe                                                 */
+/* Entrée: la socket, le tag, le message, sa longueur                                                                         */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gboolean Zmq_Send_json_node ( struct ZMQUEUE *zmq, const gchar *zmq_src_thread,
+                               const gchar *zmq_dst_instance, const gchar *zmq_dst_thread,
+                               const gchar *zmq_tag, JsonNode *RootNode )
+  { if (!zmq) return(FALSE);
+
+    Json_node_add_string ( RootNode, "zmq_src_instance", g_get_host_name() );
+    Json_node_add_string ( RootNode, "zmq_src_thread", zmq_src_thread );
+    Json_node_add_string ( RootNode, "zmq_tag", zmq_tag );
+
+    if (!zmq_dst_instance) zmq_dst_instance="*";
+    Json_node_add_string ( RootNode, "zmq_dst_instance", zmq_dst_instance );
+
+    if (!zmq_dst_thread)   zmq_dst_thread  ="*";
+    Json_node_add_string ( RootNode, "zmq_dst_thread",   zmq_dst_thread );
+
+    Info_new( Config.log, Config.log_zmq, LOG_DEBUG, "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/%s", __func__,
+              zmq->name, zmq->endpoint, g_get_host_name(), zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
+
+    gboolean retour;
+    gchar *buf = Json_node_to_string ( RootNode );
+    retour  = Zmq_Send_as_raw( zmq, buf, strlen(buf) );
+    g_free(buf);
+    if (retour==FALSE)
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
+                "%s: '%s' ('%s') : ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,
                  g_get_host_name(), zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag );
        return(FALSE);
      }

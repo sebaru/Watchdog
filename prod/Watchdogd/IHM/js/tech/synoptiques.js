@@ -67,8 +67,8 @@
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") );
     $('#idModalSynEditAccessLevel').val(0);
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('0')" );
-    $('#idModalSynEditImageSelect').val("home");
-    $('#idModalSynEditImage').attr("src", "/img/syn_accueil.png");
+    $('#idModalSynEditImageSelect').val("Accueil");
+    $('#idModalSynEditImage').attr("src", "/img/syn_maison.png");
     $('#idModalSynEditImage').css("max-width", "100px");
     $('#idModalSynEditImageSelect').change ( function () { Select_image_changed(syn_id) } );
     $('#idModalSynEditImageCustom').val('');

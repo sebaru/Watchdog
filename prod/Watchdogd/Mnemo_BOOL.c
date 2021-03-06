@@ -94,7 +94,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT m.tech_id, m.acronyme, m.etat FROM mnemos_BOOL as m"
+                "SELECT m.tech_id, m.acronyme, m.etat, m.type FROM mnemos_BOOL as m"
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -103,7 +103,9 @@
      }
 
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { Dls_data_set_bool ( NULL, db->row[0], db->row[1], NULL, atoi(db->row[2]) );
+     { gint type = atoi(db->row[3]);
+            if (type == MNEMO_BISTABLE )   Dls_data_set_BI   ( NULL, db->row[0], db->row[1], NULL, atoi(db->row[2]) );
+       else if (type == MNEMO_MONOSTABLE ) Dls_data_set_MONO ( NULL, db->row[0], db->row[1], NULL, atoi(db->row[2]) );
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: BOOL '%s:%s'=%d loaded", __func__,
                  db->row[0], db->row[1], atoi(db->row[2]) );
      }

@@ -57,19 +57,6 @@
                   (gchar *)&motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
   }
 /******************************************************************************************************************************/
-/* Envoyer_new_histo_au_client: Parcours la liste des histo et les envoi                                                      */
-/* Entrée : le client a gerer                                                                                                 */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Envoyer_histo_au_client ( struct CLIENT *client, struct CMD_TYPE_HISTO *histo )
-  { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "%s: Histo traite : id = %08d, msg_id=%d, alive = %d, msg='%s:%s', libelle=%s", __func__,
-              histo->id, histo->msg.id, histo->alive, histo->msg.tech_id, histo->msg.acronyme, histo->msg.libelle );
-
-    Envoi_client( client, TAG_HISTO, (histo->alive ? SSTAG_SERVEUR_SHOW_HISTO : SSTAG_SERVEUR_DEL_HISTO),
-                  (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
-  }
-/******************************************************************************************************************************/
 /* Run_handle_client: boucle principale d'un handle client Watchdog                                                           */
 /* Entree: l'id du hangle_client et le pid du pere                                                                            */
 /* Sortie: un code d'erreur EXIT_xxx                                                                                          */
@@ -134,15 +121,12 @@
         }
 /********************************************** Envoi des histos et des motifs ************************************************/
        if (client->mode == VALIDE)                                                /* Envoi au suppression des histo au client */
-        { struct CMD_TYPE_HISTO histo;
-          struct ZMQ_TARGET *event;
+        { struct ZMQ_TARGET *event;
           struct DLS_VISUEL dls_visuel;
           gchar buffer[2048];
           void *payload;
           gint byte;
 
-          if ( Recv_zmq ( zmq_msg, &histo, sizeof(histo) ) == sizeof(struct CMD_TYPE_HISTO) )
-           { Envoyer_histo_au_client ( client, &histo ); }
           if ( Recv_zmq ( zmq_motif, &dls_visuel, sizeof(dls_visuel) ) == sizeof(struct DLS_VISUEL) )
            { Envoyer_new_motif_au_client ( client, &dls_visuel ); }
 

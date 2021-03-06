@@ -132,7 +132,7 @@
           Json_add_int    ( builder, "nbr_sortie_tor", module->nbr_sortie_tor );
           Json_add_int    ( builder, "nbr_entree_ana", module->nbr_entree_ana );
           Json_add_int    ( builder, "nbr_sortie_ana", module->nbr_sortie_ana );
-          Json_add_bool   ( builder, "comm", Dls_data_get_bool( NULL, NULL, &module->bit_comm) );
+          Json_add_bool   ( builder, "comm", Dls_data_get_MONO( NULL, NULL, &module->bit_comm) );
           Json_add_int    ( builder, "transaction_id", module->transaction_id );
           Json_add_int    ( builder, "nbr_request_par_sec", module->nbr_request_par_sec );
           Json_add_int    ( builder, "delai", module->delai );

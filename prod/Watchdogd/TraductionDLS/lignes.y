@@ -322,10 +322,16 @@ calcul_expr3:   VALF
                             break;
                           }
                          case MNEMO_MONOSTABLE:
+                          { taille = 256;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            g_snprintf( $$, taille, "Dls_data_get_MONO(\"%s\",\"%s\",&_%s_%s)",
+                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+                            break;
+                          }
                          case MNEMO_BISTABLE:
                           { taille = 256;
                             $$ = New_chaine( taille ); /* 10 caractères max */
-                            g_snprintf( $$, taille, "Dls_data_get_bool(\"%s\",\"%s\",&_%s_%s)",
+                            g_snprintf( $$, taille, "Dls_data_get_BI(\"%s\",\"%s\",&_%s_%s)",
                                         alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                             break;
                           }
@@ -692,6 +698,8 @@ une_action:     T_ACT_DEF
                   {{ $$=New_action_vars_mono("vars->bit_alerte"); }}
                 | T_SBIEN_ALEF
                   {{ $$=New_action_vars_mono("vars->bit_alerte_fixe"); }}
+                | T_SBIEN_ALE_FUGITIVE
+                  {{ $$=New_action_vars_mono("vars->bit_alerte_fugitive"); }}
                 | T_SPERS_DER
                   {{ $$=New_action_vars_mono("vars->bit_derangement"); }}
                 | T_SPERS_DERF

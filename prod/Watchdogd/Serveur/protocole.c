@@ -60,7 +60,7 @@
              { /*case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( client ); break;*/
                case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( client ); break;
                case TAG_SUPERVISION : Gerer_protocole_supervision  ( client ); break;
-               case TAG_HISTO       : Gerer_protocole_histo        ( client ); break;
+               /*case TAG_HISTO       : Gerer_protocole_histo        ( client ); break;*/
                case TAG_ATELIER     : Gerer_protocole_atelier      ( client ); break;
                case TAG_LOWLEVEL    : Gerer_protocole_lowlevel     ( client ); break;
                case TAG_CONNEXION   : break;
@@ -73,10 +73,10 @@
 
             ident = (struct REZO_CLI_IDENT *)connexion->donnees;
             if (Tester_autorisation ( client, ident ) == TRUE)               /* Test l'authent cliente (login/code ou certif) */
-             { pthread_t tid;
+             { /*pthread_t tid;
                Ref_client( client, "Send Histo" );
                pthread_create( &tid, NULL, (void *)Envoyer_histo_thread, client );
-               pthread_detach( tid );
+               pthread_detach( tid );*/
              }
           }
   }
