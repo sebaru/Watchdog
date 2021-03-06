@@ -169,16 +169,13 @@
     g_object_unref(gen);
     return(result);
   }
-
- gchar *Json_node_to_string ( JsonNode *RootNode, gsize *taille_buf_p )
-  { JsonGenerator *gen;
-    gchar *result;
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, RootNode );
-    json_generator_set_pretty ( gen, TRUE );
-    result = json_generator_to_data (gen, taille_buf_p);
-    g_object_unref(gen);
-    return(result);
+/******************************************************************************************************************************/
+/* Json_node_to_string: transforme un JsonNode en string                                                                      */
+/* Entrée: le JsonNode a convertir                                                                                            */
+/* Sortie: un nouveau buffer                                                                                                  */
+/******************************************************************************************************************************/
+ gchar *Json_node_to_string ( JsonNode *RootNode )
+  { return ( json_to_string ( RootNode, TRUE ) );
   }
 /******************************************************************************************************************************/
 /* Json_get_from_stirng: Recupere l'object de plus haut niveau dans une chaine JSON                                           */

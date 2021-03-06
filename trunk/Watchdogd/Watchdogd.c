@@ -367,8 +367,8 @@
            { Handle_zmq_for_master( request ); }
           else
            { gint taille = strlen(buffer);
-             Send_zmq_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                  /* Sinon on envoi aux threads */
-             Send_zmq_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                  /* Sinon on envoi aux slave */
+             Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                  /* Sinon on envoi aux threads */
+             Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                  /* Sinon on envoi aux slave */
            }
           json_node_unref ( request );
         }
@@ -465,14 +465,14 @@
         { if (!strcasecmp( Json_get_string ( request, "zmq_dst_thread" ), "msrv"))
            { Handle_zmq_for_slave( request ); }
           else
-           { Send_zmq_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );          /* Sinon on envoi aux threads */
+           { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );          /* Sinon on envoi aux threads */
            }
           json_node_unref ( request );
         }
                                                 /* Si reception depuis un thread, report vers le master et les autres threads */
        if ( (byte=Recv_zmq( zmq_from_bus, &buffer, sizeof(buffer) )) > 0 )
-        { Send_zmq_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, byte );
-          Send_zmq_as_raw ( Partage->com_msrv.zmq_to_master, buffer, byte );
+        { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, byte );
+          Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_master, buffer, byte );
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */

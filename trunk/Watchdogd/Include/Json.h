@@ -45,7 +45,7 @@
  extern void Json_add_array ( JsonBuilder *builder, gchar *name );
  extern void Json_end_array ( JsonBuilder *builder );
  extern gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p );
- extern gchar *Json_node_to_string ( JsonNode *RootNode, gsize *taille_buf_p );
+ extern gchar *Json_node_to_string ( JsonNode *RootNode );
  extern JsonNode *Json_get_from_string ( gchar *chaine );
  extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );
  extern gfloat Json_get_float ( JsonNode *query, gchar *chaine );

@@ -113,9 +113,8 @@
     Json_node_add_bool   ( message, "alive", TRUE );
     Ajouter_histo_msgsDB( message );                                                                   /* Si ajout dans DB OK */
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
-
-    Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_slave, Partage->com_msrv.zmq_to_bus,
-                                "msrv", "*", "*","DLS_HISTO", builder );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*","DLS_HISTO", message );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*","DLS_HISTO", message );
     json_node_unref( message );                                                        /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
