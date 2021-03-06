@@ -191,7 +191,6 @@
  extern void Gerer_protocole_synoptique ( struct CONNEXION *connexion );
  extern void Gerer_protocole_mnemonique ( struct CONNEXION *connexion );
  extern void Gerer_protocole_supervision ( struct CONNEXION *connexion );
- extern void Gerer_protocole_histo ( struct CONNEXION *connexion );
  extern void Gerer_protocole_atelier ( struct CONNEXION *connexion );
  extern void Gerer_protocole_fichier_connecte ( struct CONNEXION *connexion );
  extern void Gerer_protocole_connexion ( struct CONNEXION *connexion );
@@ -216,12 +215,6 @@
  extern void Proto_append_source_dls( struct CMD_TYPE_SOURCE_DLS *dls, gchar *buffer );
  extern void Proto_afficher_mnemo_dls ( struct CMD_TYPE_MNEMO_BASE *mnemo );
  extern void Dls_set_compil_status ( gchar *chaine );
-
- extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );                                     /* Dans liste_histo.c */
- extern void Proto_insert_or_update_histo( struct CMD_TYPE_HISTO *histo );
- extern void Creer_page_histo( void );
- extern gchar *Type_vers_string ( guint type );
- extern gchar *Type_sms_vers_string ( guint type );
 
  extern void Proto_cacher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );                  /* Dans liste_synoptique.c*/
  extern void Proto_afficher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );

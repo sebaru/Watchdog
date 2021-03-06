@@ -71,20 +71,20 @@
 
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 /******************************************************************************************************************************/
-/* Type_vers_string: renvoie le type string associé                                                                           */
+/* Typologie_vers_string: renvoie le type string associé                                                                           */
 /* Entrée: le type numérique                                                                                                  */
 /* Sortie: la chaine de caractère                                                                                             */
 /******************************************************************************************************************************/
- gchar *Type_vers_string ( guint32 type )
+ gchar *Typologie_vers_string ( guint32 type )
   { switch (type)
-     { case MSG_ETAT        : return( "Info        (I) " );
-       case MSG_ALERTE      : return( "Alerte      (AK)" );
-       case MSG_ALARME      : return( "Alarme      (AL)" );
-       case MSG_DEFAUT      : return( "Trouble     (T) " );
-       case MSG_VEILLE      : return( "Veille      (V) " );
-       case MSG_ATTENTE     : return( "Attente     (A) " );
-       case MSG_DANGER      : return( "Danger      (DA)" );
-       case MSG_DERANGEMENT : return( "Derangement (DE)" );
+     { case 0 : return( "Info        (I) " );
+       case 1 : return( "Alerte      (AK)" );
+       case 3 : return( "Défaut      (T) " );
+       case 2 : return( "Alarme      (AL)" );
+       case 4 : return( "Veille      (V) " );
+       case 5 : return( "Attente     (A) " );
+       case 6 : return( "Danger      (DA)" );
+       case 7 : return( "Dérangement (DE)" );
      }
     return( "Unknown" );
   }
@@ -261,20 +261,21 @@ again:
      }
 
     switch (Json_get_int(element, "typologie"))
-     { case MSG_ALARME: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Pignon_orange.svg", 30, 30, TRUE, NULL ); break;
-       case MSG_ALERTE: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Bouclier2_rouge.svg", 30, 30, TRUE, NULL ); break;
-       case MSG_DANGER: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Croix_rouge_rouge.svg", 30, 30, TRUE, NULL ); break;
-       case MSG_DEFAUT: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Pignon_jaune.svg", 30, 30, TRUE, NULL ); break;
-       case MSG_DERANGEMENT: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Croix_route_orange.svg", 30, 30, TRUE, NULL ); break;
+     { case 1: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Bouclier2_rouge.svg", 30, 30, TRUE, NULL ); break;
+       case 2: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Pignon_jaune.svg", 30, 30, TRUE, NULL ); break;
+       case 3: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Pignon_orange.svg", 30, 30, TRUE, NULL ); break;
+       case 4: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Bouclier2_vert.svg", 30, 30, TRUE, NULL ); break;
+       case 6: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Croix_rouge_rouge.svg", 30, 30, TRUE, NULL ); break;
+       case 7: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Croix_route_orange.svg", 30, 30, TRUE, NULL ); break;
        default:
-       case MSG_ATTENTE:
-       case MSG_ETAT:  pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Info.svg", 30, 30, TRUE, NULL ); break;
+       case 5:
+       case 0:  pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Info.svg", 30, 30, TRUE, NULL ); break;
      }
 
     gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
                          COLONNE_TECH_ID, Json_get_string(element, "tech_id"),
                          COLONNE_ACRONYME, Json_get_string(element, "acronyme"),
-                         COLONNE_TYPE, Type_vers_string(Json_get_int(element, "typologie")),
+                         COLONNE_TYPE, Typologie_vers_string(Json_get_int(element, "typologie")),
                          COLONNE_TYPE_PIXBUF, pixbuf,
                          COLONNE_SYN_ID, Json_get_int(element, "syn_id"),
                          COLONNE_GROUPE_PAGE, groupe_page,

@@ -280,18 +280,9 @@
     gchar *zmq_dst_instance = Json_get_string ( request, "zmq_dst_instance" );
     gchar *zmq_dst_thread   = Json_get_string ( request, "zmq_dst_thread" );
 
-         if ( !strcasecmp( zmq_tag, "ping") )
+         if ( !strcasecmp( zmq_tag, "PING") )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src_instance );
      }
-#ifdef bouh
-
-    else if ( !strcasecmp( zmq_tag, "histo") )
-     { if (Send_zmq( Partage->com_msrv.zmq_msg, payload, sizeof(struct CMD_TYPE_HISTO)) == -1)
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
-                      __func__, Partage->com_msrv.zmq_msg->name, zmq_strerror(errno) );
-          }
-     }
-#endif
     else if ( !strcasecmp( zmq_tag, "SUDO") )
      { gchar chaine[80];
        if (! (Json_has_member ( request, "commande" ) ) )

@@ -73,10 +73,10 @@
 
             ident = (struct REZO_CLI_IDENT *)connexion->donnees;
             if (Tester_autorisation ( client, ident ) == TRUE)               /* Test l'authent cliente (login/code ou certif) */
-             { pthread_t tid;
+             { /*pthread_t tid;
                Ref_client( client, "Send Histo" );
                pthread_create( &tid, NULL, (void *)Envoyer_histo_thread, client );
-               pthread_detach( tid );
+               pthread_detach( tid );*/
              }
           }
   }

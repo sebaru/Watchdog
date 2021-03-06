@@ -79,7 +79,6 @@
  extern void Gerer_protocole_message( struct CLIENT *client );
  extern void Gerer_protocole_mnemonique( struct CLIENT *client );
  extern void Gerer_protocole_supervision( struct CLIENT *client );
- extern void Gerer_protocole_histo( struct CLIENT *client );
  extern void Gerer_protocole_synoptique( struct CLIENT *client );
  extern void Gerer_protocole_admin( struct CLIENT *client );
  extern void Gerer_protocole_lowlevel( struct CLIENT *client );
@@ -155,10 +154,6 @@
  extern void Proto_valider_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemo );
  extern void Proto_effacer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemo );
  extern void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemo );
-
-
- extern void *Envoyer_histo_thread ( struct CLIENT *client );                                           /* Dans envoi_histo.c */
- extern void Proto_acquitter_histo ( struct CLIENT *client, struct CMD_TYPE_HISTO *rezo_histo );
 
  extern void *Proto_envoyer_histo_msgs_thread ( struct CLIENT *client );                           /* Dans envoi_histo_hard.c */
 

@@ -37,10 +37,8 @@
  #include "Reseaux_synoptique.h"
  #include "Reseaux_dls.h"
  #include "Reseaux_mnemonique.h"
- #include "Reseaux_message.h"
  #include "Reseaux_supervision.h"
  #include "Reseaux_lowlevel.h"
- #include "Reseaux_histo.h"
  #include "Reseaux_atelier.h"
  #include "Reseaux_admin.h"
 

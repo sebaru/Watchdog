@@ -32,7 +32,7 @@ Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResourc
 #                          protocole.c protocole_gtk_message.c \
 #                          protocole_dls.c protocole_mnemonique.c \
 #                          protocole_connexion.c \
-#                          protocole_supervision.c protocole_histo.c \
+#                          protocole_supervision.c  \
 #                          protocole_atelier.c \
 #			  protocole_synoptique.c protocole_admin.c \
 #                          menu.c timer.c admin.c \
