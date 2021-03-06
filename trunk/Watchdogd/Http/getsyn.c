@@ -499,7 +499,7 @@
     if (full_syn)
      { g_snprintf(chaine, sizeof(chaine), "SELECT visu.* FROM syns_motifs AS visu "
                                           "INNER JOIN syns AS syn ON visu.syn_id=syn.id "
-                                          "WHERE syn.id='%d' AND syn.access_level<=%d",
+                                          "WHERE syn.id='%d' AND syn.access_level<=%d ORDER BY layer",
                                           syn_id, session->access_level);
      }
     else
