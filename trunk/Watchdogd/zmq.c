@@ -147,9 +147,17 @@
  gboolean Zmq_Send_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_src_thread,
                                const gchar *zmq_dst_instance, const gchar *zmq_dst_thread,
                                const gchar *zmq_tag, JsonBuilder *builder )
-  { JsonNode *body = Json_end ( builder );
-    gboolean retour = Zmq_Send_json_node ( zmq, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag, body );
-    json_node_unref(body);
+  { gboolean retour;
+    if (builder)
+     { JsonNode *body = Json_end ( builder );
+       retour = Zmq_Send_json_node ( zmq, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag, body );
+       json_node_unref(body);
+     }
+    else
+     { JsonNode *RootNode = Json_node_create();
+       retour = Zmq_Send_json_node ( zmq, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag, RootNode );
+       json_node_unref(RootNode);
+     }
     return(retour);
   }
 /******************************************************************************************************************************/
