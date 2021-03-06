@@ -208,7 +208,7 @@ reload:
     Teleinfo_Creer_DB ();                                                                   /* Création de la base de données */
     Teleinfo_Lire_config ();                                                /* Lecture de la configuration logiciel du thread */
 
-    Cfg_teleinfo.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Cfg_teleinfo.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
@@ -301,7 +301,7 @@ reload:
         }
      }
     close(Cfg_teleinfo.fd);                                                                   /* Fermeture de la connexion FD */
-    Close_zmq ( Cfg_teleinfo.zmq_to_master );
+    Zmq_Close ( Cfg_teleinfo.zmq_to_master );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

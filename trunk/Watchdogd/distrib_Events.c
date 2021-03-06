@@ -56,7 +56,10 @@
     builder = Json_create ();
     if (builder)
      { Dls_DO_to_json ( builder, dout );
-       Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_bus, Partage->com_msrv.zmq_to_slave, "msrv", "*", "*", "SET_DO", builder );
+       JsonNode *body = Json_end ( builder );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*", "SET_DO", body );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*", "SET_DO", body );
+       json_node_unref ( body );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ ); }
 
@@ -74,7 +77,10 @@ suite_AO:
     builder = Json_create ();
     if (builder)
      { Dls_AO_to_json ( builder, ao );
-       Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_bus, Partage->com_msrv.zmq_to_slave, "msrv", "*", "*", "SET_DO", builder );
+       JsonNode *body = Json_end ( builder );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*", "SET_AO", body );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*", "SET_AO", body );
+       json_node_unref ( body );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ ); }
   }

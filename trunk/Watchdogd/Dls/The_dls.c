@@ -1308,12 +1308,14 @@ end:
  void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
                          gchar *host, gchar *thread, gchar *tag, gchar *param1)
   { Dls_data_set_BI ( NULL, tech_id, acronyme, bus_p, etat );                                   /* Utilisation d'un boolean */
+#ifdef bouh
     if (Dls_data_get_bool_up(tech_id, acronyme, bus_p))
      { if (param1)
         { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
        else
         { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, NULL, 0 ); }
      }
+#endif
     if (param1) g_free(param1);                                       /* Param1 est issu d'un g_strdup ou d'un Dls_dyn_string */
   }
 /******************************************************************************************************************************/
@@ -1902,7 +1904,7 @@ end:
     while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
      { sleep(1); wait--; }        /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
 
-    Partage->com_dls.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Partage->com_dls.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
@@ -2004,7 +2006,7 @@ end:
      }
     Dls_arbre_dls_syn_erase();
     Dls_Decharger_plugins();                                                                      /* Dechargement des modules DLS */
-    Close_zmq(Partage->com_dls.zmq_to_master);
+    Zmq_Close(Partage->com_dls.zmq_to_master);
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

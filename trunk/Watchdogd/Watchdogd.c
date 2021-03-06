@@ -314,14 +314,13 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
 /************************************************* Socket ZMQ interne *********************************************************/
-    Partage->com_msrv.zmq_msg = Bind_zmq ( ZMQ_PUB, "pub-int-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-    Partage->com_msrv.zmq_motif = Bind_zmq ( ZMQ_PUB, "pub-int-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
-    Partage->com_msrv.zmq_to_bus = Bind_zmq ( ZMQ_PUB, "pub-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_from_bus = Bind_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Partage->com_msrv.zmq_motif = Zmq_Bind ( ZMQ_PUB, "pub-int-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+    Partage->com_msrv.zmq_to_bus = Zmq_Bind ( ZMQ_PUB, "pub-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_from_bus = Zmq_Bind ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
 /***************************************** Socket pour une instance master ****************************************************/
-    Partage->com_msrv.zmq_to_slave = Bind_zmq ( ZMQ_PUB, "pub-to-slave", "tcp", "*", 5555 );
-    zmq_from_slave = Bind_zmq ( ZMQ_SUB, "listen-to-slave", "tcp", "*", 5556 );
+    Partage->com_msrv.zmq_to_slave = Zmq_Bind ( ZMQ_PUB, "pub-to-slave", "tcp", "*", 5555 );
+    zmq_from_slave = Zmq_Bind ( ZMQ_SUB, "listen-to-slave", "tcp", "*", 5556 );
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single)                                                                             /* Si demarrage des thread */
@@ -394,12 +393,11 @@
     Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
-    Close_zmq ( Partage->com_msrv.zmq_msg );
-    Close_zmq ( Partage->com_msrv.zmq_motif );
-    Close_zmq ( Partage->com_msrv.zmq_to_bus );
-    Close_zmq ( zmq_from_bus );
-    Close_zmq ( Partage->com_msrv.zmq_to_slave );
-    Close_zmq ( zmq_from_slave );
+    Zmq_Close ( Partage->com_msrv.zmq_motif );
+    Zmq_Close ( Partage->com_msrv.zmq_to_bus );
+    Zmq_Close ( zmq_from_bus );
+    Zmq_Close ( Partage->com_msrv.zmq_to_slave );
+    Zmq_Close ( zmq_from_slave );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );
@@ -427,14 +425,13 @@
     Mnemo_auto_create_WATCHDOG ( FALSE, g_get_host_name(), "IO_COMM", chaine );
 
 /************************************************* Socket ZMQ interne *********************************************************/
-    Partage->com_msrv.zmq_msg    = Bind_zmq ( ZMQ_PUB, "pub-int-msgs",  "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-    Partage->com_msrv.zmq_to_bus = Bind_zmq ( ZMQ_PUB, "pub-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_from_bus                 = Bind_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Partage->com_msrv.zmq_to_bus = Zmq_Bind ( ZMQ_PUB, "pub-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_from_bus                 = Zmq_Bind ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
 /***************************************** Socket de subscription au master ***************************************************/
-    Partage->com_msrv.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",    "tcp", Config.master_host, 5556 );
+    Partage->com_msrv.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",    "tcp", Config.master_host, 5556 );
     if (!Partage->com_msrv.zmq_to_master) goto end;
-    zmq_from_master                 = Connect_zmq ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
+    zmq_from_master                 = Zmq_Connect ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
     if (!zmq_from_master) goto end;
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
@@ -495,11 +492,10 @@
 end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
-    Close_zmq ( Partage->com_msrv.zmq_msg );
-    Close_zmq ( Partage->com_msrv.zmq_to_bus );
-    Close_zmq ( zmq_from_bus );
-    Close_zmq( Partage->com_msrv.zmq_to_master );
-    Close_zmq( zmq_from_master );
+    Zmq_Close ( Partage->com_msrv.zmq_to_bus );
+    Zmq_Close ( zmq_from_bus );
+    Zmq_Close( Partage->com_msrv.zmq_to_master );
+    Zmq_Close( zmq_from_master );
 
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );

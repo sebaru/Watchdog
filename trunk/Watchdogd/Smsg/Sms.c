@@ -640,8 +640,8 @@ reload:
 
     Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_smsg.tech_id, "IO_COMM", "Statut de la communication avec le GSM" );
 
-    zmq_from_bus           = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    Cfg_smsg.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    zmq_from_bus           = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    Cfg_smsg.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     /*Envoyer_smsg_gsm_text ( "SMS System is running" );*/
     Cfg_smsg.sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
@@ -693,8 +693,8 @@ reload:
         }
      }
 	   Smsg_disconnect();
-    Close_zmq ( zmq_from_bus );
-    Close_zmq ( Cfg_smsg.zmq_to_master );
+    Zmq_Close ( zmq_from_bus );
+    Zmq_Close ( Cfg_smsg.zmq_to_master );
 
     SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE instance='%s'", NOM_THREAD, Cfg_smsg.nbr_sms, g_get_host_name() );
 

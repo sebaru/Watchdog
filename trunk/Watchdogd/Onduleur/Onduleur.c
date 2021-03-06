@@ -551,8 +551,8 @@ reload:
      }
     Ups_Creer_DB();
 
-    Cfg_ups.zmq_from_bus  = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    Cfg_ups.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Cfg_ups.zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    Cfg_ups.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Cfg_ups.Modules_UPS = NULL;                                                               /* Init des variables du thread */
 
     Charger_tous_ups();                                                                         /* Chargement des upss ups */
@@ -598,8 +598,8 @@ reload:
      }
 
     Decharger_tous_UPS();
-    Close_zmq ( Cfg_ups.zmq_to_master );
-    Close_zmq ( Cfg_ups.zmq_from_bus );
+    Zmq_Close ( Cfg_ups.zmq_to_master );
+    Zmq_Close ( Cfg_ups.zmq_from_bus );
 
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)

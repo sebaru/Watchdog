@@ -185,8 +185,8 @@ reload:
     Thread_init ( "W-DMX", "I/O", lib, WTD_VERSION, "Manage Dmx System" );
     Dmx_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
-    Cfg_dmx.zmq_from_bus  = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    Cfg_dmx.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Cfg_dmx.zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    Cfg_dmx.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     if (Dls_auto_create_plugin( Cfg_dmx.tech_id, "Gestion du DMX" ) == FALSE)
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", Cfg_dmx.tech_id ); }
@@ -245,8 +245,8 @@ reload:
 
     Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Preparing to stop . . . TID = %p", __func__, pthread_self() );
     Dmx_close();
-    Close_zmq ( Cfg_dmx.zmq_to_master );
-    Close_zmq ( Cfg_dmx.zmq_from_bus );
+    Zmq_Close ( Cfg_dmx.zmq_to_master );
+    Zmq_Close ( Cfg_dmx.zmq_from_bus );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

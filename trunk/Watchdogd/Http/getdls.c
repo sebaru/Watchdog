@@ -433,7 +433,6 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
