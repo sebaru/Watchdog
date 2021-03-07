@@ -152,7 +152,7 @@
          columns:
            [ { "data": null, "title":"Acronyme", "className": "align-middle text-center",
                "render": function (item)
-                 { return( Lien ( "/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir la courbe", item.acronyme ) ); }
+                 { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir la courbe", item.acronyme ) ); }
              },
              { "data": null, "title":"Libellé",    "className": "align-middle ",
                "render": function (item)

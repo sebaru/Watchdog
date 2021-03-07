@@ -211,7 +211,6 @@
        if (period=="HOUR") dates = json.valeurs.map( function(item) { return item.date.split(' ')[1]; } );
                       else dates = json.valeurs.map( function(item) { return item.date; } );
        var valeurs = json.valeurs.map( function(item) { return item.moyenne1; } );
-console.debug(json.courbe1.libelle);
        var data = { labels: dates,
                     datasets: [ { label: json.courbe1.libelle,
                                   borderColor: "rgba(0, 100, 255, 1.0)",
