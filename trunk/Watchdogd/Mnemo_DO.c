@@ -134,9 +134,9 @@
 /* Entrées: le builder et le bit                                                                                              */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_DO_to_json ( JsonBuilder *builder, struct DLS_DO *bit )
-  { Json_add_string ( builder, "tech_id",  bit->tech_id );
-    Json_add_string ( builder, "acronyme", bit->acronyme );
-    Json_add_bool   ( builder, "etat",     bit->etat );
+ void Dls_DO_to_json ( JsonNode *element, struct DLS_DO *bit )
+  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
+    Json_node_add_string ( element, "acronyme", bit->acronyme );
+    Json_node_add_bool   ( element, "etat",     bit->etat );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -152,11 +152,11 @@
 /* Entrées: le builder et le bit                                                                                              */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_CH_to_json ( JsonBuilder *builder, struct DLS_CH *bit )
-  { Json_add_string ( builder, "tech_id",   bit->tech_id );
-    Json_add_string ( builder, "acronyme",  bit->acronyme );
-    Json_add_int    ( builder, "valeur",    bit->valeur );
-    Json_add_bool   ( builder, "etat",      bit->etat );
-    Json_add_int    ( builder, "last_arch", bit->last_arch );
+ void Dls_CH_to_json ( JsonNode *element, struct DLS_CH *bit )
+  { Json_node_add_string ( element, "tech_id",   bit->tech_id );
+    Json_node_add_string ( element, "acronyme",  bit->acronyme );
+    Json_node_add_int    ( element, "valeur",    bit->valeur );
+    Json_node_add_bool   ( element, "etat",      bit->etat );
+    Json_node_add_int    ( element, "last_arch", bit->last_arch );
   };
 /*----------------------------------------------------------------------------------------------------------------------------*/

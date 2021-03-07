@@ -197,10 +197,11 @@
        liste = Partage->Dls_data_AO;
        while (liste)
         { ao = (struct DLS_AO *)Partage->com_msrv.Liste_AO->data;            /* Recuperation du numero de a */
-          JsonBuilder *builder = Json_create ();
-          if (builder)
-           { Dls_AO_to_json( builder, ao );
-             Zmq_Send_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", zmq_src_instance, "*", "SET_AO", builder );
+          JsonNode *RootNode = Json_node_create ();
+          if (RootNode)
+           { Dls_AO_to_json( RootNode, ao );
+             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", zmq_src_instance, "*", "SET_AO", RootNode );
+             json_node_unref(RootNode);
            }
           liste = g_slist_next(liste);
         }

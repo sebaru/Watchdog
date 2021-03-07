@@ -39,7 +39,7 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  static void Http_dls_do_plugin ( void *user_data, struct DLS_PLUGIN *dls )
-  { JsonBuilder *builder = user_data;
+  { JsonArray *array = user_data;
     struct tm *temps;
     gchar date[80];
 
@@ -47,47 +47,46 @@
     if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
           else { g_snprintf(date, sizeof(date), "Erreur"); }
 
-    Json_add_object ( builder, NULL );
-    Json_add_int    ( builder, "id",        dls->id );
-    Json_add_string ( builder, "tech_id",   dls->tech_id );
-    Json_add_string ( builder, "shortname", dls->shortname );
-    Json_add_string ( builder, "name" ,     dls->nom );
-    if (dls->version) Json_add_string ( builder, "version", dls->version() );
-                 else Json_add_string ( builder, "version", "Unknown" );
-    Json_add_bool   ( builder, "started",   dls->on );
-    Json_add_string ( builder, "start_date", date );
+    JsonNode *element = Json_node_create();
+    Json_node_add_int    ( element, "id",        dls->id );
+    Json_node_add_string ( element, "tech_id",   dls->tech_id );
+    Json_node_add_string ( element, "shortname", dls->shortname );
+    Json_node_add_string ( element, "name" ,     dls->nom );
+    if (dls->version) Json_node_add_string ( element, "version", dls->version() );
+                 else Json_node_add_string ( element, "version", "Unknown" );
+    Json_node_add_bool   ( element, "started",   dls->on );
+    Json_node_add_string ( element, "start_date", date );
 
-    Json_add_double ( builder, "conso", dls->conso );
-    Json_add_bool   ( builder, "debug",                dls->vars.debug );
-    Json_add_bool   ( builder, "bit_comm",             Dls_data_get_MONO ( dls->tech_id, "COMM", &dls->vars.bit_comm ) );
-    Json_add_bool   ( builder, "bit_defaut",           dls->vars.bit_defaut );
-    Json_add_bool   ( builder, "bit_defaut_fixe",      dls->vars.bit_defaut_fixe );
-    Json_add_bool   ( builder, "bit_alarme",           dls->vars.bit_alarme );
-    Json_add_bool   ( builder, "bit_alarme_fixe",      dls->vars.bit_alarme_fixe );
-    Json_add_bool   ( builder, "bit_activite_ok",      dls->vars.bit_activite_ok );
+    Json_node_add_double ( element, "conso", dls->conso );
+    Json_node_add_bool   ( element, "debug",                dls->vars.debug );
+    Json_node_add_bool   ( element, "bit_comm",             Dls_data_get_MONO ( dls->tech_id, "COMM", &dls->vars.bit_comm ) );
+    Json_node_add_bool   ( element, "bit_defaut",           dls->vars.bit_defaut );
+    Json_node_add_bool   ( element, "bit_defaut_fixe",      dls->vars.bit_defaut_fixe );
+    Json_node_add_bool   ( element, "bit_alarme",           dls->vars.bit_alarme );
+    Json_node_add_bool   ( element, "bit_alarme_fixe",      dls->vars.bit_alarme_fixe );
+    Json_node_add_bool   ( element, "bit_activite_ok",      dls->vars.bit_activite_ok );
 
-    Json_add_bool   ( builder, "bit_alerte",           dls->vars.bit_alerte );
-    Json_add_bool   ( builder, "bit_alerte_fixe",      dls->vars.bit_alerte_fixe );
-    Json_add_bool   ( builder, "bit_veille",           dls->vars.bit_veille );
+    Json_node_add_bool   ( element, "bit_alerte",           dls->vars.bit_alerte );
+    Json_node_add_bool   ( element, "bit_alerte_fixe",      dls->vars.bit_alerte_fixe );
+    Json_node_add_bool   ( element, "bit_veille",           dls->vars.bit_veille );
 
-    Json_add_bool   ( builder, "bit_derangement",      dls->vars.bit_derangement );
-    Json_add_bool   ( builder, "bit_derangement_fixe", dls->vars.bit_derangement_fixe );
-    Json_add_bool   ( builder, "bit_danger",           dls->vars.bit_danger );
-    Json_add_bool   ( builder, "bit_danger_fixe",      dls->vars.bit_danger_fixe );
-    Json_add_bool   ( builder, "bit_secu_pers_ok",     dls->vars.bit_secupers_ok );
+    Json_node_add_bool   ( element, "bit_derangement",      dls->vars.bit_derangement );
+    Json_node_add_bool   ( element, "bit_derangement_fixe", dls->vars.bit_derangement_fixe );
+    Json_node_add_bool   ( element, "bit_danger",           dls->vars.bit_danger );
+    Json_node_add_bool   ( element, "bit_danger_fixe",      dls->vars.bit_danger_fixe );
+    Json_node_add_bool   ( element, "bit_secu_pers_ok",     dls->vars.bit_secupers_ok );
 
-    Json_add_bool   ( builder, "bit_acquit",           dls->vars.bit_acquit );
-    Json_add_array  ( builder, "bit_IO_Comms" );
+    Json_node_add_bool   ( element, "bit_acquit",           dls->vars.bit_acquit );
+    JsonArray *io_comm_array = Json_node_add_array  ( element, "bit_IO_Comms" );
     GSList *liste = dls->Arbre_IO_Comm;
     while(liste)
      { gpointer wtd = liste->data;
-       Json_add_object ( builder, NULL );
-       Dls_WATCHDOG_to_json ( builder, wtd );
-       Json_end_object ( builder );
+       JsonNode *io_comm = Json_node_create ();
+       Dls_WATCHDOG_to_json ( io_comm, wtd );
+       Json_array_add_element (io_comm_array, io_comm );
        liste = g_slist_next( liste );
      }
-    Json_end_array  ( builder );
-    Json_end_object ( builder );
+    Json_array_add_element ( array, element );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
@@ -96,30 +95,27 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_status ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
-  { JsonBuilder *builder;
-    gchar *buf;
-    gsize taille_buf;
-
+  {
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
+    JsonNode *dls_status = Json_node_create ();
+    if (dls_status == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping dlslist ----------------------------------------------------*/
-    Json_add_array ( builder, "plugins" );
-    Dls_foreach_plugins ( builder, Http_dls_do_plugin );
-    Json_end_array ( builder );
+    JsonArray *plugins = Json_node_add_array ( dls_status, "plugins" );
+    Dls_foreach_plugins ( plugins, Http_dls_do_plugin );
 
-    buf = Json_get_buf ( builder, &taille_buf );
+    gchar *buf = Json_node_to_string ( dls_status );
+    json_node_unref ( dls_status );
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_dls_run: Donne l'état des bits d'un module, ou de tous les modules si pas de tech_id fourni                   */
@@ -129,8 +125,7 @@
  void Http_traiter_dls_run ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
   { GSList *liste;
-    gsize taille_buf;
-    gchar *buf;
+    JsonArray *array;
 
     if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -155,178 +150,166 @@
        return;
      }
 
-    JsonBuilder *builder = Json_create ();
-    if (!builder)
+    JsonNode *dls_run = Json_node_create ();
+    if (!dls_run)
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    Json_add_string ( builder, "tech_id", tech_id );
-    Json_add_int    ( builder, "top", Partage->top );
+    Json_node_add_string ( dls_run, "tech_id", tech_id );
+    Json_node_add_int    ( dls_run, "top", Partage->top );
 /*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
-    Json_add_array ( builder, "CI" );
+    array = Json_node_add_array ( dls_run, "CI" );
     liste = Partage->Dls_data_CI;
     while(liste)
      { struct DLS_CI *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, NULL );
-          Dls_CI_to_json ( builder, bit );
-          Json_end_object( builder );
+        { JsonNode *element = Json_node_create();
+          Dls_CI_to_json ( element, bit );
+          Json_array_add_element ( array, element );
         }
        liste = g_slist_next(liste);
      }
-    Json_end_array( builder );
 /*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
-    Json_add_array ( builder, "BOOL" );
+    array = Json_node_add_array ( dls_run, "BOOL" );
     liste = Partage->Dls_data_BOOL;
     while(liste)
      { struct DLS_BOOL *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, NULL );
-          Dls_BOOL_to_json ( builder, bit );
-          Json_end_object( builder );
+        { JsonNode *element = Json_node_create();
+          Dls_BOOL_to_json ( element, bit );
+          Json_array_add_element ( array, element );
         }
        liste = g_slist_next(liste);
      }
-    Json_end_array( builder );
 /*--------------------------------------------------- Compteur horaires ------------------------------------------------------*/
-    Json_add_array ( builder, "CH" );
+    array = Json_node_add_array ( dls_run, "CH" );
     liste = Partage->Dls_data_CH;
     while(liste)
      { struct DLS_CH *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, NULL );
-          Dls_CH_to_json ( builder, bit );
-          Json_end_object( builder );
+        { JsonNode *element = Json_node_create();
+          Dls_CH_to_json ( element, bit );
+          Json_array_add_element ( array, element );
         }
        liste = g_slist_next(liste);
      }
-    Json_end_array( builder );
 /*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
-    Json_add_array ( builder, "AI" );
+    array = Json_node_add_array ( dls_run, "AI" );
     liste = Partage->Dls_data_AI;
     while(liste)
      { struct DLS_AI *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, NULL );
-          Dls_AI_to_json ( builder, bit );
-          Json_end_object( builder );
+        { JsonNode *element = Json_node_create();
+          Dls_AI_to_json ( element, bit );
+          Json_array_add_element ( array, element );
         }
        liste = g_slist_next(liste);
      }
-    Json_end_array( builder );
 /*----------------------------------------------- Sortie Analogique ----------------------------------------------------------*/
-    Json_add_array ( builder, "AO" );
+    array = Json_node_add_array ( dls_run, "AO" );
     liste = Partage->Dls_data_AO;
     while(liste)
      { struct DLS_AO *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, NULL );
-          Dls_AO_to_json ( builder, bit );
-          Json_end_object( builder );
+        { JsonNode *element = Json_node_create();
+          Dls_AO_to_json ( element, bit );
+          Json_array_add_element ( array, element );
         }
        liste = g_slist_next(liste);
      }
-    Json_end_array( builder );
 /*----------------------------------------------- Temporisations -------------------------------------------------------------*/
-    Json_add_array ( builder, "T" );
+    array = Json_node_add_array ( dls_run, "T" );
     liste = Partage->Dls_data_TEMPO;
     while(liste)
      { struct DLS_TEMPO *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, NULL );
-          Dls_TEMPO_to_json ( builder, bit );
-          Json_end_object( builder );
+        { JsonNode *element = Json_node_create();
+          Dls_TEMPO_to_json ( element, bit );
+          Json_array_add_element ( array, element );
         }
        liste = g_slist_next(liste);
      }
-    Json_end_array( builder );
 /*----------------------------------------------- Entrées TOR ----------------------------------------------------------------*/
-    Json_add_array ( builder, "DI" );
+    array = Json_node_add_array ( dls_run, "DI" );
     liste = Partage->Dls_data_DI;
     while(liste)
      { struct DLS_DI *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, NULL );
-          Dls_DI_to_json ( builder, bit );
-          Json_end_object( builder );
+        { JsonNode *element = Json_node_create();
+          Dls_DI_to_json ( element, bit );
+          Json_array_add_element ( array, element );
         }
        liste = g_slist_next(liste);
      }
-    Json_end_array( builder );
 /*----------------------------------------------- Sortie TOR -----------------------------------------------------------------*/
-    Json_add_array ( builder, "DO" );
+    array = Json_node_add_array ( dls_run, "DO" );
     liste = Partage->Dls_data_DO;
     while(liste)
      { struct DLS_DO *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, NULL );
-          Dls_DO_to_json ( builder, bit );
-          Json_end_object( builder );
+        { JsonNode *element = Json_node_create();
+          Dls_DO_to_json ( element, bit );
+          Json_array_add_element ( array, element );
         }
        liste = g_slist_next(liste);
      }
-    Json_end_array( builder );
 /*----------------------------------------------- Visuels --------------------------------------------------------------------*/
-    Json_add_array ( builder, "VISUEL" );
+    array = Json_node_add_array ( dls_run, "VISUEL" );
     liste = Partage->Dls_data_VISUEL;
     while(liste)
      { struct DLS_VISUEL *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, NULL );
-          Dls_VISUEL_to_json ( builder, bit );
-          Json_end_object( builder );
+        { JsonNode *element = Json_node_create();
+          Dls_VISUEL_to_json ( element, bit );
+          Json_array_add_element ( array, element );
         }
        liste = g_slist_next(liste);
      }
-    Json_end_array( builder );
-
 /*----------------------------------------------- Messages -------------------------------------------------------------------*/
-    Json_add_array ( builder, "MSG" );
+    array = Json_node_add_array ( dls_run, "MSG" );
     liste = Partage->Dls_data_MSG;
     while(liste)
      { struct DLS_MESSAGES *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, NULL );
-          Dls_MESSAGE_to_json ( builder, bit );
-          Json_end_object( builder );
+        { JsonNode *element = Json_node_create();
+          Dls_MESSAGE_to_json ( element, bit );
+          Json_array_add_element ( array, element );
         }
        liste = g_slist_next(liste);
      }
-    Json_end_array( builder );
 /*----------------------------------------------- Registre -------------------------------------------------------------------*/
-    Json_add_array ( builder, "REGISTRE" );
+    array = Json_node_add_array ( dls_run, "REGISTRE" );
     liste = Partage->Dls_data_REGISTRE;
     while(liste)
      { struct DLS_REGISTRE *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, NULL );
-          Dls_REGISTRE_to_json ( builder, bit );
-          Json_end_object( builder );
+        { JsonNode *element = Json_node_create();
+          Dls_REGISTRE_to_json ( element, bit );
+          Json_array_add_element ( array, element );
         }
        liste = g_slist_next(liste);
      }
-    Json_end_array( builder );
 /*----------------------------------------------- Watchdog -------------------------------------------------------------------*/
-    Json_add_array ( builder, "WATCHDOG" );
+    array = Json_node_add_array ( dls_run, "WATCHDOG" );
     liste = Partage->Dls_data_WATCHDOG;
     while(liste)
      { struct DLS_WATCHDOG *bit=liste->data;
        if (!strcasecmp(bit->tech_id, tech_id))
-        { Json_add_object ( builder, NULL );
-          Dls_WATCHDOG_to_json ( builder, bit );
-          Json_end_object( builder );
+        { JsonNode *element = Json_node_create();
+          Dls_WATCHDOG_to_json ( element, bit );
+          Json_array_add_element ( array, element );
         }
        liste = g_slist_next(liste);
      }
-    Json_end_array( builder );
 /*------------------------------------------------------- fin ----------------------------------------------------------------*/
     json_node_unref(request);
-    buf = Json_get_buf ( builder, &taille_buf );
+    gchar *buf = Json_node_to_string ( dls_run );
+    json_node_unref( dls_run );
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */
@@ -680,7 +663,7 @@
  void Http_traiter_dls_compil ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
   { GBytes *request_brute;
-    gsize taille, taille_buf;
+    gsize taille;
     gchar log_buffer[1024];
     if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -716,8 +699,8 @@
 
     gint retour = Compiler_source_dls ( TRUE, Json_get_string( request, "tech_id" ), log_buffer, sizeof(log_buffer) );
 
-    JsonBuilder *builder = Json_create ();
-    if (!builder)
+    JsonNode *RootNode = Json_node_create ();
+    if (!RootNode)
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Json Memory Error");
        return;
@@ -727,48 +710,49 @@
      { case DLS_COMPIL_ERROR_LOAD_SOURCE:
             g_snprintf( log_buffer, sizeof(log_buffer), "Unable to open file for '%s' compilation",
                         Json_get_string ( request, "tech_id" ) );
-            Json_add_string ( builder, "errorlog", log_buffer );
-            Json_add_string ( builder, "result", "error" );
+            Json_node_add_string ( RootNode, "errorlog", log_buffer );
+            Json_node_add_string ( RootNode, "result", "error" );
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Source File Error" );
        break;
        case DLS_COMPIL_ERROR_LOAD_LOG:
             g_snprintf( log_buffer, sizeof(log_buffer), "Unable to open log file for '%s'",
                         Json_get_string ( request, "tech_id" ) );
-            Json_add_string ( builder, "errorlog", log_buffer );
-            Json_add_string ( builder, "result", "error" );
+            Json_node_add_string ( RootNode, "errorlog", log_buffer );
+            Json_node_add_string ( RootNode, "result", "error" );
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Log File Error" );
             break;
        case DLS_COMPIL_OK_WITH_WARNINGS:
-            Json_add_string ( builder, "errorlog", log_buffer );
-            Json_add_string ( builder, "result", "warning" );
+            Json_node_add_string ( RootNode, "errorlog", log_buffer );
+            Json_node_add_string ( RootNode, "result", "warning" );
             soup_message_set_status (msg, SOUP_STATUS_OK );
             break;
        case DLS_COMPIL_SYNTAX_ERROR:
-            Json_add_string ( builder, "errorlog", log_buffer );
-            Json_add_string ( builder, "result", "error" );
+            Json_node_add_string ( RootNode, "errorlog", log_buffer );
+            Json_node_add_string ( RootNode, "result", "error" );
             soup_message_set_status (msg, SOUP_STATUS_OK );
             break;
        case DLS_COMPIL_ERROR_FORK_GCC:
             g_snprintf( log_buffer, sizeof(log_buffer), "Gcc fork failed !" );
-            Json_add_string ( builder, "errorlog", log_buffer );
-            Json_add_string ( builder, "result", "error" );
+            Json_node_add_string ( RootNode, "errorlog", log_buffer );
+            Json_node_add_string ( RootNode, "result", "error" );
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Gcc Error" );
             break;
        case DLS_COMPIL_OK:
             g_snprintf( log_buffer, sizeof(log_buffer), "-- No error --\n-- Reset plugin OK --" );
-            Json_add_string ( builder, "errorlog", log_buffer );
-            Json_add_string ( builder, "result", "success" );
+            Json_node_add_string ( RootNode, "errorlog", log_buffer );
+            Json_node_add_string ( RootNode, "result", "success" );
             soup_message_set_status (msg, SOUP_STATUS_OK);
             break;
        default : g_snprintf( log_buffer, sizeof(log_buffer), "Unknown Error !");
-            Json_add_string ( builder, "errorlog", log_buffer );
-            Json_add_string ( builder, "result", "error" );
+            Json_node_add_string ( RootNode, "errorlog", log_buffer );
+            Json_node_add_string ( RootNode, "result", "error" );
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Unknown Error" );
      }
     Audit_log ( session, "DLS '%s' compilé", Json_get_string ( request, "tech_id" ) );
     json_node_unref(request);
-    gchar *buf = Json_get_buf (builder, &taille_buf);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    gchar *buf = Json_node_to_string (RootNode);
+    json_node_unref(RootNode);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */

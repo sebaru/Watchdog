@@ -268,16 +268,16 @@
 /* Entrées: le builder et le bit                                                                                              */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_AI_to_json ( JsonBuilder *builder, struct DLS_AI *bit )
-  { Json_add_string ( builder, "tech_id",      bit->tech_id );
-    Json_add_string ( builder, "acronyme",     bit->acronyme );
-    Json_add_double ( builder, "valeur_brute", bit->val_avant_ech );
-    Json_add_double ( builder, "valeur_min",   bit->min );
-    Json_add_double ( builder, "valeur_max",   bit->max );
-    Json_add_double ( builder, "valeur",       bit->val_ech );
-    Json_add_string ( builder, "unite",        bit->unite );
-    Json_add_int    ( builder, "type",         bit->type );
-    Json_add_int    ( builder, "in_range",     bit->inrange );
-    Json_add_int    ( builder, "last_arch",    bit->last_arch );
+ void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit )
+  { Json_node_add_string ( element, "tech_id",      bit->tech_id );
+    Json_node_add_string ( element, "acronyme",     bit->acronyme );
+    Json_node_add_double ( element, "valeur_brute", bit->val_avant_ech );
+    Json_node_add_double ( element, "valeur_min",   bit->min );
+    Json_node_add_double ( element, "valeur_max",   bit->max );
+    Json_node_add_double ( element, "valeur",       bit->val_ech );
+    Json_node_add_string ( element, "unite",        bit->unite );
+    Json_node_add_int    ( element, "type",         bit->type );
+    Json_node_add_int    ( element, "in_range",     bit->inrange );
+    Json_node_add_int    ( element, "last_arch",    bit->last_arch );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
