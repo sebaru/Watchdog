@@ -1895,10 +1895,10 @@ end:
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_10SEC", "Impulsion toutes les 10 secondes" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
-    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_2SEC", "Creneaux d'une durée de deux secondes" );
-    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
-    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde" );
-    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_5HZ",  "Creneaux d'une durée d'un 5ième de seconde" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, "SYS", "FLIPFLOP_2SEC", "Creneaux d'une durée de deux secondes" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, "SYS", "FLIPFLOP_5HZ",  "Creneaux d'une durée d'un 5ième de seconde" );
 
     gint wait=30;
     while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
@@ -1925,21 +1925,21 @@ end:
         }
 
        if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
-        { Dls_data_set_BI ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, TRUE );
-          Dls_data_set_BI ( NULL, "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz,
-                           !Dls_data_get_BI ( "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz) );
+        { Dls_data_set_MONO ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, TRUE );
+          Dls_data_set_BI   ( NULL, "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz,
+                             !Dls_data_get_BI ( "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz) );
           last_top_5hz = Partage->top;
         }
        if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
-        { Dls_data_set_BI ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
-          Dls_data_set_BI ( NULL, "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz,
-                           !Dls_data_get_BI ( "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz) );
+        { Dls_data_set_MONO ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
+          Dls_data_set_BI   ( NULL, "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz,
+                             !Dls_data_get_BI ( "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz) );
           last_top_2hz = Partage->top;
         }
        if (Partage->top-last_top_1sec>=10)                                                             /* Toutes les secondes */
-        { Dls_data_set_BI ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
-          Dls_data_set_BI ( NULL, "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec,
-                           !Dls_data_get_BI ( "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec) );
+        { Dls_data_set_MONO ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
+          Dls_data_set_BI   ( NULL, "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec,
+                             !Dls_data_get_BI ( "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec) );
           last_top_1sec = Partage->top;
 
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
@@ -1963,15 +1963,15 @@ end:
           last_top_2sec = Partage->top;
         }
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
-        { Dls_data_set_BI ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, TRUE );
+        { Dls_data_set_MONO ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, TRUE );
           last_top_5sec = Partage->top;
         }
        if (Partage->top-last_top_10sec>=100)                                                              /* Toutes les secondes */
-        { Dls_data_set_BI ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, TRUE );
+        { Dls_data_set_MONO ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, TRUE );
           last_top_10sec = Partage->top;
         }
        if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
-        { Dls_data_set_BI ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
+        { Dls_data_set_MONO ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
           Dls_data_set_AI ( "SYS", "NBR_MSG_QUEUE", &dls_nbr_msg_queue, g_slist_length(Partage->com_msrv.liste_msg), TRUE );
           Dls_data_set_AI ( "SYS", "NBR_VISUEL_QUEUE", &dls_nbr_visuel_queue, g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
           last_top_1min = Partage->top;
@@ -1989,12 +1989,6 @@ end:
        Dls_foreach_plugins ( NULL, Dls_run_plugin );
        Dls_foreach_syns    ( NULL, Dls_run_syn );
 
-       Dls_data_set_BI ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, FALSE );
-       Dls_data_set_BI ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, FALSE );
-       Dls_data_set_BI ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, FALSE );
-       Dls_data_set_BI ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, FALSE );
-       Dls_data_set_BI ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, FALSE );
-       Dls_data_set_BI ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, FALSE );
        Partage->com_dls.Top_check_horaire = FALSE;                         /* Cotrole horaire effectué un fois par minute max */
        Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
