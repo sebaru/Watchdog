@@ -139,12 +139,12 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                     { taille += (strlen($4->sinon) + 10);
                       $$ = New_chaine( taille );
                       g_snprintf( $$, taille,
-                                  "/* Ligne %d une_instr-------------*/\nif(%s)\n { %s }\nelse\n { %s }\n\n",
+                                  "vars->num_ligne = %d; /* une_instr-------------*/\nif(%s)\n { %s }\nelse\n { %s }\n\n",
                                   DlsScanner_get_lineno(), $2, $4->alors, $4->sinon );
                     }
                    else
                     { $$ = New_chaine( taille );
-                      g_snprintf( $$, taille, "/* Ligne %d une_instr-------------*/\nif(%s)\n { %s }\n\n",
+                      g_snprintf( $$, taille, "vars->num_ligne = %d;/* une_instr-------------*/\nif(%s)\n { %s }\n\n",
                                   DlsScanner_get_lineno(), $2, $4->alors );
                     }
 
