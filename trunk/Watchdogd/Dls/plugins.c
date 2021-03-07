@@ -278,6 +278,7 @@
        liste_bit = g_slist_next(liste_bit);
      }
     Charger_confDB_Registre ( plugin->tech_id );
+
     liste_bit = Partage->Dls_data_MSG;                                                /* Decharge tous les messages du module */
     while(liste_bit)
      { struct DLS_MESSAGES *msg = liste_bit->data;
@@ -285,6 +286,7 @@
        if (!strcmp(msg->tech_id, plugin->tech_id))
         { Dls_data_set_MSG ( &plugin->vars, msg->tech_id, msg->acronyme, (gpointer *)&msg, FALSE, FALSE ); }
      }
+
     liste_bit = Partage->Dls_data_BOOL;                                               /* Decharge tous les booleens du module */
     while(liste_bit)
      { struct DLS_BOOL *bool = liste_bit->data;
@@ -292,6 +294,7 @@
        if (!strcmp(bool->tech_id, plugin->tech_id))
         { bool->etat=bool->next_etat=FALSE; }
      }
+
     liste_bit = Partage->Dls_data_WATCHDOG;                                          /* Decharge tous les watchdogs du module */
     while(liste_bit)
      { struct DLS_WATCHDOG *wtd = liste_bit->data;
@@ -299,6 +302,7 @@
        if (!strcmp(wtd->tech_id, plugin->tech_id))
         { Dls_data_set_WATCHDOG ( &plugin->vars, wtd->tech_id, wtd->acronyme, (gpointer *)&wtd, FALSE ); }
      }
+
     liste_bit = Partage->Dls_data_VISUEL;                                              /* Decharge tous les visuels du module */
     while(liste_bit)
      { struct DLS_VISUEL *visu = liste_bit->data;
@@ -306,6 +310,16 @@
        if (!strcmp(visu->tech_id, plugin->tech_id))
         { Dls_data_set_VISUEL ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&visu, 0, "black", FALSE ); }
      }
+
+#ifdef bouh
+    liste_bit = Partage->Dls_data_DO;                                            /* Decharge toutes les sorties TOR du module */
+    while(liste_bit)
+     { struct DLS_DO *dout = liste_bit->data;
+       liste_bit = g_slist_next(liste_bit);
+       if (!strcmp(dout->tech_id, plugin->tech_id))
+        { Dls_data_set_DO ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&dout, FALSE ); }
+     }
+#endif
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }
 /******************************************************************************************************************************/

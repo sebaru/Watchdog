@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Http/gettableau.c       Gestion des requests sur l'URI /tableau du webservice                                  */
+/* Watchdogd/Http/gettableau.c       Gestion des requests sur l'URI /tableau du webservice                                    */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    12.12.2020 10:11:53 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -54,7 +54,8 @@
      }
 
     if ( SQL_Select_to_json_node ( RootNode, "tableaux",
-                                  "SELECT * FROM tableau INNER JOIN syns ON tableau.syn_id = syns.id "
+                                  "SELECT tableau.*,syns.page FROM tableau "
+                                  "INNER JOIN syns ON tableau.syn_id = syns.id "
                                   "WHERE access_level<=%d", session->access_level ) == FALSE )
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref(RootNode);
@@ -95,7 +96,9 @@
     gint tableau_id = Json_get_int ( request, "id" );
     json_node_unref(request);
 
-    g_snprintf( chaine, sizeof(chaine), "DELETE FROM tableau WHERE id=%d AND access_level<='%d'",
+    g_snprintf( chaine, sizeof(chaine), "DELETE tableau FROM tableau "
+                                        "INNER JOIN syns ON tableau.syn_id = syns.id "
+                                        "WHERE tableau.id=%d AND syns.access_level<='%d'",
                 tableau_id, session->access_level );
     if (SQL_Write (chaine)==FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
@@ -107,7 +110,7 @@
     Audit_log ( session, "tableau '%d' deleted", tableau_id );
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableauoptique                                                    */
+/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableau                                                   */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
@@ -154,13 +157,13 @@
     json_node_unref(request);
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableauoptique                                                    */
+/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableau                                                   */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Http_traiter_tableau_map_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                    SoupClientContext *client, gpointer user_data )
-  { gchar *buf, chaine[256];
+  { gchar *buf, chaine[384];
     gsize taille_buf;
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -200,7 +203,7 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableauoptique                                                    */
+/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableau                                                   */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
@@ -229,7 +232,7 @@
 
     g_snprintf( chaine, sizeof(chaine), "DELETE tm FROM tableau_map AS tm "
                                         "INNER JOIN tableau AS t ON t.id=tm.tableau_id "
-                                       "INNER JOIN syns ON t.syn_id = syns.id "
+                                        "INNER JOIN syns ON t.syn_id = syns.id "
                                         "WHERE tm.id=%d AND syns.access_level<='%d'", tableau_id, session->access_level );
     if (SQL_Write (chaine)==FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
@@ -241,7 +244,7 @@
     Audit_log ( session, "tableau '%d' deleted", tableau_id );
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableauoptique                                                    */
+/* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableau                                                   */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/

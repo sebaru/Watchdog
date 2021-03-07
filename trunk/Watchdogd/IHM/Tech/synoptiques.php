@@ -38,7 +38,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Page du Parent</label>
-						     <select id="idModalSynEditPPage" class="col-9 custom-select border-info"></select>
+						     <select id="idModalSynEditPPage" class="col-7 col-sm-8 custom-select border-info"></select>
      					</div>
        </div>
 
@@ -66,7 +66,7 @@
        <div class="col form-group">
 					     <div class="input-group align-items-center">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Image pré-établie</label>
-						     <select id="idModalSynEditImageSelect" class="col-6 form-control-file custom-select">
+						     <select id="idModalSynEditImageSelect" class="col-5 col-sm-6 form-control-file custom-select">
              <option value='custom'>custom</option>
              <option value='syn_maison.png'>Accueil</option>
              <option value='syn_buanderie.png'>Buanderie</option>
