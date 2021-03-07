@@ -514,6 +514,17 @@
        json_node_unref(synoptique);
        return;
      }
+/*-------------------------------------------------- Envoi les tableaux_map de la page ---------------------------------------*/
+    if (SQL_Select_to_json_node ( synoptique, "tableaux_map",
+                                 "SELECT tableau_map.* FROM tableau_map "
+                                 "INNER JOIN tableau ON tableau_map.tableau_id=tableau.id "
+                                 "INNER JOIN syns as syn ON tableau.syn_id=syn.id "
+                                 "WHERE tableau.syn_id=%d AND syn.access_level<=%d",
+                                 syn_id, session->access_level ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       json_node_unref(synoptique);
+       return;
+     }
 
 /*-------------------------------------------------- Envoi les visuels de la page --------------------------------------------*/
     if (full_syn)
