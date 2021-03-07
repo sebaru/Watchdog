@@ -185,7 +185,7 @@
 
     gboolean retour;
     gchar *buf = Json_node_to_string ( RootNode );
-    retour  = Zmq_Send_as_raw( zmq, buf, strlen(buf) );
+    retour = Zmq_Send_as_raw( zmq, buf, strlen(buf) );
     g_free(buf);
     if (retour==FALSE)
      { Info_new( Config.log, Config.log_zmq, LOG_ERR,

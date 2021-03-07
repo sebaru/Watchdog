@@ -1707,24 +1707,24 @@ end:
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_SYN *dls_syn )
-  { JsonBuilder *builder = user_data;
-    Json_add_object ( builder, NULL );
-    Json_add_int  ( builder, "id", dls_syn->syn_vars.syn_id );
-    Json_add_bool ( builder, "bit_comm", dls_syn->syn_vars.bit_comm );
-    Json_add_bool ( builder, "bit_defaut", dls_syn->syn_vars.bit_defaut );
-    Json_add_bool ( builder, "bit_defaut_fixe", dls_syn->syn_vars.bit_defaut_fixe );
-    Json_add_bool ( builder, "bit_alarme", dls_syn->syn_vars.bit_alarme );
-    Json_add_bool ( builder, "bit_alarme_fixe", dls_syn->syn_vars.bit_alarme_fixe );
-    Json_add_bool ( builder, "bit_veille_partielle", dls_syn->syn_vars.bit_veille_partielle );
-    Json_add_bool ( builder, "bit_veille_totale", dls_syn->syn_vars.bit_veille_totale );
-    Json_add_bool ( builder, "bit_alerte", dls_syn->syn_vars.bit_alerte );
-    Json_add_bool ( builder, "bit_alerte_fixe", dls_syn->syn_vars.bit_alerte_fixe );
-    Json_add_bool ( builder, "bit_alerte_fugitive", dls_syn->syn_vars.bit_alerte_fugitive );
-    Json_add_bool ( builder, "bit_derangement", dls_syn->syn_vars.bit_derangement );
-    Json_add_bool ( builder, "bit_derangement_fixe", dls_syn->syn_vars.bit_derangement_fixe );
-    Json_add_bool ( builder, "bit_danger", dls_syn->syn_vars.bit_danger );
-    Json_add_bool ( builder, "bit_danger_fixe", dls_syn->syn_vars.bit_danger_fixe );
-    Json_end_object ( builder );
+  { JsonArray *array = user_data;
+    JsonNode *element = Json_node_create ();
+    Json_node_add_int  ( element, "id", dls_syn->syn_vars.syn_id );
+    Json_node_add_bool ( element, "bit_comm", dls_syn->syn_vars.bit_comm );
+    Json_node_add_bool ( element, "bit_defaut", dls_syn->syn_vars.bit_defaut );
+    Json_node_add_bool ( element, "bit_defaut_fixe", dls_syn->syn_vars.bit_defaut_fixe );
+    Json_node_add_bool ( element, "bit_alarme", dls_syn->syn_vars.bit_alarme );
+    Json_node_add_bool ( element, "bit_alarme_fixe", dls_syn->syn_vars.bit_alarme_fixe );
+    Json_node_add_bool ( element, "bit_veille_partielle", dls_syn->syn_vars.bit_veille_partielle );
+    Json_node_add_bool ( element, "bit_veille_totale", dls_syn->syn_vars.bit_veille_totale );
+    Json_node_add_bool ( element, "bit_alerte", dls_syn->syn_vars.bit_alerte );
+    Json_node_add_bool ( element, "bit_alerte_fixe", dls_syn->syn_vars.bit_alerte_fixe );
+    Json_node_add_bool ( element, "bit_alerte_fugitive", dls_syn->syn_vars.bit_alerte_fugitive );
+    Json_node_add_bool ( element, "bit_derangement", dls_syn->syn_vars.bit_derangement );
+    Json_node_add_bool ( element, "bit_derangement_fixe", dls_syn->syn_vars.bit_derangement_fixe );
+    Json_node_add_bool ( element, "bit_danger", dls_syn->syn_vars.bit_danger );
+    Json_node_add_bool ( element, "bit_danger_fixe", dls_syn->syn_vars.bit_danger_fixe );
+    Json_array_add_element ( array, element );
   }
 /******************************************************************************************************************************/
 /* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
@@ -1815,11 +1815,11 @@ end:
        dls_syn->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
        dls_syn->syn_vars.bit_danger           = bit_danger;
        dls_syn->syn_vars.bit_danger_fixe      = bit_danger_fixe;
-       JsonBuilder *builder = Json_create ();
-       Json_add_array ( builder, "syn_vars" );
-       Dls_syn_vars_to_json ( builder, dls_syn );
-       Json_end_array ( builder );
-       Zmq_Send_with_json( Partage->com_dls.zmq_to_master, "dls", "*", "*", "SET_SYN_VARS", builder );
+       JsonNode *RootNode = Json_node_create ();
+       JsonArray *array   = Json_node_add_array ( RootNode, "syn_vars" );
+       Dls_syn_vars_to_json ( array, dls_syn );
+       Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "dls", "*", "*", "SET_SYN_VARS", RootNode );
+       json_node_unref (RootNode);
      }
  }
 /******************************************************************************************************************************/
