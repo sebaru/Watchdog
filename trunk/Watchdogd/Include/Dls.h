@@ -143,7 +143,7 @@
  struct DLS_BOOL
   { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gint    type; /* Monostable/bistable */
+    gint    classe; /* Monostable/bistable */
     gboolean etat;                                                                                      /* Etat actuel du bit */
     gboolean next_etat;                                                                       /*prochain etat calculé par DLS */
     gboolean edge_up;

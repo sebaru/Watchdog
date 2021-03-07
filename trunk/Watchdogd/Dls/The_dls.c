@@ -291,7 +291,7 @@
             { Partage->com_dls.Set_Dls_Bool_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_down, bool ); }
            Partage->audit_bit_interne_per_sec++;
            bool->etat = bool->next_etat;
-           if (bool->type == MNEMO_MONOSTABLE) bool->next_etat = FALSE;
+           if (bool->classe == MNEMO_MONOSTABLE) bool->next_etat = FALSE;
          }
         liste = g_slist_next(liste);
       }
@@ -391,7 +391,7 @@ end:
            }
           g_snprintf( bool->acronyme, sizeof(bool->acronyme), "%s", acronyme );
           g_snprintf( bool->tech_id,  sizeof(bool->tech_id),  "%s", tech_id );
-          bool->type = MNEMO_BISTABLE;
+          bool->classe = MNEMO_BISTABLE;
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
@@ -435,7 +435,7 @@ end:
            }
           g_snprintf( bool->acronyme, sizeof(bool->acronyme), "%s", acronyme );
           g_snprintf( bool->tech_id,  sizeof(bool->tech_id),  "%s", tech_id );
-          bool->type = MNEMO_MONOSTABLE;
+          bool->classe = MNEMO_MONOSTABLE;
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );

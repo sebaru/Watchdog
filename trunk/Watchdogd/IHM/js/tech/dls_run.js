@@ -169,6 +169,14 @@
             rowId: "id",
             columns:
               [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+                { "data": null, "title":"Type", "className": "align-middle text-center",
+                  "render": function (item)
+                    { if (item.classe==0)
+                       { return( Bouton ( "primary", "Le bit est un bistable", null, null, "Bistable" ) ); }
+                      else
+                       { return( Bouton ( "info", "Le bit est un monostable", null, null, "Monostable" ) ); }
+                    },
+                },
                 { "data": null, "title":"Etat", "className": "align-middle ",
                   "render": function (item)
                     { if (item.etat==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }

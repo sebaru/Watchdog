@@ -152,5 +152,6 @@
   { Json_add_string ( builder, "tech_id",  bit->tech_id );
     Json_add_string ( builder, "acronyme", bit->acronyme );
     Json_add_bool   ( builder, "etat",     bit->etat );
+    Json_add_int    ( builder, "classe",   bit->classe );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
