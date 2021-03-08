@@ -55,6 +55,6 @@
  extern gint Mnemo_auto_create_MSG ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle, gint typologie );
  extern void Charger_confDB_MSG ( void );
  extern void Updater_confDB_MSG ( void );
- extern void Dls_MESSAGE_to_json ( JsonBuilder *builder, struct DLS_MESSAGES *bit );
+ extern void Dls_MESSAGE_to_json ( JsonNode *element, struct DLS_MESSAGES *bit );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

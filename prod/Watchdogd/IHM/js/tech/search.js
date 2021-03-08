@@ -22,9 +22,9 @@
                    { if (item.classe=="MESSAGE")
                       { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
                      else if (item.classe=="CI")
-                      { return( Lien ( "/home/archive/"+item.tech_id+"/"+item.acronyme, "Voir le graphe", item.acronyme ) ); }
+                      { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme, "Voir le graphe", item.acronyme ) ); }
                      else if (item.classe=="AI")
-                      { return( Lien ( "/home/archive/"+item.tech_id+"/"+item.acronyme, "Voir le graphe", item.acronyme ) ); }
+                      { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme, "Voir le graphe", item.acronyme ) ); }
                      else return(item.acronyme);
                    }
                },

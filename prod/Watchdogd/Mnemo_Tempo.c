@@ -116,16 +116,16 @@
 /* Entrées: le builder et le bit                                                                                              */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_TEMPO_to_json ( JsonBuilder *builder, struct DLS_TEMPO *bit )
-  { Json_add_string ( builder, "tech_id",  bit->tech_id );
-    Json_add_string ( builder, "acronyme", bit->acronyme );
-    Json_add_bool ( builder, "etat", bit->state );
-    Json_add_int  ( builder, "status", bit->status );
-    Json_add_int  ( builder, "daa", bit->delai_on );
-    Json_add_int  ( builder, "dma", bit->min_on );
-    Json_add_int  ( builder, "dMa", bit->max_on );
-    Json_add_int  ( builder, "dad", bit->delai_off );
-    Json_add_int  ( builder, "date_on", bit->date_on );
-    Json_add_int  ( builder, "date_off", bit->date_off );
+ void Dls_TEMPO_to_json ( JsonNode *element, struct DLS_TEMPO *bit )
+  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
+    Json_node_add_string ( element, "acronyme", bit->acronyme );
+    Json_node_add_bool ( element, "etat", bit->state );
+    Json_node_add_int  ( element, "status", bit->status );
+    Json_node_add_int  ( element, "daa", bit->delai_on );
+    Json_node_add_int  ( element, "dma", bit->min_on );
+    Json_node_add_int  ( element, "dMa", bit->max_on );
+    Json_node_add_int  ( element, "dad", bit->delai_off );
+    Json_node_add_int  ( element, "date_on", bit->date_on );
+    Json_node_add_int  ( element, "date_off", bit->date_off );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

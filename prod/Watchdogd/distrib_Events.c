@@ -37,7 +37,7 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Gerer_arrive_Axxx_dls ( void )
-  { JsonBuilder *builder;
+  { JsonNode *RootNode;
     struct DLS_DO *dout;
     struct DLS_AO *ao;
     gint reste;
@@ -53,10 +53,12 @@
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending SET_DO '%s':'%s' to Slave/Bus (reste %d)", __func__,
               dout->tech_id, dout->acronyme, reste );
 
-    builder = Json_create ();
-    if (builder)
-     { Dls_DO_to_json ( builder, dout );
-       Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_bus, Partage->com_msrv.zmq_to_slave, "msrv", "*", "*", "SET_DO", builder );
+    RootNode = Json_node_create ();
+    if (RootNode)
+     { Dls_DO_to_json ( RootNode, dout );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*", "SET_DO", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*", "SET_DO", RootNode );
+       json_node_unref ( RootNode );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ ); }
 
@@ -71,10 +73,12 @@ suite_AO:
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending SET_AO '%s':'%s' = %f to Slave/Bus (reste %d)", __func__,
               ao->tech_id, ao->acronyme, ao->val_ech, reste );
 
-    builder = Json_create ();
-    if (builder)
-     { Dls_AO_to_json ( builder, ao );
-       Send_double_zmq_with_json ( Partage->com_msrv.zmq_to_bus, Partage->com_msrv.zmq_to_slave, "msrv", "*", "*", "SET_DO", builder );
+    RootNode = Json_node_create ();
+    if (RootNode)
+     { Dls_AO_to_json ( RootNode, ao );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*", "SET_AO", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*", "SET_AO", RootNode );
+       json_node_unref ( RootNode );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ ); }
   }

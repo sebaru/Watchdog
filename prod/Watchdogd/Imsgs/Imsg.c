@@ -404,7 +404,7 @@ reload:
     Imsgs_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
     Cfg_imsgs.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
-    zmq_from_bus           = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_from_bus           = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
 reconnect:
     Cfg_imsgs.signed_off = FALSE;
     xmpp_initialize();
@@ -469,7 +469,7 @@ reconnect:
        goto reconnect;
      }
 
-    Close_zmq ( zmq_from_bus );
+    Zmq_Close ( zmq_from_bus );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

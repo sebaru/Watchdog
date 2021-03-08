@@ -5,7 +5,10 @@
      <a href="/">Se reconnecter</a>
    </div>
 
+<div id="toplevel">
 <div id="bodycard" class="row justify-content-center"></div>
+<div id="tableaux" class="row justify-content-center"></div>
+</div>
 
 <hr>
 

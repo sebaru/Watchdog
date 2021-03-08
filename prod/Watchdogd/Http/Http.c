@@ -576,9 +576,9 @@ reload:
     GMainLoop *loop = g_main_loop_new (NULL, TRUE);
     GMainContext *loop_context = g_main_loop_get_context ( loop );
 
-    zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_motifs   = Connect_zmq ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
-    Cfg_http.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_motifs   = Zmq_Connect ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+    Cfg_http.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { gchar buffer[2048];
@@ -620,10 +620,10 @@ reload:
      }
 
     soup_server_disconnect (socket);                                                            /* Arret du serveur WebSocket */
-    /*Close_zmq ( Cfg_http.zmq_from_bus );*/
-    Close_zmq ( Cfg_http.zmq_to_master );
-    Close_zmq ( zmq_motifs );
-    Close_zmq ( zmq_from_bus );
+    /*Zmq_Close ( Cfg_http.zmq_from_bus );*/
+    Zmq_Close ( Cfg_http.zmq_to_master );
+    Zmq_Close ( zmq_motifs );
+    Zmq_Close ( zmq_from_bus );
     g_main_loop_unref(loop);
 
     g_slist_foreach ( Cfg_http.liste_http_clients, (GFunc) g_free, NULL );

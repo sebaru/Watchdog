@@ -186,7 +186,7 @@ end:
 
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
               "%s: %s disconnected (host='%s')", __func__, ups->tech_id, ups->host );
-    Send_zmq_WATCHDOG_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "IO_COMM", 0 );
+    Zmq_Send_WATCHDOG_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "IO_COMM", 0 );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -283,34 +283,34 @@ end:
        Mnemo_auto_create_DI ( FALSE, ups->tech_id, "UPS_ALARM",  "UPS en alarme !" );
 
        Mnemo_auto_create_AI ( FALSE, ups->tech_id, "LOAD", "Charge onduleur", "%" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "LOAD", 0.0, FALSE );
+       Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "LOAD", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( FALSE, ups->tech_id, "REALPOWER", "Charge onduleur", "W" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "REALPOWER", 0.0, FALSE );
+       Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "REALPOWER", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( FALSE, ups->tech_id, "BATTERY_CHARGE", "Charge batterie", "%" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_CHARGE", 0.0, FALSE );
+       Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_CHARGE", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( FALSE, ups->tech_id, "INPUT_VOLTAGE", "Tension d'entrée", "V" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "INPUT_VOLTAGE", 0.0, FALSE );
+       Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "INPUT_VOLTAGE", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( FALSE, ups->tech_id, "BATTERY_RUNTIME", "Durée de batterie restante", "s" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_RUNTIME", 0.0, FALSE );
+       Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_RUNTIME", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( FALSE, ups->tech_id, "BATTERY_VOLTAGE", "Tension batterie", "V" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_VOLTAGE", 0.0, FALSE );
+       Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_VOLTAGE", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( FALSE, ups->tech_id, "INPUT_HZ", "Fréquence d'entrée", "HZ" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "INPUT_HZ", 0.0, FALSE );
+       Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "INPUT_HZ", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( FALSE, ups->tech_id, "OUTPUT_CURRENT", "Courant de sortie", "A" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_CURRENT", 0.0, FALSE );
+       Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_CURRENT", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( FALSE, ups->tech_id, "OUTPUT_HZ", "Fréquence de sortie", "HZ" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_HZ", 0.0, FALSE );
+       Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_HZ", 0.0, FALSE );
 
        Mnemo_auto_create_AI ( FALSE, ups->tech_id, "OUTPUT_VOLTAGE", "Tension de sortie", "V" );
-       Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_VOLTAGE", 0.0, FALSE );
+       Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_VOLTAGE", 0.0, FALSE );
 
        Mnemo_auto_create_DO ( FALSE, ups->tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
        Mnemo_auto_create_DO ( FALSE, ups->tech_id, "LOAD_ON", "Active la sortie ondulée" );
@@ -486,50 +486,50 @@ end:
   { gchar *reponse;
 
     if ( (reponse = Onduleur_get_var ( ups, "ups.load" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "LOAD", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "LOAD", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( ups, "ups.realpower" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "REALPOWER", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "REALPOWER", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( ups, "battery.charge" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_CHARGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_CHARGE", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( ups, "input.voltage" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "INPUT_VOLTAGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "INPUT_VOLTAGE", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( ups, "battery.runtime" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_RUNTIME", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_RUNTIME", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( ups, "battery.voltage" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_VOLTAGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "BATTERY_VOLTAGE", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( ups, "input.frequency" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "INPUT_HZ", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "INPUT_HZ", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( ups, "output.current" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_CURRENT", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_CURRENT", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( ups, "output.frequency" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_HZ", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_HZ", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( ups, "output.voltage" )) != NULL )
-     { Send_zmq_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_VOLTAGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTPUT_VOLTAGE", atof(reponse+1), TRUE ); }
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     if ( (reponse = Onduleur_get_var ( ups, "outlet.1.status" )) != NULL )
-     { Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTLET_1_STATUS", !strcmp(reponse, "\"on\"") ); }
+     { Zmq_Send_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTLET_1_STATUS", !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( ups, "outlet.2.status" )) != NULL )
-     { Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTLET_2_STATUS", !strcmp(reponse, "\"on\"") ); }
+     { Zmq_Send_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "OUTLET_2_STATUS", !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( ups, "ups.status" )) != NULL )
-     { Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_ONLINE",       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
-       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_CHARGING",     (g_strrstr(reponse, "CHRG")?TRUE:FALSE) );
-       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_ON_BATT",      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
-       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_REPLACE_BATT", (g_strrstr(reponse, "RB")?TRUE:FALSE) );
-       Send_zmq_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_ALARM",        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
+     { Zmq_Send_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_ONLINE",       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
+       Zmq_Send_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_CHARGING",     (g_strrstr(reponse, "CHRG")?TRUE:FALSE) );
+       Zmq_Send_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_ON_BATT",      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
+       Zmq_Send_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_REPLACE_BATT", (g_strrstr(reponse, "RB")?TRUE:FALSE) );
+       Zmq_Send_DI_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "UPS_ALARM",        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
      }
-    Send_zmq_WATCHDOG_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "IO_COMM", 600 );
+    Zmq_Send_WATCHDOG_to_master ( Cfg_ups.zmq_to_master, NOM_THREAD, ups->tech_id, "IO_COMM", 600 );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -551,8 +551,8 @@ reload:
      }
     Ups_Creer_DB();
 
-    Cfg_ups.zmq_from_bus  = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    Cfg_ups.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Cfg_ups.zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    Cfg_ups.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Cfg_ups.Modules_UPS = NULL;                                                               /* Init des variables du thread */
 
     Charger_tous_ups();                                                                         /* Chargement des upss ups */
@@ -598,8 +598,8 @@ reload:
      }
 
     Decharger_tous_UPS();
-    Close_zmq ( Cfg_ups.zmq_to_master );
-    Close_zmq ( Cfg_ups.zmq_from_bus );
+    Zmq_Close ( Cfg_ups.zmq_to_master );
+    Zmq_Close ( Cfg_ups.zmq_from_bus );
 
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)

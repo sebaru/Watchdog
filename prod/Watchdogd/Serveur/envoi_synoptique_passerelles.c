@@ -103,21 +103,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* Envoyer_bit_init_pass: Envoi des passerelles à l'initialisation                                                            */
-/* Entrée: Le client destinataire et les tags reseaux                                                                         */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Envoyer_bit_init_pass ( void *user_data, struct DLS_SYN *dls_tree )
-  { struct CLIENT *client = user_data;
-
-    if( g_slist_find( client->Liste_pass, GINT_TO_POINTER(dls_tree->syn_vars.syn_id) ) )
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                   "%s: envoi des parametres du synoptique %d a %s", __func__, dls_tree->syn_vars.syn_id, client->machine );
-       Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_SET_SYN_VARS,
-                      (gchar *)&dls_tree->syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
-     }
-  }
-/******************************************************************************************************************************/
 /* Envoyer_passerelle_tag: Envoi des passerelles au client en parametre                                                       */
 /* Entrée: Le client destinataire et les tags reseaux                                                                         */
 /* Sortie: Néant                                                                                                              */
@@ -155,6 +140,5 @@
        g_free(pass);
      }
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-    Dls_foreach_syns ( client, Envoyer_bit_init_pass );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

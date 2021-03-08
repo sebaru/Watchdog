@@ -166,7 +166,7 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Send_AI_to_master ( gchar *name, gchar *chaine )                                      /* Envoi au master via ZMQ */
-  { Send_zmq_AI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, name, atof( chaine ), TRUE );
+  { Zmq_Send_AI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, name, atof( chaine ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
@@ -208,7 +208,7 @@ reload:
     Teleinfo_Creer_DB ();                                                                   /* Création de la base de données */
     Teleinfo_Lire_config ();                                                /* Lecture de la configuration logiciel du thread */
 
-    Cfg_teleinfo.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Cfg_teleinfo.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
@@ -258,7 +258,7 @@ reload:
                 nbr_octet_lu = 0;
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
                 if (!(Partage->top % 300))
-                 { Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 400 ); }
+                 { Zmq_Send_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 400 ); }
               }
              else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO)                        /* Encore en dessous de la limite ? */
               { /* Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
@@ -295,13 +295,13 @@ reload:
            { close(Cfg_teleinfo.fd);
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
-             Send_zmq_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 0 );
+             Zmq_Send_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 0 );
              Cfg_teleinfo.comm_status = FALSE;
            }
         }
      }
     close(Cfg_teleinfo.fd);                                                                   /* Fermeture de la connexion FD */
-    Close_zmq ( Cfg_teleinfo.zmq_to_master );
+    Zmq_Close ( Cfg_teleinfo.zmq_to_master );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

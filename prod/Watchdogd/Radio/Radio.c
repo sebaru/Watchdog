@@ -122,7 +122,7 @@ reload:
     Thread_init ( "W-RADIO", "USER", lib, WTD_VERSION, "Manage RADIO Module" );
     Radio_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
-    zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { gchar buffer[256];
 
@@ -143,7 +143,7 @@ reload:
         }
        sleep(1);
      }
-    Close_zmq ( zmq_from_bus );
+    Zmq_Close ( zmq_from_bus );
     Stopper_radio();
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)

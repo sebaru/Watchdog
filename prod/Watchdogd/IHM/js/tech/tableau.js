@@ -17,8 +17,8 @@
     selection = table.ajax.json().tableaux.filter( function(item) { return item.id==id } )[0];
     var json_request = JSON.stringify(
        { id: id,
-         titre: $('#idTableauTitre_'+id).val(),
-         access_level: $('#idTableauLevel_'+id).val(),
+         titre:  $('#idModalEditLibelle').val(),
+         syn_id: $('#idModalEditPage').val(),
        }
      );
     Send_to_API ( "POST", "/api/tableau/set", json_request, function (Response)
@@ -36,7 +36,7 @@
      }, null );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Tableau_Delete ( id )
+ function Show_Modal_Tableau_Delete ( id )
   { table = $('#idTableTableau').DataTable();
     selection = table.ajax.json().tableaux.filter( function(item) { return item.id==id } )[0];
     Show_modal_del ( "Détruire le tableau ?",
@@ -44,7 +44,21 @@
                      selection.titre,
                      "Tableau_Valide_delete("+id+")" );
   }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function Show_Modal_Tableau_Edit ( id )
+  { table = $('#idTableTableau').DataTable();
+    selection = table.ajax.json().tableaux.filter( function(item) { return item.id==id } )[0];
+    $('#idModalEditTitre').text ( "Modifier le tableau " + selection.titre + "?" );
+    Send_to_API ( "GET", "/api/syn/list", null, function (Response)
+     { $('#idModalEditPage').empty();
+       $.each ( Response.synoptiques, function ( i, item )
+        { $('#idModalEditPage').append("<option value='"+item.id+"'>"+item.page+" - "+htmlEncode(item.libelle)+"</option>"); } );
+     }, null );
 
+    $('#idModalEditLibelle').val( selection.titre );
+    $('#idModalEditValider').attr( "onclick", "Tableau_Set('"+selection.id+"')" );
+    $('#idModalEdit').modal("show");
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTableTableau').DataTable(
@@ -55,27 +69,15 @@
                },
          rowId: "id",
          columns:
-          [ { "data": null, "title":"Level", "className": "align-middle ",
-              "render": function (item)
-                { return( Select_Access_level ( "idTableauLevel_"+item.id, "Tableau_Set('"+item.id+"')", item.access_level )
-                        );
-                }
-            },
-            { "data": null, "title":"Titre", "className": "align-middle",
-              "render": function (item)
-                { return( Input ( "text", "idTableauTitre_"+item.id,
-                                  "Tableau_Set('"+item.id+"')",
-                                  "Quel est le titre du tableau ?",
-                                  item.titre )
-                        );
-                }
-            },
+          [ { "data": "page", "title":"Synoptique", "className": "align-middle text-center" },
+            { "data": "titre", "title":"Titre", "className": "align-middle" },
             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "primary", "Voir le tableau", "Redirect", "/home/tableau/"+item.id, "chart-line", null );
-                  boutons += Bouton_actions_add ( "primary", "Editer les courbes", "Redirect", "/tech/tableau_map/"+item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer ce tableau", "Tableau_Delete", item.id, "trash", null );
+                  boutons += Bouton_actions_add ( "secondary", "Voir le tableau", "Redirect", "/"+item.page, "chart-line", null );
+                  boutons += Bouton_actions_add ( "primary", "Configurer", "Show_Modal_Tableau_Edit", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer les courbes", "Redirect", "/tech/tableau_map/"+item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer ce tableau", "Show_Modal_Tableau_Delete", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },

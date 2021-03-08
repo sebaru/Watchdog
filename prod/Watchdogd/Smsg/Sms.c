@@ -242,7 +242,7 @@ end:
     GSM_FreeStateMachine(Cfg_smsg.gammu_machine);                                                     	/* Free up used memory */
     Cfg_smsg.gammu_machine = NULL;
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Disconnected", __func__ );
-    Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", 0 );
+    Zmq_Send_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", 0 );
     Cfg_smsg.lib->comm_status = FALSE;
   }
 /******************************************************************************************************************************/
@@ -569,7 +569,7 @@ end:
        if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
         { Envoyer_commande_dls_data ( tech_id, acro ); }
        else /* Envoi au master via thread HTTP */
-        { Send_zmq_CDE_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, tech_id, acro ); }
+        { Zmq_Send_CDE_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, tech_id, acro ); }
      }
 
     if (found)
@@ -640,8 +640,8 @@ reload:
 
     Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_smsg.tech_id, "IO_COMM", "Statut de la communication avec le GSM" );
 
-    zmq_from_bus           = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    Cfg_smsg.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    zmq_from_bus           = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    Cfg_smsg.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     /*Envoyer_smsg_gsm_text ( "SMS System is running" );*/
     Cfg_smsg.sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
@@ -668,7 +668,7 @@ reload:
 /****************************************************** Lecture de SMS ********************************************************/
        if (Cfg_smsg.lib->comm_status == TRUE)
         { if (Cfg_smsg.lib->comm_status == TRUE && Cfg_smsg.lib->comm_next_update < Partage->top)
-           { Send_zmq_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", SMSG_TEMPS_UPDATE_COMM+200 );
+           { Zmq_Send_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", SMSG_TEMPS_UPDATE_COMM+200 );
              Cfg_smsg.lib->comm_next_update = Partage->top + SMSG_TEMPS_UPDATE_COMM;
            }
           if (Lire_sms_gsm()==FALSE) { Smsg_disconnect(); }
@@ -693,8 +693,8 @@ reload:
         }
      }
 	   Smsg_disconnect();
-    Close_zmq ( zmq_from_bus );
-    Close_zmq ( Cfg_smsg.zmq_to_master );
+    Zmq_Close ( zmq_from_bus );
+    Zmq_Close ( Cfg_smsg.zmq_to_master );
 
     SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE instance='%s'", NOM_THREAD, Cfg_smsg.nbr_sms, g_get_host_name() );
 

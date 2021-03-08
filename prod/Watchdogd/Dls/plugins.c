@@ -90,7 +90,7 @@
 /******************************************************************************************************************************/
  static struct DLS_SYN *Dls_search_syn_reel ( struct DLS_SYN *syn_tree, gint id )
   { GSList *liste;
-    if (syn_tree->syn_vars.syn_id == id) return(syn_tree);
+    if (syn_tree->syn_id == id) return(syn_tree);
 
     liste = syn_tree->Dls_sub_syns;
     while (liste)
@@ -278,6 +278,7 @@
        liste_bit = g_slist_next(liste_bit);
      }
     Charger_confDB_Registre ( plugin->tech_id );
+
     liste_bit = Partage->Dls_data_MSG;                                                /* Decharge tous les messages du module */
     while(liste_bit)
      { struct DLS_MESSAGES *msg = liste_bit->data;
@@ -285,13 +286,15 @@
        if (!strcmp(msg->tech_id, plugin->tech_id))
         { Dls_data_set_MSG ( &plugin->vars, msg->tech_id, msg->acronyme, (gpointer *)&msg, FALSE, FALSE ); }
      }
+
     liste_bit = Partage->Dls_data_BOOL;                                               /* Decharge tous les booleens du module */
     while(liste_bit)
      { struct DLS_BOOL *bool = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(bool->tech_id, plugin->tech_id))
-        { bool->etat=FALSE; }
+        { bool->etat=bool->next_etat=FALSE; }
      }
+
     liste_bit = Partage->Dls_data_WATCHDOG;                                          /* Decharge tous les watchdogs du module */
     while(liste_bit)
      { struct DLS_WATCHDOG *wtd = liste_bit->data;
@@ -299,6 +302,7 @@
        if (!strcmp(wtd->tech_id, plugin->tech_id))
         { Dls_data_set_WATCHDOG ( &plugin->vars, wtd->tech_id, wtd->acronyme, (gpointer *)&wtd, FALSE ); }
      }
+
     liste_bit = Partage->Dls_data_VISUEL;                                              /* Decharge tous les visuels du module */
     while(liste_bit)
      { struct DLS_VISUEL *visu = liste_bit->data;
@@ -306,6 +310,16 @@
        if (!strcmp(visu->tech_id, plugin->tech_id))
         { Dls_data_set_VISUEL ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&visu, 0, "black", FALSE ); }
      }
+
+#ifdef bouh
+    liste_bit = Partage->Dls_data_DO;                                            /* Decharge toutes les sorties TOR du module */
+    while(liste_bit)
+     { struct DLS_DO *dout = liste_bit->data;
+       liste_bit = g_slist_next(liste_bit);
+       if (!strcmp(dout->tech_id, plugin->tech_id))
+        { Dls_data_set_DO ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&dout, FALSE ); }
+     }
+#endif
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }
 /******************************************************************************************************************************/
@@ -369,7 +383,7 @@
 /******************************************************************************************************************************/
  static void Dls_Add_plugin_to_dls_syn ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { struct DLS_SYN *dls_syn = user_data;
-    if (plugin->syn_id == dls_syn->syn_vars.syn_id)
+    if (plugin->syn_id == dls_syn->syn_id)
      { dls_syn->Dls_plugins = g_slist_append( dls_syn->Dls_plugins, plugin ); }
   }
 /******************************************************************************************************************************/
@@ -385,7 +399,7 @@
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error for id '%s'", __func__, id );
        return(NULL);
      }
-    dls_syn->syn_vars.syn_id = id;
+    dls_syn->syn_id = id;
 
     Dls_foreach_plugins ( dls_syn, Dls_Add_plugin_to_dls_syn );
 
@@ -413,7 +427,7 @@
        dls_syn->Dls_sub_syns = g_slist_remove ( dls_syn->Dls_sub_syns, sub_syn );
        Dls_arbre_dls_syn_erase_syn ( sub_syn );
      }
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Arbre syn '%d' erased", dls_syn->syn_vars.syn_id );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Arbre syn '%d' erased", dls_syn->syn_id );
     g_free(dls_syn);
   }
 /******************************************************************************************************************************/

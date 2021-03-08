@@ -354,11 +354,11 @@
 /* Entrées: le builder et le bit                                                                                              */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_VISUEL_to_json ( JsonBuilder *builder, struct DLS_VISUEL *bit )
-  { Json_add_string ( builder, "tech_id",   bit->tech_id );
-    Json_add_string ( builder, "acronyme",  bit->acronyme );
-    Json_add_int    ( builder, "mode",      bit->mode  );
-    Json_add_string ( builder, "color",     bit->color );
-    Json_add_bool   ( builder, "cligno",    bit->cligno );
+ void Dls_VISUEL_to_json ( JsonNode *RootNode, struct DLS_VISUEL *bit )
+  { Json_node_add_string ( RootNode, "tech_id",   bit->tech_id );
+    Json_node_add_string ( RootNode, "acronyme",  bit->acronyme );
+    Json_node_add_int    ( RootNode, "mode",      bit->mode  );
+    Json_node_add_string ( RootNode, "color",     bit->color );
+    Json_node_add_bool   ( RootNode, "cligno",    bit->cligno );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

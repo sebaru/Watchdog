@@ -91,11 +91,11 @@
 /* Entrées: le builder et le bit                                                                                              */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_WATCHDOG_to_json ( JsonBuilder *builder, struct DLS_WATCHDOG *bit )
-  { Json_add_string ( builder, "tech_id",  bit->tech_id );
-    Json_add_string ( builder, "acronyme", bit->acronyme );
-    Json_add_bool   ( builder, "etat",     Dls_data_get_WATCHDOG ( bit->tech_id, bit->acronyme, (gpointer)&bit ) );
+ void Dls_WATCHDOG_to_json ( JsonNode *element, struct DLS_WATCHDOG *bit )
+  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
+    Json_node_add_string ( element, "acronyme", bit->acronyme );
+    Json_node_add_bool   ( element, "etat",     Dls_data_get_WATCHDOG ( bit->tech_id, bit->acronyme, (gpointer)&bit ) );
     gint decompte = bit->top - Partage->top;
-    Json_add_int    ( builder, "decompte", (decompte > 0 ? decompte : 0) );
+    Json_node_add_int    ( element, "decompte", (decompte > 0 ? decompte : 0) );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

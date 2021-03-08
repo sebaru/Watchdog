@@ -40,7 +40,7 @@
 
  #include "watchdogd.h"
 
- #define DLS_LIBRARY_VERSION  "20210303"
+ #define DLS_LIBRARY_VERSION  "20210307"
 
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
@@ -80,14 +80,14 @@
 /* Sortie: TRUE ou FALSe                                                                                                      */
 /******************************************************************************************************************************/
  gboolean Dls_get_top_alerte ( void )
-  { return( Partage->com_dls.Dls_syns->syn_vars.bit_alerte ); }
+  { return( Partage->com_dls.Dls_syns->bit_alerte ); }
 /******************************************************************************************************************************/
 /* Dls_get_top_alerte_fugitive: Remonte la valeur du plus haut bit d'alerte fugitive dans l'arbre DLS                         */
 /* Entrée: Rien                                                                                                               */
 /* Sortie: TRUE ou FALSe                                                                                                      */
 /******************************************************************************************************************************/
  gboolean Dls_get_top_alerte_fugitive ( void )
-  { return( Partage->com_dls.Dls_syns->syn_vars.bit_alerte_fugitive ); }
+  { return( Partage->com_dls.Dls_syns->bit_alerte_fugitive ); }
 /******************************************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                                        */
 /* Entrée: le temps avant, et le temps apres l'action                                                                         */
@@ -291,7 +291,7 @@
             { Partage->com_dls.Set_Dls_Bool_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_down, bool ); }
            Partage->audit_bit_interne_per_sec++;
            bool->etat = bool->next_etat;
-           if (bool->type == MNEMO_MONOSTABLE) bool->next_etat = FALSE;
+           if (bool->classe == MNEMO_MONOSTABLE) bool->next_etat = FALSE;
          }
         liste = g_slist_next(liste);
       }
@@ -332,8 +332,9 @@
     else wtd = (struct DLS_WATCHDOG *)*wtd_p;
 
     wtd->top = Partage->top + consigne;
-    Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_WATCHDOG '%s:%s'=%d",
-              __func__, wtd->tech_id, wtd->acronyme, consigne );
+    Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+              "%s: ligne %04d: Changing DLS_WATCHDOG '%s:%s'=%d", __func__,
+              (vars ? vars->num_ligne : -1), wtd->tech_id, wtd->acronyme, consigne );
     Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
@@ -391,7 +392,7 @@ end:
            }
           g_snprintf( bool->acronyme, sizeof(bool->acronyme), "%s", acronyme );
           g_snprintf( bool->tech_id,  sizeof(bool->tech_id),  "%s", tech_id );
-          bool->type = MNEMO_BISTABLE;
+          bool->classe = MNEMO_BISTABLE;
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
@@ -403,8 +404,9 @@ end:
     else bool = (struct DLS_BOOL *)*bool_p;
 
     if (bool->next_etat != valeur)
-     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_BOOL '%s:%s'=%d up %d down %d",
-                 __func__, bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
+     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_BOOL '%s:%s'=%d up %d down %d", __func__,
+                 (vars ? vars->num_ligne : -1), bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
        Partage->audit_bit_interne_per_sec++;
        bool->next_etat = valeur;
      }
@@ -435,7 +437,7 @@ end:
            }
           g_snprintf( bool->acronyme, sizeof(bool->acronyme), "%s", acronyme );
           g_snprintf( bool->tech_id,  sizeof(bool->tech_id),  "%s", tech_id );
-          bool->type = MNEMO_MONOSTABLE;
+          bool->classe = MNEMO_MONOSTABLE;
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
@@ -447,8 +449,9 @@ end:
     else bool = (struct DLS_BOOL *)*bool_p;
 
     if (bool->next_etat != valeur)
-     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_BOOL '%s:%s'=%d up %d down %d",
-                 __func__, bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
+     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_BOOL '%s:%s'=%d up %d down %d", __func__,
+                 (vars ? vars->num_ligne : -1), bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
        Partage->audit_bit_interne_per_sec++;
        bool->next_etat = valeur;
      }
@@ -731,8 +734,9 @@ end:
     else dout = (struct DLS_DO *)*dout_p;
 
     if (dout->etat != etat)
-     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_DO '%s:%s'=%d ",
-                 __func__, dout->tech_id, dout->acronyme, etat );
+     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_DO '%s:%s'=%d ", __func__,
+                 (vars ? vars->num_ligne : -1), dout->tech_id, dout->acronyme, etat );
        if (etat)
         { pthread_mutex_lock( &Partage->com_msrv.synchro );
           Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, dout );
@@ -967,8 +971,9 @@ end:
        pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
        Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_AO '%s:%s'=%f/%f",
-                 __func__, ao->tech_id, ao->acronyme, ao->val_avant_ech, ao->val_ech );
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_AO '%s:%s'=%f/%f", __func__,
+                 (vars ? vars->num_ligne : -1), ao->tech_id, ao->acronyme, ao->val_avant_ech, ao->val_ech );
      }
     else if ( ao->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
      { need_arch = TRUE; }                                                               /* Archive au pire toutes les 10 min */
@@ -1031,8 +1036,9 @@ end:
            { cpt_imp->valeur++;
              cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
              need_arch = TRUE;
-             Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_CI '%s:%s'=%d",
-                       __func__, cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
+             Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                       "%s: ligne %04d: Changing DLS_CI '%s:%s'=%d", __func__,
+                       (vars ? vars->num_ligne : -1), cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
            }
         }
      }
@@ -1132,8 +1138,9 @@ end:
           if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
            { cpt_h->valeur++;
              cpt_h->old_top = new_top;
-             Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_CH '%s:%s'=%d",
-                       __func__, cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
+             Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                       "%s: ligne %04d: Changing DLS_CH '%s:%s'=%d", __func__,
+                       (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
              Partage->audit_bit_interne_per_sec++;
            }
           if (cpt_h->last_arch + 600 < Partage->top)
@@ -1308,12 +1315,14 @@ end:
  void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
                          gchar *host, gchar *thread, gchar *tag, gchar *param1)
   { Dls_data_set_BI ( NULL, tech_id, acronyme, bus_p, etat );                                   /* Utilisation d'un boolean */
+#ifdef bouh
     if (Dls_data_get_bool_up(tech_id, acronyme, bus_p))
      { if (param1)
-        { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
+        { Zmq_Send_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
        else
-        { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, NULL, 0 ); }
+        { Zmq_Send_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, NULL, 0 ); }
      }
+#endif
     if (param1) g_free(param1);                                       /* Param1 est issu d'un g_strdup ou d'un Dls_dyn_string */
   }
 /******************************************************************************************************************************/
@@ -1438,8 +1447,9 @@ end:
              pthread_mutex_unlock( &Partage->com_msrv.synchro );
            }
 
-          Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_MSG '%s:%s'=%d",
-                    __func__, msg->tech_id, msg->acronyme, msg->etat );
+          Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                    "%s: ligne %04d: Changing DLS_MSG '%s:%s'=%d", __func__,
+                    (vars ? vars->num_ligne : -1), msg->tech_id, msg->acronyme, msg->etat );
           msg->changes++;
           msg->last_change = Partage->top;
           Partage->audit_bit_interne_per_sec++;
@@ -1535,8 +1545,8 @@ end:
           Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "%s: Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d",
-                    __func__, visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno );
+                    "%s: ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d", __func__,
+                    (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno );
         }
        visu->changes++;                                                                                /* Un change de plus ! */
        Partage->audit_bit_interne_per_sec++;
@@ -1606,8 +1616,9 @@ end:
     if (valeur != reg->valeur)
      { reg->valeur = valeur;
        need_arch = TRUE;
-       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_REGISTRE '%s:%s'=%f",
-                 __func__, reg->tech_id, reg->acronyme, reg->valeur );
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_REGISTRE '%s:%s'=%f", __func__,
+                 (vars ? vars->num_ligne : -1), reg->tech_id, reg->acronyme, reg->valeur );
        Partage->audit_bit_interne_per_sec++;
      }
 
@@ -1705,24 +1716,24 @@ end:
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_SYN *dls_syn )
-  { JsonBuilder *builder = user_data;
-    Json_add_object ( builder, NULL );
-    Json_add_int  ( builder, "id", dls_syn->syn_vars.syn_id );
-    Json_add_bool ( builder, "bit_comm", dls_syn->syn_vars.bit_comm );
-    Json_add_bool ( builder, "bit_defaut", dls_syn->syn_vars.bit_defaut );
-    Json_add_bool ( builder, "bit_defaut_fixe", dls_syn->syn_vars.bit_defaut_fixe );
-    Json_add_bool ( builder, "bit_alarme", dls_syn->syn_vars.bit_alarme );
-    Json_add_bool ( builder, "bit_alarme_fixe", dls_syn->syn_vars.bit_alarme_fixe );
-    Json_add_bool ( builder, "bit_veille_partielle", dls_syn->syn_vars.bit_veille_partielle );
-    Json_add_bool ( builder, "bit_veille_totale", dls_syn->syn_vars.bit_veille_totale );
-    Json_add_bool ( builder, "bit_alerte", dls_syn->syn_vars.bit_alerte );
-    Json_add_bool ( builder, "bit_alerte_fixe", dls_syn->syn_vars.bit_alerte_fixe );
-    Json_add_bool ( builder, "bit_alerte_fugitive", dls_syn->syn_vars.bit_alerte_fugitive );
-    Json_add_bool ( builder, "bit_derangement", dls_syn->syn_vars.bit_derangement );
-    Json_add_bool ( builder, "bit_derangement_fixe", dls_syn->syn_vars.bit_derangement_fixe );
-    Json_add_bool ( builder, "bit_danger", dls_syn->syn_vars.bit_danger );
-    Json_add_bool ( builder, "bit_danger_fixe", dls_syn->syn_vars.bit_danger_fixe );
-    Json_end_object ( builder );
+  { JsonArray *array = user_data;
+    JsonNode *element = Json_node_create ();
+    Json_node_add_int  ( element, "id", dls_syn->syn_id );
+    Json_node_add_bool ( element, "bit_comm", dls_syn->bit_comm );
+    Json_node_add_bool ( element, "bit_defaut", dls_syn->bit_defaut );
+    Json_node_add_bool ( element, "bit_defaut_fixe", dls_syn->bit_defaut_fixe );
+    Json_node_add_bool ( element, "bit_alarme", dls_syn->bit_alarme );
+    Json_node_add_bool ( element, "bit_alarme_fixe", dls_syn->bit_alarme_fixe );
+    Json_node_add_bool ( element, "bit_veille_partielle", dls_syn->bit_veille_partielle );
+    Json_node_add_bool ( element, "bit_veille_totale", dls_syn->bit_veille_totale );
+    Json_node_add_bool ( element, "bit_alerte", dls_syn->bit_alerte );
+    Json_node_add_bool ( element, "bit_alerte_fixe", dls_syn->bit_alerte_fixe );
+    Json_node_add_bool ( element, "bit_alerte_fugitive", dls_syn->bit_alerte_fugitive );
+    Json_node_add_bool ( element, "bit_derangement", dls_syn->bit_derangement );
+    Json_node_add_bool ( element, "bit_derangement_fixe", dls_syn->bit_derangement_fixe );
+    Json_node_add_bool ( element, "bit_danger", dls_syn->bit_danger );
+    Json_node_add_bool ( element, "bit_danger_fixe", dls_syn->bit_danger_fixe );
+    Json_array_add_element ( array, element );
   }
 /******************************************************************************************************************************/
 /* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
@@ -1768,56 +1779,56 @@ end:
     while (liste)
      { struct DLS_SYN *sub_syn = liste->data;
        Dls_run_syn ( NULL, sub_syn );
-       bit_comm             &= sub_syn->syn_vars.bit_comm;
-       bit_defaut           |= sub_syn->syn_vars.bit_defaut;
-       bit_defaut_fixe      |= sub_syn->syn_vars.bit_defaut_fixe;
-       bit_alarme           |= sub_syn->syn_vars.bit_alarme;
-       bit_alarme_fixe      |= sub_syn->syn_vars.bit_alarme_fixe;
-       bit_veille_partielle |= sub_syn->syn_vars.bit_veille_partielle;
-       bit_veille_totale    &= sub_syn->syn_vars.bit_veille_totale;
-       bit_alerte           |= sub_syn->syn_vars.bit_alerte;
-       bit_alerte_fixe      |= sub_syn->syn_vars.bit_alerte_fixe;
-       bit_alerte_fugitive  |= sub_syn->syn_vars.bit_alerte_fugitive;
-       bit_derangement      |= sub_syn->syn_vars.bit_derangement;
-       bit_derangement_fixe |= sub_syn->syn_vars.bit_derangement_fixe;
-       bit_danger           |= sub_syn->syn_vars.bit_danger;
-       bit_danger_fixe      |= sub_syn->syn_vars.bit_danger_fixe;
+       bit_comm             &= sub_syn->bit_comm;
+       bit_defaut           |= sub_syn->bit_defaut;
+       bit_defaut_fixe      |= sub_syn->bit_defaut_fixe;
+       bit_alarme           |= sub_syn->bit_alarme;
+       bit_alarme_fixe      |= sub_syn->bit_alarme_fixe;
+       bit_veille_partielle |= sub_syn->bit_veille_partielle;
+       bit_veille_totale    &= sub_syn->bit_veille_totale;
+       bit_alerte           |= sub_syn->bit_alerte;
+       bit_alerte_fixe      |= sub_syn->bit_alerte_fixe;
+       bit_alerte_fugitive  |= sub_syn->bit_alerte_fugitive;
+       bit_derangement      |= sub_syn->bit_derangement;
+       bit_derangement_fixe |= sub_syn->bit_derangement_fixe;
+       bit_danger           |= sub_syn->bit_danger;
+       bit_danger_fixe      |= sub_syn->bit_danger_fixe;
        liste = liste->next;
      }
 
-    if ( bit_comm             != dls_syn->syn_vars.bit_comm ||                                  /* Detection des changements */
-         bit_defaut           != dls_syn->syn_vars.bit_defaut ||
-         bit_defaut_fixe      != dls_syn->syn_vars.bit_defaut_fixe ||
-         bit_alarme           != dls_syn->syn_vars.bit_alarme ||
-         bit_alarme_fixe      != dls_syn->syn_vars.bit_alarme_fixe ||
-         bit_veille_partielle != dls_syn->syn_vars.bit_veille_partielle ||
-         bit_veille_totale    != dls_syn->syn_vars.bit_veille_totale ||
-         bit_alerte           != dls_syn->syn_vars.bit_alerte ||
-         bit_alerte_fixe      != dls_syn->syn_vars.bit_alerte_fixe ||
-         bit_alerte_fugitive  != dls_syn->syn_vars.bit_alerte_fugitive ||
-         bit_derangement      != dls_syn->syn_vars.bit_derangement ||
-         bit_derangement_fixe != dls_syn->syn_vars.bit_derangement_fixe ||
-         bit_danger           != dls_syn->syn_vars.bit_danger ||
-         bit_danger_fixe      != dls_syn->syn_vars.bit_danger_fixe )
-     { dls_syn->syn_vars.bit_comm             = bit_comm;                               /* Recopie et envoi aux threads SSRV */
-       dls_syn->syn_vars.bit_defaut           = bit_defaut;
-       dls_syn->syn_vars.bit_defaut_fixe      = bit_defaut_fixe;
-       dls_syn->syn_vars.bit_alarme           = bit_alarme;
-       dls_syn->syn_vars.bit_alarme_fixe      = bit_alarme_fixe;
-       dls_syn->syn_vars.bit_veille_partielle = bit_veille_partielle;
-       dls_syn->syn_vars.bit_veille_totale    = bit_veille_totale;
-       dls_syn->syn_vars.bit_alerte           = bit_alerte;
-       dls_syn->syn_vars.bit_alerte_fixe      = bit_alerte_fixe;
-       dls_syn->syn_vars.bit_alerte_fugitive  = bit_alerte_fugitive;
-       dls_syn->syn_vars.bit_derangement      = bit_derangement;
-       dls_syn->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
-       dls_syn->syn_vars.bit_danger           = bit_danger;
-       dls_syn->syn_vars.bit_danger_fixe      = bit_danger_fixe;
-       JsonBuilder *builder = Json_create ();
-       Json_add_array ( builder, "syn_vars" );
-       Dls_syn_vars_to_json ( builder, dls_syn );
-       Json_end_array ( builder );
-       Send_zmq_with_json( Partage->com_dls.zmq_to_master, "dls", "*", "*", "SET_SYN_VARS", builder );
+    if ( bit_comm             != dls_syn->bit_comm ||                                  /* Detection des changements */
+         bit_defaut           != dls_syn->bit_defaut ||
+         bit_defaut_fixe      != dls_syn->bit_defaut_fixe ||
+         bit_alarme           != dls_syn->bit_alarme ||
+         bit_alarme_fixe      != dls_syn->bit_alarme_fixe ||
+         bit_veille_partielle != dls_syn->bit_veille_partielle ||
+         bit_veille_totale    != dls_syn->bit_veille_totale ||
+         bit_alerte           != dls_syn->bit_alerte ||
+         bit_alerte_fixe      != dls_syn->bit_alerte_fixe ||
+         bit_alerte_fugitive  != dls_syn->bit_alerte_fugitive ||
+         bit_derangement      != dls_syn->bit_derangement ||
+         bit_derangement_fixe != dls_syn->bit_derangement_fixe ||
+         bit_danger           != dls_syn->bit_danger ||
+         bit_danger_fixe      != dls_syn->bit_danger_fixe )
+     { dls_syn->bit_comm             = bit_comm;                               /* Recopie et envoi aux threads SSRV */
+       dls_syn->bit_defaut           = bit_defaut;
+       dls_syn->bit_defaut_fixe      = bit_defaut_fixe;
+       dls_syn->bit_alarme           = bit_alarme;
+       dls_syn->bit_alarme_fixe      = bit_alarme_fixe;
+       dls_syn->bit_veille_partielle = bit_veille_partielle;
+       dls_syn->bit_veille_totale    = bit_veille_totale;
+       dls_syn->bit_alerte           = bit_alerte;
+       dls_syn->bit_alerte_fixe      = bit_alerte_fixe;
+       dls_syn->bit_alerte_fugitive  = bit_alerte_fugitive;
+       dls_syn->bit_derangement      = bit_derangement;
+       dls_syn->bit_derangement_fixe = bit_derangement_fixe;
+       dls_syn->bit_danger           = bit_danger;
+       dls_syn->bit_danger_fixe      = bit_danger_fixe;
+       JsonNode *RootNode = Json_node_create ();
+       JsonArray *array   = Json_node_add_array ( RootNode, "syn_vars" );
+       Dls_syn_vars_to_json ( array, dls_syn );
+       Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "dls", "*", "*", "SET_SYN_VARS", RootNode );
+       json_node_unref (RootNode);
      }
  }
 /******************************************************************************************************************************/
@@ -1893,16 +1904,16 @@ end:
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_10SEC", "Impulsion toutes les 10 secondes" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
-    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_2SEC", "Creneaux d'une durée de deux secondes" );
-    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
-    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde" );
-    Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "FLIPFLOP_5HZ",  "Creneaux d'une durée d'un 5ième de seconde" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, "SYS", "FLIPFLOP_2SEC", "Creneaux d'une durée de deux secondes" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde" );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, "SYS", "FLIPFLOP_5HZ",  "Creneaux d'une durée d'un 5ième de seconde" );
 
     gint wait=30;
     while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
      { sleep(1); wait--; }        /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
 
-    Partage->com_dls.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Partage->com_dls.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
@@ -1923,21 +1934,21 @@ end:
         }
 
        if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
-        { Dls_data_set_BI ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, TRUE );
-          Dls_data_set_BI ( NULL, "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz,
-                           !Dls_data_get_BI ( "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz) );
+        { Dls_data_set_MONO ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, TRUE );
+          Dls_data_set_BI   ( NULL, "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz,
+                             !Dls_data_get_BI ( "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz) );
           last_top_5hz = Partage->top;
         }
        if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
-        { Dls_data_set_BI ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
-          Dls_data_set_BI ( NULL, "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz,
-                           !Dls_data_get_BI ( "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz) );
+        { Dls_data_set_MONO ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
+          Dls_data_set_BI   ( NULL, "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz,
+                             !Dls_data_get_BI ( "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz) );
           last_top_2hz = Partage->top;
         }
        if (Partage->top-last_top_1sec>=10)                                                             /* Toutes les secondes */
-        { Dls_data_set_BI ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
-          Dls_data_set_BI ( NULL, "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec,
-                           !Dls_data_get_BI ( "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec) );
+        { Dls_data_set_MONO ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
+          Dls_data_set_BI   ( NULL, "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec,
+                             !Dls_data_get_BI ( "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec) );
           last_top_1sec = Partage->top;
 
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
@@ -1961,15 +1972,15 @@ end:
           last_top_2sec = Partage->top;
         }
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
-        { Dls_data_set_BI ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, TRUE );
+        { Dls_data_set_MONO ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, TRUE );
           last_top_5sec = Partage->top;
         }
        if (Partage->top-last_top_10sec>=100)                                                              /* Toutes les secondes */
-        { Dls_data_set_BI ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, TRUE );
+        { Dls_data_set_MONO ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, TRUE );
           last_top_10sec = Partage->top;
         }
        if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
-        { Dls_data_set_BI ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
+        { Dls_data_set_MONO ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
           Dls_data_set_AI ( "SYS", "NBR_MSG_QUEUE", &dls_nbr_msg_queue, g_slist_length(Partage->com_msrv.liste_msg), TRUE );
           Dls_data_set_AI ( "SYS", "NBR_VISUEL_QUEUE", &dls_nbr_visuel_queue, g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
           last_top_1min = Partage->top;
@@ -1987,12 +1998,6 @@ end:
        Dls_foreach_plugins ( NULL, Dls_run_plugin );
        Dls_foreach_syns    ( NULL, Dls_run_syn );
 
-       Dls_data_set_BI ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, FALSE );
-       Dls_data_set_BI ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, FALSE );
-       Dls_data_set_BI ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, FALSE );
-       Dls_data_set_BI ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, FALSE );
-       Dls_data_set_BI ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, FALSE );
-       Dls_data_set_BI ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, FALSE );
        Partage->com_dls.Top_check_horaire = FALSE;                         /* Cotrole horaire effectué un fois par minute max */
        Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
@@ -2004,7 +2009,7 @@ end:
      }
     Dls_arbre_dls_syn_erase();
     Dls_Decharger_plugins();                                                                      /* Dechargement des modules DLS */
-    Close_zmq(Partage->com_dls.zmq_to_master);
+    Zmq_Close(Partage->com_dls.zmq_to_master);
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

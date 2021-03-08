@@ -64,7 +64,6 @@
  void Run_handle_client ( struct CLIENT *client )
   { static gint thread_count = 0;
     gchar nom[16];
-    struct ZMQUEUE *zmq_msg;
     struct ZMQUEUE *zmq_motif;
     struct ZMQUEUE *zmq_from_bus;
 
@@ -74,9 +73,8 @@
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
-    zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_msg      = Connect_zmq ( ZMQ_SUB, "listen-to-msgs",   "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-    zmq_motif    = Connect_zmq ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+    zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_motif    = Zmq_Connect ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
 
     while( Cfg_ssrv.lib->Thread_run == TRUE )                                                /* On tourne tant que necessaire */
      { usleep(10000);
@@ -121,25 +119,10 @@
         }
 /********************************************** Envoi des histos et des motifs ************************************************/
        if (client->mode == VALIDE)                                                /* Envoi au suppression des histo au client */
-        { struct ZMQ_TARGET *event;
-          struct DLS_VISUEL dls_visuel;
-          gchar buffer[2048];
-          void *payload;
-          gint byte;
-
+        { struct DLS_VISUEL dls_visuel;
           if ( Recv_zmq ( zmq_motif, &dls_visuel, sizeof(dls_visuel) ) == sizeof(struct DLS_VISUEL) )
            { Envoyer_new_motif_au_client ( client, &dls_visuel ); }
 
-          if ( (byte=Recv_zmq_with_tag( zmq_from_bus, "ssrv", &buffer, sizeof(buffer), &event, &payload )) > 0 )
-           { if (!strcmp(event->tag, "SET_SYN_VARS"))
-              { struct CMD_TYPE_SYN_VARS *syn_vars;
-                syn_vars = (struct CMD_TYPE_SYN_VARS *)payload;
-                if ( g_slist_find( client->Liste_pass, GINT_TO_POINTER(syn_vars->syn_id) ) )/* Envoi uniquement si le client en a besoin */
-                 { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_SET_SYN_VARS,
-                                 (gchar *)syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
-                 }
-              }
-           }
         }
 /************************************************ Ecoute du client  ***********************************************************/
        if (client->mode >= WAIT_FOR_IDENT) Ecouter_client( client );
@@ -150,9 +133,8 @@
         }
      }
 /**************************************************** Arret du handle_client **************************************************/
-    Close_zmq ( zmq_msg );
-    Close_zmq ( zmq_motif );
-    Close_zmq ( zmq_from_bus );
+    Zmq_Close ( zmq_motif );
+    Zmq_Close ( zmq_from_bus );
     Deconnecter(client);
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     pthread_exit( NULL );

@@ -175,15 +175,15 @@ reload:
        Mnemo_auto_create_DI ( FALSE, "AUDIO", "P_NONE", "Profil audio: All Hps disabled" );
      }
 
-    zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
-    Send_zmq_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 900 );
+    zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Zmq_Send_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 900 );
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { gchar buffer[1024];
 
        if (Cfg_audio.lib->comm_next_update < Partage->top)
-        { Send_zmq_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 900 );
+        { Zmq_Send_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 900 );
           Cfg_audio.lib->comm_next_update = Partage->top + 600;
         }
 
@@ -239,9 +239,9 @@ reload:
           json_node_unref ( request );
         }
      }
-    Send_zmq_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 0 );
-    Close_zmq ( zmq_from_bus );
-    Close_zmq ( zmq_to_master );
+    Zmq_Send_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 0 );
+    Zmq_Close ( zmq_from_bus );
+    Zmq_Close ( zmq_to_master );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

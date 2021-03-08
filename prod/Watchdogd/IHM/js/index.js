@@ -137,8 +137,9 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Change_page ( syn_id )
   { window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    $('#bodycard').fadeOut("fast", function ()
+    $('#toplevel').fadeOut("fast", function ()
      { $('#bodycard').empty();
+       $('#tableaux').empty();
        Send_to_API ( "GET", "/api/syn/show", "syn_id="+syn_id, function(Response)
         { console.log(Response);
           Synoptique = Response;
@@ -159,7 +160,17 @@
                     { Changer_etat_visuel ( etat_visuel );
                     }
                  );
-          $('#bodycard').fadeIn("slow");
+          if (Response.nbr_tableaux>0)
+           { $.each ( Response.tableaux, function (i, tableau)
+              { $('#tableaux').append("<hr>");
+                var id = "idTableau-"+tableau.id;
+                $('#tableaux').append("<canvas id='"+id+"'></canvas>").addClass("col");
+                maps = Response.tableaux_map.filter ( function (item) { return(item.tableau_id==tableau.id) } );
+                Charger_plusieurs_courbes ( id, maps, "HOUR" );
+              });
+           }
+
+          $('#toplevel').fadeIn("slow");
         }, null );
      });
 

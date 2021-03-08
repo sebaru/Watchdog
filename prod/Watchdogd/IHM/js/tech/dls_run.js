@@ -45,7 +45,7 @@
             columns:
               [ { "data": null, "title":"Acronyme", "className": "align-middle text-center",
                   "render": function (item)
-                    { return ( Lien ("/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
+                    { return ( Lien ("/tech/courbe/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
                 },
                 { "data": "valeur", "title":"Valeur", "className": "align-middle text-center " },
                 { "data": "unite", "title":"Unité", "className": "align-middle text-center " },
@@ -102,7 +102,7 @@
             columns:
               [ { "data": null, "title":"Acronyme", "className": "align-middle text-center",
                   "render": function (item)
-                    { return ( Lien ("/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
+                    { return ( Lien ("/tech/courbe/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
                 },
                 { "data": null, "title":"Etat", "className": "",
                   "render": function (item)
@@ -127,7 +127,7 @@
             columns:
               [ { "data": null, "title":"Acronyme", "className": "align-middle text-center",
                   "render": function (item)
-                    { return ( Lien ("/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
+                    { return ( Lien ("/tech/courbe/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
                 },
                 { "data": "valeur",     "title":"Valeur",   "className": "align-middle " },
                 { "data": "unite",      "title":"Unité",    "className": "align-middle " },
@@ -169,6 +169,14 @@
             rowId: "id",
             columns:
               [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+                { "data": null, "title":"Type", "className": "align-middle text-center",
+                  "render": function (item)
+                    { if (item.classe==0)
+                       { return( Bouton ( "primary", "Le bit est un bistable", null, null, "Bistable" ) ); }
+                      else
+                       { return( Bouton ( "info", "Le bit est un monostable", null, null, "Monostable" ) ); }
+                    },
+                },
                 { "data": null, "title":"Etat", "className": "align-middle ",
                   "render": function (item)
                     { if (item.etat==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }

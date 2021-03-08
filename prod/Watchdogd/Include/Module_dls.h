@@ -32,6 +32,7 @@
  struct DLS_TO_PLUGIN                                                 /* structure dechange de données entre DLS et le plugin */
   { gboolean resetted;                                  /* 1 si les bits internes "start" du plugins doivent etre positionnés */
     gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
+    gint     num_ligne;                                                         /* N° de ligne du plugin en cours d'execution */
     gpointer bit_comm;
     gpointer bit_msg_comm_ok;
     gpointer bit_msg_comm_hs;

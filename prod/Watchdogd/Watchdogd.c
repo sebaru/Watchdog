@@ -197,10 +197,11 @@
        liste = Partage->Dls_data_AO;
        while (liste)
         { ao = (struct DLS_AO *)Partage->com_msrv.Liste_AO->data;            /* Recuperation du numero de a */
-          JsonBuilder *builder = Json_create ();
-          if (builder)
-           { Dls_AO_to_json( builder, ao );
-             Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", zmq_src_instance, "*", "SET_AO", builder );
+          JsonNode *RootNode = Json_node_create ();
+          if (RootNode)
+           { Dls_AO_to_json( RootNode, ao );
+             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", zmq_src_instance, "*", "SET_AO", RootNode );
+             json_node_unref(RootNode);
            }
           liste = g_slist_next(liste);
         }
@@ -223,9 +224,9 @@
           result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_ENTREE_ANA, tech_id, acronyme, &ai_p );
           Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
                     event->src_instance, result_string );
-          Send_zmq_with_json ( Partage->com_msrv.zmq_to_bus, "msrv", event->src_instance,
+          Zmq_Send_with_json ( Partage->com_msrv.zmq_to_bus, "msrv", event->src_instance,
                               "audio", "play_google", result_string, strlen(result_string)+1 );
-          Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
+          Zmq_Send_with_json ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
                               "audio", "play_google", result_string, strlen(result_string)+1 );
           g_free(result_string);
         }
@@ -242,9 +243,9 @@
           result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_REGISTRE, tech_id, acronyme, &reg_p );
           Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
                     event->src_instance, result_string );
-          Send_zmq_with_json ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
+          Zmq_Send_with_json ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
                               "audio", "play_google", result_string, strlen(result_string)+1 );
-          Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
+          Zmq_Send_with_json ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
                               "audio", "play_google", result_string, strlen(result_string)+1 );
           g_free(result_string);
         }
@@ -314,14 +315,13 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
 /************************************************* Socket ZMQ interne *********************************************************/
-    Partage->com_msrv.zmq_msg = Bind_zmq ( ZMQ_PUB, "pub-int-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-    Partage->com_msrv.zmq_motif = Bind_zmq ( ZMQ_PUB, "pub-int-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
-    Partage->com_msrv.zmq_to_bus = Bind_zmq ( ZMQ_PUB, "pub-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_from_bus = Bind_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Partage->com_msrv.zmq_motif = Zmq_Bind ( ZMQ_PUB, "pub-int-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+    Partage->com_msrv.zmq_to_bus = Zmq_Bind ( ZMQ_PUB, "pub-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_from_bus = Zmq_Bind ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
 /***************************************** Socket pour une instance master ****************************************************/
-    Partage->com_msrv.zmq_to_slave = Bind_zmq ( ZMQ_PUB, "pub-to-slave", "tcp", "*", 5555 );
-    zmq_from_slave = Bind_zmq ( ZMQ_SUB, "listen-to-slave", "tcp", "*", 5556 );
+    Partage->com_msrv.zmq_to_slave = Zmq_Bind ( ZMQ_PUB, "pub-to-slave", "tcp", "*", 5555 );
+    zmq_from_slave = Zmq_Bind ( ZMQ_SUB, "listen-to-slave", "tcp", "*", 5556 );
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single)                                                                             /* Si demarrage des thread */
@@ -379,7 +379,7 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Send_zmq_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "msrv", "ping", NULL );
+        { Zmq_Send_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "msrv", "ping", NULL );
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
@@ -394,12 +394,11 @@
     Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
-    Close_zmq ( Partage->com_msrv.zmq_msg );
-    Close_zmq ( Partage->com_msrv.zmq_motif );
-    Close_zmq ( Partage->com_msrv.zmq_to_bus );
-    Close_zmq ( zmq_from_bus );
-    Close_zmq ( Partage->com_msrv.zmq_to_slave );
-    Close_zmq ( zmq_from_slave );
+    Zmq_Close ( Partage->com_msrv.zmq_motif );
+    Zmq_Close ( Partage->com_msrv.zmq_to_bus );
+    Zmq_Close ( zmq_from_bus );
+    Zmq_Close ( Partage->com_msrv.zmq_to_slave );
+    Zmq_Close ( zmq_from_slave );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );
@@ -427,14 +426,13 @@
     Mnemo_auto_create_WATCHDOG ( FALSE, g_get_host_name(), "IO_COMM", chaine );
 
 /************************************************* Socket ZMQ interne *********************************************************/
-    Partage->com_msrv.zmq_msg    = Bind_zmq ( ZMQ_PUB, "pub-int-msgs",  "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-    Partage->com_msrv.zmq_to_bus = Bind_zmq ( ZMQ_PUB, "pub-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_from_bus                 = Bind_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    Partage->com_msrv.zmq_to_bus = Zmq_Bind ( ZMQ_PUB, "pub-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_from_bus                 = Zmq_Bind ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
 /***************************************** Socket de subscription au master ***************************************************/
-    Partage->com_msrv.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",    "tcp", Config.master_host, 5556 );
+    Partage->com_msrv.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",    "tcp", Config.master_host, 5556 );
     if (!Partage->com_msrv.zmq_to_master) goto end;
-    zmq_from_master                 = Connect_zmq ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
+    zmq_from_master                 = Zmq_Connect ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
     if (!zmq_from_master) goto end;
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
@@ -454,7 +452,7 @@
 
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
-    Send_zmq_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_START", NULL );
+    Zmq_Send_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_START", NULL );
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
      { gchar buffer[2048];
        JsonNode *request;
@@ -480,7 +478,7 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Send_zmq_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 900 );
+        { Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 900 );
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
@@ -490,16 +488,15 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
-    Send_zmq_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );
-    Send_zmq_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_STOP", NULL );
+    Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );
+    Zmq_Send_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_STOP", NULL );
 end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
-    Close_zmq ( Partage->com_msrv.zmq_msg );
-    Close_zmq ( Partage->com_msrv.zmq_to_bus );
-    Close_zmq ( zmq_from_bus );
-    Close_zmq( Partage->com_msrv.zmq_to_master );
-    Close_zmq( zmq_from_master );
+    Zmq_Close ( Partage->com_msrv.zmq_to_bus );
+    Zmq_Close ( zmq_from_bus );
+    Zmq_Close( Partage->com_msrv.zmq_to_master );
+    Zmq_Close( zmq_from_master );
 
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );

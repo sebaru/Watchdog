@@ -96,7 +96,7 @@
             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "primary", "Voir la courbe", "Redirect", "/home/archive/"+item.tech_id+"/"+item.acronyme+"/HOUR", "chart-line", null );
+                  boutons += Bouton_actions_add ( "primary", "Voir la courbe", "Redirect", "/tech/courbe/"+item.tech_id+"/"+item.acronyme+"/HOUR", "chart-line", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer cette courbe", "Tableau_Map_Delete", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
