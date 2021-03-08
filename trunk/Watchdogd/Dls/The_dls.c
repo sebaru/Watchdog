@@ -291,8 +291,8 @@
             { Partage->com_dls.Set_Dls_Bool_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_down, bool ); }
            Partage->audit_bit_interne_per_sec++;
            bool->etat = bool->next_etat;
-           if (bool->classe == MNEMO_MONOSTABLE) bool->next_etat = FALSE;
          }
+        if (bool->classe == MNEMO_MONOSTABLE) bool->next_etat = FALSE;
         liste = g_slist_next(liste);
       }
   }
