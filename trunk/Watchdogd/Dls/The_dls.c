@@ -448,12 +448,13 @@ end:
       }
     else bool = (struct DLS_BOOL *)*bool_p;
 
-    if (bool->next_etat != valeur)
+    if (valeur == FALSE) { bool->etat = FALSE; }
+    else if (bool->etat == FALSE && bool->next_etat != TRUE)
      { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                 "%s: ligne %04d: Changing DLS_BOOL '%s:%s'=%d up %d down %d", __func__,
-                 (vars ? vars->num_ligne : -1), bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
+                 "%s: ligne %04d: Changing DLS_BOOL '%s:%s'=1", __func__,
+                 (vars ? vars->num_ligne : -1), bool->tech_id, bool->acronyme );
        Partage->audit_bit_interne_per_sec++;
-       bool->next_etat = valeur;
+       bool->next_etat = TRUE;
      }
   }
 /******************************************************************************************************************************/
