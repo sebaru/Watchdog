@@ -225,7 +225,21 @@
   };
 
  struct DLS_SYN
-  { struct CMD_TYPE_SYN_VARS syn_vars;
+  { gint syn_id;
+    gboolean bit_comm;
+    gboolean bit_defaut;
+    gboolean bit_defaut_fixe;
+    gboolean bit_alarme;
+    gboolean bit_alarme_fixe;
+    gboolean bit_veille_partielle;
+    gboolean bit_veille_totale;
+    gboolean bit_alerte;
+    gboolean bit_alerte_fixe;
+    gboolean bit_alerte_fugitive;
+    gboolean bit_derangement;
+    gboolean bit_derangement_fixe;
+    gboolean bit_danger;
+    gboolean bit_danger_fixe;
     GSList *Dls_plugins;                                                     /* Liste des plugins D.L.S associé au synoptique */
     GSList *Dls_sub_syns;                                                    /* Liste des plugins D.L.S associé au synoptique */
   };

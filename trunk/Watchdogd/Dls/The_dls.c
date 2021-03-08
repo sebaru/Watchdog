@@ -80,14 +80,14 @@
 /* Sortie: TRUE ou FALSe                                                                                                      */
 /******************************************************************************************************************************/
  gboolean Dls_get_top_alerte ( void )
-  { return( Partage->com_dls.Dls_syns->syn_vars.bit_alerte ); }
+  { return( Partage->com_dls.Dls_syns->bit_alerte ); }
 /******************************************************************************************************************************/
 /* Dls_get_top_alerte_fugitive: Remonte la valeur du plus haut bit d'alerte fugitive dans l'arbre DLS                         */
 /* Entrée: Rien                                                                                                               */
 /* Sortie: TRUE ou FALSe                                                                                                      */
 /******************************************************************************************************************************/
  gboolean Dls_get_top_alerte_fugitive ( void )
-  { return( Partage->com_dls.Dls_syns->syn_vars.bit_alerte_fugitive ); }
+  { return( Partage->com_dls.Dls_syns->bit_alerte_fugitive ); }
 /******************************************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                                        */
 /* Entrée: le temps avant, et le temps apres l'action                                                                         */
@@ -1718,21 +1718,21 @@ end:
  void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_SYN *dls_syn )
   { JsonArray *array = user_data;
     JsonNode *element = Json_node_create ();
-    Json_node_add_int  ( element, "id", dls_syn->syn_vars.syn_id );
-    Json_node_add_bool ( element, "bit_comm", dls_syn->syn_vars.bit_comm );
-    Json_node_add_bool ( element, "bit_defaut", dls_syn->syn_vars.bit_defaut );
-    Json_node_add_bool ( element, "bit_defaut_fixe", dls_syn->syn_vars.bit_defaut_fixe );
-    Json_node_add_bool ( element, "bit_alarme", dls_syn->syn_vars.bit_alarme );
-    Json_node_add_bool ( element, "bit_alarme_fixe", dls_syn->syn_vars.bit_alarme_fixe );
-    Json_node_add_bool ( element, "bit_veille_partielle", dls_syn->syn_vars.bit_veille_partielle );
-    Json_node_add_bool ( element, "bit_veille_totale", dls_syn->syn_vars.bit_veille_totale );
-    Json_node_add_bool ( element, "bit_alerte", dls_syn->syn_vars.bit_alerte );
-    Json_node_add_bool ( element, "bit_alerte_fixe", dls_syn->syn_vars.bit_alerte_fixe );
-    Json_node_add_bool ( element, "bit_alerte_fugitive", dls_syn->syn_vars.bit_alerte_fugitive );
-    Json_node_add_bool ( element, "bit_derangement", dls_syn->syn_vars.bit_derangement );
-    Json_node_add_bool ( element, "bit_derangement_fixe", dls_syn->syn_vars.bit_derangement_fixe );
-    Json_node_add_bool ( element, "bit_danger", dls_syn->syn_vars.bit_danger );
-    Json_node_add_bool ( element, "bit_danger_fixe", dls_syn->syn_vars.bit_danger_fixe );
+    Json_node_add_int  ( element, "id", dls_syn->syn_id );
+    Json_node_add_bool ( element, "bit_comm", dls_syn->bit_comm );
+    Json_node_add_bool ( element, "bit_defaut", dls_syn->bit_defaut );
+    Json_node_add_bool ( element, "bit_defaut_fixe", dls_syn->bit_defaut_fixe );
+    Json_node_add_bool ( element, "bit_alarme", dls_syn->bit_alarme );
+    Json_node_add_bool ( element, "bit_alarme_fixe", dls_syn->bit_alarme_fixe );
+    Json_node_add_bool ( element, "bit_veille_partielle", dls_syn->bit_veille_partielle );
+    Json_node_add_bool ( element, "bit_veille_totale", dls_syn->bit_veille_totale );
+    Json_node_add_bool ( element, "bit_alerte", dls_syn->bit_alerte );
+    Json_node_add_bool ( element, "bit_alerte_fixe", dls_syn->bit_alerte_fixe );
+    Json_node_add_bool ( element, "bit_alerte_fugitive", dls_syn->bit_alerte_fugitive );
+    Json_node_add_bool ( element, "bit_derangement", dls_syn->bit_derangement );
+    Json_node_add_bool ( element, "bit_derangement_fixe", dls_syn->bit_derangement_fixe );
+    Json_node_add_bool ( element, "bit_danger", dls_syn->bit_danger );
+    Json_node_add_bool ( element, "bit_danger_fixe", dls_syn->bit_danger_fixe );
     Json_array_add_element ( array, element );
   }
 /******************************************************************************************************************************/
@@ -1779,51 +1779,51 @@ end:
     while (liste)
      { struct DLS_SYN *sub_syn = liste->data;
        Dls_run_syn ( NULL, sub_syn );
-       bit_comm             &= sub_syn->syn_vars.bit_comm;
-       bit_defaut           |= sub_syn->syn_vars.bit_defaut;
-       bit_defaut_fixe      |= sub_syn->syn_vars.bit_defaut_fixe;
-       bit_alarme           |= sub_syn->syn_vars.bit_alarme;
-       bit_alarme_fixe      |= sub_syn->syn_vars.bit_alarme_fixe;
-       bit_veille_partielle |= sub_syn->syn_vars.bit_veille_partielle;
-       bit_veille_totale    &= sub_syn->syn_vars.bit_veille_totale;
-       bit_alerte           |= sub_syn->syn_vars.bit_alerte;
-       bit_alerte_fixe      |= sub_syn->syn_vars.bit_alerte_fixe;
-       bit_alerte_fugitive  |= sub_syn->syn_vars.bit_alerte_fugitive;
-       bit_derangement      |= sub_syn->syn_vars.bit_derangement;
-       bit_derangement_fixe |= sub_syn->syn_vars.bit_derangement_fixe;
-       bit_danger           |= sub_syn->syn_vars.bit_danger;
-       bit_danger_fixe      |= sub_syn->syn_vars.bit_danger_fixe;
+       bit_comm             &= sub_syn->bit_comm;
+       bit_defaut           |= sub_syn->bit_defaut;
+       bit_defaut_fixe      |= sub_syn->bit_defaut_fixe;
+       bit_alarme           |= sub_syn->bit_alarme;
+       bit_alarme_fixe      |= sub_syn->bit_alarme_fixe;
+       bit_veille_partielle |= sub_syn->bit_veille_partielle;
+       bit_veille_totale    &= sub_syn->bit_veille_totale;
+       bit_alerte           |= sub_syn->bit_alerte;
+       bit_alerte_fixe      |= sub_syn->bit_alerte_fixe;
+       bit_alerte_fugitive  |= sub_syn->bit_alerte_fugitive;
+       bit_derangement      |= sub_syn->bit_derangement;
+       bit_derangement_fixe |= sub_syn->bit_derangement_fixe;
+       bit_danger           |= sub_syn->bit_danger;
+       bit_danger_fixe      |= sub_syn->bit_danger_fixe;
        liste = liste->next;
      }
 
-    if ( bit_comm             != dls_syn->syn_vars.bit_comm ||                                  /* Detection des changements */
-         bit_defaut           != dls_syn->syn_vars.bit_defaut ||
-         bit_defaut_fixe      != dls_syn->syn_vars.bit_defaut_fixe ||
-         bit_alarme           != dls_syn->syn_vars.bit_alarme ||
-         bit_alarme_fixe      != dls_syn->syn_vars.bit_alarme_fixe ||
-         bit_veille_partielle != dls_syn->syn_vars.bit_veille_partielle ||
-         bit_veille_totale    != dls_syn->syn_vars.bit_veille_totale ||
-         bit_alerte           != dls_syn->syn_vars.bit_alerte ||
-         bit_alerte_fixe      != dls_syn->syn_vars.bit_alerte_fixe ||
-         bit_alerte_fugitive  != dls_syn->syn_vars.bit_alerte_fugitive ||
-         bit_derangement      != dls_syn->syn_vars.bit_derangement ||
-         bit_derangement_fixe != dls_syn->syn_vars.bit_derangement_fixe ||
-         bit_danger           != dls_syn->syn_vars.bit_danger ||
-         bit_danger_fixe      != dls_syn->syn_vars.bit_danger_fixe )
-     { dls_syn->syn_vars.bit_comm             = bit_comm;                               /* Recopie et envoi aux threads SSRV */
-       dls_syn->syn_vars.bit_defaut           = bit_defaut;
-       dls_syn->syn_vars.bit_defaut_fixe      = bit_defaut_fixe;
-       dls_syn->syn_vars.bit_alarme           = bit_alarme;
-       dls_syn->syn_vars.bit_alarme_fixe      = bit_alarme_fixe;
-       dls_syn->syn_vars.bit_veille_partielle = bit_veille_partielle;
-       dls_syn->syn_vars.bit_veille_totale    = bit_veille_totale;
-       dls_syn->syn_vars.bit_alerte           = bit_alerte;
-       dls_syn->syn_vars.bit_alerte_fixe      = bit_alerte_fixe;
-       dls_syn->syn_vars.bit_alerte_fugitive  = bit_alerte_fugitive;
-       dls_syn->syn_vars.bit_derangement      = bit_derangement;
-       dls_syn->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
-       dls_syn->syn_vars.bit_danger           = bit_danger;
-       dls_syn->syn_vars.bit_danger_fixe      = bit_danger_fixe;
+    if ( bit_comm             != dls_syn->bit_comm ||                                  /* Detection des changements */
+         bit_defaut           != dls_syn->bit_defaut ||
+         bit_defaut_fixe      != dls_syn->bit_defaut_fixe ||
+         bit_alarme           != dls_syn->bit_alarme ||
+         bit_alarme_fixe      != dls_syn->bit_alarme_fixe ||
+         bit_veille_partielle != dls_syn->bit_veille_partielle ||
+         bit_veille_totale    != dls_syn->bit_veille_totale ||
+         bit_alerte           != dls_syn->bit_alerte ||
+         bit_alerte_fixe      != dls_syn->bit_alerte_fixe ||
+         bit_alerte_fugitive  != dls_syn->bit_alerte_fugitive ||
+         bit_derangement      != dls_syn->bit_derangement ||
+         bit_derangement_fixe != dls_syn->bit_derangement_fixe ||
+         bit_danger           != dls_syn->bit_danger ||
+         bit_danger_fixe      != dls_syn->bit_danger_fixe )
+     { dls_syn->bit_comm             = bit_comm;                               /* Recopie et envoi aux threads SSRV */
+       dls_syn->bit_defaut           = bit_defaut;
+       dls_syn->bit_defaut_fixe      = bit_defaut_fixe;
+       dls_syn->bit_alarme           = bit_alarme;
+       dls_syn->bit_alarme_fixe      = bit_alarme_fixe;
+       dls_syn->bit_veille_partielle = bit_veille_partielle;
+       dls_syn->bit_veille_totale    = bit_veille_totale;
+       dls_syn->bit_alerte           = bit_alerte;
+       dls_syn->bit_alerte_fixe      = bit_alerte_fixe;
+       dls_syn->bit_alerte_fugitive  = bit_alerte_fugitive;
+       dls_syn->bit_derangement      = bit_derangement;
+       dls_syn->bit_derangement_fixe = bit_derangement_fixe;
+       dls_syn->bit_danger           = bit_danger;
+       dls_syn->bit_danger_fixe      = bit_danger_fixe;
        JsonNode *RootNode = Json_node_create ();
        JsonArray *array   = Json_node_add_array ( RootNode, "syn_vars" );
        Dls_syn_vars_to_json ( array, dls_syn );

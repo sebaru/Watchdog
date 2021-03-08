@@ -90,7 +90,7 @@
 /******************************************************************************************************************************/
  static struct DLS_SYN *Dls_search_syn_reel ( struct DLS_SYN *syn_tree, gint id )
   { GSList *liste;
-    if (syn_tree->syn_vars.syn_id == id) return(syn_tree);
+    if (syn_tree->syn_id == id) return(syn_tree);
 
     liste = syn_tree->Dls_sub_syns;
     while (liste)
@@ -383,7 +383,7 @@
 /******************************************************************************************************************************/
  static void Dls_Add_plugin_to_dls_syn ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { struct DLS_SYN *dls_syn = user_data;
-    if (plugin->syn_id == dls_syn->syn_vars.syn_id)
+    if (plugin->syn_id == dls_syn->syn_id)
      { dls_syn->Dls_plugins = g_slist_append( dls_syn->Dls_plugins, plugin ); }
   }
 /******************************************************************************************************************************/
@@ -399,7 +399,7 @@
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error for id '%s'", __func__, id );
        return(NULL);
      }
-    dls_syn->syn_vars.syn_id = id;
+    dls_syn->syn_id = id;
 
     Dls_foreach_plugins ( dls_syn, Dls_Add_plugin_to_dls_syn );
 
@@ -427,7 +427,7 @@
        dls_syn->Dls_sub_syns = g_slist_remove ( dls_syn->Dls_sub_syns, sub_syn );
        Dls_arbre_dls_syn_erase_syn ( sub_syn );
      }
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Arbre syn '%d' erased", dls_syn->syn_vars.syn_id );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Arbre syn '%d' erased", dls_syn->syn_id );
     g_free(dls_syn);
   }
 /******************************************************************************************************************************/
