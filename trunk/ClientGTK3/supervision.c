@@ -103,8 +103,13 @@
 /* Entrée: La page d'information synoptique                                                                                   */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Menu_acquitter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
-  { //Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACQ_SYN, (gchar *)&infos->syn.id, sizeof(gint) );
+ static void Menu_acquitter_synoptique( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_SUPERVISION *infos = page->infos;
+    JsonBuilder *builder = Json_create ();
+    if (builder == NULL) return;
+
+    Json_add_int    ( builder, "syn_id",   infos->syn_id );
+    Envoi_json_au_serveur ( page->client, "POST", builder, "/api/syn/ack", NULL );
   }
 /******************************************************************************************************************************/
 /* Menu_acquitter_synoptique: Envoi une commande d'acquit du synoptique en cours de visu                                      */
@@ -287,7 +292,7 @@
   { printf("%s\n", __func__ );
   }
  static void Traiter_visuel_ws_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
-  { struct PAGE_NOTEBOOK *page = user_data;
+  { /*struct PAGE_NOTEBOOK *page = user_data;*/
     printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
   }
 /******************************************************************************************************************************/
@@ -414,7 +419,7 @@
     infos->bouton_acq = Bouton ( "Acquitter", "emblem-default", "Acquitte les anomalies" );
     gtk_box_pack_start( GTK_BOX(boite), infos->bouton_acq, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(infos->bouton_acq), "clicked",
-                              G_CALLBACK(Menu_acquitter_synoptique), infos );
+                              G_CALLBACK(Menu_acquitter_synoptique), page );
 
 /******************************************************* Horloges *************************************************************/
     bouton = Bouton ( "Horloges", "appointment-new", "Liste les horloges de la page" );
