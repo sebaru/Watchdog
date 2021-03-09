@@ -40,7 +40,7 @@
 
  #include "watchdogd.h"
 
- #define DLS_LIBRARY_VERSION  "20210307"
+ #define DLS_LIBRARY_VERSION  "20210308"
 
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
@@ -291,8 +291,8 @@
             { Partage->com_dls.Set_Dls_Bool_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_Bool_Edge_down, bool ); }
            Partage->audit_bit_interne_per_sec++;
            bool->etat = bool->next_etat;
-           if (bool->classe == MNEMO_MONOSTABLE) bool->next_etat = FALSE;
          }
+        if (bool->classe == MNEMO_MONOSTABLE) bool->next_etat = FALSE;
         liste = g_slist_next(liste);
       }
   }
@@ -448,12 +448,15 @@ end:
       }
     else bool = (struct DLS_BOOL *)*bool_p;
 
-    if (bool->next_etat != valeur)
-     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                 "%s: ligne %04d: Changing DLS_BOOL '%s:%s'=%d up %d down %d", __func__,
-                 (vars ? vars->num_ligne : -1), bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
-       Partage->audit_bit_interne_per_sec++;
-       bool->next_etat = valeur;
+    if (valeur == FALSE) { bool->etat = FALSE; }
+    else
+     { if (bool->etat == FALSE)
+        { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                    "%s: ligne %04d: Changing DLS_BOOL '%s:%s'=1", __func__,
+                    (vars ? vars->num_ligne : -1), bool->tech_id, bool->acronyme );
+          Partage->audit_bit_interne_per_sec++;
+        }
+       bool->next_etat = TRUE;
      }
   }
 /******************************************************************************************************************************/

@@ -292,7 +292,11 @@
      { struct DLS_BOOL *bool = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(bool->tech_id, plugin->tech_id))
-        { bool->etat=bool->next_etat=FALSE; }
+        {      if (bool->classe == MNEMO_BISTABLE)
+           { Dls_data_set_BI   ( &plugin->vars, bool->tech_id, bool->acronyme, (gpointer)&bool, FALSE ); }
+          else if (bool->classe == MNEMO_MONOSTABLE)
+           { Dls_data_set_MONO ( &plugin->vars, bool->tech_id, bool->acronyme, (gpointer)&bool, FALSE ); }
+        }
      }
 
     liste_bit = Partage->Dls_data_WATCHDOG;                                          /* Decharge tous les watchdogs du module */
