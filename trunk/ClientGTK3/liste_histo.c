@@ -481,6 +481,7 @@ again:
                                                          "text", COLONNE_DATE_CREATE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_DATE_CREATE);
+    gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(store), COLONNE_DATE_CREATE, GTK_SORT_ASCENDING );
     gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
