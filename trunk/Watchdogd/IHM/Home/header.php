@@ -64,7 +64,8 @@
                       cursor: pointer;
                     }
 
-        .wtd-courbe { width: auto;
+	.wtd-courbe { background-color: white;
+                      width: auto;
                       height: 300px;
                       cursor: pointer;
                     }

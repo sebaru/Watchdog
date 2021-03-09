@@ -164,7 +164,7 @@
            { $.each ( Response.tableaux, function (i, tableau)
               { $('#tableaux').append("<hr>");
                 var id = "idTableau-"+tableau.id;
-                $('#tableaux').append("<canvas id='"+id+"'></canvas>").addClass("col");
+                $('#tableaux').append( $("<div></div>").append("<canvas id='"+id+"'></canvas>").addClass("col wtd-courbe m-1") );
                 maps = Response.tableaux_map.filter ( function (item) { return(item.tableau_id==tableau.id) } );
                 Charger_plusieurs_courbes ( id, maps, "HOUR" );
               });
