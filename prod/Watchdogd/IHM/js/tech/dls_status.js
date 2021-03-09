@@ -75,9 +75,11 @@
             }
           },
           { "data": null, title:"Alerte",  "className": "text-center align-middle", "render": function (item)
-            { if (item.bit_alerte_fixe==true)
+            { if (item.bit_alerte==true)
                { return( Bouton ( "danger", "Alerte !", null, null, "OUI" ) ); }
-              else if (item.bit_alerte==true)
+              else if (item.bit_alerte_fugitive==true)
+               { return( Bouton ( "danger", "Alerte Fugitive", null, null, "Fugitive" ) ); }
+              else if (item.bit_alerte_fixe==true)
                { return( Bouton ( "warning", "Alerte Fixe", null, null, "Fixe" ) ); }
               else
                { return( Bouton ( "outline-secondary", "Pas d'alerte", null, null, "Non" ) ); }

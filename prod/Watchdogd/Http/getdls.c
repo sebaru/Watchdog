@@ -68,6 +68,7 @@
 
     Json_node_add_bool   ( element, "bit_alerte",           dls->vars.bit_alerte );
     Json_node_add_bool   ( element, "bit_alerte_fixe",      dls->vars.bit_alerte_fixe );
+    Json_node_add_bool   ( element, "bit_alerte_fugitive",  dls->vars.bit_alerte_fugitive );
     Json_node_add_bool   ( element, "bit_veille",           dls->vars.bit_veille );
 
     Json_node_add_bool   ( element, "bit_derangement",      dls->vars.bit_derangement );
