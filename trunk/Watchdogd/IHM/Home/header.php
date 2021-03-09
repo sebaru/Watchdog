@@ -64,6 +64,11 @@
                       cursor: pointer;
                     }
 
+        .wtd-courbe { width: auto;
+                      height: 300px;
+                      cursor: pointer;
+                    }
+
         .wtd-vignette
           { width: 24px;
             height: 24px;
