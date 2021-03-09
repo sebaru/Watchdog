@@ -40,7 +40,7 @@
 
  #include "watchdogd.h"
 
- #define DLS_LIBRARY_VERSION  "20210307"
+ #define DLS_LIBRARY_VERSION  "20210308"
 
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
@@ -449,11 +449,13 @@ end:
     else bool = (struct DLS_BOOL *)*bool_p;
 
     if (valeur == FALSE) { bool->etat = FALSE; }
-    else if (bool->etat == FALSE && bool->next_etat != TRUE)
-     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                 "%s: ligne %04d: Changing DLS_BOOL '%s:%s'=1", __func__,
-                 (vars ? vars->num_ligne : -1), bool->tech_id, bool->acronyme );
-       Partage->audit_bit_interne_per_sec++;
+    else
+     { if (bool->etat == FALSE)
+        { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                    "%s: ligne %04d: Changing DLS_BOOL '%s:%s'=1", __func__,
+                    (vars ? vars->num_ligne : -1), bool->tech_id, bool->acronyme );
+          Partage->audit_bit_interne_per_sec++;
+        }
        bool->next_etat = TRUE;
      }
   }
