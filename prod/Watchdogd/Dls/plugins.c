@@ -533,6 +533,30 @@
  void Dls_acquitter_plugin ( gchar *tech_id )
   { Dls_foreach_plugins ( tech_id, Dls_acquitter_plugin_reel ); }
 /******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_acquitter_synoptique_reel ( gpointer user_data, struct DLS_SYN *syn )
+  { GSList *plugins = syn->Dls_plugins;
+    gint syn_id = GPOINTER_TO_INT(user_data);
+    if (syn_id != syn->syn_id) return;
+    while (plugins)
+     { struct DLS_PLUGIN *plugin = plugins->data;
+       Info_new( Config.log, plugin->vars.debug, LOG_NOTICE,
+                 "%s: '%s' acquitté ('%s')", __func__, plugin->tech_id, plugin->shortname );
+       plugin->vars.bit_acquit = TRUE;
+       plugins=g_slist_next(plugins);
+     }
+  }
+/******************************************************************************************************************************/
+/* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
+/* Entrée: l'ID du plugin                                                                                                     */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Dls_acquitter_synoptique ( gint syn_id )
+  { Dls_foreach_syns ( GINT_TO_POINTER(syn_id), Dls_acquitter_synoptique_reel ); }
+/******************************************************************************************************************************/
 /* Proto_compiler_source_dls: Compilation de la source DLS                                                                    */
 /* Entrée: reset=1 s'il faut resetter le plugin aprÃ¨s compil, l'id associé, et le buffer de sortie                            */
 /* Sortie: code d'erreur ou 0 si OK                                                                                           */

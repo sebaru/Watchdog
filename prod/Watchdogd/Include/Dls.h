@@ -293,6 +293,7 @@
  extern void Dls_arbre_dls_syn_erase ( void );
  extern void Dls_recalculer_arbre_dls_syn ( void );
  extern void Dls_acquitter_plugin ( gchar *tech_id );
+ extern void Dls_acquitter_synoptique ( gint syn_id );
  extern struct DLS_SYN *Dls_search_syn ( gint id );
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */

@@ -578,4 +578,27 @@
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
+/******************************************************************************************************************************/
+/* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Http_traiter_syn_ack ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                             SoupClientContext *client, gpointer user_data)
+  { if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 0 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
+
+    gint syn_id  = Json_get_int( request, "syn_id" );
+
+    Dls_acquitter_synoptique(syn_id);
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    json_node_unref(request);
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
