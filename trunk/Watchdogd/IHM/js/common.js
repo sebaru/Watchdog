@@ -14,6 +14,7 @@
 
     if (ContentType != null) { xhr.setRequestHeader('Content-type', ContentType ); }
 
+    xhr.timeout = 5000; // durée en millisecondes
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
        $(".ClassLoadingSpinner").hide();
@@ -29,6 +30,7 @@
               if (fonction_nok != null) fonction_nok(Response);
             }
      }
+    xhr.ontimeout = function() { console.log("XHR timeout for "+URL); }
     xhr.send(parametre);
   }
 /************************************ Controle de saisie avant envoi **********************************************************/
