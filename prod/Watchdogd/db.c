@@ -101,6 +101,8 @@
 
     reconnect = 1;
     mysql_options( db->mysql, MYSQL_OPT_RECONNECT, &reconnect );
+    gint timeout = 10;
+    mysql_options( db->mysql, MYSQL_OPT_CONNECT_TIMEOUT, &timeout );                         /* Timeout en cas de non reponse */
     mysql_options( db->mysql, MYSQL_SET_CHARSET_NAME, (void *)"utf8" );
     if ( ! mysql_real_connect( db->mysql, host, username, password, database, port, NULL, (multi_statements ? CLIENT_MULTI_STATEMENTS : 0) ) )
      { Info_new( Config.log, Config.log_db, LOG_ERR,
@@ -232,7 +234,7 @@
           Json_array_add_element ( array, element );
         }
      }
-    else 
+    else
      { while ( (db->row = mysql_fetch_row(db->result)) != NULL )
         { for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
            { Json_node_add_string( RootNode, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
