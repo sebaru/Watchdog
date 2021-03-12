@@ -264,6 +264,141 @@
     Updater_les_visuels ( page, element );
   }
 /******************************************************************************************************************************/
+/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Updater_un_syn_vars( struct TRAME_ITEM_PASS *trame_pass, JsonNode *syn_vars )
+  { printf ("%s: set syn_vars for %d with comm=%d\n", __func__, Json_get_int ( syn_vars, "id" ), Json_get_bool ( syn_vars, "bit_comm" ) );
+    if ( Json_get_bool ( syn_vars, "bit_comm" ) == FALSE)  /**********************  Vignette Activite *************************/
+     { Trame_set_svg ( trame_pass->item_1, "kaki", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_alarme" ) == TRUE)
+     { Trame_set_svg ( trame_pass->item_1, "rouge", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_alarme_fixe" ) == TRUE)
+     { Trame_set_svg ( trame_pass->item_1, "rouge", 0, FALSE ); }
+    else if (Json_get_bool ( syn_vars, "bit_defaut" ) == TRUE)
+     { Trame_set_svg ( trame_pass->item_1, "jaune", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_defaut_fixe" ) == TRUE)
+     { Trame_set_svg ( trame_pass->item_1, "jaune", 0, FALSE ); }
+    else
+     { Trame_set_svg ( trame_pass->item_1, "vert", 0, FALSE ); }
+
+    if (Json_get_bool ( syn_vars, "bit_comm" ) == FALSE)    /****************** Vignette Securite des Personnes ***************/
+     { Trame_set_svg ( trame_pass->item_2, "kaki", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_alerte" ) == TRUE)
+     { Trame_set_svg ( trame_pass->item_2, "rouge", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_alerte_fugitive" ) == TRUE)
+     { Trame_set_svg ( trame_pass->item_2, "rouge", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_alerte_fixe" ) == TRUE)
+     { Trame_set_svg ( trame_pass->item_2, "rouge", 0, FALSE ); }
+    else if (Json_get_bool ( syn_vars, "bit_veille_totale" ) == TRUE)
+     { Trame_set_svg ( trame_pass->item_2, "vert", 0, FALSE ); }
+    else if (Json_get_bool ( syn_vars, "bit_veille_partielle " )== TRUE)
+     { Trame_set_svg ( trame_pass->item_2, "orange", 0, FALSE ); }
+    else
+     { Trame_set_svg ( trame_pass->item_2, "blanc", 0, FALSE ); }
+
+    if (Json_get_bool ( syn_vars, "bit_comm" ) == FALSE)     /******************* Vignette Securite des Personnes *************/
+     { Trame_set_svg ( trame_pass->item_3, "kaki", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_danger" ) == TRUE)
+     { Trame_set_svg ( trame_pass->item_3, "rouge", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_danger_fixe" ) == TRUE)
+     { Trame_set_svg ( trame_pass->item_3, "rouge", 0, FALSE ); }
+    else if (Json_get_bool ( syn_vars, "bit_derangement" ) == TRUE)
+     { Trame_set_svg ( trame_pass->item_3, "jaune", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_derangement_fixe" ) == TRUE)
+     { Trame_set_svg ( trame_pass->item_3, "jaune", 0, FALSE ); }
+    else
+     { Trame_set_svg ( trame_pass->item_3, "vert", 0, FALSE ); }
+  }
+/******************************************************************************************************************************/
+/* Changer_etat_passerelle: Changement d'etat d'une passerelle (toutes les vignettes)                                         */
+/* Entrée: une reference sur la passerelle, l'etat attendu                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Updater_etiquette( struct TYPE_INFO_SUPERVISION *infos, JsonNode *syn_vars )
+  { printf ("%s: set syn_vars for %d with comm=%d\n", __func__, Json_get_int ( syn_vars, "id" ), Json_get_bool ( syn_vars, "bit_comm" ) );
+    if ( Json_get_bool ( syn_vars, "bit_comm" ) == FALSE)  /**********************  Vignette Activite *************************/
+     { Trame_set_svg ( infos->Trame->Vignette_activite, "kaki", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_alarme" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_activite, "rouge", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_alarme_fixe" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_activite, "rouge", 0, FALSE ); }
+    else if (Json_get_bool ( syn_vars, "bit_defaut" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_activite, "jaune", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_defaut_fixe" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_activite, "jaune", 0, FALSE ); }
+    else
+     { Trame_set_svg ( infos->Trame->Vignette_activite, "vert", 0, FALSE ); }
+
+    if (Json_get_bool ( syn_vars, "bit_comm" ) == FALSE)    /****************** Vignette Securite des Personnes ***************/
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "kaki", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_alerte" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "rouge", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_alerte_fugitive" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "rouge", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_alerte_fixe" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "rouge", 0, FALSE ); }
+    else if (Json_get_bool ( syn_vars, "bit_veille_totale" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "vert", 0, FALSE ); }
+    else if (Json_get_bool ( syn_vars, "bit_veille_partielle" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "orange", 0, FALSE ); }
+    else
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "blanc", 0, FALSE ); }
+
+    if (Json_get_bool ( syn_vars, "bit_comm" ) == FALSE)     /******************* Vignette Securite des Personnes *************/
+     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "kaki", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_danger" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "rouge", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_danger_fixe" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "rouge", 0, FALSE ); }
+    else if (Json_get_bool ( syn_vars, "bit_derangement" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "jaune", 0, TRUE ); }
+    else if (Json_get_bool ( syn_vars, "bit_derangement_fixe" ) == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "jaune", 0, FALSE ); }
+    else
+     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "vert", 0, FALSE ); }
+ }
+/******************************************************************************************************************************/
+/* Updater_les_syn_vars: Rafraichit toutes les passerelles de la page en fonction des syn_vars recu                           */
+/* Entrée: la page actuelle, les syn_vars recus                                                                               */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Updater_les_syn_vars( struct PAGE_NOTEBOOK *page, JsonNode *syn_vars )
+  { GList *objet;
+printf ("%s pour syn_id=%d\n", __func__, Json_get_int ( syn_vars, "id" ) );
+    struct TYPE_INFO_SUPERVISION *infos = page->infos;
+
+    if ( Json_get_int ( syn_vars, "id" ) == Json_get_int ( infos->syn, "id" ) )
+     { Updater_etiquette ( infos, syn_vars ); }
+
+    objet = infos->Trame->trame_items;
+    while (objet)
+     { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
+        { case TYPE_PASSERELLE:
+                { struct TRAME_ITEM_PASS *trame_pass = objet->data;
+                  if (trame_pass->pass->syn_cible_id == Json_get_int ( syn_vars, "id" ))
+                   { Updater_un_syn_vars( trame_pass, syn_vars );
+                   }
+                }
+               break;
+          default: break;
+         }
+        objet=objet->next;
+     }
+  }
+/******************************************************************************************************************************/
+/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Updater_les_syn_vars_by_array (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct PAGE_NOTEBOOK *page = user_data;
+    if (!page) return;
+printf ("%s\n", __func__ );
+    Updater_les_syn_vars ( page, element );
+  }
+/******************************************************************************************************************************/
 /* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MOTIF                                 */
 /* Entrée: les parametres libsoup                                                                                             */
 /* Sortie: néant                                                                                                              */
@@ -437,6 +572,7 @@
     json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),      Afficher_une_camera, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),      Afficher_un_cadran, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "etat_visuels" ), Updater_les_visuels_by_array, page );
+    json_array_foreach_element ( Json_get_array ( infos->syn, "syn_vars" ),     Updater_les_syn_vars_by_array, page );
     gtk_widget_show_all( page->child );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(page->client->Notebook), page_num );
     gchar chaine[256];
@@ -444,164 +580,6 @@
     soup_session_websocket_connect_async ( client->connexion, soup_message_new ( "GET", chaine ),
                                            NULL, NULL, g_cancellable_new(), Traiter_visuel_ws_on_connect, page );
   }
-
-#ifdef bouh
-/******************************************************************************************************************************/
-/* Changer_etat_passerelle: Changement d'etat d'une passerelle (toutes les vignettes)                                         */
-/* Entrée: une reference sur la passerelle, l'etat attendu                                                                    */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Changer_etat_passerelle( struct TRAME_ITEM_PASS *trame_pass, struct CMD_TYPE_SYN_VARS *vars )
-  { printf("Changer_etat_passerelle syn %d!\n", vars->syn_id );
-
-    if (vars->bit_comm_out == TRUE)  /****************************  Vignette Activite *****************************************/
-     { Trame_set_svg ( trame_pass->item_1, "kaki", 0, TRUE ); }
-    else if (vars->bit_alarme == TRUE)
-     { Trame_set_svg ( trame_pass->item_1, "rouge", 0, TRUE ); }
-    else if (vars->bit_alarme_fixe == TRUE)
-     { Trame_set_svg ( trame_pass->item_1, "rouge", 0, FALSE ); }
-    else if (vars->bit_defaut == TRUE)
-     { Trame_set_svg ( trame_pass->item_1, "jaune", 0, TRUE ); }
-    else if (vars->bit_defaut_fixe == TRUE)
-     { Trame_set_svg ( trame_pass->item_1, "jaune", 0, FALSE ); }
-    else
-     { Trame_set_svg ( trame_pass->item_1, "vert", 0, FALSE ); }
-
-
-    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Personnes **************************/
-     { Trame_set_svg ( trame_pass->item_2, "kaki", 0, TRUE ); }
-    else if (vars->bit_alerte == TRUE)
-     { Trame_set_svg ( trame_pass->item_2, "rouge", 0, TRUE ); }
-    else if (vars->bit_alerte_fixe == TRUE)
-     { Trame_set_svg ( trame_pass->item_2, "rouge", 0, FALSE ); }
-    else if (vars->bit_veille_totale == TRUE)
-     { Trame_set_svg ( trame_pass->item_2, "vert", 0, FALSE ); }
-    else if (vars->bit_veille_partielle == TRUE)
-     { Trame_set_svg ( trame_pass->item_2, "orange", 0, FALSE ); }
-    else
-     { Trame_set_svg ( trame_pass->item_2, "blanc", 0, FALSE ); }
-
-    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Biens ******************************/
-     { Trame_set_svg ( trame_pass->item_3, "kaki", 0, TRUE ); }
-    else if (vars->bit_danger == TRUE)
-     { Trame_set_svg ( trame_pass->item_3, "rouge", 0, TRUE ); }
-    else if (vars->bit_danger_fixe == TRUE)
-     { Trame_set_svg ( trame_pass->item_3, "rouge", 0, FALSE ); }
-    else if (vars->bit_derangement == TRUE)
-     { Trame_set_svg ( trame_pass->item_3, "jaune", 0, TRUE ); }
-    else if (vars->bit_derangement_fixe == TRUE)
-     { Trame_set_svg ( trame_pass->item_3, "jaune", 0, FALSE ); }
-    else
-     { Trame_set_svg ( trame_pass->item_3, "vert", 0, FALSE ); }
- }
-/******************************************************************************************************************************/
-/* Changer_etat_passerelle: Changement d'etat d'une passerelle (toutes les vignettes)                                         */
-/* Entrée: une reference sur la passerelle, l'etat attendu                                                                    */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Changer_etat_etiquette( struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_SYN_VARS *vars )
-  { printf("Changer_etat_etiquette syn %d!\n", vars->syn_id );
-    if (vars->bit_comm_out == TRUE)  /****************************  Vignette Activite *****************************************/
-     { Trame_set_svg ( infos->Trame->Vignette_activite, "kaki", 0, TRUE ); }
-    else if (vars->bit_alarme == TRUE)
-     { Trame_set_svg ( infos->Trame->Vignette_activite, "rouge", 0, TRUE ); }
-    else if (vars->bit_alarme_fixe == TRUE)
-     { Trame_set_svg ( infos->Trame->Vignette_activite, "rouge", 0, FALSE ); }
-    else if (vars->bit_defaut == TRUE)
-     { Trame_set_svg ( infos->Trame->Vignette_activite, "jaune", 0, TRUE ); }
-    else if (vars->bit_defaut_fixe == TRUE)
-     { Trame_set_svg ( infos->Trame->Vignette_activite, "jaune", 0, FALSE ); }
-    else
-     { Trame_set_svg ( infos->Trame->Vignette_activite, "vert", 0, FALSE ); }
-
-    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Biens ******************************/
-     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "kaki", 0, TRUE ); }
-    else if (vars->bit_alerte == TRUE)
-     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "rouge", 0, TRUE ); }
-    else if (vars->bit_alerte_fixe == TRUE)
-     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "rouge", 0, FALSE ); }
-    else if (vars->bit_veille_totale == TRUE)
-     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "vert", 0, FALSE ); }
-    else if (vars->bit_veille_partielle == TRUE)
-     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "orange", 0, FALSE ); }
-    else
-     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "blanc", 0, FALSE ); }
-
-    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Personnes **************************/
-     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "kaki", 0, TRUE ); }
-    else if (vars->bit_danger == TRUE)
-     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "rouge", 0, TRUE ); }
-    else if (vars->bit_danger_fixe == TRUE)
-     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "rouge", 0, FALSE ); }
-    else if (vars->bit_derangement == TRUE)
-     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "jaune", 0, TRUE ); }
-    else if (vars->bit_derangement_fixe == TRUE)
-     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "jaune", 0, FALSE ); }
-    else
-     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "vert", 0, FALSE ); }
- }
-
-/******************************************************************************************************************************/
-/* Proto_set_syn_vars: Mets a jour les variables de run d'un synoptique                                                       */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Proto_set_syn_vars( struct CMD_TYPE_SYN_VARS *syn_vars )
-  { struct TYPE_INFO_SUPERVISION *infos;
-    struct PAGE_NOTEBOOK *page;
-    GdkColor color;
-    GList *objet;
-    GList *liste;
-    gint cpt;
-
-printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d, der=%d, dan=%d\n",syn_vars->syn_id,
-                   syn_vars->bit_comm_out, syn_vars->bit_defaut, syn_vars->bit_alarme,
-                   syn_vars->bit_veille_partielle, syn_vars->bit_veille_totale, syn_vars->bit_alerte,
-                   syn_vars->bit_derangement, syn_vars->bit_danger );
-    cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */
-    liste = client->Liste_pages;
-    while(liste)                                                                  /* On parcours toutes les pages SUPERVISION */
-     { page = (struct PAGE_NOTEBOOK *)liste->data;
-       if (page->type != TYPE_PAGE_SUPERVISION) { liste = liste->next; continue; }
-
-       infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
-
-       if (infos->syn.id == syn_vars->syn_id)
-        {                                                     /* Positionnement de la couleur du bouton d'acquit du synotique */
-          if (syn_vars->bit_defaut || syn_vars->bit_alarme || syn_vars->bit_alerte ||
-              syn_vars->bit_derangement || syn_vars->bit_danger)
-           { //gdk_color_parse ("blue", &color);
-             //gtk_widget_override_background_color ( infos->bouton_acq, GTK_STATE_NORMAL, &color );
-           } else
-           { //gtk_widget_override_background_color ( infos->bouton_acq, GTK_STATE_NORMAL, NULL );
-           }
-
-           Changer_etat_etiquette( infos, syn_vars );                          /* Positionnement des vignettes du synoptiques */
-        }
-
-       objet = infos->Trame->trame_items;
-       while (objet)
-        { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
-           { case TYPE_PASSERELLE:
-                   { struct TRAME_ITEM_PASS *trame_pass = objet->data;
-                     if (trame_pass->pass->syn_cible_id == syn_vars->syn_id)
-                      { Changer_etat_passerelle( trame_pass, syn_vars );
-                        cpt++;                                                            /* Nous updatons un motif de plus ! */
-                      }
-                   }
-                  break;
-             default: break;
-           }
-          objet=objet->next;
-        }
-       liste = liste->next;
-     }
-
-    if (!cpt)                                 /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
-     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_SYN_VARS_UNKNOWN, (gchar *)syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
-     }
-  }
-#endif
 /******************************************************************************************************************************/
 /* Demander_synoptique_supervision: Envoie une demande d'affichage synoptique au serveur                                      */
 /* Entrée/Sortie: l'instance cliente, l'id du synoptique a demander                                                           */
