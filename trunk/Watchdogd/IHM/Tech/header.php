@@ -156,6 +156,7 @@
           <a class="dropdown-item" href="/tech/process"><i class="fas fa-microchip text-primary"></i> <span>Liste des Processus</span></a>
           <a class="dropdown-item" href="/tech/msrv"><i class="fas fa-crown text-danger"></i> <span>Maintenance</span></a>
           <a class="dropdown-item" href="/tech/archive"><i class="fas fa-database text-secondary"></i> <span>Archivage</span></a>
+          <a class="dropdown-item" href="/tech/dashboard_courbes"> <i class="fas fa-chart-line text-secondary"></i> <span>Courbes</span> </a>
         </div>
       </li>
 
