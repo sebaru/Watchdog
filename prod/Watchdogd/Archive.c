@@ -154,7 +154,7 @@
  void Run_arch ( void )
   { static gpointer arch_request_number;
     struct DB *db;
-    gint top, last_delete, nb_enreg;
+    gint top, last_delete, last_count, nb_enreg;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
@@ -180,6 +180,11 @@ reload:
           else
            { pthread_detach( tid ); }                                /* On le detache pour qu'il puisse se terminer tout seul */
           last_delete=Partage->top;
+        }
+
+       if ( (Partage->top - last_count) >= 600 )                                                       /* Une fois par minute */
+        { Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 1.0*Partage->com_arch.taille_arch, TRUE );
+          last_count=Partage->top;
         }
 
        if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
@@ -214,7 +219,6 @@ reload:
        Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
                  nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch );
        Libere_DB_SQL( &db );                                                                               /* pour historique */
-       Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 1.0*Partage->com_arch.taille_arch, TRUE );
      }
 
     if (Partage->com_arch.Thread_reload)                                                          /* On a recu reload ?? */

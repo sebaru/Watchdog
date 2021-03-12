@@ -599,7 +599,7 @@ reload:
                if (!strcasecmp( zmq_tag, "DLS_HISTO" ))    { Http_ws_send_to_all( request ); }
           else if (!strcasecmp( zmq_tag, "DLS_VISUEL" ))   { Http_ws_send_to_all( request ); }
           else if (!strcasecmp( zmq_tag, "SET_SYN_VARS" )) { Http_ws_send_to_all( request ); }
-          else json_node_unref ( request );
+          json_node_unref ( request );
         }
 
        if ( Partage->top > last_pulse + 50 )

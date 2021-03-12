@@ -183,6 +183,7 @@
           <li><h6 class="card-text">DB Hostname: <span id="idArchDBHostname">-</span></h6></li>
           <li><h6 class="card-text">DB Port: <span id="idArchDBPort">-</span></h6></li>
           <li><h6 class="card-text">DB Database: <span id="idArchDBDatabase">-</span></h6></li>
+          <li><h6 class="card-text">Nbr Enreg: <span id="idArchDBNbrEnreg">-</span></h6></li>
         </ul>
 <!--<h3 class="card-text text-center"><strong>56</h3>-->
     </div>
@@ -190,34 +191,6 @@
   </div>
 </div>
 </div>
-
-
-<hr>
-
-  <div class="row p-1">
-      <canvas id="idCourbeDlsTourParSec" class="courbe-dashboard border border-info"></canvas>
-  </div>
-
-  <div class="row p-1">
-      <canvas id="idCourbeDlsBitParSec" class="courbe-dashboard border border-info"></canvas>
-  </div>
-
-  <div class="row p-1">
-   <canvas id="idCourbeDlsAttente" class="courbe-dashboard border border-info"></canvas>
-  </div>
-
-  <div class="row p-1">
-   <canvas id="idCourbeNbArchive" class="courbe-dashboard border border-info"></canvas>
-  </div>
-
-  <div class="row p-1">
-   <canvas id="idCourbeDlsNbMSG" class="courbe-dashboard border border-info"></canvas>
-  </div>
-
-  <div class="row p-1">
-   <canvas id="idCourbeDlsNbVISUEL" class="courbe-dashboard border border-info"></canvas>
-  </div>
-
 
 <script src="/js/tech/dashboard.js" type="text/javascript"></script>
 <!-- Container -->

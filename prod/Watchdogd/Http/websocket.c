@@ -48,27 +48,9 @@
 /* Entrée: des infos sur le paquet à envoyer                                                                                  */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Envoyer_ws_au_client ( struct WS_CLIENT_SESSION *client, JsonBuilder *builder )
-  { gsize taille_buf;
-    gchar *buf = Json_get_buf (builder, &taille_buf);
-    GBytes *gbytes = g_bytes_new_take ( buf, taille_buf );
-    soup_websocket_connection_send_message ( client->connexion, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
-    g_bytes_unref( gbytes );
-  }
-/******************************************************************************************************************************/
-/* Envoyer_un_visuel: Envoi un update motif au client                                                                         */
-/* Entrée: une reference sur la session en cours, et le cadran a envoyer                                                      */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Http_Envoyer_un_visuel ( JsonNode *visuel )
-  { gchar *buf = Json_node_to_string ( visuel );
-    json_node_unref ( visuel );
-    GSList *liste = Cfg_http.liste_ws_clients;
-    while (liste)
-     { struct WS_CLIENT_SESSION *client = liste->data;
-       soup_websocket_connection_send_text ( client->connexion, buf );
-       liste = g_slist_next(liste);
-     }
+ static void Http_ws_send_to_client ( struct WS_CLIENT_SESSION *client, JsonNode *node )
+  { gchar *buf = Json_node_to_string ( node );
+    soup_websocket_connection_send_text ( client->connexion, buf );
     g_free(buf);
   }
 /******************************************************************************************************************************/
@@ -78,7 +60,6 @@
 /******************************************************************************************************************************/
  void Http_ws_send_to_all ( JsonNode *node )
   { gchar *buf = Json_node_to_string ( node );
-    json_node_unref ( node );
     GSList *liste = Cfg_http.liste_ws_clients;
     while (liste)
      { struct WS_CLIENT_SESSION *client = liste->data;
@@ -93,14 +74,11 @@
 /* Sortie: False si probleme                                                                                                  */
 /******************************************************************************************************************************/
  void Http_ws_send_pulse_to_all ( void )
-  { JsonBuilder *builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
-       return;
-     }
-    Json_add_string( builder, "zmq_tag", "PULSE" );
-    JsonNode *node = Json_end ( builder );
-    Http_ws_send_to_all ( node );
+  { JsonNode *pulse = Json_node_create();
+    if (!pulse) return;
+    Json_node_add_string( pulse, "zmq_tag", "PULSE" );
+    Http_ws_send_to_all ( pulse );
+    json_node_unref(pulse);
   }
 /******************************************************************************************************************************/
 /* Formater_cadran: Formate la structure dédiée cadran pour envoi au client                                                   */
@@ -178,14 +156,14 @@
 /* Entrée: une reference sur la session en cours, et le cadran a envoyer                                                      */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void WS_CADRAN_to_json ( JsonBuilder *builder, struct WS_CADRAN *ws_cadran )
+ static void WS_CADRAN_to_json ( JsonNode *node, struct WS_CADRAN *ws_cadran )
   { Formater_cadran ( ws_cadran );
-    Json_add_string ( builder, "tech_id",  ws_cadran->tech_id );
-    Json_add_string ( builder, "acronyme", ws_cadran->acronyme );
-    Json_add_int    ( builder, "type",     ws_cadran->type );
-    Json_add_bool   ( builder, "in_range", ws_cadran->in_range );
-    Json_add_double ( builder, "valeur",   ws_cadran->valeur );
-    Json_add_string ( builder, "unite",    ws_cadran->unite );
+    Json_node_add_string ( node, "tech_id",  ws_cadran->tech_id );
+    Json_node_add_string ( node, "acronyme", ws_cadran->acronyme );
+    Json_node_add_int    ( node, "type",     ws_cadran->type );
+    Json_node_add_bool   ( node, "in_range", ws_cadran->in_range );
+    Json_node_add_double ( node, "valeur",   ws_cadran->valeur );
+    Json_node_add_string ( node, "unite",    ws_cadran->unite );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -196,24 +174,23 @@
   { gchar chaine[256];
 
 /*-------------------------------------------------- Test autorisation d'accès -----------------------------------------------*/
-    JsonBuilder *builder = Json_create ();
-    if (!builder) return;
+    JsonNode *RootNode = Json_node_create ();
+    if (!RootNode) return;
 
-    SQL_Select_to_JSON_new ( builder, NULL, "SELECT access_level,libelle FROM syns WHERE id=%d", syn_id );
-    JsonNode *result = Json_end ( builder );
-    if ( !(Json_has_member ( result, "access_level" ) && Json_has_member ( result, "libelle" )) )
+    SQL_Select_to_json_node ( RootNode, NULL, "SELECT access_level,libelle FROM syns WHERE id=%d", syn_id );
+    if ( !(Json_has_member ( RootNode, "access_level" ) && Json_has_member ( RootNode, "libelle" )) )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Syn '%d' unknown", __func__, syn_id );
-       json_node_unref ( result );
+       json_node_unref ( RootNode );
        return;
      }
-    if (client->http_session->access_level < Json_get_int ( result, "access_level" ))
+    if (client->http_session->access_level < Json_get_int ( RootNode, "access_level" ))
      { Audit_log ( client->http_session, "Access to synoptique '%s' (id '%d') forbidden",
-                   Json_get_string ( result, "libelle" ), syn_id );
-       json_node_unref ( result );
+                   Json_get_string ( RootNode, "libelle" ), syn_id );
+       json_node_unref ( RootNode );
        return;
      }
-    else Audit_log ( client->http_session, "Envoi du synoptique '%s' (id '%d')", Json_get_string ( result, "libelle" ), syn_id );
-    json_node_unref ( result );
+    else Audit_log ( client->http_session, "Envoi du synoptique '%s' (id '%d')", Json_get_string ( RootNode, "libelle" ), syn_id );
+    json_node_unref ( RootNode );
 
 /*----------------------------------------------- Visuels --------------------------------------------------------------------*/
     struct DB *db = Init_DB_SQL();
@@ -322,11 +299,12 @@
           while (cadrans)
            { struct WS_CADRAN *cadran = cadrans->data;
              if (cadran->last_update +10 <= Partage->top)
-              { JsonBuilder *builder = Json_create();
-                if (builder)
-                 { Json_add_string ( builder, "zmq_tag", "DLS_CADRAN" );
-                   WS_CADRAN_to_json ( builder, cadran );
-                   Envoyer_ws_au_client ( client, builder );
+              { JsonNode *RootNode = Json_node_create();
+                if (RootNode)
+                 { Json_node_add_string ( RootNode, "zmq_tag", "DLS_CADRAN" );
+                   WS_CADRAN_to_json ( RootNode, cadran );
+                   Http_ws_send_to_client ( client, RootNode );
+                   json_node_unref( RootNode );
                  }
                 cadran->last_update = Partage->top;
               }

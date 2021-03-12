@@ -27,6 +27,7 @@
        document.getElementById("idArchDBHostname").innerHTML = Response.archdb_hostname;
        document.getElementById("idArchDBPort").innerHTML = Response.archdb_port;
        document.getElementById("idArchDBDatabase").innerHTML = Response.archdb_database;
+       document.getElementById("idArchDBNbrEnreg").innerHTML = Response.archdb_nbr_enreg;
        document.getElementById("idDBUsername").innerHTML = Response.db_username;
        document.getElementById("idDBHostname").innerHTML = Response.db_hostname;
        document.getElementById("idDBPort").innerHTML = Response.db_port;
@@ -40,11 +41,4 @@
        document.getElementById("idConfigStarted").innerHTML = Response.started;
        document.getElementById("idConfigTop").innerHTML = Response.top;
      });
-
-    Charger_une_courbe ( "idCourbeDlsTourParSec", "SYS", "DLS_TOUR_PER_SEC", "HOUR" );
-    Charger_une_courbe ( "idCourbeDlsBitParSec", "SYS", "DLS_BIT_PER_SEC", "HOUR" );
-    Charger_une_courbe ( "idCourbeDlsAttente", "SYS", "DLS_WAIT", "HOUR" );
-    Charger_une_courbe ( "idCourbeNbArchive", "SYS", "ARCH_REQUEST_NUMBER", "HOUR" );
-    Charger_une_courbe ( "idCourbeDlsNbMSG", "SYS", "NBR_MSG_QUEUE", "HOUR" );
-    Charger_une_courbe ( "idCourbeDlsNbVISUEL", "SYS", "NBR_VISUEL_QUEUE", "HOUR" );
   }
