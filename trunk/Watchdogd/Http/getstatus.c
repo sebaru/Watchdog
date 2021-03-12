@@ -39,10 +39,8 @@
 /******************************************************************************************************************************/
  void Http_traiter_status ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                             SoupClientContext *client, gpointer user_data )
-  { gchar date[64], *buf;
-    JsonBuilder *builder;
-    gsize taille_buf;
-    struct tm *temps;
+  { struct tm *temps;
+    gchar date[64];
     gint num;
 
     if (msg->method != SOUP_METHOD_GET)
@@ -54,57 +52,58 @@
     if (!Http_check_session( msg, session, 6 )) return;
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
 	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    Json_add_string ( builder, "version",            WTD_VERSION );
-    Json_add_string ( builder, "instance",           g_get_host_name() );
-    Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
-    Json_add_string ( builder, "master_host",        (Config.instance_is_master ? "-" : Config.master_host) );
-    Json_add_string ( builder, "run_as",             Config.run_as );
+    Json_node_add_string ( RootNode, "version",            WTD_VERSION );
+    Json_node_add_string ( RootNode, "instance",           g_get_host_name() );
+    Json_node_add_bool   ( RootNode, "instance_is_master", Config.instance_is_master );
+    Json_node_add_string ( RootNode, "master_host",        (Config.instance_is_master ? "-" : Config.master_host) );
+    Json_node_add_string ( RootNode, "run_as",             Config.run_as );
 
     temps = localtime( (time_t *)&Partage->start_time );
     if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
     else       { g_snprintf( date, sizeof(date), "Erreur" ); }
-    Json_add_string ( builder, "started",      date );
-    Json_add_string ( builder, "license",      "GPLv2 or newer" );
-    Json_add_string ( builder, "author_name",  "Sébastien LEFEVRE" );
-    Json_add_string ( builder, "author_email", "sebastien.lefevre@abls-habitat.fr" );
+    Json_node_add_string ( RootNode, "started",      date );
+    Json_node_add_string ( RootNode, "license",      "GPLv2 or newer" );
+    Json_node_add_string ( RootNode, "author_name",  "Sébastien LEFEVRE" );
+    Json_node_add_string ( RootNode, "author_email", "sebastien.lefevre@abls-habitat.fr" );
 
 /*------------------------------------------------------- Dumping Running config ---------------------------------------------*/
-    Json_add_int  ( builder, "top",          Partage->top );
-    Json_add_int  ( builder, "bit_par_sec",  Partage->audit_bit_interne_per_sec_hold );
-    Json_add_int  ( builder, "tour_par_sec", Partage->audit_tour_dls_per_sec_hold );
+    Json_node_add_int  ( RootNode, "top",          Partage->top );
+    Json_node_add_int  ( RootNode, "bit_par_sec",  Partage->audit_bit_interne_per_sec_hold );
+    Json_node_add_int  ( RootNode, "tour_par_sec", Partage->audit_tour_dls_per_sec_hold );
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                                              /* Synchro */
     num = g_slist_length( Partage->com_msrv.liste_visuel );                                       /* Recuperation du nbr de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    Json_add_int  ( builder, "length_visuel", num );
+    Json_node_add_int  ( RootNode, "length_visuel", num );
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                                              /* Synchro */
     num = g_slist_length( Partage->com_msrv.liste_msg );                                       /* Recuperation du numero de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    Json_add_int  ( builder, "length_msg", num );
+    Json_node_add_int  ( RootNode, "length_msg", num );
 
-    SQL_Select_to_JSON ( builder, NULL, "SELECT * FROM db_status");
-    Json_add_int    ( builder, "nbr_sessions", g_slist_length(Cfg_http.liste_http_clients) );
+    SQL_Select_to_json_node ( RootNode, NULL, "SELECT * FROM db_status");
+    Json_node_add_int    ( RootNode, "nbr_sessions", g_slist_length(Cfg_http.liste_http_clients) );
 
-    Json_add_string ( builder, "db_username", Config.db_username );
-    Json_add_string ( builder, "db_hostname", Config.db_hostname );
-    Json_add_int    ( builder, "db_port",     Config.db_port );
-    Json_add_string ( builder, "db_database", Config.db_database );
+    Json_node_add_string ( RootNode, "db_username", Config.db_username );
+    Json_node_add_string ( RootNode, "db_hostname", Config.db_hostname );
+    Json_node_add_int    ( RootNode, "db_port",     Config.db_port );
+    Json_node_add_string ( RootNode, "db_database", Config.db_database );
 
-    Json_add_string ( builder, "archdb_username", Partage->com_arch.archdb_username );
-    Json_add_string ( builder, "archdb_hostname", Partage->com_arch.archdb_hostname );
-    Json_add_int    ( builder, "archdb_port", Partage->com_arch.archdb_port );
-    Json_add_string ( builder, "archdb_database", Partage->com_arch.archdb_database );
+    Json_node_add_string ( RootNode, "archdb_username", Partage->com_arch.archdb_username );
+    Json_node_add_string ( RootNode, "archdb_hostname", Partage->com_arch.archdb_hostname );
+    Json_node_add_int    ( RootNode, "archdb_port", Partage->com_arch.archdb_port );
+    Json_node_add_string ( RootNode, "archdb_database", Partage->com_arch.archdb_database );
+    Json_node_add_int    ( RootNode, "archdb_nbr_enreg", Partage->com_arch.taille_arch );
 
-    buf = Json_get_buf (builder, &taille_buf);
+    gchar *buf = Json_node_to_string (RootNode);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

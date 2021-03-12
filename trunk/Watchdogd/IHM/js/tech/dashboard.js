@@ -27,6 +27,7 @@
        document.getElementById("idArchDBHostname").innerHTML = Response.archdb_hostname;
        document.getElementById("idArchDBPort").innerHTML = Response.archdb_port;
        document.getElementById("idArchDBDatabase").innerHTML = Response.archdb_database;
+       document.getElementById("idArchDBNbrEnreg").innerHTML = Response.archdb_nbr_enreg;
        document.getElementById("idDBUsername").innerHTML = Response.db_username;
        document.getElementById("idDBHostname").innerHTML = Response.db_hostname;
        document.getElementById("idDBPort").innerHTML = Response.db_port;
