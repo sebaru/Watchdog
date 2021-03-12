@@ -133,4 +133,5 @@ Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
 Watchdogd/Radio/Makefile \
 Watchdogd/Dmx/Makefile \
+Watchdogd/Ephemeride/Makefile \
 )
