@@ -58,6 +58,7 @@
        Json_node_add_string ( RootNode, "code_insee", Cfg_meteo.code_insee );
      }
     gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );

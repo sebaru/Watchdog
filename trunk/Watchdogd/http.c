@@ -41,4 +41,36 @@
     if ( !request) { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Not a JSON request"); }
     return(request);
   }
+/******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ JsonNode *Http_Response_Msg_to_Json ( SoupMessage *msg )
+  { GBytes *reponse_brute;
+    gsize taille;
+    g_object_get ( msg, "response-body-data", &reponse_brute, NULL );
+    JsonNode *reponse = Json_get_from_string ( g_bytes_get_data ( reponse_brute, &taille ) );
+    return(reponse);
+  }
+/******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ gint Http_Msg_status_code ( SoupMessage *msg )
+  { gint status;
+    g_object_get ( msg, "status-code", &status, NULL );
+    return(status);
+  }
+/******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ gchar *Http_Msg_reason_phrase ( SoupMessage *msg )
+  { gchar *phrase;
+    g_object_get ( msg, "reason-phrase", &phrase, NULL );
+    return(phrase);
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

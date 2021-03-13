@@ -76,45 +76,38 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Meteo_get_meteo_concept ( void )
-  { gchar clair[512], hash_string[48], signature[48], query[128];
-    unsigned char hash_bin[EVP_MAX_MD_SIZE];
-    EVP_MD_CTX *mdctx;
-    gsize taille_buf;
-    int md_len;
-
-    g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/meteo/0?token=%s&insee=%s",
+  { gchar query[256];
+    g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/ephemeride/0?token=%s&insee=%s",
                 Cfg_meteo.token, Cfg_meteo.code_insee );
 
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg = soup_message_new ( "GET", query );
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
-    /*SoupMessageHeaders *headers;
-    g_object_get ( G_OBJECT(soup_msg), "request_headers", &headers, NULL );
-    soup_message_headers_append ( headers, "X-Ovh-Application", Cfg_meteo.ovh_application_key );
-    soup_message_headers_append ( headers, "X-Ovh-Consumer",    Cfg_meteo.ovh_consumer_key );
-    soup_message_headers_append ( headers, "X-Ovh-Signature",   signature );
-    soup_message_headers_append ( headers, "X-Ovh-Timestamp",   timestamp );*/
     soup_session_send_message (connexion, soup_msg);
 
-    GBytes *response_brute;
-    gchar *reason_phrase;
-    gint status_code;
+    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
+    gint   status_code   = Http_Msg_status_code ( soup_msg );
 
-    g_object_get ( soup_msg, "status-code", &status_code, "reason-phrase", &reason_phrase, "response-body-data", &response_brute, NULL );
     Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
     if (status_code!=200)
-     { gsize taille;
-       gchar *error = g_bytes_get_data ( response_brute, &taille );
-       Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_ERR, "%s: Error: %s\n", __func__, error );
-       g_free(error);
-     }
+     { Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_ERR, "%s: Error: %s\n", __func__, reason_phrase ); }
     else
-     { gsize taille;
-       gchar *buf = g_bytes_get_data ( response_brute, &taille );
-       JsonNode *response = Json_get_from_string ( buf );
-       g_free(buf);
-       /*Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_ERR, "%s: Error: %s\n", __func__, error );*/
+     { gint heure, minute;
+       JsonNode *response = Http_Response_Msg_to_Json ( soup_msg );
+       JsonNode *city = Json_get_object_as_node ( response, "city" );
+       JsonNode *ephemeride = Json_get_object_as_node ( response, "ephemeride" );
+       gchar *city_name = Json_get_string ( city, "name" );
+       gchar *sunrise   = Json_get_string ( ephemeride, "sunrise" );
+       gchar *sunset    = Json_get_string ( ephemeride, "sunset" );
+       Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_DEBUG,
+                 "%s: a %s -> sunrise=%s, sunset=%s", __func__, city_name, sunrise, sunset );
+       if ( sscanf ( sunrise, "%d:%d", &heure, &minute ) == 2)
+        {
+        }
+       if ( sscanf ( sunset, "%d:%d", &heure, &minute ) == 2)
+        {
+        }
        json_node_unref ( response );
      }
     g_object_unref( soup_msg );
@@ -137,6 +130,8 @@ reload:
      { Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_meteo.tech_id ); }
 
     Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_meteo.tech_id, "IO_COMM", "Statut de la communication avec l'api meteo concept" );
+    Mnemo_auto_create_HORLOGE  ( Cfg_meteo.tech_id, "SUNRISE", "Horloge du levé du soleil" );
+    Mnemo_auto_create_HORLOGE  ( Cfg_meteo.tech_id, "SUNSET",  "Horloge du couché du soleil" );
 
     zmq_from_bus                 = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     Cfg_meteo.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );

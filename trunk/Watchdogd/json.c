@@ -125,12 +125,12 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  JsonNode *Json_node_add_objet ( JsonNode *RootNode, gchar *name )
-  { JsonObject *object = json_node_get_object (RootNode);
-    JsonNode *new_objet = json_object_new();
-    json_object_set_object_member ( object, name, new_objet );
-    return(new_objet);
+  { JsonObject *RootObject = json_node_get_object (RootNode);
+    JsonNode *new_node = json_node_alloc();
+    json_node_set_object ( new_node, json_object_new() );
+    json_object_set_member ( RootObject, name, new_node );
+    return(new_node);
   }
-
 /******************************************************************************************************************************/
 /* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
 /* Entrée: le builder, le nom du parametre, la valeur                                                                         */
