@@ -203,8 +203,10 @@
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
- static gboolean SQL_Select_to_json_node_reel ( JsonNode *RootNode, gchar *array_name, gchar *requete )
-  { struct DB *db = Init_DB_SQL ();
+ static gboolean SQL_Select_to_json_node_reel ( gboolean db_arch, JsonNode *RootNode, gchar *array_name, gchar *requete )
+  { struct DB *db;
+    if (db_arch) db = Init_ArchDB_SQL ();
+            else db = Init_DB_SQL ();
     if (!db)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
        return(FALSE);
@@ -255,51 +257,21 @@
     va_start( ap, format );
     g_vsnprintf ( chaine, sizeof(chaine), format, ap );
     va_end ( ap );
-    return(SQL_Select_to_json_node_reel ( RootNode, array_name, chaine ));
+    return(SQL_Select_to_json_node_reel ( FALSE, RootNode, array_name, chaine ));
   }
 /******************************************************************************************************************************/
 /* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
- gboolean SQL_Arch_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete )
-  { struct DB *db = Init_ArchDB_SQL ();
-    if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
-       return(FALSE);
-     }
+ gboolean SQL_Arch_to_json_node ( JsonNode *RootNode, gchar *array_name, gchar *format, ... )
+  { gchar chaine[1024];
+    va_list ap;
 
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
-       Libere_DB_SQL ( &db );
-       return(FALSE);
-     }
-    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
-
-
-    db->result = mysql_store_result ( db->mysql );
-    if ( ! db->result )
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: store_result failed (%s)", __func__, (char *) mysql_error(db->mysql) );
-       db->nbr_result = 0;
-     }
-    else
-     { if (array_name)
-        { gchar chaine[80];
-          g_snprintf(chaine, sizeof(chaine), "nbr_%s", array_name );
-          Json_add_int ( builder, chaine, mysql_num_rows ( db->result ));
-          Json_add_array( builder, array_name );
-        }
-       while ( (db->row = mysql_fetch_row(db->result)) != NULL )
-        { if (array_name) Json_add_object ( builder, NULL );
-          for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
-           { Json_add_string( builder, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
-          if (array_name) Json_end_object ( builder );
-        }
-       if (array_name) Json_end_array ( builder );
-       mysql_free_result( db->result );
-     }
-    Libere_DB_SQL( &db );
-    return(TRUE);
+    va_start( ap, format );
+    g_vsnprintf ( chaine, sizeof(chaine), format, ap );
+    va_end ( ap );
+    return(SQL_Select_to_json_node_reel ( TRUE, RootNode, array_name, chaine ));
   }
 /******************************************************************************************************************************/
 /* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */

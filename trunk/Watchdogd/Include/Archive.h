@@ -28,10 +28,10 @@
 #ifndef _ARCHIVAGE_DB_H_
  #define _ARCHIVAGE_DB_H_
 
- #define ARCHIVE_EA_TEMPS_SI_CONSTANT   600                                    /* Si constant, archivage toutes les 1 minutes */
- #define ARCHIVE_EA_TEMPS_SI_VARIABLE    50                                   /* Si variable, archivage toutes les 5 secondes */
- #define ARCHIVE_DEFAUT_RETENTION      4000                              /* Nom de jours par défaut de retention des archives */
- #define ARCHIVE_DEFAUT_BUFFER_SIZE  500000
+ #define ARCHIVE_EA_TEMPS_SI_CONSTANT     600                                  /* Si constant, archivage toutes les 1 minutes */
+ #define ARCHIVE_EA_TEMPS_SI_VARIABLE      50                                 /* Si variable, archivage toutes les 5 secondes */
+ #define ARCHIVE_DEFAUT_RETENTION        4000                            /* Nom de jours par défaut de retention des archives */
+ #define ARCHIVE_DEFAUT_BUFFER_SIZE  10000000  /* Buffer de retention pour pallier les indispos du serveur de base de données */
 
  #define NOM_TABLE_ARCH    "histo_bit"
 

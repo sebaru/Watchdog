@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Ephemeride/Ephemeride.h        Déclaration structure internes pour l'Ephemeride Watchdog                         */
+/* Watchdogd/Meteo/Meteo.h        Déclaration structure internes pour l'Meteo Watchdog                         */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    12.03.2021 18:37:46 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * sEphemeride.h
+ * sMeteo.h
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre
@@ -25,15 +25,15 @@
  * Boston, MA  02110-1301  USA
  */
 
-#ifndef _EPHEMERIDE_H_
- #define _EPHEMERIDE_H_
+#ifndef _METEO_H_
+ #define _METEO_H_
 
  #include <curl/curl.h>
 
- #define NOM_THREAD                    "ephemeride"
+ #define NOM_THREAD                    "meteo"
  #define SMSG_TEMPS_UPDATE_COMM        300
 
- struct EPHEMERIDE_CONFIG
+ struct METEO_CONFIG
   { struct LIBRAIRIE *lib;
     gchar tech_id[32];                                                                                /* Tech_id du téléphone */
     gchar description[80];                                         /* Une description du téléphone ou sa position par exemple */

@@ -66,10 +66,10 @@
 
  <div class="col p-1">
   <div class="card h-100 text-center bg-light">
-   <a href="/tech/ephemeride"><img src="/img/ephemeride.svg" height="273px" class="card-img-top" alt="Compteurs EDF"></a>
-   <div class="card-header">L'éphéméride</div>
+   <a href="/tech/meteo"><img src="/img/meteo.svg" height="273px" class="card-img-top" alt="La météo"></a>
+   <div class="card-header">La méteo</div>
    <div class="card-body">
-        <button type="button" onclick="Redirect('/tech/ephemeride')" class="btn btn-block m-1 btn-primary btn-sm"><i class="fas fa-list"></i> Configurer</button>
+        <button type="button" onclick="Redirect('/tech/meteo')" class="btn btn-block m-1 btn-primary btn-sm"><i class="fas fa-list"></i> Configurer</button>
         <button type="button" disabled class="btn btn-block m-1 btn-primary btn-sm"><i class="fas fa-directions"></i> Mapper</button>
    </div>
   </div>

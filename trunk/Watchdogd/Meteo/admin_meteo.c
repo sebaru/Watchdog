@@ -27,8 +27,8 @@
 
  #include <unistd.h>                                                                                      /* Pour gethostname */
  #include "watchdogd.h"
- #include "Ephemeride.h"
- extern struct EPHEMERIDE_CONFIG Cfg_ephemeride;
+ #include "Meteo.h"
+ extern struct METEO_CONFIG Cfg_meteo;
 
 /******************************************************************************************************************************/
 /* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
@@ -51,11 +51,11 @@
 
     Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
 
-    if (Lib->Thread_run)                                      /* Warning : Cfg_ephemeride does not exist if thread is not running ! */
-     { Json_node_add_string ( RootNode, "tech_id", Cfg_ephemeride.tech_id );
-       Json_node_add_string ( RootNode, "description", Cfg_ephemeride.description );
-       Json_node_add_string ( RootNode, "token", Cfg_ephemeride.token );
-       Json_node_add_string ( RootNode, "code_insee", Cfg_ephemeride.code_insee );
+    if (Lib->Thread_run)                                      /* Warning : Cfg_meteo does not exist if thread is not running ! */
+     { Json_node_add_string ( RootNode, "tech_id", Cfg_meteo.tech_id );
+       Json_node_add_string ( RootNode, "description", Cfg_meteo.description );
+       Json_node_add_string ( RootNode, "token", Cfg_meteo.token );
+       Json_node_add_string ( RootNode, "code_insee", Cfg_meteo.code_insee );
      }
     gchar *buf = Json_node_to_string ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
@@ -122,7 +122,7 @@
         {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED); }
        else
         { soup_message_set_status (msg, SOUP_STATUS_OK);
-          Cfg_ephemeride.test_api = TRUE;
+          Cfg_meteo.test_api = TRUE;
         }
      }
     else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
