@@ -34,15 +34,13 @@
  extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
-/* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
+/* Http_traiter_log_get: Répond aux requetes sur l'URI log                                                                    */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Http_traiter_log_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data)
-  { gchar *buf, chaine[256];
-    JsonBuilder *builder;
-    gsize taille_buf;
+  { gchar chaine[256];
 
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -52,23 +50,24 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 0)) return;
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
 	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
                                                                       /* Lancement de la requete de recuperation des messages */
     g_snprintf( chaine, sizeof(chaine), "SELECT * FROM audit_log WHERE access_level<=%d ORDER BY date DESC LIMIT 2000", session->access_level );
-    SQL_Select_to_JSON ( builder, "logs", chaine );
+    SQL_Select_to_json_node ( RootNode, "logs", chaine );
 
-    buf = Json_get_buf (builder, &taille_buf);
+    gchar *buf = Json_node_to_string (RootNode);
+    json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_config_list: Fourni une list JSON des configs Watchdog dans le domaine                                        */
+/* Audit_log: Ajoute un log applicatif                                                                                        */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/

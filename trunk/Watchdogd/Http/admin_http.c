@@ -35,38 +35,35 @@
 /* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                         */
 /******************************************************************************************************************************/
  static void Admin_Http_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    Json_add_bool ( builder, "thread_is_running", Lib->Thread_run );
+    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
 
     if (Lib->Thread_run)                                      /* Warning : Cfg_smsg does not exist if thread is not running ! */
-     { Json_add_int    ( builder, "tcp_port",                 Cfg_http.tcp_port );
-       Json_add_int    ( builder, "ssl_enable",               Cfg_http.ssl_enable );
-       Json_add_string ( builder, "ssl_cert_filepath",        Cfg_http.ssl_cert_filepath );
-       Json_add_string ( builder, "ssl_private_key_filepath", Cfg_http.ssl_private_key_filepath );
+     { Json_node_add_int    ( RootNode, "tcp_port",                 Cfg_http.tcp_port );
+       Json_node_add_int    ( RootNode, "ssl_enable",               Cfg_http.ssl_enable );
+       Json_node_add_string ( RootNode, "ssl_cert_filepath",        Cfg_http.ssl_cert_filepath );
+       Json_node_add_string ( RootNode, "ssl_private_key_filepath", Cfg_http.ssl_private_key_filepath );
        pthread_mutex_lock( &Cfg_http.lib->synchro );
-       Json_add_int    ( builder, "Abonnes_motifs",           g_slist_length (Cfg_http.liste_ws_clients) );
-       Json_add_int    ( builder, "nbr_sessions",             g_slist_length (Cfg_http.liste_http_clients ) );
+       Json_node_add_int    ( RootNode, "Abonnes_motifs",           g_slist_length (Cfg_http.liste_ws_clients) );
+       Json_node_add_int    ( RootNode, "nbr_sessions",             g_slist_length (Cfg_http.liste_http_clients ) );
        pthread_mutex_unlock( &Cfg_http.lib->synchro );
      }
-    buf = Json_get_buf ( builder, &taille_buf );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelÃ© par le thread http lors d'une requete /run/                                                  */
