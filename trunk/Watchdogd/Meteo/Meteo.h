@@ -31,7 +31,7 @@
  #include <curl/curl.h>
 
  #define NOM_THREAD                    "meteo"
- #define SMSG_TEMPS_UPDATE_COMM        300
+ #define METEO_POLLING                 36000
 
  struct METEO_CONFIG
   { struct LIBRAIRIE *lib;

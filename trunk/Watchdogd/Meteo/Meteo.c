@@ -109,7 +109,7 @@
         {
         }
        json_node_unref ( response );
-       Zmq_Send_WATCHDOG_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, "IO_COMM", 0 );
+       Zmq_Send_WATCHDOG_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, "IO_COMM", METEO_POLLING+100 );
      }
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
@@ -245,7 +245,7 @@ reload:
        sched_yield();
 
 /****************************************************** Test connexion ! ******************************************************/
-       if (Partage->top - Cfg_meteo.last_request >= 36000 || Cfg_meteo.test_api)
+       if (Partage->top - Cfg_meteo.last_request >= METEO_POLLING || Cfg_meteo.test_api)
         { Meteo_get_ephemeride();
           Meteo_get_forecast();
           Cfg_meteo.last_request = Partage->top;
