@@ -71,11 +71,11 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Envoi_sms_smsbox: Envoi un sms par SMSBOX                                                                                  */
-/* Entrée: le message à envoyer sateur                                                                                        */
+/* Meteo_get_ephemeride: Récupère l'ephemeride auprès de meteoconcept                                                         */
+/* Entrée: Niet                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Meteo_get_meteo_concept ( void )
+ static void Meteo_get_ephemeride ( void )
   { gchar query[256];
     g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/ephemeride/0?token=%s&insee=%s",
                 Cfg_meteo.token, Cfg_meteo.code_insee );
@@ -109,6 +109,82 @@
         {
         }
        json_node_unref ( response );
+       Zmq_Send_WATCHDOG_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, "IO_COMM", 0 );
+     }
+    g_object_unref( soup_msg );
+    soup_session_abort ( connexion );
+  }
+/******************************************************************************************************************************/
+/* Meteo_get_forecast: Récupère le forecast auprès de meteoconcept                                                            */
+/* Entrée: Nier                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Meteo_update_forecast ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+  { gint day = Json_get_int ( element, "day" );
+    gint temp_min = Json_get_int ( element, "tmin" );
+    gint temp_max = Json_get_int ( element, "tmax" );
+    Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_DEBUG,
+              "%s: -> day %d temp_min=%d, temp_max=%d", __func__, day, temp_min, temp_max );
+    gchar acronyme[64];
+    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", day );
+    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "tmin" ), TRUE );
+
+    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MAX", day );
+    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "tmax" ), TRUE );
+
+    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE", day );
+    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probarain" ), TRUE );
+
+    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_GEL", day );
+    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probafrost" ), TRUE );
+
+    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_BROUILLARD", day );
+    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probafog" ), TRUE );
+
+    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_70", day );
+    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probawind70" ), TRUE );
+
+    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_100", day );
+    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probawind100" ), TRUE );
+
+    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT_SI_ORAGE", day );
+    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "gustx" ), TRUE );
+
+    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_VENT_A_10M", day );
+    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "wind10m" ), TRUE );
+
+    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_DIRECTION_VENT", day );
+    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
+
+    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT", day );
+    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "gust10m" ), TRUE );
+  }
+/******************************************************************************************************************************/
+/* Meteo_get_forecast: Récupère le forecast auprès de meteoconcept                                                            */
+/* Entrée: Nier                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Meteo_get_forecast ( void )
+  { gchar query[256];
+    g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/forecast/daily?token=%s&insee=%s",
+                Cfg_meteo.token, Cfg_meteo.code_insee );
+
+/********************************************************* Envoi de la requete ************************************************/
+    SoupSession *connexion = soup_session_new();
+    SoupMessage *soup_msg = soup_message_new ( "GET", query );
+    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
+    soup_session_send_message (connexion, soup_msg);
+
+    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
+    gint   status_code   = Http_Msg_status_code ( soup_msg );
+
+    Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
+    if (status_code!=200)
+     { Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_ERR, "%s: Error: %s\n", __func__, reason_phrase ); }
+    else
+     { JsonNode *response = Http_Response_Msg_to_Json ( soup_msg );
+       Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, NULL );
+       json_node_unref ( response );
      }
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
@@ -126,31 +202,54 @@ reload:
     Thread_init ( "W-METEO", "EXTAPI", lib, WTD_VERSION, "Manage Meteo system (meteo concept)" );
     Meteo_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
-    if (Dls_auto_create_plugin( Cfg_meteo.tech_id, "Gestion de l'méteo" ) == FALSE)
+    if (Dls_auto_create_plugin( Cfg_meteo.tech_id, "Gestion de la météo" ) == FALSE)
      { Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_meteo.tech_id ); }
 
     Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_meteo.tech_id, "IO_COMM", "Statut de la communication avec l'api meteo concept" );
     Mnemo_auto_create_HORLOGE  ( Cfg_meteo.tech_id, "SUNRISE", "Horloge du levé du soleil" );
     Mnemo_auto_create_HORLOGE  ( Cfg_meteo.tech_id, "SUNSET",  "Horloge du couché du soleil" );
+    for (gint cpt=0; cpt<=13; cpt++)
+     { gchar acronyme[64];
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", cpt );
+       Mnemo_auto_create_AI ( FALSE, Cfg_meteo.tech_id, acronyme, "Température minimum", "°C" );
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MAX", cpt );
+       Mnemo_auto_create_AI ( FALSE, Cfg_meteo.tech_id, acronyme, "Température maximum", "°C" );
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE", cpt );
+       Mnemo_auto_create_AI ( FALSE, Cfg_meteo.tech_id, acronyme, "Probabilité de pluie (0-100%)", "%" );
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_GEL", cpt );
+       Mnemo_auto_create_AI ( FALSE, Cfg_meteo.tech_id, acronyme, "Probabilité de gel (0-100%)", "%" );
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_BROUILLARD", cpt );
+       Mnemo_auto_create_AI ( FALSE, Cfg_meteo.tech_id, acronyme, "Probabilité de brouillard (0-100%)", "%" );
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_70", cpt );
+       Mnemo_auto_create_AI ( FALSE, Cfg_meteo.tech_id, acronyme, "Probabilité de vent > 70km/h  (0-100%)", "%" );
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_100", cpt );
+       Mnemo_auto_create_AI ( FALSE, Cfg_meteo.tech_id, acronyme, "Probabilité de vent > 100km/h (0-100%)", "%" );
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT_SI_ORAGE", cpt );
+       Mnemo_auto_create_AI ( FALSE, Cfg_meteo.tech_id, acronyme, "Vitesse des rafales de vent si orage", "km/h" );
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_VENT_A_10M", cpt );
+       Mnemo_auto_create_AI ( FALSE, Cfg_meteo.tech_id, acronyme, "Vent moyen à 10 mètres", "km/h" );
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_DIRECTION_VENT", cpt );
+       Mnemo_auto_create_AI ( FALSE, Cfg_meteo.tech_id, acronyme, "Direction du vent", "°" );
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT", cpt );
+       Mnemo_auto_create_AI ( FALSE, Cfg_meteo.tech_id, acronyme,  "Vitesse des rafales de vent", "km/h" );
+     }
 
-    zmq_from_bus                 = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_from_bus            = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     Cfg_meteo.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
+    Meteo_get_ephemeride();
+    Meteo_get_forecast();
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { gchar buffer[1024];
        usleep(10000);
        sched_yield();
 
 /****************************************************** Test connexion ! ******************************************************/
-       if (Cfg_meteo.test_api)
-        { Meteo_get_meteo_concept();
-          Cfg_meteo.test_api = FALSE;
-        }
-
-/****************************************************** Test connexion ! ******************************************************/
-       if (Partage->top - Cfg_meteo.last_request >= 36000)
-        { Meteo_get_meteo_concept();
+       if (Partage->top - Cfg_meteo.last_request >= 36000 || Cfg_meteo.test_api)
+        { Meteo_get_ephemeride();
+          Meteo_get_forecast();
           Cfg_meteo.last_request = Partage->top;
+          Cfg_meteo.test_api = FALSE;
         }
 
 /********************************************************* Envoi de SMS *******************************************************/

@@ -143,6 +143,13 @@
 /* Entrée: le builder, le nom du parametre, la valeur                                                                         */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
+ void Json_node_foreach_array_element ( JsonNode *RootNode, gchar *nom, JsonArrayForeach fonction, gpointer data )
+  { json_array_foreach_element ( Json_get_array ( RootNode, nom ), fonction, data ); }
+/******************************************************************************************************************************/
+/* Json_add_string: Ajoute un enregistrement name/string dans le builder                                                      */
+/* Entrée: le builder, le nom du parametre, la valeur                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Json_add_node ( JsonBuilder *builder, gchar *name, JsonNode *node )
   { if (name) json_builder_set_member_name  ( builder, name );
     json_builder_add_value ( builder, node );
