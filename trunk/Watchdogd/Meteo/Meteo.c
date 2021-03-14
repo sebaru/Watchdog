@@ -100,13 +100,17 @@
        gchar *city_name = Json_get_string ( city, "name" );
        gchar *sunrise   = Json_get_string ( ephemeride, "sunrise" );
        gchar *sunset    = Json_get_string ( ephemeride, "sunset" );
-       Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_DEBUG,
-                 "%s: a %s -> sunrise=%s, sunset=%s", __func__, city_name, sunrise, sunset );
        if ( sscanf ( sunrise, "%d:%d", &heure, &minute ) == 2)
-        {
+        { Horloge_del_all_ticks ( Cfg_meteo.tech_id, "SUNRISE" );
+          Horloge_add_tick      ( Cfg_meteo.tech_id, "SUNRISE", heure, minute );
+          Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_INFO,
+                   "%s: %s -> sunrise at %02d:%02d", __func__, city_name, heure, minute );
         }
        if ( sscanf ( sunset, "%d:%d", &heure, &minute ) == 2)
-        {
+        { Horloge_del_all_ticks ( Cfg_meteo.tech_id, "SUNSET" );
+          Horloge_add_tick      ( Cfg_meteo.tech_id, "SUNSET", heure, minute );
+          Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_INFO,
+                   "%s: %s ->  sunset at %02d:%02d", __func__, city_name, heure, minute );
         }
        json_node_unref ( response );
        Zmq_Send_WATCHDOG_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, "IO_COMM", METEO_POLLING+100 );
@@ -124,7 +128,7 @@
     gint temp_min = Json_get_int ( element, "tmin" );
     gint temp_max = Json_get_int ( element, "tmax" );
     Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_DEBUG,
-              "%s: -> day %d temp_min=%d, temp_max=%d", __func__, day, temp_min, temp_max );
+              "%s: day %02d -> temp_min=%02d, temp_max=%02d", __func__, day, temp_min, temp_max );
     gchar acronyme[64];
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", day );
     Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "tmin" ), TRUE );

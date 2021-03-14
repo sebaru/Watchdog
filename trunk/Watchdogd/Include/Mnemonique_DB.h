@@ -50,6 +50,8 @@
 
  extern gboolean Mnemo_auto_create_HORLOGE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src ); /* Dans Mnemos_Horloges.c */
  extern void Activer_horlogeDB ( void );
+ extern gboolean Horloge_del_all_ticks ( gchar *tech_id, gchar *acronyme );
+ extern gboolean Horloge_add_tick ( gchar *tech_id, gchar *acronyme, gint heure, gint minute );
 
  extern void Updater_confDB_CI ( void );                                                                   /* Dans Mnemo_CI.c */
  extern void Charger_conf_CI ( struct DLS_CI *cpt_imp );

@@ -79,6 +79,27 @@
     return (retour);
   }
 /******************************************************************************************************************************/
+/* Horloge_del_all_ticks: Retire tous les ticks d'une horloge                                                                 */
+/* Entrée: le tech_id/acronyme de l'horloge                                                                                   */
+/* Sortie: FALSE si pb                                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Horloge_del_all_ticks ( gchar *tech_id, gchar *acronyme )
+  { return( SQL_Write_new ( "DELETE mnemos_HORLOGE_ticks FROM mnemos_HORLOGE_ticks "
+                            "INNER JOIN mnemos_HORLOGE ON mnemos_HORLOGE.id = mnemos_HORLOGE_ticks.horloge_id "
+                            "WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme
+                          ) );
+  }
+/******************************************************************************************************************************/
+/* Horloge_add_tick: Ajout un tick a heure/minute en parametre pour l'horloge tech_id:acronyme                                */
+/* Entrée: le tech_id/acronyme de l'horloge, l'heure et la minute                                                             */
+/* Sortie: FALSE si pb                                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Horloge_add_tick ( gchar *tech_id, gchar *acronyme, gint heure, gint minute )
+  { return( SQL_Write_new ( "INSERT INTO mnemos_HORLOGE_ticks SET "
+                            "horloge_id = (SELECT id FROM mnemos_HORLOGE WHERE tech_id='%s' AND acronyme='%s'), "
+                            "heure = %d, minute = %d", tech_id, acronyme, heure, minute ) );
+  }
+/******************************************************************************************************************************/
 /* Activer_holorgeDB: Recherche toutes les actives à date et les positionne dans la mémoire partagée                          */
 /* Entrée: rien                                                                                                               */
 /* Sortie: Les horloges sont directement pilotée dans la structure DLS_DATA                                                   */
