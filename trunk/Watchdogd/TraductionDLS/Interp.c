@@ -1042,7 +1042,7 @@
                    break;
                  }
                 case MNEMO_HORLOGE:
-                 { Mnemo_auto_create_HORLOGE ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_HORLOGE ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
                    if (!Liste_HORLOGE) Liste_HORLOGE = g_strconcat( "'", alias->acronyme, "'", NULL );
                    else
                     { old_liste = Liste_HORLOGE;
@@ -1175,7 +1175,7 @@
        SQL_Write ( requete );
        g_free(requete);
 
-       requete = g_strconcat ( "DELETE FROM mnemos_HORLOGE WHERE tech_id='", tech_id, "' ",
+       requete = g_strconcat ( "DELETE FROM mnemos_HORLOGE WHERE deletable=1 AND tech_id='", tech_id, "' ",
                                " AND acronyme NOT IN (", (Liste_HORLOGE?Liste_HORLOGE:"''") , ")", NULL );
        if (Liste_HORLOGE) g_free(Liste_HORLOGE);
        SQL_Write ( requete );

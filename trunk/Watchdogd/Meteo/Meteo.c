@@ -210,8 +210,8 @@ reload:
      { Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_meteo.tech_id ); }
 
     Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_meteo.tech_id, "IO_COMM", "Statut de la communication avec l'api meteo concept" );
-    Mnemo_auto_create_HORLOGE  ( Cfg_meteo.tech_id, "SUNRISE", "Horloge du levé du soleil" );
-    Mnemo_auto_create_HORLOGE  ( Cfg_meteo.tech_id, "SUNSET",  "Horloge du couché du soleil" );
+    Mnemo_auto_create_HORLOGE  ( FALSE, Cfg_meteo.tech_id, "SUNRISE", "Horloge du levé du soleil" );
+    Mnemo_auto_create_HORLOGE  ( FALSE, Cfg_meteo.tech_id, "SUNSET",  "Horloge du couché du soleil" );
     for (gint cpt=0; cpt<=13; cpt++)
      { gchar acronyme[64];
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", cpt );

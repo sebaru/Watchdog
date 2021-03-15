@@ -175,7 +175,7 @@
        plugin->on = FALSE;
        plugin->start_date = 0;
        plugin->conso = 0.0;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' stopped (%s)", __func__,
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: '%s' stopped (%s)", __func__,
                  plugin->tech_id, plugin->nom );
        g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET actif='0' WHERE tech_id = '%s'", plugin->tech_id );
        SQL_Write ( chaine );
@@ -194,7 +194,7 @@
        plugin->conso = 0.0;
        plugin->start_date = time(NULL);
        plugin->vars.resetted = FALSE;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s' started (%s)", __func__, plugin->tech_id, plugin->nom );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: '%s' started (%s)", __func__, plugin->tech_id, plugin->nom );
        g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET actif='1' WHERE tech_id = '%s'", plugin->tech_id );
        SQL_Write ( chaine );
      }

@@ -2201,7 +2201,12 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5397;
+    if (database_version < 5437)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE ADD `deletable` TINYINT(1) NOT NULL DEFAULT '1' AFTER `id`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5437;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

@@ -40,7 +40,7 @@
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_HORLOGE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src )
+ gboolean Mnemo_auto_create_HORLOGE ( gint deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;
     gchar requete[1024];
     gboolean retour;
@@ -63,9 +63,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_HORLOGE SET tech_id='%s',acronyme='%s',libelle='%s' "
+                "INSERT INTO mnemos_HORLOGE SET deletable=%d, tech_id='%s',acronyme='%s',libelle='%s' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                tech_id, acro, libelle );
+                deletable, tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);
 

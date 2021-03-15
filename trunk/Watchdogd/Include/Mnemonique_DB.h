@@ -48,8 +48,8 @@
  extern gboolean Recuperer_mnemos_AI_suite( struct DB **db_orig );
  extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );
 
- extern gboolean Mnemo_auto_create_HORLOGE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src ); /* Dans Mnemos_Horloges.c */
- extern void Activer_horlogeDB ( void );
+ extern void Activer_horlogeDB ( void );                                                            /* Dans Mnemos_Horloges.c */
+ extern gboolean Mnemo_auto_create_HORLOGE ( gint deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src );
  extern gboolean Horloge_del_all_ticks ( gchar *tech_id, gchar *acronyme );
  extern gboolean Horloge_add_tick ( gchar *tech_id, gchar *acronyme, gint heure, gint minute );
 
