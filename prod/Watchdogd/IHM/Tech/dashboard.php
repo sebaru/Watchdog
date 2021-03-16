@@ -57,9 +57,9 @@
     <div class="card-header bg-highlight">
       <div class="row">
         <div class="col-4">
-          <i class="fas fa-2x fa-wrench text-info"></i>
+          <i class="fas fa-2x fa-crown text-info"></i>
         </div>
-        <div class="col-8 mt-1"><h5>Configuration</h5></div>
+        <div class="col-8 mt-1"><h5>Instance</h5></div>
       </div>
     </div>
     <div class="card-body">
@@ -83,7 +83,7 @@
     <div class="card-header bg-highlight">
       <div class="row">
         <div class="col-4">
-          <i class="fas fa-2x fa-robot text-warning"></i>
+          <i class="fas fa-2x fa-cogs text-warning"></i>
         </div>
         <div class="col-8 mt-1"><h5>Entrées/Sorties</h5></div>
       </div>

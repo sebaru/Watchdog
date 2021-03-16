@@ -13,7 +13,7 @@ if [ "$SOCLE" = "fedora" ]
   dnf install -y libcurl-devel nut-devel mariadb-devel zeromq-devel libuuid-devel
   dnf install -y gtk3-devel goocanvas2-devel popt-devel libsoup-devel
   dnf install -y gtksourceview2-devel goocanvas-devel json-glib-devel gammu-devel
-  dnf install -y mpg123 sox mosquitto-devel
+  dnf install -y mpg123 sox mosquitto-devel libusb-devel
   dnf install -y libgnomeui-devel
   dnf install -y git
   git clone https://github.com/strophe/libstrophe.git
@@ -24,6 +24,14 @@ if [ "$SOCLE" = "fedora" ]
   make install
   cd ..
   rm -rf libstrophe
+  wget https://www.phidgets.com/downloads/phidget22/libraries/linux/libphidget22.tar.gz
+  tar xzf libphidget22.tar.gz
+  cd libphidget22-*
+  ./configure
+  make
+  make install
+  cd ..
+  rm -rf libphidget22*
 fi
 
 
@@ -46,6 +54,8 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   apt install -y libjson-glib-dev libmosquitto-dev
   apt install -y libgtk-3-dev libgoocanvas-2.0-dev
   apt install -y libsoup2.4-dev
+  curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -
+  apt-get install -y libphidget22
 fi
 
     if [ "$SOCLE" = "fedora" ]

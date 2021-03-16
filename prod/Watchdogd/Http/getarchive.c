@@ -40,8 +40,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_archive_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
-  { gchar *buf, requete[4096], chaine[256], *interval, nom_courbe[12];
-    gsize taille_buf;
+  { gchar requete[4096], chaine[256], *interval, nom_courbe[12];
     gint nbr;
 
     if (msg->method != SOUP_METHOD_PUT || Config.instance_is_master == FALSE)
@@ -69,8 +68,8 @@
     else if (!strcasecmp(period, "YEAR"))  { periode = 86400; interval = " WHERE date_time>=NOW() - INTERVAL 13 MONTH"; }
     g_free(period);
 
-    JsonBuilder *builder = Json_create ();
-    if (!builder)
+    JsonNode *RootNode = Json_node_create ();
+    if (!RootNode)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        json_node_unref(request);
        return;
@@ -94,27 +93,27 @@
        if (nbr!=0) g_strlcat ( chaine, "USING (date) ", sizeof(chaine) );
        g_strlcat ( requete, chaine, sizeof(requete) );
 
-       Json_add_object ( builder, nom_courbe );
+       JsonNode *json_courbe = Json_node_add_objet ( RootNode, nom_courbe );
        g_snprintf(chaine, sizeof(chaine), "SELECT * FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme );
-       SQL_Select_to_JSON ( builder, NULL, chaine );
-       Json_end_object ( builder );
+       SQL_Select_to_json_node ( json_courbe, NULL, chaine );
 
        g_free(tech_id);
        g_free(acronyme);
      }
 
-    if (SQL_Arch_to_JSON ( builder, "valeurs", requete ) == FALSE)
+    if (SQL_Arch_to_json_node ( RootNode, "valeurs", requete ) == FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
        json_node_unref(request);
-       g_object_unref(builder);
+       g_object_unref(RootNode);
        return;
      }
 
     json_node_unref(request);
 
-    buf = Json_get_buf (builder, &taille_buf);
+    gchar *buf = Json_node_to_string (RootNode);
+    json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

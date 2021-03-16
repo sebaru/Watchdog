@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 define([MAJOR_VERSION], [3])
-define([MINOR_VERSION], [6])
+define([MINOR_VERSION], [7])
 define([SVN_VERSION],   esyscmd([sh -c "svnversion -n | sed s/M//g"]))
 
 AC_INIT([Watchdog], [MAJOR_VERSION.MINOR_VERSION.SVN_VERSION],
@@ -133,4 +133,5 @@ Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
 Watchdogd/Radio/Makefile \
 Watchdogd/Dmx/Makefile \
+Watchdogd/Meteo/Makefile \
 )

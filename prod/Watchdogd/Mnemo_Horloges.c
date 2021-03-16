@@ -40,7 +40,7 @@
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_HORLOGE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src )
+ gboolean Mnemo_auto_create_HORLOGE ( gint deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;
     gchar requete[1024];
     gboolean retour;
@@ -63,9 +63,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_HORLOGE SET tech_id='%s',acronyme='%s',libelle='%s' "
+                "INSERT INTO mnemos_HORLOGE SET deletable=%d, tech_id='%s',acronyme='%s',libelle='%s' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                tech_id, acro, libelle );
+                deletable, tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);
 
@@ -77,6 +77,27 @@
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return (retour);
+  }
+/******************************************************************************************************************************/
+/* Horloge_del_all_ticks: Retire tous les ticks d'une horloge                                                                 */
+/* Entrée: le tech_id/acronyme de l'horloge                                                                                   */
+/* Sortie: FALSE si pb                                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Horloge_del_all_ticks ( gchar *tech_id, gchar *acronyme )
+  { return( SQL_Write_new ( "DELETE mnemos_HORLOGE_ticks FROM mnemos_HORLOGE_ticks "
+                            "INNER JOIN mnemos_HORLOGE ON mnemos_HORLOGE.id = mnemos_HORLOGE_ticks.horloge_id "
+                            "WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme
+                          ) );
+  }
+/******************************************************************************************************************************/
+/* Horloge_add_tick: Ajout un tick a heure/minute en parametre pour l'horloge tech_id:acronyme                                */
+/* Entrée: le tech_id/acronyme de l'horloge, l'heure et la minute                                                             */
+/* Sortie: FALSE si pb                                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Horloge_add_tick ( gchar *tech_id, gchar *acronyme, gint heure, gint minute )
+  { return( SQL_Write_new ( "INSERT INTO mnemos_HORLOGE_ticks SET "
+                            "horloge_id = (SELECT id FROM mnemos_HORLOGE WHERE tech_id='%s' AND acronyme='%s'), "
+                            "heure = %d, minute = %d", tech_id, acronyme, heure, minute ) );
   }
 /******************************************************************************************************************************/
 /* Activer_holorgeDB: Recherche toutes les actives à date et les positionne dans la mémoire partagée                          */

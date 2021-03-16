@@ -3,7 +3,7 @@
 #* Projet WatchDog version 3.0       Gestion d'habitat                      lun 02 jun 2003 14:24:24 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Dls TraductionDLS Smsg Modbus Audio Onduleur TeleinfoEDF Http Radio Imsgs
+SUBDIRS = Include Dls TraductionDLS Smsg Modbus Audio Onduleur TeleinfoEDF Http Radio Imsgs Meteo
 
 bin_SCRIPTS = Wtd_set_volume.sh Wtd_play_google.sh
 bin_PROGRAMS = Watchdogd

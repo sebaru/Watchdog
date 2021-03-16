@@ -574,6 +574,7 @@
      }
 
     gchar *buf = Json_node_to_string ( synoptique );
+    json_node_unref(synoptique);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );

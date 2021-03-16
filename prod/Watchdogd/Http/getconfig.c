@@ -40,9 +40,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_config_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gchar requete[256];
-    gsize taille;
+  { gchar requete[256];
     if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -50,13 +48,8 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "id" ) ) )
      { json_node_unref(request);
@@ -96,9 +89,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_config_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gchar critere[256];
-    gsize taille;
+  { gchar critere[256];
     if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -106,13 +97,8 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "instance" ) && Json_has_member ( request, "thread" ) && Json_has_member ( request, "parametres" ) ) )
      { json_node_unref(request);
@@ -142,8 +128,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_config_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
-  { gchar *buf, requete[256], critere[128];
-    gsize taille_buf;
+  { gchar requete[256], critere[128];
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -151,7 +136,6 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-
 
     gchar *instance = Normaliser_as_ascii ( g_hash_table_lookup ( query, "instance" ) );
     gchar *thread   = Normaliser_as_ascii ( g_hash_table_lookup ( query, "thread" ) );
@@ -178,17 +162,18 @@
        g_strlcat ( requete, critere, sizeof(requete) );
      }
 
-    JsonBuilder *builder = Json_create ();
-    if (!builder)
+    JsonNode *RootNode = Json_node_create ();
+    if (!RootNode)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    SQL_Select_to_JSON ( builder, "configs", requete );
+    SQL_Select_to_json_node ( RootNode, "configs", requete );
 
-    buf = Json_get_buf (builder, &taille_buf);
+    gchar *buf = Json_node_to_string (RootNode);
+    json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
