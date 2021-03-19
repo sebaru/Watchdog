@@ -80,7 +80,7 @@
      { SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_modules` ("
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                   "`enable` tinyint(1) NOT NULL,"
+                   "`enable` tinyint(1) NOT NULL DEFAULT '1',"
                    "`hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                    "`tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT hostname,"
                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
@@ -94,7 +94,7 @@ end:
     Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
   }
 #ifdef boh
-  
+
 /******************************************************************************************************************************/
 /* Recuperer_liste_id_phidgetDB: Recupération de la liste des ids des phidgets                                                  */
 /* Entrée: un log et une database                                                                                             */

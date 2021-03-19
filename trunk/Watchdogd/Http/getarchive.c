@@ -104,7 +104,7 @@
     if (SQL_Arch_to_json_node ( RootNode, "valeurs", requete ) == FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
        json_node_unref(request);
-       g_object_unref(RootNode);
+       json_node_unref(RootNode);
        return;
      }
 
