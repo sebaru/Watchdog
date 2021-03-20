@@ -82,6 +82,7 @@
                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
                    "`enable` tinyint(1) NOT NULL DEFAULT '1',"
                    "`hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                   "`password` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                    "PRIMARY KEY (`id`)"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
@@ -1065,54 +1066,45 @@ end:
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO, "%s: '%s' Exited", __func__, module->phidget.tech_id );
     pthread_exit(GINT_TO_POINTER(0));
   }
+#endif
 /******************************************************************************************************************************/
-/* Charger_tous_Phidget: Requete la DB pour charger les modules et les bornes phidget                                           */
+/* Charger_un_Hub: Charge un Hub dans la librairie                                                                            */
+/* Entrée: La structure Json representant le hub                                                                              */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Charger_un_Hub (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+  {
+    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
+                "%s: Chargement du HUB '%s'('%s')", __func__, Json_get_string(element, "hostname"), Json_get_string(element, "description") );
+    PhidgetNet_addServer( Json_get_string(element, "hostname"),
+                          Json_get_string(element, "hostname"), 5661,
+                          Json_get_string(element, "password"), 0);
+  }
+/******************************************************************************************************************************/
+/* Charger_tous_Hub: Requete la DB pour charger les hub phidget                                                               */
 /* Entrée: rien                                                                                                               */
-/* Sortie: le nombre de modules trouvé                                                                                        */
+/* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- static gboolean Charger_tous_PHIDGET ( void  )
+ static gboolean Charger_tous_Hub ( void  )
   { struct PHIDGETDB *phidget;
     struct DB *db;
     gint cpt;
 
-    db = Init_DB_SQL();
-    if (!db) return(FALSE);
+    JsonNode *RootNode = Json_node_create ();
+    if (!RootNode) return(FALSE);
 
-/*************************************************** Chargement des modules ***************************************************/
-    if ( ! Recuperer_phidgetDB( db ) )
-     { Libere_DB_SQL( &db );
+    if (SQL_Select_to_json_node ( RootNode, "hubs", "SELECT * FROM phidget_hub WHERE enable=1" ) == FALSE)
+     { json_node_unref(RootNode);
        return(FALSE);
      }
 
-    Cfg_phidget.Modules_PHIDGET = NULL;
-    cpt = 0;
-    while ( (phidget = Recuperer_phidgetDB_suite(db)) != NULL )
-     { struct MODULE_PHIDGET *module;
-       pthread_t tid;
-
-       module = (struct MODULE_PHIDGET *)g_try_malloc0( sizeof(struct MODULE_PHIDGET) );
-       if (!module)                                                                       /* Si probleme d'allocation mémoire */
-        { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR,
-                   "%s: Erreur allocation mémoire struct MODULE_PHIDGET", __func__ );
-          g_free(phidget);
-          Libere_DB_SQL( &db );
-          return(FALSE);
-        }
-       memcpy( &module->phidget, phidget, sizeof(struct PHIDGETDB) );
-       g_free(phidget);
-       cpt++;                                                                  /* Nous avons ajouté un module dans la liste ! */
-                                                                                            /* Ajout dans la liste de travail */
-       Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-                "%s: tech_id='%s', enable='%d'", __func__, module->phidget.tech_id, module->phidget.enable );
-       pthread_create( &tid, NULL, (void *)Run_phidget_thread, module );
-       Cfg_phidget.Modules_PHIDGET = g_slist_prepend ( Cfg_phidget.Modules_PHIDGET, module );
-     }
-    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO, "%s: %d modules PHIDGET found  !", __func__, cpt );
-    Libere_DB_SQL( &db );
+    Json_node_foreach_array_element ( RootNode, "hubs", Charger_un_Hub, NULL );
+    json_node_unref(RootNode);
     return(TRUE);
   }
+#ifdef bouh
 /******************************************************************************************************************************/
-/* Decharger_tous_phidget: Decharge l'ensemble des modules PHIDGET                                                              */
+/* Decharger_tous_phidget: Decharge l'ensemble des modules PHIDGET                                                            */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
@@ -1201,18 +1193,17 @@ Phidget_close((PhidgetHandle)ch);
 PhidgetAccelerometer_delete(&ch); //Replace DigitalInput with the channel class of your channel
 //PhidgetDigitalInput_delete(&ch); //Replace DigitalInput with the channel class of your channel
 
-#ifdef bouh
 
-    if ( Charger_tous_PHIDGET() == FALSE )                                                  /* Chargement des modules phidget */
-     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: No module PHIDGET found -> stop", __func__ );
+    if ( Charger_tous_Hub() == FALSE )                                                      /* Chargement des modules phidget */
+     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: Error while loading HUB PHIDGET found -> stop", __func__ );
        Cfg_phidget.lib->Thread_run = FALSE;                                                     /* Le thread ne tourne plus ! */
      }
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { usleep(100000);
      }
-    Decharger_tous_PHIDGET();
-#endif
+
+    Phidget_resetLibrary();
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

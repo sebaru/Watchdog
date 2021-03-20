@@ -191,7 +191,7 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "hostname" ) && Json_has_member ( request, "description" ) &&
-            Json_has_member ( request, "enable" )
+            Json_has_member ( request, "password" ) && Json_has_member ( request, "enable" )
            )
        )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -201,19 +201,21 @@
 
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
+    gchar *password    = Normaliser_chaine ( Json_get_string( request, "password" ) );
 
     if (Json_has_member ( request, "id" ))
-     { retour = SQL_Write_new ( "UPDATE phidget_hub SET description='%s', hostname='%s' WHERE id='%d'",
-                                description, hostname, Json_get_int ( request, "id" ) );
+     { retour = SQL_Write_new ( "UPDATE phidget_hub SET description='%s', hostname='%s', password='%s' WHERE id='%d'",
+                                description, hostname, password, Json_get_int ( request, "id" ) );
      }
     else
-     { retour = SQL_Write_new ( "INSERT INTO phidget_hub SET description='%s', hostname='%s'",
-                                description, hostname );
+     { retour = SQL_Write_new ( "INSERT INTO phidget_hub SET description='%s', hostname='%s', password='%s'",
+                                description, hostname, password );
      }
     json_node_unref(request);
 
     g_free(description);
     g_free(hostname);
+    g_free(password);
     if (retour)
      { soup_message_set_status (msg, SOUP_STATUS_OK);
        Lib->Thread_reload = TRUE;
@@ -221,8 +223,8 @@
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
   }
 /******************************************************************************************************************************/
-/* Admin_json_phidget_set: Met à jour une entrée WAGO                                                                          */
-/* Entrées: la connexion Websocket                                                                                            */
+/* Admin_json_phidget_hub_start_stop: Start ou Stop un Hub Phidget                                                            */
+/* Entrées: la connexion Websocket, le champ start/stop                                                                       */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Admin_json_phidget_hub_start_stop ( struct LIBRAIRIE *Lib, SoupMessage *msg, gboolean start )
