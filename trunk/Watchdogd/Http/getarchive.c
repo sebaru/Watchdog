@@ -103,7 +103,7 @@
 
        taille_requete += strlen(chaine)+1;
        requete = g_try_realloc ( requete, taille_requete );
-       if (requete) g_strlcat ( requete, chaine, sizeof(requete) );
+       if (requete) g_strlcat ( requete, chaine, taille_requete );
 
        JsonNode *json_courbe = Json_node_add_objet ( RootNode, nom_courbe );
        g_snprintf(chaine, sizeof(chaine), "SELECT * FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme );
