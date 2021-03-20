@@ -83,7 +83,7 @@
        return;
      }
 
-    g_snprintf( requete, sizeof(requete), "SELECT * FROM ");
+    g_snprintf( requete, taille_requete, "SELECT * FROM ");
 
     int nbr_courbe = json_array_get_length ( Json_get_array ( request, "courbes" ) );
     for (nbr=0; nbr<nbr_courbe; nbr++)
