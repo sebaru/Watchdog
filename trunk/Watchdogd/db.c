@@ -194,7 +194,7 @@
 
     va_start( ap, format );
     gsize taille = g_printf_string_upper_bound (format, ap);
-    gchar *chaine = g_try_malloc(taille)+1;
+    gchar *chaine = g_try_malloc(taille+1);
     if (chaine)
      { g_vsnprintf ( chaine, taille, format, ap );
        va_end ( ap );
@@ -261,7 +261,7 @@
 
     va_start( ap, format );
     gsize taille = g_printf_string_upper_bound (format, ap);
-    gchar *chaine = g_try_malloc(taille)+1;
+    gchar *chaine = g_try_malloc(taille+1);
     if (chaine)
      { g_vsnprintf ( chaine, taille, format, ap );
        va_end ( ap );
