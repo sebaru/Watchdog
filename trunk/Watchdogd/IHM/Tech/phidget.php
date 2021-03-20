@@ -115,7 +115,7 @@
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Classe</label>
 						     <select id="idModalPhidgetIOClasse" required class="col-7 col-sm-8 form-control-file custom-select">
-             <option value='VoltageRatio'>Voltage Ratio</option>
+             <option value='VoltageRatioInput'>Voltage Ratio Input</option>
              <option value='DigitalInput'>Digital Input</option>
              <option value='DigitalOutput'>Digital Output</option>
            </select>

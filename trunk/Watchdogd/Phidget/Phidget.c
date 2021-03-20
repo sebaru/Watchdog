@@ -91,7 +91,7 @@
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
                    "`hub_id` int(11) NOT NULL,"
                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                   "`classe` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                   "`classe` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                    "`port` int(11) NOT NULL,"
                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                    "PRIMARY KEY (`id`),"
@@ -245,7 +245,7 @@ end:
 
     if (SQL_Select_to_json_node ( RootNode, "hubs",
                                   "SELECT hub.serial,io.* FROM phidget_io AS io "
-                                  "INNER JOIN phidget_hub AS hub ON hub.id=io.hub_id" ) == FALSE)
+                                  "INNER JOIN phidget_hub AS hub ON hub.id=io.hub_id WHERE hub.enable=1" ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
      }
