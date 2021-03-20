@@ -55,7 +55,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   apt install -y libgtk-3-dev libgoocanvas-2.0-dev
   apt install -y libsoup2.4-dev
   curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -
-  apt-get install -y libphidget22
+  apt install -y libphidget22 libphidget22-dev
 fi
 
     if [ "$SOCLE" = "fedora" ]

@@ -193,6 +193,113 @@
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
   }
 /******************************************************************************************************************************/
+/* Admin_json_phidget_hub_list: Renvoie la liste des hub Phidget configurés                                                   */
+/* Entrées: la connexion Websocket destinataire                                                                               */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Admin_json_phidget_io_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    if (SQL_Select_to_json_node ( RootNode, "ios",
+                                  "SELECT hub.hostname, hub.serial, hub.id as hub_id, io.* FROM phidget_hub AS hub "
+                                  "INNER JOIN phidget_io AS io ON hub.id=io.hub_id"
+                                ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       json_node_unref(RootNode);
+       return;
+     }
+
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref(RootNode);
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ static void Admin_json_phidget_io_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  {
+    if (msg->method != SOUP_METHOD_DELETE)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
+
+    if ( ! (Json_has_member ( request, "id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    SQL_Write_new( "DELETE FROM phidget_io WHERE id='%d'", Json_get_int ( request, "id" ) );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    Lib->Thread_reload = TRUE;
+  }
+/******************************************************************************************************************************/
+/* Admin_json_phidget_set: Met à jour une entrée WAGO                                                                          */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Admin_json_phidget_io_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { gboolean retour;
+
+    if ( msg->method != SOUP_METHOD_POST )
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
+
+    if ( ! (Json_has_member ( request, "hub_id" ) && Json_has_member ( request, "description" ) &&
+            Json_has_member ( request, "classe" ) && Json_has_member ( request, "port" )
+           )
+       )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       json_node_unref(request);
+       return;
+     }
+
+    gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
+    gchar *classe      = Normaliser_chaine ( Json_get_string( request, "classe" ) );
+    gchar port         = Json_get_int ( request, "port" );
+    gchar hub_id       = Json_get_int ( request, "hub_id" );
+
+    if (Json_has_member ( request, "id" ))
+     { retour = SQL_Write_new ( "UPDATE phidget_io SET description='%s', classe='%s', port='%d', hub_id='%d' WHERE id='%d'",
+                                description, classe, port, hub_id, Json_get_int ( request, "id" ) );
+     }
+    else
+     { retour = SQL_Write_new ( "INSERT INTO phidget_io SET description='%s', classe='%s', port='%d', hub_id='%d'",
+                                description, classe, port, hub_id );
+     }
+    json_node_unref(request);
+
+    g_free(description);
+    g_free(classe);
+    if (retour)
+     { soup_message_set_status (msg, SOUP_STATUS_OK);
+       Lib->Thread_reload = TRUE;
+     }
+    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+  }
+/******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
@@ -202,13 +309,15 @@
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
-         if (!strcasecmp(path, "/hub_list"))    { Admin_json_phidget_hub_list ( lib, msg ); }
-    /*else if (!strcasecmp(path, "/module_list")) { Admin_json_phidget_modules_status ( lib, msg ); }*/
-    else if (!strcasecmp(path, "/status"))      { Admin_json_phidget_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/hub_del"))     { Admin_json_phidget_hub_del ( lib, msg ); }
-    else if (!strcasecmp(path, "/hub_set"))     { Admin_json_phidget_hub_set ( lib, msg ); }
-    else if (!strcasecmp(path, "/hub_start"))   { Admin_json_phidget_hub_start_stop ( lib, msg, TRUE ); }
-    else if (!strcasecmp(path, "/hub_stop"))    { Admin_json_phidget_hub_start_stop ( lib, msg, FALSE ); }
+         if (!strcasecmp(path, "/status"))    { Admin_json_phidget_status ( lib, msg ); }
+    else if (!strcasecmp(path, "/hub_list"))  { Admin_json_phidget_hub_list ( lib, msg ); }
+    else if (!strcasecmp(path, "/hub_del"))   { Admin_json_phidget_hub_del ( lib, msg ); }
+    else if (!strcasecmp(path, "/hub_set"))   { Admin_json_phidget_hub_set ( lib, msg ); }
+    else if (!strcasecmp(path, "/hub_start")) { Admin_json_phidget_hub_start_stop ( lib, msg, TRUE ); }
+    else if (!strcasecmp(path, "/hub_stop"))  { Admin_json_phidget_hub_start_stop ( lib, msg, FALSE ); }
+    else if (!strcasecmp(path, "/io_list"))   { Admin_json_phidget_io_list ( lib, msg ); }
+    else if (!strcasecmp(path, "/io_del"))    { Admin_json_phidget_io_del ( lib, msg ); }
+    else if (!strcasecmp(path, "/io_set"))    { Admin_json_phidget_io_set ( lib, msg ); }
     else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
     return;
   }

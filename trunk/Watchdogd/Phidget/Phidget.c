@@ -92,7 +92,7 @@
                    "`hub_id` int(11) NOT NULL,"
                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
                    "`classe` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                   "`password` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                   "`port` int(11) NOT NULL,"
                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                    "PRIMARY KEY (`id`),"
                    "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
