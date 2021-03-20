@@ -194,9 +194,11 @@
 
     va_start( ap, format );
     gsize taille = g_printf_string_upper_bound (format, ap);
+    va_end ( ap );
     gchar *chaine = g_try_malloc(taille+1);
     if (chaine)
-     { g_vsnprintf ( chaine, taille, format, ap );
+     { va_start( ap, format );
+       g_vsnprintf ( chaine, taille, format, ap );
        va_end ( ap );
        gboolean retour = SQL_Select_to_JSON ( builder, array_name, chaine );
        g_free(chaine);
@@ -261,10 +263,13 @@
 
     va_start( ap, format );
     gsize taille = g_printf_string_upper_bound (format, ap);
+    va_end ( ap );
     gchar *chaine = g_try_malloc(taille+1);
     if (chaine)
-     { g_vsnprintf ( chaine, taille, format, ap );
+     { va_start( ap, format );
+       g_vsnprintf ( chaine, taille, format, ap );
        va_end ( ap );
+
        gboolean retour = SQL_Select_to_json_node_reel ( FALSE, RootNode, array_name, chaine );
        g_free(chaine);
        return(retour);
