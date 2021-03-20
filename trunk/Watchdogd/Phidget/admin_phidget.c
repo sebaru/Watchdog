@@ -57,67 +57,6 @@
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
-#ifdef bouh
-/******************************************************************************************************************************/
-/* Admin_json_phidget_list : fonction appelée pour lister les modules phidget                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- static void Admin_json_phidget_modules_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { GSList *liste_modules;
-    JsonBuilder *RootNode;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-/************************************************ Préparation du buffer JSON **************************************************/
-    RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    Json_add_array ( RootNode, "modules" );
-    if (Lib->Thread_run)                                    /* Warning : Cfg_phidget does not exist if thread is not running ! */
-     { pthread_mutex_lock( &Lib->synchro );
-       liste_modules = Cfg_phidget.Modules_PHIDGET;
-       while ( liste_modules )
-        { struct MODULE_PHIDGET *module = liste_modules->data;
-
-          Json_add_object ( RootNode, NULL );
-          Json_add_string ( RootNode, "tech_id", module->phidget.tech_id );
-          Json_add_string ( RootNode, "mode", Modbus_mode_to_string(module) );
-          Json_add_bool   ( RootNode, "started", module->started );
-          Json_add_int    ( RootNode, "nbr_entree_tor", module->nbr_entree_tor );
-          Json_add_int    ( RootNode, "nbr_sortie_tor", module->nbr_sortie_tor );
-          Json_add_int    ( RootNode, "nbr_entree_ana", module->nbr_entree_ana );
-          Json_add_int    ( RootNode, "nbr_sortie_ana", module->nbr_sortie_ana );
-          Json_add_bool   ( RootNode, "comm", Dls_data_get_MONO( NULL, NULL, &module->bit_comm) );
-          Json_add_int    ( RootNode, "transaction_id", module->transaction_id );
-          Json_add_int    ( RootNode, "nbr_request_par_sec", module->nbr_request_par_sec );
-          Json_add_int    ( RootNode, "delai", module->delai );
-          Json_add_int    ( RootNode, "nbr_deconnect", module->nbr_deconnect );
-          Json_add_int    ( RootNode, "last_reponse", (Partage->top - module->date_last_reponse)/10 );
-          Json_add_int    ( RootNode, "date_next_eana", (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1) );
-          Json_add_int    ( RootNode, "date_retente", (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1) );
-          Json_end_object ( RootNode );                                                                       /* End Module Array */
-
-          liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
-        }
-       pthread_mutex_unlock( &Lib->synchro );
-     }
-    Json_end_array (RootNode);                                                                                 /* End Document */
-
-    buf = Json_get_buf ( RootNode, &taille_buf );
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(taille_buf) );
-  }
-#endif
 /******************************************************************************************************************************/
 /* Admin_json_phidget_hub_list: Renvoie la liste des hub Phidget configurés                                                   */
 /* Entrées: la connexion Websocket destinataire                                                                               */
@@ -191,7 +130,8 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "hostname" ) && Json_has_member ( request, "description" ) &&
-            Json_has_member ( request, "password" ) && Json_has_member ( request, "enable" )
+            Json_has_member ( request, "password" ) && Json_has_member ( request, "enable" ) &&
+            Json_has_member ( request, "serial" )
            )
        )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -204,12 +144,12 @@
     gchar *password    = Normaliser_chaine ( Json_get_string( request, "password" ) );
 
     if (Json_has_member ( request, "id" ))
-     { retour = SQL_Write_new ( "UPDATE phidget_hub SET description='%s', hostname='%s', password='%s' WHERE id='%d'",
-                                description, hostname, password, Json_get_int ( request, "id" ) );
+     { retour = SQL_Write_new ( "UPDATE phidget_hub SET description='%s', hostname='%s', password='%s', serial='%d' WHERE id='%d'",
+                                description, hostname, password, Json_get_int ( request, "serial" ), Json_get_int ( request, "id" ) );
      }
     else
-     { retour = SQL_Write_new ( "INSERT INTO phidget_hub SET description='%s', hostname='%s', password='%s'",
-                                description, hostname, password );
+     { retour = SQL_Write_new ( "INSERT INTO phidget_hub SET description='%s', hostname='%s', password='%s', serial='%d'",
+                                description, hostname, password, Json_get_int ( request, "serial" ) );
      }
     json_node_unref(request);
 

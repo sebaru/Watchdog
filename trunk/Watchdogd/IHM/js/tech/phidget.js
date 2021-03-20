@@ -45,6 +45,7 @@
          hostname   : $('#idModalPhidgetHubHostname').val(),
          description: $('#idModalPhidgetHubDescription').val(),
          password   : $('#idModalPhidgetHubPassword').val(),
+         serial     : $('#idModalPhidgetHubSerial').val(),
        };
     if (id!=-1) json_request.id = id;
     Send_to_API ( 'POST', "/api/process/phidget/hub_set", JSON.stringify(json_request), function ()
@@ -60,6 +61,7 @@
     $('#idModalPhidgetHubHostname').val ( selection.hostname );
     $('#idModalPhidgetHubDescription').val( selection.description );
     $('#idModalPhidgetHubPassword').val( selection.password );
+    $('#idModalPhidgetHubSerial').val( selection.serial );
     $('#idModalPhidgetHubValider').attr( "onclick", "Valider_Phidget_Hub_Set("+id+")" );
     $('#idModalPhidgetHub').modal("show");
   }
@@ -69,6 +71,7 @@
     $('#idModalPhidgetHubHostname').val ( "" );
     $('#idModalPhidgetHubDescription').val( "" );
     $('#idModalPhidgetHubPassword').val( "" );
+    $('#idModalPhidgetHubSerial').val( "" );
     $('#idModalPhidgetHubValider').attr( "onclick", "Valider_Phidget_Hub_Set(-1)" );
     $('#idModalPhidgetHub').modal("show");
   }
@@ -101,6 +104,7 @@
             { "data": "hostname", "title":"Hostname", "className": "align-middle text-center " },
             { "data": "description", "title":"Description", "className": "align-middle text-center " },
             { "data": "password", "title":"Password", "className": "align-middle text-center " },
+            { "data": "serial", "title":"Serial Number", "className": "align-middle text-center " },
             { "data": "date_create", "title":"Date Création", "className": "align-middle text-center " },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();

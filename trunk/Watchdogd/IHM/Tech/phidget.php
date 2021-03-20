@@ -71,6 +71,13 @@
 
        <div class="col form-group">
 					     <div class="input-group">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Mot de passe</label>
+						     <input id="idModalPhidgetHubSerial" required type="number" class="form-control" placeholder="Serial Number">
+     					</div>
+   					</div>
+
+       <div class="col form-group">
+					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Description</label>
 						     <input id="idModalPhidgetHubDescription" type="text" class="form-control" placeholder="Ou est le module ?">
      					</div>
