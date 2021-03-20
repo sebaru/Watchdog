@@ -77,12 +77,11 @@
              "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, WTD_VERSION );
 
     if (database_version==0)
-     { SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_modules` ("
+     { SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_hub` ("
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
                    "`enable` tinyint(1) NOT NULL DEFAULT '1',"
                    "`hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                   "`tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT hostname,"
                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                    "PRIMARY KEY (`id`)"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
@@ -93,7 +92,7 @@ end:
     database_version = 2;
     Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
   }
-#ifdef boh
+#ifdef bouh
 
 /******************************************************************************************************************************/
 /* Recuperer_liste_id_phidgetDB: Recupération de la liste des ids des phidgets                                                  */

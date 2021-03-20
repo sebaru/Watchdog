@@ -44,7 +44,7 @@
 </div>
 
 
-<div id="idModalPhidgetHubEdit" class="modal fade" tabindex="-1" role="dialog">
+<div id="idModalPhidgetHub" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
@@ -54,13 +54,6 @@
         </button>
       </div>
       <div class="modal-body">
-
-       <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">TechID</label>
-						     <input id="idModalPhidgetHubTechID" required type="text" class="form-control" placeholder="Tech ID du module">
-     					</div>
-   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
