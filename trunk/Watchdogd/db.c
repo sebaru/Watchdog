@@ -282,13 +282,22 @@
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
  gboolean SQL_Arch_to_json_node ( JsonNode *RootNode, gchar *array_name, gchar *format, ... )
-  { gchar chaine[1024];
-    va_list ap;
+  { va_list ap;
 
     va_start( ap, format );
-    g_vsnprintf ( chaine, sizeof(chaine), format, ap );
+    gsize taille = g_printf_string_upper_bound (format, ap);
     va_end ( ap );
-    return(SQL_Select_to_json_node_reel ( TRUE, RootNode, array_name, chaine ));
+    gchar *chaine = g_try_malloc(taille+1);
+    if (chaine)
+     { va_start( ap, format );
+       g_vsnprintf ( chaine, taille, format, ap );
+       va_end ( ap );
+
+       gboolean retour = SQL_Select_to_json_node_reel ( TRUE, RootNode, array_name, chaine );
+       g_free(chaine);
+       return(retour);
+     }
+    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
