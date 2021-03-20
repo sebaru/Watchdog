@@ -5,7 +5,7 @@
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Show_Phidget_Hub_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
         <button type="button" onclick="Redirect('/tech/phidget_map')" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
-        <button type="button" onclick="Phidget_refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
+        <button type="button" onclick="Phidget_Hub_refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
    </div>
  </div>
 
@@ -31,7 +31,14 @@
     </table>
 
 <hr>
- <h3>Détails des I/O Phidget</h3>
+ <div class="row m-2">
+   <h3><img src="/img/phidget_hub5000.jpg" style="width:80px" alt="Phidget HB5000">Détails des I/O Phidgets</h3>
+   <div class ="ml-auto btn-group align-items-start">
+        <button type="button" onclick="Show_Phidget_IO_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
+        <button type="button" onclick="Redirect('/tech/phidget_map')" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
+        <button type="button" onclick="Phidget_IO_refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
+   </div>
+ </div>
 
     <table id="idTablePhidgetRun" class="table table-striped table-bordered table-hover">
       <thead class="thead-dark">

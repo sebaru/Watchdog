@@ -1,9 +1,10 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
- function Phidget_refresh ( )
+ function Phidget_Hub_refresh ( )
   { $('#idTablePhidgetHub').DataTable().ajax.reload(null, false);
-    $('#idTablePhidgetIO').DataTable().ajax.reload(null, false);
-    $('#idTablePhidgetRun').DataTable().ajax.reload(null, false);
+  }
+ function Phidget_IO_refresh ( )
+  { $('#idTablePhidgetIO').DataTable().ajax.reload(null, false);
   }
 /************************************ Envoi les infos de modifications phidget ************************************************/
  function Phidget_enable_hub ( id )
