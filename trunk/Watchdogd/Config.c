@@ -51,7 +51,6 @@
     g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", DEFAUT_LIBRAIRIE_DIR   );
 
     Config.instance_is_master = TRUE;
-    Config.log_db             = FALSE;
     Config.db_port            = DEFAUT_DB_PORT;
 
     g_snprintf( Config.db_hostname, sizeof(Config.db_hostname), "%s", DEFAUT_DB_HOST  );
@@ -60,8 +59,6 @@
     g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME  );
 
     Config.log_level = LOG_INFO;
-    Config.log_msrv  = FALSE;
-    Config.log_arch  = FALSE;
 
     gkf = g_key_file_new();
 
@@ -83,7 +80,6 @@
      { g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", chaine ); g_free(chaine); }
 
 /******************************************************** Partie DATABASE *****************************************************/
-    Config.log_db = g_key_file_get_boolean ( gkf, "DATABASE", "debug", NULL );
     num           = g_key_file_get_integer ( gkf, "DATABASE", "port", NULL );
     if (num) Config.db_port = num;
 
@@ -104,7 +100,6 @@
      { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", chaine ); g_free(chaine); }
 
 /******************************************************** Partie LOG **********************************************************/
-    Config.log_msrv = g_key_file_get_boolean ( gkf, "LOG", "debug_msrv", NULL );
     Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "debug_arch", NULL );
     g_key_file_free(gkf);
     return(TRUE);
@@ -129,7 +124,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db username          %s", Config.db_username );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db password          *******" );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db debug             %d", Config.log_db );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
   }
 /******************************************************************************************************************************/

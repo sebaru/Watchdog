@@ -110,13 +110,12 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogLevel set to '%d'", __func__, log_target );
 
     Config.log_db = Json_get_int ( request, "log_db" );
-    Modifier_configDB_int ( "msrv", "log_db", Config.log_db );
+    Modifier_configDB ( "msrv", "log_db", (Config.log_db ? "true" : "false") );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogDB set to '%d'", __func__, Config.log_db );
 
     Config.log_zmq = Json_get_int ( request, "log_zmq" );
-    Modifier_configDB_int ( "msrv", "log_zmq", Config.log_zmq );
+    Modifier_configDB ( "msrv", "log_zmq", (Config.log_zmq ? "true" : "false") );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogZMQ set to '%d'", __func__, Config.log_zmq );
-
 
     json_node_unref(request);
 	   soup_message_set_status (msg, SOUP_STATUS_OK);

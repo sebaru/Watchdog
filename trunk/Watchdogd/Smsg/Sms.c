@@ -56,7 +56,7 @@
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB connexion failed", __func__ );
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -65,7 +65,7 @@
                " FROM %s WHERE instance='%s' LIMIT 1", NOM_THREAD, g_get_host_name());
     if (!Lancer_requete_SQL ( db, requete ))
      { Libere_DB_SQL ( &db );
-       Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB Requete failed", __func__ );
+       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: DB Requete failed", __func__ );
        return(FALSE);
      }
 
@@ -165,9 +165,9 @@ end:
     sms = (struct SMSDB *)g_try_malloc0( sizeof(struct SMSDB) );
     if (!sms) Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
-     { g_snprintf( sms->user_phone, sizeof(sms->user_phone), "%s", db->row[5] );
-       g_snprintf( sms->user_name,      sizeof(sms->user_name),      "%s", db->row[1] );
-       g_snprintf( sms->user_comment,   sizeof(sms->user_comment),   "%s", db->row[3] );
+     { g_snprintf( sms->user_phone,   sizeof(sms->user_phone), "%s", db->row[5] );
+       g_snprintf( sms->user_name,    sizeof(sms->user_name),      "%s", db->row[1] );
+       g_snprintf( sms->user_comment, sizeof(sms->user_comment),   "%s", db->row[3] );
        sms->user_id            = atoi(db->row[0]);
        sms->user_enable        = atoi(db->row[2]);
        sms->user_notification  = atoi(db->row[4]);
@@ -187,7 +187,7 @@ end:
 
     phone = Normaliser_chaine ( tel );
     if (!phone)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
                 "%s: Normalisation phone impossible", __func__ );
        return(NULL);
      }

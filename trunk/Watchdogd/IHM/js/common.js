@@ -236,9 +236,9 @@
        var myChart = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
 
-    if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
+    /* if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
     else if (period=="DAY")  setInterval( function() { window.location.reload(); }, 300000);
-    else setInterval( function() { window.location.reload(); }, 600000);
+    else setInterval( function() { window.location.reload(); }, 600000);*/
 	 }
 
 /********************************* Chargement d'une courbe dans u synoptique 1 au démrrage ************************************/
@@ -283,8 +283,8 @@ console.debug(data);
        var myChart = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
 
-    if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
+    /*if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
     else if (period=="DAY")  setInterval( function() { window.location.reload(); }, 300000);
-    else setInterval( function() { window.location.reload(); }, 600000);
+    else setInterval( function() { window.location.reload(); }, 600000);*/
 	 }
 /*----------------------------------------------------------------------------------------------------------------------------*/

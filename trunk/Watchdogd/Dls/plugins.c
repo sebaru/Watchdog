@@ -123,7 +123,7 @@
 
     struct DB *db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB connexion failed", __func__ );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: DB connexion failed", __func__ );
        return;
      }
 
@@ -136,7 +136,7 @@
                                         "INNER JOIN thread_classe AS tc ON map_thread = tc.thread "
                                         " WHERE tech_id='%s' AND tc.classe='I/O'", dls->tech_id );
     if (!Lancer_requete_SQL ( db, chaine ))
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB request failed", __func__ );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: DB request failed", __func__ );
        return;
      }
 
@@ -145,14 +145,14 @@
        if (db->row[0])
         { Dls_data_get_WATCHDOG ( db->row[0], "IO_COMM", &wtd );
           if (wtd) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, wtd );
-          else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, db->row[0] ); }
+          else { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, db->row[0] ); }
         }
      }
     if (dls->is_thread)
      { gpointer wtd = NULL;/* Le bit de synthèse comm du module dépend aussi de l'io_comm du module lui-meme si dependance thread */
        Dls_data_get_WATCHDOG ( dls->tech_id, "IO_COMM", &wtd );
        if (wtd) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, wtd );
-       else { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, dls->tech_id ); }
+       else { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, dls->tech_id ); }
      }
     Libere_DB_SQL ( &db );
   }
