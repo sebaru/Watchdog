@@ -34,35 +34,32 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_audio_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    Json_add_bool ( builder, "thread_is_running", Lib->Thread_run );
+    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
     if (Lib->Thread_run)                                     /* Warning : Cfg_audio does not exist if thread is not running ! */
-     { Json_add_string ( builder, "langage", Cfg_audio.language );
-       Json_add_string ( builder, "device", Cfg_audio.device );
-       Json_add_bool ( builder, "diffusion_enabled",    Cfg_audio.diffusion_enabled );
-       Json_add_int  ( builder, "last_audio",           Cfg_audio.last_audio );
-       Json_add_int  ( builder, "nbr_diffusion_wav",    Cfg_audio.nbr_diffusion_wav );
-       Json_add_int  ( builder, "nbr_diffusion_google", Cfg_audio.nbr_diffusion_google );
+     { Json_node_add_string ( RootNode, "langage", Cfg_audio.language );
+       Json_node_add_string ( RootNode, "device", Cfg_audio.device );
+       Json_node_add_bool   ( RootNode, "diffusion_enabled",    Cfg_audio.diffusion_enabled );
+       Json_node_add_int    ( RootNode, "last_audio",           Cfg_audio.last_audio );
+       Json_node_add_int    ( RootNode, "nbr_diffusion_wav",    Cfg_audio.nbr_diffusion_wav );
+       Json_node_add_int    ( RootNode, "nbr_diffusion_google", Cfg_audio.nbr_diffusion_google );
      }
-    buf = Json_get_buf ( builder, &taille_buf );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
