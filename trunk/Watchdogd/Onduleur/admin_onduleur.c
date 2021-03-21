@@ -35,30 +35,27 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_ups_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    Json_add_bool ( builder, "thread_is_running", Lib->Thread_run );
+    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
 /*    if (Lib->Thread_run)                                    /* Warning : Cfg_ups does not exist if thread is not running ! */
 /*     { Json_add_int ( builder, "nbr_request_par_sec", Cfg_ups.nbr_request_par_sec ); }*/
 
-    buf = Json_get_buf ( builder, &taille_buf );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Admin_json_ups_list : fonction appelée pour lister les upss ups                                                   */
@@ -66,53 +63,50 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_ups_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { GSList *liste_upss;
-    JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    Json_add_array ( builder, "ups" );
+    JsonArray *array = Json_node_add_array ( RootNode, "ups" );
     if (Lib->Thread_run)                                    /* Warning : Cfg_ups does not exist if thread is not running ! */
      { pthread_mutex_lock( &Lib->synchro );
-       liste_upss = Cfg_ups.Modules_UPS;
+       GSList *liste_upss = Cfg_ups.Modules_UPS;
        while ( liste_upss )
         { struct MODULE_UPS *ups = liste_upss->data;
 
-          Json_add_object ( builder, NULL );
-          Json_add_string ( builder, "tech_id", ups->tech_id );
-          Json_add_string ( builder, "host", ups->host );
-          Json_add_string ( builder, "name", ups->name );
-          Json_add_string ( builder, "description", ups->description );
-          Json_add_bool   ( builder, "enable", ups->enable );
-          Json_add_bool   ( builder, "started", ups->started );
-          Json_add_int    ( builder, "nbr_connexion", ups->nbr_connexion );
-          Json_add_string ( builder, "admin_username", ups->admin_username );
-          Json_add_string ( builder, "admin_password", ups->admin_password );
-          Json_add_string ( builder, "date_create", ups->date_create );
-          Json_end_object ( builder );                                                                       /* End Module Array */
+          JsonNode *ups_node = Json_node_create();
+          if (ups_node)
+           { Json_node_add_string ( ups_node, "tech_id", ups->tech_id );
+             Json_node_add_string ( ups_node, "host", ups->host );
+             Json_node_add_string ( ups_node, "name", ups->name );
+             Json_node_add_string ( ups_node, "description", ups->description );
+             Json_node_add_bool   ( ups_node, "enable", ups->enable );
+             Json_node_add_bool   ( ups_node, "started", ups->started );
+             Json_node_add_int    ( ups_node, "nbr_connexion", ups->nbr_connexion );
+             Json_node_add_string ( ups_node, "admin_username", ups->admin_username );
+             Json_node_add_string ( ups_node, "admin_password", ups->admin_password );
+             Json_node_add_string ( ups_node, "date_create", ups->date_create );
+             Json_array_add_element ( array, ups_node );                                                  /* End Module Array */
+           }
 
           liste_upss = liste_upss->next;                                                      /* Passage au ups suivant */
         }
        pthread_mutex_unlock( &Lib->synchro );
      }
-    Json_end_array (builder);                                                                                 /* End Document */
 
-    buf = Json_get_buf ( builder, &taille_buf );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
@@ -120,20 +114,14 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  static void Admin_json_ups_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { GBytes *request_brute;
-    gsize taille;
-    gchar chaine[256];
+  { gchar chaine[256];
     if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
@@ -162,21 +150,15 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Admin_json_ups_set_add ( gboolean ajout, struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { GBytes *request_brute;
-    gchar requete[256];
-    gsize taille;
+  { gchar requete[256];
 
     if ( msg->method != SOUP_METHOD_POST )
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) &&
             Json_has_member ( request, "host" ) && Json_has_member ( request, "name" ) &&
@@ -222,21 +204,15 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Admin_json_ups_start ( struct LIBRAIRIE *Lib, SoupMessage *msg, gboolean start )
-  { GBytes *request_brute;
-    gchar requete[256];
-    gsize taille;
+  { gchar requete[256];
 
     if ( msg->method != SOUP_METHOD_POST )
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
