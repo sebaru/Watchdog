@@ -120,7 +120,7 @@
     Select_from_api ( 'idModalPhidgetIOHubID', "/api/process/phidget/hub_list", null , "hubs", "id",
                       function ( hub ) { return( hub.serial + " - " + hub.description ); }, null );
     $('#idModalPhidgetIOHubID').val( "" );
-    $('#idModalPhidgetIOClasse').val( "" );
+    $('#idModalPhidgetIOClasse').val( "DigitalInput" );
     $('#idModalPhidgetIODescription').val( "" );
     $('#idModalPhidgetIOPort').val( "" );
     $('#idModalPhidgetIOValider').attr( "onclick", "Valider_Phidget_IO_Set(-1)" );
@@ -140,7 +140,7 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": null, "title":"Enabled", "className": "align-middle text-center",
+          [ { "data": null, "title":"Enable", "className": "align-middle text-center",
               "render": function (item)
                 { if (item.enable==true)
                    { return( Bouton ( "success", "Désactiver le HUB",

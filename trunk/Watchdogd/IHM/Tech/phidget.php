@@ -106,7 +106,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Serial Number</label>
-						     <select id="idModalPhidgetIOHubID" required class="col-7 col-sm-8 form-control-file custom-select">
+						     <select id="idModalPhidgetIOHubID" required class="col-7 col-sm-8 custom-select border-info">
            </select>
      					</div>
    					</div>
@@ -114,10 +114,10 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Classe</label>
-						     <select id="idModalPhidgetIOClasse" required class="col-7 col-sm-8 form-control-file custom-select">
-             <option value='VoltageRatioInput'>Voltage Ratio Input</option>
+						     <select id="idModalPhidgetIOClasse" required class="col-7 col-sm-8 custom-select border-info">
              <option value='DigitalInput'>Digital Input</option>
              <option value='DigitalOutput'>Digital Output</option>
+             <option value='VoltageRatioInput'>Voltage Ratio Input</option>
            </select>
      					</div>
    					</div>
