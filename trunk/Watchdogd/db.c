@@ -2221,7 +2221,7 @@ fin:
        "SELECT 'CI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_CI UNION "
        "SELECT 'HORLOGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_HORLOGE UNION "
        "SELECT 'TEMPO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_Tempo UNION "
-       "SELECT 'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_R UNION "
+       "SELECT 'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_R UNION "
        "SELECT 'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM syns_motifs UNION "
        "SELECT 'WATCHDOG' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_WATCHDOG UNION "
        "SELECT 'TABLEAU' AS classe, -1 AS classe_int, '' AS tech_id, '' AS acronyme, titre AS libelle, 'none' as unite FROM tableau UNION "
