@@ -33,44 +33,52 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_status ( JsonBuilder *builder )
-  { gint cpt;
-    Json_add_string ( builder, "tech_id", Cfg_dmx.tech_id );
-    Json_add_string ( builder, "device", Cfg_dmx.device );
-    Json_add_int    ( builder, "nbr_request", Cfg_dmx.nbr_request );
-    Json_add_int    ( builder, "taille_trame_dmx", Cfg_dmx.taille_trame_dmx );
-    Json_add_bool   ( builder, "comm", Cfg_dmx.comm_status );
+ static void Admin_json_dmx_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
 
-    if (Cfg_dmx.Canal)
-     { for (cpt=0; cpt<64; cpt++)
-        { gchar canal[12];
-          g_snprintf( canal, sizeof(canal), "canal_%d", cpt+1 );
-          Json_add_int ( builder, canal, Cfg_dmx.Trame_dmx.channel[cpt] ); /*Canal[cpt].val_avant_ech );*/
+    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
+
+    if (Lib->Thread_run)                                      /* Warning : Cfg_smsg does not exist if thread is not running ! */
+     { Json_node_add_string ( RootNode, "tech_id", Cfg_dmx.tech_id );
+       Json_node_add_string ( RootNode, "device", Cfg_dmx.device );
+       Json_node_add_int    ( RootNode, "nbr_request", Cfg_dmx.nbr_request );
+       Json_node_add_int    ( RootNode, "taille_trame_dmx", Cfg_dmx.taille_trame_dmx );
+       Json_node_add_bool   ( RootNode, "comm", Cfg_dmx.comm_status );
+
+       if (Cfg_dmx.Canal)
+        { for (gint cpt=0; cpt<64; cpt++)
+           { gchar canal[12];
+             g_snprintf( canal, sizeof(canal), "canal_%d", cpt+1 );
+             Json_node_add_int ( RootNode, canal, Cfg_dmx.Trame_dmx.channel[cpt] ); /*Canal[cpt].val_avant_ech );*/
+           }
         }
      }
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref(RootNode);
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( gchar *commande, gchar **buffer_p, gsize *taille_p )
-  { JsonBuilder *builder;
-
-    *buffer_p = NULL;
-    *taille_p = 0;
-
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+ void Admin_json ( struct LIBRAIRIE *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
+  { if (access_level < 6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
-/************************************************ Préparation du buffer JSON **************************************************/
-                                                                      /* Lancement de la requete de recuperation des messages */
-    if (!strcmp(commande, "/status")) { Admin_json_status ( builder ); }
-
-/************************************************ Génération du JSON **********************************************************/
-    *buffer_p = Json_get_buf ( builder, taille_p );
-    return;
+         if (!strcasecmp(path, "/status"))   { Admin_json_dmx_status ( lib, msg ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
