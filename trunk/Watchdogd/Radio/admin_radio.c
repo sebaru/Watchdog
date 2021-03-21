@@ -33,30 +33,43 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_status ( JsonBuilder *builder )
-  { Json_add_int ( builder, "nbr_diffusion_radio", Cfg_radio.nbr_diffusion );
-    Json_add_int ( builder, "radio_en_cours", Cfg_radio.radio_en_cours );
+ static void Admin_json_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
+
+    if (Lib->Thread_run)                                      /* Warning : Cfg_smsg does not exist if thread is not running ! */
+     { Json_node_add_int ( RootNode, "nbr_diffusion_radio", Cfg_radio.nbr_diffusion );
+       Json_node_add_int ( RootNode, "radio_en_cours", Cfg_radio.radio_en_cours );
+     }
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref(RootNode);
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( gchar *commande, gchar **buffer_p, gsize *taille_p )
-  { JsonBuilder *builder;
-    *buffer_p = NULL;
-    *taille_p = 0;
-
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+ void Admin_json ( struct LIBRAIRIE *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
+  { if (access_level < 6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
-     }
-/************************************************ Préparation du buffer JSON **************************************************/
-                                                                      /* Lancement de la requete de recuperation des messages */
-    if (!strcmp(commande, "/status")) { Admin_json_status ( builder ); }
+     }                                                         /* Lancement de la requete de recuperation des messages */
 
-    *buffer_p = Json_get_buf ( builder, taille_p );
-    return;
+    if (!strcmp(path, "/status")) { Admin_json_status ( lib, msg ); }
+    else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
