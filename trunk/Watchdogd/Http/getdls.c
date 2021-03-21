@@ -335,19 +335,19 @@
        return;
      }
 
-    gchar *tech_id = Normaliser_as_ascii ( Json_get_string ( request, "tech_id" ) );
+    gchar *tech_id = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
+    json_node_unref(request);
     if (!tech_id)
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
        return;
      }
-    json_node_unref(request);
 
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       g_free(tech_id);
        return;
      }
 
@@ -356,9 +356,11 @@
                                  "WHERE tech_id='%s' AND s.access_level<'%d'", tech_id, session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
+       g_free(tech_id);
        return;
      }
 
+    g_free(tech_id);
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
@@ -381,7 +383,6 @@
     if (!Http_check_session( msg, session, 6 )) return;
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
-
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
@@ -458,7 +459,6 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -495,7 +495,6 @@
     if (!Http_check_session( msg, session, 6 )) return;
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
-
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
@@ -665,9 +664,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_compil ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille;
-    gchar log_buffer[1024];
+  { gchar log_buffer[1024];
     if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -675,13 +672,8 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( Json_has_member ( request, "compil_all" ) && Json_get_bool ( request, "compil_all" ) == TRUE )
      { Dls_foreach_plugins ( session, Http_Dls_compil );
