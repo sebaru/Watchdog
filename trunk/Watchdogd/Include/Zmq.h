@@ -53,9 +53,6 @@
  extern void Zmq_Send_CDE_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme );
  extern void Zmq_Send_WATCHDOG_to_master ( void *zmq, gchar *thread, gchar *tech_id, gchar *acronyme, gint consigne );
  extern JsonNode *Recv_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *thread, gchar *buf, gint taille_buf );
- extern gboolean Zmq_Send_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_source_thread,
-                                      const gchar *zmq_target_instance, const gchar *zmq_target_thread,
-                                      const gchar *zmq_tag, JsonBuilder *builder );
  extern gboolean Zmq_Send_json_node ( struct ZMQUEUE *zmq, const gchar *zmq_src_thread,
                                       const gchar *zmq_dst_instance, const gchar *zmq_dst_thread,
                                       const gchar *zmq_tag, JsonNode *RootNode );

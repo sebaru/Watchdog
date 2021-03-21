@@ -387,7 +387,7 @@ end:
 
     JsonArray *receivers = Json_node_add_array ( RootNode, "receivers" );
     JsonNode *tel_node = Json_node_create();
-    json_node_add_string_value( tel_node, telephone );
+    json_node_set_string( tel_node, telephone );
     Json_array_add_element ( receivers, tel_node );
 
     gchar libelle[128];

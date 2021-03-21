@@ -163,9 +163,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_tableau_map_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                    SoupClientContext *client, gpointer user_data )
-  { gchar *buf, chaine[384];
-    gsize taille_buf;
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -180,27 +178,30 @@
      }
     gint tableau_id = atoi(tableau_id_string);
 
-    JsonBuilder *builder = Json_create ();
-    if (!builder)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT tm.*,dico.libelle,dico.unite FROM tableau_map AS tm "
-                                       "INNER JOIN tableau AS t ON t.id=tm.tableau_id "
-                                       "INNER JOIN syns ON t.syn_id = syns.id "
-                                       "LEFT JOIN dictionnaire AS dico ON tm.tech_id=dico.tech_id AND tm.acronyme=dico.acronyme "
-                                       "WHERE syns.access_level<=%d AND t.id='%d'", session->access_level, tableau_id );
-    if (SQL_Select_to_JSON ( builder, "tableau_map", chaine ) == FALSE)
+    if (SQL_Select_to_json_node ( RootNode, "tableau_map",
+                                 "SELECT tm.*,dico.libelle,dico.unite FROM tableau_map AS tm "
+                                 "INNER JOIN tableau AS t ON t.id=tm.tableau_id "
+                                 "INNER JOIN syns ON t.syn_id = syns.id "
+                                 "LEFT JOIN dictionnaire AS dico ON tm.tech_id=dico.tech_id AND tm.acronyme=dico.acronyme "
+                                 "WHERE syns.access_level<=%d AND t.id='%d'", session->access_level, tableau_id ) == FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
-       g_object_unref(builder);
+       json_node_unref ( RootNode );
        return;
      }
 
-    buf = Json_get_buf (builder, &taille_buf);
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableau                                                   */

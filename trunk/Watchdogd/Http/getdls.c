@@ -103,7 +103,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *dls_status = Json_node_create ();
     if (dls_status == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -319,10 +319,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_source ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
-  { gchar *buf, chaine[256];
-    gsize taille_buf;
-
-    if (msg->method != SOUP_METHOD_PUT)
+  { if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -344,23 +341,29 @@
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
        return;
      }
+    json_node_unref(request);
 
-    JsonBuilder *builder = Json_create ();
-    if (!builder)
-     { json_node_unref(request);
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
-    g_snprintf( chaine, sizeof(chaine),
-               "SELECT d.* FROM dls as d INNER JOIN syns as s ON d.syn_id=s.id "
-               "WHERE tech_id='%s' AND s.access_level<'%d'", tech_id, session->access_level );
-    json_node_unref(request);
-    SQL_Select_to_JSON ( builder, NULL, chaine );
 
-    buf = Json_get_buf (builder, &taille_buf);
+    if (SQL_Select_to_json_node ( RootNode, "results",
+                                 "SELECT d.* FROM dls as d INNER JOIN syns as s ON d.syn_id=s.id "
+                                 "WHERE tech_id='%s' AND s.access_level<'%d'", tech_id, session->access_level )==FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       json_node_unref ( RootNode );
+       return;
+     }
+
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */
@@ -520,11 +523,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                               SoupClientContext *client, gpointer user_data )
-  { JsonBuilder *builder;
-    gchar *buf, chaine[512];
-    gsize taille_buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -533,27 +532,30 @@
     if (!Http_check_session( msg, session, 6 )) return;
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
-    g_snprintf(chaine, sizeof(chaine), "SELECT d.id, d.tech_id, d.package, d.syn_id, d.name, d.shortname, d.actif, d.compil_status, "
-                                       "d.nbr_compil, d.nbr_ligne, d.compil_date, d.debug, ps.page as ppage, s.page as page "
-                                       "FROM dls AS d "
-                                       "INNER JOIN syns as s ON d.syn_id=s.id "
-                                       "INNER JOIN syns as ps ON s.parent_id = ps.id "
-                                       "WHERE s.access_level<'%d' ORDER BY d.tech_id", session->access_level );
-    if (SQL_Select_to_JSON ( builder, "plugins", chaine ) == FALSE)
+
+    if (SQL_Select_to_json_node ( RootNode, "plugins",
+                                 "SELECT d.id, d.tech_id, d.package, d.syn_id, d.name, d.shortname, d.actif, d.compil_status, "
+                                 "d.nbr_compil, d.nbr_ligne, d.compil_date, d.debug, ps.page as ppage, s.page as page "
+                                 "FROM dls AS d "
+                                 "INNER JOIN syns as s ON d.syn_id=s.id "
+                                 "INNER JOIN syns as ps ON s.parent_id = ps.id "
+                                 "WHERE s.access_level<'%d' ORDER BY d.tech_id", session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       g_object_unref(builder);
+       json_node_unref ( RootNode );
        return;
      }
-    buf = Json_get_buf ( builder, &taille_buf );
+
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
