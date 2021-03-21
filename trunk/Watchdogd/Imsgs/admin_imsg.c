@@ -29,67 +29,49 @@
  #include "Imsg.h"
  extern struct IMSGS_CONFIG Cfg_imsgs;
 /******************************************************************************************************************************/
-/* Admin_json_list : fonction appelée pour vérifier la liste des destinataires                                                */
+/* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
 /* Entrée : un JSon Builder                                                                                                   */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_list ( JsonBuilder *builder )
-  { struct IMSGSDB *imsgs;
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
+ static void Admin_json_imsg_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  {
+    if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    if ( ! Recuperer_imsgsDB( db ) )
-     { Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_imsgs Failed", __func__ );
-       return;
-     }
+    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
 
-    while ( (imsgs = Recuperer_imsgsDB_suite( db )) != NULL)
-     { Json_add_object ( builder, imsgs->user_name );
-       Json_add_int    ( builder, "user_id", imsgs->user_id );
-       Json_add_bool   ( builder, "user_enable", imsgs->user_enable );
-       Json_add_bool   ( builder, "user_notification", imsgs->user_notification );
-       Json_add_string ( builder, "user_jabber_id", imsgs->user_jabberid );
-       Json_add_bool   ( builder, "user_allow_cde", imsgs->user_allow_cde );
-       Json_add_bool   ( builder, "user_available", imsgs->user_available );
-       Json_add_string ( builder, "user_comment", imsgs->user_comment );
-       Json_end_object ( builder );                                                                           /* End Document */
+    if (Lib->Thread_run)                                      /* Warning : Cfg_meteo does not exist if thread is not running ! */
+     { /*Json_node_add_string ( RootNode, "tech_id", Cfg_meteo.tech_id );*/
      }
-    Libere_DB_SQL( &db );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref(RootNode);
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-
-    *buffer_p = NULL;
-    *taille_p = 0;
-
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+ void Admin_json ( struct LIBRAIRIE *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
+  { if (access_level < 6)
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
-/************************************************ Préparation du buffer JSON **************************************************/
-                                                                      /* Lancement de la requete de recuperation des messages */
-    if (!strcmp(commande, "/list")) { Admin_json_list ( builder ); }
-    else if ( ! strcmp ( commande, "/send/" ) )
-				 { Json_add_string ( builder, "message_sent", commande+6 );
-       Imsgs_Envoi_message_to_all_available ( commande+6 );
+         if (!strcasecmp(path, "/status")) { Admin_json_imsg_status ( lib, msg ); }
+    else if (!strcasecmp(path, "/send/" ) )
+				 { Imsgs_Envoi_message_to_all_available ( path+6 );
      }
-
-/************************************************ Génération du JSON **********************************************************/
-    *buffer_p = Json_get_buf ( builder, &taille_buf );
-    *taille_p = taille_buf;
-    return;
+    else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
