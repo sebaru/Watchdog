@@ -22,6 +22,8 @@
                overflow-y: scroll;
              }
 
+        h3 { color: white }
+
         .nav-link:hover { color: white !important;
                           background-color: #48BBC0;
                         }

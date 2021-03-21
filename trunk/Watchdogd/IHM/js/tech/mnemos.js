@@ -396,11 +396,11 @@
             },
             { "data": null, "title":"Acronyme", "className": "align-middle",
               "render": function (item)
-                { return( Lien ( "/home/horloge/"+item.id, "Editer les ticks", item.acronyme ) ); }
+                { return( Lien ( "/horloge/"+item.id, "Editer les ticks", item.acronyme ) ); }
             },
             { "data": null, "title":"Libellé", "className": "align-middle",
               "render": function (item)
-                { return( Lien ( "/home/horloge/"+item.id, "Editer les ticks", item.libelle ) ); }
+                { return( Lien ( "/horloge/"+item.id, "Editer les ticks", item.libelle ) ); }
             },
             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
               "render": function (item)

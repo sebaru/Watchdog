@@ -25,6 +25,8 @@
                       { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme, "Voir le graphe", item.acronyme ) ); }
                      else if (item.classe=="AI")
                       { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme, "Voir le graphe", item.acronyme ) ); }
+                     else if (item.classe=="HORLOGE")
+                      { return( Lien ( "/horloge/"+item.id, "Editer les ticks", item.acronyme ) ); }
                      else return(item.acronyme);
                    }
                },

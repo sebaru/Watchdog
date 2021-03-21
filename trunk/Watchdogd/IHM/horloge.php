@@ -22,4 +22,4 @@
 <!-- Container -->
 </div>
 
-<script src="/js/home/horloge.js" type="text/javascript"></script>
+<script src="/js/horloge.js" type="text/javascript"></script>

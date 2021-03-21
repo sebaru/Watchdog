@@ -148,11 +148,16 @@
        soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
        return;
      }
+    else if (!strcasecmp( URI[1], "login"))
+     { if (session)
+        { g_strfreev(URI);
+          soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/" );
+          return;
+        }
+       g_snprintf ( fichier, sizeof(fichier), "%s/IHM/login.php", WTD_PKGDATADIR );
+     }
     else if (!session)
-     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/login.php", WTD_PKGDATADIR ); }
-    else if (session && !strcasecmp( URI[1], "login"))
-     { g_strfreev(URI);
-       soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/" );
+     { soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/login" );
        return;
      }
     else if (!strcasecmp( URI[1], "upload"))
@@ -171,17 +176,17 @@
        g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Tech/%s.php", WTD_PKGDATADIR, (URI[2] ? URI[2] : "dashboard") );
 
      }
-    else if (!strcasecmp(URI[1], "home" ))
-     { g_snprintf ( header, sizeof(header), "%s/IHM/Home/header.php", WTD_PKGDATADIR );
-       g_snprintf ( footer, sizeof(footer), "%s/IHM/Home/footer.php", WTD_PKGDATADIR );
+    else if (!strcasecmp(URI[1], "" ))
+     { g_snprintf ( header, sizeof(header), "%s/IHM/header.php", WTD_PKGDATADIR );
+       g_snprintf ( footer, sizeof(footer), "%s/IHM/footer.php", WTD_PKGDATADIR );
        has_template = TRUE;
-       g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Home/%s.php", WTD_PKGDATADIR, URI[2] );
+       g_snprintf ( fichier, sizeof(fichier), "%s/IHM/index.php", WTD_PKGDATADIR );
      }
     else
-     { g_snprintf ( header, sizeof(header), "%s/IHM/Home/header.php", WTD_PKGDATADIR );
-       g_snprintf ( footer, sizeof(footer), "%s/IHM/Home/footer.php", WTD_PKGDATADIR );
+     { g_snprintf ( header, sizeof(header), "%s/IHM/header.php", WTD_PKGDATADIR );
+       g_snprintf ( footer, sizeof(footer), "%s/IHM/footer.php", WTD_PKGDATADIR );
        has_template = TRUE;
-       g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Home/index.php", WTD_PKGDATADIR );
+       g_snprintf ( fichier, sizeof(fichier), "%s/IHM/%s.php", WTD_PKGDATADIR, URI[1] );
      }
     g_strfreev(URI);
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s : Serving file %s", __func__, fichier );
