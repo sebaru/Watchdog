@@ -1,5 +1,10 @@
 <div class="container">
 
+   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
+     <h4 class="alert-heading">Warning !</h4>
+         Thread <a href="/tech/process">TELEINFOEDF</a> is not running !
+   </div>
+
  <div class="row m-2">
    <h3><img src="/img/linky.jpg" style="width:80px" alt="Teleinfo E.D.F"> Configuration des modules Téléinfo EDF</h3>
 
@@ -10,11 +15,6 @@
  </div>
 
 <hr>
-
-   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
-     <h4 class="alert-heading">Warning !</h4>
-         Thread <a href="/tech/process">TELEINFOEDF</a> is not running !
-   </div>
 
        <div class="col form-group">
 					     <div class="input-group">

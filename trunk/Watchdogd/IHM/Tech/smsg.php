@@ -1,5 +1,10 @@
 <div class="container">
 
+   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
+     <h4 class="alert-heading">Warning !</h4>
+         Thread <a href="/tech/process">SMSG</a> is not running !
+   </div>
+
  <div class="row m-2">
    <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Configuration des GSM</h3>
 
@@ -14,11 +19,6 @@
 
 <div class="row m-2">
  </div>
-
-   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
-     <h4 class="alert-heading">Warning !</h4>
-         Thread <a href="/tech/process">SMSG</a> is not running !
-   </div>
 
        <div class="col form-group">
 					     <div class="input-group">

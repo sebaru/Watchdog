@@ -1,5 +1,10 @@
 <div class="container">
 
+   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
+     <h4 class="alert-heading">Warning !</h4>
+         Le Thread <a href="/tech/process">Archive</a> ne tourne pas !
+   </div>
+
  <div class="row m-2">
    <h3><i class="fas fa-database text-secondary"></i> Paramétrage des Archives</h3>
 
@@ -11,11 +16,6 @@
  </div>
 
 <hr>
-
-   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
-     <h4 class="alert-heading">Warning !</h4>
-         Le Thread <a href="/tech/process">Archive</a> ne tourne pas !
-   </div>
 
        <div class="col form-group">
 					     <div class="input-group">

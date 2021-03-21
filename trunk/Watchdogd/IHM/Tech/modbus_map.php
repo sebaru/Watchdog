@@ -1,5 +1,10 @@
 <div class="container-fluid">
 
+   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
+     <h4 class="alert-heading">Warning !</h4>
+         Thread <a href="/tech/process">Modbus</a> is not running !
+   </div>
+
  <div class="row m-2">
    <h3><img src="/img/wago_750342.webp" style="width:80px" alt="Wago 750-342">Mapping des I/O Wago sur Modbus</h3>
 
@@ -10,11 +15,6 @@
  </div>
 
 <hr>
-
-   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
-     <h4 class="alert-heading">Warning !</h4>
-         Thread <a href="/tech/process">Modbus</a> is not running !
-   </div>
 
           <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#idTabEntreeTor">

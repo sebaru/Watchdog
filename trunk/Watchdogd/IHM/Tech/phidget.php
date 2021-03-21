@@ -1,5 +1,10 @@
 <div class="container-fluid">
 
+   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
+     <h4 class="alert-heading">Warning !</h4>
+         Le Thread <a href="/tech/process">Phidget</a> ne tourne pas !
+   </div>
+
  <div class="row m-2">
    <h3><img src="/img/phidget_hub5000.jpg" style="width:80px" alt="Phidget HB5000">Liste des HUB5000 Phidgets</h3>
    <div class ="ml-auto btn-group align-items-start">
@@ -10,11 +15,6 @@
  </div>
 
 <hr>
-
-   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
-     <h4 class="alert-heading">Warning !</h4>
-         Le Thread <a href="/tech/process">Phidget</a> ne tourne pas !
-   </div>
 
     <table id="idTablePhidgetHub" class="table table-striped table-bordered table-hover">
       <thead class="thead-dark">
