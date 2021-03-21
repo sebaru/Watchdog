@@ -63,38 +63,35 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_smsg_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    Json_add_bool ( builder, "thread_is_running", Lib->Thread_run );
+    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
 
     if (Lib->Thread_run)                                      /* Warning : Cfg_smsg does not exist if thread is not running ! */
-     { Json_add_string ( builder, "tech_id", Cfg_smsg.tech_id );
-       Json_add_string ( builder, "ovh_service_name", Cfg_smsg.ovh_service_name );
-       Json_add_string ( builder, "ovh_application_key", Cfg_smsg.ovh_application_key );
-       Json_add_string ( builder, "ovh_application_secret", Cfg_smsg.ovh_application_secret );
-       Json_add_string ( builder, "ovh_consumer_key", Cfg_smsg.ovh_consumer_key );
-       Json_add_string ( builder, "description", Cfg_smsg.description );
-       Json_add_bool   ( builder, "comm_status", Cfg_smsg.lib->comm_status );
-       Json_add_int    ( builder, "nbr_sms", Cfg_smsg.nbr_sms );
+     { Json_node_add_string ( RootNode, "tech_id", Cfg_smsg.tech_id );
+       Json_node_add_string ( RootNode, "ovh_service_name", Cfg_smsg.ovh_service_name );
+       Json_node_add_string ( RootNode, "ovh_application_key", Cfg_smsg.ovh_application_key );
+       Json_node_add_string ( RootNode, "ovh_application_secret", Cfg_smsg.ovh_application_secret );
+       Json_node_add_string ( RootNode, "ovh_consumer_key", Cfg_smsg.ovh_consumer_key );
+       Json_node_add_string ( RootNode, "description", Cfg_smsg.description );
+       Json_node_add_bool   ( RootNode, "comm_status", Cfg_smsg.lib->comm_status );
+       Json_node_add_int    ( RootNode, "nbr_sms", Cfg_smsg.nbr_sms );
      }
-    buf = Json_get_buf ( builder, &taille_buf );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Admin_json_smsg_set: Configure le thread SMSG                                                                              */
