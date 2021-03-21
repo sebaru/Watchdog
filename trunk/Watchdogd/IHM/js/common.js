@@ -261,7 +261,7 @@
                   }
        for (i=0; i<tableau_map.length; i++)
         { data.datasets.push ( { label: Response["courbe"+(i+1)].libelle+ " ("+Response["courbe"+(i+1)].unite+")",
-                                 borderColor: Response["courbe"+(i+1)].color,
+                                 borderColor: tableau_map[i].color,
                                  backgroundColor: "rgba(100, 100, 100, 0.0)",
                                  /*backgroundColor: "rgba(100, 100, 100, 0.1)",*/
                                  borderWidth: "1",
