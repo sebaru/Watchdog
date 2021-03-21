@@ -40,7 +40,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_archive_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
-  { gchar *requete = NULL, chaine[256], *interval, nom_courbe[12];
+  { gchar *requete = NULL, chaine[512], *interval, nom_courbe[12];
     gint nbr;
 
     if (msg->method != SOUP_METHOD_PUT || Config.instance_is_master == FALSE)
