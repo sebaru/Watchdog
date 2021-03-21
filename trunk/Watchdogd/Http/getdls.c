@@ -351,7 +351,7 @@
        return;
      }
 
-    if (SQL_Select_to_json_node ( RootNode, "results",
+    if (SQL_Select_to_json_node ( RootNode, NULL,
                                  "SELECT d.* FROM dls as d INNER JOIN syns as s ON d.syn_id=s.id "
                                  "WHERE tech_id='%s' AND s.access_level<'%d'", tech_id, session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
