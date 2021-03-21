@@ -35,27 +35,24 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_tinfo_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    SQL_Select_to_JSON_new ( builder, "tinfos", "SELECT instance, tech_id, description FROM %s", NOM_THREAD );
-    buf = Json_get_buf ( builder, &taille_buf );
+    SQL_Select_to_json_node ( RootNode, "tinfos", "SELECT instance, tech_id, description FROM %s", NOM_THREAD );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */

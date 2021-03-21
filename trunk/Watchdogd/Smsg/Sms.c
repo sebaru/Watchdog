@@ -376,22 +376,25 @@ end:
   { gchar clair[512], hash_string[48], signature[48], query[128];
     unsigned char hash_bin[EVP_MAX_MD_SIZE];
     EVP_MD_CTX *mdctx;
-    gsize taille_buf;
     int md_len;
 
-    JsonBuilder *builder = Json_create();
-    Json_add_bool  ( builder, "noStopClause", TRUE );
-    Json_add_string( builder, "priority", "high" );
-    Json_add_bool  ( builder, "senderForResponse", TRUE );
-    Json_add_int   ( builder, "validityPeriod", 2880 ); /* 2 jours */
-    Json_add_string( builder, "charset", "UTF-8" );
-    Json_add_array ( builder, "receivers" );
-    json_builder_add_string_value( builder, telephone );
-    Json_end_array ( builder );
+    JsonNode *RootNode = Json_node_create();
+    Json_node_add_bool  ( RootNode, "noStopClause", TRUE );
+    Json_node_add_string( RootNode, "priority", "high" );
+    Json_node_add_bool  ( RootNode, "senderForResponse", TRUE );
+    Json_node_add_int   ( RootNode, "validityPeriod", 2880 ); /* 2 jours */
+    Json_node_add_string( RootNode, "charset", "UTF-8" );
+
+    JsonArray *receivers = Json_node_add_array ( RootNode, "receivers" );
+    JsonNode *tel_node = Json_node_create();
+    json_node_add_string_value( tel_node, telephone );
+    Json_array_add_element ( receivers, tel_node );
+
     gchar libelle[128];
     g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
-    Json_add_string( builder, "message", libelle );
-    gchar *body = Json_get_buf( builder, &taille_buf );
+    Json_node_add_string( RootNode, "message", libelle );
+    gchar *body = Json_node_to_string( RootNode );
+    json_node_unref(RootNode);
 
     gchar *method = "POST";
     g_snprintf( query, sizeof(query), "https://eu.api.ovh.com/1.0/sms/%s/jobs", Cfg_smsg.ovh_service_name );
@@ -420,7 +423,7 @@ end:
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg = soup_message_new ( method, query );
-    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, body, taille_buf );
+    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, body, strlen(body) );
     SoupMessageHeaders *headers;
     g_object_get ( G_OBJECT(soup_msg), "request_headers", &headers, NULL );
     soup_message_headers_append ( headers, "X-Ovh-Application", Cfg_smsg.ovh_application_key );
@@ -498,13 +501,12 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_smsg_ovh_text ( gchar *texte )
-  { JsonBuilder *builder = Json_create();
-    Json_add_string ( builder, "libelle", texte );
-    Json_add_string ( builder, "dls_shortname", Cfg_smsg.tech_id );
-    Json_add_int    ( builder, "sms_notification", MESSAGE_SMS_OVH_ONLY );
-    JsonNode *msg = Json_end ( builder );
-    Smsg_send_to_all_authorized_recipients( msg );
-    json_node_unref(msg);
+  { JsonNode *RootNode = Json_node_create();
+    Json_node_add_string ( RootNode, "libelle", texte );
+    Json_node_add_string ( RootNode, "dls_shortname", Cfg_smsg.tech_id );
+    Json_node_add_int    ( RootNode, "sms_notification", MESSAGE_SMS_OVH_ONLY );
+    Smsg_send_to_all_authorized_recipients( RootNode );
+    json_node_unref(RootNode);
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -512,13 +514,12 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_smsg_gsm_text ( gchar *texte )
-  { JsonBuilder *builder = Json_create();
-    Json_add_string ( builder, "libelle", texte );
-    Json_add_string ( builder, "dls_shortname", Cfg_smsg.tech_id );
-    Json_add_int    ( builder, "sms_notification", MESSAGE_SMS_GSM_ONLY );
-    JsonNode *msg = Json_end ( builder );
-    Smsg_send_to_all_authorized_recipients( msg );
-    json_node_unref(msg);
+  { JsonNode *RootNode = Json_node_create();
+    Json_node_add_string ( RootNode, "libelle", texte );
+    Json_node_add_string ( RootNode, "dls_shortname", Cfg_smsg.tech_id );
+    Json_node_add_int    ( RootNode, "sms_notification", MESSAGE_SMS_GSM_ONLY );
+    Smsg_send_to_all_authorized_recipients( RootNode );
+    json_node_unref(RootNode);
   }
 /******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
