@@ -99,9 +99,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_syn_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                               SoupClientContext *client, gpointer user_data )
-  { gchar *buf, chaine[256];
-    gsize taille_buf;
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -109,25 +107,28 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
 
-    JsonBuilder *builder = Json_create ();
-    if (!builder)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT syn.*, psyn.page as ppage, psyn.libelle AS plibelle, psyn.id AS pid FROM syns AS syn"
-                                       " INNER JOIN syns as psyn ON psyn.id=syn.parent_id"
-                                       " WHERE syn.access_level<='%d' ORDER BY syn.page", session->access_level);
-    if (SQL_Select_to_JSON ( builder, "synoptiques", chaine ) == FALSE)
+    if (SQL_Select_to_json_node ( RootNode, "synoptiques",
+                                 "SELECT syn.*, psyn.page as ppage, psyn.libelle AS plibelle, psyn.id AS pid FROM syns AS syn"
+                                 " INNER JOIN syns as psyn ON psyn.id=syn.parent_id"
+                                 " WHERE syn.access_level<='%d' ORDER BY syn.page", session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       g_object_unref(builder);
+       json_node_unref ( RootNode );
        return;
      }
 
-    buf = Json_get_buf (builder, &taille_buf);
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -248,10 +249,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_syn_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                             SoupClientContext *client, gpointer user_data )
-  { gchar *buf, chaine[256];
-    gsize taille_buf;
-
-    if (msg->method != SOUP_METHOD_PUT)
+  {if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -270,24 +268,27 @@
     gint syn_id = Json_get_int ( request, "syn_id" );
     json_node_unref(request);
 
-    JsonBuilder *builder = Json_create ();
-    if (!builder)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT s.*, ps.page AS ppage FROM syns AS s INNER JOIN syns AS ps ON s.parent_id = ps.id "
-                                       "WHERE s.id=%d AND s.access_level<=%d ORDER BY s.page", syn_id, session->access_level );
-    if (SQL_Select_to_JSON ( builder, NULL, chaine ) == FALSE)
+    if (SQL_Select_to_json_node ( RootNode, NULL,
+                                 "SELECT s.*, ps.page AS ppage FROM syns AS s INNER JOIN syns AS ps ON s.parent_id = ps.id "
+                                 "WHERE s.id=%d AND s.access_level<=%d ORDER BY s.page", syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       g_object_unref(builder);
+       json_node_unref ( RootNode );
        return;
      }
 
-    buf = Json_get_buf (builder, &taille_buf);
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
     Audit_log ( session, "Synoptique '%d' get", syn_id );
   }
 /******************************************************************************************************************************/
@@ -297,7 +298,6 @@
 /******************************************************************************************************************************/
  static void Http_syn_save_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct HTTP_CLIENT_SESSION *session = user_data;
-    gchar requete[256];
     if ( ! (Json_has_member ( element, "id" ) &&
             Json_has_member ( element, "posx" ) &&
             Json_has_member ( element, "posy" ) &&
@@ -320,15 +320,14 @@
     gchar *clic_acronyme = Normaliser_chaine( Json_get_string ( element, "clic_acronyme" ) );
     gchar *def_color = Normaliser_chaine( Json_get_string ( element, "def_color" ) );
 
-    g_snprintf( requete, sizeof(requete),
-               "UPDATE syns_motifs AS m INNER JOIN syns AS s ON m.syn_id = s.id SET m.libelle='%s', "
-               "m.tech_id='%s', m.acronyme='%s', "
-               "m.clic_tech_id='%s', m.clic_acronyme='%s', "
-               "m.def_color='%s', m.angle='%s', m.scale='%s', m.gestion='%d' "
-               " WHERE id='%d' AND s.access_level<'%d'",
-                libelle, tech_id, acronyme, clic_tech_id, clic_acronyme, def_color,
-                Json_get_string( element, "angle" ), Json_get_string(element,"scale"), Json_get_int(element,"gestion"),
-                Json_get_int(element,"id"), session->access_level );
+    SQL_Write_new( "UPDATE syns_motifs AS m INNER JOIN syns AS s ON m.syn_id = s.id SET m.libelle='%s', "
+                   "m.tech_id='%s', m.acronyme='%s', "
+                   "m.clic_tech_id='%s', m.clic_acronyme='%s', "
+                   "m.def_color='%s', m.angle='%s', m.scale='%s', m.gestion='%d' "
+                   " WHERE id='%d' AND s.access_level<'%d'",
+                   libelle, tech_id, acronyme, clic_tech_id, clic_acronyme, def_color,
+                   Json_get_string( element, "angle" ), Json_get_string(element,"scale"), Json_get_int(element,"gestion"),
+                   Json_get_int(element,"id"), session->access_level );
 
     g_free(libelle);
     g_free(tech_id);
@@ -336,8 +335,6 @@
     g_free(clic_tech_id);
     g_free(clic_acronyme);
     g_free(def_color);
-
-    SQL_Write (requete);
  }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */

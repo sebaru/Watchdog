@@ -66,7 +66,7 @@
        g_free(database_version_string);
      } else database_version=0;
 
-    Info_new( Config.log, Config.log_db, LOG_NOTICE,
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
              "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, WTD_VERSION );
 
     if (database_version==0)

@@ -39,12 +39,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_process_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                   SoupClientContext *client, gpointer user_data )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    GSList *liste;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -60,63 +55,63 @@
      }
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    Json_add_array ( builder, "Process" );                                                               /* Contenu du Status */
+    JsonArray *process = Json_node_add_array ( RootNode, "Process" );                                    /* Contenu du Status */
 
-    Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
-    Json_add_string ( builder, "thread",  "msrv" );
-    Json_add_bool   ( builder, "debug",   Config.log_msrv );
-    Json_add_bool   ( builder, "started", Partage->com_msrv.Thread_run );
-    Json_add_string ( builder, "version", WTD_VERSION );
-    Json_add_int    ( builder, "start_time", Partage->start_time );
-    Json_add_string ( builder, "objet",   "Local Master Server" );
-    Json_end_object ( builder );                                                                              /* End Document */
+    JsonNode *element = Json_node_create();
+    Json_node_add_string ( element, "thread",  "msrv" );
+    Json_node_add_bool   ( element, "debug",   Config.log_msrv );
+    Json_node_add_bool   ( element, "started", Partage->com_msrv.Thread_run );
+    Json_node_add_string ( element, "version", WTD_VERSION );
+    Json_node_add_int    ( element, "start_time", Partage->start_time );
+    Json_node_add_string ( element, "objet",   "Local Master Server" );
+    Json_array_add_element ( process, element );
 
-    Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
-    Json_add_string ( builder, "thread",  "dls" );
-    Json_add_bool   ( builder, "debug",   Partage->com_dls.Thread_debug );
-    Json_add_bool   ( builder, "started", Partage->com_dls.Thread_run );
-    Json_add_string ( builder, "version", WTD_VERSION );
-    Json_add_int    ( builder, "start_time", Partage->start_time );
-    Json_add_string ( builder, "objet",   "D.L.S" );
-    Json_end_object ( builder );                                                                              /* End Document */
+    element = Json_node_create();
+    Json_node_add_string ( element, "thread",  "dls" );
+    Json_node_add_bool   ( element, "debug",   Partage->com_dls.Thread_debug );
+    Json_node_add_bool   ( element, "started", Partage->com_dls.Thread_run );
+    Json_node_add_string ( element, "version", WTD_VERSION );
+    Json_node_add_int    ( element, "start_time", Partage->start_time );
+    Json_node_add_string ( element, "objet",   "D.L.S" );
+    Json_array_add_element ( process, element );
 
-    Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
-    Json_add_string ( builder, "thread",  "archive" );
-    Json_add_bool   ( builder, "debug",   Config.log_arch );
-    Json_add_bool   ( builder, "started", Partage->com_arch.Thread_run );
-    Json_add_string ( builder, "version", WTD_VERSION );
-    Json_add_int    ( builder, "start_time", Partage->start_time );
-    Json_add_string ( builder, "objet",   "Archivage" );
-    Json_end_object ( builder );                                                                              /* End Document */
+    element = Json_node_create();
+    Json_node_add_string ( element, "thread",  "archive" );
+    Json_node_add_bool   ( element, "debug",   Config.log_arch );
+    Json_node_add_bool   ( element, "started", Partage->com_arch.Thread_run );
+    Json_node_add_string ( element, "version", WTD_VERSION );
+    Json_node_add_int    ( element, "start_time", Partage->start_time );
+    Json_node_add_string ( element, "objet",   "Archivage" );
+    Json_array_add_element ( process, element );
 
-    liste = Partage->com_msrv.Librairies;                                                /* Parcours de toutes les librairies */
+    GSList *liste = Partage->com_msrv.Librairies;                                        /* Parcours de toutes les librairies */
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
-       Json_add_object ( builder, NULL );                                                                /* Contenu du Status */
-       Json_add_string ( builder, "thread",  lib->admin_prompt );
-       Json_add_bool   ( builder, "debug",   lib->Thread_debug );
-       Json_add_bool   ( builder, "started", lib->Thread_run );
-       Json_add_string ( builder, "version", lib->version );
-       Json_add_int    ( builder, "start_time", lib->start_time );
-       Json_add_string ( builder, "objet",   lib->admin_help );
-       Json_end_object ( builder );                                                                           /* End Document */
+       element = Json_node_create();
+       Json_node_add_string ( element, "thread",  lib->admin_prompt );
+       Json_node_add_bool   ( element, "debug",   lib->Thread_debug );
+       Json_node_add_bool   ( element, "started", lib->Thread_run );
+       Json_node_add_string ( element, "version", lib->version );
+       Json_node_add_int    ( element, "start_time", lib->start_time );
+       Json_node_add_string ( element, "objet",   lib->admin_help );
+       Json_array_add_element ( process, element );
 
        liste = liste->next;
      }
-    Json_end_array ( builder );
 
-    buf = Json_get_buf ( builder, &taille_buf );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-   }
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+  }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess_debug: Active ou non le debug d'un process                                                 */
 /* Entrées: la connexion Websocket                                                                                            */

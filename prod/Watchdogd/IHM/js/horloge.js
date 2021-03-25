@@ -54,7 +54,7 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { vars = window.location.pathname.split('/');
-    if ( vars[3] == undefined ) return; else target = vars[3];
+    if ( vars[2] == undefined ) return; else target = vars[2];
 
     Send_to_API ( "GET", "/api/horloge/get", "horloge_id="+target, function(Response)
      { $('#idHorlogeTitle').text( Response.libelle );

@@ -60,7 +60,7 @@
        Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*", "SET_DO", RootNode );
        json_node_unref ( RootNode );
      }
-    else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ ); }
+    else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }
 
 suite_AO:
     if (!Partage->com_msrv.Liste_AO) return;                                                      /* Si pas de a, on se barre */
@@ -80,6 +80,6 @@ suite_AO:
        Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*", "SET_AO", RootNode );
        json_node_unref ( RootNode );
      }
-    else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon builder creation failed", __func__ ); }
+    else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -1,5 +1,10 @@
 <div class="container-fluid">
 
+   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
+     <h4 class="alert-heading">Warning !</h4>
+         Thread <a href="/tech/process">GSM</a> is not running !
+   </div>
+
  <div class="row m-2">
    <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Mapping des Entrées SMS via GSM</h3>
 
@@ -10,11 +15,6 @@
  </div>
 
 <hr>
-
-   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
-     <h4 class="alert-heading">Warning !</h4>
-         Thread <a href="/tech/process">GSM</a> is not running !
-   </div>
 
 <!----------------------------------------------------------------------------------------------------------------------------->
 

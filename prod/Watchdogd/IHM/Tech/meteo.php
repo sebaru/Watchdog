@@ -1,5 +1,10 @@
 <div class="container">
 
+   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
+     <h4 class="alert-heading">Warning !</h4>
+         Thread <a href="/tech/process">Météo</a> is not running !
+   </div>
+
  <div class="row m-2">
    <h3><img src="/img/meteo.svg" style="width:80px" alt="Récupération Météo">Configuration de la météo</h3>
 
@@ -13,11 +18,6 @@
 
 <div class="row m-2">
  </div>
-
-   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
-     <h4 class="alert-heading">Warning !</h4>
-         Thread <a href="/tech/process">Météo</a> is not running !
-   </div>
 
        <div class="col form-group">
 					     <div class="input-group">

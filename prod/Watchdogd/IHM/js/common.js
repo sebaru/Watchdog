@@ -236,9 +236,9 @@
        var myChart = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
 
-    if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
+    /* if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
     else if (period=="DAY")  setInterval( function() { window.location.reload(); }, 300000);
-    else setInterval( function() { window.location.reload(); }, 600000);
+    else setInterval( function() { window.location.reload(); }, 600000);*/
 	 }
 
 /********************************* Chargement d'une courbe dans u synoptique 1 au démrrage ************************************/
@@ -260,7 +260,7 @@
                     datasets: [],
                   }
        for (i=0; i<tableau_map.length; i++)
-        { data.datasets.push ( { label: tableau_map[i].libelle+ " ("+tableau_map[i].unite+")",
+        { data.datasets.push ( { label: Response["courbe"+(i+1)].libelle+ " ("+Response["courbe"+(i+1)].unite+")",
                                  borderColor: tableau_map[i].color,
                                  backgroundColor: "rgba(100, 100, 100, 0.0)",
                                  /*backgroundColor: "rgba(100, 100, 100, 0.1)",*/
@@ -283,8 +283,8 @@ console.debug(data);
        var myChart = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
 
-    if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
+    /*if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
     else if (period=="DAY")  setInterval( function() { window.location.reload(); }, 300000);
-    else setInterval( function() { window.location.reload(); }, 600000);
+    else setInterval( function() { window.location.reload(); }, 600000);*/
 	 }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -37,8 +37,8 @@
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Log DB</label>
 						     <select id="idMSRVLogDB" class="custom-select" onchange="MSRV_Set_Log_Level()">
-             <option value="0">Désactivé</option>
-             <option value="1">Activé</option>
+             <option value="false">Désactivé</option>
+             <option value="true">Activé</option>
            </select>
      					</div>
   					</div>
@@ -47,8 +47,8 @@
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Log ZMQ</label>
 						     <select id="idMSRVLogZMQ" class="custom-select" onchange="MSRV_Set_Log_Level()">
-             <option value="0">Désactivé</option>
-             <option value="1">Activé</option>
+             <option value="false">Désactivé</option>
+             <option value="true">Activé</option>
            </select>
      					</div>
   					</div>

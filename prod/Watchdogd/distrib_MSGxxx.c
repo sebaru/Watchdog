@@ -43,18 +43,17 @@
     struct timeval tv;
     struct tm *temps;
 
-    JsonBuilder *builder = Json_create ();
-    SQL_Select_to_JSON_new ( builder, NULL,
-                            "SELECT msgs.*,dls.shortname as dls_shortname, dls.syn_id,"
-                            "parent_syn.page as syn_parent_page, syn.page as syn_page "
-                            "FROM msgs "
-                            "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
-                            "INNER JOIN syns as syn ON syn.id = dls.syn_id "
-                            "INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id "
-                            "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme            /* Where */
-                           );
-    JsonNode *histo = Json_end ( builder );
+    JsonNode *histo = Json_node_create ();
     if (!histo) return;
+    SQL_Select_to_json_node ( histo, NULL,
+                             "SELECT msgs.*,dls.shortname as dls_shortname, dls.syn_id,"
+                             "parent_syn.page as syn_parent_page, syn.page as syn_page "
+                             "FROM msgs "
+                             "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
+                             "INNER JOIN syns as syn ON syn.id = dls.syn_id "
+                             "INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id "
+                             "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme            /* Where */
+                            );
 
     gettimeofday( &tv, NULL );
     temps = localtime( (time_t *)&tv.tv_sec );
@@ -132,17 +131,17 @@
     g_snprintf( date_fin, sizeof(date_fin), "%s.%02d", date_utf8, (gint)tv.tv_usec/10000 );
     g_free( date_utf8 );
 
-    JsonBuilder *builder = Json_create ();
-    SQL_Select_to_JSON_new ( builder, NULL,
-                            "SELECT msgs.*, syn.id as syn_id, syn.page as syn_page "
-                            "FROM msgs "
-                            "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
-                            "INNER JOIN syns as syn ON syn.id = dls.syn_id "
-                            "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme );
+    JsonNode *histo = Json_node_create ();
+    if (!histo) return;
+    SQL_Select_to_json_node ( histo, NULL,
+                             "SELECT msgs.*, syn.id as syn_id, syn.page as syn_page "
+                             "FROM msgs "
+                             "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
+                             "INNER JOIN syns as syn ON syn.id = dls.syn_id "
+                             "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme );
 
-    Json_add_string ( builder, "date_fin", date_fin );
-    Json_add_bool   ( builder, "alive", FALSE );
-    JsonNode *histo = Json_end ( builder );
+    Json_node_add_string ( histo, "date_fin", date_fin );
+    Json_node_add_bool   ( histo, "alive", FALSE );
     Retirer_histo_msgsDB( histo );
 /******************************************************* Envoi du histo aux librairies abonnées *******************************/
     Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*","DLS_HISTO", histo );

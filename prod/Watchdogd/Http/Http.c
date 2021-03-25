@@ -206,30 +206,27 @@
 /******************************************************************************************************************************/
  static void Http_traiter_ping ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    Json_add_bool   ( builder, "installed", Config.installed );
+    Json_node_add_bool   ( RootNode, "installed", Config.installed );
 
-    buf = Json_get_buf (builder, &taille_buf);
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_traiter_disconnect: Répond aux requetes sur l'URI disconnect                                                          */
@@ -261,11 +258,6 @@
  static void Http_traiter_connect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data )
   { gchar requete[256], *name;
-    GBytes *request_brute;
-    JsonBuilder *builder;
-    gsize taille_buf;
-    gsize taille;
-    gchar *buf;
 
     if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -279,12 +271,11 @@
      }
 
     Http_print_request ( server, msg, path, client );
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
-    if ( ! (request && Json_has_member ( request, "username" ) && Json_has_member ( request, "password" ) ) )
-     { if (request) json_node_unref(request);
+    if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "password" ) ) )
+     { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -391,28 +382,29 @@
               session->username, session->host );
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    Json_add_bool   ( builder, "connected", TRUE );
-    Json_add_string ( builder, "version",  WTD_VERSION );
-    Json_add_string ( builder, "username", session->username );
-    Json_add_string ( builder, "instance", g_get_host_name() );
-    Json_add_bool   ( builder, "instance_is_master", Config.instance_is_master );
-    Json_add_bool   ( builder, "ssl", soup_server_is_https (server) );
-    Json_add_int    ( builder, "access_level", session->access_level );
-    Json_add_string ( builder, "wtd_session", session->wtd_session );
-    Json_add_int    ( builder, "wtd_session_expiry", Cfg_http.wtd_session_expiry );
-    Json_add_string ( builder, "message", "Welcome back Home !" );
-    buf = Json_get_buf (builder, &taille_buf);
+    Json_node_add_bool   ( RootNode, "connected", TRUE );
+    Json_node_add_string ( RootNode, "version",  WTD_VERSION );
+    Json_node_add_string ( RootNode, "username", session->username );
+    Json_node_add_string ( RootNode, "instance", g_get_host_name() );
+    Json_node_add_bool   ( RootNode, "instance_is_master", Config.instance_is_master );
+    Json_node_add_bool   ( RootNode, "ssl", soup_server_is_https (server) );
+    Json_node_add_int    ( RootNode, "access_level", session->access_level );
+    Json_node_add_string ( RootNode, "wtd_session", session->wtd_session );
+    Json_node_add_int    ( RootNode, "wtd_session_expiry", Cfg_http.wtd_session_expiry );
+    Json_node_add_string ( RootNode, "message", "Welcome back Home !" );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_users_kill: Kill une session utilisateur                                                                      */
@@ -421,9 +413,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_search ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                             SoupClientContext *client, gpointer user_data )
-  { gsize taille_buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -431,19 +421,25 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 1 )) return;
 
-    JsonBuilder *builder = Json_create ();
-    if (!builder)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    if (SQL_Select_to_JSON ( builder, "results", "SELECT * FROM dictionnaire" ))
-         { soup_message_set_status (msg, SOUP_STATUS_OK); }
-    else { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error"); }
+    if (SQL_Select_to_json_node ( RootNode, "results", "SELECT * FROM dictionnaire" )==FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       json_node_unref ( RootNode );
+       return;
+     }
 
-    gchar *buf = Json_get_buf (builder, &taille_buf);
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Run_thread: Thread principal                                                                                               */

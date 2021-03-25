@@ -97,6 +97,7 @@
  gboolean Horloge_add_tick ( gchar *tech_id, gchar *acronyme, gint heure, gint minute )
   { return( SQL_Write_new ( "INSERT INTO mnemos_HORLOGE_ticks SET "
                             "horloge_id = (SELECT id FROM mnemos_HORLOGE WHERE tech_id='%s' AND acronyme='%s'), "
+                            "lundi=1, mardi=1, mercredi=1, jeudi=1, vendredi=1, samedi=1, dimanche=1, "
                             "heure = %d, minute = %d", tech_id, acronyme, heure, minute ) );
   }
 /******************************************************************************************************************************/

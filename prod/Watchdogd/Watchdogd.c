@@ -379,7 +379,7 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Zmq_Send_with_json ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "msrv", "ping", NULL );
+        { Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "msrv", "ping", NULL );
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
@@ -452,7 +452,7 @@
 
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
-    Zmq_Send_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_START", NULL );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_START", NULL );
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
      { gchar buffer[2048];
        JsonNode *request;
@@ -489,7 +489,7 @@
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );
-    Zmq_Send_with_json ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_STOP", NULL );
+    Zmq_Send_json_node( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_STOP", NULL );
 end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
@@ -676,19 +676,19 @@ end:
        if (database_debug)
         { Config.log_db = !strcasecmp(database_debug,"true");
           g_free(database_debug);
-        }
+        } else Config.log_db = TRUE;
 
        gchar *zmq_debug = Recuperer_configDB_by_nom( "msrv", "log_zmq" );             /* Récupération d'une config dans la DB */
        if (zmq_debug)
         { Config.log_zmq = !strcasecmp(zmq_debug,"true");
           g_free(zmq_debug);
-        }
+        } else Config.log_zmq = TRUE;
 
        gchar *msrv_debug = Recuperer_configDB_by_nom( "msrv", "debug" );              /* Récupération d'une config dans la DB */
        if (msrv_debug)
         { Config.log_msrv = !strcasecmp(msrv_debug,"true");
           g_free(msrv_debug);
-        }
+        } else Config.log_msrv = TRUE;
 
        gchar *use_subdir = Recuperer_configDB_by_nom ( "msrv", "use_subdir" );
        if (use_subdir)

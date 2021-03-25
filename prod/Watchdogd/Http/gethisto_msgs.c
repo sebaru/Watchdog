@@ -37,8 +37,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_histo_alive ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data)
-  { gchar chaine[512], critere[32];
-    gsize taille_buf;
+  { gchar critere[32];
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -50,31 +49,33 @@
     else bzero ( critere, sizeof(critere) );
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    JsonBuilder *builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    g_snprintf( chaine, sizeof(chaine),
-                "SELECT histo.*, histo.alive, histo.libelle, msg.typologie, dls.syn_id,"
-                "parent_syn.page as syn_parent_page, syn.page as syn_page,"
-                "dls.shortname as dls_shortname, msg.tech_id, msg.acronyme"
-                " FROM histo_msgs as histo"
-                " INNER JOIN msgs as msg ON msg.id = histo.id_msg"
-                " INNER JOIN dls as dls ON dls.tech_id = msg.tech_id"
-                " INNER JOIN syns as syn ON syn.id = dls.syn_id"
-                " INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id"
-                " WHERE alive = 1 %s ORDER BY histo.date_create DESC", critere );
-    if (SQL_Select_to_JSON ( builder, "enregs", chaine ) == FALSE)
+    if (SQL_Select_to_json_node ( RootNode, "enregs",
+                                  "SELECT histo.*, histo.alive, histo.libelle, msg.typologie, dls.syn_id,"
+                                  "parent_syn.page as syn_parent_page, syn.page as syn_page,"
+                                  "dls.shortname as dls_shortname, msg.tech_id, msg.acronyme"
+                                  " FROM histo_msgs as histo"
+                                  " INNER JOIN msgs as msg ON msg.id = histo.id_msg"
+                                  " INNER JOIN dls as dls ON dls.tech_id = msg.tech_id"
+                                  " INNER JOIN syns as syn ON syn.id = dls.syn_id"
+                                  " INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id"
+                                  " WHERE alive = 1 %s ORDER BY histo.date_create DESC", critere ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       g_object_unref(builder);
+       json_node_unref ( RootNode );
        return;
      }
 
-    gchar *buf = Json_get_buf (builder, &taille_buf);
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
@@ -109,18 +110,19 @@
        Acquitter_histo_msgsDB ( tech_id, acronyme, session->username, date_fixe );
        Dls_acquitter_plugin(tech_id);
 
-       JsonBuilder *builder = Json_create ();
-       if (builder == NULL)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon builder creation failed", __func__ );
+       JsonNode *RootNode = Json_node_create ();
+       if (RootNode == NULL)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: JSon RootNode creation failed", __func__ );
           soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
         }
        else
-        { Json_add_string ( builder, "zmq_tag", "DLS_HISTO" );
-          Json_add_string ( builder, "tech_id", tech_id );
-          Json_add_string ( builder, "acronyme", acronyme );
-          Json_add_string ( builder, "nom_ack", session->username );
-          Json_add_string ( builder, "date_fixe", date_fixe );
-          Http_ws_send_to_all ( Json_end ( builder ) );
+        { Json_node_add_string ( RootNode, "zmq_tag", "DLS_HISTO" );
+          Json_node_add_string ( RootNode, "tech_id", tech_id );
+          Json_node_add_string ( RootNode, "acronyme", acronyme );
+          Json_node_add_string ( RootNode, "nom_ack", session->username );
+          Json_node_add_string ( RootNode, "date_fixe", date_fixe );
+          Http_ws_send_to_all ( RootNode );
+          json_node_unref(RootNode);
           soup_message_set_status (msg, SOUP_STATUS_OK);
         }
      }

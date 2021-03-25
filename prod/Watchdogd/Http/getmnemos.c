@@ -40,8 +40,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_mnemos_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
-  { gchar *buf, chaine[256];
-    gsize taille_buf;
+  { gchar chaine[256];
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -63,9 +62,11 @@
        return;
      }
 
-    JsonBuilder *builder = Json_create ();
-    if (!builder)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
@@ -93,12 +94,18 @@
      { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_WATCHDOG AS m WHERE m.tech_id='%s'", tech_id ); }
     else if (!strcasecmp ( classe, "MSG" ) )
      { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from msgs AS m WHERE m.tech_id='%s'", tech_id ); }
-    SQL_Select_to_JSON ( builder, classe, chaine );
 
-    buf = Json_get_buf (builder, &taille_buf);
+    if (SQL_Select_to_json_node ( RootNode, classe, chaine )==FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       json_node_unref ( RootNode );
+       return;
+     }
+
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_mnemos_set: Modifie la config d'un mnemonique                                                                 */
@@ -211,9 +218,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_mnemos_validate ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                      SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille, taille_buf;
-    gchar *buf, chaine[256];
+  { gchar chaine[256];
 
     if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -222,14 +227,9 @@
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
      { json_node_unref(request);
@@ -243,10 +243,12 @@
     gchar   *classe = NULL;
     if (Json_has_member ( request, "classe" )) { classe = Normaliser_as_ascii ( Json_get_string ( request,"classe" ) ); }
 
-    JsonBuilder *builder = Json_create ();
-    if (!builder)
-     { json_node_unref(request);
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       json_node_unref(request);
        return;
      }
 
@@ -257,7 +259,7 @@
        g_strlcat ( chaine, "' ", sizeof(chaine) );
      }*/
     g_strlcat ( chaine, " ORDER BY tech_id", sizeof(chaine) );
-    SQL_Select_to_JSON ( builder, "tech_ids_found", chaine );
+    SQL_Select_to_json_node ( RootNode, "tech_ids_found", chaine );
 
     g_snprintf(chaine, sizeof(chaine),
               "SELECT acronyme,libelle FROM dictionnaire WHERE tech_id='%s' AND acronyme LIKE '%%%s%%'",
@@ -268,12 +270,13 @@
        g_strlcat ( chaine, "' ", sizeof(chaine) );
      }
     g_strlcat ( chaine, " ORDER BY acronyme", sizeof(chaine) );
-    SQL_Select_to_JSON ( builder, "acronymes_found", chaine );
+    SQL_Select_to_json_node ( RootNode, "acronymes_found", chaine );
     json_node_unref(request);
 
-    buf = Json_get_buf (builder, &taille_buf);
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

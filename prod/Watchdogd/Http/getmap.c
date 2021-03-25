@@ -40,9 +40,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_map_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                               SoupClientContext *client, gpointer user_data )
-  { JsonBuilder *builder;
-    gchar *buf, chaine[512], *target;
-    gsize taille_buf;
+  { gchar *target;
 
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -74,25 +72,24 @@
      }
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM %s AS m WHERE map_thread='%s'", target, thread );
-
-    if (SQL_Select_to_JSON ( builder, "mappings", chaine ) == FALSE)
+    if (SQL_Select_to_json_node ( RootNode, "mappings", "SELECT * FROM %s AS m WHERE map_thread='%s'", target, thread ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       g_object_unref(builder);
+       json_node_unref ( RootNode );
        return;
      }
 
-    buf = Json_get_buf ( builder, &taille_buf );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_traiter_map_del: supprime un mapping dans la base de données                                                          */
@@ -102,20 +99,14 @@
  void Http_traiter_map_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
   { gchar requete[256], *target;
-    GBytes *request_brute;
-    gsize taille;
 
     if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "classe" ) &&
             Json_has_member ( request, "map_tech_id" ) && Json_has_member ( request, "map_tag" ) ) )
@@ -151,21 +142,15 @@
 /******************************************************************************************************************************/
  void Http_traiter_map_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille;
-    gchar requete[512];
+  { gchar requete[512];
 
     if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
             Json_has_member ( request, "map_tech_id" ) && Json_has_member ( request, "map_tag" ) &&

@@ -57,7 +57,7 @@
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB connexion failed", __func__ );
+     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -66,7 +66,7 @@
                " FROM %s WHERE instance='%s' LIMIT 1", NOM_THREAD, g_get_host_name());
     if (!Lancer_requete_SQL ( db, requete ))
      { Libere_DB_SQL ( &db );
-       Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB Requete failed", __func__ );
+       Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: DB Requete failed", __func__ );
        return(FALSE);
      }
 
@@ -75,7 +75,7 @@
        g_snprintf( Cfg_teleinfo.description, sizeof(Cfg_teleinfo.description), "%s", db->row[1] );
        g_snprintf( Cfg_teleinfo.port,        sizeof(Cfg_teleinfo.port),        "%s", db->row[2] );
      }
-    else Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB Get Result failed", __func__ );
+    else Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: DB Get Result failed", __func__ );
     Libere_DB_SQL ( &db );
     return(TRUE);
   }

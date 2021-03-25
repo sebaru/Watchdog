@@ -35,27 +35,24 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_tinfo_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    SQL_Select_to_JSON_new ( builder, "tinfos", "SELECT instance, tech_id, description FROM %s", NOM_THREAD );
-    buf = Json_get_buf ( builder, &taille_buf );
+    SQL_Select_to_json_node ( RootNode, "tinfos", "SELECT instance, tech_id, description FROM %s", NOM_THREAD );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
@@ -63,42 +60,39 @@
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_tinfo_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    Json_add_bool ( builder, "thread_is_running", Lib->Thread_run );
+    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
 
     if (Lib->Thread_run)                                     /* Warning : Cfg_tinfo does not exist if thread is not running ! */
-     { Json_add_string ( builder, "tech_id", Cfg_teleinfo.tech_id );
-				   Json_add_string ( builder, "port", Cfg_teleinfo.port );
-				   Json_add_string ( builder, "description", Cfg_teleinfo.description );
-				   Json_add_bool   ( builder, "comm_status", Cfg_teleinfo.comm_status );
+     { Json_node_add_string ( RootNode, "tech_id", Cfg_teleinfo.tech_id );
+				   Json_node_add_string ( RootNode, "port", Cfg_teleinfo.port );
+				   Json_node_add_string ( RootNode, "description", Cfg_teleinfo.description );
+				   Json_node_add_bool   ( RootNode, "comm_status", Cfg_teleinfo.comm_status );
 				   switch ( Cfg_teleinfo.mode )
-        { case TINFO_WAIT_BEFORE_RETRY: Json_add_string ( builder, "mode", "TINFO_WAIT_BEFORE_RETRY" ); break;
-          case TINFO_RETRING          : Json_add_string ( builder, "mode", "TINFO_RETRYING" ); break;
-          case TINFO_CONNECTED        : Json_add_string ( builder, "mode", "TINFO_CONNECTED" ); break;
-          default: Json_add_string ( builder, "mode", "UNKNOWN" ); break;
+        { case TINFO_WAIT_BEFORE_RETRY: Json_node_add_string ( RootNode, "mode", "TINFO_WAIT_BEFORE_RETRY" ); break;
+          case TINFO_RETRING          : Json_node_add_string ( RootNode, "mode", "TINFO_RETRYING" ); break;
+          case TINFO_CONNECTED        : Json_node_add_string ( RootNode, "mode", "TINFO_CONNECTED" ); break;
+          default: Json_node_add_string ( RootNode, "mode", "UNKNOWN" ); break;
         }
-				   Json_add_int ( builder, "retry_in", (Cfg_teleinfo.date_next_retry - Partage->top)/10.0 );
-				   Json_add_int ( builder, "last_view", (Partage->top - Cfg_teleinfo.last_view)/10.0 );
+				   Json_node_add_int ( RootNode, "retry_in", (Cfg_teleinfo.date_next_retry - Partage->top)/10.0 );
+				   Json_node_add_int ( RootNode, "last_view", (Partage->top - Cfg_teleinfo.last_view)/10.0 );
      }
-    buf = Json_get_buf ( builder, &taille_buf );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Admin_json_tinfo_set: Configure le thread TINFO                                                                            */

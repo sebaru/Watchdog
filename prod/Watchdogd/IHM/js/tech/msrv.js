@@ -37,8 +37,8 @@
   { var json_request = JSON.stringify(
      { instance : $('#idTargetInstance').val(),
        log_level: $("#idMSRVLogLevel").val(),
-       log_db   : $("#idMSRVLogDB").val(),
-       log_zmq  : $("#idMSRVLogZMQ").val()
+       log_db   : ($("#idMSRVLogDB").val()=="true" ? true : false),
+       log_zmq  : ($("#idMSRVLogZMQ").val()=="true" ? true : false),
      } );
     Send_to_API ( 'POST', "/api/instance/loglevel", json_request, null );
   }

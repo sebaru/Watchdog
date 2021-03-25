@@ -1887,9 +1887,9 @@ end:
     if (strcmp ( Partage->com_dls.Library_version, DLS_LIBRARY_VERSION ) )
      { Partage->com_dls.Compil_at_boot = TRUE;
        if (Modifier_configDB ( "dls", "library_version", DLS_LIBRARY_VERSION ))
-        { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating library version OK", __func__ ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: updating library version OK", __func__ ); }
        else
-        { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: update library error" ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: update library error" ); }
      }
     Dls_Charger_plugins();                                                                      /* Chargement des modules dls */
     Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */

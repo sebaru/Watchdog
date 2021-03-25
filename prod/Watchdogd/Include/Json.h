@@ -31,8 +31,6 @@
  #include <json-glib/json-glib.h>
 
 /************************************************ Définitions des prototypes **************************************************/
- extern JsonBuilder *Json_create ( void );
- extern JsonNode *Json_end ( JsonBuilder *builder );
  extern JsonNode *Json_node_create ( void );
  extern void Json_node_add_string ( JsonNode *RootNode, gchar *name, gchar *chaine );
  extern void Json_node_add_bool ( JsonNode *RootNode, gchar *name, gboolean valeur );
@@ -42,16 +40,6 @@
  extern JsonNode *Json_node_add_objet ( JsonNode *RootNode, gchar *name );
  extern void Json_array_add_element ( JsonArray *array, JsonNode *element );
  extern void Json_node_foreach_array_element ( JsonNode *RootNode, gchar *nom, JsonArrayForeach fonction, gpointer data );
- extern void Json_add_node ( JsonBuilder *builder, gchar *name, JsonNode *node );
- extern void Json_add_string ( JsonBuilder *builder, gchar *name, gchar *chaine );
- extern void Json_add_int ( JsonBuilder *builder, gchar *name, gint valeur );
- extern void Json_add_double ( JsonBuilder *builder, gchar *name, gdouble valeur );
- extern void Json_add_bool ( JsonBuilder *builder, gchar *name, gboolean bool );
- extern void Json_add_object ( JsonBuilder *builder, gchar *name );
- extern void Json_end_object ( JsonBuilder *builder );
- extern void Json_add_array ( JsonBuilder *builder, gchar *name );
- extern void Json_end_array ( JsonBuilder *builder );
- extern gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p );
  extern gchar *Json_node_to_string ( JsonNode *RootNode );
  extern JsonNode *Json_get_from_string ( gchar *chaine );
  extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );

@@ -141,7 +141,7 @@
   }
 /******************************************************************************************************************************/
 /* Dls_DI_to_json : Formate un bit au format JSON                                                                             */
-/* Entrées: le builder et le bit                                                                                              */
+/* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit )

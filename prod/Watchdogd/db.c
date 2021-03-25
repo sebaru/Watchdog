@@ -147,62 +147,6 @@
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
- gboolean SQL_Select_to_JSON ( JsonBuilder *builder, gchar *array_name, gchar *requete )
-  { struct DB *db = Init_DB_SQL ();
-    if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
-       return(FALSE);
-     }
-
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
-       Libere_DB_SQL ( &db );
-       return(FALSE);
-     }
-    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
-
-    db->result = mysql_store_result ( db->mysql );
-    if ( ! db->result )
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: store_result failed (%s)", __func__, (char *) mysql_error(db->mysql) );
-       db->nbr_result = 0;
-     }
-    else
-     { if (array_name)
-        { gchar chaine[80];
-          g_snprintf(chaine, sizeof(chaine), "nbr_%s", array_name );
-          Json_add_int ( builder, chaine, mysql_num_rows ( db->result ));
-          Json_add_array( builder, array_name );
-        }
-       while ( (db->row = mysql_fetch_row(db->result)) != NULL )
-        { if (array_name) Json_add_object ( builder, NULL );
-          for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
-           { Json_add_string( builder, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
-          if (array_name) Json_end_object ( builder );
-        }
-       if (array_name) Json_end_array ( builder );
-       mysql_free_result( db->result );
-     }
-    Libere_DB_SQL( &db );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* SQL_Write_new: Envoie une requete en parametre au serveur de base de données                                               */
-/* Entrée: le format de la requete, ainsi que tous les parametres associés                                                    */
-/******************************************************************************************************************************/
- gboolean SQL_Select_to_JSON_new ( JsonBuilder *builder, gchar *array_name, gchar *format, ... )
-  { gchar chaine[1024];
-    va_list ap;
-
-    va_start( ap, format );
-    g_vsnprintf ( chaine, sizeof(chaine), format, ap );
-    va_end ( ap );
-    return(SQL_Select_to_JSON ( builder, array_name, chaine ));
-  }
-/******************************************************************************************************************************/
-/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
-/* Entrée: La DB, la requete                                                                                                  */
-/* Sortie: TRUE si pas de souci                                                                                               */
-/******************************************************************************************************************************/
  static gboolean SQL_Select_to_json_node_reel ( gboolean db_arch, JsonNode *RootNode, gchar *array_name, gchar *requete )
   { struct DB *db;
     if (db_arch) db = Init_ArchDB_SQL ();
@@ -251,13 +195,22 @@
 /* Entrée: le format de la requete, ainsi que tous les parametres associés                                                    */
 /******************************************************************************************************************************/
  gboolean SQL_Select_to_json_node ( JsonNode *RootNode, gchar *array_name, gchar *format, ... )
-  { gchar chaine[1024];
-    va_list ap;
+  { va_list ap;
 
     va_start( ap, format );
-    g_vsnprintf ( chaine, sizeof(chaine), format, ap );
+    gsize taille = g_printf_string_upper_bound (format, ap);
     va_end ( ap );
-    return(SQL_Select_to_json_node_reel ( FALSE, RootNode, array_name, chaine ));
+    gchar *chaine = g_try_malloc(taille+1);
+    if (chaine)
+     { va_start( ap, format );
+       g_vsnprintf ( chaine, taille, format, ap );
+       va_end ( ap );
+
+       gboolean retour = SQL_Select_to_json_node_reel ( FALSE, RootNode, array_name, chaine );
+       g_free(chaine);
+       return(retour);
+     }
+    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
@@ -265,13 +218,22 @@
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
  gboolean SQL_Arch_to_json_node ( JsonNode *RootNode, gchar *array_name, gchar *format, ... )
-  { gchar chaine[1024];
-    va_list ap;
+  { va_list ap;
 
     va_start( ap, format );
-    g_vsnprintf ( chaine, sizeof(chaine), format, ap );
+    gsize taille = g_printf_string_upper_bound (format, ap);
     va_end ( ap );
-    return(SQL_Select_to_json_node_reel ( TRUE, RootNode, array_name, chaine ));
+    gchar *chaine = g_try_malloc(taille+1);
+    if (chaine)
+     { va_start( ap, format );
+       g_vsnprintf ( chaine, taille, format, ap );
+       va_end ( ap );
+
+       gboolean retour = SQL_Select_to_json_node_reel ( TRUE, RootNode, array_name, chaine );
+       g_free(chaine);
+       return(retour);
+     }
+    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
@@ -2248,22 +2210,22 @@ fin:
 
     g_snprintf( requete, sizeof(requete),
        "CREATE OR REPLACE VIEW dictionnaire AS "
-       "SELECT 'DLS' AS classe, -1 AS classe_int,tech_id,shortname as acronyme,name as libelle, 'none' as unite FROM dls UNION "
-       "SELECT 'SYNOPTIQUE' AS classe, -1 AS classe_int,page as tech_id,'' as acronyme,libelle, 'none' as unite FROM syns UNION "
-       "SELECT 'AI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_AI UNION "
-       "SELECT 'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DI UNION "
-       "SELECT 'DO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DO UNION "
-       "SELECT 'AO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_AO UNION "
-       "SELECT 'BOOL' AS classe, type AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_BOOL UNION "
-       "SELECT 'CH' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_CH UNION "
-       "SELECT 'CI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_CI UNION "
-       "SELECT 'HORLOGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_HORLOGE UNION "
-       "SELECT 'TEMPO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_Tempo UNION "
-       "SELECT 'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_R UNION "
-       "SELECT 'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM syns_motifs UNION "
-       "SELECT 'WATCHDOG' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_WATCHDOG UNION "
-       "SELECT 'TABLEAU' AS classe, -1 AS classe_int, '' AS tech_id, '' AS acronyme, titre AS libelle, 'none' as unite FROM tableau UNION "
-       "SELECT 'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM msgs",
+       "SELECT id,'DLS' AS classe, -1 AS classe_int,tech_id,shortname as acronyme,name as libelle, 'none' as unite FROM dls UNION "
+       "SELECT id,'SYNOPTIQUE' AS classe, -1 AS classe_int,page as tech_id,'' as acronyme,libelle, 'none' as unite FROM syns UNION "
+       "SELECT id,'AI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_AI UNION "
+       "SELECT id,'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DI UNION "
+       "SELECT id,'DO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DO UNION "
+       "SELECT id,'AO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_AO UNION "
+       "SELECT id,'BOOL' AS classe, type AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_BOOL UNION "
+       "SELECT id,'CH' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_CH UNION "
+       "SELECT id,'CI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_CI UNION "
+       "SELECT id,'HORLOGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_HORLOGE UNION "
+       "SELECT id,'TEMPO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_Tempo UNION "
+       "SELECT id,'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_R UNION "
+       "SELECT id,'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM syns_motifs UNION "
+       "SELECT id,'WATCHDOG' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_WATCHDOG UNION "
+       "SELECT id,'TABLEAU' AS classe, -1 AS classe_int, '' AS tech_id, '' AS acronyme, titre AS libelle, 'none' as unite FROM tableau UNION "
+       "SELECT id,'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM msgs",
         MNEMO_ENTREE_ANA, MNEMO_ENTREE, MNEMO_SORTIE, MNEMO_SORTIE_ANA, MNEMO_CPTH, MNEMO_CPT_IMP, MNEMO_HORLOGE,
         MNEMO_TEMPO, MNEMO_REGISTRE, MNEMO_WATCHDOG, MNEMO_MSG
       );

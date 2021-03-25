@@ -145,23 +145,23 @@
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
- void Histo_msg_print_to_JSON ( JsonBuilder *builder, JsonNode *histo )
-  { Json_add_bool   ( builder, "alive",           Json_get_bool( histo, "alive") ); /* Le message est-il encore d'actualité ? */
-    Json_add_string ( builder, "nom_ack",         Json_get_string( histo, "nom_ack") );
-    Json_add_string ( builder, "date_create",     Json_get_string( histo, "date_create") );
-    Json_add_string ( builder, "date_fixe",       Json_get_string( histo, "date_fixe") );
-    Json_add_string ( builder, "date_fin",        Json_get_string( histo, "date_fin") );
-    Json_add_string ( builder, "tech_id",         Json_get_string( histo, "tech_id") );
-    Json_add_string ( builder, "acronyme",        Json_get_string( histo, "acronyme") );
-    Json_add_int    ( builder, "typologie",       Json_get_int   ( histo, "typologie") );
-    Json_add_string ( builder, "dls_shortname",   Json_get_string( histo, "dls_shortname") );
-    Json_add_string ( builder, "libelle",         Json_get_string( histo, "libelle") );
-    Json_add_int    ( builder, "syn_id",          Json_get_int   ( histo, "syn_id") );
-    Json_add_string ( builder, "syn_parent_page", Json_get_string( histo, "syn_parent_page") );
-    Json_add_string ( builder, "syn_page",        Json_get_string( histo, "syn_page") );
-    Json_add_string ( builder, "syn_libelle",     Json_get_string( histo, "syn_libelle") );
-    Json_add_int    ( builder, "sms_notification",Json_get_int   ( histo, "sms_notiifcation") );
-    Json_add_string ( builder, "audio_libelle",   Json_get_string( histo, "audio_libelle") );
-    Json_add_string ( builder, "audio_profil",    Json_get_string( histo, "audio_profil") );
+ void Histo_msg_print_to_JSON ( JsonNode *RootNode, JsonNode *histo )
+  { Json_node_add_bool   ( RootNode, "alive",           Json_get_bool  ( histo, "alive") ); /* Le message est-il encore d'actualité ? */
+    Json_node_add_string ( RootNode, "nom_ack",         Json_get_string( histo, "nom_ack") );
+    Json_node_add_string ( RootNode, "date_create",     Json_get_string( histo, "date_create") );
+    Json_node_add_string ( RootNode, "date_fixe",       Json_get_string( histo, "date_fixe") );
+    Json_node_add_string ( RootNode, "date_fin",        Json_get_string( histo, "date_fin") );
+    Json_node_add_string ( RootNode, "tech_id",         Json_get_string( histo, "tech_id") );
+    Json_node_add_string ( RootNode, "acronyme",        Json_get_string( histo, "acronyme") );
+    Json_node_add_int    ( RootNode, "typologie",       Json_get_int   ( histo, "typologie") );
+    Json_node_add_string ( RootNode, "dls_shortname",   Json_get_string( histo, "dls_shortname") );
+    Json_node_add_string ( RootNode, "libelle",         Json_get_string( histo, "libelle") );
+    Json_node_add_int    ( RootNode, "syn_id",          Json_get_int   ( histo, "syn_id") );
+    Json_node_add_string ( RootNode, "syn_parent_page", Json_get_string( histo, "syn_parent_page") );
+    Json_node_add_string ( RootNode, "syn_page",        Json_get_string( histo, "syn_page") );
+    Json_node_add_string ( RootNode, "syn_libelle",     Json_get_string( histo, "syn_libelle") );
+    Json_node_add_int    ( RootNode, "sms_notification",Json_get_int   ( histo, "sms_notiifcation") );
+    Json_node_add_string ( RootNode, "audio_libelle",   Json_get_string( histo, "audio_libelle") );
+    Json_node_add_string ( RootNode, "audio_profil",    Json_get_string( histo, "audio_profil") );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

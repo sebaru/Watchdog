@@ -29,9 +29,9 @@
 
  #include "watchdogd.h"
 /******************************************************************************************************************************/
-/* Json_create: Prepare un builder pour creer un nouveau buffer mail                                                          */
-/* Entrée: néant                                                                                                              */
-/* Sortie: NULL si erreur                                                                                                     */
+/* Send_mail: Envoi un mail en utilisation le sendmail du system                                                              */
+/* Entrée: Le sujet, le destinataire, le corps du message                                                                     */
+/* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body )
   { gchar fichier[32], commande[128], chaine[256];

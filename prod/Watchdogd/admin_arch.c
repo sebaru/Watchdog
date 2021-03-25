@@ -257,9 +257,7 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Admin_arch_table_status ( SoupMessage *msg )
-  { gchar requete[256];
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -272,10 +270,9 @@
        return;
      }
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT table_name, table_rows FROM information_schema.tables WHERE table_schema='%s' "
-                "AND table_name like 'histo_bit_%%'", Partage->com_arch.archdb_database );
-    SQL_Arch_to_json_node ( RootNode, "tables", requete );
+    SQL_Arch_to_json_node ( RootNode, "tables",
+                            "SELECT table_name, table_rows FROM information_schema.tables WHERE table_schema='%s' "
+                            "AND table_name like 'histo_bit_%%'", Partage->com_arch.archdb_database );
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref(RootNode);

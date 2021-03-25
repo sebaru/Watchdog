@@ -144,31 +144,13 @@
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Zmq_Send_with_json ( struct ZMQUEUE *zmq, const gchar *zmq_src_thread,
-                               const gchar *zmq_dst_instance, const gchar *zmq_dst_thread,
-                               const gchar *zmq_tag, JsonBuilder *builder )
-  { gboolean retour;
-    if (builder)
-     { JsonNode *body = Json_end ( builder );
-       retour = Zmq_Send_json_node ( zmq, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag, body );
-       json_node_unref(body);
-     }
-    else
-     { JsonNode *RootNode = Json_node_create();
-       retour = Zmq_Send_json_node ( zmq, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, zmq_tag, RootNode );
-       json_node_unref(RootNode);
-     }
-    return(retour);
-  }
-/******************************************************************************************************************************/
-/* Zmq_Send_with_tag: Envoie un message dans la socket avec le tag en prefixe                                                 */
-/* Entrée: la socket, le tag, le message, sa longueur                                                                         */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
  gboolean Zmq_Send_json_node ( struct ZMQUEUE *zmq, const gchar *zmq_src_thread,
                                const gchar *zmq_dst_instance, const gchar *zmq_dst_thread,
                                const gchar *zmq_tag, JsonNode *RootNode )
-  { if (!zmq) return(FALSE);
+  { gboolean own_node=FALSE;
+    if (!zmq) return(FALSE);
+
+    if (!RootNode) { RootNode = Json_node_create(); own_node = TRUE; }
 
     Json_node_add_string ( RootNode, "zmq_src_instance", g_get_host_name() );
     Json_node_add_string ( RootNode, "zmq_src_thread", zmq_src_thread );
@@ -185,8 +167,10 @@
 
     gboolean retour;
     gchar *buf = Json_node_to_string ( RootNode );
+    if (own_node) json_node_unref(RootNode);
     retour = Zmq_Send_as_raw( zmq, buf, strlen(buf) );
     g_free(buf);
+
     if (retour==FALSE)
      { Info_new( Config.log, Config.log_zmq, LOG_ERR,
                 "%s: '%s' ('%s') : ERROR SENDING %s/%s -> %s/%s/%s", __func__, zmq->name, zmq->endpoint,

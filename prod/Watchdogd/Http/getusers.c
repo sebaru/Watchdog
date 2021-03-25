@@ -329,11 +329,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_users_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf, chaine[256];
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -342,22 +338,23 @@
     if (!Http_check_session( msg, session, 1 )) return;
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    g_snprintf( chaine, sizeof(chaine), "SELECT id,access_level,username,email,enable,comment,notification,allow_cde,phone,xmpp "
-                                        "FROM users WHERE access_level<'%d' OR (access_level='%d' AND username='%s')",
-                                         session->access_level, session->access_level, session->username );
-    SQL_Select_to_JSON ( builder, "users", chaine );
-    buf = Json_get_buf ( builder, &taille_buf );
+    SQL_Select_to_json_node ( RootNode, "users",
+                             "SELECT id,access_level,username,email,enable,comment,notification,allow_cde,phone,xmpp "
+                             "FROM users WHERE access_level<'%d' OR (access_level='%d' AND username='%s')",
+                             session->access_level, session->access_level, session->username );
+
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-    Audit_log ( session, "Get User session list" );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getusers_list: Traite une requete sur l'URI users/list                                                */
@@ -366,47 +363,44 @@
 /******************************************************************************************************************************/
  void Http_traiter_users_sessions ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data )
-  { JsonBuilder *builder;
-    gsize taille_buf;
-    gchar *buf;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 1 )) return;
-
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    Json_add_array ( builder, "Sessions" );
+    JsonArray *sessions = Json_node_add_array ( RootNode, "Sessions" );
     GSList *liste = Cfg_http.liste_http_clients;
     while(liste)
      { struct HTTP_CLIENT_SESSION *sess = liste->data;
        if (sess->access_level <= session->access_level)
-        { Json_add_object ( builder, NULL );
-          Json_add_string ( builder, "username", sess->username );
-          Json_add_string ( builder, "host", sess->host );
-          Json_add_string ( builder, "wtd_session", sess->wtd_session );
-          Json_add_int    ( builder, "access_level", sess->access_level );
-          Json_add_int    ( builder, "last_request", sess->last_request );
-          Json_end_object ( builder );
+        { JsonNode *session_node = Json_node_create();
+          if (session_node)
+           { Json_node_add_string ( session_node, "username", sess->username );
+             Json_node_add_string ( session_node, "host", sess->host );
+             Json_node_add_string ( session_node, "wtd_session", sess->wtd_session );
+             Json_node_add_int    ( session_node, "access_level", sess->access_level );
+             Json_node_add_int    ( session_node, "last_request", sess->last_request );
+             Json_array_add_element ( sessions, session_node );
+           }
         }
        liste = g_slist_next ( liste );
      }
-    Json_end_array ( builder );
 
-    buf = Json_get_buf ( builder, &taille_buf );
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getusers_list: Traite une requete sur l'URI users/list                                                */
@@ -415,20 +409,13 @@
 /******************************************************************************************************************************/
  void Http_traiter_users_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                SoupClientContext *client, gpointer user_data )
-  { JsonBuilder *builder;
-     GBytes *request_brute;
-    gsize taille_buf;
-    gchar chaine[256];
-
-    if (msg->method != SOUP_METHOD_PUT)
+  { if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 0 )) return;
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
@@ -441,20 +428,22 @@
     json_node_unref(request);
 
 /************************************************ Préparation du buffer JSON **************************************************/
-    builder = Json_create ();
-    if (builder)
-     { g_snprintf( chaine, sizeof(chaine), "SELECT id,access_level,username,email,enable,comment,notification,phone,xmpp "
-                                           "FROM users WHERE username='%s' and access_level<'%d'", username, session->access_level );
-       SQL_Select_to_JSON ( builder, NULL, chaine );
-       gchar *buf = Json_get_buf ( builder, &taille_buf );
-   	   soup_message_set_status (msg, SOUP_STATUS_OK);
-       soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-     }
-    else
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
+
+    SQL_Select_to_json_node ( RootNode, NULL,
+                             "SELECT id,access_level,username,email,enable,comment,notification,phone,xmpp "
+                             "FROM users WHERE username='%s' and access_level<'%d'", username, session->access_level );
     g_free(username);
+
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

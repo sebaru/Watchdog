@@ -40,7 +40,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_archive_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
-  { gchar requete[4096], chaine[256], *interval, nom_courbe[12];
+  { gchar *requete = NULL, chaine[512], *interval, nom_courbe[12];
     gint nbr;
 
     if (msg->method != SOUP_METHOD_PUT || Config.instance_is_master == FALSE)
@@ -75,7 +75,15 @@
        return;
      }
 
-    g_snprintf( requete, sizeof(requete), "SELECT * FROM ");
+    gint taille_requete = 32;
+    requete = g_try_malloc(taille_requete);
+    if (!requete)
+     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       json_node_unref(request);
+       return;
+     }
+
+    g_snprintf( requete, taille_requete, "SELECT * FROM ");
 
     int nbr_courbe = json_array_get_length ( Json_get_array ( request, "courbes" ) );
     for (nbr=0; nbr<nbr_courbe; nbr++)
@@ -85,13 +93,17 @@
        gchar *tech_id  = Normaliser_chaine ( Json_get_string ( courbe, "tech_id" ) );
        gchar *acronyme = Normaliser_chaine ( Json_get_string ( courbe, "acronyme" ) );
 
-       if (nbr!=0) g_strlcat ( requete, "INNER JOIN ", sizeof(requete) );
        g_snprintf( chaine, sizeof(chaine),
+                  "%s "
                   "(SELECT FROM_UNIXTIME((UNIX_TIMESTAMP(date_time) DIV %d)*%d) AS date, COALESCE(ROUND(AVG(valeur),3),0) AS moyenne%d "
-                  " FROM histo_bit_%s_%s %s GROUP BY date ORDER BY date) AS %s ",
-                   periode, periode, nbr+1, tech_id, acronyme, interval, nom_courbe );
-       if (nbr!=0) g_strlcat ( chaine, "USING (date) ", sizeof(chaine) );
-       g_strlcat ( requete, chaine, sizeof(requete) );
+                  " FROM histo_bit_%s_%s %s GROUP BY date ORDER BY date) AS %s "
+                  "%s ",
+                  (nbr!=0 ? "INNER JOIN" : ""), periode, periode, nbr+1, tech_id, acronyme, interval, nom_courbe,
+                  (nbr!=0 ? "USING(date)" : "") );
+
+       taille_requete += strlen(chaine)+1;
+       requete = g_try_realloc ( requete, taille_requete );
+       if (requete) g_strlcat ( requete, chaine, taille_requete );
 
        JsonNode *json_courbe = Json_node_add_objet ( RootNode, nom_courbe );
        g_snprintf(chaine, sizeof(chaine), "SELECT * FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme );
@@ -102,12 +114,14 @@
      }
 
     if (SQL_Arch_to_json_node ( RootNode, "valeurs", requete ) == FALSE)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
+     { g_free(requete);
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
        json_node_unref(request);
-       g_object_unref(RootNode);
+       json_node_unref(RootNode);
        return;
      }
 
+    g_free(requete);
     json_node_unref(request);
 
     gchar *buf = Json_node_to_string (RootNode);
