@@ -170,7 +170,7 @@
      }
 
     if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                                            /* Double clic ?? */
-     { //GotoSyn;
+     { Go_to_syn(client);
        return(TRUE);
      }
 
@@ -426,7 +426,7 @@ again:
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
-/***************************************** La liste des groupes *******************************************/
+/************************************************ La liste des groupes ********************************************************/
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
@@ -445,7 +445,7 @@ again:
                                               gdk_rgba_get_type()                     /* Couleur du texte de l'enregistrement */
                                );
 
-    client->Liste_histo = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                               /* Creation de la vue */
+    client->Liste_histo = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                       /* Creation de la vue */
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(client->Liste_histo) );
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
     gtk_container_add( GTK_CONTAINER(scroll), client->Liste_histo );
@@ -475,7 +475,7 @@ again:
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_TYPE);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
+    renderer = gtk_cell_renderer_text_new();                                                         /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( "Timestamp", renderer,
                                                          "text", COLONNE_DATE_CREATE,
@@ -484,15 +484,15 @@ again:
     gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(store), COLONNE_DATE_CREATE, GTK_SORT_ASCENDING );
     gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
-    g_object_set( renderer, "xalign", 0.5, NULL );
+    renderer = gtk_cell_renderer_text_new();                                                         /* Colonne du synoptique */
+    g_object_set( renderer, "xalign", 0.5, NULL ); 
     colonne = gtk_tree_view_column_new_with_attributes ( "DLS Shortname", renderer,
                                                          "text", COLONNE_DLS_SHORTNAME,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_DLS_SHORTNAME);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
+    renderer = gtk_cell_renderer_text_new();                                                         /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( "Ack", renderer,
                                                          "text", COLONNE_ACK,
@@ -500,18 +500,18 @@ again:
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_ACK);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                                        /* Colonne du libelle */
+    renderer = gtk_cell_renderer_text_new();                                                            /* Colonne du libelle */
     colonne = gtk_tree_view_column_new_with_attributes ( "Message", renderer,
                                                          "text", COLONNE_LIBELLE,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
-    g_signal_connect( G_OBJECT(client->Liste_histo), "button_press_event",               /* Gestion du menu popup */
-                      G_CALLBACK(Gerer_popup_histo), client );
-    g_object_unref (G_OBJECT (store));                        /* nous n'avons plus besoin de notre modele */
+    g_signal_connect( G_OBJECT(client->Liste_histo), "button_press_event",                           /* Gestion du menu popup */
+                      G_CALLBACK(Gerer_popup_histo), client ); 
+    g_object_unref (G_OBJECT (store));                                            /* nous n'avons plus besoin de notre modele */
 
-/************************************ Les boutons de controles ********************************************/
+/******************************************** Les boutons de controles ********************************************************/
 /*    boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
@@ -523,4 +523,4 @@ again:
     gtk_widget_show_all( hboite );
     return(hboite);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
