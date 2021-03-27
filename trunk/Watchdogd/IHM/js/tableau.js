@@ -20,7 +20,11 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Tableau_Set_Period ()
   { console.log("Tableau_Set_Period");
-    Charger_page_tableau ( Tableau_ID, $("#idTableauPeriod").val() );
+    Send_to_API ( "GET", "/api/tableau/map/list", "tableau_id="+tableau_id, function(Response)
+        { $('#idTableauTitle').text(Response.titre);
+          Charger_plusieurs_courbes ( "idTableauCanvas", Response.tableau_map, $("#idTableauPeriod").val() );
+          $('#toplevel').fadeIn("slow");
+        }, null );
   }
 
  function Charger_page_tableau ( tableau_id, period )
