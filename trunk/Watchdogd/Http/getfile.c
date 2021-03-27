@@ -176,17 +176,11 @@
        g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Tech/%s.php", WTD_PKGDATADIR, (URI[2] ? URI[2] : "dashboard") );
 
      }
-    else if (!strcasecmp(URI[1], "" ))
-     { g_snprintf ( header, sizeof(header), "%s/IHM/header.php", WTD_PKGDATADIR );
-       g_snprintf ( footer, sizeof(footer), "%s/IHM/footer.php", WTD_PKGDATADIR );
-       has_template = TRUE;
-       g_snprintf ( fichier, sizeof(fichier), "%s/IHM/index.php", WTD_PKGDATADIR );
-     }
     else
      { g_snprintf ( header, sizeof(header), "%s/IHM/header.php", WTD_PKGDATADIR );
        g_snprintf ( footer, sizeof(footer), "%s/IHM/footer.php", WTD_PKGDATADIR );
        has_template = TRUE;
-       g_snprintf ( fichier, sizeof(fichier), "%s/IHM/%s.php", WTD_PKGDATADIR, URI[1] );
+       g_snprintf ( fichier, sizeof(fichier), "%s/IHM/index.php", WTD_PKGDATADIR );
      }
     g_strfreev(URI);
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s : Serving file %s", __func__, fichier );

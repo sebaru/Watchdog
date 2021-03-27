@@ -14,7 +14,8 @@
 
     if (ContentType != null) { xhr.setRequestHeader('Content-type', ContentType ); }
 
-    xhr.timeout = 5000; // durée en millisecondes
+    xhr.timeout = 60000; // durée en millisecondes
+
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
        $(".ClassLoadingSpinner").hide();

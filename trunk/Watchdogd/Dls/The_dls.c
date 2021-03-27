@@ -437,7 +437,7 @@ end:
 
     if (bool->next_etat != valeur)
      { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                 "%s: ligne %04d: Changing DLS_BOOL '%s:%s'=%d up %d down %d", __func__,
+                 "%s: ligne %04d: Changing DLS_BI '%s:%s'=%d up %d down %d", __func__,
                  (vars ? vars->num_ligne : -1), bool->tech_id, bool->acronyme, valeur, bool->edge_up, bool->edge_down );
        Partage->audit_bit_interne_per_sec++;
        bool->next_etat = valeur;
