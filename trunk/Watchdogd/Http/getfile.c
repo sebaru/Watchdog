@@ -267,17 +267,30 @@
        close(fd);
      }
 /*************************************************** Envoi au client **********************************************************/
+    SoupMessageHeaders *headers;
+    g_object_get ( G_OBJECT(msg), "response_headers", &headers, NULL );
+
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
          if ( g_str_has_suffix (path, ".js") )
-     { soup_message_set_response ( msg, "text/javascript; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
+     { soup_message_set_response ( msg, "text/javascript; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result );
+       soup_message_headers_append ( headers, "cache-control", "private, max-age=60" );
+     }
     else if ( g_str_has_suffix (path, ".png") )
-     { soup_message_set_response ( msg, "image/png; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
+     { soup_message_set_response ( msg, "image/png; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result );
+       soup_message_headers_append ( headers, "cache-control", "private, max-age=86400" );
+     }
     else if ( g_str_has_suffix (path, ".svg") )
-     { soup_message_set_response ( msg, "image/svg+xml; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
+     { soup_message_set_response ( msg, "image/svg+xml; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result );
+       soup_message_headers_append ( headers, "cache-control", "private, max-age=86400" );
+     }
     else if ( g_str_has_suffix (path, ".jpg") )
-     { soup_message_set_response ( msg, "image/jpeg; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
+     { soup_message_set_response ( msg, "image/jpeg; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result );
+       soup_message_headers_append ( headers, "cache-control", "private, max-age=86400" );
+     }
     else if ( g_str_has_suffix (path, ".webp") )
-     { soup_message_set_response ( msg, "image/webp; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
+     { soup_message_set_response ( msg, "image/webp; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result );
+       soup_message_headers_append ( headers, "cache-control", "private, max-age=86400" );
+     }
     else if ( g_str_has_suffix (path, ".wav") )
      { soup_message_set_response ( msg, "audio/x-wav", SOUP_MEMORY_TAKE, result, taille_result ); }
     else
