@@ -24,7 +24,7 @@
  function Charger_page_tableau ( tableau_id )
   { if (tableau_id==undefined) tableau_id=10000;
     $('#toplevel').fadeOut("fast", function()
-     { $('#toplovel').empty.append(TableauDIV);
+     { $('#toplovel').empty().append(TableauDIV);
        Send_to_API ( "GET", "/api/tableau/map/list", "tableau_id="+tableau_id, function(Response)
         { $('#idTableauTitle').val(Response.titre);
           Charger_plusieurs_courbes ( "idTableauCanvas", Response.tableau_map, "HOUR" );
