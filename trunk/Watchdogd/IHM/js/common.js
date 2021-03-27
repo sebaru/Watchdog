@@ -235,8 +235,8 @@
                                }
                      };
        var ctx = document.getElementById(idChart).getContext('2d');
-       if (Charts[id]) Charts.destroy();
-       Charts[id] = new Chart(ctx, { type: 'line', data: data, options: options } );
+       if (Charts[idChart]) Charts.destroy();
+       Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
 
     /* if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
@@ -283,8 +283,8 @@ console.debug(data);
                                }
                      };
        var ctx = document.getElementById(idChart).getContext('2d');
-       if (Charts[id]) Charts.destroy();
-       Charts[id] = new Chart(ctx, { type: 'line', data: data, options: options } );
+       if (Charts[idChart]) Charts.destroy();
+       Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
 
     /*if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
