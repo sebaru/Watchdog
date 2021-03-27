@@ -15,19 +15,23 @@
                  "</div>"+
                  "<div class='row'><canvas id='idTableauCanvas' class='wtd-courbe'></canvas></div>";
 
+ var Tableau_ID;
+
 /********************************************* Appelé au chargement de la page ************************************************/
  function Tableau_Set_Period ()
   { console.log("Tableau_Set_Period");
-    /*vars = window.location.pathname.split('/');
-    Redirect ( "/tableau/"+vars[2]+"/"+$("#idTableauPeriod").val() );*/
+    Charger_page_tableau ( Tableau_ID, $("#idTableauPeriod").val() );
   }
- function Charger_page_tableau ( tableau_id )
+
+ function Charger_page_tableau ( tableau_id, period )
   { if (tableau_id==undefined) tableau_id=10000;
+    Tableau_ID = tableau_id;
+
     $('#toplevel').fadeOut("fast", function()
      { $('#toplevel').empty().append(TableauDIV);
        Send_to_API ( "GET", "/api/tableau/map/list", "tableau_id="+tableau_id, function(Response)
         { $('#idTableauTitle').text(Response.titre);
-          Charger_plusieurs_courbes ( "idTableauCanvas", Response.tableau_map, "HOUR" );
+          Charger_plusieurs_courbes ( "idTableauCanvas", Response.tableau_map, period );
           $('#toplevel').fadeIn("slow");
         }, null );
        console.log("loaded");
