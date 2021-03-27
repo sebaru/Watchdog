@@ -1,5 +1,6 @@
  document.addEventListener('DOMContentLoaded', Load_common, false);
 
+ var Charts[];
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Send_to_API ( method, URL, parametre, fonction_ok, fonction_nok )
   { var xhr = new XMLHttpRequest;
@@ -234,7 +235,8 @@
                                }
                      };
        var ctx = document.getElementById(idChart).getContext('2d');
-       var myChart = new Chart(ctx, { type: 'line', data: data, options: options } );
+       if (Charts[id]) Charts.destroy();
+       Charts[id] = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
 
     /* if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
@@ -281,7 +283,8 @@ console.debug(data);
                                }
                      };
        var ctx = document.getElementById(idChart).getContext('2d');
-       var myChart = new Chart(ctx, { type: 'line', data: data, options: options } );
+       if (Charts[id]) Charts.destroy();
+       Charts[id] = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
 
     /*if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
