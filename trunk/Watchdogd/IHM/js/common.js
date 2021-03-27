@@ -235,7 +235,7 @@
                                }
                      };
        var ctx = document.getElementById(idChart).getContext('2d');
-       if (Charts[idChart]) Charts.destroy();
+       if (Charts != null && Charts[idChart] != null) Charts[idChart].destroy();
        Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
 
@@ -283,7 +283,7 @@ console.debug(data);
                                }
                      };
        var ctx = document.getElementById(idChart).getContext('2d');
-       if (Charts[idChart]) Charts.destroy();
+       if (Charts != null && Charts[idChart] != null) Charts[idChart].destroy();
        Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
 
