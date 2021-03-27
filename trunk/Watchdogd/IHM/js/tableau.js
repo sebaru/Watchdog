@@ -20,7 +20,7 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Tableau_Set_Period ()
   { console.log("Tableau_Set_Period");
-    Send_to_API ( "GET", "/api/tableau/map/list", "tableau_id="+tableau_id, function(Response)
+    Send_to_API ( "GET", "/api/tableau/map/list", "tableau_id="+Tableau_ID, function(Response)
         { $('#idTableauTitle').text(Response.titre);
           Charger_plusieurs_courbes ( "idTableauCanvas", Response.tableau_map, $("#idTableauPeriod").val() );
           $('#toplevel').fadeIn("slow");
