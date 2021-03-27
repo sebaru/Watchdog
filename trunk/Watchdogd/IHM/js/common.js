@@ -1,6 +1,7 @@
  document.addEventListener('DOMContentLoaded', Load_common, false);
 
- var Charts;
+ var Charts = new Array();
+
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Send_to_API ( method, URL, parametre, fonction_ok, fonction_nok )
   { var xhr = new XMLHttpRequest;
