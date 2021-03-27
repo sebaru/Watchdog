@@ -26,7 +26,7 @@
     $('#toplevel').fadeOut("fast", function()
      { $('#toplevel').empty().append(TableauDIV);
        Send_to_API ( "GET", "/api/tableau/map/list", "tableau_id="+tableau_id, function(Response)
-        { $('#idTableauTitle').val(Response.titre);
+        { $('#idTableauTitle').text(Response.titre);
           Charger_plusieurs_courbes ( "idTableauCanvas", Response.tableau_map, "HOUR" );
           $('#toplevel').fadeIn("slow");
         }, null );
