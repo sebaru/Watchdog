@@ -66,9 +66,9 @@
                       cursor: pointer;
                     }
 
-	.wtd-courbe { background-color: white;
+	       .wtd-courbe { background-color: white;
                       width: auto;
-                      height: 300px;
+                      height: 400px;
                       cursor: pointer;
                     }
 
@@ -79,8 +79,8 @@
 
         @media (max-width: 768px)
          { .wtd-synoptique
-            { max-height: 128px;
-              max-width: 128px;
+            { max-height: 96px;
+              max-width: 96px;
             }
            .wtd-vignette
             { max-width: 16px;
@@ -91,8 +91,11 @@
                max-height: 32px;
              }
            .wtd-visuel
-             { max-width: 32px;
-               max-height: 32px;
+             { max-width: 96px;
+               max-height: 96px;
+             }
+           .wtd-courbe
+             { height: 300px;
              }
          }
 
@@ -158,7 +161,7 @@
 
 <header>
 	<nav class="navbar navbar-dark navbar-expand-md fixed-top shadow"> <!-- fixed-top -->
-  <a class="navbar-brand" href="#" onclick="Change_page('1')">
+  <a class="navbar-brand" href="#" onclick="Charger_page_synoptique('1')">
     <img src="/img/syn_maison.png" alt="Accueil" class="wtd-menu">
   </a>
 

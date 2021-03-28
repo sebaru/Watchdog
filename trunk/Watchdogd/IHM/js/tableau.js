@@ -26,13 +26,16 @@
      }, null );
   }
 
+/********************************************* Appelé au changement de periode ************************************************/
  function Tableau_Set_Period ()
   { Charger_un_tableau ( Tableau_ID, $("#idTableauPeriod").val() ); }
 
+/********************************************* Charge la page entiere *********************************************************/
  function Charger_page_tableau ( tableau_id )
   { if (tableau_id==undefined) tableau_id=10000;
     Tableau_ID = tableau_id;
 
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     $('#toplevel').fadeOut("fast", function()
      { $('#toplevel').empty().append(TableauDIV);
        Charger_un_tableau ( Tableau_ID, "HOUR" );

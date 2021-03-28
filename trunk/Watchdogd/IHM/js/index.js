@@ -7,9 +7,7 @@
   { vars = window.location.pathname.split('/');
     console.log("Load_page " + vars[1]);
 
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-
-    Change_page (1);
+    Charger_page_synoptique (1);
 
     var WTDWebSocket = new WebSocket("wss://"+window.location.hostname+":"+window.location.port+"/api/live-motifs", "live-motifs");
     WTDWebSocket.onopen = function (event)

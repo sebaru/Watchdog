@@ -81,6 +81,18 @@
                   error: function ( xhr, status, error ) { /*Show_Error(xhr.statusText);*/ }
                 },
           rowId: "id",
+          createdRow: function( row, item, dataIndex )
+           {      if (item.typologie==0) { classe="text-white"; } /* etat */
+             else if (item.typologie==1) { classe="text-danger" } /* alerte */
+             else if (item.typologie==2) { classe="text-warning"; } /* defaut */
+             else if (item.typologie==3) { classe="text-warning"; } /* alarme */
+             else if (item.typologie==4) { classe="text-success"; } /* veille */
+             else if (item.typologie==5) { classe="text-white"; }   /* attente */
+             else if (item.typologie==6) { classe="text-danger"; } /* danger */
+             else if (item.typologie==7) { classe="text-warning"; } /* derangement */
+             else classe="text-info";
+             $(row).addClass( classe );
+           },
           columns:
            [ { "data": null, "title":"-", "className": "align-middle text-center bg-dark",
                "render": function (item)
@@ -97,9 +109,9 @@
                    return("<img class='wtd-vignette "+classe+"' src='/img/"+img+"'>");
                  }
              },
-             { "data": "date_create", "title":"Apparition", "className": "text-center bg-dark d-none d-sm-table-cell" },
-             { "data": "dls_shortname", "title":"Objet", "className": "text-center bg-dark " },
-             { "data": "libelle", "title":"Message", "className": "text-center bg-dark" },
+             { "data": "date_create", "title":"Apparition", "className": "align-middle text-center bg-dark d-none d-sm-table-cell" },
+             { "data": "dls_shortname", "title":"Objet", "className": "align-middle text-center bg-dark " },
+             { "data": "libelle", "title":"Message", "className": "align-middle text-center bg-dark", },
              { "data": null, "title":"Acquit", "className": "align-middle text-center bg-dark d-none d-sm-table-cell",
                "render": function (item)
                  { if (item.typologie==0) return("-");                                                      /* Si INFO, pas de ACK */
@@ -133,10 +145,9 @@
      Messages_loaded = true;
   }
 /********************************************* Appelé au chargement de la page ************************************************/
- function Charger_page_home ( syn_id )
+ function Charger_un_synoptique ( syn_id )
   { var bodymain = $('#bodymain');
     var tableaux = $('#tableaux');
-    console.log("Charger_page_home " + syn_id);
     Send_to_API ( "GET", "/api/syn/show", "syn_id="+syn_id, function(Response)
      { console.log(Response);
        Synoptique = Response;
@@ -147,8 +158,11 @@
                  }
               );
        Set_syn_vars ( Response.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
+
        if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg" ); }
                                 else { Changer_img_src ( 'idMenuImgAccueil', "/img/"+Response.image ); }
+       $('#idMenuImgAccueil').on("click", function () { Charger_page_synoptique ( Response.id ); } );
+
        $.each ( Response.visuels, function (i, visuel)
                  { bodymain.append ( Creer_visuel ( visuel ) );
                  }
@@ -157,6 +171,7 @@
                  { Changer_etat_visuel ( etat_visuel );
                  }
               );
+
        if (Response.nbr_tableaux>0)
         { $.each ( Response.tableaux, function (i, tableau)
            { tableaux.append("<hr>");
@@ -175,15 +190,15 @@
  }
 
 /********************************************* Appelé au chargement de la page ************************************************/
- function Change_page ( syn_id )
+ function Charger_page_synoptique ( syn_id )
   {
-    console.log("Change_page " + syn_id);
+    console.log("Charger_page_synoptique " + syn_id);
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     $('#toplevel').fadeOut("fast", function ()
      { $('#toplevel').empty()
                      .append("<div id='bodymain' class='row justify-content-center'></div")
                      .append("<div id='tableaux' class='row justify-content-center'></div");
-       Charger_page_home ( syn_id );
+       Charger_un_synoptique ( syn_id );
      });
   }
 /********************************************* Appelé au chargement de la page ************************************************/
@@ -198,7 +213,7 @@
                .append( $('<div></div>').addClass("card-body text-center")
                         .append( $('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
                                                                                   : "/img/"+Response.image) )
-                                 .attr("onclick", "Change_page("+Response.id+")")
+                                 .attr("onclick", "Charger_page_synoptique("+Response.id+")")
                                  .addClass("wtd-synoptique")
                                )
                       )
