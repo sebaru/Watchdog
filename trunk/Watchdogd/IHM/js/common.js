@@ -183,7 +183,7 @@
  function Slide_down_when_loaded ( id )
   { var images = $('#'+id+' img');
     var loaded_images_count = 0;
-    console.log("waiting for "+images.length+" images");
+    if (images.length==0) { $('#'+id).slideDown("slow"); return; }
     images.on("load", function()
      { loaded_images_count++;
        if (loaded_images_count == images.length) { $('#'+id).slideDown("slow"); }
