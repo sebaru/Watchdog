@@ -5,7 +5,7 @@
      <a href="/">Se reconnecter</a>
    </div>
 
-<div id="toplevel" class="m-2">
+<div id="toplevel" class="m-1">
 </div>
 
 <hr>

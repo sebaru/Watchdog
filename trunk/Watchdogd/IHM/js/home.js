@@ -184,8 +184,7 @@
         }
 
        Charger_messages ( syn_id );
-
-       $('#toplevel').fadeIn("slow");
+       Slide_down_when_loaded ( "toplevel" );
      }, null );
  }
 
@@ -194,10 +193,10 @@
   {
     console.log("Charger_page_synoptique " + syn_id);
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    $('#toplevel').fadeOut("fast", function ()
+    $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
-                     .append("<div id='bodymain' class='row justify-content-center'></div")
-                     .append("<div id='tableaux' class='row justify-content-center'></div");
+                     .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div")
+                     .append("<div id='tableaux' class='row row-cols-1 row-cols-sm-1 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 justify-content-center'></div");
        Charger_un_synoptique ( syn_id );
      });
   }

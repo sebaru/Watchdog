@@ -174,10 +174,20 @@
   }
 /********************************************* Affichage des vignettes ********************************************************/
  function Changer_img_src ( id, target )
-  { $('#'+id).fadeOut("slow", function()
-     { $('#'+id).on("load", function() { $('#'+id).fadeIn("slow"); } );
+  { $('#'+id).slideUp("slow", function()
+     { $('#'+id).on("load", function() { $('#'+id).slideDown("slow"); } );
        $('#'+id).attr("src", target);
      } );
+  }
+/********************************************* Affichage des vignettes ********************************************************/
+ function Slide_down_when_loaded ( id )
+  { var images = $('#'+id+' img');
+    var loaded_images_count = 0;
+    console.log("waiting for "+images.length+" images");
+    images.on("load", function()
+     { loaded_images_count++;
+       if (loaded_images_count == images.length) { $('#'+id).slideDown("slow"); }
+     });
   }
 /****************************************** Escape les " et ' *****************************************************************/
  function htmlEncode ( string )

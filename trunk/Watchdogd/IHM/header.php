@@ -113,7 +113,6 @@
         .nav-link:hover { color: white !important;
                           background-color: #48BBC0;
                         }
-    }
       </style>
 
     </head>

@@ -22,7 +22,7 @@
   { Send_to_API ( "GET", "/api/tableau/map/list", "tableau_id="+id, function(Response)
      { $('#idTableauTitle').text(Response.titre);
        Charger_plusieurs_courbes ( "idTableauCanvas", Response.tableau_map, period );
-       $('#toplevel').fadeIn("slow");
+       $('#toplevel').slideDown("slow");
      }, null );
   }
 
@@ -36,7 +36,7 @@
     Tableau_ID = tableau_id;
 
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    $('#toplevel').fadeOut("fast", function()
+    $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty().append(TableauDIV);
        Charger_un_tableau ( Tableau_ID, "HOUR" );
      });
