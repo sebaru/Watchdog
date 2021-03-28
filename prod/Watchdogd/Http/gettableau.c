@@ -162,7 +162,7 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Http_traiter_tableau_map_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                   SoupClientContext *client, gpointer user_data )
+                                      SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -183,6 +183,15 @@
     if (RootNode == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    if ( SQL_Select_to_json_node ( RootNode, NULL,
+                                  "SELECT tableau.*,syns.page FROM tableau "
+                                  "INNER JOIN syns ON tableau.syn_id = syns.id "
+                                  "WHERE tableau.id=%d AND access_level<=%d", tableau_id, session->access_level ) == FALSE )
+     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
+       json_node_unref ( RootNode );
        return;
      }
 

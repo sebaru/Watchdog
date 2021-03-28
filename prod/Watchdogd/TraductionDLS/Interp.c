@@ -648,12 +648,12 @@
     taille = 256;
     action->alors = New_chaine( taille );
     g_snprintf( action->alors, taille,
-                "   Dls_data_set_tempo ( \"%s\", \"%s\", &_%s_%s, 1, %d, %d, %d, %d, %d );\n",
+                "   Dls_data_set_tempo ( vars, \"%s\", \"%s\", &_%s_%s, 1, %d, %d, %d, %d, %d );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
                 daa, dma, dMa, dad, random );
     action->sinon = New_chaine( taille );
     g_snprintf( action->sinon, taille,
-                "   Dls_data_set_tempo ( \"%s\", \"%s\", &_%s_%s, 0, %d, %d, %d, %d, %d );\n",
+                "   Dls_data_set_tempo ( vars, \"%s\", \"%s\", &_%s_%s, 0, %d, %d, %d, %d, %d );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
                 daa, dma, dMa, dad, random );
     return(action);

@@ -66,7 +66,7 @@
  extern gboolean Dls_data_get_DI_down   ( gchar *tech_id, gchar *acronyme, gpointer *di_p );
  extern void     Dls_data_set_DO        ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *dout_p, gboolean valeur );
  extern void     Dls_data_set_MSG       ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat );
- extern void     Dls_data_set_tempo     ( gchar *tech_id, gchar *acronyme, gpointer *tempo_p, gboolean etat,
+ extern void     Dls_data_set_tempo     ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *tempo_p, gboolean etat,
                                           gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
  extern gfloat   Dls_data_get_AO        ( gchar *tech_id, gchar *acronyme, gpointer *ao_p );
  extern void     Dls_data_set_AO        ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *ao_p, gfloat val_avant_ech );

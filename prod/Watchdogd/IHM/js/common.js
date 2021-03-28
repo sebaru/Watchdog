@@ -1,5 +1,7 @@
  document.addEventListener('DOMContentLoaded', Load_common, false);
 
+ var Charts = new Array();
+
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Send_to_API ( method, URL, parametre, fonction_ok, fonction_nok )
   { var xhr = new XMLHttpRequest;
@@ -14,7 +16,8 @@
 
     if (ContentType != null) { xhr.setRequestHeader('Content-type', ContentType ); }
 
-    xhr.timeout = 5000; // durée en millisecondes
+    xhr.timeout = 60000; // durée en millisecondes
+
     xhr.onreadystatechange = function()
      { if ( xhr.readyState != 4 ) return;
        $(".ClassLoadingSpinner").hide();
@@ -171,10 +174,20 @@
   }
 /********************************************* Affichage des vignettes ********************************************************/
  function Changer_img_src ( id, target )
-  { $('#'+id).fadeOut("slow", function()
-     { $('#'+id).on("load", function() { $('#'+id).fadeIn("slow"); } );
+  { $('#'+id).slideUp("slow", function()
+     { $('#'+id).on("load", function() { $('#'+id).slideDown("slow"); } );
        $('#'+id).attr("src", target);
      } );
+  }
+/********************************************* Affichage des vignettes ********************************************************/
+ function Slide_down_when_loaded ( id )
+  { var images = $('#'+id+' img');
+    var loaded_images_count = 0;
+    if (images.length==0) { $('#'+id).slideDown("slow"); return; }
+    images.on("load", function()
+     { loaded_images_count++;
+       if (loaded_images_count == images.length) { $('#'+id).slideDown("slow"); }
+     });
   }
 /****************************************** Escape les " et ' *****************************************************************/
  function htmlEncode ( string )
@@ -233,7 +246,8 @@
                                }
                      };
        var ctx = document.getElementById(idChart).getContext('2d');
-       var myChart = new Chart(ctx, { type: 'line', data: data, options: options } );
+       if (Charts != null && Charts[idChart] != null) Charts[idChart].destroy();
+       Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
 
     /* if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
@@ -280,7 +294,8 @@ console.debug(data);
                                }
                      };
        var ctx = document.getElementById(idChart).getContext('2d');
-       var myChart = new Chart(ctx, { type: 'line', data: data, options: options } );
+       if (Charts != null && Charts[idChart] != null) Charts[idChart].destroy();
+       Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
 
     /*if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
