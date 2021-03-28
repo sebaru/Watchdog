@@ -100,14 +100,21 @@
     return(new_node);
   }
 /******************************************************************************************************************************/
-/* Json_add_string: Ajoute un enregistrement name/string dans le RootNode                                                     */
+/* Json_array_add_element: Ajoute un enregistrement dans le tableau                                                           */
 /* Entrée: le RootNode, le nom du parametre, la valeur                                                                        */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Json_array_add_element ( JsonArray *array, JsonNode *element )
   { json_array_add_element ( array, element ); }
 /******************************************************************************************************************************/
-/* Json_add_string: Ajoute un enregistrement name/string dans le RootNode                                                     */
+/* Json_get_array_as_list: Récupère le tableau en paramtre sous forme de list                                                 */
+/* Entrée: le RootNode, le nom du tableau                                                                                     */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ GList *Json_get_array_as_list ( JsonNode *RootNode, gchar *chaine )
+  { return (json_array_get_elements ( Json_get_array ( RootNode, chaine ) )); }
+/******************************************************************************************************************************/
+/* Json_node_foreach_array_element: Lance une fonction ne parametre sur chacun des elements d'un tableau                      */
 /* Entrée: le RootNode, le nom du parametre, la valeur                                                                        */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/

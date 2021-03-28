@@ -6,8 +6,6 @@
    </div>
 
 <div id="toplevel" class="m-2">
-  <div id="bodymain" class="justify-content-center"></div>
-  <div id="tableaux" class="row justify-content-center"></div>
 </div>
 
 <hr>

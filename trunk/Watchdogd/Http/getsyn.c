@@ -549,26 +549,24 @@
         }
      }
 /*------------------------------------------------- Envoi l'état de tous les visuels du synoptique ---------------------------*/
-    struct DLS_SYN *dls_syn = Dls_search_syn ( syn_id );                                            /* Récupère le synoptique */
-    if (dls_syn)
-     { GSList *liste_visu;
-       JsonArray *etat_visuels = Json_node_add_array ( synoptique, "etat_visuels" );
-       liste_visu = Partage->Dls_data_VISUEL;
-       while(liste_visu)                    /* Parcours tous les visuels et envoie ceux relatifs aux DLS du synoptique chargé */
-        { struct DLS_VISUEL *visuel=liste_visu->data;
-          GSList *liste_plugin = dls_syn->Dls_plugins;
-          while (liste_plugin)
-           { struct DLS_PLUGIN *plugin = liste_plugin->data;
-             if (!strcasecmp(visuel->tech_id, plugin->tech_id))
-              { JsonNode *element = Json_node_create ();
-                Dls_VISUEL_to_json ( element, visuel );
-                Json_array_add_element ( etat_visuels, element );
-              }
-             liste_plugin = g_slist_next(liste_plugin);
+    JsonArray *etat_visuels = Json_node_add_array ( synoptique, "etat_visuels" );
+    GList *syn_visuels      = Json_get_array_as_list ( synoptique, "visuels" );
+    GSList *dls_visuels     = Partage->Dls_data_VISUEL;
+    while(dls_visuels)                      /* Parcours tous les visuels et envoie ceux relatifs aux DLS du synoptique chargé */
+     { struct DLS_VISUEL *dls_visuel=dls_visuels->data;
+       GList *visuels = syn_visuels;
+       while (visuels)
+        { JsonNode *visuel = visuels->data;
+          if (!strcasecmp( Json_get_string(visuel, "tech_id"), dls_visuel->tech_id))
+           { JsonNode *element = Json_node_create ();
+             Dls_VISUEL_to_json ( element, dls_visuel );
+             Json_array_add_element ( etat_visuels, element );
            }
-          liste_visu = g_slist_next(liste_visu);
+          visuels = g_list_next(visuels);
         }
+       dls_visuels = g_slist_next(dls_visuels);
      }
+    g_list_free(syn_visuels);
 
     gchar *buf = Json_node_to_string ( synoptique );
     json_node_unref(synoptique);

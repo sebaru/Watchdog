@@ -500,7 +500,7 @@ printf ("%s\n", __func__ );
     infos->syn = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
     infos->syn_id = Json_get_int ( infos->syn, "id" );
     infos->timer_id = g_timeout_add( 500, Timer, page );
-    printf("---- chargement id %d \n", infos->syn_id );
+    printf("%s: ---- chargement id %d \n", __func__, infos->syn_id );
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     page->child = hboite;

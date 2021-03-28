@@ -181,6 +181,8 @@ reload:
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { gchar buffer[1024];
+       usleep(1000);
+       sched_yield();
 
        if (Cfg_audio.lib->comm_next_update < Partage->top)
         { Zmq_Send_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 900 );
