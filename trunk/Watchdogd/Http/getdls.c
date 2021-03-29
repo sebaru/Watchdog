@@ -397,7 +397,7 @@
        return;
      }
 
-    Activer_plugin ( target, TRUE );
+    Dls_Activer_plugin ( target, TRUE );
     Audit_log ( session, "DLS '%s' started", target );
     g_free(target);
 /*************************************************** Envoi au client **********************************************************/
@@ -434,7 +434,7 @@
        return;
      }
 
-    Activer_plugin ( target, FALSE );
+    Dls_Activer_plugin ( target, FALSE );
     Audit_log ( session, "DLS '%s' stopped", target );
     g_free(target);
 /*************************************************** Envoi au client **********************************************************/
@@ -472,7 +472,7 @@
        return;
      }
 
-    Debug_plugin ( target, TRUE );
+    Dls_Debug_plugin ( target, TRUE );
     Audit_log ( session, "DLS '%s' debug enabled", target );
     g_free(target);
 /*************************************************** Envoi au client **********************************************************/
@@ -509,7 +509,7 @@
        return;
      }
 
-    Debug_plugin ( target, FALSE );
+    Dls_Debug_plugin ( target, FALSE );
     Audit_log ( session, "DLS '%s' debug disabled", target );
     g_free(target);
 /*************************************************** Envoi au client **********************************************************/
@@ -648,16 +648,6 @@
     g_free(tech_id);
   }
 /******************************************************************************************************************************/
-/* Http_Dls_compil: Compilation du plugin DLS fourni. Appellé récursivement pour compiler tous les plugins                    */
-/* Entrées: la session utilisateur et le plugin                                                                               */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Http_Dls_compil (void *user_data, struct DLS_PLUGIN *plugin)
-  { struct HTTP_CLIENT_SESSION *session = user_data;
-    Compiler_source_dls( FALSE, plugin->tech_id, NULL, 0 );                 /* Reset interdit sinon conflit de mutex */
-    Audit_log ( session, "DLS '%s' compilé", plugin->tech_id );
-  }
-/******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
@@ -675,13 +665,6 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( Json_has_member ( request, "compil_all" ) && Json_get_bool ( request, "compil_all" ) == TRUE )
-     { Dls_foreach_plugins ( session, Http_Dls_compil );
-       json_node_unref(request);
-       soup_message_set_status(msg, SOUP_STATUS_OK);
-       return;
-     }
-
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -692,7 +675,7 @@
        Save_source_dls_to_DB ( Json_get_string( request, "tech_id" ), sourcecode, strlen(sourcecode) );
      }
 
-    gint retour = Compiler_source_dls ( TRUE, Json_get_string( request, "tech_id" ), log_buffer, sizeof(log_buffer) );
+    Dls_Reseter_un_plugin ( Json_get_string( request, "tech_id" ) );
 
     JsonNode *RootNode = Json_node_create ();
     if (!RootNode)
@@ -701,46 +684,32 @@
        return;
      }
 
-    switch(retour)
+    SQL_Select_to_json_node ( RootNode, NULL,
+                             "SELECT errorlog, compil_status FROM dls WHERE tech_id='%s'",
+                              Json_get_string( request, "tech_id" ) );
+
+    switch(Json_get_int( RootNode, "compil_status" ))
      { case DLS_COMPIL_ERROR_LOAD_SOURCE:
-            g_snprintf( log_buffer, sizeof(log_buffer), "Unable to open file for '%s' compilation",
-                        Json_get_string ( request, "tech_id" ) );
-            Json_node_add_string ( RootNode, "errorlog", log_buffer );
-            Json_node_add_string ( RootNode, "result", "error" );
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Source File Error" );
        break;
        case DLS_COMPIL_ERROR_LOAD_LOG:
-            g_snprintf( log_buffer, sizeof(log_buffer), "Unable to open log file for '%s'",
-                        Json_get_string ( request, "tech_id" ) );
-            Json_node_add_string ( RootNode, "errorlog", log_buffer );
-            Json_node_add_string ( RootNode, "result", "error" );
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Log File Error" );
             break;
        case DLS_COMPIL_OK_WITH_WARNINGS:
-            Json_node_add_string ( RootNode, "errorlog", log_buffer );
-            Json_node_add_string ( RootNode, "result", "warning" );
             soup_message_set_status (msg, SOUP_STATUS_OK );
             break;
        case DLS_COMPIL_SYNTAX_ERROR:
-            Json_node_add_string ( RootNode, "errorlog", log_buffer );
-            Json_node_add_string ( RootNode, "result", "error" );
             soup_message_set_status (msg, SOUP_STATUS_OK );
             break;
        case DLS_COMPIL_ERROR_FORK_GCC:
             g_snprintf( log_buffer, sizeof(log_buffer), "Gcc fork failed !" );
-            Json_node_add_string ( RootNode, "errorlog", log_buffer );
-            Json_node_add_string ( RootNode, "result", "error" );
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Gcc Error" );
             break;
        case DLS_COMPIL_OK:
             g_snprintf( log_buffer, sizeof(log_buffer), "-- No error --\n-- Reset plugin OK --" );
-            Json_node_add_string ( RootNode, "errorlog", log_buffer );
-            Json_node_add_string ( RootNode, "result", "success" );
             soup_message_set_status (msg, SOUP_STATUS_OK);
             break;
        default : g_snprintf( log_buffer, sizeof(log_buffer), "Unknown Error !");
-            Json_node_add_string ( RootNode, "errorlog", log_buffer );
-            Json_node_add_string ( RootNode, "result", "error" );
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Unknown Error" );
      }
     Audit_log ( session, "DLS '%s' compilé", Json_get_string ( request, "tech_id" ) );

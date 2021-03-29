@@ -51,8 +51,6 @@
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Creer_configDB ( "dls", "compil_at_boot", "false" );                                       /* Settings default parameters */
-    Partage->com_dls.Compil_at_boot = FALSE;                                                   /* Settings default parameters */
     Creer_configDB ( "dls", "debug", "false" );                                                /* Settings default parameters */
     Partage->com_dls.Thread_debug   = FALSE;                                                   /* Settings default parameters */
     Creer_configDB ( "dls", "library_version", DLS_LIBRARY_VERSION );                          /* Settings default parameters */
@@ -67,8 +65,6 @@
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
      {      if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Partage->com_dls.Thread_debug = TRUE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "compil_at_boot" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Partage->com_dls.Compil_at_boot = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "library_version" ) )
         { g_snprintf( Partage->com_dls.Library_version, sizeof(Partage->com_dls.Library_version), "%s", valeur ); }
      }
@@ -1917,12 +1913,12 @@ end:
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
 
     if (strcmp ( Partage->com_dls.Library_version, DLS_LIBRARY_VERSION ) )
-     { Partage->com_dls.Compil_at_boot = TRUE;
-       if (Modifier_configDB ( "dls", "library_version", DLS_LIBRARY_VERSION ))
+     { if (Modifier_configDB ( "dls", "library_version", DLS_LIBRARY_VERSION ))
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: updating library version OK", __func__ ); }
        else
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: update library error" ); }
      }
+
     Dls_Charger_plugins();                                                                      /* Chargement des modules dls */
     Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
     Dls_recalculer_arbre_dls_syn();
