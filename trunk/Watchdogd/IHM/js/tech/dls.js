@@ -16,14 +16,6 @@
   { Redirect ( "/tech/dls_status" );
   }
 
-/************************************ Envoi les infos de modifications synoptique *********************************************/
- function Dls_Compiler_tous_dls ( )
-  { var json_request = JSON.stringify( { compil_all: true } );
-    Send_to_API ( 'POST', "/api/dls/compil", json_request, function ()
-     { $('#idTableDLS').DataTable().ajax.reload();
-     }, null );
-  }
-
 /******************************************************************************************************************************/
  function Dls_start_plugin ( tech_id )
   { var json_request = JSON.stringify( { tech_id : tech_id } );
@@ -81,7 +73,6 @@
      { $('#idTableDLS').DataTable().ajax.reload(null, false);
      }, null);
   }
-
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Dls_Set ( dls_id )

@@ -4,7 +4,6 @@
    <h3><i class="fas fa-code text-primary"></i> Liste des Modules D.L.S</h3>
 
    <div class ="ml-auto btn-group align-items-start">
-        <button type="button" onclick="Dls_Compiler_tous_dls()" class="btn btn-outline-success"><i class="fas fa-coffee"></i> Tout Compiler</button>
         <button type="button" onclick="Show_Modal_Dls_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un DLS</button>
         <button type="button" onclick="Go_to_dls_status()" class="btn btn-info"><i class="fas fa-eye"></i> Statut Global</button>
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
