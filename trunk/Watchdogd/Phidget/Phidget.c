@@ -113,7 +113,7 @@ end:
   {	PhidgetReturnCode errorCode;
     size_t errorDetailLen = 100;
     const gchar* errorString;
-    gchar errorDetail[100];
+    gchar errorDetail[256];
     Phidget_getLastError(&errorCode, &errorString, errorDetail, &errorDetailLen);
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR,
               "%s: Phidget Error %d : %s - %s", __func__, errorCode, errorString, errorDetail );
@@ -160,6 +160,15 @@ end:
               "%s: Changement de valeur : %lf", __func__, voltageRatio );
   }
 /******************************************************************************************************************************/
+/* Phidget_onPHSensorChange: Appelé quand un module I/O PHSensor a changé de valeur                                           */
+/* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void CCONV Phidget_onPHSensorChange ( PhidgetPHSensorHandle canal, void *ctx, double PH )
+  {
+	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
+              "%s: Changement de valeur : %lf", __func__, PH );
+  }/***************************************************************************************************************************/
 /* Phidget_onAttachHandler: Appelé quand un canal estmodule I/O VoltageRatio a changé de valeur                               */
 /* Entrée: le channel, le contexte                                                                                            */
 /* Sortie: néant                                                                                                              */
@@ -187,6 +196,32 @@ end:
 	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
               "%s: Phidget S/N %d detached", __func__, deviceSerialNumber );
   }
+
+/******************************************************************************************************************************/
+/* Charger_un_IO: Charge une IO dans la librairie                                                                             */
+/* Entrée: La structure Json representant l'i/o                                                                               */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Phidget_set_config ( PhidgetHandle handle, gint serial, gint port, gboolean is_hub_port )
+   { if (Phidget_setDeviceSerialNumber((PhidgetHandle)handle, serial) != EPHIDGET_OK)
+      {	Phidget_print_error();
+        return;
+    	 }
+   	 if (Phidget_setIsHubPortDevice((PhidgetHandle)handle, is_hub_port) != EPHIDGET_OK)
+      {	Phidget_print_error();
+        return;
+    	 }
+
+   	 if (Phidget_setHubPort((PhidgetHandle)handle, port) != EPHIDGET_OK)
+      {	Phidget_print_error();
+        return;
+    	 }
+
+   	 if (Phidget_setIsRemote((PhidgetHandle)handle, 1) != EPHIDGET_OK)
+      {	Phidget_print_error();
+        return;
+    	 }
+   }
 /******************************************************************************************************************************/
 /* Charger_un_IO: Charge une IO dans la librairie                                                                             */
 /* Entrée: La structure Json representant l'i/o                                                                               */
@@ -200,38 +235,35 @@ end:
                 "%s: Chargement d'une IO '%s' port %d on S/N %d", __func__, classe, port, serial );
 
     if (!strcasecmp(classe, "VoltageRatioInput"))
-     { PhidgetVoltageRatioInputHandle voltageRatioInput;
-
-      	PhidgetVoltageRatioInput_create(&voltageRatioInput);
-
-       if (Phidget_setDeviceSerialNumber((PhidgetHandle)voltageRatioInput, serial) != EPHIDGET_OK)
-        {	Phidget_print_error();
-		        return;
-       	}
-      	if (Phidget_setIsHubPortDevice((PhidgetHandle)voltageRatioInput, 1) != EPHIDGET_OK)
-        {	Phidget_print_error();
-		        return;
-       	}
-
-      	if (Phidget_setHubPort((PhidgetHandle)voltageRatioInput, port) != EPHIDGET_OK)
-        {	Phidget_print_error();
-		        return;
-       	}
-
-      	if (Phidget_setIsRemote((PhidgetHandle)voltageRatioInput, 1) != EPHIDGET_OK)
-        {	Phidget_print_error();
-		        return;
-       	}
-
-      	PhidgetVoltageRatioInput_setOnVoltageRatioChangeHandler(voltageRatioInput, Phidget_onVoltageRatioChange, NULL);
-	      Phidget_setOnAttachHandler((PhidgetHandle)voltageRatioInput, Phidget_onAttachHandler, NULL);
-	      Phidget_setOnDetachHandler((PhidgetHandle)voltageRatioInput, Phidget_onDetachHandler, NULL);
-
+     { PhidgetVoltageRatioInputHandle handle;
+      	PhidgetVoltageRatioInput_create(&handle);
+   	   PhidgetVoltageRatioInput_setOnVoltageRatioChangeHandler(handle, Phidget_onVoltageRatioChange, NULL);
+       Phidget_set_config ( (PhidgetHandle)handle, serial, port, TRUE );
+       Phidget_setOnAttachHandler((PhidgetHandle)handle, Phidget_onAttachHandler, NULL);
+       Phidget_setOnDetachHandler((PhidgetHandle)handle, Phidget_onDetachHandler, NULL);
 	      //Open your Phidgets and wait for attachment
-      	if (Phidget_open ((PhidgetHandle)voltageRatioInput) != EPHIDGET_OK)
+   	   if (Phidget_open ((PhidgetHandle)handle) != EPHIDGET_OK)
         {	Phidget_print_error();
-		        return;
-       	}
+          return;
+        }
+     }
+    else if (!strcasecmp(classe, "PHSensorInput"))
+     { PhidgetPHSensorHandle handle;
+      	PhidgetPHSensor_create(&handle);
+   	   PhidgetPHSensor_setOnPHChangeHandler(handle, Phidget_onPHSensorChange, NULL);
+       Phidget_set_config ( (PhidgetHandle)handle, serial, port, FALSE );
+       Phidget_setOnAttachHandler((PhidgetHandle)handle, Phidget_onAttachHandler, NULL);
+       Phidget_setOnDetachHandler((PhidgetHandle)handle, Phidget_onDetachHandler, NULL);
+	      //Open your Phidgets and wait for attachment
+   	   if (Phidget_open ((PhidgetHandle)handle) != EPHIDGET_OK)
+        {	Phidget_print_error();
+          return;
+        }
+     }
+    else
+     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
+                 "%s: classe phidget '%s' inconnue pour port %d on S/N %d", __func__, classe, port, serial );
+       return;
      }
   }
 /******************************************************************************************************************************/
@@ -271,6 +303,8 @@ reload:
        goto end;
      }
     Phidget_Creer_DB();
+
+    if (Cfg_phidget.lib->Thread_debug) PhidgetLog_enable(PHIDGET_LOG_INFO, "phidgetlog.log");
 
     if ( Charger_tous_Hub() == FALSE )                                                      /* Chargement des modules phidget */
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: Error while loading HUB PHIDGET -> stop", __func__ );

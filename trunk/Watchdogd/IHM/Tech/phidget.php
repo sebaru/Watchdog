@@ -117,6 +117,8 @@
 						     <select id="idModalPhidgetIOClasse" required class="col-7 col-sm-8 custom-select border-info">
              <option value='DigitalInput'>Digital Input</option>
              <option value='DigitalOutput'>Digital Output</option>
+             <option value='PHSensorInput'>PH Sensor Input</option>
+             <option value='VoltageInput'>Voltage Input</option>
              <option value='VoltageRatioInput'>Voltage Ratio Input</option>
            </select>
      					</div>
