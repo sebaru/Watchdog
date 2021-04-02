@@ -9,21 +9,21 @@
 /************************************ Envoi les infos de modifications phidget ************************************************/
  function Phidget_enable_hub ( id )
   { var json_request = JSON.stringify( { id : id } );
-    Send_to_API ( 'POST', "/api/process/phidget/hub_start", json_request, function ()
+    Send_to_API ( 'POST', "/api/process/phidget/hub/start", json_request, function ()
      { $('#idTablePhidgetHub').DataTable().ajax.reload(null, false);
      });
   }
 /************************************ Envoi les infos de modifications phidget ************************************************/
  function Phidget_disable_hub ( id )
   { var json_request = JSON.stringify( { id : id } );
-    Send_to_API ( 'POST', "/api/process/phidget/hub_stop", json_request, function ()
+    Send_to_API ( 'POST', "/api/process/phidget/hub/stop", json_request, function ()
      { $('#idTablePhidgetHub').DataTable().ajax.reload(null, false);
      });
   }
 /************************************ Envoi les infos de modifications phidget ************************************************/
  function Valider_Phidget_Hub_Del ( id )
   { var json_request = JSON.stringify( { id : id } );
-    Send_to_API ( 'DELETE', "/api/process/phidget/hub_del", json_request, function ()
+    Send_to_API ( 'DELETE', "/api/process/phidget/hub/del", json_request, function ()
      { $('#idTablePhidgetHub').DataTable().ajax.reload(null, false);
      });
   }
@@ -46,7 +46,7 @@
          serial     : $('#idModalPhidgetHubSerial').val(),
        };
     if (id!=-1) json_request.id = id;
-    Send_to_API ( 'POST', "/api/process/phidget/hub_set", JSON.stringify(json_request), function ()
+    Send_to_API ( 'POST', "/api/process/phidget/hub/set", JSON.stringify(json_request), function ()
      { $('#idTablePhidgetHub').DataTable().ajax.reload(null, false);
      });
   }
@@ -75,7 +75,7 @@
 /************************************ Envoi les infos de modifications phidget ************************************************/
  function Valider_Phidget_IO_Del ( id )
   { var json_request = JSON.stringify( { id : id } );
-    Send_to_API ( 'DELETE', "/api/process/phidget/io_del", json_request, function ()
+    Send_to_API ( 'DELETE', "/api/process/phidget/io/del", json_request, function ()
      { $('#idTablePhidgetIO').DataTable().ajax.reload(null, false);
      });
   }
@@ -97,7 +97,7 @@
          hub_id     : $('#idModalPhidgetIOHubID').val(),
        };
     if (id!=-1) json_request.id = id;
-    Send_to_API ( 'POST', "/api/process/phidget/io_set", JSON.stringify(json_request), function ()
+    Send_to_API ( 'POST', "/api/process/phidget/io/set", JSON.stringify(json_request), function ()
      { $('#idTablePhidgetIO').DataTable().ajax.reload(null, false);
      });
   }
@@ -106,7 +106,7 @@
   { table = $('#idTablePhidgetIO').DataTable();
     selection = table.ajax.json().ios.filter( function(item) { return item.id==id } )[0];
     $('#idModalPhidgetIOTitre').text ( "Editer Phidget IO - " + selection.description );
-    Select_from_api ( 'idModalPhidgetIOHubID', "/api/process/phidget/hub_list", null , "hubs", "id",
+    Select_from_api ( 'idModalPhidgetIOHubID', "/api/process/phidget/hub/list", null , "hubs", "id",
                       function ( hub ) { return( hub.serial + " - " + hub.hostname + " - " + hub.description ); }, selection.hub_id );
     $('#idModalPhidgetIOClasse').val ( selection.classe );
     $('#idModalPhidgetIODescription').val( selection.description );
@@ -117,7 +117,7 @@
 /********************************************* Afichage du modal d'edition phidget ********************************************/
  function Show_Phidget_IO_Add ()
   { $('#idModalPhidgetIOTitre').text ( "Ajouter un IO Phidget" );
-    Select_from_api ( 'idModalPhidgetIOHubID', "/api/process/phidget/hub_list", null , "hubs", "id",
+    Select_from_api ( 'idModalPhidgetIOHubID', "/api/process/phidget/hub/list", null , "hubs", "id",
                       function ( hub ) { return( hub.serial + " - " + hub.description ); }, null );
     $('#idModalPhidgetIOHubID').val( "" );
     $('#idModalPhidgetIOClasse').val( "DigitalInput" );
@@ -136,7 +136,7 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id",
-         ajax: {	url : "/api/process/phidget/hub_list",	type : "GET", dataSrc: "hubs",
+         ajax: {	url : "/api/process/phidget/hub/list",	type : "GET", dataSrc: "hubs",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
@@ -175,11 +175,11 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id",
-         ajax: {	url : "/api/process/phidget/io_list",	type : "GET", dataSrc: "ios",
+         ajax: {	url : "/api/process/phidget/io/list",	type : "GET", dataSrc: "ios",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "serial", "title":"Hub Serial Number", "className": "align-middle text-center " },
+          [ { "data": "hostname", "title":"Hub Hostname", "className": "align-middle text-center " },
             { "data": "port", "title":"Port du Hub", "className": "align-middle text-center " },
             { "data": "classe", "title":"Classe", "className": "align-middle text-center " },
             { "data": "description", "title":"Description", "className": "align-middle text-center " },
