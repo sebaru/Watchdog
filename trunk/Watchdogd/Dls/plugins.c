@@ -324,8 +324,11 @@
  static gboolean Dls_Charger_un_plugin ( struct DLS_PLUGIN *dls )
   { gchar nom_fichier_absolu[60];
 
-    if (Compiler_source_dls( dls->tech_id )<DLS_COMPIL_OK)
-     { Dls_stop_plugin_reel ( dls->tech_id, dls );
+    dls->compil_status = Compiler_source_dls( dls->tech_id );
+    if (dls->compil_status<DLS_COMPIL_OK)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
+                "%s: Candidat '%s' CompilStatus failed", __func__, dls->tech_id );
+       Dls_stop_plugin_reel ( dls->tech_id, dls );
        return(FALSE);
      }
 
