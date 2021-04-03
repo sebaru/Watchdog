@@ -9,7 +9,6 @@
                        [ "Error: Need compiling again", "outline-danger" ],
                        [ "OK", "success" ],
                        [ "Warnings", "outline-warning" ],
-                       [ "Error", "outline-danger" ]
                      ];
 
  function Go_to_dls_status ()
@@ -163,10 +162,12 @@
                    { return( Bouton ( "success", "Désactiver le plugin",
                                       "Dls_stop_plugin", item.tech_id, "Actif" ) );
                    }
-                  else
+                  if (item.compil_status>=7) /* Si compil OK ou warning */
                    { return( Bouton ( "outline-secondary", "Activer le plugin",
                                       "Dls_start_plugin", item.tech_id, "Désactivé" ) );
                    }
+                  return( Bouton ( "outline-secondary", "Compilation nécéssaire",
+                                   null, null, "Désactivé" ) );
                 }
             },
             { "data": null, title:"Debug",  "className": "text-center align-middle", "render": function (item)
