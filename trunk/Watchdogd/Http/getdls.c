@@ -588,7 +588,7 @@
     g_free(target);
     if (SQL_Write (chaine)==FALSE)
        { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error"); }
-	   else soup_message_set_status (msg, SOUP_STATUS_OK);
+    else soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */
@@ -600,8 +600,8 @@
   { gchar requete[256];
 
     if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
+     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+       return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
