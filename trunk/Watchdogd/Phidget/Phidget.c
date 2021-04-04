@@ -87,15 +87,20 @@
                    "`serial` INT(11) NOT NULL DEFAULT '0',"
                    "PRIMARY KEY (`id`)"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
-       SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_io` ("
+       SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_AI` ("
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
-                   "`hub_id` int(11) NOT NULL,"
                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
+                   "`hub_id` int(11) NOT NULL,"
+                   "`mnemo_id` int(11) NULL,"
                    "`classe` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                   "`capteur` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                   "`intervalle` int(11) NOT NULL,"
                    "`port` int(11) NOT NULL,"
-                   "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                    "PRIMARY KEY (`id`),"
-                   "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                   "UNIQUE (hub_id, port, classe),"
+                   "UNIQUE (mnemo_id),"
+                   "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
+                   "FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_AI` (`id`) ON DELETE SET NULL ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
        goto end;
      }
@@ -227,12 +232,12 @@ end:
 /* Entrée: La structure Json representant l'i/o                                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Charger_un_IO (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+ static void Charger_un_AI (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { gchar *classe = Json_get_string(element, "classe");
     gint port     = Json_get_int   (element, "port");
     gint serial   = Json_get_int   (element, "serial");
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-                "%s: Chargement d'une IO '%s' port %d on S/N %d", __func__, classe, port, serial );
+                "%s: Chargement d'une AI '%s' port %d on S/N %d", __func__, classe, port, serial );
 
     if (!strcasecmp(classe, "VoltageRatioInput"))
      { PhidgetVoltageRatioInputHandle handle;
@@ -247,7 +252,20 @@ end:
           return;
         }
      }
-    else if (!strcasecmp(classe, "PHSensorInput"))
+    /* else if (!strcasecmp(classe, "VoltageInput"))
+     { PhidgetVoltageRatioInputHandle handle;
+      	PhidgetVoltageRatioInput_create(&handle);
+   	   PhidgetVoltageRatioInput_setOnVoltageRatioChangeHandler(handle, Phidget_onVoltageRatioChange, NULL);
+       Phidget_set_config ( (PhidgetHandle)handle, serial, port, TRUE );
+       Phidget_setOnAttachHandler((PhidgetHandle)handle, Phidget_onAttachHandler, NULL);
+       Phidget_setOnDetachHandler((PhidgetHandle)handle, Phidget_onDetachHandler, NULL);
+	      //Open your Phidgets and wait for attachment
+   	   if (Phidget_open ((PhidgetHandle)handle) != EPHIDGET_OK)
+        {	Phidget_print_error();
+          return;
+        }
+     }*/
+    else if (!strcasecmp(classe, "PHSensor"))
      { PhidgetPHSensorHandle handle;
       	PhidgetPHSensor_create(&handle);
    	   PhidgetPHSensor_setOnPHChangeHandler(handle, Phidget_onPHSensorChange, NULL);
@@ -275,14 +293,14 @@ end:
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode) return(FALSE);
 
-    if (SQL_Select_to_json_node ( RootNode, "hubs",
-                                  "SELECT hub.serial,io.* FROM phidget_io AS io "
-                                  "INNER JOIN phidget_hub AS hub ON hub.id=io.hub_id WHERE hub.enable=1" ) == FALSE)
+    if (SQL_Select_to_json_node ( RootNode, "AI",
+                                  "SELECT hub.serial,ai.* FROM phidget_AI AS ai "
+                                  "INNER JOIN phidget_hub AS hub ON hub.id=ai.hub_id WHERE hub.enable=1" ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
      }
 
-    Json_node_foreach_array_element ( RootNode, "hubs", Charger_un_IO, NULL );
+    Json_node_foreach_array_element ( RootNode, "AI", Charger_un_AI, NULL );
     json_node_unref(RootNode);
     return(TRUE);
   }

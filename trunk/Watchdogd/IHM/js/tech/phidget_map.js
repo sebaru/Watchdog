@@ -1,25 +1,23 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function Valider_Phidget_Del ( type, map_tech_id, map_tag )
+ function Valider_Phidget_Del ( type, id )
   { var json_request = JSON.stringify(
-       { classe     : type,
-         map_tech_id: map_tech_id,
-         map_tag    : map_tag
+       { classe : type,
+         id     : id,
        }
      );
-    Send_to_API ( 'DELETE', "/api/map/del", json_request, function()
+    Send_to_API ( 'DELETE', "/api/process/phidget/map/del", json_request, function()
      { $('#idTablePhidgetMap'+type).DataTable().ajax.reload(null, false);
-       $('#idToastStatus').toast('show');
      }, null );
   }
 
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Del ( type, selection )
   { Show_modal_del ( "Détruire le mapping ?", "Etes-vous sur de vouloir supprimer ce mapping ?",
-                     selection.map_tech_id+":"+selection.map_tag +
+                     selection.hub_description+":"+selection.capteur +
                      " <-> " + selection.tech_id + ":" + selection.acronyme + " - " +
-                     selection.libelle, "Valider_Phidget_Del('"+type+"','"+selection.map_tech_id+"','"+selection.map_tag+"')" );
+                     selection.libelle, "Valider_Phidget_Del('"+type+"','"+selection.id+"')" );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Del_DI ( id )
@@ -90,25 +88,30 @@
  function Valider_Phidget_Edit_AI ( )
   { if ($('#idModalEditAISelectTechID').val() == null) return;
     if ($('#idModalEditAISelectAcronyme').val() == null) return;
-    if (!isNum("idModalEditAIWagoTag")) return;
+    if (!isNum("idModalEditAIPort")) return;
+    if (!isNum("idModalEditAIMin")) return;
+    if (!isNum("idModalEditAIMax")) return;
+    if (!isNum("idModalEditAIIntervalle")) return;
+    if ($("#idModalEditAIPort").val()==null) return;
+    if ($("#idModalEditAIUnite").val()==null) return;
     var json_request = JSON.stringify(
        { classe     : 'AI',
-         thread     : 'MODBUS',
-         tech_id    : $('#idModalEditAISelectTechID').val().toUpperCase(),
-         acronyme   : $('#idModalEditAISelectAcronyme').val().toUpperCase(),
-         map_tech_id: $('#idModalEditAIWagoTechID').val().toUpperCase(),
-         map_tag    : "AI"+$('#idModalEditAIWagoTag').val(),
-         type       : $('#idModalEditAIType').val(),
+         capteur    : $('#idModalEditAICapteur').val(),
+         hub_id     : $('#idModalEditAIHub').val(),
+         port       : $('#idModalEditAIPort').val(),
          min        : $('#idModalEditAIMin').val(),
          max        : $('#idModalEditAIMax').val(),
+         intervalle : $('#idModalEditAIIntervalle').val(),
          unite      : $('#idModalEditAIUnite').val(),
-         map_question_vocale: $('#idModalEditAI #idModalEditMapQuestionVoc').val(),
-         map_reponse_vocale : $('#idModalEditAI #idModalEditMapReponseVoc').val(),
+         tech_id    : $('#idModalEditAISelectTechID').val().toUpperCase(),
+         acronyme   : $('#idModalEditAISelectAcronyme').val().toUpperCase(),
+         map_question_vocale: $('#idModalEditAIMapQuestionVoc').val(),
+         map_reponse_vocale : $('#idModalEditAIMapReponseVoc').val(),
        }
      );
-    Send_to_API ( 'POST', "/api/map/set", json_request, function ()
+    Send_to_API ( 'POST', "/api/process/phidget/map/set", json_request, function ()
      { $('#idTablePhidgetMapAI').DataTable().ajax.reload(null, false);
-       Process_reload ( null, "MODBUS", false );
+       Process_reload ( null, "PHIDGET", false );
      });
     $('#idModalEditAI').modal("hide");
   }
@@ -194,34 +197,58 @@
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Edit_AI ( id )
-  { if (id>0)
+  { $('#idModalEditAIUnite').on("change", function()
+     { $('#idModalEditAIMinUnite').text($('#idModalEditAIUnite').val());
+       $('#idModalEditAIMaxUnite').text($('#idModalEditAIUnite').val());
+     });
+
+    $('#idModalEditAICapteur').on("change", function()
+     { switch($('#idModalEditAICapteur').val())
+        { case "ADP1000-ORP": $('#idModalEditAIUnite').val("mV").prop('disabled', true).trigger('change');
+                              $('#idModalEditAIMin').val("-400").prop('disabled', true);
+                              $('#idModalEditAIMax').val("400").prop('disabled', true);
+                              break;
+          case "ADP1000-PH" : $('#idModalEditAIUnite').val("pH").prop('disabled', true).trigger('change');
+                              $('#idModalEditAIMin').val("1").prop('disabled', true);
+                              $('#idModalEditAIMax').val("14").prop('disabled', true);
+                              break;
+          default           : $('#idModalEditAIUnite').prop('disabled', false);
+                              $('#idModalEditAIMin').prop('disabled', false);
+                              $('#idModalEditAIMax').prop('disabled', false);
+        }
+     });
+
+    if (id>0)
      { table = $('#idTablePhidgetMapAI').DataTable();
        selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-       $('#idModalEditAITitre').text ( "Editer MAP AI - " + selection.map_tech_id + ":" + selection.map_tag );
+       $('#idModalEditAITitre').text ( "Editer MAP AI - " + selection.hub_description + ":" + selection.capteur );
        PhidgetMap_Update_Choix_Tech_ID( 'idModalEditAI', 'AI', selection.tech_id, selection.acronyme );
-       Select_from_api ( "idModalEditAIWagoTechID", "/api/process/phidget/list", null, "modules", "tech_id",
-                         function (item) { return(item.tech_id) }, selection.map_tech_id );
-       $('#idModalEditAIWagoTag').val ( selection.map_tag.substring(2) );
-       $('#idModalEditAIType').val ( selection.type );
+       Select_from_api ( "idModalEditAIHub", "/api/process/phidget/hub/list", null, "hubs", "id",
+                         function (item) { return(item.hostname + " - " + item.serial+" - "+item.description) }, selection.hub_id );
+       $('#idModalEditAIPort').val ( selection.port );
+       $('#idModalEditAICapteur').val ( selection.capteur ).trigger('change');
        $('#idModalEditAIMin').val ( selection.min );
        $('#idModalEditAIMax').val ( selection.max );
-       $('#idModalEditAIUnite').val ( selection.unite );
+       $('#idModalEditAIUnite').val ( selection.unite ).trigger('change');
+       $('#idModalEditAIIntervalle').val ( selection.intervalle );
        $('#idModalEditAIMapQuestionVoc').val ( selection.map_question_vocale );
        $('#idModalEditAIMapReponseVoc').val ( selection.map_reponse_vocale );
        $('#idModalEditAIValider').attr( "onclick", "Valider_Phidget_Edit_AI()" );
      }
     else
      { $('#idModalEditAITitre').text ( "Ajouter un MAP AI" );
-       Select_from_api ( "idModalEditAIWagoTechID", "/api/process/phidget/list", null, "modules", "tech_id",
-                         function (item) { return(item.tech_id) }, null );
-       $('#idModalEditAIWagoTag').val ( "0" );
+       Select_from_api ( "idModalEditAIHub", "/api/process/phidget/hub/list", null, "hubs", "id",
+                         function (item) { return(item.hostname + " - " + item.serial+" - "+item.description) }, null );
+       $('#idModalEditAIPort').val ( '' );
+       $('#idModalEditAICapteur').val("");
        $('#idModalEditAIRechercherTechID').val ( '' );
-       $('#idModalEditAIType').val ( 0 );
        $('#idModalEditAIMapQuestionVoc').val ( '' );
        $('#idModalEditAIMapReponseVoc').val ( '' );
+       $('#idModalEditAIIntervalle').val ( '0' );
        $('#idModalEditAIValider').attr( "onclick", "Valider_Phidget_Edit_AI()" );
        PhidgetMap_Update_Choix_Tech_ID( 'idModalEditAI', 'AI', null, null );
      }
+
     $('#idModalEditAI').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -336,9 +363,17 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "map_tech_id", "title":"WAGO TechID", "className": "align-middle text-center" },
-            { "data": "map_tag", "title":"WAGO I/O", "className": "align-middle text-center" },
-             { "data": null, "title":"Map", "className": "align-middle text-center",
+          [ { "data": null, "title":"Hub", "className": "align-middle text-center",
+              "render": function (item)
+                { return( item.hub_hostname+" - "+item.hub_description ); }
+            },
+            { "data": "port", "title":"Port", "className": "align-middle text-center" },
+            { "data": "intervalle", "title":"Intervalle", "className": "align-middle text-center" },
+            { "data": null, "title":"Capteur", "className": "align-middle text-center",
+              "render": function (item)
+                { return( item.capteur+" - "+item.classe ); }
+            },
+            { "data": null, "title":"Map", "className": "align-middle text-center",
               "render": function (item)
                 { return( "<->" ); }
             },

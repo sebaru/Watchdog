@@ -193,124 +193,12 @@
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
   }
 /******************************************************************************************************************************/
-/* Admin_json_phidget_hub_list: Renvoie la liste des hub Phidget configurés                                                   */
-/* Entrées: la connexion Websocket destinataire                                                                               */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_json_phidget_io_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    if (SQL_Select_to_json_node ( RootNode, "ios",
-                                  "SELECT hub.hostname, hub.serial, hub.id as hub_id, io.* FROM phidget_hub AS hub "
-                                  "INNER JOIN phidget_io AS io ON hub.id=io.hub_id"
-                                ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref(RootNode);
-       return;
-     }
-
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : FALSE si pb                                                                                                       */
-/******************************************************************************************************************************/
- static void Admin_json_phidget_io_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  {
-    if (msg->method != SOUP_METHOD_DELETE)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "id" ) ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    SQL_Write_new( "DELETE FROM phidget_io WHERE id='%d'", Json_get_int ( request, "id" ) );
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    Lib->Thread_reload = TRUE;
-  }
-/******************************************************************************************************************************/
-/* Admin_json_phidget_set: Met à jour une entrée WAGO                                                                          */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_json_phidget_io_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { gboolean retour;
-
-    if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "hub_id" ) && Json_has_member ( request, "description" ) &&
-            Json_has_member ( request, "classe" ) && Json_has_member ( request, "port" )
-           )
-       )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
-       return;
-     }
-
-    gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
-    gchar *classe      = Normaliser_chaine ( Json_get_string( request, "classe" ) );
-    gchar port         = Json_get_int ( request, "port" );
-    gchar hub_id       = Json_get_int ( request, "hub_id" );
-
-    if (Json_has_member ( request, "id" ))
-     { retour = SQL_Write_new ( "UPDATE phidget_io SET description='%s', classe='%s', port='%d', hub_id='%d' WHERE id='%d'",
-                                description, classe, port, hub_id, Json_get_int ( request, "id" ) );
-     }
-    else
-     { retour = SQL_Write_new ( "INSERT INTO phidget_io SET description='%s', classe='%s', port='%d', hub_id='%d'",
-                                description, classe, port, hub_id );
-     }
-    json_node_unref(request);
-
-    g_free(description);
-    g_free(classe);
-    if (retour)
-     { soup_message_set_status (msg, SOUP_STATUS_OK);
-       Lib->Thread_reload = TRUE;
-     }
-    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-  }
-
-
-
-/******************************************************************************************************************************/
 /* Admin_json_phidget_map_list: Recupère la liste des mapping d'une certaine classe pour le thread phidget                    */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Admin_json_phidget_map_list ( struct LIBRAIRIE *Lib, GHashTable *query, SoupMessage *msg )
-  { gchar *target;
-
-    if (msg->method != SOUP_METHOD_GET)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -321,15 +209,6 @@
        return;
      }
 
-         if (! strcasecmp( classe, "DI" ) ) target = "mnemos_DI";
-    else if (! strcasecmp( classe, "DO" ) ) target = "mnemos_DO";
-    else if (! strcasecmp( classe, "AI" ) ) target = "mnemos_AI";
-    else if (! strcasecmp( classe, "AO" ) ) target = "mnemos_AO";
-    else
-     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Wrong class" );
-		     return;
-     }
-
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
@@ -338,14 +217,25 @@
        return;
      }
 
-    if (SQL_Select_to_json_node ( RootNode, "mappings",
-                                 "SELECT m.*, hub.hostname, io.classe, io.port, io.id AS io_id, io.description FROM %s AS m "
-                                 "INNER JOIN phidget_io AS io ON m.map_tag=io.id "
-                                 "INNER JOIN phidget_hub AS hub ON io.hub_id = hub.id "
-                                 "WHERE map_thread='%s' ", target, NOM_THREAD ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+/*         if (! strcasecmp( classe, "DI" ) ) target = "mnemos_DI";
+    else if (! strcasecmp( classe, "DO" ) ) target = "mnemos_DO";
+    else*/ if (! strcasecmp( classe, "AI" ) )
+     { if (SQL_Select_to_json_node ( RootNode, "mappings",
+                                    "SELECT m.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale, m.min, m.max, m.unite, "
+                                    "hub.hostname AS hub_hostname, hub.description AS hub_description, "
+                                    "ai.* FROM phidget_AI AS ai "
+                                    "INNER JOIN mnemos_AI AS m ON ai.mnemo_id=m.id "
+                                    "INNER JOIN phidget_hub AS hub ON ai.hub_id = hub.id " ) == FALSE)
+        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+          json_node_unref ( RootNode );
+          return;
+        }
+     }
+/*    else if (! strcasecmp( classe, "AO" ) ) target = "mnemos_AO";*/
+    else
+     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Wrong class" );
        json_node_unref ( RootNode );
-       return;
+		     return;
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
@@ -360,9 +250,7 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Admin_json_phidget_map_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { gchar requete[512];
-
-    if (msg->method != SOUP_METHOD_POST)
+  { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -371,18 +259,26 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
-            Json_has_member ( request, "io_id" ) && Json_has_member ( request, "classe" ) ) )
+            Json_has_member ( request, "capteur" ) && Json_has_member ( request, "classe" ) &&
+            Json_has_member ( request, "hub_id" ) && Json_has_member ( request, "port" )
+           )
+       )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        json_node_unref(request);
        return;
      }
 
-    gchar *tech_id     = Normaliser_as_ascii ( Json_get_string( request, "tech_id" ) );
-    gchar *acronyme    = Normaliser_as_ascii ( Json_get_string( request, "acronyme" ) );
+    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *acronyme    = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
+    gchar *capteur     = Normaliser_chaine ( Json_get_string( request, "capteur" ) );
     gchar *classe      = Json_get_string( request, "classe" );
-    gint   io_id       = Json_get_int ( request, "io_id" );
 
-    if (! strcasecmp( classe, "DI" ) )
+    gchar *phidget_classe;
+         if (!strcasecmp ( capteur, "ADP1000-ORP" )) phidget_classe="VoltageInput";
+    else if (!strcasecmp ( capteur, "ADP1000-PH" ))  phidget_classe="PHSensor";
+    else phidget_classe="Unknown";
+
+/*    if (! strcasecmp( classe, "DI" ) )
      { SQL_Write_new ( "UPDATE mnemos_DI SET map_thread=NULL, map_tech_id=NULL, map_tag=NULL "
                        " WHERE map_tech_id='%s' AND map_tag='%d';", NOM_THREAD, io_id );
 
@@ -395,8 +291,8 @@
           { soup_message_set_status (msg, SOUP_STATUS_OK); }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
-    else if (! strcasecmp( classe, "AI" ) )
-     { if ( ! (Json_has_member ( request, "type" ) && Json_has_member ( request, "min" ) &&
+    else*/ if (! strcasecmp( classe, "AI" ) )
+     { if ( ! (Json_has_member ( request, "intervalle" ) && Json_has_member ( request, "min" ) &&
                Json_has_member ( request, "max" ) && Json_has_member ( request, "unite" ) &&
                Json_has_member ( request, "map_question_vocale" ) && Json_has_member ( request, "map_reponse_vocale" )
           ) )
@@ -404,24 +300,34 @@
           goto end;
         }
 
-       SQL_Write_new ( "UPDATE mnemos_AI SET map_thread=NULL, map_tech_id=NULL, map_tag=NULL "
-                       " WHERE map_tech_id='%s' AND map_tag='%s';", NOM_THREAD, io_id );
-
        gchar *unite               = Normaliser_chaine( Json_get_string ( request, "unite" ) );
        gchar *map_question_vocale = Normaliser_chaine( Json_get_string ( request, "map_question_vocale" ) );
        gchar *map_reponse_vocale  = Normaliser_chaine( Json_get_string ( request, "map_reponse_vocale" ) );
-       g_snprintf( requete, sizeof(requete),
-                   "UPDATE mnemos_AI SET map_thread='%s', map_tech_id='%s', map_tag='%d',"
-                   " type='%d', min='%d', max='%d', unite='%s', map_question_vocale='%s', map_reponse_vocale='%s'"
-                   " WHERE tech_id='%s' AND acronyme='%s';",
-                   NOM_THREAD, NOM_THREAD, io_id, Json_get_int ( request, "type" ),
-                   Json_get_int ( request, "min" ), Json_get_int ( request, "max" ),
-                   unite, map_question_vocale, map_reponse_vocale,
-                   tech_id, acronyme );
+
+       SQL_Write_new ( "UPDATE mnemos_AI SET map_thread='PHIDGET', map_tech_id='PHIDGET', "
+                       "min='%d', max='%d', unite='%s', map_question_vocale='%s', map_reponse_vocale='%s' "
+                       "WHERE tech_id='%s' AND acronyme='%s'",
+                       Json_get_int ( request, "min" ), Json_get_int ( request, "max" ), unite,
+                       map_question_vocale, map_reponse_vocale,
+                       tech_id, acronyme
+                     );
        g_free(unite);
        g_free(map_question_vocale);
        g_free(map_reponse_vocale);
-       if (SQL_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
+
+       SQL_Write_new ("UPDATE phidget_AI SET mnemo_id=NULL WHERE mnemo_id=(SELECT id FROM mnemos_AI "
+                      "WHERE tech_id='%s' AND acronyme='%s')",
+                       tech_id, acronyme
+                     );
+
+       if (SQL_Write_new ( "INSERT INTO phidget_AI SET hub_id=%d, port=%d, intervalle=%d, classe='%s', capteur='%s',"
+                           "mnemo_id=(SELECT id FROM mnemos_AI WHERE tech_id='%s' AND acronyme='%s') "
+                           "ON DUPLICATE KEY UPDATE mnemo_id=VALUES(mnemo_id)",
+                           Json_get_int( request, "hub_id"), Json_get_int( request, "port"), Json_get_int( request, "intervalle" ),
+                           phidget_classe, capteur,
+                           tech_id, acronyme
+                         ))
+          { soup_message_set_status (msg, SOUP_STATUS_OK); }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
 /*
@@ -476,6 +382,55 @@
      {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
     Dls_recalculer_arbre_comm();/* Calcul de l'arbre de communication car il peut y avoir de nouvelles dependances sur les plugins */
 end:
+    g_free(tech_id);
+    g_free(acronyme);
+    g_free(capteur);
+    json_node_unref(request);
+  }
+/******************************************************************************************************************************/
+/* Admin_json_phidget_map_del: supprime un mapping dans la base de données Phidget                                            */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Admin_json_phidget_map_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  { if (msg->method != SOUP_METHOD_DELETE)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
+
+    if ( ! (Json_has_member ( request, "classe" ) && Json_has_member ( request, "id" )) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       json_node_unref(request);
+       return;
+     }
+
+    gchar *classe      = Json_get_string( request, "classe" );
+
+    if (! strcasecmp( classe, "DI" ) )
+     { if (SQL_Write_new ( "DELETE FROM phidget_DI WHERE id='%d'", Json_get_int ( request, "id" ) ))
+          { soup_message_set_status (msg, SOUP_STATUS_OK); }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+     }
+    else if (! strcasecmp( classe, "AI" ) )
+     { if (SQL_Write_new ( "DELETE FROM phidget_AI WHERE id='%d'", Json_get_int ( request, "id" ) ))
+          { soup_message_set_status (msg, SOUP_STATUS_OK); }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+     }
+    else if (! strcasecmp( classe, "DO" ) )
+     { if (SQL_Write_new ( "DELETE FROM phidget_DO WHERE id='%d'", Json_get_int ( request, "id" ) ))
+          { soup_message_set_status (msg, SOUP_STATUS_OK); }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+     }
+    else if (! strcasecmp( classe, "AO" ) )
+     { if (SQL_Write_new ( "DELETE FROM phidget_AO WHERE id='%d'", Json_get_int ( request, "id" ) ))
+          { soup_message_set_status (msg, SOUP_STATUS_OK); }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+     }
+    else
+     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
     json_node_unref(request);
   }
 /******************************************************************************************************************************/
@@ -494,11 +449,9 @@ end:
     else if (!strcasecmp(path, "/hub/set"))   { Admin_json_phidget_hub_set ( lib, msg ); }
     else if (!strcasecmp(path, "/hub/start")) { Admin_json_phidget_hub_start_stop ( lib, msg, TRUE ); }
     else if (!strcasecmp(path, "/hub/stop"))  { Admin_json_phidget_hub_start_stop ( lib, msg, FALSE ); }
-    else if (!strcasecmp(path, "/io/list"))   { Admin_json_phidget_io_list ( lib, msg ); }
-    else if (!strcasecmp(path, "/io/del"))    { Admin_json_phidget_io_del ( lib, msg ); }
-    else if (!strcasecmp(path, "/io/set"))    { Admin_json_phidget_io_set ( lib, msg ); }
     else if (!strcasecmp(path, "/map/list"))  { Admin_json_phidget_map_list ( lib, query, msg ); }
     else if (!strcasecmp(path, "/map/set"))   { Admin_json_phidget_map_set ( lib, msg ); }
+    else if (!strcasecmp(path, "/map/del"))   { Admin_json_phidget_map_del ( lib, msg ); }
     else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
     return;
   }

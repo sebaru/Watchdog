@@ -114,15 +114,22 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget Tech_ID</label>
-						     <select id="idModalEditDIPhidgetTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget Hub</label>
+						     <select id="idModalEditDIPhidgetHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget DI</label>
-						     <input id="idModalEditDIPhidgetTag" type="number" required min=0 max=128 class="form-control" placeholder="DIxx">
+						     <label class="col-5 col-sm-4 col-form-label text-right">N° de port du HUB</label>
+						     <input id="idModalEditDIPhidgetPort" type="number" required min=0 max=6 class="form-control" placeholder="numéro">
+     					</div>
+  					</div>
+
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Classe du Capteur</label>
+						     <select id="idModalEditDIClasse" class="custom-select border-info" placeholder="Classe du capteur"></select>
      					</div>
   					</div>
 
@@ -226,48 +233,65 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget Tech_ID</label>
-						     <input id="idModalEditAIPhidgetTechID" type="text" class="form-control" placeholder="Module WAGO">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget Hub</label>
+						     <select id="idModalEditAIHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget AI</label>
-						     <input id="idModalEditAIPhidgetTag" type="number" required min=0 max=128 class="form-control" placeholder="AIxx">
+						     <label class="col-5 col-sm-4 col-form-label text-right">N° de port du HUB</label>
+						     <input id="idModalEditAIPort" type="number" required min=0 max=6 class="form-control" placeholder="Numéro du port">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Type de borne</label>
-						     <select id="idModalEditAIType" class="custom-select border-info">
-             <option value="3">4/20 mA 750455</option>
-             <option value="4">Pt-100 750461</option>
+						     <label class="col-5 col-sm-4 col-form-label text-right">Classe du Capteur</label>
+						     <select id="idModalEditAICapteur" class="custom-select border-info" placeholder="Classe du capteur">
+             <option value="ADP1000-ORP" selected>ADP1000 - ORP</option>
+             <option value="ADP1000-PH">ADP1000 - PHSensor</option>
+             <option value="autre">Autre</option>
            </select>
      					</div>
-   					</div>
+  					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Unité</label>
-						     <input id="idModalEditAIUnite" type="text" class="form-control" placeholder="°C, km/h, ...">
+						     <input id="idModalEditAIUnite" type="text" required class="form-control" placeholder="Unité de mesure">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Minimum</label>
-						     <input id="idModalEditAIMin" type="number" class="form-control" placeholder="Valeur Min">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Valeur minimale</label>
+						     <input id="idModalEditAIMin" type="number" required class="form-control" placeholder="Valeur minimale">
+						     <div class="input-group-append">
+							     <span id="idModalEditAIMinUnite" class="input-group-text"></span>
+						     </div>
      					</div>
-   					</div>
+  					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Maximum</label>
-						     <input id="idModalEditAIMax" type="number" class="form-control" placeholder="Valeur Max">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Valeur maximale</label>
+						     <input id="idModalEditAIMax" type="number" required class="form-control" placeholder="Valeur maximale">
+						     <div class="input-group-append">
+							     <span id="idModalEditAIMaxUnite" class="input-group-text"></span>
+						     </div>
      					</div>
-   					</div>
+  					</div>
+
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Intervalle d'acquisition</label>
+						     <input id="idModalEditAIIntervalle" type="number" required min=0 max=1000 class="form-control" placeholder="Fréquence d'acquisition">
+						     <div class="input-group-append">
+							     <span class="input-group-text">seconde(s)</span>
+						     </div>
+     					</div>
+  					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
