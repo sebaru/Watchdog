@@ -86,8 +86,8 @@
                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                    "`serial` INT(11) NOT NULL DEFAULT '0',"
                    "PRIMARY KEY (`id`),"
-                   "UNIQUE(hostname)"
-                   "UNIQUE(serial)"
+                   "UNIQUE (hostname),"
+                   "UNIQUE (serial)"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
        SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_AI` ("
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
