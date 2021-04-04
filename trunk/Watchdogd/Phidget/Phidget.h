@@ -35,6 +35,13 @@
 
  struct PHIDGET_CONFIG                                                                 /* Communication entre DLS et la Phidget */
   { struct LIBRAIRIE *lib;
+    GSList *Liste_sensors;
+  };
+
+ struct PHIDGET_ANALOGINPUT
+  { PhidgetHandle handle;
+    gint intervalle;
+    struct DLS_AI *dls_ai;
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/

@@ -244,7 +244,7 @@
        $('#idModalEditAIRechercherTechID').val ( '' );
        $('#idModalEditAIMapQuestionVoc').val ( '' );
        $('#idModalEditAIMapReponseVoc').val ( '' );
-       $('#idModalEditAIIntervalle').val ( '0' );
+       $('#idModalEditAIIntervalle').val ( "5" );
        $('#idModalEditAIValider').attr( "onclick", "Valider_Phidget_Edit_AI()" );
        PhidgetMap_Update_Choix_Tech_ID( 'idModalEditAI', 'AI', null, null );
      }

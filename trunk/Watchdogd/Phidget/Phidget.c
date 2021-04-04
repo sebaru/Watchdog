@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Phidget/Phidget.c  Gestion des modules PHIDGET Watchdgo 3.0                                                       */
+/* Watchdogd/Phidget/Phidget.c  Gestion des modules PHIDGET Watchdgo 3.0                                                      */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    18.03.2021 22:02:42 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -47,7 +47,7 @@
 
  struct PHIDGET_CONFIG Cfg_phidget;
 /******************************************************************************************************************************/
-/* Phidget_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
+/* Phidget_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -85,7 +85,9 @@
                    "`password` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                    "`serial` INT(11) NOT NULL DEFAULT '0',"
-                   "PRIMARY KEY (`id`)"
+                   "PRIMARY KEY (`id`),"
+                   "UNIQUE(hostname)"
+                   "UNIQUE(serial)"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
        SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_AI` ("
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -106,7 +108,7 @@
      }
 
 end:
-    database_version = 2;
+    database_version = 1;
     Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
   }
 /******************************************************************************************************************************/
@@ -116,9 +118,9 @@ end:
 /******************************************************************************************************************************/
  static void Phidget_print_error ( void )
   {	PhidgetReturnCode errorCode;
-    size_t errorDetailLen = 100;
+    size_t errorDetailLen = 256;
     const gchar* errorString;
-    gchar errorDetail[256];
+    gchar errorDetail[errorDetailLen];
     Phidget_getLastError(&errorCode, &errorString, errorDetail, &errorDetailLen);
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR,
               "%s: Phidget Error %d : %s - %s", __func__, errorCode, errorString, errorDetail );
@@ -129,9 +131,9 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Charger_un_Hub (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  {
-    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-                "%s: Chargement du HUB '%s'('%s')", __func__, Json_get_string(element, "hostname"), Json_get_string(element, "description") );
+  { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
+              "%s: Chargement du HUB '%s'('%s')", __func__,
+              Json_get_string(element, "hostname"), Json_get_string(element, "description") );
     PhidgetNet_addServer( Json_get_string(element, "hostname"),
                           Json_get_string(element, "hostname"), 5661,
                           Json_get_string(element, "password"), 0);
@@ -155,53 +157,71 @@ end:
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Phidget_onVoltageRatioChange: Appelé quand un module I/O VoltageRatio a changé de valeur                                   */
+/* Phidget_onPHSensorChange: Appelé quand un module I/O PHSensor a changé de valeur                                           */
 /* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void CCONV Phidget_onVoltageRatioChange ( PhidgetVoltageRatioInputHandle canal, void *ctx, double voltageRatio )
-  {
+ static void CCONV Phidget_onPHSensorChange ( PhidgetPHSensorHandle handle, void *ctx, double valeur )
+  { struct PHIDGET_ANALOGINPUT *canal = ctx;
 	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-              "%s: Changement de valeur : %lf", __func__, voltageRatio );
+              "%s: '%s':'%s' = %lf", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur );
+    Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onPHSensorChange: Appelé quand un module I/O PHSensor a changé de valeur                                           */
 /* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void CCONV Phidget_onPHSensorChange ( PhidgetPHSensorHandle canal, void *ctx, double PH )
-  {
+ static void CCONV Phidget_onVoltableInputChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur )
+  { struct PHIDGET_ANALOGINPUT *canal = ctx;
 	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-              "%s: Changement de valeur : %lf", __func__, PH );
-  }/***************************************************************************************************************************/
+              "%s: '%s':'%s' = %lf", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur );
+    Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
+  }
+/***************************************************************************************************************************/
 /* Phidget_onAttachHandler: Appelé quand un canal estmodule I/O VoltageRatio a changé de valeur                               */
 /* Entrée: le channel, le contexte                                                                                            */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void CCONV Phidget_onAttachHandler ( PhidgetHandle ph, void *ctx )
-  {
-    //You can access the Phidget that fired the event by using the first parameter
-    //of the event handler
-    int deviceSerialNumber;
-    Phidget_getDeviceSerialNumber(ph, &deviceSerialNumber);
-	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-              "%s: Phidget S/N %d attached", __func__, deviceSerialNumber );
-  }
-/******************************************************************************************************************************/
-/* Phidget_onAttachHandler: Appelé quand un canal estmodule I/O VoltageRatio a changé de valeur                               */
-/* Entrée: le channel, le contexte                                                                                            */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void CCONV Phidget_onDetachHandler ( PhidgetHandle ph, void *ctx )
-  {
-    //You can access the Phidget that fired the event by using the first parameter
-    //of the event handler
-    int deviceSerialNumber;
-    Phidget_getDeviceSerialNumber(ph, &deviceSerialNumber);
-	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-              "%s: Phidget S/N %d detached", __func__, deviceSerialNumber );
-  }
+ static void CCONV Phidget_onAnalogInputAttachHandler ( PhidgetHandle handle, void *ctx )
+  { struct PHIDGET_ANALOGINPUT *canal = ctx;
+	   int serial_number, nbr_canaux, port, num_canal;
+    const char *classe;
 
+    Phidget_getDeviceSerialNumber(handle, &serial_number);
+    Phidget_getDeviceChannelCount(handle, PHIDCHCLASS_NOTHING, &nbr_canaux );
+    Phidget_getHubPort(handle, &port );
+    Phidget_getChannel( handle, &num_canal );
+    Phidget_getChannelClassName( handle, &classe );
+
+	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
+              "%s: Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached with intervalle %d (sec). %d channels available.",
+              __func__, serial_number, port, classe, num_canal, canal->intervalle, nbr_canaux );
+    if (canal->intervalle)
+     { if (Phidget_setDataInterval( handle, canal->intervalle*1000 ) != EPHIDGET_OK)	Phidget_print_error(); }
+  }
+/******************************************************************************************************************************/
+/* Phidget_onAttachHandler: Appelé quand un canal estmodule I/O VoltageRatio a changé de valeur                               */
+/* Entrée: le channel, le contexte                                                                                            */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void CCONV Phidget_onAnalogInputDetachHandler ( PhidgetHandle handle, void *ctx )
+  { struct PHIDGET_ANALOGINPUT *canal = ctx;
+	   //You can access the Phidget that fired the event by using the first parameter
+    //of the event handler
+    int serial_number, nbr_canaux, port, num_canal;
+    const char *classe;
+
+    Phidget_getDeviceSerialNumber(handle, &serial_number);
+    Phidget_getDeviceChannelCount(handle, PHIDCHCLASS_NOTHING, &nbr_canaux );
+    Phidget_getHubPort(handle, &port );
+    Phidget_getChannel( handle, &num_canal );
+    Phidget_getChannelClassName( handle, &classe );
+    Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, 0.0, FALSE );
+	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
+              "%s: Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') detached . %d channels available.",
+              __func__, serial_number, port, classe, num_canal, nbr_canaux );
+  }
 /******************************************************************************************************************************/
 /* Charger_un_IO: Charge une IO dans la librairie                                                                             */
 /* Entrée: La structure Json representant l'i/o                                                                               */
@@ -228,29 +248,41 @@ end:
     	 }
    }
 /******************************************************************************************************************************/
-/* Charger_un_IO: Charge une IO dans la librairie                                                                             */
+/* Charger_un_AI: Charge une IO dans la librairie                                                                             */
 /* Entrée: La structure Json representant l'i/o                                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Charger_un_AI (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { gchar *classe = Json_get_string(element, "classe");
-    gint port     = Json_get_int   (element, "port");
-    gint serial   = Json_get_int   (element, "serial");
+  { gchar *classe   = Json_get_string(element, "classe");
+    gint port       = Json_get_int   (element, "port");
+    gchar *hub      = Json_get_string(element, "hub_description");
+    gint serial     = Json_get_int   (element, "hub_serial");
+    gint intervalle = Json_get_int   (element, "intervalle");
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-                "%s: Chargement d'une AI '%s' port %d on S/N %d", __func__, classe, port, serial );
+                "%s: Hub '%s' (S/N %d), port '%d' classe '%s'", __func__, hub, serial, port, classe );
+
+    struct PHIDGET_ANALOGINPUT *canal = g_try_malloc0 ( sizeof(struct PHIDGET_ANALOGINPUT) );
+    if (!canal)
+     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
+                 "%s: Memory Error on hub '%s' (S/N %d), port '%d' classe '%s'", __func__, hub, serial, port, classe );
+       return;
+     }
+    canal->intervalle = intervalle;
+    Dls_data_get_AI ( Json_get_string ( element, "tech_id" ), Json_get_string ( element, "acronyme" ), (gpointer)&canal->dls_ai );
 
     if (!strcasecmp(classe, "VoltageRatioInput"))
-     { PhidgetVoltageRatioInputHandle handle;
+     { /*PhidgetVoltageRatioInputHandle handle;
       	PhidgetVoltageRatioInput_create(&handle);
-   	   PhidgetVoltageRatioInput_setOnVoltageRatioChangeHandler(handle, Phidget_onVoltageRatioChange, NULL);
-       Phidget_set_config ( (PhidgetHandle)handle, serial, port, TRUE );
+   	   /*PhidgetVoltageRatioInput_setOnVoltageRatioChangeHandler(handle, Phidget_onVoltageRatioChange, NULL);*/
+   	   /*PhidgetVoltageRatioInput_setOnVoltageRatioChangeHandler(handle, Phidget_onVoltageRatioChange, NULL);*/
+       /*Phidget_set_config ( (PhidgetHandle)handle, serial, port, TRUE );
        Phidget_setOnAttachHandler((PhidgetHandle)handle, Phidget_onAttachHandler, NULL);
        Phidget_setOnDetachHandler((PhidgetHandle)handle, Phidget_onDetachHandler, NULL);
 	      //Open your Phidgets and wait for attachment
    	   if (Phidget_open ((PhidgetHandle)handle) != EPHIDGET_OK)
         {	Phidget_print_error();
           return;
-        }
+        }*/
      }
     /* else if (!strcasecmp(classe, "VoltageInput"))
      { PhidgetVoltageRatioInputHandle handle;
@@ -266,23 +298,29 @@ end:
         }
      }*/
     else if (!strcasecmp(classe, "PHSensor"))
-     { PhidgetPHSensorHandle handle;
-      	PhidgetPHSensor_create(&handle);
-   	   PhidgetPHSensor_setOnPHChangeHandler(handle, Phidget_onPHSensorChange, NULL);
-       Phidget_set_config ( (PhidgetHandle)handle, serial, port, FALSE );
-       Phidget_setOnAttachHandler((PhidgetHandle)handle, Phidget_onAttachHandler, NULL);
-       Phidget_setOnDetachHandler((PhidgetHandle)handle, Phidget_onDetachHandler, NULL);
-	      //Open your Phidgets and wait for attachment
-   	   if (Phidget_open ((PhidgetHandle)handle) != EPHIDGET_OK)
-        {	Phidget_print_error();
-          return;
-        }
+     { PhidgetPHSensor_create((PhidgetPHSensorHandle *)&canal->handle);
+   	   PhidgetPHSensor_setOnPHChangeHandler((PhidgetPHSensorHandle)canal->handle, Phidget_onPHSensorChange, canal);
+     }
+    else if (!strcasecmp(classe, "VoltageInput"))
+     { PhidgetVoltageInput_create((PhidgetVoltageInputHandle *)&canal->handle);
+   	   PhidgetVoltageInput_setOnVoltageChangeHandler((PhidgetVoltageInputHandle)canal->handle, Phidget_onVoltableInputChange, canal);
      }
     else
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-                 "%s: classe phidget '%s' inconnue pour port %d on S/N %d", __func__, classe, port, serial );
+                 "%s: classe phidget inconnue on hub '%s'(S/N %d), port '%d' classe '%s'", __func__, hub, serial, port, classe );
+       g_free(canal);
        return;
      }
+
+    Phidget_set_config ( (PhidgetHandle)canal->handle, serial, port, FALSE );
+    Phidget_setOnAttachHandler((PhidgetHandle)canal->handle, Phidget_onAnalogInputAttachHandler, canal);
+    Phidget_setOnDetachHandler((PhidgetHandle)canal->handle, Phidget_onAnalogInputDetachHandler, canal);
+    if (Phidget_open ((PhidgetHandle)canal->handle) != EPHIDGET_OK)
+     {	Phidget_print_error();
+       g_free(canal);
+       return;
+     }
+   Cfg_phidget.Liste_sensors = g_slist_prepend ( Cfg_phidget.Liste_sensors, canal );
   }
 /******************************************************************************************************************************/
 /* Charger_tous_IO: Charge toutes les I/O Phidget                                                                             */
@@ -294,8 +332,11 @@ end:
     if (!RootNode) return(FALSE);
 
     if (SQL_Select_to_json_node ( RootNode, "AI",
-                                  "SELECT hub.serial,ai.* FROM phidget_AI AS ai "
-                                  "INNER JOIN phidget_hub AS hub ON hub.id=ai.hub_id WHERE hub.enable=1" ) == FALSE)
+                                  "SELECT hub.serial AS hub_serial,hub.description AS hub_description, "
+                                  "ai.*,m.tech_id,m.acronyme FROM phidget_AI AS ai "
+                                  "INNER JOIN mnemos_AI AS m ON ai.mnemo_id=m.id "
+                                  "INNER JOIN phidget_hub AS hub ON hub.id=ai.hub_id "
+                                  "WHERE hub.enable=1" ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
      }
@@ -339,6 +380,9 @@ reload:
      }
 
     Phidget_resetLibrary();
+    g_slist_foreach ( Cfg_phidget.Liste_sensors, (GFunc) g_free, NULL );
+    g_slist_free ( Cfg_phidget.Liste_sensors );
+
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

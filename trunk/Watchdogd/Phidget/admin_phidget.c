@@ -48,8 +48,8 @@
      }
 
     Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
-/*    if (Lib->Thread_run)                                    /* Warning : Cfg_phidget does not exist if thread is not running ! */
-/*     { Json_add_int ( RootNode, "nbr_request_par_sec", Cfg_phidget.nbr_request_par_sec ); }*/
+    if (Lib->Thread_run)                                    /* Warning : Cfg_phidget does not exist if thread is not running ! */
+     { Json_node_add_int ( RootNode, "nbr_sensors", g_slist_length(Cfg_phidget.Liste_sensors) ); }
 
     gchar *buf = Json_node_to_string(RootNode);
     json_node_unref(RootNode);
@@ -315,14 +315,14 @@
        g_free(map_question_vocale);
        g_free(map_reponse_vocale);
 
-       SQL_Write_new ("UPDATE phidget_AI SET mnemo_id=NULL WHERE mnemo_id=(SELECT id FROM mnemos_AI "
-                      "WHERE tech_id='%s' AND acronyme='%s')",
+       SQL_Write_new ("UPDATE phidget_AI SET mnemo_id=NULL "
+                      "WHERE mnemo_id=(SELECT id FROM mnemos_AI WHERE tech_id='%s' AND acronyme='%s')",
                        tech_id, acronyme
                      );
 
        if (SQL_Write_new ( "INSERT INTO phidget_AI SET hub_id=%d, port=%d, intervalle=%d, classe='%s', capteur='%s',"
                            "mnemo_id=(SELECT id FROM mnemos_AI WHERE tech_id='%s' AND acronyme='%s') "
-                           "ON DUPLICATE KEY UPDATE mnemo_id=VALUES(mnemo_id)",
+                           "ON DUPLICATE KEY UPDATE mnemo_id=VALUES(mnemo_id), intervalle=VALUES(intervalle)",
                            Json_get_int( request, "hub_id"), Json_get_int( request, "port"), Json_get_int( request, "intervalle" ),
                            phidget_classe, capteur,
                            tech_id, acronyme
