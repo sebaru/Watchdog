@@ -23,6 +23,9 @@
      { $('#'+table).DataTable().ajax.reload(null, false); }, null );
   }
 /******************************************************************************************************************************/
+ function Dls_run_refresh ( table )
+  { $('#'+table).DataTable().ajax.reload(null, false); }
+/******************************************************************************************************************************/
  function Dls_run_DI_set ( acronyme )
   { Dls_run_set ( "idTableEntreeTOR", "DI", acronyme, true ); }
 /******************************************************************************************************************************/
@@ -176,6 +179,33 @@
            { "data": "multi",      "title":"Multiplicateur", "className": "text-center align-middle " },
            { "data": "unite",      "title":"Unité", "className": "text-center align-middle " },
          ],
+       /*order: [ [0, "desc"] ],*/
+       responsive: true,
+     });
+
+    $('#idTableCH').DataTable(
+     { pageLength : 50,
+       fixedHeader: true, paging: false, ordering: true, searching: true,
+       ajax: {	url : "/api/dls/run",	type : "GET", data: { tech_id: vars[3], classe: "CH" }, dataSrc: "CH",
+               error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+             },
+       rowId: "id",
+       columns:
+         [ { "data": null, "title":"Acronyme", "className": "align-middle text-center",
+             "render": function (item)
+               { return ( Lien ("/tech/courbe/"+item.tech_id+"/"+item.acronyme+"/HOUR'", "Voir le graphe", item.acronyme ) ); },
+           },
+           { "data": null, "title":"Etat", "className": "",
+             "render": function (item)
+               { if (item.etat==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
+                                 else { return( Bouton ( "outline-secondary", "Le bit est a 0", null, null, "0" ) ); }
+               },
+           },
+           { "data": null, "title":"Valeur",     "className": "text-center align-middle",
+             "render": function (item)
+               { return ( item.valeur/10 + "s = " + (Math.floor(item.valeur/36000)) + "h" );
+               },
+           },         ],
        /*order: [ [0, "desc"] ],*/
        responsive: true,
      });

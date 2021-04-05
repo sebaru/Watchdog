@@ -8,7 +8,7 @@
  <div class="row m-2">
    <h3><img src="/img/meteo.svg" style="width:80px" alt="Récupération Météo">Configuration de la météo</h3>
 
-   <div class ="ml-auto btn-group align-items-center">
+   <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Meteo_Load_config()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
         <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>

@@ -17,9 +17,6 @@
 
 <hr>
 
-<div class="row m-2">
- </div>
-
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Choix du GSM</label>
