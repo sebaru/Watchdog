@@ -496,6 +496,7 @@ reload:
     soup_server_add_handler ( socket, "/api/dls/source",     Http_traiter_dls_source, NULL, NULL );
     soup_server_add_handler ( socket, "/api/dls/del",        Http_traiter_dls_del, NULL, NULL );
     soup_server_add_handler ( socket, "/api/dls/status" ,    Http_traiter_dls_status, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/dls/run/set" ,   Http_traiter_dls_run_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/dls/run" ,       Http_traiter_dls_run, NULL, NULL );
     soup_server_add_handler ( socket, "/api/dls/debug" ,     Http_traiter_dls_debug, NULL, NULL );
     soup_server_add_handler ( socket, "/api/dls/undebug",    Http_traiter_dls_undebug, NULL, NULL );
