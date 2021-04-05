@@ -204,12 +204,12 @@
 
     $('#idModalEditAICapteur').on("change", function()
      { switch($('#idModalEditAICapteur').val())
-        { case "ADP1000-ORP": $('#idModalEditAIUnite').val("mV").prop('disabled', true).trigger('change');
-                              $('#idModalEditAIMin').val("-400").prop('disabled', true);
-                              $('#idModalEditAIMax').val("400").prop('disabled', true);
+        { case "ADP1000-ORP": $('#idModalEditAIUnite').val("V").prop('disabled', true).trigger('change');
+                              $('#idModalEditAIMin').val("-2").prop('disabled', true);
+                              $('#idModalEditAIMax').val("+2").prop('disabled', true);
                               break;
           case "ADP1000-PH" : $('#idModalEditAIUnite').val("pH").prop('disabled', true).trigger('change');
-                              $('#idModalEditAIMin').val("1").prop('disabled', true);
+                              $('#idModalEditAIMin').val("0").prop('disabled', true);
                               $('#idModalEditAIMax').val("14").prop('disabled', true);
                               break;
           default           : $('#idModalEditAIUnite').prop('disabled', false);
