@@ -266,7 +266,6 @@
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                             /* TRUE si le thread doit tout logguer */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
-    gboolean Compil_at_boot;                                            /* True si DLS doit compiler les plugins au démarrage */
     gchar Library_version[12];                       /* Version de librairie. Si différent, impose une recompilation complete */
     guint temps_sched;                                          /* Delai d'attente DLS pour assurer 100 tours max par seconde */
     gboolean Top_check_horaire;                                                    /* True le controle horaire est réalisable */
@@ -283,10 +282,9 @@
 
  extern void Dls_Charger_plugins ( void );                                                                  /* Dans plugins.c */
  extern void Dls_Decharger_plugins ( void );
- extern gint Compiler_source_dls( gboolean reset, gchar *tech_id, gchar *buffer, gint taille_buffer );
- extern void Debug_plugin ( gchar *tech_id, gboolean actif );
- extern void Activer_plugin ( gchar *tech_id, gboolean actif );
- extern void Reseter_un_plugin ( gchar *tech_id );
+ extern void Dls_Debug_plugin ( gchar *tech_id, gboolean actif );
+ extern void Dls_Activer_plugin ( gchar *tech_id, gboolean actif );
+ extern void Dls_Reseter_un_plugin ( gchar *tech_id );
  extern void Dls_foreach_plugins ( gpointer user_data, void (*do_plugin) (gpointer user_data, struct DLS_PLUGIN *) );
  extern void Dls_foreach_syns ( gpointer user_data, void (*do_syn)(gpointer user_data, struct DLS_SYN *) );
  extern void Dls_recalculer_arbre_comm ( void );

@@ -38,7 +38,7 @@
   }
 /************************************ Controle de saisie avant envoi **********************************************************/
  function isNum ( id )
-  { FormatTag = RegExp(/^[0-9]+$/);
+  { FormatTag = RegExp(/^[0-9-]+$/);
     input = $('#'+id);
     return ( FormatTag.test(input.val()) )
   }

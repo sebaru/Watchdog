@@ -83,9 +83,9 @@
           rowId: "id",
           createdRow: function( row, item, dataIndex )
            {      if (item.typologie==0) { classe="text-white"; } /* etat */
-             else if (item.typologie==1) { classe="text-danger" } /* alerte */
+             else if (item.typologie==1) { classe="text-warning" } /* alerte */
              else if (item.typologie==2) { classe="text-warning"; } /* defaut */
-             else if (item.typologie==3) { classe="text-warning"; } /* alarme */
+             else if (item.typologie==3) { classe="text-danger"; } /* alarme */
              else if (item.typologie==4) { classe="text-success"; } /* veille */
              else if (item.typologie==5) { classe="text-white"; }   /* attente */
              else if (item.typologie==6) { classe="text-danger"; } /* danger */
@@ -97,9 +97,9 @@
            [ { "data": null, "title":"-", "className": "align-middle text-center bg-dark",
                "render": function (item)
                  {      if (item.typologie==0) { cligno = false; img = "info.svg"; } /* etat */
-                   else if (item.typologie==1) { cligno = true;  img = "bouclier_rouge.svg"; } /* alerte */
-                   else if (item.typologie==2) { cligno = true;  img = "pignon_jaune.svg"; } /* defaut */
-                   else if (item.typologie==3) { cligno = true;  img = "pignon_orange.svg"; } /* alarme */
+                   else if (item.typologie==1) { cligno = true;  img = "bouclier_orange.svg"; } /* alerte */
+                   else if (item.typologie==2) { cligno = true;  img = "pignon_orange.svg"; } /* defaut */
+                   else if (item.typologie==3) { cligno = true;  img = "pignon_rouge.svg"; } /* alarme */
                    else if (item.typologie==4) { cligno = false; img = "bouclier_vert.svg"; } /* veille */
                    else if (item.typologie==5) { cligno = false; img = "info.svg"; } /* attente */
                    else if (item.typologie==6) { cligno = true;  img = "croix_rouge_rouge.svg"; } /* danger */

@@ -218,9 +218,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_mnemos_validate ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                      SoupClientContext *client, gpointer user_data )
-  { gchar chaine[256];
-
-    if (msg->method != SOUP_METHOD_PUT)
+  { if (msg->method != SOUP_METHOD_PUT)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -231,17 +229,18 @@
     if (!request) return;
 
 
-    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+            Json_has_member ( request, "classe" )
+           )
+       )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    gchar   *tech_id  = Normaliser_as_ascii ( Json_get_string ( request,"tech_id" ) );
-    gchar   *acronyme = Normaliser_as_ascii ( Json_get_string ( request,"acronyme" ) );
-
-    gchar   *classe = NULL;
-    if (Json_has_member ( request, "classe" )) { classe = Normaliser_as_ascii ( Json_get_string ( request,"classe" ) ); }
+    gchar *tech_id  = Normaliser_as_ascii ( Json_get_string ( request, "tech_id" ) );
+    gchar *acronyme = Normaliser_as_ascii ( Json_get_string ( request, "acronyme" ) );
+    gchar *classe   = Normaliser_as_ascii ( Json_get_string ( request, "classe" ) );
 
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
@@ -252,25 +251,14 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "SELECT tech_id, name FROM dls WHERE tech_id LIKE '%%%s%%'", tech_id);
-/*    if (classe)
-     { g_strlcat ( chaine,  " AND classe='", sizeof(chaine) );
-       g_strlcat ( chaine, classe, sizeof(chaine) );
-       g_strlcat ( chaine, "' ", sizeof(chaine) );
-     }*/
-    g_strlcat ( chaine, " ORDER BY tech_id", sizeof(chaine) );
-    SQL_Select_to_json_node ( RootNode, "tech_ids_found", chaine );
+    SQL_Select_to_json_node ( RootNode, "tech_ids_found",
+                              "SELECT tech_id, name FROM dls WHERE tech_id LIKE '%%%s%%' ORDER BY tech_id", tech_id);
 
-    g_snprintf(chaine, sizeof(chaine),
-              "SELECT acronyme,libelle FROM dictionnaire WHERE tech_id='%s' AND acronyme LIKE '%%%s%%'",
-               tech_id, acronyme );
-    if (classe)
-     { g_strlcat ( chaine, "AND classe='", sizeof(chaine) );
-       g_strlcat ( chaine, classe, sizeof(chaine) );
-       g_strlcat ( chaine, "' ", sizeof(chaine) );
-     }
-    g_strlcat ( chaine, " ORDER BY acronyme", sizeof(chaine) );
-    SQL_Select_to_json_node ( RootNode, "acronymes_found", chaine );
+    SQL_Select_to_json_node ( RootNode, "acronymes_found",
+                              "SELECT acronyme,libelle FROM dictionnaire WHERE tech_id='%s' AND acronyme LIKE '%%%s%%' "
+                              "AND classe='%s' ORDER BY acronyme",
+                              tech_id, acronyme, (classe ? classe : "")
+                            );
     json_node_unref(request);
 
     gchar *buf = Json_node_to_string ( RootNode );

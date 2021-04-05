@@ -45,9 +45,10 @@
     COLONNE_COULEUR_TEXTE,
     NBR_COLONNE
   };
+
  GdkRGBA COULEUR_FOND[]=
   { { 0.687, 0.687, 0.687, 1.0 }, /* Info */
-    { 0.5, 0.0, 0.0, 1.0 }, /* Alerte */
+    { 1.0, 0.647, 0.0, 1.0 }, /* Alerte */
     { 1.0, 1.0, 0.0, 1.0 }, /* Trouble */
     { 1.0, 0.0, 0.0, 1.0 }, /* Alarme */
     { 0.0, 1.0, 0.0, 1.0 }, /* Veille */
@@ -79,8 +80,8 @@
   { switch (type)
      { case 0 : return( "Info        (I) " );
        case 1 : return( "Alerte      (AK)" );
-       case 3 : return( "Défaut      (T) " );
-       case 2 : return( "Alarme      (AL)" );
+       case 2 : return( "Défaut      (T) " );
+       case 3 : return( "Alarme      (AL)" );
        case 4 : return( "Veille      (V) " );
        case 5 : return( "Attente     (A) " );
        case 6 : return( "Danger      (DA)" );
@@ -261,9 +262,9 @@ again:
      }
 
     switch (Json_get_int(element, "typologie"))
-     { case 1: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Bouclier2_rouge.svg", 30, 30, TRUE, NULL ); break;
-       case 2: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Pignon_jaune.svg", 30, 30, TRUE, NULL ); break;
-       case 3: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Pignon_orange.svg", 30, 30, TRUE, NULL ); break;
+     { case 1: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Bouclier2_orange.svg", 30, 30, TRUE, NULL ); break;
+       case 2: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Pignon_orange.svg", 30, 30, TRUE, NULL ); break;
+       case 3: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Pignon_rouge.svg", 30, 30, TRUE, NULL ); break;
        case 4: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Bouclier2_vert.svg", 30, 30, TRUE, NULL ); break;
        case 6: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Croix_rouge_rouge.svg", 30, 30, TRUE, NULL ); break;
        case 7: pixbuf = gdk_pixbuf_new_from_resource_at_scale ( "/fr/abls_habitat/watchdog/icons/Croix_route_orange.svg", 30, 30, TRUE, NULL ); break;
@@ -485,7 +486,7 @@ again:
     gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                                         /* Colonne du synoptique */
-    g_object_set( renderer, "xalign", 0.5, NULL ); 
+    g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( "DLS Shortname", renderer,
                                                          "text", COLONNE_DLS_SHORTNAME,
                                                          NULL);
@@ -508,7 +509,7 @@ again:
     gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_histo), colonne );
 
     g_signal_connect( G_OBJECT(client->Liste_histo), "button_press_event",                           /* Gestion du menu popup */
-                      G_CALLBACK(Gerer_popup_histo), client ); 
+                      G_CALLBACK(Gerer_popup_histo), client );
     g_object_unref (G_OBJECT (store));                                            /* nous n'avons plus besoin de notre modele */
 
 /******************************************** Les boutons de controles ********************************************************/

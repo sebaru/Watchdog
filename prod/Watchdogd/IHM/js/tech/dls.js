@@ -9,19 +9,10 @@
                        [ "Error: Need compiling again", "outline-danger" ],
                        [ "OK", "success" ],
                        [ "Warnings", "outline-warning" ],
-                       [ "Error", "outline-danger" ]
                      ];
 
  function Go_to_dls_status ()
   { Redirect ( "/tech/dls_status" );
-  }
-
-/************************************ Envoi les infos de modifications synoptique *********************************************/
- function Dls_Compiler_tous_dls ( )
-  { var json_request = JSON.stringify( { compil_all: true } );
-    Send_to_API ( 'POST', "/api/dls/compil", json_request, function ()
-     { $('#idTableDLS').DataTable().ajax.reload();
-     }, null );
   }
 
 /******************************************************************************************************************************/
@@ -81,7 +72,6 @@
      { $('#idTableDLS').DataTable().ajax.reload(null, false);
      }, null);
   }
-
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Dls_Set ( dls_id )
@@ -172,10 +162,12 @@
                    { return( Bouton ( "success", "Désactiver le plugin",
                                       "Dls_stop_plugin", item.tech_id, "Actif" ) );
                    }
-                  else
+                  if (item.compil_status>=7) /* Si compil OK ou warning */
                    { return( Bouton ( "outline-secondary", "Activer le plugin",
                                       "Dls_start_plugin", item.tech_id, "Désactivé" ) );
                    }
+                  return( Bouton ( "outline-secondary", "Compilation nécéssaire",
+                                   null, null, "Désactivé" ) );
                 }
             },
             { "data": null, title:"Debug",  "className": "text-center align-middle", "render": function (item)

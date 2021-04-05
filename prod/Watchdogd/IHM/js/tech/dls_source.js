@@ -23,11 +23,9 @@
     Send_to_API ( "POST", "/api/dls/compil", json_request, function(Response)
      { $("#idErrorLog").html(Response.errorlog.replace(/(?:\r\n|\r|\n)/g, '<br>'));
        $("#idErrorLog").removeClass("alert-info alert-warning alert-danger alert-success");
-       switch(Response.result)
-        { case "success" : $("#idErrorLog").addClass("alert-success"); break;
-          case "error"   : $("#idErrorLog").addClass("alert-danger"); break;
-          case "warning" : $("#idErrorLog").addClass("alert-warning"); break;
-        }
+            if (Response.compil_status==7) { $("#idErrorLog").addClass("alert-success"); }                              /* OK */
+       else if (Response.compil_status==8) { $("#idErrorLog").addClass("alert-warning"); }                         /* Warning */
+       else $("#idErrorLog").addClass("alert-danger");
      }, null );
   }
 /********************************************* Appelé au chargement de la page ************************************************/
@@ -44,5 +42,8 @@
     Send_to_API ( "PUT", "/api/dls/source", json_request, function(Response)
      { SourceCode.getDoc().setValue(Response.sourcecode);
        $("#idErrorLog").html(Response.errorlog.replace(/(?:\r\n|\r|\n)/g, '<br>'));
+            if (Response.compil_status==7) { $("#idErrorLog").addClass("alert-success"); }                              /* OK */
+       else if (Response.compil_status==8) { $("#idErrorLog").addClass("alert-warning"); }                         /* Warning */
+       else $("#idErrorLog").addClass("alert-danger");
      }, null);
   }
