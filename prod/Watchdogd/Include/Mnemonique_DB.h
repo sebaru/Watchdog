@@ -54,12 +54,12 @@
  extern gboolean Horloge_add_tick ( gchar *tech_id, gchar *acronyme, gint heure, gint minute );
 
  extern void Updater_confDB_CI ( void );                                                                   /* Dans Mnemo_CI.c */
- extern void Charger_conf_CI ( struct DLS_CI *cpt_imp );
+ extern void Charger_confDB_CI ( struct DLS_CI *cpt_imp );
  extern gboolean Mnemo_auto_create_CI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );
  extern void Dls_CI_to_json ( JsonNode *element, struct DLS_CI *bit );
 
  extern void Updater_confDB_CH ( void );                                                                   /* Dans Mnemo_CH.c */
- extern void Charger_conf_CH ( struct DLS_CH *cpt_h );
+ extern void Charger_confDB_CH ( struct DLS_CH *cpt_h );
  extern gboolean Mnemo_auto_create_CH ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );
  extern void Dls_CH_to_json ( JsonNode *element, struct DLS_CH *bit );
 

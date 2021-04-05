@@ -83,7 +83,7 @@
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
- void Charger_conf_CH ( struct DLS_CH *cpt_h )
+ void Charger_confDB_CH ( struct DLS_CH *cpt_h )
   { gchar requete[512];
     struct DB *db;
 
