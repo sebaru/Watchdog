@@ -163,6 +163,10 @@ end:
 /******************************************************************************************************************************/
  static void CCONV Phidget_onPHSensorChange ( PhidgetPHSensorHandle handle, void *ctx, double valeur )
   { struct PHIDGET_ANALOGINPUT *canal = ctx;
+    if (!canal->dls_ai)
+     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
+       return;
+     }
 	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %lf", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
@@ -174,7 +178,11 @@ end:
 /******************************************************************************************************************************/
  static void CCONV Phidget_onVoltableInputChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur )
   { struct PHIDGET_ANALOGINPUT *canal = ctx;
-	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
+    if (!canal->dls_ai)
+     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
+       return;
+     }
+    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %lf", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
   }
@@ -267,8 +275,12 @@ end:
                  "%s: Memory Error on hub '%s' (S/N %d), port '%d' classe '%s'", __func__, hub, serial, port, classe );
        return;
      }
-    canal->intervalle = intervalle;
-    Dls_data_get_AI ( Json_get_string ( element, "tech_id" ), Json_get_string ( element, "acronyme" ), (gpointer)&canal->dls_ai );
+
+    canal->intervalle = intervalle;                                               /* Sauvegarde de l'intervalle d'acquisition */
+    gchar *tech_id  = Json_get_string ( element, "tech_id" );
+    gchar *acronyme = Json_get_string ( element, "acronyme" );
+    Charger_confDB_AI ( tech_id, acronyme );
+    Dls_data_get_AI ( tech_id, acronyme, (gpointer)&canal->dls_ai );                      /* Récupération de l'élément DLS_AI */
 
     if (!strcasecmp(classe, "VoltageRatioInput"))
      { /*PhidgetVoltageRatioInputHandle handle;

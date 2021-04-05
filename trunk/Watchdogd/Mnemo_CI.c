@@ -80,11 +80,11 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Charger_conf_CI: Recupération de la conf de l'entrée analogique en parametre                                               */
+/* Charger_confDB_CI: Recupération de la conf de l'entrée analogique en parametre                                             */
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
- void Charger_conf_CI ( struct DLS_CI *cpt_imp )
+ void Charger_confDB_CI ( struct DLS_CI *cpt_imp )
   { gchar requete[512];
     struct DB *db;
 

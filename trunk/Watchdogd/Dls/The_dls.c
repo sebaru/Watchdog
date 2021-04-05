@@ -999,7 +999,7 @@ end:
           default:
                ao->val_ech = 0.0;
         }
-       pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
+       pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
        Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
@@ -1044,7 +1044,7 @@ end:
           Partage->Dls_data_CI = g_slist_prepend ( Partage->Dls_data_CI, cpt_imp );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding CI '%s:%s'", __func__, tech_id, acronyme );
-          Charger_conf_CI ( cpt_imp );                                     /* Chargement des valeurs en base pour ce compteur */
+          Charger_confDB_CI ( cpt_imp );                                   /* Chargement des valeurs en base pour ce compteur */
         }
        if (cpt_imp_p) *cpt_imp_p = (gpointer)cpt_imp;                   /* Sauvegarde pour acceleration si besoin */
       }
@@ -1076,7 +1076,7 @@ end:
     else
      { if (reset==0) cpt_imp->etat = FALSE; }
 
-    if ( cpt_imp->last_update + 10 <= Partage->top )                                                    /* Toutes les secondes */
+    if ( cpt_imp->last_update + 10 <= Partage->top )                                                   /* Toutes les secondes */
      { memcpy( &cpt_imp->valeurs[0], &cpt_imp->valeurs[1], 59*sizeof(cpt_imp->valeurs[0]) );
        cpt_imp->valeurs[59] = cpt_imp->valeur;
        cpt_imp->imp_par_minute = cpt_imp->valeur - cpt_imp->valeurs[0];
@@ -1087,12 +1087,12 @@ end:
          (cpt_imp->archivage == 3 && cpt_imp->last_arch + 36000  <= Partage->top) ||
          (cpt_imp->archivage == 4 && cpt_imp->last_arch + 864000 <= Partage->top)
        )
-     { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 );             /* Archivage si besoin */
+     { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 );                /* Archivage si besoin */
        cpt_imp->last_arch = Partage->top;
      }
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_CI : Recupere la valeur de l'EA en parametre                                                             */
+/* Dls_data_get_CI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
  gint Dls_data_get_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p )
@@ -1145,7 +1145,7 @@ end:
           Partage->Dls_data_CH = g_slist_prepend ( Partage->Dls_data_CH, cpt_h );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding CH '%s:%s'", __func__, tech_id, acronyme );
-          Charger_conf_CH ( cpt_h );                                       /* Chargement des valeurs en base pour ce compteur */
+          Charger_confDB_CH ( cpt_h );                                     /* Chargement des valeurs en base pour ce compteur */
         }
        if (cpt_h_p) *cpt_h_p = (gpointer)cpt_h;                                     /* Sauvegarde pour acceleration si besoin */
       }
