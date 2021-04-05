@@ -128,184 +128,204 @@
   { GSList *liste;
     JsonArray *array;
 
-    if (msg->method != SOUP_METHOD_PUT)
+    if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
 
-    if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    gchar *tech_id = Normaliser_as_ascii ( Json_get_string ( request, "tech_id" ) );
-    if (!tech_id)
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
+    gchar *tech_id_src = g_hash_table_lookup ( query, "tech_id" );
+    gchar *classe_src  = g_hash_table_lookup ( query, "classe" );
+    if (! (tech_id_src && classe_src))
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     JsonNode *dls_run = Json_node_create ();
     if (!dls_run)
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
+
+    gchar *tech_id = Normaliser_chaine ( tech_id_src );
+    gchar *classe  = Normaliser_chaine ( classe_src );
+
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_node_add_string ( dls_run, "tech_id", tech_id );
     Json_node_add_int    ( dls_run, "top", Partage->top );
 /*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
-    array = Json_node_add_array ( dls_run, "CI" );
-    liste = Partage->Dls_data_CI;
-    while(liste)
-     { struct DLS_CI *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { JsonNode *element = Json_node_create();
-          Dls_CI_to_json ( element, bit );
-          Json_array_add_element ( array, element );
+    if (!strcasecmp ( classe, "CI" ))
+     { array = Json_node_add_array ( dls_run, "CI" );
+       liste = Partage->Dls_data_CI;
+       while(liste)
+        { struct DLS_CI *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_CI_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
      }
 /*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
-    array = Json_node_add_array ( dls_run, "BOOL" );
-    liste = Partage->Dls_data_BOOL;
-    while(liste)
-     { struct DLS_BOOL *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { JsonNode *element = Json_node_create();
-          Dls_BOOL_to_json ( element, bit );
-          Json_array_add_element ( array, element );
+    else if (!strcasecmp ( classe, "BOOL" ))
+     { array = Json_node_add_array ( dls_run, "BOOL" );
+       liste = Partage->Dls_data_BOOL;
+       while(liste)
+        { struct DLS_BOOL *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_BOOL_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
      }
 /*--------------------------------------------------- Compteur horaires ------------------------------------------------------*/
-    array = Json_node_add_array ( dls_run, "CH" );
-    liste = Partage->Dls_data_CH;
-    while(liste)
-     { struct DLS_CH *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { JsonNode *element = Json_node_create();
-          Dls_CH_to_json ( element, bit );
-          Json_array_add_element ( array, element );
+    else if (!strcasecmp ( classe, "CH" ))
+     { array = Json_node_add_array ( dls_run, "CH" );
+       liste = Partage->Dls_data_CH;
+       while(liste)
+        { struct DLS_CH *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_CH_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
      }
 /*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
-    array = Json_node_add_array ( dls_run, "AI" );
-    liste = Partage->Dls_data_AI;
-    while(liste)
-     { struct DLS_AI *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { JsonNode *element = Json_node_create();
-          Dls_AI_to_json ( element, bit );
-          Json_array_add_element ( array, element );
+    else if (!strcasecmp ( classe, "AI" ))
+     { array = Json_node_add_array ( dls_run, "AI" );
+       liste = Partage->Dls_data_AI;
+       while(liste)
+        { struct DLS_AI *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_AI_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
      }
 /*----------------------------------------------- Sortie Analogique ----------------------------------------------------------*/
-    array = Json_node_add_array ( dls_run, "AO" );
-    liste = Partage->Dls_data_AO;
-    while(liste)
-     { struct DLS_AO *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { JsonNode *element = Json_node_create();
-          Dls_AO_to_json ( element, bit );
-          Json_array_add_element ( array, element );
+    else if (!strcasecmp ( classe, "AO" ))
+     { array = Json_node_add_array ( dls_run, "AO" );
+       liste = Partage->Dls_data_AO;
+       while(liste)
+        { struct DLS_AO *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_AO_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
      }
 /*----------------------------------------------- Temporisations -------------------------------------------------------------*/
-    array = Json_node_add_array ( dls_run, "T" );
-    liste = Partage->Dls_data_TEMPO;
-    while(liste)
-     { struct DLS_TEMPO *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { JsonNode *element = Json_node_create();
-          Dls_TEMPO_to_json ( element, bit );
-          Json_array_add_element ( array, element );
+    else if (!strcasecmp ( classe, "TEMPO" ))
+     { array = Json_node_add_array ( dls_run, "TEMPO" );
+       liste = Partage->Dls_data_TEMPO;
+       while(liste)
+        { struct DLS_TEMPO *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_TEMPO_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
      }
 /*----------------------------------------------- Entrées TOR ----------------------------------------------------------------*/
-    array = Json_node_add_array ( dls_run, "DI" );
-    liste = Partage->Dls_data_DI;
-    while(liste)
-     { struct DLS_DI *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { JsonNode *element = Json_node_create();
-          Dls_DI_to_json ( element, bit );
-          Json_array_add_element ( array, element );
+    else if (!strcasecmp ( classe, "DI" ))
+     { array = Json_node_add_array ( dls_run, "DI" );
+       liste = Partage->Dls_data_DI;
+       while(liste)
+        { struct DLS_DI *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_DI_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
      }
 /*----------------------------------------------- Sortie TOR -----------------------------------------------------------------*/
-    array = Json_node_add_array ( dls_run, "DO" );
-    liste = Partage->Dls_data_DO;
-    while(liste)
-     { struct DLS_DO *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { JsonNode *element = Json_node_create();
-          Dls_DO_to_json ( element, bit );
-          Json_array_add_element ( array, element );
+    else if (!strcasecmp ( classe, "DO" ))
+     { array = Json_node_add_array ( dls_run, "DO" );
+       liste = Partage->Dls_data_DO;
+       while(liste)
+        { struct DLS_DO *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_DO_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
      }
 /*----------------------------------------------- Visuels --------------------------------------------------------------------*/
-    array = Json_node_add_array ( dls_run, "VISUEL" );
-    liste = Partage->Dls_data_VISUEL;
-    while(liste)
-     { struct DLS_VISUEL *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { JsonNode *element = Json_node_create();
-          Dls_VISUEL_to_json ( element, bit );
-          Json_array_add_element ( array, element );
+    else if (!strcasecmp ( classe, "VISUEL" ))
+      {array = Json_node_add_array ( dls_run, "VISUEL" );
+       liste = Partage->Dls_data_VISUEL;
+       while(liste)
+        { struct DLS_VISUEL *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_VISUEL_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
      }
 /*----------------------------------------------- Messages -------------------------------------------------------------------*/
-    array = Json_node_add_array ( dls_run, "MSG" );
-    liste = Partage->Dls_data_MSG;
-    while(liste)
-     { struct DLS_MESSAGES *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { JsonNode *element = Json_node_create();
-          Dls_MESSAGE_to_json ( element, bit );
-          Json_array_add_element ( array, element );
+    else if (!strcasecmp ( classe, "MSG" ))
+     { array = Json_node_add_array ( dls_run, "MSG" );
+       liste = Partage->Dls_data_MSG;
+       while(liste)
+        { struct DLS_MESSAGES *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_MESSAGE_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
      }
 /*----------------------------------------------- Registre -------------------------------------------------------------------*/
-    array = Json_node_add_array ( dls_run, "REGISTRE" );
-    liste = Partage->Dls_data_REGISTRE;
-    while(liste)
-     { struct DLS_REGISTRE *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { JsonNode *element = Json_node_create();
-          Dls_REGISTRE_to_json ( element, bit );
-          Json_array_add_element ( array, element );
+    else if (!strcasecmp ( classe, "REGISTRE" ))
+     { array = Json_node_add_array ( dls_run, "REGISTRE" );
+       liste = Partage->Dls_data_REGISTRE;
+       while(liste)
+        { struct DLS_REGISTRE *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_REGISTRE_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
      }
 /*----------------------------------------------- Watchdog -------------------------------------------------------------------*/
-    array = Json_node_add_array ( dls_run, "WATCHDOG" );
-    liste = Partage->Dls_data_WATCHDOG;
-    while(liste)
-     { struct DLS_WATCHDOG *bit=liste->data;
-       if (!strcasecmp(bit->tech_id, tech_id))
-        { JsonNode *element = Json_node_create();
-          Dls_WATCHDOG_to_json ( element, bit );
-          Json_array_add_element ( array, element );
+    else if (!strcasecmp ( classe, "WATCHDOG" ))
+     { array = Json_node_add_array ( dls_run, "WATCHDOG" );
+       liste = Partage->Dls_data_WATCHDOG;
+       while(liste)
+        { struct DLS_WATCHDOG *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_WATCHDOG_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
      }
 /*------------------------------------------------------- fin ----------------------------------------------------------------*/
-    json_node_unref(request);
+    g_free(tech_id);
+    g_free(classe);
     gchar *buf = Json_node_to_string ( dls_run );
     json_node_unref( dls_run );
 /*************************************************** Envoi au client **********************************************************/
@@ -717,6 +737,70 @@
     gchar *buf = Json_node_to_string (RootNode);
     json_node_unref(RootNode);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_dls_run_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                 SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
+
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+            Json_has_member ( request, "classe" ) && Json_has_member ( request, "valeur" )
+           )
+       )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    gchar *tech_id  = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
+    gchar *acronyme = Normaliser_chaine ( Json_get_string ( request, "acronyme" ) );
+    gchar *classe   = Normaliser_chaine ( Json_get_string ( request, "classe" ) );
+    if ( !strcasecmp ( classe, "DI" ) )
+     { gboolean valeur = Json_get_bool ( request, "valeur" );
+       Dls_data_set_DI ( NULL, tech_id, acronyme, NULL, valeur );
+       Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );
+       soup_message_set_status (msg, SOUP_STATUS_OK );
+     }
+    else if ( !strcasecmp ( classe, "DO" ) )
+     { gboolean valeur = Json_get_bool ( request, "valeur" );
+       Dls_data_set_DO ( NULL, tech_id, acronyme, NULL, valeur );
+       Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );
+       soup_message_set_status (msg, SOUP_STATUS_OK );
+     }
+    else if ( !strcasecmp ( classe, "BI" ) )
+     { gboolean valeur = Json_get_bool ( request, "valeur" );
+       Dls_data_set_BI ( NULL, tech_id, acronyme, NULL, valeur );
+       Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );
+       soup_message_set_status (msg, SOUP_STATUS_OK );
+     }
+    else if ( !strcasecmp ( classe, "MONO" ) )
+     { Dls_data_set_MONO ( NULL, tech_id, acronyme, NULL, TRUE );
+       Audit_log ( session, "DLS %s '%s:%s' set to TRUE", classe, tech_id, acronyme );
+       soup_message_set_status (msg, SOUP_STATUS_OK );
+     }
+    else if ( !strcasecmp ( classe, "MSG" ) )
+     { gboolean valeur = Json_get_bool ( request, "valeur" );
+       Dls_data_set_MSG ( NULL, tech_id, acronyme, NULL, FALSE, valeur );
+       Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );
+       soup_message_set_status (msg, SOUP_STATUS_OK );
+     }
+    else soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Wrong Class" );
+    json_node_unref(request);
+    g_free(tech_id);
+    g_free(acronyme);
+    g_free(classe);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */

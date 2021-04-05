@@ -184,10 +184,10 @@
                "render": function (item)
                  { return(htmlEncode(item.libelle)); }
              },
-                    { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
-                    { "data": "map_tech_id","title":"map_tech_id","className": "align-middle " },
-                    { "data": "map_tag",    "title":"map_tag",    "className": "align-middle " },
-                    { "data": "dst_param1", "title":"dst_param1", "className": "align-middle " },
+             { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
+             { "data": "map_tech_id","title":"map_tech_id","className": "align-middle " },
+             { "data": "map_tag",    "title":"map_tag",    "className": "align-middle " },
+             { "data": "dst_param1", "title":"dst_param1", "className": "align-middle " },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
