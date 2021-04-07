@@ -158,6 +158,9 @@
                  }
               );
        Set_syn_vars ( Response.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
+       $.each ( Response.horloges, function (i, horloge)
+                 { bodymain.append ( Creer_horloge ( horloge ) ); }
+              );
 
        if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg" ); }
                                 else { Changer_img_src ( 'idMenuImgAccueil', "/img/"+Response.image ); }

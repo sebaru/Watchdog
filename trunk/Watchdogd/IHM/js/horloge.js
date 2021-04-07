@@ -1,5 +1,3 @@
- document.addEventListener('DOMContentLoaded', Load_page, false);
-
 /************************************ Créé un nouveau tableau *****************************************************************/
  function Horloge_ticks_add (  )
   { vars = window.location.pathname.split('/');
@@ -52,11 +50,28 @@
   }
 
 /********************************************* Appelé au chargement de la page ************************************************/
- function Load_page ()
-  { vars = window.location.pathname.split('/');
-    if ( vars[2] == undefined ) return; else target = vars[2];
-
-    Send_to_API ( "GET", "/api/horloge/get", "horloge_id="+target, function(Response)
+ function Creer_horloge ( Response )
+  { var card = $('<div></div>').addClass("card bg-transparent m-1")
+               /*.append( $('<div></div>').addClass("card-header text-center")
+                        .append($('<img>').attr("id", "idVignetteActivite_"+Response.id).addClass("wtd-vignette") )
+                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette") )
+                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette") )
+                        .append( " "+Response.page )
+                      )*/
+               .append( $('<div></div>').addClass("card-body text-center")
+                        .append( $('<img>').attr("src", "/img/calendar.svg" )
+                                 .attr("onclick", "Charger_page_horloge("+Response.id+")")
+                                 .addClass("wtd-synoptique")
+                               )
+                      )
+               .append( $('<div></div>').addClass("card-footer text-center")
+                        .append( "<p>"+Response.libelle+"</p>" )
+                      );
+    return(card);
+  }
+/********************************************* Appelé au chargement de l'horloge **********************************************/
+ function Charger_une_horloge ( horloge_id )
+  { Send_to_API ( "GET", "/api/horloge/get", "horloge_id="+horloge_id, function(Response)
      { $('#idHorlogeTitle').text( Response.libelle );
      }, null );
 
@@ -65,7 +80,7 @@
     $('#idTableHorloge').DataTable(
        { pageLength : 25,
          fixedHeader: true, paging: false, searching: false, ordering: false,
-         ajax: {	url : "/api/horloge/ticks/list",	type : "GET", dataSrc: "horloge_ticks", data: { "horloge_id": target },
+         ajax: {	url : "/api/horloge/ticks/list",	type : "GET", dataSrc: "horloge_ticks", data: { "horloge_id": horloge_id },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          rowId: "id",
@@ -131,5 +146,17 @@
          responsive: true,
        }
      );
-
+    Slide_down_when_loaded ( "toplevel" );
   }
+/********************************************* Appelé au chargement de la page ************************************************/
+ function Charger_page_horloge ( horloge_id )
+  { console.log("Charger_page_horloge " + horloge_id);
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    $('#toplevel').slideUp("normal", function ()
+     { $('#toplevel').empty()
+                     .append("<div id='bodymain' class='row'></div")
+                     .append("<table id='idTableHorloge' class='table table-dark table-striped table-bordered table-hover'></table>");
+       Charger_une_horloge ( horloge_id );
+     });
+  }
+/*----------------------------------------------------------------------------------------------------------------------------*/

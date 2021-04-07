@@ -548,6 +548,17 @@
           return;
         }
      }
+/*-------------------------------------------------- Envoi les horloges de la page -------------------------------------------*/
+    if (SQL_Select_to_json_node ( synoptique, "horloges",
+                                 "SELECT horloge.* FROM mnemos_HORLOGE AS horloge "
+                                 "INNER JOIN dls ON dls.tech_id=horloge.tech_id "
+                                 "INNER JOIN syns as syn ON dls.syn_id=syn.id "
+                                 "WHERE dls.syn_id=%d AND syn.access_level<=%d",
+                                 syn_id, session->access_level ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       json_node_unref(synoptique);
+       return;
+     }
 /*------------------------------------------------- Envoi l'état de tous les visuels du synoptique ---------------------------*/
     JsonArray *etat_visuels = Json_node_add_array ( synoptique, "etat_visuels" );
     GList *syn_visuels      = Json_get_array_as_list ( synoptique, "visuels" );
