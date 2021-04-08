@@ -67,7 +67,10 @@
      }
 
     if (SQL_Select_to_json_node ( RootNode, "horloges",
-                                 "SELECT * FROM mnemos_HORLOGE WHERE tech_id='%s' AND access_level<=%d",
+                                 "SELECT h.* FROM mnemos_HORLOGE AS h "
+                                 "INNER JOIN dls ON dls.tech_id = h.tech_id "
+                                 "INNER JOIN syns ON syns.id = dls.syn_id "
+                                 "WHERE h.tech_id='%s' AND access_level<=%d",
                                   tech_id, session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
@@ -113,8 +116,11 @@
      }
 
     if (SQL_Select_to_json_node ( RootNode, "horloge_ticks",
-                                 "SELECT t.* FROM mnemos_HORLOGE_ticks as t INNER JOIN mnemos_HORLOGE as h"
-                                 " ON t.horloge_id = h.id WHERE h.id=%d AND access_level<=%d",
+                                 "SELECT t.* FROM mnemos_HORLOGE_ticks as t "
+                                 "INNER JOIN mnemos_HORLOGE as h ON t.horloge_id = h.id "
+                                 "INNER JOIN dls ON dls.tech_id = h.tech_id "
+                                 "INNER JOIN syns ON syns.id = dls.syn_id "
+                                 "WHERE h.id=%d AND access_level<=%d",
                                  horloge_id, session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
@@ -240,9 +246,7 @@
      }
 
     if ( Json_has_member ( request, "id" ) )                                                                       /* Edition */
-     { g_snprintf( critere, sizeof(critere), " WHERE access_level <= %d", session->access_level );
-       g_strlcat ( chaine, critere, sizeof(chaine) );
-       g_snprintf( critere, sizeof(critere), " AND t.id=%d", Json_get_int ( request, "id") );
+     { g_snprintf( critere, sizeof(critere), " WHERE t.id=%d", Json_get_int ( request, "id") );
        g_strlcat ( chaine, critere, sizeof(chaine) );
      }
 
