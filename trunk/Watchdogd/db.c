@@ -2168,7 +2168,12 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5437;
+    if (database_version < 5523)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_HORLOGE DROP `access_level`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5523;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

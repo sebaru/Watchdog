@@ -550,7 +550,7 @@
      }
 /*-------------------------------------------------- Envoi les horloges de la page -------------------------------------------*/
     if (SQL_Select_to_json_node ( synoptique, "horloges",
-                                 "SELECT horloge.* FROM mnemos_HORLOGE AS horloge "
+                                 "SELECT DISTINCT horloge.tech_id, dls.name as dls_name FROM mnemos_HORLOGE AS horloge "
                                  "INNER JOIN dls ON dls.tech_id=horloge.tech_id "
                                  "INNER JOIN syns as syn ON dls.syn_id=syn.id "
                                  "WHERE dls.syn_id=%d AND syn.access_level<=%d",

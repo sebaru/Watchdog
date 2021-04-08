@@ -47,27 +47,34 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 0 )) return;
 
-    gpointer horloge_id_string = g_hash_table_lookup ( query, "horloge_id" );
-    if (!horloge_id_string)
+    gpointer tech_id_string = g_hash_table_lookup ( query, "tech_id" );
+    if (!tech_id_string)
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-
+    gchar *tech_id = Normaliser_chaine ( tech_id_string );
+    if (!tech_id)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Memory Error");
+       return;
+     }
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       g_free(tech_id);
        return;
      }
 
-    if (SQL_Select_to_json_node ( RootNode, NULL,
-                                 "SELECT * FROM mnemos_HORLOGE WHERE id=%d AND access_level<=%d",
-                                  atoi(horloge_id_string), session->access_level )==FALSE)
+    if (SQL_Select_to_json_node ( RootNode, "horloges",
+                                 "SELECT * FROM mnemos_HORLOGE WHERE tech_id='%s' AND access_level<=%d",
+                                  tech_id, session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
+       g_free(tech_id);
        return;
      }
+    g_free(tech_id);
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
