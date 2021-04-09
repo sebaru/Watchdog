@@ -247,14 +247,14 @@
        $("#"+idfooter).css("background-color", "darkgreen" );
      }
 /*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
-    else if (visuel.mode_affichage=="cadre")
+    else if (visuel.ihm_affichage=="cadre")
      { Changer_img_src ( idimage, "/img/"+visuel.forme+"."+visuel.extension);
        $("#"+idvisuel).css("border", "medium solid "+etat.color );
        $("#"+idheader).css("background-color", "transparent" );
        $("#"+idfooter).css("background-color", "transparent" );
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
-    else if (visuel.mode_affichage=="2_modes")
+    else if (visuel.ihm_affichage=="2_modes")
      { if (etat.mode>0) { target = "/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension; }
                   else  { target = "/img/"+visuel.forme+"."+visuel.extension; }
        Changer_img_src ( idimage, target );
