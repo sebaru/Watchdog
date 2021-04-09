@@ -421,6 +421,15 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 1 )) return;
 
+    gchar *search;
+    gpointer search_string = g_hash_table_lookup ( query, "search[value]" );
+    if (!search_string) { search = g_strdup (""); }
+                   else { search = Normaliser_chaine ( search_string ); }
+    if (!search)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Memory Error");
+       return;
+     }
+
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
@@ -429,11 +438,48 @@
        return;
      }
 
-    if (SQL_Select_to_json_node ( RootNode, "results", "SELECT * FROM dictionnaire" )==FALSE)
+    gchar *draw_string = g_hash_table_lookup ( query, "draw" );
+    if (draw_string) Json_node_add_int ( RootNode, "draw", atoi(draw_string) );
+                else Json_node_add_int ( RootNode, "draw", 1 );
+
+    gint start;
+    gchar *start_string = g_hash_table_lookup ( query, "start" );
+    if (start_string) start = atoi(start_string);
+                 else start = 200;
+
+    gint length;
+    gchar *length_string = g_hash_table_lookup ( query, "length" );
+    if (length_string) length = atoi(length_string);
+                  else length = 200;
+
+
+    if (SQL_Select_to_json_node ( RootNode, NULL, "SELECT COUNT(*) AS recordsTotal FROM dictionnaire LIMIT %d", length )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
+       g_free(search);
        return;
      }
+    if (SQL_Select_to_json_node ( RootNode, NULL,
+                                  "SELECT COUNT(*) AS recordsFiltered FROM dictionnaire "
+                                  "WHERE tech_id LIKE '%%%s%%' OR acronyme LIKE '%%%s%%' OR libelle LIKE '%%%s%%' "
+                                  "LIMIT %d OFFSET %d",
+                                  search, search, search, length, start )==FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       json_node_unref ( RootNode );
+       g_free(search);
+       return;
+     }
+    if (SQL_Select_to_json_node ( RootNode, "data",
+                                  "SELECT * FROM dictionnaire "
+                                  "WHERE tech_id LIKE '%%%s%%' OR acronyme LIKE '%%%s%%' OR libelle LIKE '%%%s%%' "
+                                  "LIMIT %d OFFSET %d",
+                                  search, search, search, length, start )==FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       json_node_unref ( RootNode );
+       g_free(search);
+       return;
+     }
+    g_free(search);
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
