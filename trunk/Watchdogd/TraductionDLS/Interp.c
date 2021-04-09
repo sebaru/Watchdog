@@ -682,6 +682,20 @@
     return(action);
   }
 /******************************************************************************************************************************/
+/* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ struct OPTION *New_option_chaine( gint type, gchar *chaine )
+  { struct OPTION *option;
+    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
+    if (option)
+     { option->type   = type;
+       option->chaine = chaine;
+     }
+    return(option);
+  }
+/******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
@@ -700,21 +714,30 @@
     alias->options  = options;
     alias->used     = 0;
     Alias = g_slist_prepend( Alias, alias );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
-/* Entrées: rien                                                                                                              */
-/* Sortie: NULL si probleme                                                                                                   */
-/******************************************************************************************************************************/
- struct OPTION *New_option_chaine( gint type, gchar *chaine )
-  { struct OPTION *option;
-    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
-    if (option)
-     { option->type   = type;
-       option->chaine = chaine;
+    if (bit != MNEMO_MOTIF) return(TRUE);
+
+    gchar *forme_src = Get_option_chaine ( options, T_FORME );
+    gchar ss_chaine[128], ss_acronyme[64], *ihm_reaction;
+    GList *ss_options;
+    if (!forme_src) return(TRUE);
+
+    gchar *forme = Normaliser_chaine ( forme_src );
+    if (!forme) return(TRUE);
+
+    JsonNode *RootNode = Json_node_create();
+    SQL_Select_to_json_node ( RootNode, NULL, "SELECT ihm_reaction FROM icone WHERE forme='%s'", forme );
+    ihm_reaction = Json_get_string ( RootNode, "ihm_reaction" );
+    if (ihm_reaction)
+     { if (!strcasecmp ( ihm_reaction, "clic" ))
+        { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
+          g_snprintf( ss_chaine, sizeof(ss_chaine), "Clic sur l'icone depuis l'IHM" );
+          ss_options = g_list_append ( NULL, New_option_chaine ( T_LIBELLE, ss_chaine ) );
+          New_alias ( tech_id, ss_acronyme, MNEMO_ENTREE, ss_options );
+        }
      }
-    return(option);
+    g_free(forme);
+    json_node_unref(RootNode);
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */

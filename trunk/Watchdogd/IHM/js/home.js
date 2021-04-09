@@ -254,7 +254,7 @@
        $("#"+idfooter).css("background-color", "transparent" );
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
-    else if (visuel.mode_affichage=="2_modes_1_action")
+    else if (visuel.mode_affichage=="2_modes")
      { if (etat.mode>0) { target = "/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension; }
                   else  { target = "/img/"+visuel.forme+"."+visuel.extension; }
        Changer_img_src ( idimage, target );
@@ -274,23 +274,26 @@
   { var id = "wtd-visu-"+Response.tech_id+"-"+Response.acronyme;
     var contenu;
 /*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
-         if (Response.mode_affichage=="cadre")
+         if (Response.ihm_affichage=="cadre")
      { contenu = $('<img>').addClass("wtd-visuel").attr ( "id", id+"-img" ); }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
-    else if (Response.mode_affichage=="2_modes_1_action")
+    else if (Response.ihm_affichage=="2_modes")
      { contenu = $('<img>');
        $(contenu).addClass("wtd-visuel")
                  .attr ( "id", id+"-img" )
-                 .attr ( "src", "/img/"+Response.forme+"."+Response.extension )
-                 .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
+                 .attr ( "src", "/img/"+Response.forme+"."+Response.extension );
+
      }
     else
      { contenu = $('<img>').addClass("wtd-visuel").attr ( "id", id+"-img" ); }
 
+    if (Response.ihm_reaction=="clic")
+     { $(contenu).click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } ); }
+
     var card = $('<div></div>').addClass("row bg-transparent m-1")
                .append( $('<div></div>').addClass("col mt-2 text-center text-white")
                         .append( $('<p></p>').text (Response.dls_shortname )
-                                 .attr ( "id", id+"-header-text" )
+                                             .attr ( "id", id+"-header-text" )
                                )
                       )
                .append( $('<div></div>').addClass("w-100") )
@@ -300,7 +303,7 @@
                .append( $('<div></div>').addClass("w-100") )
                .append( $('<div></div>').addClass("col mt-2 text-center text-white")
                         .append( $('<p></p>').text(Response.libelle)
-                                 .attr ( "id", id+"-footer-text" )
+                                             .attr ( "id", id+"-footer-text" )
                                )
                       )
                .attr ( "id", id );

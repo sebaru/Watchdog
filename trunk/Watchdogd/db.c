@@ -2181,19 +2181,20 @@ fin:
     g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `icone` ("
                                           "`id` int(11) NOT NULL AUTO_INCREMENT,"
                                           "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
-                                          "`mode_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
+                                          "`ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
+                                          "`ihm_reaction` VARCHAR(32) NOT NULL DEFAULT 'clic',"
                                           "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
                                           "PRIMARY KEY (`id`)"
                                           ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
     Lancer_requete_SQL ( db, requete );
 
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='wago_750342', mode_affichage='cadre', extension='webp'" );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='wago_750342', ihm_affichage='cadre', ihm_reaction='none', extension='webp'" );
     Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='satellite', mode_affichage='cadre', extension='svg'" );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='satellite', ihm_affichage='cadre', ihm_reaction='none', extension='svg'" );
     Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='sms', mode_affichage='cadre', extension='jpg'" );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='sms', ihm_affichage='cadre', ihm_reaction='none', extension='jpg'" );
     Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='ampoule', mode_affichage='2_modes_1_action', extension='png'" );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='ampoule', ihm_affichage='2_modes', ihm_reaction='clic', extension='png'" );
     Lancer_requete_SQL ( db, requete );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
