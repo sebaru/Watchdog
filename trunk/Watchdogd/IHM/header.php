@@ -42,6 +42,10 @@
 
         .card { color: white; }
 
+        .wtd-img-grayscale
+          { filter: grayscale(100%) blur(1px);
+            transition: 2s;
+          }
 
         .wtd-menu
           { border-radius: 20%;
