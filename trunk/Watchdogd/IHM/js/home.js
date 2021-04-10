@@ -39,35 +39,70 @@
   }
 /******************************************************************************************************************************/
  function Set_syn_vars ( syn_id, syn_vars )
-  {      if (syn_vars.bit_comm == false) { activite_coul = "kaki"; activite_cligno = true; }
-    else if (syn_vars.bit_alarme == true) { activite_coul = "rouge"; activite_cligno = true; }
-    else if (syn_vars.bit_defaut == true) { activite_coul = "orange"; activite_cligno = true; }
-    else if (syn_vars.bit_alarme_fixe == true) { activite_coul = "rouge"; activite_cligno = false; }
-    else if (syn_vars.bit_defaut_fixe == true) { activite_coul = "orange"; activite_cligno = false; }
-    else { activite_coul = "vert"; activite_cligno = false; }
-    Set_vignette ( "idVignetteActivite_"+syn_id, "activite", activite_coul, activite_cligno );
-    if (syn_id == Synoptique.id)
-     { Set_vignette ( "idMasterVignetteActivite", "activite", activite_coul, activite_cligno ); }
+  { var vignette = $('#idVignette_'+syn_id);
 
-         if (syn_vars.bit_comm == false) { secu_bien_coul = "kaki"; secu_bien_cligno = true; }
-    else if (syn_vars.bit_alerte == true) { secu_bien_coul = "rouge"; secu_bien_cligno = true; }
-    else if (syn_vars.bit_alerte_fixe == true) { secu_bien_coul = "rouge"; secu_bien_cligno = true; }
-    else if (syn_vars.bit_veille_totale == true) { secu_bien_coul = "vert"; secu_bien_cligno = false; }
-    else if (syn_vars.bit_veille_partielle == true) { secu_bien_coul = "orange"; secu_bien_cligno = false; }
-    else { secu_bien_coul = "blanc"; secu_bien_cligno = false; }
-    Set_vignette ( "idVignetteSecuBien_"+syn_id, "secu_bien", secu_bien_coul, secu_bien_cligno );
-    if (syn_id == Synoptique.id)
-     { Set_vignette ( "idMasterVignetteSecuBien", "secu_bien", secu_bien_coul, secu_bien_cligno ); }
+    if (syn_vars.bit_comm == false)
+     { $('#idImgSyn_'+syn_id).addClass("wtd-img-grayscale");
+       Changer_img_src ( "idVignetteComm_"+syn_id, "/img/syn_communication.png" );
+       $('#idVignetteComm_'+syn_id).slideDown().addClass("wtd-cligno");
+     }
+    else
+     { $('#idImgSyn_'+syn_id).removeClass("wtd-img-grayscale");
+       $('#idVignetteComm_'+syn_id).slideUp().removeClass("wtd-cligno");
+     }  
 
-         if (syn_vars.bit_comm == false) { secu_pers_coul = "kaki"; secu_pers_cligno = true; }
-    else if (syn_vars.bit_danger == true) { secu_pers_coul = "rouge"; secu_pers_cligno = true; }
-    else if (syn_vars.bit_derangement == true) { secu_pers_coul = "orange"; secu_pers_cligno = true; }
-    else if (syn_vars.bit_danger_fixe == true) { secu_pers_coul = "rouge"; secu_pers_cligno = false; }
-    else if (syn_vars.bit_derangement_fixe == true) { secu_pers_coul = "orange"; secu_pers_cligno = false; }
-    else { secu_pers_coul = "vert"; secu_pers_cligno = false; }
-    Set_vignette ( "idVignetteSecuPers_"+syn_id, "secu_pers", secu_pers_coul, secu_pers_cligno );
-    if (syn_id == Synoptique.id)
-     { Set_vignette ( "idMasterVignetteSecuPers", "secu_pers", secu_pers_coul, secu_pers_cligno ); }
+    if (syn_vars.bit_alerte == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg" );
+       vignette.slideDown().addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_alerte_fixe == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg" );
+       vignette.slideDown().removeClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_alarme == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg" );
+       vignette.slideDown().addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_alarme_fixe == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg" );
+       vignette.slideDown().removeClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_defaut == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg" );
+       vignette.slideDown().addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_defaut_fixe == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg" );
+       vignette.slideDown().removeClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_danger == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg" );
+       vignette.slideDown().addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_danger_fixe == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg" );
+       vignette.slideDown().removeClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_derangement == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg" );
+       vignette.slideDown().addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_derangement_fixe == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg" );
+       vignette.slideDown().removeClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_veille_partielle == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_jaune.svg" );
+       vignette.slideDown().removeClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_veille_totale == false)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg" );
+       vignette.slideDown().addClass("wtd-cligno");
+     }
+    else
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_vert.svg" );
+       vignette.slideUp().removeClass("wtd-cligno");
+     }
   }
 /******************************************************************************************************************************/
  function Charger_messages ( syn_id )
@@ -119,25 +154,6 @@
                    return( Bouton ( "primary", "Acquitter le message", "Msg_acquitter", item.id, "Acquitter" ) );
                  }
              },
- /*            { "data": null, "title":"Titre", "className": "align-middle ",
-               "render": function (item)
-                 { return( Input ( "text", "idTableauTitre_"+item.id,
-                                   "Tableau_Set('"+item.id+"')",
-                                   "Quel est le titre du tableau ?",
-                                   item.titre )
-                         );
-                 }
-             },
-             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
-               "render": function (item)
-                 { boutons = Bouton_actions_start ();
-                   boutons += Bouton_actions_add ( "primary", "Voir le tableau", "Redirect", "/home/tableau?id="+item.id, "chart-line", null );
-                   boutons += Bouton_actions_add ( "primary", "Editer les courbes", "Redirect", "/tech/tableau_map/"+item.id, "pen", null );
-                   boutons += Bouton_actions_add ( "danger", "Supprimer ce tableau", "Tableau_Delete", item.id, "trash", null );
-                   boutons += Bouton_actions_end ();
-                   return(boutons);
-                 },
-             }*/
            ],
           /*order: [ [0, "desc"] ],*/
           responsive: false,
@@ -207,18 +223,24 @@
  function Creer_card ( Response )
   { var card = $('<div></div>').addClass("row bg-transparent")
 	       .append( $('<div><div>').addClass('w-100') )
-               .append( $('<div></div>').addClass("col text-center mb-1")
+               .append( $('<div></div>').addClass("col text-center mb-1 wtd-img-container")
+                        .append($('<img>').attr("id", "idVignetteComm_"+Response.id).addClass("wtd-vignette-comm wtd-img-superpose-milieu")
+				          .attr("src","/img/pignon_vert.svg") )
+/*                        .append($('<img>').attr("id", "idVignetteActivite_"+Response.id).addClass("wtd-vignette wtd-img-superpose").slideUp() )
+                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette wtd-img-superpose").slideUp() )
+                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette wtd-img-superpose").slideUp() )*/
                         .append( $('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
                                                                                   : "/img/"+Response.image) )
                                  .attr("onclick", "Charger_page_synoptique("+Response.id+")")
-                                 .addClass("wtd-synoptique")
+                                 .attr("id", "idImgSyn_"+Response.id)
+				 .addClass("wtd-synoptique")
                                )
-                      )
+	              )
                .append ( $('<div><div>').addClass('w-100') )
                .append( $('<div></div>').addClass("col text-center mb-2")
-                        .append($('<img>').attr("id", "idVignetteActivite_"+Response.id).addClass("wtd-vignette").css("display", "none") )
-                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette").css("display", "none") )
-                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette").css("display", "none") )
+                        .append($('<img>').attr("id", "idVignette_"+Response.id).addClass("wtd-vignette"))
+/*                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette").css("display", "none") )*/
+/*                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette").css("display", "none") )*/
                         .append( $('<span></span>').addClass("text-white").text(" "+Response.page) )
                       );
 

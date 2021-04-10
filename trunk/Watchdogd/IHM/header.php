@@ -47,6 +47,18 @@
             transition: 2s;
           }
 
+        .wtd-img-container
+          { position: relative;
+          }
+
+	.wtd-img-superpose-milieu
+	  { position: absolute;
+	    left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+	    z-index:2;
+          }
+
         .wtd-menu
           { border-radius: 20%;
             max-width: 48px;
@@ -79,6 +91,11 @@
         .wtd-vignette
           { width: 24px;
             height: 24px;
+          }
+
+	.wtd-vignette-comm
+          { width: 48px;
+            height: 48px;
           }
 
         @media (max-width: 768px)
