@@ -205,22 +205,21 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Creer_card ( Response )
-  { var card = $('<div></div>').addClass("card bg-transparent m-1")
-               .append( $('<div></div>').addClass("card-header text-center")
-                        .append($('<img>').attr("id", "idVignetteActivite_"+Response.id).addClass("wtd-vignette") )
-                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette") )
-                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette") )
-                        .append( " "+Response.page )
-                      )
-               .append( $('<div></div>').addClass("card-body text-center")
+  { var card = $('<div></div>').addClass("row bg-transparent")
+	       .append( $('<div><div>').addClass('w-100') )
+               .append( $('<div></div>').addClass("col text-center mb-1")
                         .append( $('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
                                                                                   : "/img/"+Response.image) )
                                  .attr("onclick", "Charger_page_synoptique("+Response.id+")")
                                  .addClass("wtd-synoptique")
                                )
                       )
-               .append( $('<div></div>').addClass("card-footer text-center")
-                        .append( "<p>"+Response.libelle+"</p>" )
+               .append ( $('<div><div>').addClass('w-100') )
+               .append( $('<div></div>').addClass("col text-center mb-2")
+                        .append($('<img>').attr("id", "idVignetteActivite_"+Response.id).addClass("wtd-vignette").css("display", "none") )
+                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette").css("display", "none") )
+                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette").css("display", "none") )
+                        .append( $('<span></span>').addClass("text-white").text(" "+Response.page) )
                       );
 
     return(card);
