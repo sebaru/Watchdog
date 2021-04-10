@@ -79,8 +79,8 @@
 
         @media (max-width: 768px)
          { .wtd-synoptique
-            { max-height: 96px;
-              max-width: 96px;
+            { max-height: 64px;
+              max-width: 64px;
             }
            .wtd-vignette
             { max-width: 16px;
@@ -91,8 +91,8 @@
                max-height: 32px;
              }
            .wtd-visuel
-             { max-width: 96px;
-               max-height: 96px;
+             { max-width: 64px;
+               max-height: 64px;
              }
            .wtd-courbe
              { height: 300px;
