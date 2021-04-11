@@ -160,7 +160,7 @@
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
-                     .append("<div id='bodymain'></div>").addClass('m-1');
+                     .append("<div id='bodymain'></div>").addClass('mx-1');
        Charger_une_horloge ( dls_tech_id );
      });
   }

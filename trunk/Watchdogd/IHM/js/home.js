@@ -197,7 +197,7 @@
         { $.each ( Response.tableaux, function (i, tableau)
            { tableaux.append("<hr>");
              var id = "idTableau-"+tableau.id;
-             tableaux.append( $("<div></div>").append("<canvas id='"+id+"'></canvas>").addClass("col wtd-courbe m-1") );
+             tableaux.append( $("<div></div>").append("<canvas id='"+id+"'></canvas>").addClass("col wtd-courbe mx-1") );
              maps = Response.tableaux_map.filter ( function (item) { return(item.tableau_id==tableau.id) } );
              Charger_plusieurs_courbes ( id, maps, "HOUR" );
              $('#'+id).on("click", function () { Charger_page_tableau(tableau.id); } );
@@ -217,7 +217,7 @@
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
                      .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div")
-                     .append("<div id='tableaux' class='row justify-content-center'></div");
+                     .append("<div id='tableaux' class='row mx-1 justify-content-center'></div");
        Charger_un_synoptique ( syn_id );
      });
   }
@@ -313,7 +313,7 @@
     if (Response.ihm_reaction=="clic")
      { $(contenu).click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } ); }
 
-    var card = $('<div></div>').addClass("row bg-transparent m-1")
+    var card = $('<div></div>').addClass("row bg-transparent mx-1")
                .append( $('<div></div>').addClass("col mt-2 text-center text-white")
                         .append( $('<p></p>').text (Response.dls_shortname )
                                              .attr ( "id", id+"-header-text" )
