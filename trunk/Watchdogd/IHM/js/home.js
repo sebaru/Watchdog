@@ -49,43 +49,43 @@
     else
      { $('#idImgSyn_'+syn_id).removeClass("wtd-img-grayscale");
        $('#idVignetteComm_'+syn_id).slideUp().removeClass("wtd-cligno");
-     }  
+     }
 
-    if (syn_vars.bit_alerte == true)
+    if (syn_vars.bit_danger == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg" );
+       vignette.slideDown().addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_alerte == true)
      { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg" );
+       vignette.slideDown().addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_alarme == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg" );
+       vignette.slideDown().addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_defaut == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg" );
+       vignette.slideDown().addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_derangement == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg" );
        vignette.slideDown().addClass("wtd-cligno");
      }
     else if (syn_vars.bit_alerte_fixe == true)
      { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg" );
        vignette.slideDown().removeClass("wtd-cligno");
      }
-    else if (syn_vars.bit_alarme == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg" );
-       vignette.slideDown().addClass("wtd-cligno");
-     }
     else if (syn_vars.bit_alarme_fixe == true)
      { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg" );
        vignette.slideDown().removeClass("wtd-cligno");
-     }
-    else if (syn_vars.bit_defaut == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg" );
-       vignette.slideDown().addClass("wtd-cligno");
      }
     else if (syn_vars.bit_defaut_fixe == true)
      { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg" );
        vignette.slideDown().removeClass("wtd-cligno");
      }
-    else if (syn_vars.bit_danger == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg" );
-       vignette.slideDown().addClass("wtd-cligno");
-     }
     else if (syn_vars.bit_danger_fixe == true)
      { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg" );
        vignette.slideDown().removeClass("wtd-cligno");
-     }
-    else if (syn_vars.bit_derangement == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg" );
-       vignette.slideDown().addClass("wtd-cligno");
      }
     else if (syn_vars.bit_derangement_fixe == true)
      { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg" );
@@ -222,25 +222,25 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Creer_card ( Response )
   { var card = $('<div></div>').addClass("row bg-transparent")
-	       .append( $('<div><div>').addClass('w-100') )
-               .append( $('<div></div>').addClass("col text-center mb-1 wtd-img-container")
-                        .append($('<img>').attr("id", "idVignetteComm_"+Response.id).addClass("wtd-vignette-comm wtd-img-superpose-milieu")
-				          .attr("src","/img/pignon_vert.svg") )
-/*                        .append($('<img>').attr("id", "idVignetteActivite_"+Response.id).addClass("wtd-vignette wtd-img-superpose").slideUp() )
-                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette wtd-img-superpose").slideUp() )
-                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette wtd-img-superpose").slideUp() )*/
-                        .append( $('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
-                                                                                  : "/img/"+Response.image) )
-                                 .attr("onclick", "Charger_page_synoptique("+Response.id+")")
-                                 .attr("id", "idImgSyn_"+Response.id)
-				 .addClass("wtd-synoptique")
+               .append( $('<div></div>').addClass("col text-center")
+                        .append( $('<div></div>').addClass("d-inline-block wtd-img-container")
+                                 .append($('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
+                                                                                           : "/img/"+Response.image) )
+                                                   .attr("onclick", "Charger_page_synoptique("+Response.id+")")
+                                                   .attr("id", "idImgSyn_"+Response.id)
+		                              	                  .addClass("wtd-synoptique") )
+                                 .append($('<img>').attr("id", "idVignetteComm_"+Response.id)
+				                                               /*.attr("src","/img/pignon_vert.svg")*/
+                                                   .addClass("wtd-vignette wtd-img-superpose-bas-droite").slideUp()
+                                        )
+                                 .append($('<img>').attr("id", "idVignette_"+Response.id)
+				                                               /*.attr("src","")*/
+                                                   .addClass("wtd-vignette wtd-img-superpose-haut-droite").slideUp()
+                                        )
                                )
-	              )
+	                     )
                .append ( $('<div><div>').addClass('w-100') )
                .append( $('<div></div>').addClass("col text-center mb-2")
-                        .append($('<img>').attr("id", "idVignette_"+Response.id).addClass("wtd-vignette"))
-/*                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette").css("display", "none") )*/
-/*                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette").css("display", "none") )*/
                         .append( $('<span></span>').addClass("text-white").text(" "+Response.page) )
                       );
 

@@ -51,12 +51,36 @@
           { position: relative;
           }
 
-	.wtd-img-superpose-milieu
-	  { position: absolute;
-	    left: 50%;
+	       .wtd-img-superpose-milieu
+	         { position: absolute;
+	           left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-	    z-index:2;
+	           z-index:2;
+          }
+
+	       .wtd-img-superpose-bas-droite
+	         { position: absolute;
+	           bottom: 0px;
+            right: 0px;
+            transform: translate(+50%, 0%);
+	           z-index:2;
+          }
+
+	       .wtd-img-superpose-haut-droite
+	         { position: absolute;
+	           top: 0px;
+            right: 0px;
+            transform: translate(+50%, 0%);
+	           z-index:2;
+          }
+
+	       .wtd-img-superpose-haut-gauche
+	         { position: absolute;
+	           top: 0px;
+            left: 0px;
+            transform: translate(-50%, 0%);
+	           z-index:2;
           }
 
         .wtd-menu
@@ -89,13 +113,8 @@
                     }
 
         .wtd-vignette
-          { width: 24px;
-            height: 24px;
-          }
-
-	.wtd-vignette-comm
-          { width: 48px;
-            height: 48px;
+          { width: 32px;
+            height: 32px;
           }
 
         @media (max-width: 768px)
@@ -186,9 +205,9 @@
   </a>
 
   <a class="nav-item"><img id="idMenuImgAccueil" src="" alt="Accueil" class="wtd-menu mr-1"></a>
-  <a class="nav-item"><img id="idMasterVignetteActivite" class="wtd-menu mr-1" src=""></a>
+  <!--<a class="nav-item"><img id="idMasterVignetteActivite" class="wtd-menu mr-1" src=""></a>
   <a class="nav-item"><img id="idMasterVignetteSecuBien" class="wtd-menu mr-1" src=""></a>
-  <a class="nav-item"><img id="idMasterVignetteSecuPers" class="wtd-menu mr-1" src=""></a>
+  <a class="nav-item"><img id="idMasterVignetteSecuPers" class="wtd-menu mr-1" src=""></a>-->
   <ul class="navbar-nav">
     <a class="nav-link rounded d-none d-sm-inline" href="#"> <span id="idPageTitle">Loading...</span></a>
   </ul>
