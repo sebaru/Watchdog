@@ -116,9 +116,11 @@
      }
 
     if (SQL_Select_to_json_node ( RootNode, "synoptiques",
-                                 "SELECT syn.*, psyn.page as ppage, psyn.libelle AS plibelle, psyn.id AS pid FROM syns AS syn"
-                                 " INNER JOIN syns as psyn ON psyn.id=syn.parent_id"
-                                 " WHERE syn.access_level<='%d' ORDER BY syn.page", session->access_level ) == FALSE)
+                                 "SELECT syn.*, psyn.page as ppage, psyn.libelle AS plibelle, psyn.id AS pid, "
+                                         "(SELECT COUNT(*) FROM dls WHERE dls.syn_id=syn.id) AS dls_count "
+                                 "FROM syns AS syn "
+                                 "INNER JOIN syns AS psyn ON psyn.id=syn.parent_id "
+                                 "WHERE syn.access_level<='%d' ORDER BY syn.page", session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
        return;
@@ -277,7 +279,9 @@
      }
 
     if (SQL_Select_to_json_node ( RootNode, NULL,
-                                 "SELECT s.*, ps.page AS ppage FROM syns AS s INNER JOIN syns AS ps ON s.parent_id = ps.id "
+                                 "SELECT s.*, ps.page AS ppage "
+                                 "FROM syns AS s "
+                                 "INNER JOIN syns AS ps ON s.parent_id = ps.id "
                                  "WHERE s.id=%d AND s.access_level<=%d ORDER BY s.page", syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );

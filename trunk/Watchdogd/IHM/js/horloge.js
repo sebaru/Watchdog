@@ -56,20 +56,15 @@
 
 /********************************************* Appelé au chargement de la page ************************************************/
  function Creer_horloge ( Response )
-  { var card = $('<div></div>').addClass("card bg-transparent m-1")
-               .append( $('<div></div>').addClass("card-header text-center")
-                        /*.append($('<img>').attr("id", "idVignetteActivite_"+Response.id).addClass("wtd-vignette") )
-                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette") )
-                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette") )*/
-                        .append( "Horloges" )
-                      )
-               .append( $('<div></div>').addClass("card-body text-center")
+  { var card = $('<div></div>').addClass("row bg-transparent")
+               .append( $('<div></div>').addClass("col text-center")
                         .append( $('<img>').attr("src", "/img/calendar.svg" )
-                                 .attr("onclick", "Charger_page_horloge('"+Response.tech_id+"')")
-                                 .addClass("wtd-synoptique")
+                                           .attr("onclick", "Charger_page_horloge('"+Response.tech_id+"')")
+                                           .addClass("wtd-synoptique")
                                )
                       )
-               .append( $('<div></div>').addClass("card-footer text-center")
+               .append( $('<div></div>').addClass('w-100') )
+               .append( $('<div></div>').addClass("col text-center text-white")
                         .append( "<p>"+Response.dls_name+"</p>" )
                       );
     return(card);
@@ -165,7 +160,7 @@
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
-                     .append("<div id='bodymain'></div>");
+                     .append("<div id='bodymain'></div>").addClass('m-1');
        Charger_une_horloge ( dls_tech_id );
      });
   }

@@ -241,9 +241,9 @@
                                         )
                                )
 	                     )
-               .append ( $('<div><div>').addClass('w-100') )
+               .append( $('<div></div>').addClass('w-100') )
                .append( $('<div></div>').addClass("col text-center mb-2")
-                        .append( $('<span></span>').addClass("text-white").text(" "+Response.page) )
+                        .append( $('<span></span>').addClass("text-white").text(" "+Response.libelle) )
                       );
 
     return(card);
