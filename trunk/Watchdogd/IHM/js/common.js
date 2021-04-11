@@ -181,7 +181,7 @@
   }
 /********************************************* Affichage des vignettes ********************************************************/
  function Slide_down_when_loaded ( id )
-  { var images = $('#'+id+' img');
+  { var images = $('#'+id+' img[src]');
     var loaded_images_count = 0;
     if (images.length==0) { $('#'+id).slideDown("slow"); return; }
     images.on("load", function()
