@@ -216,7 +216,7 @@
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
-                     .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div")
+                     .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div")
                      .append("<div id='tableaux' class='row mx-1 justify-content-center'></div");
        Charger_un_synoptique ( syn_id );
      });
