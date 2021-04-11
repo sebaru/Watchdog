@@ -2,26 +2,25 @@
 
 /************************************ Créé un nouveau tableau *****************************************************************/
  function Tableau_New ( )
-  { var json_request = JSON.stringify(
-       { titre: "Nouveau tableau",
-         access_level: 0
-       }
-     );
-    Send_to_API ( "POST", "/api/tableau/set", json_request, function (Response)
-     { $('#idTableTableau').DataTable().ajax.reload(null, false);
-     }, null );
+  { $('#idModalEditTitre').text ( "Ajouter un tableau" );
+    Select_from_api ( "idModalEditPage", "/api/syn/list", null, "synoptiques", "id", function (item)
+     { return ( item.page+" - "+htmlEncode(item.libelle) ); });
+
+    $('#idModalEditLibelle').val( "" );
+    $('#idModalEditValider').attr( "onclick", "Tableau_Set(null)" );
+    $('#idModalEdit').modal("show");
   }
 /************************************ Créé un nouveau tableau *****************************************************************/
  function Tableau_Set ( id )
   { table = $('#idTableTableau').DataTable();
     selection = table.ajax.json().tableaux.filter( function(item) { return item.id==id } )[0];
-    var json_request = JSON.stringify(
-       { id: id,
-         titre:  $('#idModalEditLibelle').val(),
+    var json_request =
+       { titre:  $('#idModalEditLibelle').val(),
          syn_id: $('#idModalEditPage').val(),
        }
-     );
-    Send_to_API ( "POST", "/api/tableau/set", json_request, function (Response)
+    if (id!=null) json_request.id = id;
+
+    Send_to_API ( "POST", "/api/tableau/set", JSON.stringify(json_request), function (Response)
      { $('#idTableTableau').DataTable().ajax.reload(null, false);
      }, null );
   }

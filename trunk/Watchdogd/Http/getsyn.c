@@ -117,7 +117,8 @@
 
     if (SQL_Select_to_json_node ( RootNode, "synoptiques",
                                  "SELECT syn.*, psyn.page as ppage, psyn.libelle AS plibelle, psyn.id AS pid, "
-                                         "(SELECT COUNT(*) FROM dls WHERE dls.syn_id=syn.id) AS dls_count "
+                                         "(SELECT COUNT(*) FROM dls WHERE dls.syn_id=syn.id) AS dls_count, "
+                                         "(SELECT COUNT(*) FROM syns AS sub_syn WHERE syn.id=sub_syn.parent_id) AS subsyn_count "
                                  "FROM syns AS syn "
                                  "INNER JOIN syns AS psyn ON psyn.id=syn.parent_id "
                                  "WHERE syn.access_level<='%d' ORDER BY syn.page", session->access_level ) == FALSE)

@@ -167,6 +167,7 @@
                 { return( Lien ( "/"+item.page, "Voir le synoptique "+item.libelle, item.libelle ) ); },
             },
             { "data": "dls_count", "title": "#dls", "className": "align-middle text-center" },
+            { "data": "subsyn_count", "title": "#SubSyn", "className": "align-middle text-center" },
             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
