@@ -12,8 +12,6 @@
        localStorage.setItem("instance",           Response.instance );
        localStorage.setItem("instance_is_master", Response.instance_is_master );
        localStorage.setItem("wtd_session",        Response.wtd_session );
-       document.cookie = "wtd_session="+Response.wtd_session+"; path=/";
-       if (Response.access_level>=6) window.location.replace("/tech/dashboard");
-       else window.location.replace("/");
+       window.location.replace("/");
      });
   }

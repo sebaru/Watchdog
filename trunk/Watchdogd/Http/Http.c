@@ -61,7 +61,7 @@
     Cfg_http.tcp_port = 5560;
     Creer_configDB_int ( NOM_THREAD, "tcp_port", Cfg_http.tcp_port );
 
-    Cfg_http.wtd_session_expiry = 7200;
+    Cfg_http.wtd_session_expiry = 600; /* En secondes */
     Creer_configDB_int ( NOM_THREAD, "wtd_session_expiry", Cfg_http.wtd_session_expiry );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
@@ -200,7 +200,20 @@
     return(FALSE);
   }
 /******************************************************************************************************************************/
-/* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
+/* Http_add_cookie: Ajoute un cookie a la reponse                                                                             */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_add_cookie ( SoupMessage *msg, gchar *name, gchar *value, gint life )
+  { SoupCookie *cookie = soup_cookie_new ( name, value, NULL, "/", life );
+    soup_cookie_set_http_only ( cookie, TRUE );
+    if (Cfg_http.ssl_enable) soup_cookie_set_secure ( cookie, TRUE );
+    GSList *liste = g_slist_append ( NULL, cookie );
+    soup_cookies_to_response ( liste, msg );
+    g_slist_free(liste);
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_ping: Répond aux requetes sur l'URI ping, et renouvelle le cookie de session                                  */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
@@ -211,6 +224,9 @@
 		     return;
      }
 
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 0 )) return;
+
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
@@ -220,7 +236,8 @@
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    Json_node_add_bool   ( RootNode, "installed", Config.installed );
+    Json_node_add_string ( RootNode, "response", "pong" );
+    Http_add_cookie ( msg, "wtd_session", session->wtd_session, Cfg_http.wtd_session_expiry );
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
@@ -372,12 +389,7 @@
      }
     Cfg_http.liste_http_clients = g_slist_append ( Cfg_http.liste_http_clients, session );
 
-    SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", session->wtd_session, NULL, "/", Cfg_http.wtd_session_expiry );
-    soup_cookie_set_http_only ( wtd_session, TRUE );
-    if (Cfg_http.ssl_enable) soup_cookie_set_secure ( wtd_session, TRUE );
-    GSList *liste = g_slist_append ( NULL, wtd_session );
-    soup_cookies_to_response ( liste, msg );
-    g_slist_free(liste);
+    Http_add_cookie ( msg, "wtd_session", session->wtd_session, Cfg_http.wtd_session_expiry );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: User '%s:%s' connected", __func__,
               session->username, session->host );
 

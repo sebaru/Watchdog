@@ -1,5 +1,5 @@
 
- var TableauDIV ="<div class='row mx-1'>"+
+ var TableauDIV ="<div class='row mx-1 mb-1'>"+
                  "  <h3><i class='fas fa-chart-line text-primary'></i> <strong id='idTableauTitle'></strong></h3>"+
                  "  <div class ='ml-auto btn-group align-items-start'>"+
                  "   <i class='fas fa-clock text-primary mt-2 mr-2'></i>"+
