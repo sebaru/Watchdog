@@ -77,6 +77,7 @@ newline       [\n\r]+
 "_TOP_ALERTE"              { DlsScanner_lval.val = T_TOP_ALERTE;    return T_TOP_ALERTE;    }
 "_TOP_ALERTE_FUGITIVE"     { DlsScanner_lval.val = T_TOP_ALERTE_FUGITIVE;return T_TOP_ALERTE_FUGITIVE;}
 "_BUS"                     { DlsScanner_lval.val = T_BUS;           return T_BUS;           }
+"_PID"                     { DlsScanner_lval.val = T_PID;           return T_PID;           }
 
  /***************************************** Methodes speciales ********************************************/
 "_HEURE"                   { DlsScanner_lval.val = HEURE;       return HEURE;       }
@@ -149,11 +150,16 @@ newline       [\n\r]+
 "host"                     { DlsScanner_lval.val = T_HOST;      return T_HOST;      }
 "thread"                   { DlsScanner_lval.val = T_THREAD;    return T_THREAD;    }
 "tag"                      { DlsScanner_lval.val = T_TAG;       return T_TAG;       }
-"param1"                   { DlsScanner_lval.val = T_PARAM1;    return T_PARAM1;    }
 "forme"                    { DlsScanner_lval.val = T_FORME;     return T_FORME;     }
+"input"                    { DlsScanner_lval.val = T_INPUT;     return T_INPUT;     }
+"kp"                       { DlsScanner_lval.val = T_KP;        return T_KP;        }
+"ki"                       { DlsScanner_lval.val = T_KI;        return T_KI;        }
+"kd"                       { DlsScanner_lval.val = T_KD;        return T_KD;        }
+"min"                      { DlsScanner_lval.val = T_MIN;       return T_MIN;       }
+"max"                      { DlsScanner_lval.val = T_MAX;       return T_MAX;       }
+
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }
-"dyn_string"               { DlsScanner_lval.val = T_DYN_STRING;return T_DYN_STRING;}
 "switch"                   { DlsScanner_lval.val = T_SWITCH;    return T_SWITCH;    }
 "."                        { DlsScanner_lval.val = ET;          return ET;          }
 "+"                        { DlsScanner_lval.val = T_PLUS;      return T_PLUS;      }

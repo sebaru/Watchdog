@@ -206,51 +206,6 @@
           liste = g_slist_next(liste);
         }
      }
-#ifdef bouh
-    else if ( !strcmp(event->tag, "SNIPS_QUESTION") )
-     { struct DB *db;
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SNIPS_QUESTION from %s/%s to %s/%s : '%s'",
-                 __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
-
-       if ( ! Recuperer_mnemos_AI_by_map_question_vocale ( &db, (gchar *)payload ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Error searching Database for '%s'", __func__, payload ); }
-       else while ( Recuperer_mnemos_AI_suite( &db ) )
-        { gchar *tech_id = db->row[0], *acronyme = db->row[1], *libelle = db->row[2];
-          gchar *map_question_vocale = db->row[3], *map_reponse_vocale = db->row[4];
-          gchar *result_string;
-          gpointer ai_p=NULL;
-          Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s - %s", __func__,
-                    map_question_vocale, tech_id, acronyme, libelle, map_reponse_vocale );
-          result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_ENTREE_ANA, tech_id, acronyme, &ai_p );
-          Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
-                    event->src_instance, result_string );
-          Zmq_Send_with_json ( Partage->com_msrv.zmq_to_bus, "msrv", event->src_instance,
-                              "audio", "play_google", result_string, strlen(result_string)+1 );
-          Zmq_Send_with_json ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
-                              "audio", "play_google", result_string, strlen(result_string)+1 );
-          g_free(result_string);
-        }
-
-       if ( ! Recuperer_mnemos_R_by_map_question_vocale ( &db, (gchar *)payload ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Error searching Database for '%s'", __func__, payload ); }
-       else while ( Recuperer_mnemos_R_suite( &db ) )
-        { gchar *tech_id = db->row[0], *acronyme = db->row[1], *libelle = db->row[2];
-          gchar *map_question_vocale = db->row[3], *map_reponse_vocale = db->row[4];
-          gchar *result_string;
-          gpointer reg_p=NULL;
-          Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s - %s", __func__,
-                    map_question_vocale, tech_id, acronyme, libelle, map_reponse_vocale );
-          result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_REGISTRE, tech_id, acronyme, &reg_p );
-          Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Sending %s:audio:play_google:'%s'", __func__,
-                    event->src_instance, result_string );
-          Zmq_Send_with_json ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
-                              "audio", "play_google", result_string, strlen(result_string)+1 );
-          Zmq_Send_with_json ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
-                              "audio", "play_google", result_string, strlen(result_string)+1 );
-          g_free(result_string);
-        }
-     }
-#endif
     else if ( !strcasecmp( zmq_tag, "SUDO") )
      { gchar chaine[80];
        if (! (Json_has_member ( request, "commande" ) ) )
