@@ -174,10 +174,19 @@
   }
 /********************************************* Affichage des vignettes ********************************************************/
  function Changer_img_src ( id, target )
-  { $('#'+id).slideUp("slow", function()
-     { $('#'+id).on("load", function() { $('#'+id).slideDown("slow"); } );
-       $('#'+id).attr("src", target);
-     } );
+  { var image = $('#'+id);
+    if (image.attr('src') == "")
+     { image.slideUp("fast", function()
+        { image.on("load", function() { image.slideDown("normal"); } );
+          image.attr("src", target);
+        });
+     }
+    else
+     { image.fadeOut("fast", function()
+        { image.on("load", function() { image.fadeIn("normal"); } );
+          image.attr("src", target);
+        });
+     }
   }
 /********************************************* Affichage des vignettes ********************************************************/
  function Slide_down_when_loaded ( id )
