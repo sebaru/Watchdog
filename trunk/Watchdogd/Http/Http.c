@@ -212,6 +212,19 @@
     return(result);
   }
 /******************************************************************************************************************************/
+/* Http_add_cookie: Ajoute un cookie a la reponse                                                                             */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_add_cookie ( SoupMessage *msg, gchar *name, gchar *value, gint life )
+  { SoupCookie *cookie = soup_cookie_new ( name, value, NULL, "/", life );
+    soup_cookie_set_http_only ( cookie, TRUE );
+    if (Cfg_http.ssl_enable) soup_cookie_set_secure ( cookie, TRUE );
+    GSList *liste = g_slist_append ( NULL, cookie );
+    soup_cookies_to_response ( liste, msg );
+    g_slist_free(liste);
+  }
+/******************************************************************************************************************************/
 /* Http_print_request: affiche les données relatives à une requete                                                            */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
@@ -223,6 +236,8 @@
               (session ? session->username : "none"), soup_client_context_get_host(client),
               (session ? session->access_level : -1), path
                );
+    if (session) Http_add_cookie ( msg, "wtd_session", session->wtd_session, Cfg_http.wtd_session_expiry );
+
     return(session);
   }
 /******************************************************************************************************************************/
@@ -240,19 +255,6 @@
     if (session->access_level>=min_access_level) return(TRUE);
     soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Session Level forbidden");
     return(FALSE);
-  }
-/******************************************************************************************************************************/
-/* Http_add_cookie: Ajoute un cookie a la reponse                                                                             */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Http_add_cookie ( SoupMessage *msg, gchar *name, gchar *value, gint life )
-  { SoupCookie *cookie = soup_cookie_new ( name, value, NULL, "/", life );
-    soup_cookie_set_http_only ( cookie, TRUE );
-    if (Cfg_http.ssl_enable) soup_cookie_set_secure ( cookie, TRUE );
-    GSList *liste = g_slist_append ( NULL, cookie );
-    soup_cookies_to_response ( liste, msg );
-    g_slist_free(liste);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_ping: Répond aux requetes sur l'URI ping, et renouvelle le cookie de session                                  */
@@ -279,7 +281,6 @@
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_node_add_string ( RootNode, "response", "pong" );
-    Http_add_cookie ( msg, "wtd_session", session->wtd_session, Cfg_http.wtd_session_expiry );
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
