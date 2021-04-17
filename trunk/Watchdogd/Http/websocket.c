@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Http/ws.c        Gestion des echanges des elements visuels de watchdog                                    */
+/* Watchdogd/Http/ws.c        Gestion des echanges des elements visuels de watchdog                                           */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    06.05.2020 09:53:41 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -35,7 +35,7 @@
   { gchar tech_id[32];
     gchar acronyme[64];
     gchar unite[32];
-    gint type;
+    gint classe;
     gpointer dls_data;
     gfloat old_valeur;
     gfloat valeur;
@@ -88,7 +88,7 @@
  static void Formater_cadran( struct WS_CADRAN *cadran )
   {
     if (!cadran) return;
-    switch(cadran->type)
+    switch(cadran->classe)
      { /*case MNEMO_BISTABLE:
             cadran->in_range = TRUE;
             cadran->valeur = 1.0 * Dls_data_get_BI/MONO ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
@@ -128,9 +128,17 @@
              }
             break;
        case MNEMO_REGISTRE:
-            cadran->valeur = -1.0;
-            g_snprintf( cadran->unite, sizeof(cadran->unite), "?" );
-            cadran->in_range = TRUE;
+             { struct DLS_REGISTRE *registre;
+               cadran->valeur = Dls_data_get_R(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+               if (!cadran->dls_data)                      /* si Registre pas trouvée, on remonte le nom du cadran en libellé */
+                { cadran->in_range = FALSE;
+                  break;
+                }
+               registre = (struct DLS_REGISTRE *)cadran->dls_data;
+               cadran->in_range = TRUE;
+               cadran->valeur = registre->valeur;
+               g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", registre->unite );
+             }
             break;
        case MNEMO_TEMPO:
             Dls_data_get_tempo ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
@@ -160,7 +168,7 @@
   { Formater_cadran ( ws_cadran );
     Json_node_add_string ( node, "tech_id",  ws_cadran->tech_id );
     Json_node_add_string ( node, "acronyme", ws_cadran->acronyme );
-    Json_node_add_int    ( node, "type",     ws_cadran->type );
+    Json_node_add_int    ( node, "type",     ws_cadran->classe );
     Json_node_add_bool   ( node, "in_range", ws_cadran->in_range );
     Json_node_add_double ( node, "valeur",   ws_cadran->valeur );
     Json_node_add_string ( node, "unite",    ws_cadran->unite );
@@ -227,8 +235,8 @@
           if (ws_cadran)
            { g_snprintf( ws_cadran->tech_id,  sizeof(ws_cadran->tech_id),  "%s", tech_id  );
              g_snprintf( ws_cadran->acronyme, sizeof(ws_cadran->acronyme), "%s", acronyme );
-             ws_cadran->type = Rechercher_DICO_type ( ws_cadran->tech_id, ws_cadran->acronyme );
-             if (ws_cadran->type!=-1)
+             ws_cadran->classe = Rechercher_DICO_type ( ws_cadran->tech_id, ws_cadran->acronyme );
+             if (ws_cadran->classe!=-1)
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au CADRAN %s:%s", __func__,
                           client->http_session->username, ws_cadran->tech_id, ws_cadran->acronyme );
                 client->Liste_bit_cadrans = g_slist_prepend( client->Liste_bit_cadrans, ws_cadran );
