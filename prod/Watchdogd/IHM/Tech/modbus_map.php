@@ -171,7 +171,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
-						     <input id="idModalEditDOWagoTechID" type="text" class="form-control" placeholder="Module WAGO">
+						     <select id="idModalEditDOWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
      					</div>
   					</div>
 
@@ -227,7 +227,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
-						     <input id="idModalEditAIWagoTechID" type="text" class="form-control" placeholder="Module WAGO">
+						     <select id="idModalEditAIWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
      					</div>
   					</div>
 
@@ -327,7 +327,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
-						     <input id="idModalEditAOWagoTechID" type="text" class="form-control" placeholder="Module WAGO">
+						     <select id="idModalEditAOWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
      					</div>
   					</div>
 

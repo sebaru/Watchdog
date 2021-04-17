@@ -138,14 +138,48 @@
 /* Entrées: la liste des options, le type a rechercher                                                                        */
 /* Sortie: -1 si pas trouvé                                                                                                   */
 /******************************************************************************************************************************/
- static int Get_option_entier( GList *liste_options, gint type )
+ static int Get_option_entier( GList *liste_options, gint token )
   { struct OPTION *option;
     GList *liste;
     liste = liste_options;
     while (liste)
      { option=(struct OPTION *)liste->data;
-       if ( option->type == type )
-        { return (option->entier); }
+       if ( option->token == token )
+        { return (option->val_as_int); }
+       liste = liste->next;
+     }
+    return(-1);
+  }
+/******************************************************************************************************************************/
+/* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
+/* Entrées: la liste des options, le type a rechercher                                                                        */
+/* Sortie: -1 si pas trouvé                                                                                                   */
+/******************************************************************************************************************************/
+ static struct ALIAS *Get_option_alias( GList *liste_options, gint token )
+  { struct OPTION *option;
+    GList *liste;
+    liste = liste_options;
+    while (liste)
+     { option=(struct OPTION *)liste->data;
+       if ( option->token == token && option->token_classe == ID )
+        { return (option->val_as_alias); }
+       liste = liste->next;
+     }
+    return(NULL);
+  }
+/******************************************************************************************************************************/
+/* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
+/* Entrées: la liste des options, le type a rechercher                                                                        */
+/* Sortie: -1 si pas trouvé                                                                                                   */
+/******************************************************************************************************************************/
+ static gdouble Get_option_double( GList *liste_options, gint token )
+  { struct OPTION *option;
+    GList *liste;
+    liste = liste_options;
+    while (liste)
+     { option=(struct OPTION *)liste->data;
+       if ( option->token == token && option->token_classe == VALF )
+        { return (option->val_as_double); }
        liste = liste->next;
      }
     return(-1);
@@ -155,20 +189,20 @@
 /* Entrées: la liste des options, le type a rechercher                                                                        */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
- static gchar *Get_option_chaine( GList *liste_options, gint type )
+ static gchar *Get_option_chaine( GList *liste_options, gint token )
   { struct OPTION *option;
     GList *liste;
     liste = liste_options;
     while (liste)
      { option=(struct OPTION *)liste->data;
-       if ( option->type == type )
+       if ( option->token == token && option->token_classe == T_CHAINE )
         { return (option->chaine); }
        liste = liste->next;
      }
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associée àla condition, en respectant les options                        */
+/* New_condition_bi: Prepare la chaine de caractere associée àla condition, en respectant les options                         */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -383,6 +417,100 @@
          }
    return(result);
  }
+/******************************************************************************************************************************/
+/* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
+/* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
+/* Sortie: False si il existe deja, true sinon                                                                                */
+/******************************************************************************************************************************/
+ gchar *New_calcul_PID ( GList *options )
+  { struct ALIAS *input = Get_option_alias ( options, T_INPUT );
+    if (!input)
+     { Emettre_erreur_new ( "PID : input unknown. Select one R." );
+       return(g_strdup("0"));
+     }
+    if ( input->classe != MNEMO_REGISTRE )
+     { Emettre_erreur_new ( "PID : input must be R." );
+       return(g_strdup("0"));
+     }
+
+    struct ALIAS *consigne = Get_option_alias ( options, T_CONSIGNE );
+    if (!consigne)
+     { Emettre_erreur_new ( "PID : consigne unknown. Select one R." );
+       return(g_strdup("0"));
+     }
+    if ( consigne->classe != MNEMO_REGISTRE )
+     { Emettre_erreur_new ( "PID : consigne must be R." );
+       return(g_strdup("0"));
+     }
+
+    struct ALIAS *kp = Get_option_alias ( options, T_KP );
+    if (!kp)
+     { Emettre_erreur_new ( "PID : kp. Select one R." );
+       return(g_strdup("0"));
+     }
+    if ( kp->classe != MNEMO_REGISTRE )
+     { Emettre_erreur_new ( "PID : kp must be R." );
+       return(g_strdup("0"));
+     }
+
+    struct ALIAS *ki = Get_option_alias ( options, T_KD );
+    if (!ki)
+     { Emettre_erreur_new ( "PID : ki. Select one R." );
+       return(g_strdup("0"));
+     }
+    if ( ki->classe != MNEMO_REGISTRE )
+     { Emettre_erreur_new ( "PID : ki must be R." );
+       return(g_strdup("0"));
+     }
+
+    struct ALIAS *kd = Get_option_alias ( options, T_KI );
+    if (!kd)
+     { Emettre_erreur_new ( "PID : kd. Select one R." );
+       return(g_strdup("0"));
+     }
+    if ( kd->classe != MNEMO_REGISTRE )
+     { Emettre_erreur_new ( "PID : kd must be R." );
+       return(g_strdup("0"));
+     }
+
+    struct ALIAS *output_min = Get_option_alias ( options, T_MIN );
+    if (!output_min)
+     { Emettre_erreur_new ( "PID : output_min. Select one R." );
+       return(g_strdup("0"));
+     }
+    if ( output_min->classe != MNEMO_REGISTRE )
+     { Emettre_erreur_new ( "PID : output_min must be R." );
+       return(g_strdup("0"));
+     }
+
+    struct ALIAS *output_max = Get_option_alias ( options, T_MAX );
+    if (!output_max)
+     { Emettre_erreur_new ( "PID : output_max. Select one R." );
+       return(g_strdup("0"));
+     }
+    if ( output_max->classe != MNEMO_REGISTRE )
+     { Emettre_erreur_new ( "PID : output_max must be R." );
+       return(g_strdup("0"));
+     }
+
+    gint taille=512;
+    gchar *chaine = New_chaine ( taille );
+    g_snprintf( chaine, taille, "Dls_PID ( \"%s\", \"%s\", &_%s_%s, "
+                                          "\"%s\", \"%s\", &_%s_%s, "
+                                          "\"%s\", \"%s\", &_%s_%s, "
+                                          "\"%s\", \"%s\", &_%s_%s, "
+                                          "\"%s\", \"%s\", &_%s_%s, "
+                                          "\"%s\", \"%s\", &_%s_%s, "
+                                          "\"%s\", \"%s\", &_%s_%s )",
+                input->tech_id, input->acronyme, input->tech_id, input->acronyme,
+                consigne->tech_id, consigne->acronyme, consigne->tech_id, consigne->acronyme,
+                kp->tech_id, kp->acronyme, kp->tech_id, kp->acronyme,
+                ki->tech_id, ki->acronyme, ki->tech_id, ki->acronyme,
+                kd->tech_id, kd->acronyme, kd->tech_id, kd->acronyme,
+                output_min->tech_id, output_min->acronyme, output_min->tech_id, output_min->acronyme,
+                output_max->tech_id, output_max->acronyme, output_max->tech_id, output_max->acronyme );
+    return(chaine);
+  }
 /******************************************************************************************************************************/
 /* New_condition_vars: formate une condition avec le nom de variable en parametre                                             */
 /* Entrées: numero du monostable, sa logique                                                                                  */
@@ -609,11 +737,11 @@
   { struct ACTION *result;
     gint taille;
     gchar *host, *thread, *tag, *param1;
-
+#ifdef bouh
     host   = Get_option_chaine ( options, T_HOST   ); if(!host) host="*";
     thread = Get_option_chaine ( options, T_THREAD ); if (!thread) thread="*";
     tag    = Get_option_chaine ( options, T_TAG    ); if (!tag) tag="no tag";
-    param1 = Get_option_chaine ( options, T_PARAM1 );                            /* Param1 est un appel de fonction ou NULL ! */
+/*  param1 = Get_option_chaine ( options, T_PARAM1 );                            /* Param1 est un appel de fonction ou NULL ! */
 
     result = New_action();
     taille = 256;
@@ -628,6 +756,8 @@
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
                 host, thread, tag );
     return(result);
+#endif
+return(NULL);
   }
 /******************************************************************************************************************************/
 /* New_action_tempo: Prepare une struct action avec une commande TR                                                           */
@@ -682,6 +812,21 @@
     return(action);
   }
 /******************************************************************************************************************************/
+/* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ struct OPTION *New_option_chaine( gint token, gchar *chaine )
+  { struct OPTION *option;
+    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
+    if (option)
+     { option->token        = token;
+       option->token_classe = T_CHAINE;
+       option->chaine       = chaine;
+     }
+    return(option);
+  }
+/******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
@@ -700,21 +845,31 @@
     alias->options  = options;
     alias->used     = 0;
     Alias = g_slist_prepend( Alias, alias );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
-/* Entrées: rien                                                                                                              */
-/* Sortie: NULL si probleme                                                                                                   */
-/******************************************************************************************************************************/
- struct OPTION *New_option_chaine( gint type, gchar *chaine )
-  { struct OPTION *option;
-    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
-    if (option)
-     { option->type   = type;
-       option->chaine = chaine;
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
+    if (bit != MNEMO_MOTIF) return(TRUE);
+
+    gchar *forme_src = Get_option_chaine ( options, T_FORME );
+    gchar ss_chaine[128], ss_acronyme[64], *ihm_reaction;
+    GList *ss_options;
+    if (!forme_src) return(TRUE);
+
+    gchar *forme = Normaliser_chaine ( forme_src );
+    if (!forme) return(TRUE);
+
+    JsonNode *RootNode = Json_node_create();
+    SQL_Select_to_json_node ( RootNode, NULL, "SELECT ihm_reaction FROM icone WHERE forme='%s'", forme );
+    ihm_reaction = Json_get_string ( RootNode, "ihm_reaction" );
+    if (ihm_reaction)
+     { if (!strcasecmp ( ihm_reaction, "clic" ))
+        { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
+          g_snprintf( ss_chaine, sizeof(ss_chaine), "Clic sur l'icone depuis l'IHM" );
+          ss_options = g_list_append ( NULL, New_option_chaine ( T_LIBELLE, ss_chaine ) );
+          New_alias ( tech_id, ss_acronyme, MNEMO_ENTREE, ss_options );
+        }
      }
-    return(option);
+    g_free(forme);
+    json_node_unref(RootNode);
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
@@ -793,14 +948,13 @@
   { while (options)
      { struct OPTION *option = (struct OPTION *)options->data;
        options = g_list_remove (options, option);
-       switch (option->type)
+       switch (option->token)
         { case T_FORME:
           case T_LIBELLE:
           case T_ETIQUETTE:
           case T_HOST:
           case T_THREAD:
           case T_TAG:
-          case T_PARAM1:
                g_free(option->chaine);
                break;
         }

@@ -174,22 +174,14 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Processer_trame( void )
-  { if ( ! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 ) )
-     { Send_AI_to_master ( "ADCO", Cfg_teleinfo.buffer + 5 ); }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 ) )
-     { Send_AI_to_master ( "ISOUS", Cfg_teleinfo.buffer + 6 ); }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "BASE", 4 ) )
-     { Send_AI_to_master ( "BASE", Cfg_teleinfo.buffer + 5 ); }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )
-     { Send_AI_to_master ( "HCHC", Cfg_teleinfo.buffer + 5 ); }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 ) )
-     { Send_AI_to_master ( "HCHP", Cfg_teleinfo.buffer + 5 ); }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 ) )
-     { Send_AI_to_master ( "IINST", Cfg_teleinfo.buffer + 6 ); }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 ) )
-     { Send_AI_to_master ( "IMAX", Cfg_teleinfo.buffer + 5 ); }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 ) )
-     { Send_AI_to_master ( "PAPP", Cfg_teleinfo.buffer + 5 ); }
+  {      if ( ! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 ) )  { Send_AI_to_master ( "ADCO", Cfg_teleinfo.buffer + 5 ); }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 ) ) { Send_AI_to_master ( "ISOUS", Cfg_teleinfo.buffer + 6 ); }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "BASE", 4 ) )  { Send_AI_to_master ( "BASE", Cfg_teleinfo.buffer + 5 ); }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )  { Send_AI_to_master ( "HCHC", Cfg_teleinfo.buffer + 5 ); }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 ) )  { Send_AI_to_master ( "HCHP", Cfg_teleinfo.buffer + 5 ); }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 ) ) { Send_AI_to_master ( "IINST", Cfg_teleinfo.buffer + 6 ); }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 ) )  { Send_AI_to_master ( "IMAX", Cfg_teleinfo.buffer + 5 ); }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 ) )  { Send_AI_to_master ( "PAPP", Cfg_teleinfo.buffer + 5 ); }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     Cfg_teleinfo.last_view = Partage->top;
   }
@@ -219,12 +211,14 @@ reload:
 
        if (Cfg_teleinfo.mode == TINFO_WAIT_BEFORE_RETRY)
         { if ( Cfg_teleinfo.date_next_retry <= Partage->top )
-      		   { Cfg_teleinfo.mode = TINFO_RETRING;
-			          Cfg_teleinfo.date_next_retry = 0;
+           { Cfg_teleinfo.mode = TINFO_RETRING;
+             Cfg_teleinfo.date_next_retry = 0;
              Cfg_teleinfo.nbr_connexion = 0;
-		         }
-		        else continue;
-		      }
+             Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Retrying Connexion.", __func__ );
+
+           }
+          else continue;
+        }
 
        if (Cfg_teleinfo.mode == TINFO_RETRING)
         { Cfg_teleinfo.fd = Init_teleinfo();
@@ -236,8 +230,8 @@ reload:
            }
           else
            { Cfg_teleinfo.mode = TINFO_CONNECTED;
-			          Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO, "%s: Acces TELEINFO FD=%d", __func__, Cfg_teleinfo.fd );
-		         }
+             Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO, "%s: Acces TELEINFO FD=%d", __func__, Cfg_teleinfo.fd );
+           }
         }
 
 /************************************************ Reception trame TELEINFO ****************************************************/
@@ -257,8 +251,10 @@ reload:
                 Processer_trame();
                 nbr_octet_lu = 0;
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
-                if (!(Partage->top % 300))
-                 { Zmq_Send_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 400 ); }
+                if ( Cfg_teleinfo.lib->comm_next_update < Partage->top )
+                 { Zmq_Send_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 400 );
+                   Cfg_teleinfo.lib->comm_next_update = Partage->top + 300;
+                 }
               }
              else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO)                        /* Encore en dessous de la limite ? */
               { /* Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
@@ -278,9 +274,9 @@ reload:
        if (!(Partage->top % 50))                                                                /* Test toutes les 5 secondes */
         { gboolean closing = FALSE;
           struct stat buf;
-	         gint retour;
-		        retour = fstat( Cfg_teleinfo.fd, &buf );
-		        if (retour == -1)
+          gint retour;
+          retour = fstat( Cfg_teleinfo.fd, &buf );
+          if (retour == -1)
            { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
                       "%s: Fstat Error (%s), closing connexion and re-trying in %ds", __func__,
                        strerror(errno), TINFO_RETRY_DELAI/10 );

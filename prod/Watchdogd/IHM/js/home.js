@@ -39,35 +39,72 @@
   }
 /******************************************************************************************************************************/
  function Set_syn_vars ( syn_id, syn_vars )
-  {      if (syn_vars.bit_comm == false) { activite_coul = "kaki"; activite_cligno = true; }
-    else if (syn_vars.bit_alarme == true) { activite_coul = "rouge"; activite_cligno = true; }
-    else if (syn_vars.bit_defaut == true) { activite_coul = "orange"; activite_cligno = true; }
-    else if (syn_vars.bit_alarme_fixe == true) { activite_coul = "rouge"; activite_cligno = false; }
-    else if (syn_vars.bit_defaut_fixe == true) { activite_coul = "orange"; activite_cligno = false; }
-    else { activite_coul = "vert"; activite_cligno = false; }
-    Set_vignette ( "idVignetteActivite_"+syn_id, "activite", activite_coul, activite_cligno );
-    if (syn_id == Synoptique.id)
-     { Set_vignette ( "idMasterVignetteActivite", "activite", activite_coul, activite_cligno ); }
+  { var vignette = $('#idVignette_'+syn_id);
 
-         if (syn_vars.bit_comm == false) { secu_bien_coul = "kaki"; secu_bien_cligno = true; }
-    else if (syn_vars.bit_alerte == true) { secu_bien_coul = "rouge"; secu_bien_cligno = true; }
-    else if (syn_vars.bit_alerte_fixe == true) { secu_bien_coul = "rouge"; secu_bien_cligno = true; }
-    else if (syn_vars.bit_veille_totale == true) { secu_bien_coul = "vert"; secu_bien_cligno = false; }
-    else if (syn_vars.bit_veille_partielle == true) { secu_bien_coul = "orange"; secu_bien_cligno = false; }
-    else { secu_bien_coul = "blanc"; secu_bien_cligno = false; }
-    Set_vignette ( "idVignetteSecuBien_"+syn_id, "secu_bien", secu_bien_coul, secu_bien_cligno );
-    if (syn_id == Synoptique.id)
-     { Set_vignette ( "idMasterVignetteSecuBien", "secu_bien", secu_bien_coul, secu_bien_cligno ); }
+    if (syn_vars.bit_comm == false)
+     { $('#idImgSyn_'+syn_id).addClass("wtd-img-grayscale");
+       Changer_img_src ( "idVignetteComm_"+syn_id, "/img/syn_communication.png" );
+       $('#idVignetteComm_'+syn_id).addClass("wtd-cligno");
+     }
+    else
+     { $('#idImgSyn_'+syn_id).removeClass("wtd-img-grayscale");
+       $('#idVignetteComm_'+syn_id).slideUp().removeClass("wtd-cligno");
+     }
 
-         if (syn_vars.bit_comm == false) { secu_pers_coul = "kaki"; secu_pers_cligno = true; }
-    else if (syn_vars.bit_danger == true) { secu_pers_coul = "rouge"; secu_pers_cligno = true; }
-    else if (syn_vars.bit_derangement == true) { secu_pers_coul = "orange"; secu_pers_cligno = true; }
-    else if (syn_vars.bit_danger_fixe == true) { secu_pers_coul = "rouge"; secu_pers_cligno = false; }
-    else if (syn_vars.bit_derangement_fixe == true) { secu_pers_coul = "orange"; secu_pers_cligno = false; }
-    else { secu_pers_coul = "vert"; secu_pers_cligno = false; }
-    Set_vignette ( "idVignetteSecuPers_"+syn_id, "secu_pers", secu_pers_coul, secu_pers_cligno );
-    if (syn_id == Synoptique.id)
-     { Set_vignette ( "idMasterVignetteSecuPers", "secu_pers", secu_pers_coul, secu_pers_cligno ); }
+    if (syn_vars.bit_danger == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg" );
+       vignette.addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_alerte == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg" );
+       vignette.addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_alarme == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg" );
+       vignette.addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_defaut == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg" );
+       vignette.addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_derangement == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg" );
+       vignette.addClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_alerte_fixe == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg" );
+       vignette.removeClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_alarme_fixe == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg" );
+       vignette.removeClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_defaut_fixe == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg" );
+       vignette.removeClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_danger_fixe == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg" );
+       vignette.removeClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_derangement_fixe == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg" );
+       vignette.removeClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_veille_totale == true)
+     { vignette.slideUp().removeClass("wtd-cligno"); }
+    else if (syn_vars.bit_veille_partielle == true)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_jaune.svg" );
+       vignette.removeClass("wtd-cligno");
+     }
+    else if (syn_vars.bit_veille_partielle == false)
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_blanc.svg" );
+       vignette.removeClass("wtd-cligno");
+     }
+    else
+     { /*Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_vert.svg" );*/
+       vignette.slideUp().removeClass("wtd-cligno");
+     }
   }
 /******************************************************************************************************************************/
  function Charger_messages ( syn_id )
@@ -119,25 +156,6 @@
                    return( Bouton ( "primary", "Acquitter le message", "Msg_acquitter", item.id, "Acquitter" ) );
                  }
              },
- /*            { "data": null, "title":"Titre", "className": "align-middle ",
-               "render": function (item)
-                 { return( Input ( "text", "idTableauTitre_"+item.id,
-                                   "Tableau_Set('"+item.id+"')",
-                                   "Quel est le titre du tableau ?",
-                                   item.titre )
-                         );
-                 }
-             },
-             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
-               "render": function (item)
-                 { boutons = Bouton_actions_start ();
-                   boutons += Bouton_actions_add ( "primary", "Voir le tableau", "Redirect", "/home/tableau?id="+item.id, "chart-line", null );
-                   boutons += Bouton_actions_add ( "primary", "Editer les courbes", "Redirect", "/tech/tableau_map/"+item.id, "pen", null );
-                   boutons += Bouton_actions_add ( "danger", "Supprimer ce tableau", "Tableau_Delete", item.id, "trash", null );
-                   boutons += Bouton_actions_end ();
-                   return(boutons);
-                 },
-             }*/
            ],
           /*order: [ [0, "desc"] ],*/
           responsive: false,
@@ -158,6 +176,9 @@
                  }
               );
        Set_syn_vars ( Response.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
+       $.each ( Response.horloges, function (i, horloge)
+                 { bodymain.append ( Creer_horloge ( horloge ) ); }
+              );
 
        if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg" ); }
                                 else { Changer_img_src ( 'idMenuImgAccueil', "/img/"+Response.image ); }
@@ -176,7 +197,7 @@
         { $.each ( Response.tableaux, function (i, tableau)
            { tableaux.append("<hr>");
              var id = "idTableau-"+tableau.id;
-             tableaux.append( $("<div></div>").append("<canvas id='"+id+"'></canvas>").addClass("col wtd-courbe m-1") );
+             tableaux.append( $("<div></div>").append("<canvas id='"+id+"'></canvas>").addClass("col wtd-courbe mx-1") );
              maps = Response.tableaux_map.filter ( function (item) { return(item.tableau_id==tableau.id) } );
              Charger_plusieurs_courbes ( id, maps, "HOUR" );
              $('#'+id).on("click", function () { Charger_page_tableau(tableau.id); } );
@@ -195,29 +216,34 @@
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
-                     .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div")
-                     .append("<div id='tableaux' class='row justify-content-center'></div");
+                     .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div")
+                     .append("<div id='tableaux' class='row mx-1 justify-content-center'></div");
        Charger_un_synoptique ( syn_id );
      });
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Creer_card ( Response )
-  { var card = $('<div></div>').addClass("card bg-transparent m-1")
-               .append( $('<div></div>').addClass("card-header text-center")
-                        .append($('<img>').attr("id", "idVignetteActivite_"+Response.id).addClass("wtd-vignette") )
-                        .append($('<img>').attr("id", "idVignetteSecuBien_"+Response.id).addClass("wtd-vignette") )
-                        .append($('<img>').attr("id", "idVignetteSecuPers_"+Response.id).addClass("wtd-vignette") )
-                        .append( " "+Response.page )
-                      )
-               .append( $('<div></div>').addClass("card-body text-center")
-                        .append( $('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
-                                                                                  : "/img/"+Response.image) )
-                                 .attr("onclick", "Charger_page_synoptique("+Response.id+")")
-                                 .addClass("wtd-synoptique")
+  { var card = $('<div></div>').addClass("row bg-transparent")
+               .append( $('<div></div>').addClass("col text-center")
+                        .append( $('<div></div>').addClass("d-inline-block wtd-img-container")
+                                 .append($('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
+                                                                                           : "/img/"+Response.image) )
+                                                   .attr("onclick", "Charger_page_synoptique("+Response.id+")")
+                                                   .attr("id", "idImgSyn_"+Response.id)
+		                              	                  .addClass("wtd-synoptique") )
+                                 .append($('<img>').attr("id", "idVignetteComm_"+Response.id)
+				                                               /*.attr("src","/img/pignon_vert.svg")*/
+                                                   .addClass("wtd-vignette wtd-img-superpose-bas-droite").slideUp()
+                                        )
+                                 .append($('<img>').attr("id", "idVignette_"+Response.id)
+				                                               /*.attr("src","")*/
+                                                   .addClass("wtd-vignette wtd-img-superpose-haut-droite").slideUp()
+                                        )
                                )
-                      )
-               .append( $('<div></div>').addClass("card-footer text-center")
-                        .append( "<p>"+Response.libelle+"</p>" )
+	                     )
+               .append( $('<div></div>').addClass('w-100') )
+               .append( $('<div></div>').addClass("col text-center mb-2")
+                        .append( $('<span></span>').addClass("text-white").text(" "+Response.libelle) )
                       );
 
     return(card);
@@ -244,14 +270,14 @@
        $("#"+idfooter).css("background-color", "darkgreen" );
      }
 /*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
-    else if (visuel.mode_affichage=="cadre")
+    else if (visuel.ihm_affichage=="cadre")
      { Changer_img_src ( idimage, "/img/"+visuel.forme+"."+visuel.extension);
        $("#"+idvisuel).css("border", "medium solid "+etat.color );
        $("#"+idheader).css("background-color", "transparent" );
        $("#"+idfooter).css("background-color", "transparent" );
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
-    else if (visuel.mode_affichage=="2_modes_1_action")
+    else if (visuel.ihm_affichage=="2_modes")
      { if (etat.mode>0) { target = "/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension; }
                   else  { target = "/img/"+visuel.forme+"."+visuel.extension; }
        Changer_img_src ( idimage, target );
@@ -271,23 +297,26 @@
   { var id = "wtd-visu-"+Response.tech_id+"-"+Response.acronyme;
     var contenu;
 /*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
-         if (Response.mode_affichage=="cadre")
+         if (Response.ihm_affichage=="cadre")
      { contenu = $('<img>').addClass("wtd-visuel").attr ( "id", id+"-img" ); }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
-    else if (Response.mode_affichage=="2_modes_1_action")
+    else if (Response.ihm_affichage=="2_modes")
      { contenu = $('<img>');
        $(contenu).addClass("wtd-visuel")
                  .attr ( "id", id+"-img" )
-                 .attr ( "src", "/img/"+Response.forme+"."+Response.extension )
-                 .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
+                 .attr ( "src", "/img/"+Response.forme+"."+Response.extension );
+
      }
     else
      { contenu = $('<img>').addClass("wtd-visuel").attr ( "id", id+"-img" ); }
 
-    var card = $('<div></div>').addClass("row bg-transparent m-1")
+    if (Response.ihm_reaction=="clic")
+     { $(contenu).click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } ); }
+
+    var card = $('<div></div>').addClass("row bg-transparent mx-1")
                .append( $('<div></div>').addClass("col mt-2 text-center text-white")
                         .append( $('<p></p>').text (Response.dls_shortname )
-                                 .attr ( "id", id+"-header-text" )
+                                             .attr ( "id", id+"-header-text" )
                                )
                       )
                .append( $('<div></div>').addClass("w-100") )
@@ -297,7 +326,7 @@
                .append( $('<div></div>').addClass("w-100") )
                .append( $('<div></div>').addClass("col mt-2 text-center text-white")
                         .append( $('<p></p>').text(Response.libelle)
-                                 .attr ( "id", id+"-footer-text" )
+                                             .attr ( "id", id+"-footer-text" )
                                )
                       )
                .attr ( "id", id );

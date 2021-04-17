@@ -583,8 +583,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { gchar chaine[256];
-    if (msg->method != SOUP_METHOD_DELETE)
+  { if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -604,11 +603,13 @@
     json_node_unref(request);
 
     Audit_log ( session, "DLS '%s' supprimé", target );
-    g_snprintf(chaine, sizeof(chaine),  "DELETE FROM dls WHERE tech_id='%s'", target );
+    if (SQL_Write_new ( "DELETE FROM dls WHERE tech_id='%s'", target )==FALSE)
+     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error"); }
+    else
+     { soup_message_set_status (msg, SOUP_STATUS_OK);
+       Partage->com_dls.Thread_reload = TRUE;                                                                  /* Relance DLS */
+     }
     g_free(target);
-    if (SQL_Write (chaine)==FALSE)
-       { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error"); }
-    else soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */

@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container-fluid">
 
  <div class="row m-2">
    <h3><i class="fas fa-mimage text-primary"></i> Liste des Synoptiques</strong></h3>

@@ -49,10 +49,11 @@
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_SBIEN_ALE_FUGITIVE T_TOP_ALERTE T_TOP_ALERTE_FUGITIVE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_SPERS_OK T_OSYN_ACQ
 %token <val>    T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_OK
-%token <val>    T_BUS T_HOST T_THREAD T_TAG T_PARAM1
+%token <val>    T_BUS T_HOST T_THREAD T_TAG
 
 %token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
-%token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM T_UPDATE T_CONSIGNE
+%token <val>    T_PID T_KP T_KI T_KD T_INPUT T_MIN T_MAX
+%token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM T_UPDATE T_CONSIGNE T_ALIAS
 
 %token <val>    T_TYPE T_INFO T_ATTENTE T_DEFAUT T_ALARME T_VEILLE T_ALERTE T_DERANGEMENT T_DANGER
 %type  <val>    type_msg
@@ -63,7 +64,7 @@
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
 %type  <val>    modulateur jour_semaine
 
-%token <val>    T_BI T_MONO ENTREE SORTIE T_ANALOG_OUTPUT T_TEMPO T_HORLOGE T_DYN_STRING
+%token <val>    T_BI T_MONO ENTREE SORTIE T_ANALOG_OUTPUT T_TEMPO T_HORLOGE
 %token <val>    T_MSG T_ICONE T_CPT_H T_CPT_IMP EANA T_START T_REGISTRE T_DIGITAL_OUTPUT T_WATCHDOG
 %type  <val>    alias_bit
 
@@ -76,7 +77,9 @@
 
 %type  <val>         barre
 %type  <gliste>      liste_options options
-%type  <option>      une_option dyn_string
+%type  <option>      une_option
+%type  <gliste>      liste_options_pid options_pid
+%type  <option>      une_option_pid
 %type  <chaine>      unite facteur expr suffixe unSwitch listeCase une_instr listeInstr
 %type  <action>      action une_action
 %type  <comparateur> comparateur
@@ -156,17 +159,19 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                 | T_MOINS expr T_MOINS T_POUV calcul_expr T_PFERM DONNE calcul_ea_result PVIRGULE
                 {{ int taille;
                    if ($8)
-                    { taille = strlen($5)+strlen($2)+strlen($8->tech_id)+strlen($8->acronyme)+100;
+                    { taille = strlen($5)+strlen($2)+strlen($8->tech_id)+strlen($8->acronyme)+128;
                       $$ = New_chaine( taille );
                       if ($8->classe==MNEMO_SORTIE_ANA)
                        { g_snprintf( $$, taille,
-                                     "if(%s) { Dls_data_set_AO ( vars, \"%s\", \"%s\", &_%s_%s, %s ); }\n",
-                                     $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
+                                     "vars->num_ligne = %d; /* une_instr-------------*/\n"
+                                     "if(%s)\n { Dls_data_set_AO ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n }\n",
+                                     DlsScanner_get_lineno(), $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
                        }
                       else if ($8->classe==MNEMO_REGISTRE)
                        { g_snprintf( $$, taille,
-                                     "if(%s) { Dls_data_set_R ( vars, \"%s\", \"%s\", &_%s_%s, %s ); }\n",
-                                     $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
+                                     "vars->num_ligne = %d; /* une_instr-------------*/\n"
+                                     "if(%s)\n { Dls_data_set_R ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n }\n",
+                                     DlsScanner_get_lineno(), $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
                        }
                       else
                        { Emettre_erreur_new( "'%s:%s' is unknown", $8->tech_id, $8->acronyme ); }
@@ -272,8 +277,9 @@ calcul_expr3:   VALF
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "%d", $1 );
                 }}
-                | T_POUV calcul_expr T_PFERM
-                {{ $$=$2; }}
+                | T_PID liste_options_pid
+                {{ $$ = New_calcul_PID ( $2 );
+                }}
                 | ID suffixe
                 {{ char *tech_id, *acro;
                    struct ALIAS *alias;
@@ -815,171 +821,223 @@ options:        options VIRGULE une_option
 
 une_option:     MODE T_EGAL ENTIER
                 {{ $$=New_option();
-                   $$->type = MODE;
-                   $$->entier = $3;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 | T_CONSIGNE T_EGAL ENTIER
                 {{ $$=New_option();
-                   $$->type = T_CONSIGNE;
-                   $$->entier = $3;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 | COLOR T_EGAL couleur
                 {{ $$=New_option();
-                   $$->type = COLOR;
-                   $$->entier = $3;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 | T_LIBELLE T_EGAL T_CHAINE
                 {{ $$=New_option();
-                   $$->type = T_LIBELLE;
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
                 | T_FORME T_EGAL T_CHAINE
                 {{ $$=New_option();
-                   $$->type = T_FORME;
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
                 | T_ETIQUETTE T_EGAL T_CHAINE
                 {{ $$=New_option();
-                   $$->type = T_ETIQUETTE;
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
                 | CLIGNO
                 {{ $$=New_option();
-                   $$->type = CLIGNO;
-                   $$->entier = 1;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = 1;
                 }}
                 | CLIGNO T_EGAL ENTIER
                 {{ $$=New_option();
-                   $$->type = CLIGNO;
-                   $$->entier = $3;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 | T_UNITE T_EGAL T_CHAINE
                 {{ $$=New_option();
-                   $$->type = T_UNITE;
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
                 | RESET
                 {{ $$=New_option();
-                   $$->type = RESET;
-                   $$->entier = 1;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = 1;
                 }}
                 | RESET T_EGAL ENTIER
                 {{ $$=New_option();
-                   $$->type = RESET;
-                   $$->entier = $3;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 | T_UPDATE
                 {{ $$=New_option();
-                   $$->type = T_UPDATE;
-                   $$->entier = 1;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = 1;
                 }}
                 | RATIO T_EGAL ENTIER
                 {{ $$=New_option();
-                   $$->type = RATIO;
-                   $$->entier = $3;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 | T_EDGE_UP
                 {{ $$=New_option();
-                   $$->type = T_EDGE_UP;
-                   $$->entier = 1;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = 1;
                 }}
                 | T_EDGE_DOWN
                 {{ $$=New_option();
-                   $$->type = T_EDGE_DOWN;
-                   $$->entier = 1;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = 1;
                 }}
                 | T_IN_RANGE
                 {{ $$=New_option();
-                   $$->type = T_IN_RANGE;
-                   $$->entier = 1;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = 1;
                 }}
                 | T_DAA T_EGAL ENTIER
                 {{ $$=New_option();
-                   $$->type = T_DAA;
-                   $$->entier = $3;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 | T_DMINA T_EGAL ENTIER
                 {{ $$=New_option();
-                   $$->type = T_DMINA;
-                   $$->entier = $3;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 | T_DMAXA T_EGAL ENTIER
                 {{ $$=New_option();
-                   $$->type = T_DMAXA;
-                   $$->entier = $3;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 | T_DAD T_EGAL ENTIER
                 {{ $$=New_option();
-                   $$->type = T_DAD;
-                   $$->entier = $3;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 | T_RANDOM T_EGAL ENTIER
                 {{ $$=New_option();
-                   $$->type = T_RANDOM;
-                   $$->entier = $3;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 | T_TYPE T_EGAL type_msg
                 {{ $$=New_option();
-                   $$->type = T_TYPE;
-                   $$->entier = $3;
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 | T_HOST T_EGAL T_CHAINE
                 {{ $$=New_option();
-                   $$->type = T_HOST;
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
                 | T_THREAD T_EGAL T_CHAINE
                 {{ $$=New_option();
-                   $$->type = T_THREAD;
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
                 | T_TAG T_EGAL T_CHAINE
                 {{ $$=New_option();
-                   $$->type = T_TAG;
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
-                }}
-                | T_PARAM1 T_EGAL dyn_string
-                {{ $$=$3;
-                   $$->type = T_PARAM1;
                 }}
                 ;
 
-dyn_string:     T_CHAINE
-                {{ gint taille_chaine;
-                   $$=New_option();
-                   $$->type = T_CHAINE;
-                   taille_chaine = strlen($1)+100;
-                   $$->chaine = g_try_malloc0(taille_chaine);
-                   g_snprintf( $$->chaine, taille_chaine, "strdup(\"%s\")", $1 );
-                   g_free($1);
+/**************************************************** Gestion des options *****************************************************/
+liste_options_pid:
+                T_POUV options_pid T_PFERM   {{ $$ = $2;   }}
+                |                            {{ $$ = NULL; }}
+                ;
+
+options_pid:    options_pid VIRGULE une_option_pid
+                {{ $$ = g_list_append( $1, $3 );
                 }}
-                | T_DYN_STRING T_POUV T_CHAINE VIRGULE ID suffixe T_PFERM
-                {{ gchar *tech_id, *acro;
-                   struct ALIAS *alias;
-                   gint taille_chaine;
-                   if ($6) { tech_id = $5; acro = $6; }
-                      else { tech_id = NULL; acro = $5; }
-                   alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
-                   if (!alias && $6) { alias = Set_new_external_alias(tech_id,acro); }/* Si dependance externe, on va chercher */
-                   alias = Get_alias_par_acronyme(tech_id, acro);
-                   if (!alias)
-                    { if ($6) Emettre_erreur_new( "'%s:%s' is not defined", tech_id, acro );
-                         else Emettre_erreur_new( "'%s' is not defined", acro );
-                      $$=New_option();
-                      $$->type = T_DYN_STRING;
-                      $$->chaine = strdup("error");
-                    }
-                   else
-                    { $$=New_option();
-                      taille_chaine = strlen($3)+100;
-                      $$->type = T_DYN_STRING;
-                      $$->chaine = g_try_malloc0(taille_chaine);
-                      g_snprintf( $$->chaine, taille_chaine, "Dls_dyn_string(\"%s\",%d,\"%s\",\"%s\", &_%s_%s)",
-                                  $3, alias->classe, alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-                    }
-                   g_free($3);
-                   g_free($5);
-                   if ($6) g_free($6);
+                | une_option_pid {{ $$ = g_list_append( NULL, $1 ); }}
+                ;
+
+une_option_pid: T_CONSIGNE T_EGAL ID
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ID;
+                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   if (!$$->val_as_alias)
+                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                }}
+                | T_INPUT T_EGAL ID
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ID;
+                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   if (!$$->val_as_alias)
+                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                }}
+                | T_KP T_EGAL ID
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ID;
+                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   if (!$$->val_as_alias)
+                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                }}
+                | T_KI T_EGAL ID
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ID;
+                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   if (!$$->val_as_alias)
+                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                }}
+                | T_KD T_EGAL ID
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ID;
+                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   if (!$$->val_as_alias)
+                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                }}
+                | T_MIN T_EGAL ID
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ID;
+                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   if (!$$->val_as_alias)
+                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                }}
+                | T_MAX T_EGAL ID
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ID;
+                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   if (!$$->val_as_alias)
+                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
                 }}
                 ;
 

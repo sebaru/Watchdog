@@ -1673,7 +1673,7 @@ end:
      { reg = (struct DLS_REGISTRE *)*r_p;
        return( reg->valeur );
      }
-    if (!tech_id || !acronyme) return(FALSE);
+    if (!tech_id || !acronyme) return(0.0);
 
     liste = Partage->Dls_data_REGISTRE;
     while (liste)
@@ -1682,68 +1682,54 @@ end:
        liste = g_slist_next(liste);
      }
 
-    if (!liste) return(FALSE);
+    if (!liste) return(0.0);
     if (r_p) *r_p = (gpointer)reg;                                              /* Sauvegarde pour acceleration si besoin */
     return( reg->valeur );
   }
 /******************************************************************************************************************************/
-/* Dls_dyn_string: Formate la chaine en parametre avec le bit également en parametre                                          */
-/* Entrée : La chaine source, le type de bit, le tech_id/acronyme, le pointeur de raccourci                                   */
-/* sortie : Une nouvelle chaine de caractere à g_freer                                                                        */
+/* Dls_data_get_reg: Remonte l'etat d'un registre                                                                             */
+/* Sortie : TRUE sur le regean est UP                                                                                         */
 /******************************************************************************************************************************/
- gchar *Dls_dyn_string ( gchar *format, gint classe, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p )
-  { gchar result[128], *debut, chaine[64];
-    debut = g_strrstr ( format, "$1" );                            /* Début pointe sur le $ de "$1" si présent dans la chaine */
-    if (!debut) return(g_strdup(format));
-    g_snprintf( result, debut-format+1, "%s", format );                                                           /* Prologue */
-    switch (classe)
-     { case MNEMO_CPT_IMP:
-             { struct DLS_CI *ci = *dlsdata_p;
-               g_snprintf( chaine, sizeof(chaine), "%d %s", ci->valeur, ci->unite ); /* Row1 = unite */
-             }
-            break;
-       case MNEMO_ENTREE_ANA:
-            if (!strcasecmp(tech_id, "SYS") && !strcasecmp(acronyme, "TIME"))
-             { struct tm tm;
-               time_t temps;
-               time(&temps);
-               localtime_r( &temps, &tm );
-               g_snprintf( chaine, sizeof(chaine), "%d heure et %d minute", tm.tm_hour, tm.tm_min );
-             }
-            else
-             { Dls_data_get_AI ( tech_id, acronyme, dlsdata_p );
-               struct DLS_AI *ai = *dlsdata_p;
-               if (ai)
-                { if (ai->val_ech-roundf(ai->val_ech) == 0.0)
-                   { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
-                  else
-                   { g_snprintf( chaine, sizeof(chaine), "%.2f %s", ai->val_ech, ai->unite ); }
-                }
-               else g_snprintf( chaine, sizeof(chaine), "erreur" );
-             }
-            break;
-       case MNEMO_REGISTRE:
-             { Dls_data_get_R ( tech_id, acronyme, dlsdata_p );
-               struct DLS_REGISTRE *reg = *dlsdata_p;
-               if (reg)
-                { if (reg->valeur-roundf(reg->valeur) == 0.0)
-                   { g_snprintf( chaine, sizeof(chaine), "%.0f %s", reg->valeur, reg->unite ); }
-                  else
-                   { g_snprintf( chaine, sizeof(chaine), "%.2f %s", reg->valeur, reg->unite ); }
-                }
-               else g_snprintf( chaine, sizeof(chaine), "erreur" );
-             }
-            break;
-       default: return(NULL);
-     }
-    g_strlcat ( result, chaine, sizeof(result) );
-    g_strlcat ( result, debut+2, sizeof(result) );
-    return(g_strdup(result));
-  }
+ gdouble Dls_PID ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input,
+                   gchar *consigne_tech_id, gchar *consigne_acronyme, gpointer *r_consigne,
+                   gchar *kp_tech_id, gchar *kp_acronyme, gpointer *r_kp,
+                   gchar *ki_tech_id, gchar *ki_acronyme, gpointer *r_ki,
+                   gchar *kd_tech_id, gchar *kd_acronyme, gpointer *r_kd,
+                   gchar *outputmin_tech_id, gchar *outputmin_acronyme, gpointer *r_outputmin,
+                   gchar *outputmax_tech_id, gchar *outputmax_acronyme, gpointer *r_outputmax
+                 )
+  { Dls_data_get_R ( input_tech_id, input_acronyme, r_input );
+    Dls_data_get_R ( consigne_tech_id, consigne_acronyme, r_consigne );
+    Dls_data_get_R ( kp_tech_id, kp_acronyme, r_kp );
+    Dls_data_get_R ( kp_tech_id, kp_acronyme, r_kp );
+    Dls_data_get_R ( kp_tech_id, kp_acronyme, r_kp );
+    Dls_data_get_R ( outputmin_tech_id, outputmin_acronyme, r_outputmin );
+    Dls_data_get_R ( outputmax_tech_id, outputmax_acronyme, r_outputmax );
+    if ( ! (r_input && r_consigne && r_kp && r_ki && r_kd && r_outputmin && r_outputmax) ) return(0.0);
 
+    struct DLS_REGISTRE *input = *r_input;
+    struct DLS_REGISTRE *consigne = *r_consigne;
+    struct DLS_REGISTRE *kp = *r_kp;
+    struct DLS_REGISTRE *ki = *r_ki;
+    struct DLS_REGISTRE *kd = *r_kd;
+    struct DLS_REGISTRE *outputmin = *r_outputmin;
+    struct DLS_REGISTRE *outputmax = *r_outputmax;
+
+    if ( ! (input && consigne && kp && ki && kd && outputmin && outputmax) ) return(0.0);
+
+    gdouble erreur           = consigne->valeur - input->valeur;
+    input->pid_somme_erreurs+= erreur;                                /* possibilité de débordement si trop long a stabiliser */
+    gdouble variation_erreur = erreur - input->pid_prev_erreur;
+    gdouble result = kp->valeur * erreur + ki->valeur * input->pid_somme_erreurs + kd->valeur * variation_erreur;
+    input->pid_prev_erreur = erreur;
+
+         if (result > outputmax->valeur ) result = outputmax->valeur;
+    else if (result < outputmin->valeur ) result = outputmin->valeur;
+    return(result);
+  }
 /******************************************************************************************************************************/
 /* Http_Dls_get_syn_vars: ajoute un objet dans le tableau des syn_vars pour l'enoyer au client                                */
-/* Entrées: le buuilder Json et la connexion Websocket                                                                         */
+/* Entrées: le buuilder Json et la connexion Websocket                                                                        */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_SYN *dls_syn )

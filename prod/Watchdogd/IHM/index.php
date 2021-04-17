@@ -5,7 +5,7 @@
      <a href="/">Se reconnecter</a>
    </div>
 
-<div id="toplevel" class="m-1">
+<div id="toplevel" class="">
 </div>
 
 <hr>
@@ -24,3 +24,4 @@
 <script src="/js/index.js" type="text/javascript"></script>
 <script src="/js/home.js" type="text/javascript"></script>
 <script src="/js/tableau.js" type="text/javascript"></script>
+<script src="/js/horloge.js" type="text/javascript"></script>

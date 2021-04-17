@@ -61,7 +61,7 @@
     Cfg_http.tcp_port = 5560;
     Creer_configDB_int ( NOM_THREAD, "tcp_port", Cfg_http.tcp_port );
 
-    Cfg_http.wtd_session_expiry = 7200;
+    Cfg_http.wtd_session_expiry = 600; /* En secondes */
     Creer_configDB_int ( NOM_THREAD, "wtd_session_expiry", Cfg_http.wtd_session_expiry );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
@@ -107,6 +107,48 @@
                                 SOUP_MEMORY_COPY, new_msg->response_body->data, new_msg->response_body->length );
     g_object_unref ( new_msg );
     g_object_unref( connexion );
+  }
+/******************************************************************************************************************************/
+/* Http_Save_and_close_sessions: Sauvegarde les sessions en base de données                                                   */
+/* Entrées: néant                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_Save_and_close_sessions ( void )
+  { SQL_Write_new ( "DELETE FROM users_sessions" );
+    while ( Cfg_http.liste_http_clients )
+     { struct HTTP_CLIENT_SESSION *session = Cfg_http.liste_http_clients->data;
+       SQL_Write_new ( "INSERT INTO users_sessions SET username='%s', wtd_session='%s', host='%s', last_request='%d'",
+                       session->username, session->wtd_session, session->host, session->last_request );
+       Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
+       g_free(session);
+     }
+    Cfg_http.liste_http_clients = NULL;
+  }
+/******************************************************************************************************************************/
+/* Http_Load_sessions: Charge les sessions en base de données                                                                 */
+/* Entrées: néant                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_Load_one_session ( JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct HTTP_CLIENT_SESSION *session = g_try_malloc0( sizeof ( struct HTTP_CLIENT_SESSION ) );
+    if (!session) return;
+    g_snprintf( session->username,    sizeof(session->username),    "%s", Json_get_string ( element, "username" ) );
+    g_snprintf( session->wtd_session, sizeof(session->wtd_session), "%s", Json_get_string ( element, "wtd_session" ) );
+    g_snprintf( session->host,        sizeof(session->host),        "%s", Json_get_string ( element, "host" ) );
+    session->last_request = Json_get_int ( element, "last_request" );
+    Cfg_http.liste_http_clients = g_slist_prepend ( Cfg_http.liste_http_clients, session );
+  }
+/******************************************************************************************************************************/
+/* Http_Load_sessions: Charge les sessions en base de données                                                                 */
+/* Entrées: néant                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_Load_sessions ( void )
+  { JsonNode *RootNode = Json_node_create();
+    SQL_Select_to_json_node ( RootNode, "sessions", "SELECT * FROM users_sessions" );
+    if (Json_has_member ( RootNode, "sessions" ))
+     { Json_node_foreach_array_element ( RootNode, "sessions", Http_Load_one_session, NULL ); }
+    json_node_unref(RootNode);
   }
 /******************************************************************************************************************************/
 /* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */
@@ -200,7 +242,20 @@
     return(FALSE);
   }
 /******************************************************************************************************************************/
-/* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
+/* Http_add_cookie: Ajoute un cookie a la reponse                                                                             */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_add_cookie ( SoupMessage *msg, gchar *name, gchar *value, gint life )
+  { SoupCookie *cookie = soup_cookie_new ( name, value, NULL, "/", life );
+    soup_cookie_set_http_only ( cookie, TRUE );
+    if (Cfg_http.ssl_enable) soup_cookie_set_secure ( cookie, TRUE );
+    GSList *liste = g_slist_append ( NULL, cookie );
+    soup_cookies_to_response ( liste, msg );
+    g_slist_free(liste);
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_ping: Répond aux requetes sur l'URI ping, et renouvelle le cookie de session                                  */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
@@ -211,6 +266,9 @@
 		     return;
      }
 
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 0 )) return;
+
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
@@ -220,7 +278,8 @@
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    Json_node_add_bool   ( RootNode, "installed", Config.installed );
+    Json_node_add_string ( RootNode, "response", "pong" );
+    Http_add_cookie ( msg, "wtd_session", session->wtd_session, Cfg_http.wtd_session_expiry );
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
@@ -372,12 +431,7 @@
      }
     Cfg_http.liste_http_clients = g_slist_append ( Cfg_http.liste_http_clients, session );
 
-    SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", session->wtd_session, NULL, "/", Cfg_http.wtd_session_expiry );
-    soup_cookie_set_http_only ( wtd_session, TRUE );
-    if (Cfg_http.ssl_enable) soup_cookie_set_secure ( wtd_session, TRUE );
-    GSList *liste = g_slist_append ( NULL, wtd_session );
-    soup_cookies_to_response ( liste, msg );
-    g_slist_free(liste);
+    Http_add_cookie ( msg, "wtd_session", session->wtd_session, Cfg_http.wtd_session_expiry );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: User '%s:%s' connected", __func__,
               session->username, session->host );
 
@@ -421,6 +475,15 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 1 )) return;
 
+    gchar *search;
+    gpointer search_string = g_hash_table_lookup ( query, "search[value]" );
+    if (!search_string) { search = g_strdup (""); }
+                   else { search = Normaliser_chaine ( search_string ); }
+    if (!search)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Memory Error");
+       return;
+     }
+
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
@@ -429,11 +492,48 @@
        return;
      }
 
-    if (SQL_Select_to_json_node ( RootNode, "results", "SELECT * FROM dictionnaire" )==FALSE)
+    gchar *draw_string = g_hash_table_lookup ( query, "draw" );
+    if (draw_string) Json_node_add_int ( RootNode, "draw", atoi(draw_string) );
+                else Json_node_add_int ( RootNode, "draw", 1 );
+
+    gint start;
+    gchar *start_string = g_hash_table_lookup ( query, "start" );
+    if (start_string) start = atoi(start_string);
+                 else start = 200;
+
+    gint length;
+    gchar *length_string = g_hash_table_lookup ( query, "length" );
+    if (length_string) length = atoi(length_string);
+                  else length = 200;
+
+
+    if (SQL_Select_to_json_node ( RootNode, NULL, "SELECT COUNT(*) AS recordsTotal FROM dictionnaire LIMIT %d", length )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
+       g_free(search);
        return;
      }
+    if (SQL_Select_to_json_node ( RootNode, NULL,
+                                  "SELECT COUNT(*) AS recordsFiltered FROM dictionnaire "
+                                  "WHERE tech_id LIKE '%%%s%%' OR acronyme LIKE '%%%s%%' OR libelle LIKE '%%%s%%' "
+                                  "LIMIT %d OFFSET %d",
+                                  search, search, search, length, start )==FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       json_node_unref ( RootNode );
+       g_free(search);
+       return;
+     }
+    if (SQL_Select_to_json_node ( RootNode, "data",
+                                  "SELECT * FROM dictionnaire "
+                                  "WHERE tech_id LIKE '%%%s%%' OR acronyme LIKE '%%%s%%' OR libelle LIKE '%%%s%%' "
+                                  "LIMIT %d OFFSET %d",
+                                  search, search, search, length, start )==FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       json_node_unref ( RootNode );
+       g_free(search);
+       return;
+     }
+    g_free(search);
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
@@ -574,6 +674,7 @@ reload:
     GMainLoop *loop = g_main_loop_new (NULL, TRUE);
     GMainContext *loop_context = g_main_loop_get_context ( loop );
 
+    Http_Load_sessions ();
     zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     zmq_motifs   = Zmq_Connect ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
     Cfg_http.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
@@ -624,10 +725,8 @@ reload:
     Zmq_Close ( zmq_from_bus );
     g_main_loop_unref(loop);
 
-    g_slist_foreach ( Cfg_http.liste_http_clients, (GFunc) g_free, NULL );
-    g_slist_free ( Cfg_http.liste_http_clients );
-    Cfg_http.liste_http_clients = NULL;
-
+    Http_Save_and_close_sessions();
+    
     while ( Cfg_http.liste_ws_clients )
      { Http_ws_destroy_session ( (struct WS_CLIENT_SESSION *)(Cfg_http.liste_ws_clients->data ) ); }
 

@@ -44,9 +44,12 @@
 
 
  struct OPTION
-  { gint type;
-    union { int entier;
+  { gint token;
+    gint token_classe;
+    union { gint val_as_int;
             gchar *chaine;
+            gdouble val_as_double;
+            struct ALIAS *val_as_alias;
           };
   };
 
@@ -83,6 +86,7 @@
  extern gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_WATCHDOG( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_vars( int barre, gchar *nom );
+ extern gchar *New_calcul_PID ( GList *options );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options );

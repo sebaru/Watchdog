@@ -2,38 +2,40 @@
 
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { Send_to_API ( "GET", "/api/search", null, function(Response)
-     { $('#idTableSearchResults').DataTable(
-          { pageLength : 50,
-            fixedHeader: true,
-            rowId: "id",
-            data: Response.results,
-            columns:
-             [ { "data": "classe", "title":"Classe", "className": "align-middle  text-center" },
-               { "data": null, "title":"TechID/Page", "className": "align-middle ",
-                 "render": function (item)
-                   { if (item.classe=="SYNOPTIQUE")
-                      { return( Lien ( "/home/syn/"+item.tech_id, "Voir le synoptique", item.tech_id ) ); }
-                     else return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) );
-                   }
+  { $('#idTableSearchResults').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         rowId: "id",
+         processing: true,
+         serverSide: true,
+         ajax: {	url : "/api/search",	type : "GET",
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
-               { "data": null, "title":"Acronyme", "className": "align-middle ",
-                 "render": function (item)
-                   { if (item.classe=="MESSAGE")
-                      { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
-                     else if (item.classe=="CI")
-                      { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme, "Voir le graphe", item.acronyme ) ); }
-                     else if (item.classe=="AI")
-                      { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme, "Voir le graphe", item.acronyme ) ); }
-                     else if (item.classe=="HORLOGE")
-                      { return( Lien ( "/horloge/"+item.id, "Editer les ticks", item.acronyme ) ); }
-                     else return(item.acronyme);
-                   }
-               },
-               { "data": "libelle", "title":"Libelle", "className": "align-middle  text-center" },
-               { "data": "unite", "title":"Unité", "className": "align-middle  text-center" },
-             ]
-          }
-       );
-     }, null );
+         columns:
+          [ { "data": "classe", "title":"Classe", "className": "align-middle  text-center" },
+            { "data": null, "title":"TechID/Page", "className": "align-middle ",
+              "render": function (item)
+                { if (item.classe=="SYNOPTIQUE")
+                   { return( Lien ( "/home/syn/"+item.tech_id, "Voir le synoptique", item.tech_id ) ); }
+                  else return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) );
+                }
+            },
+            { "data": null, "title":"Acronyme", "className": "align-middle ",
+              "render": function (item)
+                { if (item.classe=="MESSAGE")
+                   { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+                  else if (item.classe=="CI")
+                   { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme, "Voir le graphe", item.acronyme ) ); }
+                  else if (item.classe=="AI")
+                   { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme, "Voir le graphe", item.acronyme ) ); }
+                  else if (item.classe=="HORLOGE")
+                   { return( Lien ( "/horloge/"+item.id, "Editer les ticks", item.acronyme ) ); }
+                  else return(item.acronyme);
+                }
+            },
+            { "data": "libelle", "title":"Libelle", "className": "align-middle  text-center" },
+            { "data": "unite", "title":"Unité", "className": "align-middle  text-center" },
+          ]
+       }
+    );
   }

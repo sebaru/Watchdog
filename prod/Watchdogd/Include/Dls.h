@@ -222,6 +222,8 @@
     gchar  unite[32];
     gint   archivage;
     guint  last_arch;                                                    /* Date de dernier enregistrement en base de données */
+    gdouble pid_somme_erreurs;                                                                                /* Calcul PID KI*/
+    gdouble pid_prev_erreur;                                                                                 /* Calcul PID KD */
   };
 
  struct DLS_SYN

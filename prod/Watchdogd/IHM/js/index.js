@@ -1,5 +1,10 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
+ function Ping ()
+  { setTimeout ( function()                                                                         /* Un ping tous les jours */
+     { Send_to_API ( "GET", "/api/ping", null, function () { Ping(); }, null );
+     }, 60000 );
+  }
 /******************************************************************************************************************************/
 /* Load_page: Appelé au chargement de la page                                                                                 */
 /******************************************************************************************************************************/
@@ -39,5 +44,6 @@
        else console.log("zmq_tag: " + Response.zmq_tag + " not known");
      }
 
+    Ping();
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

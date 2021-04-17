@@ -86,6 +86,14 @@
  extern gchar *Dls_dyn_string ( gchar *format, gint type_bit, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p );
  extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *visuel_p, gint mode,
                                    gchar *color, gboolean cligno );
+ extern gdouble Dls_PID ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input,
+                          gchar *consigne_tech_id, gchar *consigne_acronyme, gpointer *r_consigne,
+                          gchar *kp_tech_id, gchar *kp_acronyme, gpointer *r_kp,
+                          gchar *ki_tech_id, gchar *ki_acronyme, gpointer *r_ki,
+                          gchar *kd_tech_id, gchar *kd_acronyme, gpointer *r_kd,
+                          gchar *outputmin_tech_id, gchar *outputmin_acronyme, gpointer *r_outputmin,
+                          gchar *outputmax_tech_id, gchar *outputmax_acronyme, gpointer *r_outputmax
+                        );
 
  extern int Heure( int heure, int minute );                                                        /* Tester l'heure actuelle */
  extern int Heure_avant( int heure, int minute );
