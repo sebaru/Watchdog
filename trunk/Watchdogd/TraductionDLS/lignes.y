@@ -77,6 +77,8 @@
 %type  <val>         barre
 %type  <gliste>      liste_options options
 %type  <option>      une_option
+%type  <gliste>      liste_options_tempo options_tempo
+%type  <option>      une_option_tempo
 %type  <gliste>      liste_options_registre options_registre
 %type  <option>      une_option_registre
 %type  <option>      une_option_cadran
@@ -133,7 +135,7 @@ un_alias:       T_DEFINE ID EQUIV T_REGISTRE liste_options_registre PVIRGULE
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
                 }}
-                | T_DEFINE ID EQUIV T_TEMPO liste_options PVIRGULE
+                | T_DEFINE ID EQUIV T_TEMPO liste_options_tempo PVIRGULE
                 {{ if ( New_alias(NULL, $2, MNEMO_TEMPO, $5) == FALSE )                    /* Deja defini ? */
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
@@ -1029,6 +1031,51 @@ une_option:     MODE T_EGAL ENTIER
                    $$->token = $1;
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
+                }}
+                ;
+
+/**************************************************** Gestion des options tempo ***********************************************/
+liste_options_tempo:
+                T_POUV options_tempo T_PFERM   {{ $$ = $2;   }}
+                |                              {{ $$ = NULL; }}
+                ;
+
+options_tempo:  options_tempo VIRGULE une_option_tempo
+                                     {{ $$ = g_list_append( $1, $3 );   }}
+                | une_option_tempo   {{ $$ = g_list_append( NULL, $1 ); }}
+                | une_option_commune {{ $$ = g_list_append( NULL, $1 ); }}
+                ;
+
+une_option_tempo:
+                T_DAA T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
+                }}
+                | T_DMINA T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
+                }}
+                | T_DMAXA T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
+                }}
+                | T_DAD T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
+                }}
+                | T_RANDOM T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 ;
 
