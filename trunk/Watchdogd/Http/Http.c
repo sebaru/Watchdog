@@ -109,6 +109,47 @@
     g_object_unref( connexion );
   }
 /******************************************************************************************************************************/
+/* Http_Save_and_close_sessions: Sauvegarde les sessions en base de données                                                   */
+/* Entrées: néant                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_Save_and_close_sessions ( void )
+  { SQL_Write_new ( "DELETE FROM users_sessions" );
+    while ( Cfg_http.liste_http_clients )
+     { struct HTTP_CLIENT_SESSION *session = Cfg_http.liste_http_clients->data;
+       SQL_Write_new ( "INSERT INTO users_sessions SET username='%s', wtd_session='%s', host='%s', last_request='%d'",
+                       session->username, session->wtd_session, session->host, session->last_request );
+       Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
+       g_free(session);
+     }
+    Cfg_http.liste_http_clients = NULL;
+  }
+/******************************************************************************************************************************/
+/* Http_Load_sessions: Charge les sessions en base de données                                                                 */
+/* Entrées: néant                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_Load_one_session ( JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct HTTP_CLIENT_SESSION *session = g_try_malloc0( sizeof ( struct HTTP_CLIENT_SESSION ) );
+    if (!session) return;
+    g_snprintf( session->username,    sizeof(session->username),    "%s", Json_get_string ( element, "username" ) );
+    g_snprintf( session->wtd_session, sizeof(session->wtd_session), "%s", Json_get_string ( element, "wtd_session" ) );
+    g_snprintf( session->host,        sizeof(session->host),        "%s", Json_get_string ( element, "host" ) );
+    session->last_request = Json_get_int ( element, "last_request" );
+    Cfg_http.liste_http_clients = g_slist_prepend ( Cfg_http.liste_http_clients, session );
+  }
+/******************************************************************************************************************************/
+/* Http_Load_sessions: Charge les sessions en base de données                                                                 */
+/* Entrées: néant                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_Load_sessions ( void )
+  { JsonNode *RootNode = Json_node_create();
+    SQL_Select_to_json_node ( RootNode, "sessions", "SELECT * FROM users_sessions" );
+    Json_node_foreach_array_element ( RootNode, "session", Http_Load_one_session, NULL );
+    json_node_unref(RootNode);
+  }
+/******************************************************************************************************************************/
 /* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */
 /* Entrées: une structure util, un code confidentiel                                                                          */
 /* Sortie: FALSE si erreur                                                                                                    */
@@ -632,6 +673,7 @@ reload:
     GMainLoop *loop = g_main_loop_new (NULL, TRUE);
     GMainContext *loop_context = g_main_loop_get_context ( loop );
 
+    Http_Load_sessions ();
     zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     zmq_motifs   = Zmq_Connect ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
     Cfg_http.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
@@ -682,10 +724,8 @@ reload:
     Zmq_Close ( zmq_from_bus );
     g_main_loop_unref(loop);
 
-    g_slist_foreach ( Cfg_http.liste_http_clients, (GFunc) g_free, NULL );
-    g_slist_free ( Cfg_http.liste_http_clients );
-    Cfg_http.liste_http_clients = NULL;
-
+    Http_Save_and_close_sessions();
+    
     while ( Cfg_http.liste_ws_clients )
      { Http_ws_destroy_session ( (struct WS_CLIENT_SESSION *)(Cfg_http.liste_ws_clients->data ) ); }
 
