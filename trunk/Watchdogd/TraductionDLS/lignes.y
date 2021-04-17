@@ -79,6 +79,8 @@
 %type  <option>      une_option
 %type  <gliste>      liste_options_tempo options_tempo
 %type  <option>      une_option_tempo
+%type  <gliste>      liste_options_msg options_msg
+%type  <option>      une_option_msg
 %type  <gliste>      liste_options_registre options_registre
 %type  <option>      une_option_registre
 %type  <option>      une_option_cadran
@@ -130,7 +132,7 @@ un_alias:       T_DEFINE ID EQUIV T_REGISTRE liste_options_registre PVIRGULE
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
                 }}
-                | T_DEFINE ID EQUIV T_MSG liste_options PVIRGULE
+                | T_DEFINE ID EQUIV T_MSG liste_options_msg PVIRGULE
                 {{ if ( New_alias(NULL, $2, MNEMO_MSG, $5) == FALSE )                    /* Deja defini ? */
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
@@ -1031,6 +1033,32 @@ une_option:     MODE T_EGAL ENTIER
                    $$->token = $1;
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
+                }}
+                ;
+
+/**************************************************** Gestion des options messages ********************************************/
+liste_options_msg:
+                T_POUV options_msg T_PFERM   {{ $$ = $2;   }}
+                |                            {{ $$ = NULL; }}
+                ;
+
+options_msg:    options_msg VIRGULE une_option_msg
+                                     {{ $$ = g_list_append( $1, $3 );   }}
+                | une_option_msg     {{ $$ = g_list_append( NULL, $1 ); }}
+                | une_option_commune {{ $$ = g_list_append( NULL, $1 ); }}
+                ;
+
+une_option_msg: T_UPDATE
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = 1;
+                }}
+                | T_TYPE T_EGAL type_msg
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
                 }}
                 ;
 
