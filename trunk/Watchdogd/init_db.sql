@@ -684,7 +684,6 @@ CREATE TABLE IF NOT EXISTS `users_sessions` (
   `host` VARCHAR(32) NOT NULL,
   `wtd_session` VARCHAR(42) NOT NULL,
   `last_request` INT(11) NOT NULL,
-  `date_create` datetime NOT NULL,
   FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

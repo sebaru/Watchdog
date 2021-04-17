@@ -146,7 +146,8 @@
  static void Http_Load_sessions ( void )
   { JsonNode *RootNode = Json_node_create();
     SQL_Select_to_json_node ( RootNode, "sessions", "SELECT * FROM users_sessions" );
-    Json_node_foreach_array_element ( RootNode, "session", Http_Load_one_session, NULL );
+    if (Json_has_member ( RootNode, "sessions" ))
+     { Json_node_foreach_array_element ( RootNode, "sessions", Http_Load_one_session, NULL ); }
     json_node_unref(RootNode);
   }
 /******************************************************************************************************************************/

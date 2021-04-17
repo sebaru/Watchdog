@@ -2173,14 +2173,16 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 5546)
+    if (database_version < 5547)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `users_sessions` ADD `host` VARCHAR(32) NOT NULL AFTER `username`" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `users_sessions` ADD `last_request` INT(11) NOT NULL" );
        Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE DROP `date_create`" );
+       Lancer_requete_SQL ( db, requete );
      }
   
-    database_version = 5546;
+    database_version = 5547;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );
