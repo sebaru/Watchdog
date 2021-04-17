@@ -401,9 +401,9 @@
    return(result);
  }
 /******************************************************************************************************************************/
-/* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
-/* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
-/* Sortie: False si il existe deja, true sinon                                                                                */
+/* New_calcul_PID: Calcul un PID                                                                                              */
+/* Entrées: la liste d'option associée au PID                                                                                 */
+/* Sortie: la chaine de calcul DLS                                                                                            */
 /******************************************************************************************************************************/
  gchar *New_calcul_PID ( GList *options )
   { struct ALIAS *input = Get_option_alias ( options, T_INPUT );
@@ -810,6 +810,23 @@ return(NULL);
     return(option);
   }
 /******************************************************************************************************************************/
+/* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
+/* Entrées: la liste des options, le type a rechercher                                                                        */
+/* Sortie: -1 si pas trouvé                                                                                                   */
+/******************************************************************************************************************************/
+ static gdouble Get_option_double( GList *liste_options, gint token )
+  { struct OPTION *option;
+    GList *liste;
+    liste = liste_options;
+    while (liste)
+     { option=(struct OPTION *)liste->data;
+       if ( option->token == token && option->token_classe == T_VALF )
+        { return (option->val_as_double); }
+       liste = liste->next;
+     }
+    return(-1);
+  }
+/******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
@@ -829,6 +846,7 @@ return(NULL);
     alias->used     = 0;
     Alias = g_slist_prepend( Alias, alias );
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
+
     if (bit != MNEMO_MOTIF) return(TRUE);
 
     gchar *forme_src = Get_option_chaine ( options, T_FORME );
@@ -931,16 +949,7 @@ return(NULL);
   { while (options)
      { struct OPTION *option = (struct OPTION *)options->data;
        options = g_list_remove (options, option);
-       switch (option->token)
-        { case T_FORME:
-          case T_LIBELLE:
-          case T_ETIQUETTE:
-          case T_HOST:
-          case T_THREAD:
-          case T_TAG:
-               g_free(option->chaine);
-               break;
-        }
+       if (option->token_classe == T_CHAINE) g_free(option->chaine);
        g_free(option);
      }
   }
@@ -1191,6 +1200,15 @@ return(NULL);
                 case MNEMO_REGISTRE:
                  { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
                    Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle, unite );
+
+                   gchar *forme = Get_option_chaine( alias->options, T_FORME );
+                   if (forme)
+                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, forme,
+                                                      Get_option_double ( alias->options, T_MIN ),
+                                                      Get_option_double ( alias->options, T_MAX )
+                                                    );
+                    }
+
                    if (!Liste_REGISTRE) Liste_REGISTRE = g_strconcat( "'", alias->acronyme, "'", NULL );
                    else
                     { old_liste = Liste_REGISTRE;

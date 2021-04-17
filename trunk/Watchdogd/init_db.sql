@@ -420,16 +420,20 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
 
 CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `auto_create` tinyint(1) NULL DEFAULT NULL,
   `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "SYS",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
+  `minimum` int(11) NOT NULL DEFAULT '0',
+  `maximum` int(11) NOT NULL DEFAULT '100',
   `type` int(11) NOT NULL DEFAULT '0',
   `angle` int(11) NOT NULL DEFAULT '0',
   `nb_decimal` int(11) NOT NULL DEFAULT '2',
   PRIMARY KEY (`id`),
+  UNIQUE (`tech_id`, `acronyme`, `auto_create`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;

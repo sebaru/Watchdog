@@ -66,18 +66,21 @@
 
 %token <val>    T_BI T_MONO T_ENTREE SORTIE T_ANALOG_OUTPUT T_TEMPO T_HORLOGE
 %token <val>    T_MSG T_VISUEL T_CPT_H T_CPT_IMP T_AI T_START T_REGISTRE T_DIGITAL_OUTPUT T_WATCHDOG
-%type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_EDGE_DOWN T_IN_RANGE
 %type  <val>    couleur
 
 %token <chaine> ID T_CHAINE
 %token <val>    ENTIER
-%token <valf>   VALF
+%token <valf>   T_VALF
 
 %type  <val>         barre
 %type  <gliste>      liste_options options
 %type  <option>      une_option
+%type  <gliste>      liste_options_registre options_registre
+%type  <option>      une_option_registre
+%type  <option>      une_option_cadran
+%type  <option>      une_option_commune
 %type  <gliste>      liste_options_pid options_pid
 %type  <option>      une_option_pid
 %type  <chaine>      unite facteur expr suffixe unSwitch listeCase une_instr listeInstr
@@ -100,28 +103,86 @@ listeAlias:     un_alias listeAlias
                 | un_alias
                 ;
 
-un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
-                {{ if ( New_alias(NULL, $2, $4, $5) == FALSE )                    /* Deja defini ? */
+un_alias:       T_DEFINE ID EQUIV T_REGISTRE liste_options_registre PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_REGISTRE, $5) == FALSE )                    /* Deja defini ? */
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
                 }}
-                ;
-alias_bit:        T_BI        {{ $$=MNEMO_BISTABLE;   }}
-                | T_MONO      {{ $$=MNEMO_MONOSTABLE; }}
-                | T_ENTREE      {{ $$=MNEMO_ENTREE;   }}
-                | SORTIE      {{ $$=MNEMO_SORTIE;     }}
-                | T_MSG       {{ $$=MNEMO_MSG;        }}
-                | T_TEMPO     {{ $$=MNEMO_TEMPO;      }}
-                | T_VISUEL     {{ $$=MNEMO_MOTIF;     }}
-                | T_CPT_H     {{ $$=MNEMO_CPTH;       }}
-                | T_CPT_IMP   {{ $$=MNEMO_CPT_IMP;    }}
-                | T_AI        {{ $$=MNEMO_ENTREE_ANA; }}
-                | T_ANALOG_OUTPUT {{ $$=MNEMO_SORTIE_ANA; }}
-                | T_DIGITAL_OUTPUT {{ $$=MNEMO_DIGITAL_OUTPUT; }}
-                | T_REGISTRE  {{ $$=MNEMO_REGISTRE;   }}
-                | T_HORLOGE   {{ $$=MNEMO_HORLOGE;    }}
-                | T_BUS       {{ $$=MNEMO_BUS;        }}
-                | T_WATCHDOG  {{ $$=MNEMO_WATCHDOG;   }}
+                | T_DEFINE ID EQUIV T_BI liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_BISTABLE, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_MONO liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_MONOSTABLE, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_ENTREE liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_ENTREE, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV SORTIE liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_SORTIE, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_MSG liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_MSG, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_TEMPO liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_TEMPO, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_CPT_IMP liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_CPT_IMP, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_CPT_H liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_CPTH, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_VISUEL liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_MOTIF, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_AI liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_ENTREE_ANA, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_ANALOG_OUTPUT liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_SORTIE_ANA, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_DIGITAL_OUTPUT liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_DIGITAL_OUTPUT, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_HORLOGE liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_HORLOGE, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_BUS liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_BUS, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
+                | T_DEFINE ID EQUIV T_WATCHDOG liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, MNEMO_WATCHDOG, $5) == FALSE )                    /* Deja defini ? */
+                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   g_free($2);
+                }}
                 ;
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
@@ -265,7 +326,7 @@ calcul_expr2:   calcul_expr2 T_FOIS calcul_expr3
                 }}
                 | calcul_expr3
                 ;
-calcul_expr3:   VALF
+calcul_expr3:   T_VALF
                 {{ int taille;
                    taille = 15;
                    $$ = New_chaine( taille );
@@ -783,7 +844,7 @@ une_action:     T_ACT_DEF
                 }}
                 ;
 
-comparateur:    ordre VALF
+comparateur:    ordre T_VALF
                 {{ $$ = New_comparateur();
                    $$->type = $1;
                    $$->valf = $2;
@@ -971,6 +1032,60 @@ une_option:     MODE T_EGAL ENTIER
                 }}
                 ;
 
+/**************************************************** Gestion des options *****************************************************/
+liste_options_registre:
+                T_POUV options_registre T_PFERM   {{ $$ = $2;   }}
+                |                                 {{ $$ = NULL; }}
+                ;
+
+options_registre:
+                options_registre VIRGULE une_option_registre
+                                      {{ $$ = g_list_append( $1, $3 ); }}
+                | une_option_registre {{ $$ = g_list_append( NULL, $1 ); }}
+                | une_option_cadran   {{ $$ = g_list_append( NULL, $1 ); }}
+                | une_option_commune  {{ $$ = g_list_append( NULL, $1 ); }}
+                ;
+
+une_option_registre:
+                T_UNITE T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
+                   $$->chaine = $3;
+                }}
+                ;
+
+/**************************************************** Les options cadrans *****************************************************/
+une_option_cadran:
+                T_FORME T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
+                   $$->chaine = $3;
+                }}
+                | T_MIN T_EGAL T_VALF
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = $3;
+                }}
+                | T_MAX T_EGAL T_VALF
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = $3;
+                }}
+                ;
+
+/**************************************************** Les options coomunes ****************************************************/
+une_option_commune:
+                T_LIBELLE T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
+                   $$->chaine = $3;
+                }}
+                ;
 /**************************************************** Gestion des options *****************************************************/
 liste_options_pid:
                 T_POUV options_pid T_PFERM   {{ $$ = $2;   }}

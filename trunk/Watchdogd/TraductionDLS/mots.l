@@ -202,7 +202,7 @@ newline       [\n\r]+
 
 {id}                       { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return ID;       }
 {digit}                    { DlsScanner_lval.val    = atoi(DlsScanner_text);           return ENTIER;   }
-{digitf}                   { DlsScanner_lval.valf   = atof(DlsScanner_text);           return VALF;     }
+{digitf}                   { DlsScanner_lval.valf   = atof(DlsScanner_text);           return T_VALF;   }
 
 .                          { DlsScanner_lval.val = T_ERROR; return T_ERROR; }
  /*------------------------------------------------------------------------------------------------------*/
