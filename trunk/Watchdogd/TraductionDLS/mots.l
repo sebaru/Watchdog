@@ -56,16 +56,21 @@ newline       [\n\r]+
 {newline}
 
  /******************************************** Methodes ***************************************************/
-"_EA"                      { DlsScanner_lval.val = EANA;            return EANA;            }
+"_EA"                      { DlsScanner_lval.val = T_AI;            return T_AI;            }
+"_AI"                      { DlsScanner_lval.val = T_AI;            return T_AI;            }
 "_AO"                      { DlsScanner_lval.val = T_ANALOG_OUTPUT; return T_ANALOG_OUTPUT; }
-"_DO"                      { DlsScanner_lval.val = T_DIGITAL_OUTPUT;return T_DIGITAL_OUTPUT;  }
-"_E"                       { DlsScanner_lval.val = ENTREE;          return ENTREE;          }
+"_E"                       { DlsScanner_lval.val = T_ENTREE;        return T_ENTREE;        }
+"_DI"                      { DlsScanner_lval.val = T_ENTREE;        return T_ENTREE;        }
 "_A"                       { DlsScanner_lval.val = SORTIE;          return SORTIE;          }
-"_I"                       { DlsScanner_lval.val = T_ICONE;         return T_ICONE;         }
+"_DO"                      { DlsScanner_lval.val = T_DIGITAL_OUTPUT;return T_DIGITAL_OUTPUT;}
+"_I"                       { DlsScanner_lval.val = T_VISUEL;        return T_VISUEL;        }
+"_VISUEL"                  { DlsScanner_lval.val = T_VISUEL;        return T_VISUEL;        }
 "_B"                       { DlsScanner_lval.val = T_BI;            return T_BI;            }
 "_M"                       { DlsScanner_lval.val = T_MONO;          return T_MONO;          }
 "_T"                       { DlsScanner_lval.val = T_TEMPO;         return T_TEMPO;         }
+"_TEMPO"                   { DlsScanner_lval.val = T_TEMPO;         return T_TEMPO;         }
 "_R"                       { DlsScanner_lval.val = T_REGISTRE;      return T_REGISTRE;      }
+"_REGISTRE"                { DlsScanner_lval.val = T_REGISTRE;      return T_REGISTRE;      }
 "_CH"                      { DlsScanner_lval.val = T_CPT_H;         return T_CPT_H;         }
 "_CI"                      { DlsScanner_lval.val = T_CPT_IMP;       return T_CPT_IMP;       }
 "_HORLOGE"                 { DlsScanner_lval.val = T_HORLOGE;       return T_HORLOGE;       }

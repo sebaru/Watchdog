@@ -168,23 +168,6 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
-/* Entrées: la liste des options, le type a rechercher                                                                        */
-/* Sortie: -1 si pas trouvé                                                                                                   */
-/******************************************************************************************************************************/
- static gdouble Get_option_double( GList *liste_options, gint token )
-  { struct OPTION *option;
-    GList *liste;
-    liste = liste_options;
-    while (liste)
-     { option=(struct OPTION *)liste->data;
-       if ( option->token == token && option->token_classe == VALF )
-        { return (option->val_as_double); }
-       liste = liste->next;
-     }
-    return(-1);
-  }
-/******************************************************************************************************************************/
 /* Get_option_chaine: Cherche une option de type chaine et renvoie sa valeur                                                  */
 /* Entrées: la liste des options, le type a rechercher                                                                        */
 /* Sortie: NULL si probleme                                                                                                   */

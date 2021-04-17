@@ -64,8 +64,8 @@
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
 %type  <val>    modulateur jour_semaine
 
-%token <val>    T_BI T_MONO ENTREE SORTIE T_ANALOG_OUTPUT T_TEMPO T_HORLOGE
-%token <val>    T_MSG T_ICONE T_CPT_H T_CPT_IMP EANA T_START T_REGISTRE T_DIGITAL_OUTPUT T_WATCHDOG
+%token <val>    T_BI T_MONO T_ENTREE SORTIE T_ANALOG_OUTPUT T_TEMPO T_HORLOGE
+%token <val>    T_MSG T_VISUEL T_CPT_H T_CPT_IMP T_AI T_START T_REGISTRE T_DIGITAL_OUTPUT T_WATCHDOG
 %type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_EDGE_DOWN T_IN_RANGE
@@ -108,14 +108,14 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                 ;
 alias_bit:        T_BI        {{ $$=MNEMO_BISTABLE;   }}
                 | T_MONO      {{ $$=MNEMO_MONOSTABLE; }}
-                | ENTREE      {{ $$=MNEMO_ENTREE;     }}
+                | T_ENTREE      {{ $$=MNEMO_ENTREE;   }}
                 | SORTIE      {{ $$=MNEMO_SORTIE;     }}
                 | T_MSG       {{ $$=MNEMO_MSG;        }}
                 | T_TEMPO     {{ $$=MNEMO_TEMPO;      }}
-                | T_ICONE     {{ $$=MNEMO_MOTIF;      }}
+                | T_VISUEL     {{ $$=MNEMO_MOTIF;     }}
                 | T_CPT_H     {{ $$=MNEMO_CPTH;       }}
                 | T_CPT_IMP   {{ $$=MNEMO_CPT_IMP;    }}
-                | EANA        {{ $$=MNEMO_ENTREE_ANA; }}
+                | T_AI        {{ $$=MNEMO_ENTREE_ANA; }}
                 | T_ANALOG_OUTPUT {{ $$=MNEMO_SORTIE_ANA; }}
                 | T_DIGITAL_OUTPUT {{ $$=MNEMO_DIGITAL_OUTPUT; }}
                 | T_REGISTRE  {{ $$=MNEMO_REGISTRE;   }}
