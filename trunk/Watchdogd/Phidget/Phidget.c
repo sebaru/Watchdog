@@ -171,8 +171,24 @@ end:
               "%s: '%s':'%s' = %lf", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
   }
+
 /******************************************************************************************************************************/
-/* Phidget_onPHSensorChange: Appelé quand un module I/O PHSensor a changé de valeur                                           */
+/* Phidget_onVoltableInputError: Appelé quand une erreur est constatée sur le module Phidget                                  */
+/* Entrée: le channel, le contexte, et la description de l'erreur                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void CCONV Phidget_onVoltableInputError (PhidgetHandle ph, void *ctx, Phidget_ErrorEventCode code, const char* description)
+  { struct PHIDGET_ANALOGINPUT *canal = ctx;
+    if (!canal->dls_ai)
+     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
+       return;
+     }
+    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;", __func__,
+              canal->dls_ai->tech_id, canal->dls_ai->acronyme, description, code );
+    canal->dls_ai->inrange = FALSE;
+  }
+/******************************************************************************************************************************/
+/* Phidget_onORPChange: Appelé quand un module I/O ORP a changé de valeur                                                     */
 /* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -207,6 +223,11 @@ end:
               __func__, serial_number, port, classe, num_canal, canal->intervalle, nbr_canaux );
     if (canal->intervalle)
      { if (Phidget_setDataInterval( handle, canal->intervalle*1000 ) != EPHIDGET_OK)	Phidget_print_error(); }
+
+    if (!strcasecmp(canal->capteur, "ADP1000-ORP"))
+     { if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_2V ) != EPHIDGET_OK )
+        { Phidget_print_error(); }
+     }
   }
 /******************************************************************************************************************************/
 /* Phidget_onAttachHandler: Appelé quand un canal estmodule I/O VoltageRatio a changé de valeur                               */
@@ -261,28 +282,29 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Charger_un_AI (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { gchar *classe   = Json_get_string(element, "classe");
+  { gchar *capteur  = Json_get_string(element, "capteur");
     gint port       = Json_get_int   (element, "port");
     gchar *hub      = Json_get_string(element, "hub_description");
     gint serial     = Json_get_int   (element, "hub_serial");
     gint intervalle = Json_get_int   (element, "intervalle");
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-                "%s: Hub '%s' (S/N %d), port '%d' classe '%s'", __func__, hub, serial, port, classe );
+                "%s: Hub '%s' (S/N %d), port '%d' capteur '%s'", __func__, hub, serial, port, capteur );
 
     struct PHIDGET_ANALOGINPUT *canal = g_try_malloc0 ( sizeof(struct PHIDGET_ANALOGINPUT) );
     if (!canal)
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-                 "%s: Memory Error on hub '%s' (S/N %d), port '%d' classe '%s'", __func__, hub, serial, port, classe );
+                 "%s: Memory Error on hub '%s' (S/N %d), port '%d' capteur '%s'", __func__, hub, serial, port, capteur );
        return;
      }
 
+    g_snprintf( canal->capteur, sizeof(canal->capteur), "%s", capteur );                     /* Sauvegarde du type de capteur */
     canal->intervalle = intervalle;                                               /* Sauvegarde de l'intervalle d'acquisition */
     gchar *tech_id  = Json_get_string ( element, "tech_id" );
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     Charger_confDB_AI ( tech_id, acronyme );
     Dls_data_get_AI ( tech_id, acronyme, (gpointer)&canal->dls_ai );                      /* Récupération de l'élément DLS_AI */
 
-    if (!strcasecmp(classe, "VoltageRatioInput"))
+    if (!strcasecmp(capteur, "test"))
      { /*PhidgetVoltageRatioInputHandle handle;
       	PhidgetVoltageRatioInput_create(&handle);
    	   /*PhidgetVoltageRatioInput_setOnVoltageRatioChangeHandler(handle, Phidget_onVoltageRatioChange, NULL);*/
@@ -309,30 +331,32 @@ end:
           return;
         }
      }*/
-    else if (!strcasecmp(classe, "PHSensor"))
-     { PhidgetPHSensor_create((PhidgetPHSensorHandle *)&canal->handle);
-   	   PhidgetPHSensor_setOnPHChangeHandler((PhidgetPHSensorHandle)canal->handle, Phidget_onPHSensorChange, canal);
+    else if (!strcasecmp(capteur, "ADP1000-PH"))
+     { if ( PhidgetPHSensor_create( (PhidgetPHSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( PhidgetPHSensor_setOnPHChangeHandler( (PhidgetPHSensorHandle)canal->handle, Phidget_onPHSensorChange, canal ) ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onVoltableInputError, canal ) ) goto error;
      }
-    else if (!strcasecmp(classe, "VoltageInput"))
-     { PhidgetVoltageInput_create((PhidgetVoltageInputHandle *)&canal->handle);
-   	   PhidgetVoltageInput_setOnVoltageChangeHandler((PhidgetVoltageInputHandle)canal->handle, Phidget_onVoltableInputChange, canal);
+    else if (!strcasecmp(capteur, "ADP1000-ORP"))
+     { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+   	   if ( PhidgetVoltageInput_setOnVoltageChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
+                                                            Phidget_onVoltableInputChange, canal ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onVoltableInputError, canal ) != EPHIDGET_OK ) goto error;
      }
     else
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-                 "%s: classe phidget inconnue on hub '%s'(S/N %d), port '%d' classe '%s'", __func__, hub, serial, port, classe );
-       g_free(canal);
-       return;
+                 "%s: classe phidget inconnue on hub '%s'(S/N %d), port '%d' capteur '%s'", __func__, hub, serial, port, capteur );
+       goto error;
      }
 
     Phidget_set_config ( (PhidgetHandle)canal->handle, serial, port, FALSE );
     Phidget_setOnAttachHandler((PhidgetHandle)canal->handle, Phidget_onAnalogInputAttachHandler, canal);
     Phidget_setOnDetachHandler((PhidgetHandle)canal->handle, Phidget_onAnalogInputDetachHandler, canal);
-    if (Phidget_open ((PhidgetHandle)canal->handle) != EPHIDGET_OK)
-     {	Phidget_print_error();
-       g_free(canal);
-       return;
-     }
-   Cfg_phidget.Liste_sensors = g_slist_prepend ( Cfg_phidget.Liste_sensors, canal );
+    if (Phidget_open ((PhidgetHandle)canal->handle) != EPHIDGET_OK) goto error;
+    Cfg_phidget.Liste_sensors = g_slist_prepend ( Cfg_phidget.Liste_sensors, canal );
+    return;
+error:
+  	 Phidget_print_error();
+    g_free(canal);
   }
 /******************************************************************************************************************************/
 /* Charger_tous_IO: Charge toutes les I/O Phidget                                                                             */

@@ -86,14 +86,14 @@
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Phidget_Edit_AI ( )
-  { if ($('#idModalEditAISelectTechID').val() == null) return;
-    if ($('#idModalEditAISelectAcronyme').val() == null) return;
-    if (!isNum("idModalEditAIPort")) return;
-    if (!isNum("idModalEditAIMin")) return;
-    if (!isNum("idModalEditAIMax")) return;
-    if (!isNum("idModalEditAIIntervalle")) return;
-    if ($("#idModalEditAIPort").val()==null) return;
-    if ($("#idModalEditAIUnite").val()==null) return;
+  { if ($('#idModalEditAISelectTechID').val() == null) { console.log("Erreur idModalEditAISelectTechID"); return; }
+    if ($('#idModalEditAISelectAcronyme').val() == null) { console.log("Erreur idModalEditAISelectAcronyme"); return; }
+    if (!isNum("idModalEditAIPort")) { console.log("Erreur idModalEditAIPort"); return; }
+    if (!isNum("idModalEditAIMin")) { console.log("Erreur idModalEditAIMin"); return; }
+    if (!isNum("idModalEditAIMax")) { console.log("Erreur idModalEditAIMax"); return; }
+    if (!isNum("idModalEditAIIntervalle")) { console.log("Erreur idModalEditAIIntervalle"); return; }
+    if ($("#idModalEditAIPort").val()==null) { console.log("Erreur idModalEditAIPort"); return; }
+    if ($("#idModalEditAIUnite").val()==null) { console.log("Erreur idModalEditAIUnite"); return; }
     var json_request = JSON.stringify(
        { classe     : 'AI',
          capteur    : $('#idModalEditAICapteur').val(),
@@ -206,7 +206,7 @@
      { switch($('#idModalEditAICapteur').val())
         { case "ADP1000-ORP": $('#idModalEditAIUnite').val("V").prop('disabled', true).trigger('change');
                               $('#idModalEditAIMin').val("-2").prop('disabled', true);
-                              $('#idModalEditAIMax').val("+2").prop('disabled', true);
+                              $('#idModalEditAIMax').val("2").prop('disabled', true);
                               break;
           case "ADP1000-PH" : $('#idModalEditAIUnite').val("pH").prop('disabled', true).trigger('change');
                               $('#idModalEditAIMin').val("0").prop('disabled', true);
@@ -368,7 +368,7 @@
                 { return( item.hub_hostname+" - "+item.hub_description ); }
             },
             { "data": "port", "title":"Port", "className": "align-middle text-center" },
-            { "data": "intervalle", "title":"Intervalle", "className": "align-middle text-center" },
+            { "data": "intervalle", "title":"Acquisition (s)", "className": "align-middle text-center" },
             { "data": null, "title":"Capteur", "className": "align-middle text-center",
               "render": function (item)
                 { return( item.capteur+" - "+item.classe ); }
@@ -386,11 +386,12 @@
                 { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir le graphe", item.acronyme ) ); }
             },
             { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
-            { "data": null, "title":"Echange vocaux", "className": "align-left text-center",
+            { "data": null, "title":"Echange vocaux", "className": "align-middle text-center",
               "render": function (item)
                 { return( "Question : "+item.map_question_vocale+"<br>Réponse:"+item.map_reponse_vocale ); }
             },
-            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
+            { "data": null, "title":"Actions", "orderable": false, "className": "align-middle text-center",
+              "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "Show_Modal_Map_Edit_AI", item.id, "pen", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_AI", item.id, "trash", null );
