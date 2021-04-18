@@ -135,6 +135,7 @@
     g_snprintf( session->username,    sizeof(session->username),    "%s", Json_get_string ( element, "username" ) );
     g_snprintf( session->wtd_session, sizeof(session->wtd_session), "%s", Json_get_string ( element, "wtd_session" ) );
     g_snprintf( session->host,        sizeof(session->host),        "%s", Json_get_string ( element, "host" ) );
+    session->access_level = Json_get_int ( element, "access_level" );
     session->last_request = Json_get_int ( element, "last_request" );
     Cfg_http.liste_http_clients = g_slist_prepend ( Cfg_http.liste_http_clients, session );
   }
@@ -145,7 +146,10 @@
 /******************************************************************************************************************************/
  static void Http_Load_sessions ( void )
   { JsonNode *RootNode = Json_node_create();
-    SQL_Select_to_json_node ( RootNode, "sessions", "SELECT * FROM users_sessions" );
+    SQL_Select_to_json_node ( RootNode, "sessions", "SELECT session.*, user.access_level "
+                                                    "FROM users_sessions AS session "
+                                                    "INNER JOIN users ON session.username = user.username"
+                            );
     if (Json_has_member ( RootNode, "sessions" ))
      { Json_node_foreach_array_element ( RootNode, "sessions", Http_Load_one_session, NULL ); }
     json_node_unref(RootNode);
@@ -217,7 +221,7 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Http_add_cookie ( SoupMessage *msg, gchar *name, gchar *value, gint life )
-  { SoupCookie *cookie = soup_cookie_new ( name, value, NULL, "/", life );
+  { SoupCookie *cookie = soup_cookie_new ( name, value, "", "/", life );
     soup_cookie_set_http_only ( cookie, TRUE );
     if (Cfg_http.ssl_enable) soup_cookie_set_secure ( cookie, TRUE );
     GSList *liste = g_slist_append ( NULL, cookie );
@@ -727,7 +731,7 @@ reload:
     g_main_loop_unref(loop);
 
     Http_Save_and_close_sessions();
-    
+
     while ( Cfg_http.liste_ws_clients )
      { Http_ws_destroy_session ( (struct WS_CLIENT_SESSION *)(Cfg_http.liste_ws_clients->data ) ); }
 
