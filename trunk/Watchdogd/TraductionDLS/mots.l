@@ -56,8 +56,8 @@ newline       [\n\r]+
 {newline}
 
  /******************************************** Methodes ***************************************************/
-"_EA"                      { DlsScanner_lval.val = T_AI;            return T_AI;            }
-"_AI"                      { DlsScanner_lval.val = T_AI;            return T_AI;            }
+"_EA"                      { DlsScanner_lval.val = T_ANALOG_INPUT;  return T_ANALOG_INPUT;  }
+"_AI"                      { DlsScanner_lval.val = T_ANALOG_INPUT;  return T_ANALOG_INPUT;  }
 "_AO"                      { DlsScanner_lval.val = T_ANALOG_OUTPUT; return T_ANALOG_OUTPUT; }
 "_E"                       { DlsScanner_lval.val = T_ENTREE;        return T_ENTREE;        }
 "_DI"                      { DlsScanner_lval.val = T_ENTREE;        return T_ENTREE;        }
@@ -156,6 +156,7 @@ newline       [\n\r]+
 "thread"                   { DlsScanner_lval.val = T_THREAD;    return T_THREAD;    }
 "tag"                      { DlsScanner_lval.val = T_TAG;       return T_TAG;       }
 "forme"                    { DlsScanner_lval.val = T_FORME;     return T_FORME;     }
+"cadran"                   { DlsScanner_lval.val = T_CADRAN;    return T_CADRAN;    }
 "input"                    { DlsScanner_lval.val = T_INPUT;     return T_INPUT;     }
 "kp"                       { DlsScanner_lval.val = T_KP;        return T_KP;        }
 "ki"                       { DlsScanner_lval.val = T_KI;        return T_KI;        }

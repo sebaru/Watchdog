@@ -1169,6 +1169,15 @@ return(NULL);
                  }
                 case MNEMO_ENTREE_ANA:
                  { Mnemo_auto_create_AI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, NULL );
+
+                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN );
+                   if (cadran)
+                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, cadran,
+                                                      Get_option_double ( alias->options, T_MIN ),
+                                                      Get_option_double ( alias->options, T_MAX )
+                                                    );
+                    }
+
                    if (!Liste_AI) Liste_AI = g_strconcat( "'", alias->acronyme, "'", NULL );
                    else
                     { old_liste = Liste_AI;
@@ -1201,9 +1210,9 @@ return(NULL);
                  { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
                    Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle, unite );
 
-                   gchar *forme = Get_option_chaine( alias->options, T_FORME );
-                   if (forme)
-                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, forme,
+                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN );
+                   if (cadran)
+                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, cadran,
                                                       Get_option_double ( alias->options, T_MIN ),
                                                       Get_option_double ( alias->options, T_MAX )
                                                     );

@@ -51,7 +51,7 @@
 %token <val>    T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_OK
 %token <val>    T_BUS T_HOST T_THREAD T_TAG
 
-%token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
+%token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE T_FORME T_CADRAN
 %token <val>    T_PID T_KP T_KI T_KD T_INPUT T_MIN T_MAX
 %token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM T_UPDATE T_CONSIGNE T_ALIAS
 
@@ -65,7 +65,7 @@
 %type  <val>    modulateur jour_semaine
 
 %token <val>    T_BI T_MONO T_ENTREE SORTIE T_ANALOG_OUTPUT T_TEMPO T_HORLOGE
-%token <val>    T_MSG T_VISUEL T_CPT_H T_CPT_IMP T_AI T_START T_REGISTRE T_DIGITAL_OUTPUT T_WATCHDOG
+%token <val>    T_MSG T_VISUEL T_CPT_H T_CPT_IMP T_ANALOG_INPUT T_START T_REGISTRE T_DIGITAL_OUTPUT T_WATCHDOG
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_EDGE_DOWN T_IN_RANGE
 %type  <val>    couleur
@@ -81,6 +81,8 @@
 %type  <option>      une_option_tempo
 %type  <gliste>      liste_options_msg options_msg
 %type  <option>      une_option_msg
+%type  <gliste>      liste_options_ai options_ai
+%type  <option>      une_option_ai
 %type  <gliste>      liste_options_registre options_registre
 %type  <option>      une_option_registre
 %type  <option>      une_option_cadran
@@ -157,7 +159,7 @@ un_alias:       T_DEFINE ID EQUIV T_REGISTRE liste_options_registre PVIRGULE
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
                 }}
-                | T_DEFINE ID EQUIV T_AI liste_options PVIRGULE
+                | T_DEFINE ID EQUIV T_ANALOG_INPUT liste_options_ai PVIRGULE
                 {{ if ( New_alias(NULL, $2, MNEMO_ENTREE_ANA, $5) == FALSE )                    /* Deja defini ? */
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
@@ -1045,7 +1047,6 @@ liste_options_msg:
 options_msg:    options_msg VIRGULE une_option_msg
                                      {{ $$ = g_list_append( $1, $3 );   }}
                 | une_option_msg     {{ $$ = g_list_append( NULL, $1 ); }}
-                | une_option_commune {{ $$ = g_list_append( NULL, $1 ); }}
                 ;
 
 une_option_msg: T_UPDATE
@@ -1060,6 +1061,7 @@ une_option_msg: T_UPDATE
                    $$->token_classe = ENTIER;
                    $$->val_as_int = $3;
                 }}
+                | une_option_commune
                 ;
 
 /**************************************************** Gestion des options tempo ***********************************************/
@@ -1071,7 +1073,6 @@ liste_options_tempo:
 options_tempo:  options_tempo VIRGULE une_option_tempo
                                      {{ $$ = g_list_append( $1, $3 );   }}
                 | une_option_tempo   {{ $$ = g_list_append( NULL, $1 ); }}
-                | une_option_commune {{ $$ = g_list_append( NULL, $1 ); }}
                 ;
 
 une_option_tempo:
@@ -1105,6 +1106,7 @@ une_option_tempo:
                    $$->token_classe = ENTIER;
                    $$->val_as_int = $3;
                 }}
+                | une_option_commune
                 ;
 
 /**************************************************** Gestion des options *****************************************************/
@@ -1117,8 +1119,6 @@ options_registre:
                 options_registre VIRGULE une_option_registre
                                       {{ $$ = g_list_append( $1, $3 ); }}
                 | une_option_registre {{ $$ = g_list_append( NULL, $1 ); }}
-                | une_option_cadran   {{ $$ = g_list_append( NULL, $1 ); }}
-                | une_option_commune  {{ $$ = g_list_append( NULL, $1 ); }}
                 ;
 
 une_option_registre:
@@ -1128,15 +1128,51 @@ une_option_registre:
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
+                | une_option_cadran
+                | une_option_commune
                 ;
 
-/**************************************************** Les options cadrans *****************************************************/
-une_option_cadran:
-                T_FORME T_EGAL T_CHAINE
+/**************************************************** Gestion des options *****************************************************/
+liste_options_ai:
+                T_POUV options_ai T_PFERM   {{ $$ = $2;   }}
+                |                           {{ $$ = NULL; }}
+                ;
+
+options_ai:
+                options_ai VIRGULE une_option_ai
+                                      {{ $$ = g_list_append( $1, $3 ); }}
+                | une_option_ai       {{ $$ = g_list_append( NULL, $1 ); }}
+                ;
+
+une_option_ai:
+                T_UNITE T_EGAL T_CHAINE
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
+                }}
+                | une_option_cadran
+                | une_option_commune
+                ;
+/**************************************************** Les options cadrans *****************************************************/
+une_option_cadran:
+                T_CADRAN T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
+                   $$->chaine = $3;
+                }}
+                | T_MIN T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = 1.0*$3;
+                }}
+                | T_MAX T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = 1.0*$3;
                 }}
                 | T_MIN T_EGAL T_VALF
                 {{ $$=New_option();
@@ -1168,8 +1204,7 @@ liste_options_pid:
                 ;
 
 options_pid:    options_pid VIRGULE une_option_pid
-                {{ $$ = g_list_append( $1, $3 );
-                }}
+                                 {{ $$ = g_list_append( $1, $3 );   }}
                 | une_option_pid {{ $$ = g_list_append( NULL, $1 ); }}
                 ;
 
