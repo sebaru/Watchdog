@@ -109,6 +109,16 @@
     g_object_unref( connexion );
   }
 /******************************************************************************************************************************/
+/* Http_destroy_session: Libère une session en paramètre                                                                      */
+/* Entrées: la session                                                                                                        */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_destroy_session ( struct HTTP_CLIENT_SESSION *session )
+  {
+    g_slist_free ( session->Liste_bit_cadrans );
+    g_free(session);
+  }
+/******************************************************************************************************************************/
 /* Http_Save_and_close_sessions: Sauvegarde les sessions en base de données                                                   */
 /* Entrées: néant                                                                                                             */
 /* Sortie: néant                                                                                                              */
@@ -120,7 +130,7 @@
        SQL_Write_new ( "INSERT INTO users_sessions SET username='%s', wtd_session='%s', host='%s', last_request='%d'",
                        session->username, session->wtd_session, session->host, session->last_request );
        Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
-       g_free(session);
+       Http_destroy_session(session);
      }
     Cfg_http.liste_http_clients = NULL;
   }
@@ -148,7 +158,7 @@
   { JsonNode *RootNode = Json_node_create();
     SQL_Select_to_json_node ( RootNode, "sessions", "SELECT session.*, user.access_level "
                                                     "FROM users_sessions AS session "
-                                                    "INNER JOIN users ON session.username = user.username"
+                                                    "INNER JOIN users AS user ON session.username = user.username"
                             );
     if (Json_has_member ( RootNode, "sessions" ))
      { Json_node_foreach_array_element ( RootNode, "sessions", Http_Load_one_session, NULL ); }
@@ -715,7 +725,7 @@ reload:
              if (client->last_request + Cfg_http.wtd_session_expiry*10 < Partage->top )
               { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, client );
                 Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Session '%s' out of time", __func__, client->wtd_session );
-                g_free(client);
+                Http_destroy_session ( client );
               }
            }
         }

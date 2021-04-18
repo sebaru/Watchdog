@@ -51,8 +51,9 @@
 %token <val>    T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_OK
 %token <val>    T_BUS T_HOST T_THREAD T_TAG
 
-%token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE T_FORME T_CADRAN
-%token <val>    T_PID T_KP T_KI T_KD T_INPUT T_MIN T_MAX
+%token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
+%token <val>    T_CADRAN T_MIN T_MAX T_DECIMAL
+%token <val>    T_PID T_KP T_KI T_KD T_INPUT
 %token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM T_UPDATE T_CONSIGNE T_ALIAS
 
 %token <val>    T_TYPE T_INFO T_ATTENTE T_DEFAUT T_ALARME T_VEILLE T_ALERTE T_DERANGEMENT T_DANGER
@@ -1184,6 +1185,12 @@ une_option_cadran:
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = T_VALF;
+                   $$->val_as_double = $3;
+                }}
+                | T_DECIMAL T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
                    $$->val_as_double = $3;
                 }}
                 ;

@@ -40,7 +40,8 @@
 /* Entrée: le plugin source, la cible, et les parametres du cadran                                                            */
 /* Sortie: FALSE si erreu                                                                                                     */
 /******************************************************************************************************************************/
- gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *forme_src, gint min, gint max )
+ gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *forme_src,
+                                          gdouble min, gdouble max, gint nb_decimal )
   { gchar *acro, *forme;
 /******************************************** Préparation de la base du mnemo *************************************************/
     acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
@@ -61,13 +62,13 @@
     gboolean retour;
     retour = SQL_Write_new
                ("INSERT INTO syns_cadrans SET "
-                "syn_id=%d, tech_id='%s', acronyme='%s', forme='%s', minimum='%d', maximum='%d', auto_create=1 "
+                "syn_id=%d, tech_id='%s', acronyme='%s', forme='%s', minimum='%lf', maximum='%lf', nb_decimal='%d', auto_create=1 "
                 "ON DUPLICATE KEY UPDATE forme=VALUES(forme), minimum=VALUES(minimum), maximum=VALUES(maximum)",
-                plugin->syn_id, plugin->tech_id, acro, forme, min, max );
+                plugin->syn_id, plugin->tech_id, acro, forme, min, max, nb_decimal );
 
-    SQL_Write_new ("UPDATE syns_cadrans SET forme='%s', minimum='%d', maximum='%d' "
+    SQL_Write_new ("UPDATE syns_cadrans SET forme='%s', minimum='%lf', maximum='%lf', nb_decimal='%d' "
                    "WHERE tech_id='%s' AND acronyme='%s';",
-                   forme, min, max, plugin->tech_id, acro );
+                   forme, min, max, nb_decimal, plugin->tech_id, acro );
 
     g_free(forme);
     g_free(acro);

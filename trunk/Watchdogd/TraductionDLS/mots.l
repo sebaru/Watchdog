@@ -39,7 +39,7 @@
  /*%option debug*/
 
 /* Expressions rationnelles de detection */
-digit         [0-9]+
+digit         [-]?[0-9]+
 digitf        [-]?[0-9]+[\.[0-9]+]?
 id            [a-zA-Z][a-zA-Z_0-9]+[a-zA-Z0-9]
 chaine        [^"]*
@@ -163,6 +163,7 @@ newline       [\n\r]+
 "kd"                       { DlsScanner_lval.val = T_KD;        return T_KD;        }
 "min"                      { DlsScanner_lval.val = T_MIN;       return T_MIN;       }
 "max"                      { DlsScanner_lval.val = T_MAX;       return T_MAX;       }
+"decimal"                  { DlsScanner_lval.val = T_DECIMAL;   return T_DECIMAL;   }
 
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }

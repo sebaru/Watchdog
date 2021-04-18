@@ -429,7 +429,7 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `posy` int(11) NOT NULL DEFAULT '0',
   `minimum` int(11) NOT NULL DEFAULT '0',
   `maximum` int(11) NOT NULL DEFAULT '100',
-  `type` int(11) NOT NULL DEFAULT '0',
+  `type` int(11) NOT NULL DEFAULT '0', /* A virer quand la migration full json gtk3 aura été faire */
   `angle` int(11) NOT NULL DEFAULT '0',
   `nb_decimal` int(11) NOT NULL DEFAULT '2',
   PRIMARY KEY (`id`),

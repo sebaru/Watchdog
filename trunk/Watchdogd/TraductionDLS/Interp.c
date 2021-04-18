@@ -138,7 +138,7 @@
 /* Entrées: la liste des options, le type a rechercher                                                                        */
 /* Sortie: -1 si pas trouvé                                                                                                   */
 /******************************************************************************************************************************/
- static int Get_option_entier( GList *liste_options, gint token )
+ static int Get_option_entier( GList *liste_options, gint token, gint defaut )
   { struct OPTION *option;
     GList *liste;
     liste = liste_options;
@@ -148,7 +148,7 @@
         { return (option->val_as_int); }
        liste = liste->next;
      }
-    return(-1);
+    return(defaut);
   }
 /******************************************************************************************************************************/
 /* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
@@ -194,11 +194,11 @@
     gint taille;
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
-    if (Get_option_entier( options, T_EDGE_UP) == 1)
+    if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
      { g_snprintf( result, taille, "%sDls_data_get_bool_up ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
-    else if (Get_option_entier( options, T_EDGE_DOWN) == 1)
+    else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
      { g_snprintf( result, taille, "%sDls_data_get_bool_down ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
@@ -218,11 +218,11 @@
     gint taille;
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
-    if (Get_option_entier( options, T_EDGE_UP) == 1)
+    if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
      { g_snprintf( result, taille, "%sDls_data_get_DI_up ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
-    else if (Get_option_entier( options, T_EDGE_DOWN) == 1)
+    else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
      { g_snprintf( result, taille, "%sDls_data_get_DI_down ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
@@ -238,7 +238,7 @@
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
  gchar *New_condition_entree_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur )
-  { gint taille, in_range = Get_option_entier ( options, T_IN_RANGE );
+  { gint taille, in_range = Get_option_entier ( options, T_IN_RANGE, 0 );
     gchar *result;
 
     if (in_range==1)
@@ -536,8 +536,7 @@
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-    gint update = Get_option_entier ( options, T_UPDATE );
-    if (update==-1) update=0;
+    gint update = Get_option_entier ( options, T_UPDATE, 0 );
 
     g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, TRUE );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
@@ -627,7 +626,7 @@
   { struct ACTION *action;
     int taille, reset;
 
-    reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
+    reset = Get_option_entier ( options, RESET, 0 );
     taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
@@ -648,8 +647,8 @@
   { struct ACTION *action;
     int taille, reset, ratio;
 
-    reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
-    ratio = Get_option_entier ( options, RATIO ); if (ratio == -1) ratio = 1;
+    reset = Get_option_entier ( options, RESET, 0 );
+    ratio = Get_option_entier ( options, RATIO, 1 );
 
     taille = 256;
     action = New_action();
@@ -670,7 +669,7 @@
  struct ACTION *New_action_WATCHDOG( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
 
-    gint consigne = Get_option_entier ( options, T_CONSIGNE ); if (consigne == -1) consigne = 600;
+    gint consigne = Get_option_entier ( options, T_CONSIGNE, 600 );
     gint taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
@@ -689,9 +688,9 @@
     int taille, mode, coul, cligno;
     gchar *color;
 
-    mode   = Get_option_entier ( options, MODE   ); if (mode   == -1) mode   = 0;
-    coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul   = 0;
-    cligno = Get_option_entier ( options, CLIGNO ); if (cligno == -1) cligno = 0;
+    mode   = Get_option_entier ( options, MODE, 0   );
+    coul   = Get_option_entier ( options, COLOR, 0  );
+    cligno = Get_option_entier ( options, CLIGNO, 0 );
     taille = 512;
     action = New_action();
     action->alors = New_chaine( taille );
@@ -751,11 +750,11 @@ return(NULL);
   { struct ACTION *action;
     int taille, daa, dma, dMa, dad, random;
 
-    daa    = Get_option_entier ( options, T_DAA );      if (daa == -1)    daa = 0;
-    dma    = Get_option_entier ( options, T_DMINA );    if (dma == -1)    dma = 0;
-    dMa    = Get_option_entier ( options, T_DMAXA );    if (dMa == -1)    dMa = 0;
-    dad    = Get_option_entier ( options, T_DAD );      if (dad == -1)    dad = 0;
-    random = Get_option_entier ( options, T_RANDOM );   if (random == -1) random = 0;
+    daa    = Get_option_entier ( options, T_DAA, 0 );
+    dma    = Get_option_entier ( options, T_DMINA, 0 );
+    dMa    = Get_option_entier ( options, T_DMAXA, 0 );
+    dad    = Get_option_entier ( options, T_DAD, 0 );
+    random = Get_option_entier ( options, T_RANDOM, 0 );
 
     action = New_action();
     taille = 256;
@@ -814,7 +813,7 @@ return(NULL);
 /* Entrées: la liste des options, le type a rechercher                                                                        */
 /* Sortie: -1 si pas trouvé                                                                                                   */
 /******************************************************************************************************************************/
- static gdouble Get_option_double( GList *liste_options, gint token )
+ static gdouble Get_option_double( GList *liste_options, gint token, gdouble defaut )
   { struct OPTION *option;
     GList *liste;
     liste = liste_options;
@@ -824,7 +823,7 @@ return(NULL);
         { return (option->val_as_double); }
        liste = liste->next;
      }
-    return(-1);
+    return(defaut);
   }
 /******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
@@ -1173,8 +1172,9 @@ return(NULL);
                    gchar *cadran = Get_option_chaine( alias->options, T_CADRAN );
                    if (cadran)
                     { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, cadran,
-                                                      Get_option_double ( alias->options, T_MIN ),
-                                                      Get_option_double ( alias->options, T_MAX )
+                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
+                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
+                                                      Get_option_entier ( alias->options, T_DECIMAL, 2 )
                                                     );
                     }
 
@@ -1213,8 +1213,9 @@ return(NULL);
                    gchar *cadran = Get_option_chaine( alias->options, T_CADRAN );
                    if (cadran)
                     { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, cadran,
-                                                      Get_option_double ( alias->options, T_MIN ),
-                                                      Get_option_double ( alias->options, T_MAX )
+                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
+                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
+                                                      Get_option_entier ( alias->options, T_DECIMAL, 2 )
                                                     );
                     }
 
@@ -1264,8 +1265,8 @@ return(NULL);
                  }
                 case MNEMO_MSG:
                  { gint param;
-                   param = Get_option_entier ( alias->options, T_TYPE );
-                   Mnemo_auto_create_MSG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, (param!=-1 ? param : MSG_ETAT) );
+                   param = Get_option_entier ( alias->options, T_TYPE, MSG_ETAT );
+                   Mnemo_auto_create_MSG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, param );
                    if (!Liste_MESSAGE) Liste_MESSAGE = g_strconcat( "'", alias->acronyme, "'", NULL );
                    else
                     { old_liste = Liste_MESSAGE;
