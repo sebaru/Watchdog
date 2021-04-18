@@ -199,7 +199,7 @@ end:
        return;
      }
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %lf", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur );
+              "%s: '%s':'%s' = %lf %s", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur, canal->dls_ai->unite );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
   }
 /***************************************************************************************************************************/
