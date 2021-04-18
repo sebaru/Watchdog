@@ -218,7 +218,7 @@
  function Charger_page_synoptique ( syn_id )
   {
     console.log("Charger_page_synoptique " + syn_id);
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    Scroll_to_top();
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
                      .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div")

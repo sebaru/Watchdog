@@ -62,11 +62,11 @@
     gboolean retour;
     retour = SQL_Write_new
                ("INSERT INTO syns_cadrans SET "
-                "syn_id=%d, tech_id='%s', acronyme='%s', forme='%s', minimum='%lf', maximum='%lf', nb_decimal='%d', auto_create=1 "
+                "syn_id=%d, tech_id='%s', acronyme='%s', forme='%s', minimum='%f', maximum='%f', nb_decimal='%d', auto_create=1 "
                 "ON DUPLICATE KEY UPDATE forme=VALUES(forme), minimum=VALUES(minimum), maximum=VALUES(maximum)",
                 plugin->syn_id, plugin->tech_id, acro, forme, min, max, nb_decimal );
 
-    SQL_Write_new ("UPDATE syns_cadrans SET forme='%s', minimum='%lf', maximum='%lf', nb_decimal='%d' "
+    SQL_Write_new ("UPDATE syns_cadrans SET forme='%s', minimum='%f', maximum='%f', nb_decimal='%d' "
                    "WHERE tech_id='%s' AND acronyme='%s';",
                    forme, min, max, nb_decimal, plugin->tech_id, acro );
 

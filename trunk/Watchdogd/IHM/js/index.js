@@ -20,12 +20,14 @@
        this.send ( json_request );
      }
     WTDWebSocket.onerror = function (event)
-     { $('#idAlertConnexionLost').show();
+     { Scroll_to_top();
+       $('#idAlertConnexionLost').show();
        console.log("Error au websocket !");
        console.debug(event);
      }
     WTDWebSocket.onclose = function (event)
-     { $('#idAlertConnexionLost').show();
+     { Scroll_to_top();
+       $('#idAlertConnexionLost').show();
        console.log("Close au websocket !");
        console.debug(event);
      }

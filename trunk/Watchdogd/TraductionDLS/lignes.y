@@ -1191,7 +1191,7 @@ une_option_cadran:
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ENTIER;
-                   $$->val_as_double = $3;
+                   $$->val_as_int = $3;
                 }}
                 ;
 
