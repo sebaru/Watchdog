@@ -627,22 +627,28 @@ end:
            }
         }
 
-       gchar *database_debug = Recuperer_configDB_by_nom( "msrv", "log_db" );         /* Récupération d'une config dans la DB */
-       if (database_debug)
-        { Config.log_db = !strcasecmp(database_debug,"true");
-          g_free(database_debug);
+       gchar *log_db = Recuperer_configDB_by_nom( "msrv", "log_db" );         /* Récupération d'une config dans la DB */
+       if (log_db)
+        { Config.log_db = !strcasecmp(log_db,"true");
+          g_free(log_db);
         } else Config.log_db = TRUE;
 
-       gchar *zmq_debug = Recuperer_configDB_by_nom( "msrv", "log_zmq" );             /* Récupération d'une config dans la DB */
-       if (zmq_debug)
-        { Config.log_zmq = !strcasecmp(zmq_debug,"true");
-          g_free(zmq_debug);
+       gchar *log_zmq = Recuperer_configDB_by_nom( "msrv", "log_zmq" );             /* Récupération d'une config dans la DB */
+       if (log_zmq)
+        { Config.log_zmq = !strcasecmp(log_zmq,"true");
+          g_free(log_zmq);
         } else Config.log_zmq = TRUE;
 
-       gchar *msrv_debug = Recuperer_configDB_by_nom( "msrv", "debug" );              /* Récupération d'une config dans la DB */
-       if (msrv_debug)
-        { Config.log_msrv = !strcasecmp(msrv_debug,"true");
-          g_free(msrv_debug);
+       gchar *log_trad = Recuperer_configDB_by_nom( "msrv", "log_trad" );           /* Récupération d'une config dans la DB */
+       if (log_trad)
+        { Config.log_trad = !strcasecmp(log_trad,"true");
+          g_free(log_trad);
+        } else Config.log_trad = TRUE;
+
+       gchar *debug = Recuperer_configDB_by_nom( "msrv", "debug" );              /* Récupération d'une config dans la DB */
+       if (debug)
+        { Config.log_msrv = !strcasecmp(debug,"true");
+          g_free(debug);
         } else Config.log_msrv = TRUE;
 
        gchar *use_subdir = Recuperer_configDB_by_nom ( "msrv", "use_subdir" );

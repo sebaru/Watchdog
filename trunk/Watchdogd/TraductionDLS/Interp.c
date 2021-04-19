@@ -67,18 +67,18 @@
     taille = strlen(chaine);
     if ( Buffer_used + taille > Buffer_taille)
      { gchar *new_Buffer;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
+       Info_new( Config.log, Config.log_trad, LOG_DEBUG,
                 "%s: buffer too small, trying to expand it to %d)", __func__, Buffer_taille + taille );
        new_Buffer = g_try_realloc( Buffer, Buffer_taille + taille );
        if (!new_Buffer)
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Fail to expand buffer. skipping", __func__ );
+        { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Fail to expand buffer. skipping", __func__ );
           return;
         }
        Buffer = new_Buffer;
        Buffer_taille = Buffer_taille + taille;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Buffer expanded to %d bytes", __func__, Buffer_taille );
+       Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Buffer expanded to %d bytes", __func__, Buffer_taille );
      }
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
     memcpy ( Buffer + Buffer_used, chaine, taille );                                             /* Recopie du bout de buffer */
     Buffer_used += taille;
   }
@@ -107,7 +107,7 @@
        g_snprintf( log, sizeof(log), "Ligne %d: %s\n", DlsScanner_get_lineno(), chaine );
        write( Id_log, log, strlen(log) );
 
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
+       Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
      }
     else if (nbr_erreur==15)
      { write( Id_log, too_many, strlen(too_many)+1 ); }
@@ -844,7 +844,7 @@ return(NULL);
     alias->options  = options;
     alias->used     = 0;
     Alias = g_slist_prepend( Alias, alias );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
 
     if (bit != MNEMO_MOTIF) return(TRUE);
 
@@ -988,7 +988,7 @@ return(NULL);
 
     plugin = Rechercher_plugin_dlsDB ( tech_id );
     if (!plugin)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: plugin '%s' not found.", __func__, tech_id );
+     { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: plugin '%s' not found.", __func__, tech_id );
        return (TRAD_DLS_ERROR_NO_FILE);
      }
     memcpy ( &Dls_plugin, plugin, sizeof(struct DLS_PLUGIN) );
@@ -1003,12 +1003,12 @@ return(NULL);
     g_snprintf( log,    sizeof(log),    "Dls/%s.log", tech_id );
     g_snprintf( cible,  sizeof(cible),  "Dls/%s.c", tech_id );
     unlink ( log );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: tech_id='%s', source='%s', log='%s'", __func__,
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: tech_id='%s', source='%s', log='%s'", __func__,
               tech_id, source, log );
 
     Id_log = open( log, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_log<0)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, Config.log_trad, LOG_WARNING,
                 "%s: Log creation failed %s (%s)", __func__, log, strerror(errno) );
        close(Id_log);
        return(TRAD_DLS_ERROR_NO_FILE);
@@ -1042,7 +1042,7 @@ return(NULL);
        New_alias_permanent ( "MSG_COMM_HS", MNEMO_MSG, libelle );
        Mnemo_auto_create_MSG ( FALSE, Dls_plugin.tech_id, "MSG_COMM_HS", libelle, MSG_DEFAUT );
 
-       DlsScanner_debug = Partage->com_dls.Thread_debug;
+       DlsScanner_debug = Config.log_trad;
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);
@@ -1061,7 +1061,7 @@ return(NULL);
        unlink ( cible );
        fd = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );             /* Enregistrement du buffer resultat sur disque */
        if (fd<0)
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
+        { Info_new( Config.log, Config.log_trad, LOG_WARNING,
                    "%s: Target creation failed %s (%s)", __func__, cible, strerror(errno) );
           retour = TRAD_DLS_ERROR_NO_FILE;
         }

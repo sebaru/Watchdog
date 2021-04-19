@@ -28,21 +28,21 @@
 #ifndef _CONFIG_H_
  #define _CONFIG_H_
 
- #define NOM_TABLE_CONFIG         "config"                          /* Nom de la table en base de données */
+ #define NOM_TABLE_CONFIG         "config"                                              /* Nom de la table en base de données */
 
- #define TAILLE_HOME              80                                           /* Chemin HOME de watchdog */
+ #define TAILLE_HOME              80                                                               /* Chemin HOME de watchdog */
 
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
+ extern struct CONFIG Config;                                /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
   struct CONFIG
-  { gchar config_file[80];                    /* Nom du fichier dont est issu les informations ci dessous */
-    gchar run_as [ 40 ];                                        /* Nom du user sur lequel tourne Watchdog */
+  { gchar config_file[80];                                        /* Nom du fichier dont est issu les informations ci dessous */
+    gchar run_as [ 40 ];                                                            /* Nom du user sur lequel tourne Watchdog */
 
     gint  db_port;
-    gchar db_hostname[ TAILLE_DB_HOST+1 ];                            /* Nom du host de la base de donnes */
-    gchar db_username[ TAILLE_DB_USERNAME+1 ];            /* Nom de l'administrateur de la base de données*/
-    gchar db_database[ TAILLE_DB_DATABASE+1 ];                          /* Chemin d'acces aux DB watchdog */
-    gchar db_password[ TAILLE_DB_PASSWORD+1 ];                          /* Mot de passe de connexion ODBC */
+    gchar db_hostname[ TAILLE_DB_HOST+1 ];                                                /* Nom du host de la base de donnes */
+    gchar db_username[ TAILLE_DB_USERNAME+1 ];                                /* Nom de l'administrateur de la base de données*/
+    gchar db_database[ TAILLE_DB_DATABASE+1 ];                                              /* Chemin d'acces aux DB watchdog */
+    gchar db_password[ TAILLE_DB_PASSWORD+1 ];                                              /* Mot de passe de connexion ODBC */
 
     gboolean installed;                                                                    /* TRUE si la config a pu etre lue */
     gchar home [ TAILLE_HOME+1 ];                                                              /* Repertoire maison du daemon */
@@ -54,8 +54,9 @@
     gboolean log_arch;                                                                                /* TRUE si log_override */
     gboolean log_db;                                                                              /* TRUE si log des acces DB */
     gboolean log_zmq;                                                                            /* TRUE si log des acces ZMQ */
-    struct LOG *log;                                                         /* Pour l'affichage des logs */
-    gint single;                                                                /* Demarrage des thread ? */
+    gboolean log_trad;                                                                    /* TRUE si log des compilations DLS */
+    gboolean single;                                                                                /* Demarrage des thread ? */
+    struct LOG *log;                                                                             /* Pour l'affichage des logs */
   };
 
  #define DEFAUT_DB_HOST                 "localhost"          /* Ne pas depasser TAILLE_DB_HOST caracteres */

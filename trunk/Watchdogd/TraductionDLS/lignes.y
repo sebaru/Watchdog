@@ -333,7 +333,9 @@ calcul_expr2:   calcul_expr2 T_FOIS calcul_expr3
                 }}
                 | calcul_expr3
                 ;
-calcul_expr3:   T_VALF
+calcul_expr3:   T_POUV calcul_expr T_PFERM
+                {{ $$=$2; }}
+                | T_VALF
                 {{ int taille;
                    taille = 15;
                    $$ = New_chaine( taille );

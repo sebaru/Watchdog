@@ -91,7 +91,7 @@
      }
 
     if ( ! (Json_has_member ( request, "log_level" ) && Json_has_member ( request, "log_db" ) &&
-            Json_has_member ( request, "log_zmq" ))
+            Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_trad" ) )
        )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -116,6 +116,10 @@
     Config.log_zmq = Json_get_bool ( request, "log_zmq" );
     Modifier_configDB ( "msrv", "log_zmq", (Config.log_zmq ? "true" : "false") );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogZMQ set to '%d'", __func__, Config.log_zmq );
+
+    Config.log_trad = Json_get_bool ( request, "log_trad" );
+    Modifier_configDB ( "msrv", "log_trad", (Config.log_trad ? "true" : "false") );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogTrad set to '%d'", __func__, Config.log_trad );
 
     json_node_unref(request);
 	   soup_message_set_status (msg, SOUP_STATUS_OK);

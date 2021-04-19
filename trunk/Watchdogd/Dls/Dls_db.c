@@ -201,41 +201,30 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Set_compil_status_plugin_dlsDB( gchar *tech_id_src, gint status, gchar *log_buffer )
-  { gchar requete[2048], *log, *tech_id;
+  { gchar *log, *tech_id;
     gboolean retour;
-    struct DB *db;
 
     tech_id = Normaliser_chaine ( tech_id_src );                                             /* Formatage correct des chaines */
     if (!tech_id)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation tech_id impossible", __func__ );
+     { Info_new( Config.log, Config.log_trad, LOG_WARNING, "%s: Normalisation tech_id impossible", __func__ );
        return(FALSE);
      }
 
     log = Normaliser_chaine ( log_buffer );                                                  /* Formatage correct des chaines */
     if (!log)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation buffer impossible", __func__ );
+     { Info_new( Config.log, Config.log_trad, LOG_WARNING, "%s: Normalisation buffer impossible", __func__ );
        g_free(tech_id);
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s SET "
-                "compil_date=NOW(), compil_status='%d', nbr_compil=nbr_compil+1, "
-                "nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''))+1, "
-                "errorlog='%s' "
-                "WHERE tech_id='%s'",
-                NOM_TABLE_DLS, status, log, tech_id );
+    retour = SQL_Write_new ( "UPDATE %s SET "
+                             "compil_date=NOW(), compil_status='%d', nbr_compil=nbr_compil+1, "
+                             "nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''))+1, "
+                             "errorlog='%s' "
+                             "WHERE tech_id='%s'",
+                             NOM_TABLE_DLS, status, log, tech_id );
     g_free(log);
     g_free(tech_id);
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
     return(retour);
   }
 /******************************************************************************************************************************/

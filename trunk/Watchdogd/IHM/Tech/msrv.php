@@ -53,6 +53,16 @@
      					</div>
   					</div>
 
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Log Traduction DLS</label>
+						     <select id="idMSRVLogTrad" class="custom-select" onchange="MSRV_Set_Log_Level()">
+             <option value="false">Désactivé</option>
+             <option value="true">Activé</option>
+           </select>
+     					</div>
+  					</div>
+
        <div class="alert alert-danger">Attention, la modification des données ci dessous peuvent déconnecter l'instance !</div>
 
        <div class="col form-group">
