@@ -114,7 +114,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Http_destroy_session ( struct HTTP_CLIENT_SESSION *session )
-  {
+  { while ( session->liste_ws_clients ) Http_ws_destroy_session ( (struct WS_CLIENT_SESSION *)session->liste_ws_clients->data );
     g_slist_free ( session->Liste_bit_cadrans );
     g_free(session);
   }
@@ -716,8 +716,7 @@ reload:
         }
 
        if ( Partage->top > last_pulse + 50 )
-        { Http_ws_send_pulse_to_all();
-          last_pulse = Partage->top;
+        { last_pulse = Partage->top;
           GSList *liste = Cfg_http.liste_http_clients;
           while(liste)
            { struct HTTP_CLIENT_SESSION *client = liste->data;
@@ -741,9 +740,6 @@ reload:
     g_main_loop_unref(loop);
 
     Http_Save_and_close_sessions();
-
-    while ( Cfg_http.liste_ws_clients )
-     { Http_ws_destroy_session ( (struct WS_CLIENT_SESSION *)(Cfg_http.liste_ws_clients->data ) ); }
 
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)

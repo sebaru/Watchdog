@@ -47,25 +47,18 @@
 /******************************************************************************************************************************/
  void Http_ws_send_to_all ( JsonNode *node )
   { gchar *buf = Json_node_to_string ( node );
-    GSList *liste = Cfg_http.liste_ws_clients;
-    while (liste)
-     { struct WS_CLIENT_SESSION *client = liste->data;
-       soup_websocket_connection_send_text ( client->connexion, buf );
-       liste = g_slist_next(liste);
+    GSList *sessions = Cfg_http.liste_http_clients;
+    while ( sessions )
+     { struct HTTP_CLIENT_SESSION *session = sessions->data;
+       GSList *liste_ws = session->liste_ws_clients;
+       while (liste_ws)
+        { struct WS_CLIENT_SESSION *client = liste_ws->data;
+          soup_websocket_connection_send_text ( client->connexion, buf );
+          liste_ws = g_slist_next(liste_ws);
+        }
+       sessions = g_slist_next ( sessions );
      }
     g_free(buf);
-  }
-/******************************************************************************************************************************/
-/* Recuperer_histo_msgsDB_alive: Recupération de l'ensemble des messages encore Alive dans le BDD                             */
-/* Entrée: La base de données de travail                                                                                      */
-/* Sortie: False si probleme                                                                                                  */
-/******************************************************************************************************************************/
- void Http_ws_send_pulse_to_all ( void )
-  { JsonNode *pulse = Json_node_create();
-    if (!pulse) return;
-    Json_node_add_string( pulse, "zmq_tag", "PULSE" );
-    Http_ws_send_to_all ( pulse );
-    json_node_unref(pulse);
   }
 /******************************************************************************************************************************/
 /* Envoyer_un_cadran: Envoi un update cadran au client                                                                        */
@@ -111,10 +104,13 @@
        else
         { gchar *wtd_session = Json_get_string ( response, "wtd_session");
           GSList *liste = Cfg_http.liste_http_clients;
-          while ( liste )
+          while ( liste )                                                      /* Recherche de la session HTTP correspondante */
            { struct HTTP_CLIENT_SESSION *http_session = liste->data;
              if (!strcmp(http_session->wtd_session, wtd_session))
               { client->http_session = http_session;
+                pthread_mutex_lock( &Cfg_http.lib->synchro );
+                http_session->liste_ws_clients = g_slist_prepend ( http_session->liste_ws_clients, client );
+                pthread_mutex_unlock( &Cfg_http.lib->synchro );
                 Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: session found for '%s' !", __func__, http_session->username );
                 break;
               }
@@ -134,28 +130,30 @@
 /******************************************************************************************************************************/
  void Http_Envoyer_les_cadrans ( void )
   { pthread_mutex_lock( &Cfg_http.lib->synchro );
-    GSList *clients = Cfg_http.liste_ws_clients;
-    while (clients)
-     { struct WS_CLIENT_SESSION *client = clients->data;
-       if (client->http_session)
-        { GSList *cadrans = client->http_session->Liste_bit_cadrans;
-          while (cadrans)
-           { struct HTTP_CADRAN *cadran = cadrans->data;
-             if (cadran->last_update + 10 <= Partage->top)
-              { JsonNode *RootNode = Json_node_create();
-                if (RootNode)
-                 { Http_Formater_cadran ( cadran );
-                   Json_node_add_string ( RootNode, "zmq_tag", "DLS_CADRAN" );
-                   HTTP_CADRAN_to_json ( RootNode, cadran );
+    GSList *sessions = Cfg_http.liste_http_clients;
+    while ( sessions )
+     { struct HTTP_CLIENT_SESSION *session = sessions->data;
+       GSList *cadrans = session->Liste_bit_cadrans;
+       while ( cadrans )
+        { struct HTTP_CADRAN *cadran = cadrans->data;
+          if (cadran->last_update + 10 <= Partage->top)
+           { GSList *clients = session->liste_ws_clients;
+             JsonNode *RootNode = Json_node_create();
+             if (RootNode)
+              { Http_Formater_cadran ( cadran );
+                Json_node_add_string ( RootNode, "zmq_tag", "DLS_CADRAN" );
+                HTTP_CADRAN_to_json ( RootNode, cadran );
+                while (clients)
+                 { struct WS_CLIENT_SESSION *client = clients->data;
                    Http_ws_send_to_client ( client, RootNode );
-                   json_node_unref( RootNode );
+                   clients = g_slist_next(clients);
                  }
-                cadran->last_update = Partage->top;
+                json_node_unref( RootNode );
               }
-             cadrans = g_slist_next(cadrans);
+             cadran->last_update = Partage->top;
            }
         }
-       clients = g_slist_next(clients);
+      sessions = g_slist_next(sessions);
      }
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
   }
@@ -165,12 +163,15 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client )
-  { pthread_mutex_lock( &Cfg_http.lib->synchro );
-    Cfg_http.liste_ws_clients = g_slist_remove ( Cfg_http.liste_ws_clients, client );
-    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+  { if (client->http_session)
+     { struct HTTP_CLIENT_SESSION *session = client->http_session;
+       pthread_mutex_lock( &Cfg_http.lib->synchro );
+       session->liste_ws_clients = g_slist_remove ( session->liste_ws_clients, client );
+       pthread_mutex_unlock( &Cfg_http.lib->synchro );
+       g_slist_free ( client->Liste_bit_visuels );
+     }
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Session closed !", __func__ );
     g_object_unref(client->connexion);
-    g_slist_free ( client->Liste_bit_visuels );
     g_free(client);
   }
 /******************************************************************************************************************************/
@@ -205,9 +206,6 @@
     g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_on_closed), client );
     g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_on_error), client );
     /*soup_websocket_connection_send_text ( connexion, "Welcome on Watchdog WebSocket !" );*/
-    pthread_mutex_lock( &Cfg_http.lib->synchro );
-    Cfg_http.liste_ws_clients = g_slist_prepend ( Cfg_http.liste_ws_clients, client );
-    pthread_mutex_unlock( &Cfg_http.lib->synchro );
     g_object_ref(connexion);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
