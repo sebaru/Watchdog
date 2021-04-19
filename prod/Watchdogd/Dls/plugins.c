@@ -193,7 +193,7 @@
                  plugin->tech_id, plugin->nom );
        return;
      }
-      
+
     plugin->on = TRUE;
     plugin->conso = 0.0;
     plugin->start_date = time(NULL);
@@ -233,43 +233,43 @@
     unlink(chaine);
     id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Open file '%s' for write failed (%s)", __func__,
+     { Info_new( Config.log, Config.log_trad, LOG_WARNING, "%s: Open file '%s' for write failed (%s)", __func__,
                  chaine, strerror(errno) );
        close(id_fichier);
        return(DLS_COMPIL_EXPORT_DB_FAILED);
      }
     else
      { if (write( id_fichier, Source, taille_source )<0)
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Write %d bytes to file '%s' failed (%s)", __func__,
+        { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Write %d bytes to file '%s' failed (%s)", __func__,
                     taille_source, chaine, strerror(errno) );
          close(id_fichier);
          return(DLS_COMPIL_EXPORT_DB_FAILED);
         }
        else
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Write %d bytes to file '%s' OK", __func__,
+        { Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Write %d bytes to file '%s' OK", __func__,
                     taille_source, chaine);
           close(id_fichier);
         }
      }
 
     retour = Traduire_DLS( tech_id );                                                                       /* Traduction DLS */
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG,
              "%s: fin traduction '%s'. Code retour '%d'", __func__, tech_id, retour );
 
     if (retour == TRAD_DLS_ERROR_NO_FILE)                                             /* Retour de la traduction D.L.S vers C */
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: envoi erreur file Traduction D.L.S '%s'", tech_id );
+     { Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: envoi erreur file Traduction D.L.S '%s'", tech_id );
        Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_ERROR_LOAD_SOURCE, "Erreur chargement source" );
        return( DLS_COMPIL_ERROR_LOAD_SOURCE );
      }
 
     memset ( log_buffer, 0, sizeof(log_buffer) );                            /* Chargement de fichier de log dans la database */
 
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Chargement du fichier de log D.L.S '%s'", __func__, tech_id );
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Chargement du fichier de log D.L.S '%s'", __func__, tech_id );
     g_snprintf( log_file, sizeof(log_file), "Dls/%s.log", tech_id );
 
     id_fichier = open( log_file, O_RDONLY, 0 );              /* Ouverture du fichier log et chargement du contenu dans buffer */
     if (id_fichier<0)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
+     { Info_new( Config.log, Config.log_trad, LOG_ERR,
                 "%s: Impossible de charger le fichier de log '%s' : %s", __func__, log_file, strerror(errno) );
        Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_ERROR_LOAD_LOG, "Erreur chargement log" );
        return(DLS_COMPIL_ERROR_LOAD_LOG);
@@ -289,7 +289,7 @@
 
     pidgcc = fork();
     if (pidgcc<0)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s_Fils: envoi erreur Fork GCC '%s'", __func__, tech_id );
+     { Info_new( Config.log, Config.log_trad, LOG_WARNING, "%s_Fils: envoi erreur Fork GCC '%s'", __func__, tech_id );
        Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_ERROR_FORK_GCC, "Erreur Fork GCC" );
        return(DLS_COMPIL_ERROR_FORK_GCC);
      }
@@ -303,11 +303,11 @@
        _exit(0);
      }
 
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Waiting for gcc to finish pid %d", __func__, pidgcc );
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Waiting for gcc to finish pid %d", __func__, pidgcc );
     wait4(pidgcc, NULL, 0, NULL );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: gcc is down, OK %d", __func__, pidgcc );
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: gcc is down, OK %d", __func__, pidgcc );
 
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: end of '%s'", __func__, tech_id );
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: end of '%s'", __func__, tech_id );
     if (retour == TRAD_DLS_WARNING)
      { Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_OK_WITH_WARNINGS, log_buffer );
        return( DLS_COMPIL_OK_WITH_WARNINGS );

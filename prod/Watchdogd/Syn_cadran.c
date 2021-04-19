@@ -36,6 +36,45 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Synoptique_auto_create_CADRAN: Création automatique d'un cadran depuis la compilation DLS                                  */
+/* Entrée: le plugin source, la cible, et les parametres du cadran                                                            */
+/* Sortie: FALSE si erreu                                                                                                     */
+/******************************************************************************************************************************/
+ gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *forme_src,
+                                          gdouble min, gdouble max, gint nb_decimal )
+  { gchar *acro, *forme;
+/******************************************** Préparation de la base du mnemo *************************************************/
+    acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
+    if ( !acro )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
+       return(FALSE);
+     }
+
+    forme      = Normaliser_chaine ( forme_src );                                            /* Formatage correct des chaines */
+    if ( !forme )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation forme impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
+       return(FALSE);
+     }
+
+    gboolean retour;
+    retour = SQL_Write_new
+               ("INSERT INTO syns_cadrans SET "
+                "syn_id=%d, tech_id='%s', acronyme='%s', forme='%s', minimum='%f', maximum='%f', nb_decimal='%d', auto_create=1 "
+                "ON DUPLICATE KEY UPDATE forme=VALUES(forme), minimum=VALUES(minimum), maximum=VALUES(maximum)",
+                plugin->syn_id, plugin->tech_id, acro, forme, min, max, nb_decimal );
+
+    SQL_Write_new ("UPDATE syns_cadrans SET forme='%s', minimum='%f', maximum='%f', nb_decimal='%d' "
+                   "WHERE tech_id='%s' AND acronyme='%s';",
+                   forme, min, max, nb_decimal, plugin->tech_id, acro );
+
+    g_free(forme);
+    g_free(acro);
+    return (retour);
+  }
+/******************************************************************************************************************************/
 /* Retirer_cadranDB: Elimination d'un cadran                                                                                  */
 /* Entrée: un cadran                                                                                                          */
 /* Sortie: false si probleme                                                                                                  */

@@ -2178,11 +2178,24 @@ encore:
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `users_sessions` ADD `last_request` INT(11) NOT NULL" );
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE DROP `date_create`" );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `users_sessions` DROP `date_create`" );
        Lancer_requete_SQL ( db, requete );
      }
-  
-    database_version = 5547;
+
+    if (database_version < 5550)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_cadrans` ADD `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown' AFTER `id`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_cadrans` ADD `auto_create` tinyint(1) NULL DEFAULT NULL AFTER `id`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_cadrans` ADD `minimum` FLOAT NOT NULL DEFAULT '0'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_cadrans` ADD `maximum` FLOAT NOT NULL DEFAULT '100'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_cadrans` ADD UNIQUE (`tech_id`, `acronyme`, `auto_create`)");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5550;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

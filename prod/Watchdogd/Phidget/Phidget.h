@@ -40,6 +40,7 @@
 
  struct PHIDGET_ANALOGINPUT
   { PhidgetHandle handle;
+    gchar capteur[32];
     gint intervalle;
     struct DLS_AI *dls_ai;
   };

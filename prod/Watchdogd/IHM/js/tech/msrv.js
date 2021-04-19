@@ -30,6 +30,7 @@
        $('#idMSRVLogLevel').val( parametre.log_level );
        $('#idMSRVLogDB').val( parametre.log_db );
        $('#idMSRVLogZMQ').val( parametre.log_zmq );
+       $('#idMSRVLogTrad').val( parametre.log_trad );
      }, null);
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -39,6 +40,7 @@
        log_level: $("#idMSRVLogLevel").val(),
        log_db   : ($("#idMSRVLogDB").val()=="true" ? true : false),
        log_zmq  : ($("#idMSRVLogZMQ").val()=="true" ? true : false),
+       log_trad : ($("#idMSRVLogTrad").val()=="true" ? true : false),
      } );
     Send_to_API ( 'POST', "/api/instance/loglevel", json_request, null );
   }

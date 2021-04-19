@@ -188,6 +188,9 @@
         });
      }
   }
+/********************************************* Remonte la page au top *********************************************************/
+ function Scroll_to_top ()
+  { window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }); }
 /********************************************* Affichage des vignettes ********************************************************/
  function Slide_down_when_loaded ( id )
   { var images = $('#'+id+' img[src]');

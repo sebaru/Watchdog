@@ -39,7 +39,6 @@
  struct WS_CLIENT_SESSION
   { SoupWebsocketConnection *connexion;
     SoupClientContext *context;
-    GSList *Liste_bit_cadrans;
     GSList *Liste_bit_visuels;
     struct HTTP_CLIENT_SESSION *http_session;
   };
@@ -49,6 +48,7 @@
     gchar host[32];
     gchar wtd_session[42];
     gint  access_level;
+    GSList *Liste_bit_cadrans;
     time_t last_request;
   };
 
@@ -65,6 +65,18 @@
     GSList *liste_http_clients;
     gint wtd_session_expiry;
  };
+
+/******************************************************************************************************************************/
+ struct HTTP_CADRAN
+  { gchar tech_id[32];
+    gchar acronyme[64];
+    gchar unite[32];
+    gint classe;
+    gpointer dls_data;
+    gdouble  valeur;
+    gboolean in_range;
+    gint last_update;
+  };
 
 /*************************************************** Définitions des prototypes ***********************************************/
  extern gboolean Http_Lire_config ( void );
@@ -208,6 +220,7 @@
  extern void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client );
  extern void Http_ws_send_to_all ( JsonNode *node );
  extern void Http_ws_send_pulse_to_all ( void );
+ extern void Http_Formater_cadran( struct HTTP_CADRAN *cadran );
  extern void Audit_log ( struct HTTP_CLIENT_SESSION *session, gchar *format, ... );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

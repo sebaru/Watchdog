@@ -31,19 +31,6 @@
  extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
- struct WS_CADRAN
-  { gchar tech_id[32];
-    gchar acronyme[64];
-    gchar unite[32];
-    gint classe;
-    gpointer dls_data;
-    gfloat old_valeur;
-    gfloat valeur;
-    gboolean in_range;
-    gint last_update;
-  };
-
-/******************************************************************************************************************************/
 /* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
 /* Entrée: des infos sur le paquet à envoyer                                                                                  */
 /* Sortie: rien                                                                                                               */
@@ -81,171 +68,17 @@
     json_node_unref(pulse);
   }
 /******************************************************************************************************************************/
-/* Formater_cadran: Formate la structure dédiée cadran pour envoi au client                                                   */
-/* Entrée: un cadran                                                                                                          */
-/* Sortie: une structure prete à l'envoie                                                                                     */
-/******************************************************************************************************************************/
- static void Formater_cadran( struct WS_CADRAN *cadran )
-  {
-    if (!cadran) return;
-    switch(cadran->classe)
-     { /*case MNEMO_BISTABLE:
-            cadran->in_range = TRUE;
-            cadran->valeur = 1.0 * Dls_data_get_BI/MONO ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-            break;
-       case MNEMO_ENTREE:
-            cadran->in_range = TRUE;
-            cadran->valeur = 1.0 * Dls_data_get_DI ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-            break;*/
-       case MNEMO_ENTREE_ANA:
-             { struct DLS_AI *ai;
-               cadran->valeur = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-               if (!cadran->dls_data)                            /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-                { cadran->in_range = FALSE;
-                  break;
-                }
-               ai = (struct DLS_AI *)cadran->dls_data;
-               cadran->in_range = ai->inrange;
-               cadran->valeur = ai->val_ech;
-               g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ai->unite );
-             }
-            break;
-       case MNEMO_CPTH:
-             { cadran->in_range = TRUE;
-               cadran->valeur = Dls_data_get_CH(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-             }
-            break;
-       case MNEMO_CPT_IMP:
-             { cadran->valeur = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-               struct DLS_CI *ci=cadran->dls_data;
-               if (!ci)                                          /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-                { cadran->in_range = FALSE;
-                  break;
-                }
-               cadran->in_range = TRUE;
-               cadran->valeur *= ci->multi;                                                               /* Multiplication ! */
-               g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ci->unite );
-             }
-            break;
-       case MNEMO_REGISTRE:
-             { struct DLS_REGISTRE *registre;
-               cadran->valeur = Dls_data_get_R(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-               if (!cadran->dls_data)                      /* si Registre pas trouvée, on remonte le nom du cadran en libellé */
-                { cadran->in_range = FALSE;
-                  break;
-                }
-               registre = (struct DLS_REGISTRE *)cadran->dls_data;
-               cadran->in_range = TRUE;
-               cadran->valeur = registre->valeur;
-               g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", registre->unite );
-             }
-            break;
-       case MNEMO_TEMPO:
-            Dls_data_get_tempo ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-            struct DLS_TEMPO *tempo = cadran->dls_data;
-            if (!tempo)
-             { cadran->in_range = FALSE;
-               break;
-             }
-            cadran->in_range = FALSE;
-
-            if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON)                     /* Temporisation Retard en train de compter */
-             { cadran->valeur = (tempo->date_on - Partage->top); }
-            else if (tempo->status == DLS_TEMPO_NOT_COUNTING)                  /* Tempo ne compte pas: on affiche la consigne */
-             { cadran->valeur = tempo->delai_on; }
-            break;
-       default:
-            cadran->in_range = FALSE;
-            break;
-      }
-  }
-/******************************************************************************************************************************/
 /* Envoyer_un_cadran: Envoi un update cadran au client                                                                        */
 /* Entrée: une reference sur la session en cours, et le cadran a envoyer                                                      */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void WS_CADRAN_to_json ( JsonNode *node, struct WS_CADRAN *ws_cadran )
-  { Formater_cadran ( ws_cadran );
-    Json_node_add_string ( node, "tech_id",  ws_cadran->tech_id );
-    Json_node_add_string ( node, "acronyme", ws_cadran->acronyme );
-    Json_node_add_int    ( node, "type",     ws_cadran->classe );
-    Json_node_add_bool   ( node, "in_range", ws_cadran->in_range );
-    Json_node_add_double ( node, "valeur",   ws_cadran->valeur );
-    Json_node_add_string ( node, "unite",    ws_cadran->unite );
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Http_ws_set_abonnement ( struct WS_CLIENT_SESSION *client, gint syn_id )
-  { gchar chaine[256];
-
-/*-------------------------------------------------- Test autorisation d'accès -----------------------------------------------*/
-    JsonNode *RootNode = Json_node_create ();
-    if (!RootNode) return;
-
-    SQL_Select_to_json_node ( RootNode, NULL, "SELECT access_level,libelle FROM syns WHERE id=%d", syn_id );
-    if ( !(Json_has_member ( RootNode, "access_level" ) && Json_has_member ( RootNode, "libelle" )) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Syn '%d' unknown", __func__, syn_id );
-       json_node_unref ( RootNode );
-       return;
-     }
-    if (client->http_session->access_level < Json_get_int ( RootNode, "access_level" ))
-     { Audit_log ( client->http_session, "Access to synoptique '%s' (id '%d') forbidden",
-                   Json_get_string ( RootNode, "libelle" ), syn_id );
-       json_node_unref ( RootNode );
-       return;
-     }
-    else Audit_log ( client->http_session, "Envoi du synoptique '%s' (id '%d')", Json_get_string ( RootNode, "libelle" ), syn_id );
-    json_node_unref ( RootNode );
-
-/*----------------------------------------------- Visuels --------------------------------------------------------------------*/
-    struct DB *db = Init_DB_SQL();
-    if (!db) return;
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT tech_id, acronyme FROM syns_motifs WHERE syn_id=%d", syn_id );
-    Lancer_requete_SQL ( db, chaine );                                                      /* Execution de la requete SQL */
-    while(Recuperer_ligne_SQL(db))                                                      /* Chargement d'une ligne resultat */
-     { gchar *tech_id  = db->row[0];
-       gchar *acronyme = db->row[1];
-       struct DLS_VISUEL *visuel = NULL;
-       Dls_data_get_VISUEL ( tech_id, acronyme, (gpointer)&visuel );
-       if ( visuel && !g_slist_find ( client->Liste_bit_visuels, visuel ) )
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au VISUEL %s:%s", __func__,
-                    client->http_session->username, visuel->tech_id, visuel->acronyme );
-          client->Liste_bit_visuels = g_slist_prepend( client->Liste_bit_visuels, visuel );
-        }
-     }
-
-    g_snprintf(chaine, sizeof(chaine), "SELECT tech_id,acronyme FROM syns_cadrans WHERE syn_id=%d", syn_id );
-    Lancer_requete_SQL ( db, chaine );                                                         /* Execution de la requete SQL */
-    while(Recuperer_ligne_SQL(db))                                                         /* Chargement d'une ligne resultat */
-     { gchar *tech_id  = db->row[0];
-       gchar *acronyme = db->row[1];
-       GSList *liste = client->Liste_bit_cadrans;                                    /* Le cadran est-il déjà dans la liste ? */
-       while(liste)
-        { struct WS_CADRAN *cadran=liste->data;
-          if ( !strcasecmp( tech_id, cadran->tech_id ) && !strcasecmp( acronyme, cadran->acronyme ) ) break;
-          liste = g_slist_next(liste);
-        }
-       if (!liste)                                          /* si le cadran n'est pas trouvé, on l'ajoute a la liste d'abonné */
-        { struct WS_CADRAN *ws_cadran;
-          ws_cadran = (struct WS_CADRAN *)g_try_malloc0(sizeof(struct WS_CADRAN));
-          if (ws_cadran)
-           { g_snprintf( ws_cadran->tech_id,  sizeof(ws_cadran->tech_id),  "%s", tech_id  );
-             g_snprintf( ws_cadran->acronyme, sizeof(ws_cadran->acronyme), "%s", acronyme );
-             ws_cadran->classe = Rechercher_DICO_type ( ws_cadran->tech_id, ws_cadran->acronyme );
-             if (ws_cadran->classe!=-1)
-              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au CADRAN %s:%s", __func__,
-                          client->http_session->username, ws_cadran->tech_id, ws_cadran->acronyme );
-                client->Liste_bit_cadrans = g_slist_prepend( client->Liste_bit_cadrans, ws_cadran );
-              }
-             else { g_free(ws_cadran); }                                                                  /* Si pas trouvé... */
-           }
-        }
-     }
-    Libere_DB_SQL( &db );
+ static void HTTP_CADRAN_to_json ( JsonNode *node, struct HTTP_CADRAN *http_cadran )
+  { Json_node_add_string ( node, "tech_id",  http_cadran->tech_id );
+    Json_node_add_string ( node, "acronyme", http_cadran->acronyme );
+    Json_node_add_int    ( node, "classe",   http_cadran->classe );
+    Json_node_add_bool   ( node, "in_range", http_cadran->in_range );
+    Json_node_add_double ( node, "valeur",   http_cadran->valeur );
+    Json_node_add_string ( node, "unite",    http_cadran->unite );
   }
 /******************************************************************************************************************************/
 /* Http_ws_on_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket                              */
@@ -268,10 +101,12 @@
        json_node_unref(response);
        return;
      }
-    gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
 
-    if(!strcasecmp(zmq_tag,"SET_ABONNEMENT"))
-     { if ( ! (Json_has_member( response, "wtd_session") && Json_has_member ( response, "syn_id" ) ))
+    gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: '%s' received from '%s'", __func__, zmq_tag, client->http_session->username );
+
+    if(!strcasecmp(zmq_tag,"CONNECT"))
+     { if ( ! (Json_has_member( response, "wtd_session") ))
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket without wtd_session !", __func__ ); }
        else
         { gchar *wtd_session = Json_get_string ( response, "wtd_session");
@@ -281,14 +116,14 @@
              if (!strcmp(http_session->wtd_session, wtd_session))
               { client->http_session = http_session;
                 Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: session found for '%s' !", __func__, http_session->username );
-                Http_ws_set_abonnement ( client, Json_get_int ( response, "syn_id" ) );
                 break;
               }
              liste = g_slist_next ( liste );
            }
         }
      }
-    else if (!client->http_session)
+
+    if (!client->http_session)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Not authorized !", __func__ ); }
     json_node_unref(response);
   }
@@ -303,14 +138,15 @@
     while (clients)
      { struct WS_CLIENT_SESSION *client = clients->data;
        if (client->http_session)
-        { GSList *cadrans = client->Liste_bit_cadrans;
+        { GSList *cadrans = client->http_session->Liste_bit_cadrans;
           while (cadrans)
-           { struct WS_CADRAN *cadran = cadrans->data;
-             if (cadran->last_update +10 <= Partage->top)
+           { struct HTTP_CADRAN *cadran = cadrans->data;
+             if (cadran->last_update + 10 <= Partage->top)
               { JsonNode *RootNode = Json_node_create();
                 if (RootNode)
-                 { Json_node_add_string ( RootNode, "zmq_tag", "DLS_CADRAN" );
-                   WS_CADRAN_to_json ( RootNode, cadran );
+                 { Http_Formater_cadran ( cadran );
+                   Json_node_add_string ( RootNode, "zmq_tag", "DLS_CADRAN" );
+                   HTTP_CADRAN_to_json ( RootNode, cadran );
                    Http_ws_send_to_client ( client, RootNode );
                    json_node_unref( RootNode );
                  }
@@ -334,12 +170,11 @@
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Session closed !", __func__ );
     g_object_unref(client->connexion);
-    g_slist_foreach ( client->Liste_bit_cadrans, (GFunc)g_free, NULL );
     g_slist_free ( client->Liste_bit_visuels );
     g_free(client);
   }
 /******************************************************************************************************************************/
-/* Http_ws_on_closed: Traite une deconnexion                                                                           */
+/* Http_ws_on_closed: Traite une deconnexion                                                                                  */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
@@ -365,7 +200,7 @@
        return;
      }
     client->connexion = connexion;
-    client->context = context;
+    client->context   = context;
     g_signal_connect ( connexion, "message", G_CALLBACK(Http_ws_on_message), client );
     g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_on_closed), client );
     g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_on_error), client );

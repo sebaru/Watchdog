@@ -39,7 +39,7 @@
  /*%option debug*/
 
 /* Expressions rationnelles de detection */
-digit         [0-9]+
+digit         [-]?[0-9]+
 digitf        [-]?[0-9]+[\.[0-9]+]?
 id            [a-zA-Z][a-zA-Z_0-9]+[a-zA-Z0-9]
 chaine        [^"]*
@@ -56,16 +56,21 @@ newline       [\n\r]+
 {newline}
 
  /******************************************** Methodes ***************************************************/
-"_EA"                      { DlsScanner_lval.val = EANA;            return EANA;            }
+"_EA"                      { DlsScanner_lval.val = T_ANALOG_INPUT;  return T_ANALOG_INPUT;  }
+"_AI"                      { DlsScanner_lval.val = T_ANALOG_INPUT;  return T_ANALOG_INPUT;  }
 "_AO"                      { DlsScanner_lval.val = T_ANALOG_OUTPUT; return T_ANALOG_OUTPUT; }
-"_DO"                      { DlsScanner_lval.val = T_DIGITAL_OUTPUT;return T_DIGITAL_OUTPUT;  }
-"_E"                       { DlsScanner_lval.val = ENTREE;          return ENTREE;          }
+"_E"                       { DlsScanner_lval.val = T_ENTREE;        return T_ENTREE;        }
+"_DI"                      { DlsScanner_lval.val = T_ENTREE;        return T_ENTREE;        }
 "_A"                       { DlsScanner_lval.val = SORTIE;          return SORTIE;          }
-"_I"                       { DlsScanner_lval.val = T_ICONE;         return T_ICONE;         }
+"_DO"                      { DlsScanner_lval.val = T_DIGITAL_OUTPUT;return T_DIGITAL_OUTPUT;}
+"_I"                       { DlsScanner_lval.val = T_VISUEL;        return T_VISUEL;        }
+"_VISUEL"                  { DlsScanner_lval.val = T_VISUEL;        return T_VISUEL;        }
 "_B"                       { DlsScanner_lval.val = T_BI;            return T_BI;            }
 "_M"                       { DlsScanner_lval.val = T_MONO;          return T_MONO;          }
 "_T"                       { DlsScanner_lval.val = T_TEMPO;         return T_TEMPO;         }
+"_TEMPO"                   { DlsScanner_lval.val = T_TEMPO;         return T_TEMPO;         }
 "_R"                       { DlsScanner_lval.val = T_REGISTRE;      return T_REGISTRE;      }
+"_REGISTRE"                { DlsScanner_lval.val = T_REGISTRE;      return T_REGISTRE;      }
 "_CH"                      { DlsScanner_lval.val = T_CPT_H;         return T_CPT_H;         }
 "_CI"                      { DlsScanner_lval.val = T_CPT_IMP;       return T_CPT_IMP;       }
 "_HORLOGE"                 { DlsScanner_lval.val = T_HORLOGE;       return T_HORLOGE;       }
@@ -151,12 +156,14 @@ newline       [\n\r]+
 "thread"                   { DlsScanner_lval.val = T_THREAD;    return T_THREAD;    }
 "tag"                      { DlsScanner_lval.val = T_TAG;       return T_TAG;       }
 "forme"                    { DlsScanner_lval.val = T_FORME;     return T_FORME;     }
+"cadran"                   { DlsScanner_lval.val = T_CADRAN;    return T_CADRAN;    }
 "input"                    { DlsScanner_lval.val = T_INPUT;     return T_INPUT;     }
 "kp"                       { DlsScanner_lval.val = T_KP;        return T_KP;        }
 "ki"                       { DlsScanner_lval.val = T_KI;        return T_KI;        }
 "kd"                       { DlsScanner_lval.val = T_KD;        return T_KD;        }
 "min"                      { DlsScanner_lval.val = T_MIN;       return T_MIN;       }
 "max"                      { DlsScanner_lval.val = T_MAX;       return T_MAX;       }
+"decimal"                  { DlsScanner_lval.val = T_DECIMAL;   return T_DECIMAL;   }
 
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }
@@ -197,7 +204,7 @@ newline       [\n\r]+
 
 {id}                       { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return ID;       }
 {digit}                    { DlsScanner_lval.val    = atoi(DlsScanner_text);           return ENTIER;   }
-{digitf}                   { DlsScanner_lval.valf   = atof(DlsScanner_text);           return VALF;     }
+{digitf}                   { DlsScanner_lval.valf   = atof(DlsScanner_text);           return T_VALF;   }
 
 .                          { DlsScanner_lval.val = T_ERROR; return T_ERROR; }
  /*------------------------------------------------------------------------------------------------------*/

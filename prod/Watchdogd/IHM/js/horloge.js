@@ -157,7 +157,7 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Charger_page_horloge ( dls_tech_id )
   { console.log("Charger_page_horloge " + dls_tech_id);
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    Scroll_to_top();
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
                      .append("<div id='bodymain'></div>").addClass('mx-1');

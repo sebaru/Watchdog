@@ -67,18 +67,18 @@
     taille = strlen(chaine);
     if ( Buffer_used + taille > Buffer_taille)
      { gchar *new_Buffer;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
+       Info_new( Config.log, Config.log_trad, LOG_DEBUG,
                 "%s: buffer too small, trying to expand it to %d)", __func__, Buffer_taille + taille );
        new_Buffer = g_try_realloc( Buffer, Buffer_taille + taille );
        if (!new_Buffer)
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Fail to expand buffer. skipping", __func__ );
+        { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Fail to expand buffer. skipping", __func__ );
           return;
         }
        Buffer = new_Buffer;
        Buffer_taille = Buffer_taille + taille;
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Buffer expanded to %d bytes", __func__, Buffer_taille );
+       Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Buffer expanded to %d bytes", __func__, Buffer_taille );
      }
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
     memcpy ( Buffer + Buffer_used, chaine, taille );                                             /* Recopie du bout de buffer */
     Buffer_used += taille;
   }
@@ -107,7 +107,7 @@
        g_snprintf( log, sizeof(log), "Ligne %d: %s\n", DlsScanner_get_lineno(), chaine );
        write( Id_log, log, strlen(log) );
 
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
+       Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
      }
     else if (nbr_erreur==15)
      { write( Id_log, too_many, strlen(too_many)+1 ); }
@@ -138,7 +138,7 @@
 /* Entrées: la liste des options, le type a rechercher                                                                        */
 /* Sortie: -1 si pas trouvé                                                                                                   */
 /******************************************************************************************************************************/
- static int Get_option_entier( GList *liste_options, gint token )
+ static int Get_option_entier( GList *liste_options, gint token, gint defaut )
   { struct OPTION *option;
     GList *liste;
     liste = liste_options;
@@ -148,7 +148,7 @@
         { return (option->val_as_int); }
        liste = liste->next;
      }
-    return(-1);
+    return(defaut);
   }
 /******************************************************************************************************************************/
 /* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
@@ -166,23 +166,6 @@
        liste = liste->next;
      }
     return(NULL);
-  }
-/******************************************************************************************************************************/
-/* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
-/* Entrées: la liste des options, le type a rechercher                                                                        */
-/* Sortie: -1 si pas trouvé                                                                                                   */
-/******************************************************************************************************************************/
- static gdouble Get_option_double( GList *liste_options, gint token )
-  { struct OPTION *option;
-    GList *liste;
-    liste = liste_options;
-    while (liste)
-     { option=(struct OPTION *)liste->data;
-       if ( option->token == token && option->token_classe == VALF )
-        { return (option->val_as_double); }
-       liste = liste->next;
-     }
-    return(-1);
   }
 /******************************************************************************************************************************/
 /* Get_option_chaine: Cherche une option de type chaine et renvoie sa valeur                                                  */
@@ -211,11 +194,11 @@
     gint taille;
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
-    if (Get_option_entier( options, T_EDGE_UP) == 1)
+    if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
      { g_snprintf( result, taille, "%sDls_data_get_bool_up ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
-    else if (Get_option_entier( options, T_EDGE_DOWN) == 1)
+    else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
      { g_snprintf( result, taille, "%sDls_data_get_bool_down ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
@@ -235,11 +218,11 @@
     gint taille;
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
-    if (Get_option_entier( options, T_EDGE_UP) == 1)
+    if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
      { g_snprintf( result, taille, "%sDls_data_get_DI_up ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
-    else if (Get_option_entier( options, T_EDGE_DOWN) == 1)
+    else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
      { g_snprintf( result, taille, "%sDls_data_get_DI_down ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
@@ -255,7 +238,7 @@
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
  gchar *New_condition_entree_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur )
-  { gint taille, in_range = Get_option_entier ( options, T_IN_RANGE );
+  { gint taille, in_range = Get_option_entier ( options, T_IN_RANGE, 0 );
     gchar *result;
 
     if (in_range==1)
@@ -418,9 +401,9 @@
    return(result);
  }
 /******************************************************************************************************************************/
-/* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
-/* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
-/* Sortie: False si il existe deja, true sinon                                                                                */
+/* New_calcul_PID: Calcul un PID                                                                                              */
+/* Entrées: la liste d'option associée au PID                                                                                 */
+/* Sortie: la chaine de calcul DLS                                                                                            */
 /******************************************************************************************************************************/
  gchar *New_calcul_PID ( GList *options )
   { struct ALIAS *input = Get_option_alias ( options, T_INPUT );
@@ -553,8 +536,7 @@
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-    gint update = Get_option_entier ( options, T_UPDATE );
-    if (update==-1) update=0;
+    gint update = Get_option_entier ( options, T_UPDATE, 0 );
 
     g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, TRUE );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
@@ -644,7 +626,7 @@
   { struct ACTION *action;
     int taille, reset;
 
-    reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
+    reset = Get_option_entier ( options, RESET, 0 );
     taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
@@ -665,8 +647,8 @@
   { struct ACTION *action;
     int taille, reset, ratio;
 
-    reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
-    ratio = Get_option_entier ( options, RATIO ); if (ratio == -1) ratio = 1;
+    reset = Get_option_entier ( options, RESET, 0 );
+    ratio = Get_option_entier ( options, RATIO, 1 );
 
     taille = 256;
     action = New_action();
@@ -687,7 +669,7 @@
  struct ACTION *New_action_WATCHDOG( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
 
-    gint consigne = Get_option_entier ( options, T_CONSIGNE ); if (consigne == -1) consigne = 600;
+    gint consigne = Get_option_entier ( options, T_CONSIGNE, 600 );
     gint taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
@@ -706,9 +688,9 @@
     int taille, mode, coul, cligno;
     gchar *color;
 
-    mode   = Get_option_entier ( options, MODE   ); if (mode   == -1) mode   = 0;
-    coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul   = 0;
-    cligno = Get_option_entier ( options, CLIGNO ); if (cligno == -1) cligno = 0;
+    mode   = Get_option_entier ( options, MODE, 0   );
+    coul   = Get_option_entier ( options, COLOR, 0  );
+    cligno = Get_option_entier ( options, CLIGNO, 0 );
     taille = 512;
     action = New_action();
     action->alors = New_chaine( taille );
@@ -768,11 +750,11 @@ return(NULL);
   { struct ACTION *action;
     int taille, daa, dma, dMa, dad, random;
 
-    daa    = Get_option_entier ( options, T_DAA );      if (daa == -1)    daa = 0;
-    dma    = Get_option_entier ( options, T_DMINA );    if (dma == -1)    dma = 0;
-    dMa    = Get_option_entier ( options, T_DMAXA );    if (dMa == -1)    dMa = 0;
-    dad    = Get_option_entier ( options, T_DAD );      if (dad == -1)    dad = 0;
-    random = Get_option_entier ( options, T_RANDOM );   if (random == -1) random = 0;
+    daa    = Get_option_entier ( options, T_DAA, 0 );
+    dma    = Get_option_entier ( options, T_DMINA, 0 );
+    dMa    = Get_option_entier ( options, T_DMAXA, 0 );
+    dad    = Get_option_entier ( options, T_DAD, 0 );
+    random = Get_option_entier ( options, T_RANDOM, 0 );
 
     action = New_action();
     taille = 256;
@@ -827,6 +809,23 @@ return(NULL);
     return(option);
   }
 /******************************************************************************************************************************/
+/* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
+/* Entrées: la liste des options, le type a rechercher                                                                        */
+/* Sortie: -1 si pas trouvé                                                                                                   */
+/******************************************************************************************************************************/
+ static gdouble Get_option_double( GList *liste_options, gint token, gdouble defaut )
+  { struct OPTION *option;
+    GList *liste;
+    liste = liste_options;
+    while (liste)
+     { option=(struct OPTION *)liste->data;
+       if ( option->token == token && option->token_classe == T_VALF )
+        { return (option->val_as_double); }
+       liste = liste->next;
+     }
+    return(defaut);
+  }
+/******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
@@ -845,7 +844,8 @@ return(NULL);
     alias->options  = options;
     alias->used     = 0;
     Alias = g_slist_prepend( Alias, alias );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
+
     if (bit != MNEMO_MOTIF) return(TRUE);
 
     gchar *forme_src = Get_option_chaine ( options, T_FORME );
@@ -948,16 +948,7 @@ return(NULL);
   { while (options)
      { struct OPTION *option = (struct OPTION *)options->data;
        options = g_list_remove (options, option);
-       switch (option->token)
-        { case T_FORME:
-          case T_LIBELLE:
-          case T_ETIQUETTE:
-          case T_HOST:
-          case T_THREAD:
-          case T_TAG:
-               g_free(option->chaine);
-               break;
-        }
+       if (option->token_classe == T_CHAINE) g_free(option->chaine);
        g_free(option);
      }
   }
@@ -997,7 +988,7 @@ return(NULL);
 
     plugin = Rechercher_plugin_dlsDB ( tech_id );
     if (!plugin)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: plugin '%s' not found.", __func__, tech_id );
+     { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: plugin '%s' not found.", __func__, tech_id );
        return (TRAD_DLS_ERROR_NO_FILE);
      }
     memcpy ( &Dls_plugin, plugin, sizeof(struct DLS_PLUGIN) );
@@ -1012,12 +1003,12 @@ return(NULL);
     g_snprintf( log,    sizeof(log),    "Dls/%s.log", tech_id );
     g_snprintf( cible,  sizeof(cible),  "Dls/%s.c", tech_id );
     unlink ( log );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: tech_id='%s', source='%s', log='%s'", __func__,
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: tech_id='%s', source='%s', log='%s'", __func__,
               tech_id, source, log );
 
     Id_log = open( log, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_log<0)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, Config.log_trad, LOG_WARNING,
                 "%s: Log creation failed %s (%s)", __func__, log, strerror(errno) );
        close(Id_log);
        return(TRAD_DLS_ERROR_NO_FILE);
@@ -1051,7 +1042,7 @@ return(NULL);
        New_alias_permanent ( "MSG_COMM_HS", MNEMO_MSG, libelle );
        Mnemo_auto_create_MSG ( FALSE, Dls_plugin.tech_id, "MSG_COMM_HS", libelle, MSG_DEFAUT );
 
-       DlsScanner_debug = Partage->com_dls.Thread_debug;
+       DlsScanner_debug = Config.log_trad;
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);
@@ -1070,7 +1061,7 @@ return(NULL);
        unlink ( cible );
        fd = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );             /* Enregistrement du buffer resultat sur disque */
        if (fd<0)
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
+        { Info_new( Config.log, Config.log_trad, LOG_WARNING,
                    "%s: Target creation failed %s (%s)", __func__, cible, strerror(errno) );
           retour = TRAD_DLS_ERROR_NO_FILE;
         }
@@ -1177,6 +1168,16 @@ return(NULL);
                  }
                 case MNEMO_ENTREE_ANA:
                  { Mnemo_auto_create_AI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, NULL );
+
+                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN );
+                   if (cadran)
+                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, cadran,
+                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
+                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
+                                                      Get_option_entier ( alias->options, T_DECIMAL, 2 )
+                                                    );
+                    }
+
                    if (!Liste_AI) Liste_AI = g_strconcat( "'", alias->acronyme, "'", NULL );
                    else
                     { old_liste = Liste_AI;
@@ -1208,6 +1209,16 @@ return(NULL);
                 case MNEMO_REGISTRE:
                  { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
                    Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle, unite );
+
+                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN );
+                   if (cadran)
+                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, cadran,
+                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
+                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
+                                                      Get_option_entier ( alias->options, T_DECIMAL, 2 )
+                                                    );
+                    }
+
                    if (!Liste_REGISTRE) Liste_REGISTRE = g_strconcat( "'", alias->acronyme, "'", NULL );
                    else
                     { old_liste = Liste_REGISTRE;
@@ -1254,8 +1265,8 @@ return(NULL);
                  }
                 case MNEMO_MSG:
                  { gint param;
-                   param = Get_option_entier ( alias->options, T_TYPE );
-                   Mnemo_auto_create_MSG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, (param!=-1 ? param : MSG_ETAT) );
+                   param = Get_option_entier ( alias->options, T_TYPE, MSG_ETAT );
+                   Mnemo_auto_create_MSG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, param );
                    if (!Liste_MESSAGE) Liste_MESSAGE = g_strconcat( "'", alias->acronyme, "'", NULL );
                    else
                     { old_liste = Liste_MESSAGE;

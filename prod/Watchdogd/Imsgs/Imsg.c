@@ -207,7 +207,22 @@
     Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
-/* Imsgs_handle_message_CB : CB appellé lorsque l'on recoit un message xmpp                                                       */
+/* Imsgs_Envoi_message_to_by_json : Envoi un message json au client en parametre data                                         */
+/* Entrée : Le tableau, l'index, l'element json et le destinataire                                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Imsgs_Envoi_message_to_by_json ( JsonArray *array, guint index, JsonNode *element, void *data )
+  { gchar *from = data;
+    gchar *tech_id = Json_get_string ( element, "tech_id" );
+    gchar *acro    = Json_get_string ( element, "acronyme" );
+    gchar *libelle = Json_get_string ( element, "libelle" );
+    gchar *map_tag = Json_get_string ( element, "map_tag" );
+    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
+              map_tag, tech_id, acro, libelle );
+    Imsgs_Envoi_message_to( from, map_tag );
+  }
+/******************************************************************************************************************************/
+/* Imsgs_handle_message_CB : CB appellé lorsque l'on recoit un message xmpp                                                   */
 /* Entrée : Le Handler, la connexion, le message                                                                              */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
@@ -217,8 +232,8 @@
     const char *from;
     gchar *message;
 
-    from = xmpp_stanza_get_attribute	( stanza, "from" );
-    message = xmpp_message_get_body 	( stanza );
+    from = xmpp_stanza_get_attribute    ( stanza, "from" );
+    message = xmpp_message_get_body     ( stanza );
     if (!from || !message)
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Error : from or message = NULL", __func__ );
        return(1);
@@ -240,29 +255,34 @@
        goto end;
      }
 
-    if ( ! Recuperer_mnemos_DI_by_tag ( &db, Cfg_imsgs.tech_id, message ) )
+    JsonNode *RootNode = Json_node_create();
+    if ( RootNode == NULL )
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s : Memory Error for '%s'", __func__, from );
+       goto end;
+     }
+    SQL_Select_to_json_node ( RootNode, "results",
+                              "SELECT * FROM mnemos_DI WHERE map_thread='W-SMSG' AND map_tag LIKE '%%%s%%'", message );
+
+    if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, message );
        Imsgs_Envoi_message_to( from, "Error searching Database .. Sorry .." );
        goto end;
      }
 
-    if ( db->nbr_result == 0 )                                                /* Si pas d'enregistrement, demande de préciser */
-     { Imsgs_Envoi_message_to( from, "Error... No result found .. Sorry .." );
-       Libere_DB_SQL ( &db );
-     }
-    else if ( db->nbr_result > 1 )                                           /* Si trop d'enregistrement, demande de préciser */
-     { Imsgs_Envoi_message_to( from, " Need to choose ... :" );
-       while ( Recuperer_mnemos_DI_suite( &db ) )
-        { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
-          Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
-                    src_text, tech_id, acro, libelle );
-          Imsgs_Envoi_message_to( from, src_text );
-        }
+    gint nbr_results = Json_get_int ( RootNode, "nbr_results" );
+    if ( nbr_results == 0 )
+     { Imsgs_Envoi_message_to( from, "Je n'ai pas trouvé, désolé." ); }
+    else if ( nbr_results > 1 )                                              /* Si trop d'enregistrement, demande de préciser */
+     { Imsgs_Envoi_message_to( from, "Aîe, plusieurs choix sont possibles ... :" );
+       Json_node_foreach_array_element ( RootNode, "results", Imsgs_Envoi_message_to_by_json, from );
      }
     else while ( Recuperer_mnemos_DI_suite( &db ) )
-     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
+     { gchar *tech_id = Json_get_string ( RootNode, "tech_id" );
+       gchar *acro    = Json_get_string ( RootNode, "acronyme" );
+       gchar *libelle = Json_get_string ( RootNode, "libelle" );
+       gchar *map_tag = Json_get_string ( RootNode, "map_tag" );
        Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
-                 src_text, tech_id, acro, libelle );
+                 map_tag, tech_id, acro, libelle );
         if (Config.instance_is_master==TRUE)                                                      /* si l'instance est Maitre */
         { Envoyer_commande_dls_data ( tech_id, acro ); }
      }
@@ -377,9 +397,9 @@ end:
      {
        Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: Account '%s' connected and %s secure",
                  __func__, Cfg_imsgs.username, (xmpp_conn_is_secured (conn) ? "IS" : "IS NOT") );
-       xmpp_handler_add	( Cfg_imsgs.conn, Imsgs_handle_message_CB,  NULL, "message",  NULL, NULL );
-       xmpp_handler_add	( Cfg_imsgs.conn, Imsgs_handle_presence_CB, NULL, "presence", NULL, NULL );
-       /*xmpp_handler_add	( Cfg_imsgs.conn, Imsgs_test, NULL, NULL, NULL, NULL );*/
+       xmpp_handler_add ( Cfg_imsgs.conn, Imsgs_handle_message_CB,  NULL, "message",  NULL, NULL );
+       xmpp_handler_add ( Cfg_imsgs.conn, Imsgs_handle_presence_CB, NULL, "presence", NULL, NULL );
+       /*xmpp_handler_add   ( Cfg_imsgs.conn, Imsgs_test, NULL, NULL, NULL, NULL );*/
 
        Imsgs_set_presence( "A votre écoute !" );
        Imsgs_Envoi_message_to_all_available ( "Instance démarrée. A l'écoute !" );

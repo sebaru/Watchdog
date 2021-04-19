@@ -35,7 +35,7 @@
   { if (tableau_id==undefined) tableau_id=10000;
     Tableau_ID = tableau_id;
 
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    Scroll_to_top();
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty().append(TableauDIV);
        Charger_un_tableau ( Tableau_ID, "HOUR" );

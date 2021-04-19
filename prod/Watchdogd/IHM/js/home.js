@@ -48,7 +48,7 @@
      }
     else
      { $('#idImgSyn_'+syn_id).removeClass("wtd-img-grayscale");
-       $('#idVignetteComm_'+syn_id).slideUp().removeClass("wtd-cligno");
+       $('#idVignetteComm_'+syn_id).removeClass("wtd-cligno").slideUp();
      }
 
     if (syn_vars.bit_danger == true)
@@ -103,7 +103,7 @@
      }
     else
      { /*Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_vert.svg" );*/
-       vignette.slideUp().removeClass("wtd-cligno");
+       vignette.removeClass("wtd-cligno").slideUp();
      }
   }
 /******************************************************************************************************************************/
@@ -193,6 +193,11 @@
                  }
               );
 
+       $.each ( Response.cadrans, function (i, cadran)
+                 { bodymain.append( $('<div></div>').addClass('w-100') ).append ( Creer_cadran ( cadran ) );
+                 }
+              );
+
        if (Response.nbr_tableaux>0)
         { $.each ( Response.tableaux, function (i, tableau)
            { tableaux.append("<hr>");
@@ -213,7 +218,7 @@
  function Charger_page_synoptique ( syn_id )
   {
     console.log("Charger_page_synoptique " + syn_id);
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    Scroll_to_top();
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
                      .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div")
@@ -247,6 +252,58 @@
                       );
 
     return(card);
+  }
+/******************************************************************************************************************************/
+/* Creer_cadran: Ajoute un cadran sur la page du synoptique                                                                   */
+/******************************************************************************************************************************/
+ function Creer_cadran ( cadran )
+  { var card = $('<div></div>').addClass("row bg-transparent border border-info")
+               .append( $('<div></div>').addClass("col text-center")
+                        .append( $('<span></span>').addClass("text-white").text( "Cadran" )
+                               )
+                      )
+               .append( $('<div></div>').addClass('w-100') )
+               .append( $('<div></div>').addClass("col")
+                        .append( $('<div></div>').addClass("progress")
+                                 .append( $('<div></div>').addClass("progress-bar")
+                                          .attr("wtd-cadran-forme", cadran.forme)
+                                          .attr("role", "progressbar" )
+                                          .attr("aria-valuemin", cadran.minimum )
+                                          .attr("aria-valuemax", cadran.maximum )
+                                          .attr("id", "wtd-cadran-forme-"+cadran.tech_id+"-"+cadran.acronyme)
+                                        )
+                               )
+	                     )
+               .append( $('<div></div>').addClass('w-100') )
+               .append( $('<div></div>').addClass("col text-center")
+                        .append( $('<h4></h4>').addClass("text-white").text( "Loading" )
+                                 .attr("id", "wtd-cadran-texte-"+cadran.tech_id+"-"+cadran.acronyme)
+                               )
+                      )
+               .append( $('<div></div>').addClass('w-100') )
+               .append( $('<div></div>').addClass("col text-center mb-2")
+                        .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
+                      );
+
+    return(card);
+  }
+/******************************************************************************************************************************/
+/* Changer_etat_cadran: Appeler par la websocket pour changer un visuel d'un cadran                                           */
+/******************************************************************************************************************************/
+ function Changer_etat_cadran ( etat )
+  { if (Synoptique==null) return;
+    var idcadranforme = "wtd-cadran-forme-"+etat.tech_id+"-"+etat.acronyme;
+    var idcadrantexte = "wtd-cadran-texte-"+etat.tech_id+"-"+etat.acronyme;
+    cadrans = Synoptique.cadrans.filter( function (item) { return(item.tech_id==etat.tech_id && item.acronyme==etat.acronyme); });
+    if (cadrans.length!=1) return;
+    cadran = cadrans[0];
+    console.debug(etat);
+    etat.valeur = etat.valeur.toFixed(cadran.nb_decimal);
+    $('#'+idcadrantexte).text( etat.valeur + " " + etat.unite );
+    if (cadran.forme=="progress")
+     { var position = 100*(etat.valeur-cadran.minimum)/(cadran.maximum-cadran.minimum);
+       $('#'+idcadranforme).css("width", position+"%").attr("aria-valuenow", position);
+     }
   }
 /******************************************************************************************************************************/
 /* Changer_etat_visuel: Appeler par la websocket pour changer un visuel d'etat                                                */
