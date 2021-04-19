@@ -47,6 +47,7 @@
 /******************************************************************************************************************************/
  void Http_ws_send_to_all ( JsonNode *node )
   { gchar *buf = Json_node_to_string ( node );
+    pthread_mutex_lock( &Cfg_http.lib->synchro );
     GSList *sessions = Cfg_http.liste_http_clients;
     while ( sessions )
      { struct HTTP_CLIENT_SESSION *session = sessions->data;
@@ -58,6 +59,7 @@
         }
        sessions = g_slist_next ( sessions );
      }
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
     g_free(buf);
   }
 /******************************************************************************************************************************/
@@ -152,8 +154,9 @@
               }
              cadran->last_update = Partage->top;
            }
+          cadrans = g_slist_next(cadrans);
         }
-      sessions = g_slist_next(sessions);
+       sessions = g_slist_next(sessions);
      }
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
   }

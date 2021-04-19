@@ -717,6 +717,13 @@ reload:
 
        if ( Partage->top > last_pulse + 50 )
         { last_pulse = Partage->top;
+          JsonNode *pulse = Json_node_create();
+          if (pulse)
+           { Json_node_add_string( pulse, "zmq_tag", "PULSE" );
+             Http_ws_send_to_all ( pulse );
+             json_node_unref(pulse);
+           }
+          pthread_mutex_lock( &Cfg_http.lib->synchro );
           GSList *liste = Cfg_http.liste_http_clients;
           while(liste)
            { struct HTTP_CLIENT_SESSION *client = liste->data;
@@ -727,6 +734,7 @@ reload:
                 Http_destroy_session ( client );
               }
            }
+          pthread_mutex_unlock( &Cfg_http.lib->synchro );
         }
 
        g_main_context_iteration ( loop_context, FALSE );
