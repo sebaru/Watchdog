@@ -48,7 +48,7 @@
      }
     else
      { $('#idImgSyn_'+syn_id).removeClass("wtd-img-grayscale");
-       $('#idVignetteComm_'+syn_id).slideUp().removeClass("wtd-cligno");
+       $('#idVignetteComm_'+syn_id).removeClass("wtd-cligno").slideUp();
      }
 
     if (syn_vars.bit_danger == true)
@@ -103,7 +103,7 @@
      }
     else
      { /*Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_vert.svg" );*/
-       vignette.slideUp().removeClass("wtd-cligno");
+       vignette.removeClass("wtd-cligno").slideUp();
      }
   }
 /******************************************************************************************************************************/
