@@ -376,6 +376,13 @@ again:
        g_signal_connect ( client->websocket, "message", G_CALLBACK(Traiter_histo_ws_CB), client );
        g_signal_connect ( client->websocket, "closed",  G_CALLBACK(Traiter_histo_ws_on_closed), client );
        g_signal_connect ( client->websocket, "error",   G_CALLBACK(Traiter_histo_ws_on_error), client );
+
+       JsonBuilder *builder = Json_create ();
+       if (builder == NULL) return;
+
+       Json_add_string ( builder, "zmq_tag", "CONNECT" );
+       Json_add_string ( builder, "wtd_session", client->wtd_session );
+       Envoi_ws_au_serveur ( client, client->websocket, builder );
      }
     else { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
            g_error_free (error);
