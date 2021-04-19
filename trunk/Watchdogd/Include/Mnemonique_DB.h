@@ -55,7 +55,7 @@
 
  extern void Updater_confDB_CI ( void );                                                                   /* Dans Mnemo_CI.c */
  extern void Charger_confDB_CI ( struct DLS_CI *cpt_imp );
- extern gboolean Mnemo_auto_create_CI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src );
+ extern gboolean Mnemo_auto_create_CI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src, gdouble multi );
  extern void Dls_CI_to_json ( JsonNode *element, struct DLS_CI *bit );
 
  extern void Updater_confDB_CH ( void );                                                                   /* Dans Mnemo_CH.c */

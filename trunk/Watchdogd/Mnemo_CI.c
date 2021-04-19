@@ -41,11 +41,9 @@
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_CI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src )
-  { gchar *acro, *libelle;
-    gchar requete[1024];
+ gboolean Mnemo_auto_create_CI ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src, gdouble multi )
+  { gchar *acro, *libelle, *unite;
     gboolean retour;
-    struct DB *db;
 
 /******************************************** Préparation de la base du mnemo *************************************************/
     acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
@@ -63,20 +61,21 @@
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_CI SET tech_id='%s',acronyme='%s',libelle='%s' "
-                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                tech_id, acro, libelle );
-    g_free(libelle);
-    g_free(acro);
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+    unite      = Normaliser_chaine ( unite_src );                                            /* Formatage correct des chaines */
+    if ( !unite )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation unite impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
+       g_free(libelle);
        return(FALSE);
      }
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
+
+    retour = SQL_Write_new ( "INSERT INTO mnemos_CI SET tech_id='%s',acronyme='%s',libelle='%s',unite='%s',multi='%f' "
+                             " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), unite=VALUES(unite), multi=VALUES(multi)",
+                             tech_id, acro, libelle, unite, multi );
+    g_free(unite);
+    g_free(libelle);
+    g_free(acro);
     return (retour);
   }
 /******************************************************************************************************************************/

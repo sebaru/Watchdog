@@ -51,7 +51,7 @@
 %token <val>    T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_OK
 %token <val>    T_BUS T_HOST T_THREAD T_TAG
 
-%token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
+%token <val>    MODE COLOR CLIGNO RESET T_RATIO T_MULTI T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
 %token <val>    T_CADRAN T_MIN T_MAX T_DECIMAL
 %token <val>    T_PID T_KP T_KI T_KD T_INPUT
 %token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM T_UPDATE T_CONSIGNE T_ALIAS
@@ -80,6 +80,8 @@
 %type  <option>      une_option
 %type  <gliste>      liste_options_tempo options_tempo
 %type  <option>      une_option_tempo
+%type  <gliste>      liste_options_cpt options_cpt
+%type  <option>      une_option_cpt
 %type  <gliste>      liste_options_msg options_msg
 %type  <option>      une_option_msg
 %type  <gliste>      liste_options_ai options_ai
@@ -145,12 +147,12 @@ un_alias:       T_DEFINE ID EQUIV T_REGISTRE liste_options_registre PVIRGULE
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
                 }}
-                | T_DEFINE ID EQUIV T_CPT_IMP liste_options PVIRGULE
+                | T_DEFINE ID EQUIV T_CPT_IMP liste_options_cpt PVIRGULE
                 {{ if ( New_alias(NULL, $2, MNEMO_CPT_IMP, $5) == FALSE )                    /* Deja defini ? */
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
                 }}
-                | T_DEFINE ID EQUIV T_CPT_H liste_options PVIRGULE
+                | T_DEFINE ID EQUIV T_CPT_H liste_options_cpt PVIRGULE
                 {{ if ( New_alias(NULL, $2, MNEMO_CPTH, $5) == FALSE )                    /* Deja defini ? */
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
@@ -943,29 +945,11 @@ une_option:     MODE T_EGAL ENTIER
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
-                | RESET
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = 1;
-                }}
-                | RESET T_EGAL ENTIER
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = $3;
-                }}
                 | T_UPDATE
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ENTIER;
                    $$->val_as_int = 1;
-                }}
-                | RATIO T_EGAL ENTIER
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = $3;
                 }}
                 | T_EDGE_UP
                 {{ $$=New_option();
@@ -985,42 +969,7 @@ une_option:     MODE T_EGAL ENTIER
                    $$->token_classe = ENTIER;
                    $$->val_as_int = 1;
                 }}
-                | T_DAA T_EGAL ENTIER
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = $3;
-                }}
-                | T_DMINA T_EGAL ENTIER
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = $3;
-                }}
-                | T_DMAXA T_EGAL ENTIER
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = $3;
-                }}
-                | T_DAD T_EGAL ENTIER
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = $3;
-                }}
-                | T_RANDOM T_EGAL ENTIER
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = $3;
-                }}
-                | T_TYPE T_EGAL type_msg
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = $3;
-                }}
+
                 | T_HOST T_EGAL T_CHAINE
                 {{ $$=New_option();
                    $$->token = $1;
@@ -1040,7 +989,50 @@ une_option:     MODE T_EGAL ENTIER
                    $$->chaine = $3;
                 }}
                 ;
+/**************************************************** Gestion des options compteurs *******************************************/
+liste_options_cpt:
+                T_POUV options_cpt T_PFERM   {{ $$ = $2;   }}
+                |                            {{ $$ = NULL; }}
+                ;
 
+options_cpt:    options_cpt VIRGULE une_option_cpt
+                                 {{ $$ = g_list_append( $1, $3 );   }}
+                | une_option_cpt {{ $$ = g_list_append( NULL, $1 ); }}
+                ;
+
+une_option_cpt: T_UNITE T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
+                   $$->chaine = $3;
+                }}
+                | RESET
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = 1;
+                }}
+                | RESET T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
+                }}
+                | T_RATIO T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
+                }}
+                | T_MULTI T_EGAL T_VALF
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = $3;
+                }}
+                | une_option_cadran
+                | une_option_commune
+                ;
 /**************************************************** Gestion des options messages ********************************************/
 liste_options_msg:
                 T_POUV options_msg T_PFERM   {{ $$ = $2;   }}

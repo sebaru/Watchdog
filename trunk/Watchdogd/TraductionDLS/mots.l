@@ -127,7 +127,8 @@ newline       [\n\r]+
  /************************************************* Options ************************************************/
 "mode"                     { DlsScanner_lval.val = MODE;        return MODE;        }
 "reset"                    { DlsScanner_lval.val = RESET;       return RESET;       }
-"ratio"                    { DlsScanner_lval.val = RATIO;       return RATIO;       }
+"multi"                    { DlsScanner_lval.val = T_MULTI;     return T_MULTI;     }
+"ratio"                    { DlsScanner_lval.val = T_RATIO;     return T_RATIO;     }
 "color"                    { DlsScanner_lval.val = COLOR;       return COLOR;       }
 "cligno"                   { DlsScanner_lval.val = CLIGNO;      return CLIGNO;      }
 "in_range"                 { DlsScanner_lval.val = T_IN_RANGE;  return T_IN_RANGE;  }

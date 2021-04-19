@@ -148,7 +148,10 @@
              },
              { "data": "date_create", "title":"Apparition", "className": "align-middle text-center bg-dark d-none d-sm-table-cell" },
              { "data": "dls_shortname", "title":"Objet", "className": "align-middle text-center bg-dark " },
-             { "data": "libelle", "title":"Message", "className": "align-middle text-center bg-dark", },
+             { "data": null, "title":"Message", "className": "align-middle text-center bg-dark",
+               "render": function (item)
+                 { return( htmlEncode(item.libelle) ); }
+             },
              { "data": null, "title":"Acquit", "className": "align-middle text-center bg-dark d-none d-sm-table-cell",
                "render": function (item)
                  { if (item.typologie==0) return("-");                                                      /* Si INFO, pas de ACK */
