@@ -114,7 +114,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Http_destroy_session ( struct HTTP_CLIENT_SESSION *session )
-  {
+  { while ( session->liste_ws_clients ) Http_ws_destroy_session ( (struct WS_CLIENT_SESSION *)session->liste_ws_clients->data );
     g_slist_free ( session->Liste_bit_cadrans );
     g_free(session);
   }
@@ -716,8 +716,14 @@ reload:
         }
 
        if ( Partage->top > last_pulse + 50 )
-        { Http_ws_send_pulse_to_all();
-          last_pulse = Partage->top;
+        { last_pulse = Partage->top;
+          JsonNode *pulse = Json_node_create();
+          if (pulse)
+           { Json_node_add_string( pulse, "zmq_tag", "PULSE" );
+             Http_ws_send_to_all ( pulse );
+             json_node_unref(pulse);
+           }
+          pthread_mutex_lock( &Cfg_http.lib->synchro );
           GSList *liste = Cfg_http.liste_http_clients;
           while(liste)
            { struct HTTP_CLIENT_SESSION *client = liste->data;
@@ -728,6 +734,7 @@ reload:
                 Http_destroy_session ( client );
               }
            }
+          pthread_mutex_unlock( &Cfg_http.lib->synchro );
         }
 
        g_main_context_iteration ( loop_context, FALSE );
@@ -741,9 +748,6 @@ reload:
     g_main_loop_unref(loop);
 
     Http_Save_and_close_sessions();
-
-    while ( Cfg_http.liste_ws_clients )
-     { Http_ws_destroy_session ( (struct WS_CLIENT_SESSION *)(Cfg_http.liste_ws_clients->data ) ); }
 
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)

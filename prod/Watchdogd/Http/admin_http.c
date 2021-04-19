@@ -55,7 +55,6 @@
        Json_node_add_string ( RootNode, "ssl_cert_filepath",        Cfg_http.ssl_cert_filepath );
        Json_node_add_string ( RootNode, "ssl_private_key_filepath", Cfg_http.ssl_private_key_filepath );
        pthread_mutex_lock( &Cfg_http.lib->synchro );
-       Json_node_add_int    ( RootNode, "Abonnes_motifs",           g_slist_length (Cfg_http.liste_ws_clients) );
        Json_node_add_int    ( RootNode, "nbr_sessions",             g_slist_length (Cfg_http.liste_http_clients ) );
        pthread_mutex_unlock( &Cfg_http.lib->synchro );
      }

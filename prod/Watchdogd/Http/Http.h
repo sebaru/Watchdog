@@ -50,6 +50,7 @@
     gint  access_level;
     GSList *Liste_bit_cadrans;
     time_t last_request;
+    GSList *liste_ws_clients;
   };
 
  struct HTTP_CONFIG
@@ -61,7 +62,6 @@
     gboolean ssl_enable;                                                                             /* TRUE si connexion SSL */
     gchar ssl_cert_filepath[80];
     gchar ssl_private_key_filepath[80];
-    GSList *liste_ws_clients;
     GSList *liste_http_clients;
     gint wtd_session_expiry;
  };
@@ -219,7 +219,6 @@
  extern void Http_redirect_to_slave ( SoupMessage *msg, gchar *target );
  extern void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client );
  extern void Http_ws_send_to_all ( JsonNode *node );
- extern void Http_ws_send_pulse_to_all ( void );
  extern void Http_Formater_cadran( struct HTTP_CADRAN *cadran );
  extern void Audit_log ( struct HTTP_CLIENT_SESSION *session, gchar *format, ... );
  #endif

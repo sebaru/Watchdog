@@ -229,7 +229,6 @@
     printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
            Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );
 
-    printf("Infos->trame=%p\n", infos->Trame );
     if (!infos->Trame) return;
     GList *liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de la page */
     while (liste_motifs)
@@ -415,6 +414,7 @@ printf ("%s\n", __func__ );
 
          if ( !strcasecmp ( zmq_tag, "DLS_CADRAN" ) ) { Updater_les_cadrans ( page, response ); }
     else if ( !strcasecmp ( zmq_tag, "DLS_VISUEL" ) ) { Updater_les_visuels  ( page, response ); }
+    else if ( !strcasecmp ( zmq_tag, "PULSE" ) ) { }
     else printf("%s: zmq_tag '%s' unknown\n", __func__, zmq_tag );
     json_node_unref(response);
   }
@@ -455,8 +455,7 @@ printf ("%s\n", __func__ );
     JsonBuilder *builder = Json_create ();
     if (builder == NULL) return;
 
-    Json_add_string ( builder, "zmq_tag", "SET_ABONNEMENT" );
-    Json_add_int    ( builder, "syn_id",   infos->syn_id );
+    Json_add_string ( builder, "zmq_tag", "CONNECT" );
     Json_add_string ( builder, "wtd_session", page->client->wtd_session );
     Envoi_ws_au_serveur ( page->client, infos->ws_motifs, builder );
   }
