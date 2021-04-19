@@ -68,17 +68,9 @@
        case MNEMO_ENTREE_ANA:
             if (!Json_get_bool(cadran,"in_range")) g_snprintf(libelle, sizeof(libelle), "not in range" );
             else
-             { gchar *digit, *decimal, format[24];
-
-
+             { gchar *digit, format[24];
                if(-1000000.0<trame_cadran->valeur && trame_cadran->valeur<1000000.0) digit = "%6"; else digit="%8";
-               switch (trame_cadran->cadran->nb_decimal)
-                { case 0: decimal = "0"; break;
-                  case 1: decimal = "1"; break;
-                  case 2:
-                  default: decimal = "2"; break;
-                }
-               g_snprintf( format, sizeof(format), "%s.%sf %%s", digit, decimal );
+               g_snprintf( format, sizeof(format), "%s.%df %%s", digit, trame_cadran->cadran->nb_decimal );
                g_snprintf( libelle, sizeof(libelle), format, trame_cadran->valeur, Json_get_string(cadran, "unite") );
              }
             break;
