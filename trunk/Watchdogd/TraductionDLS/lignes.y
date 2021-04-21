@@ -67,6 +67,7 @@
 
 %token <val>    T_BI T_MONO T_ENTREE SORTIE T_ANALOG_OUTPUT T_TEMPO T_HORLOGE
 %token <val>    T_MSG T_VISUEL T_CPT_H T_CPT_IMP T_ANALOG_INPUT T_START T_REGISTRE T_DIGITAL_OUTPUT T_WATCHDOG
+%type  <val>    alias_classe
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_EDGE_DOWN T_IN_RANGE
 %type  <val>    couleur
@@ -78,20 +79,6 @@
 %type  <val>         barre
 %type  <gliste>      liste_options options
 %type  <option>      une_option
-%type  <gliste>      liste_options_tempo options_tempo
-%type  <option>      une_option_tempo
-%type  <gliste>      liste_options_cpt options_cpt
-%type  <option>      une_option_cpt
-%type  <gliste>      liste_options_msg options_msg
-%type  <option>      une_option_msg
-%type  <gliste>      liste_options_ai options_ai
-%type  <option>      une_option_ai
-%type  <gliste>      liste_options_registre options_registre
-%type  <option>      une_option_registre
-%type  <option>      une_option_cadran
-%type  <option>      une_option_commune
-%type  <gliste>      liste_options_pid options_pid
-%type  <option>      une_option_pid
 %type  <chaine>      unite facteur expr suffixe unSwitch listeCase une_instr listeInstr
 %type  <action>      action une_action
 %type  <comparateur> comparateur
@@ -112,87 +99,31 @@ listeAlias:     un_alias listeAlias
                 | un_alias
                 ;
 
-un_alias:       T_DEFINE ID EQUIV T_REGISTRE liste_options_registre PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_REGISTRE, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_BI liste_options PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_BISTABLE, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_MONO liste_options PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_MONOSTABLE, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_ENTREE liste_options PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_ENTREE, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV SORTIE liste_options PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_SORTIE, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_MSG liste_options_msg PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_MSG, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_TEMPO liste_options_tempo PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_TEMPO, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_CPT_IMP liste_options_cpt PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_CPT_IMP, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_CPT_H liste_options_cpt PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_CPTH, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_VISUEL liste_options PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_MOTIF, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_ANALOG_INPUT liste_options_ai PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_ENTREE_ANA, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_ANALOG_OUTPUT liste_options PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_SORTIE_ANA, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_DIGITAL_OUTPUT liste_options PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_DIGITAL_OUTPUT, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_HORLOGE liste_options PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_HORLOGE, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_BUS liste_options PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_BUS, $5) == FALSE )                    /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
-                   g_free($2);
-                }}
-                | T_DEFINE ID EQUIV T_WATCHDOG liste_options PVIRGULE
-                {{ if ( New_alias(NULL, $2, MNEMO_WATCHDOG, $5) == FALSE )                    /* Deja defini ? */
+un_alias:       T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
+                {{ if ( New_alias(NULL, $2, $4, $5) == FALSE )                                               /* Deja defini ? */
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
                 }}
                 ;
+
+alias_classe:     T_BI        {{ $$=MNEMO_BISTABLE;   }}
+                | T_MONO      {{ $$=MNEMO_MONOSTABLE; }}
+                | T_ENTREE    {{ $$=MNEMO_ENTREE;     }}
+                | SORTIE      {{ $$=MNEMO_SORTIE;     }}
+                | T_MSG       {{ $$=MNEMO_MSG;        }}
+                | T_TEMPO     {{ $$=MNEMO_TEMPO;      }}
+                | T_VISUEL    {{ $$=MNEMO_MOTIF;      }}
+                | T_CPT_H     {{ $$=MNEMO_CPTH;       }}
+                | T_CPT_IMP   {{ $$=MNEMO_CPT_IMP;    }}
+                | T_ANALOG_INPUT   {{ $$=MNEMO_ENTREE_ANA; }}
+                | T_ANALOG_OUTPUT  {{ $$=MNEMO_SORTIE_ANA;     }}
+                | T_DIGITAL_OUTPUT {{ $$=MNEMO_DIGITAL_OUTPUT; }}
+                | T_REGISTRE  {{ $$=MNEMO_REGISTRE;   }}
+                | T_HORLOGE   {{ $$=MNEMO_HORLOGE;    }}
+                | T_BUS       {{ $$=MNEMO_BUS;        }}
+                | T_WATCHDOG  {{ $$=MNEMO_WATCHDOG;   }}
+                ;
+
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
                 {{ int taille = ($1 ? strlen($1) : 0) + ($2 ? strlen($2) : 0) + 1;
@@ -349,7 +280,7 @@ calcul_expr3:   T_POUV calcul_expr T_PFERM
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "%d", $1 );
                 }}
-                | T_PID liste_options_pid
+                | T_PID liste_options
                 {{ $$ = New_calcul_PID ( $2 );
                 }}
                 | ID suffixe
@@ -886,24 +817,11 @@ liste_options:  T_POUV options T_PFERM   {{ $$ = $2;   }}
                 ;
 
 options:        options VIRGULE une_option
-                {{ $$ = g_list_append( $1, $3 );
-                }}
+                             {{ $$ = g_list_append( $1, $3 );   }}
                 | une_option {{ $$ = g_list_append( NULL, $1 ); }}
                 ;
 
-une_option:     MODE T_EGAL ENTIER
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = $3;
-                }}
-                | T_CONSIGNE T_EGAL ENTIER
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = $3;
-                }}
-                | COLOR T_EGAL couleur
+une_option:     T_CONSIGNE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ENTIER;
@@ -915,41 +833,17 @@ une_option:     MODE T_EGAL ENTIER
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
-                | T_FORME T_EGAL T_CHAINE
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = T_CHAINE;
-                   $$->chaine = $3;
-                }}
                 | T_ETIQUETTE T_EGAL T_CHAINE
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
-                | CLIGNO
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = 1;
-                }}
-                | CLIGNO T_EGAL ENTIER
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = $3;
-                }}
                 | T_UNITE T_EGAL T_CHAINE
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
-                }}
-                | T_UPDATE
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = 1;
                 }}
                 | T_EDGE_UP
                 {{ $$=New_option();
@@ -988,24 +882,37 @@ une_option:     MODE T_EGAL ENTIER
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
-                ;
-/**************************************************** Gestion des options compteurs *******************************************/
-liste_options_cpt:
-                T_POUV options_cpt T_PFERM   {{ $$ = $2;   }}
-                |                            {{ $$ = NULL; }}
-                ;
-
-options_cpt:    options_cpt VIRGULE une_option_cpt
-                                 {{ $$ = g_list_append( $1, $3 );   }}
-                | une_option_cpt {{ $$ = g_list_append( NULL, $1 ); }}
-                ;
-
-une_option_cpt: T_UNITE T_EGAL T_CHAINE
+                | MODE T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
+                }}
+                | COLOR T_EGAL couleur
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
+                }}
+                | T_FORME T_EGAL T_CHAINE
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
+                | CLIGNO
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = 1;
+                }}
+                | CLIGNO T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = ENTIER;
+                   $$->val_as_int = $3;
+                }}
+                ;
                 | RESET
                 {{ $$=New_option();
                    $$->token = $1;
@@ -1030,21 +937,7 @@ une_option_cpt: T_UNITE T_EGAL T_CHAINE
                    $$->token_classe = T_VALF;
                    $$->val_as_double = $3;
                 }}
-                | une_option_cadran
-                | une_option_commune
-                ;
-/**************************************************** Gestion des options messages ********************************************/
-liste_options_msg:
-                T_POUV options_msg T_PFERM   {{ $$ = $2;   }}
-                |                            {{ $$ = NULL; }}
-                ;
-
-options_msg:    options_msg VIRGULE une_option_msg
-                                     {{ $$ = g_list_append( $1, $3 );   }}
-                | une_option_msg     {{ $$ = g_list_append( NULL, $1 ); }}
-                ;
-
-une_option_msg: T_UPDATE
+                | T_UPDATE
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ENTIER;
@@ -1056,22 +949,7 @@ une_option_msg: T_UPDATE
                    $$->token_classe = ENTIER;
                    $$->val_as_int = $3;
                 }}
-                | une_option_commune
-                ;
-
-/**************************************************** Gestion des options tempo ***********************************************/
-liste_options_tempo:
-                T_POUV options_tempo T_PFERM   {{ $$ = $2;   }}
-                |                              {{ $$ = NULL; }}
-                ;
-
-options_tempo:  options_tempo VIRGULE une_option_tempo
-                                     {{ $$ = g_list_append( $1, $3 );   }}
-                | une_option_tempo   {{ $$ = g_list_append( NULL, $1 ); }}
-                ;
-
-une_option_tempo:
-                T_DAA T_EGAL ENTIER
+                | T_DAA T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ENTIER;
@@ -1101,57 +979,7 @@ une_option_tempo:
                    $$->token_classe = ENTIER;
                    $$->val_as_int = $3;
                 }}
-                | une_option_commune
-                ;
-
-/**************************************************** Gestion des options *****************************************************/
-liste_options_registre:
-                T_POUV options_registre T_PFERM   {{ $$ = $2;   }}
-                |                                 {{ $$ = NULL; }}
-                ;
-
-options_registre:
-                options_registre VIRGULE une_option_registre
-                                      {{ $$ = g_list_append( $1, $3 ); }}
-                | une_option_registre {{ $$ = g_list_append( NULL, $1 ); }}
-                ;
-
-une_option_registre:
-                T_UNITE T_EGAL T_CHAINE
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = T_CHAINE;
-                   $$->chaine = $3;
-                }}
-                | une_option_cadran
-                | une_option_commune
-                ;
-
-/**************************************************** Gestion des options *****************************************************/
-liste_options_ai:
-                T_POUV options_ai T_PFERM   {{ $$ = $2;   }}
-                |                           {{ $$ = NULL; }}
-                ;
-
-options_ai:
-                options_ai VIRGULE une_option_ai
-                                      {{ $$ = g_list_append( $1, $3 ); }}
-                | une_option_ai       {{ $$ = g_list_append( NULL, $1 ); }}
-                ;
-
-une_option_ai:
-                T_UNITE T_EGAL T_CHAINE
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = T_CHAINE;
-                   $$->chaine = $3;
-                }}
-                | une_option_cadran
-                | une_option_commune
-                ;
-/**************************************************** Les options cadrans *****************************************************/
-une_option_cadran:
-                T_CADRAN T_EGAL T_CHAINE
+                | T_CADRAN T_EGAL T_CHAINE
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = T_CHAINE;
@@ -1187,29 +1015,7 @@ une_option_cadran:
                    $$->token_classe = ENTIER;
                    $$->val_as_int = $3;
                 }}
-                ;
-
-/**************************************************** Les options coomunes ****************************************************/
-une_option_commune:
-                T_LIBELLE T_EGAL T_CHAINE
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = T_CHAINE;
-                   $$->chaine = $3;
-                }}
-                ;
-/**************************************************** Gestion des options *****************************************************/
-liste_options_pid:
-                T_POUV options_pid T_PFERM   {{ $$ = $2;   }}
-                |                            {{ $$ = NULL; }}
-                ;
-
-options_pid:    options_pid VIRGULE une_option_pid
-                                 {{ $$ = g_list_append( $1, $3 );   }}
-                | une_option_pid {{ $$ = g_list_append( NULL, $1 ); }}
-                ;
-
-une_option_pid: T_CONSIGNE T_EGAL ID
+                | T_CONSIGNE T_EGAL ID
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ID;
