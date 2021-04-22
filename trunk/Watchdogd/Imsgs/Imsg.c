@@ -222,6 +222,21 @@
     Imsgs_Envoi_message_to( from, map_tag );
   }
 /******************************************************************************************************************************/
+/* Imsgs_Envoi_message_to_by_json : Envoi un message json au client en parametre data                                         */
+/* Entrée : Le tableau, l'index, l'element json et le destinataire                                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Imsgs_Envoyer_commande_dls_data ( JsonArray *array, guint index, JsonNode *element, void *data )
+  { gchar *from = data;
+    gchar *tech_id = Json_get_string ( element, "tech_id" );
+    gchar *acro    = Json_get_string ( element, "acronyme" );
+    gchar *libelle = Json_get_string ( element, "libelle" );
+    gchar *map_tag = Json_get_string ( element, "map_tag" );
+    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Match found from '%s' -> '%s' '%s:%s' - %s", __func__,
+              from, map_tag, tech_id, acro, libelle );
+    Envoyer_commande_dls_data ( tech_id, acro );
+  }
+/******************************************************************************************************************************/
 /* Imsgs_handle_message_CB : CB appellé lorsque l'on recoit un message xmpp                                                   */
 /* Entrée : Le Handler, la connexion, le message                                                                              */
 /* Sortie : Néant                                                                                                             */
@@ -276,15 +291,7 @@
        Json_node_foreach_array_element ( RootNode, "results", Imsgs_Envoi_message_to_by_json, from );
      }
     else
-     { gchar *tech_id = Json_get_string ( RootNode, "tech_id" );
-       gchar *acro    = Json_get_string ( RootNode, "acronyme" );
-       gchar *libelle = Json_get_string ( RootNode, "libelle" );
-       gchar *map_tag = Json_get_string ( RootNode, "map_tag" );
-       Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: Match found '%s' '%s:%s' - %s", __func__,
-                 map_tag, tech_id, acro, libelle );
-        if (Config.instance_is_master==TRUE)                                                      /* si l'instance est Maitre */
-        { Envoyer_commande_dls_data ( tech_id, acro ); }
-     }
+     { Json_node_foreach_array_element ( RootNode, "results", Imsgs_Envoyer_commande_dls_data, from ); }
 end:
     json_node_unref( RootNode );
     xmpp_free(Cfg_imsgs.ctx, message);
@@ -422,6 +429,11 @@ reload:
     Cfg_imsgs.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
     Thread_init ( "W-IMSGS", "USER", lib, WTD_VERSION, "Manage Instant Messaging system (libstrophe)" );
     Imsgs_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
+    if (Config.instance_is_master==FALSE)
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE,
+                "%s: Instance is not Master. Shutting Down %p", __func__, pthread_self() );
+       goto end;
+     }
 
     Cfg_imsgs.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
     zmq_from_bus           = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
@@ -491,6 +503,7 @@ reconnect:
 
     Zmq_Close ( zmq_from_bus );
 
+end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;

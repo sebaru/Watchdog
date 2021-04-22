@@ -522,6 +522,24 @@ end:
     json_node_unref(RootNode);
   }
 /******************************************************************************************************************************/
+/* Imsgs_Envoi_message_to_by_json : Envoi un message json au client en parametre data                                         */
+/* Entrée : Le tableau, l'index, l'element json et le destinataire                                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Sms_Envoyer_commande_dls_data ( JsonArray *array, guint index, JsonNode *element, void *data )
+  { gchar *from = data;
+    gchar *tech_id = Json_get_string ( element, "tech_id" );
+    gchar *acro    = Json_get_string ( element, "acronyme" );
+    gchar *libelle = Json_get_string ( element, "libelle" );
+    gchar *map_tag = Json_get_string ( element, "map_tag" );
+    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Match found from '%s' -> '%s' '%s:%s' - %s", __func__,
+              from, map_tag, tech_id, acro, libelle );
+    if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
+     { Envoyer_commande_dls_data ( tech_id, acro ); }
+    else /* Envoi au master via thread HTTP */
+     { Zmq_Send_CDE_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, tech_id, acro ); }
+  }
+/******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
 /* Entrée: le message text à traiter                                                                                          */
 /* Sortie : Néant                                                                                                             */
@@ -566,7 +584,9 @@ end:
                               "SELECT * FROM mnemos_DI WHERE map_thread='COMMAND_TEXT' AND map_tag LIKE '%%%s%%'", texte );
 
     if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
+     { g_snprintf(chaine, sizeof(chaine), "'%s' not found.", texte );
+       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte );
+     }
     else
      { gint nbr_results = Json_get_int ( RootNode, "nbr_results" );
        if ( nbr_results == 0 )
@@ -574,16 +594,7 @@ end:
        else if ( nbr_results > 1 )                                           /* Si trop d'enregistrement, demande de préciser */
         { g_snprintf(chaine, sizeof(chaine), "Trop de résultats pour '%s'.", texte ); }    /* Envoi de l'erreur si pas trouvé */
        else
-        { gchar *tech_id = Json_get_string ( RootNode, "tech_id" );
-          gchar *acro    = Json_get_string ( RootNode, "acronyme" );
-          gchar *libelle = Json_get_string ( RootNode, "libelle" );
-          gchar *map_tag = Json_get_string ( RootNode, "map_tag" );
-          Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Match found '%s' '%s:%s' - %s", __func__,
-                    map_tag, tech_id, acro, libelle );
-          if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
-           { Envoyer_commande_dls_data ( tech_id, acro ); }
-          else /* Envoi au master via thread HTTP */
-           { Zmq_Send_CDE_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, tech_id, acro ); }
+        { Json_node_foreach_array_element ( RootNode, "results", Sms_Envoyer_commande_dls_data, from );
           g_snprintf(chaine, sizeof(chaine), "'%s': fait.", texte );
         }
       }
