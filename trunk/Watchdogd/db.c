@@ -2202,7 +2202,12 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5576;
+    if (database_version < 5578)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `users_sessions` CHANGE `wtd_sessions` `wtd_session` VARCHAR(42) UNIQUE NOT NULL" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5578;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

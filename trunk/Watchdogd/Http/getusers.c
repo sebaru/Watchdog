@@ -386,6 +386,7 @@
         { JsonNode *session_node = Json_node_create();
           if (session_node)
            { Json_node_add_string ( session_node, "username", sess->username );
+             Json_node_add_string ( session_node, "useragent", sess->useragent );
              Json_node_add_string ( session_node, "host", sess->host );
              Json_node_add_string ( session_node, "wtd_session", sess->wtd_session );
              Json_node_add_int    ( session_node, "access_level", sess->access_level );

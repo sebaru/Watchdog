@@ -3,7 +3,8 @@
  function Send_credential ()
   { var json_request = JSON.stringify(
      { username : document.getElementById("username").value,
-       password : document.getElementById("password").value
+       password : document.getElementById("password").value,
+       useragent : window.navigator.userAgent
      });
 
     Send_to_API ( 'POST', "/api/connect", json_request, function (Response)
