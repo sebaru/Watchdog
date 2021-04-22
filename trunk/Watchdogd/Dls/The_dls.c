@@ -1856,7 +1856,6 @@ end:
  static void Dls_run_plugin ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { struct timeval tv_avant, tv_apres;
 
-    if (!(plugin->on && plugin->go)) return;
 /*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
     gboolean bit_comm_module = TRUE;
     GSList *liste = plugin->Arbre_IO_Comm;
@@ -1875,6 +1874,7 @@ end:
     Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
     Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
 
+    if (!(plugin->on && plugin->go)) return;                          /* si plugin a l'arret, on considère que la comm est OK */
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
     gettimeofday( &tv_avant, NULL );
     plugin->go( &plugin->vars );                                                                     /* On appel le plugin */
