@@ -527,10 +527,8 @@ end:
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Traiter_commande_sms ( gchar *from, gchar *texte )
-  { gboolean found = FALSE;
-    struct SMSDB *sms;
+  { struct SMSDB *sms;
     gchar chaine[160];
-    struct DB *db;
 
     sms = Smsg_is_recipient_authorized ( from );
     if ( sms == NULL )
@@ -559,23 +557,37 @@ end:
        return;
      }
 
-    if ( ! Recuperer_mnemos_DI_by_tag ( &db, Cfg_smsg.tech_id, texte ) )
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
-    else while ( Recuperer_mnemos_DI_suite( &db ) )
-     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
-       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Dyn Match found '%s' '%s:%s' - %s", __func__,
-                 src_text, tech_id, acro, libelle );
-
-       found=TRUE;
-       if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
-        { Envoyer_commande_dls_data ( tech_id, acro ); }
-       else /* Envoi au master via thread HTTP */
-        { Zmq_Send_CDE_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, tech_id, acro ); }
+    JsonNode *RootNode = Json_node_create();
+    if ( RootNode == NULL )
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s : Memory Error for '%s'", __func__, from );
+       return;
      }
+    SQL_Select_to_json_node ( RootNode, "results",
+                              "SELECT * FROM mnemos_DI WHERE map_thread='COMMAND_TEXT' AND map_tag LIKE '%%%s%%'", texte );
 
-    if (found)
-         { g_snprintf(chaine, sizeof(chaine), "'%s' done.", texte ); }
-    else { g_snprintf(chaine, sizeof(chaine), "'%s' not found in database.", texte ); }    /* Envoi de l'erreur si pas trouvé */
+    if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
+    else
+     { gint nbr_results = Json_get_int ( RootNode, "nbr_results" );
+       if ( nbr_results == 0 )
+        { g_snprintf(chaine, sizeof(chaine), "'%s' not found.", texte ); }                 /* Envoi de l'erreur si pas trouvé */
+       else if ( nbr_results > 1 )                                           /* Si trop d'enregistrement, demande de préciser */
+        { g_snprintf(chaine, sizeof(chaine), "Trop de résultats pour '%s'.", texte ); }    /* Envoi de l'erreur si pas trouvé */
+       else
+        { gchar *tech_id = Json_get_string ( RootNode, "tech_id" );
+          gchar *acro    = Json_get_string ( RootNode, "acronyme" );
+          gchar *libelle = Json_get_string ( RootNode, "libelle" );
+          gchar *map_tag = Json_get_string ( RootNode, "map_tag" );
+          Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Match found '%s' '%s:%s' - %s", __func__,
+                    map_tag, tech_id, acro, libelle );
+          if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
+           { Envoyer_commande_dls_data ( tech_id, acro ); }
+          else /* Envoi au master via thread HTTP */
+           { Zmq_Send_CDE_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, tech_id, acro ); }
+          g_snprintf(chaine, sizeof(chaine), "'%s': fait.", texte );
+        }
+      }
+    json_node_unref( RootNode );
     Envoyer_smsg_gsm_text ( chaine );
   }
 /******************************************************************************************************************************/

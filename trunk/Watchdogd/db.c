@@ -2195,7 +2195,14 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5550;
+    if (database_version < 5576)
+     { g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_DI` SET map_thread='COMMAND_TEXT' WHERE map_thread='W-SMSG'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_DI` SET map_thread='COMMAND_TEXT' WHERE map_thread='SMSG'");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5576;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );
