@@ -23,7 +23,7 @@
         .nav-link {
                   }
 
-        .nav-link:hover { color: white !important;
+        .nav-link:hover { /*color: white !important; attention, cible aussi les nav-tabs */
                           background-color: #48BBC0;
                         }
         .courbe-dashboard { height: 300px; }
