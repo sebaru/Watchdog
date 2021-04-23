@@ -126,9 +126,9 @@
  static void Http_Save_and_close_sessions ( void )
   { while ( Cfg_http.liste_http_clients )
      { struct HTTP_CLIENT_SESSION *session = Cfg_http.liste_http_clients->data;
-       SQL_Write_new ( "INSERT INTO users_sessions SET username='%s', wtd_session='%s', host='%s', last_request='%d' "
+       SQL_Write_new ( "INSERT INTO users_sessions SET username='%s', useragent='%s', wtd_session='%s', host='%s', last_request='%d' "
                        "ON DUPLICATE KEY UPDATE last_request=VALUES(last_request)",
-                       session->username, session->wtd_session, session->host, session->last_request );
+                       session->username, session->useragent, session->wtd_session, session->host, session->last_request );
        Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
        Http_destroy_session(session);
      }
@@ -143,6 +143,7 @@
   { struct HTTP_CLIENT_SESSION *session = g_try_malloc0( sizeof ( struct HTTP_CLIENT_SESSION ) );
     if (!session) return;
     g_snprintf( session->username,    sizeof(session->username),    "%s", Json_get_string ( element, "username" ) );
+    g_snprintf( session->useragent,   sizeof(session->useragent),   "%s", Json_get_string ( element, "useragent" ) );
     g_snprintf( session->wtd_session, sizeof(session->wtd_session), "%s", Json_get_string ( element, "wtd_session" ) );
     g_snprintf( session->host,        sizeof(session->host),        "%s", Json_get_string ( element, "host" ) );
     session->access_level = Json_get_int ( element, "access_level" );
@@ -428,7 +429,9 @@
      }
 
     g_snprintf( session->username, sizeof(session->username), "%s", db->row[0] );
-    g_snprintf( session->useragent, sizeof(session->useragent), "%s", Json_get_string ( request, "useragent" ) );
+    gchar *useragent = Normaliser_chaine ( Json_get_string ( request, "useragent" ) );
+    g_snprintf( session->useragent, sizeof(session->useragent), "%s", useragent );
+    g_free(useragent);
     gchar *temp = g_inet_address_to_string ( g_inet_socket_address_get_address ( G_INET_SOCKET_ADDRESS(soup_client_context_get_remote_address (client) )) );
     g_snprintf( session->host, sizeof(session->host), "%s", temp );
     g_free(temp);

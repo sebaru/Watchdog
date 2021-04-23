@@ -2207,7 +2207,22 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5578;
+    if (database_version < 5583)
+     { g_snprintf( requete, sizeof(requete), "DROP TABLE `users_sessions`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `users_sessions` ("
+                                             "`wtd_session` VARCHAR(42) PRIMARY KEY,"
+                                             "`username` VARCHAR(32) NOT NULL,"
+                                             "`useragent` VARCHAR(128) NOT NULL,"
+                                             "`host` VARCHAR(32) NOT NULL,"
+                                             "`last_request` INT(11) NOT NULL,"
+                                             "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                                             "FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE"
+                                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5583;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

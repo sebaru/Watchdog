@@ -685,10 +685,12 @@ INSERT INTO `users` (`id`, `enable`, `access_level`, `username`, `salt`, `hash`,
 (1, 1, 0, 'guest', 'c607ac2c103d731de0cc549f90095734', '4ef847cbf200e403327cce2c8cad26d34442073b4b3c72631631d849875935f3', 'Guest user ', NOW(), NOW());
 
 CREATE TABLE IF NOT EXISTS `users_sessions` (
+  `wtd_session` VARCHAR(42) PRIMARY KEY,
   `username` VARCHAR(32) NOT NULL,
+  `useragent` VARCHAR(128) NOT NULL,
   `host` VARCHAR(32) NOT NULL,
-  `wtd_session` VARCHAR(42) UNIQUE NOT NULL,
   `last_request` INT(11) NOT NULL,
+  `date_create` DATETIME NOT NULL DEFAULT NOW(),
   FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
