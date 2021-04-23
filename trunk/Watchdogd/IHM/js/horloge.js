@@ -76,7 +76,7 @@
        array_jour = [ { valeur: 0, texte: "Non" }, { valeur: 1, texte: "Oui" } ];
        $.each ( Response.horloges, function (i, horloge)
         { bodymain.append ( $("<h4></h4>" ).text( horloge.libelle ).addClass("text-white align-items-center") )
-                   .append( $("<table></table>").
+                  .append ( $("<table></table>").
                               attr("id","idTableHorloge_"+horloge.id).
                               addClass("table table-dark table-striped table-bordered table-hover"))
                   .append("<hr>");

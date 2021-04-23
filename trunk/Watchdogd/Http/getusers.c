@@ -295,21 +295,24 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( ! (Json_has_member ( request, "wtd_session" ) ) )
+    if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "appareil" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    gchar *target_sid = Json_get_string( request, "wtd_session" );
+    gchar *target_username = Json_get_string( request, "username" );
+    gchar *target_appareil = Json_get_string( request, "appareil" );
 
     GSList *liste = Cfg_http.liste_http_clients;
     while(liste)
      { struct HTTP_CLIENT_SESSION *target = liste->data;
-       if ( !strcmp(target->wtd_session, target_sid) )
+       if ( !strcmp(target->username, target_username) &&
+            !strcmp(target->appareil, target_appareil)
+          )
         { if ( session->access_level>target->access_level || !strcmp(session->username,target->username) )
            { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, target );
-             Audit_log ( session, "Session of '%s' killed", target->username );
+             Audit_log ( session, "Session '%s' on '%s' killed", target->username, target->appareil );
              g_free(target);
              soup_message_set_status (msg, SOUP_STATUS_OK );
            }
@@ -382,13 +385,14 @@
     GSList *liste = Cfg_http.liste_http_clients;
     while(liste)
      { struct HTTP_CLIENT_SESSION *sess = liste->data;
-       if (sess->access_level <= session->access_level)
+       if ( (sess->access_level < session->access_level) ||
+            (!strcmp( sess->username, session->username)) )
         { JsonNode *session_node = Json_node_create();
           if (session_node)
            { Json_node_add_string ( session_node, "username", sess->username );
+             Json_node_add_string ( session_node, "appareil", sess->appareil );
              Json_node_add_string ( session_node, "useragent", sess->useragent );
              Json_node_add_string ( session_node, "host", sess->host );
-             Json_node_add_string ( session_node, "wtd_session", sess->wtd_session );
              Json_node_add_int    ( session_node, "access_level", sess->access_level );
              Json_node_add_int    ( session_node, "last_request", sess->last_request );
              Json_array_add_element ( sessions, session_node );

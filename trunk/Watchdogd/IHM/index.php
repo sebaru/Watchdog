@@ -25,3 +25,4 @@
 <script src="/js/home.js" type="text/javascript"></script>
 <script src="/js/tableau.js" type="text/javascript"></script>
 <script src="/js/horloge.js" type="text/javascript"></script>
+<script src="/js/user_sessions.js" type="text/javascript"></script>

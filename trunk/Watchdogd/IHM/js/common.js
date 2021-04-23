@@ -148,7 +148,7 @@
     if (level == 6) return( Badge ( "warning", "Accès technicien 6", "6" ) );
     if (level == 7) return( Badge ( "warning", "Accès technicien 7", "7" ) );
     if (level == 8) return( Badge ( "warning", "Accès technicien 8", "8" ) );
-    if (level == 9) return( Badge ( "danger", "Accès technicien 9", "9" ) );
+    if (level >= 9) return( Badge ( "danger", "Accès technicien 9", "9" ) );
     return( Badge ( "success", "Accès public", "0" ) );
   }
 

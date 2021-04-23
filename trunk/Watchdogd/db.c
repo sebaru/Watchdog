@@ -2213,6 +2213,7 @@ encore:
        g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `users_sessions` ("
                                              "`wtd_session` VARCHAR(42) PRIMARY KEY,"
                                              "`username` VARCHAR(32) NOT NULL,"
+                                             "`appareil` VARCHAR(32) NOT NULL,"
                                              "`useragent` VARCHAR(128) NOT NULL,"
                                              "`host` VARCHAR(32) NOT NULL,"
                                              "`last_request` INT(11) NOT NULL,"
