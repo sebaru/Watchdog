@@ -1,16 +1,10 @@
 <div class="container-fluid">
 
-   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
-     <h4 class="alert-heading">Warning !</h4>
-         Thread <a href="/tech/process">GSM</a> is not running !
-   </div>
-
  <div class="row m-2">
-   <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Mapping des Entrées SMS via GSM</h3>
+   <h3><img src="/img/commande_texte.png" style="width:80px" alt="Commandes textuelles">Mapping des Commandes Textuelles</h3>
 
-   <div class ="ml-auto btn-group align-items-start">
-        <button type="button" onclick="Show_Modal_Map_Edit_DI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping GSM</button>
-        <button type="button" onclick="Redirect('/tech/smsg')" class="btn btn-primary"><i class="fas fa-list"></i> Liste des GSM</button>
+   <div class ="ml-auto btn-group align-items-center">
+        <button type="button" onclick="Show_Modal_Map_Edit_DI(null)" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping</button>
    </div>
  </div>
 
@@ -18,7 +12,7 @@
 
 <!----------------------------------------------------------------------------------------------------------------------------->
 
-    <table id="idTableGSM" class="table table-striped table-bordered table-hover">
+    <table id="idTableTXT" class="table table-striped table-bordered table-hover">
       <thead class="thead-dark">
 				  </thead>
 			   <tbody>
@@ -42,29 +36,22 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">GSM Tech_ID</label>
-						     <select id="idModalEditGSMTechID" class="custom-select border-info"></select>
-     					</div>
-  					</div>
-
-       <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Commande SMS</label>
-						     <input id="idModalEditGSMTag" type="text" class="form-control" placeholder="Commande SMS">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Commande textuelle</label>
+						     <input id="idModalEditTXTTag" type="text" class="form-control" placeholder="Commande SMS">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-						     <input id="idModalEditRechercherTechID" oninput="GSMMap_Update_Choix_Tech_ID()" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
+						     <input id="idModalEditRechercherTechID" oninput="TXTMap_Update_Choix_Tech_ID()" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditSelectTechID" onchange="GSMMap_Update_Choix_Acronyme()" class="col-9 custom-select border-info"></select>
+						     <select id="idModalEditSelectTechID" onchange="TXTMap_Update_Choix_Acronyme()" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
@@ -85,4 +72,4 @@
 </div>
 
 
-<script src="/js/tech/smsg_map.js" type="text/javascript"></script>
+<script src="/js/tech/command_text.js" type="text/javascript"></script>

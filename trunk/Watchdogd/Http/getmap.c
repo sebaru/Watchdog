@@ -98,7 +98,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_map_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { gchar requete[256], *target;
+  { gchar *target;
 
     if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -109,7 +109,7 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "classe" ) &&
-            Json_has_member ( request, "map_tech_id" ) && Json_has_member ( request, "map_tag" ) ) )
+            Json_has_member ( request, "id" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        json_node_unref(request);
        return;
@@ -124,16 +124,13 @@
 		     return;
      }
 
-    gchar *tech_id = Normaliser_chaine ( Json_get_string( request, "map_tech_id" ) );
-    gchar *tag     = Normaliser_chaine ( Json_get_string( request, "map_tag" ) );
+    gint id = Json_get_int( request, "id" );
     json_node_unref(request);
-    g_snprintf( requete, sizeof(requete), "UPDATE %s SET map_thread = NULL, map_tech_id = NULL, map_tag = NULL "
-                                          "WHERE map_tech_id='%s' AND map_tag='%s'", target, tech_id, tag );
-    g_free(tech_id);
-    g_free(tag);
-
-    if (SQL_Write (requete)) soup_message_set_status (msg, SOUP_STATUS_OK);
-    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+    if (SQL_Write_new ("UPDATE %s SET map_thread = NULL, map_tech_id = NULL, map_tag = NULL "
+                       "WHERE id = '%d'", target, id))
+     { soup_message_set_status (msg, SOUP_STATUS_OK); }
+    else
+     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
   }
 /******************************************************************************************************************************/
 /* Http_traiter_map_set: ajoute un mapping dans la base de données                                                            */
@@ -153,18 +150,22 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
-            Json_has_member ( request, "map_tech_id" ) && Json_has_member ( request, "map_tag" ) &&
+            Json_has_member ( request, "map_tag" ) &&
             Json_has_member ( request, "classe" ) && Json_has_member ( request, "thread" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        json_node_unref(request);
        return;
      }
 
-    gchar *map_tech_id = Normaliser_as_ascii ( Json_get_string( request, "map_tech_id" ) );
-    gchar *map_tag     = Normaliser_chaine   ( Json_get_string( request, "map_tag" ) );
-    gchar *tech_id     = Normaliser_as_ascii ( Json_get_string( request, "tech_id" ) );
-    gchar *acronyme    = Normaliser_as_ascii ( Json_get_string( request, "acronyme" ) );
-    gchar *thread      = Normaliser_as_ascii ( Json_get_string( request, "thread" ) );
+    gchar *map_tech_id = NULL;
+    if (Json_has_member ( request, "map_tech_id" ))
+     {  map_tech_id = Normaliser_chaine ( Json_get_string( request, "map_tech_id" ) ); }
+    else
+     {  map_tech_id = g_strdup("ALL"); }
+    gchar *map_tag     = Normaliser_chaine  ( Json_get_string( request, "map_tag" ) );
+    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *acronyme    = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
+    gchar *thread      = Normaliser_chaine ( Json_get_string( request, "thread" ) );
     gchar *classe      = Json_get_string( request, "classe" );
 
     if (! strcasecmp( classe, "DI" ) )
@@ -263,7 +264,11 @@
      {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
     Dls_recalculer_arbre_comm();/* Calcul de l'arbre de communication car il peut y avoir de nouvelles dependances sur les plugins */
 end:
+    g_free(tech_id);
+    g_free(acronyme);
+    g_free(map_tech_id);
     g_free(map_tag);
+    g_free(thread);
     json_node_unref(request);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
