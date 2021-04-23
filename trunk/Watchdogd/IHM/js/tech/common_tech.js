@@ -17,17 +17,7 @@
     if(instance!=null) json_request.instance=instance;
     Send_to_API ( "POST", "/api/process/reload", JSON.stringify(json_request), null, null);
   }
-/************************************ Envoi les infos de modifications synoptique *********************************************/
- function Valider_Map_Del ( table, classe, id )
-  { var json_request = JSON.stringify(
-       { classe : classe,
-         id     : id,
-       }
-     );
-    Send_to_API ( "DELETE", "/api/map/del", json_request, function(Response)
-     { $('#'+table).DataTable().ajax.reload(null, false);
-     }, null );
-  }
+
 /********************************************* Renvoi un Select d'archivage ***************************************************/
  function Bouton_Archivage ( id, fonction, selected )
   { return("<select id='"+id+"' class='custom-select'"+

@@ -1,5 +1,16 @@
 document.addEventListener('DOMContentLoaded', Load_page, false);
 
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function Valider_Map_Del ( classe, id )
+  { var json_request = JSON.stringify(
+       { classe : classe,
+         id     : id,
+       }
+     );
+    Send_to_API ( "DELETE", "/api/map/del", json_request, function(Response)
+     { $('#idTableTXT').DataTable().ajax.reload(null, false);
+     }, null );
+  }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Del ( classe, selection )
   { $('#idModalDelTitre').text ( "Détruire le mapping ?" );
@@ -10,7 +21,7 @@ document.addEventListener('DOMContentLoaded', Load_page, false);
                                  "<br>" + selection.libelle
                                 );
     $('#idModalDelValider').attr( "onclick",
-                                  "Valider_Map_Del('idTableTXT','"+classe+"','"+selection.id+"')" );
+                                  "Valider_Map_Del('"+classe+"','"+selection.id+"')" );
     $('#idModalDel').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/

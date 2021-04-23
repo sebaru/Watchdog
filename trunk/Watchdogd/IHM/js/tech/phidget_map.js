@@ -1,23 +1,23 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function Valider_Phidget_Del ( type, id )
+ function Valider_Phidget_Del ( classe, id )
   { var json_request = JSON.stringify(
-       { classe : type,
+       { classe : classe,
          id     : id,
        }
      );
     Send_to_API ( 'DELETE', "/api/process/phidget/map/del", json_request, function()
-     { $('#idTablePhidgetMap'+type).DataTable().ajax.reload(null, false);
+     { $('#idTablePhidgetMap'+classe).DataTable().ajax.reload(null, false);
      }, null );
   }
 
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Map_Del ( type, selection )
+ function Show_Modal_Map_Del ( classe, selection )
   { Show_modal_del ( "Détruire le mapping ?", "Etes-vous sur de vouloir supprimer ce mapping ?",
                      selection.hub_description+":"+selection.capteur +
                      " <-> " + selection.tech_id + ":" + selection.acronyme + " - " +
-                     selection.libelle, "Valider_Phidget_Del('"+type+"','"+selection.id+"')" );
+                     selection.libelle, "Valider_Phidget_Del('"+classe+"','"+selection.id+"')" );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Del_DI ( id )
