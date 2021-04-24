@@ -295,24 +295,21 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "appareil" ) ) )
+    if ( ! (Json_has_member ( request, "id" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    gchar *target_username = Json_get_string( request, "username" );
-    gchar *target_appareil = Json_get_string( request, "appareil" );
+    gint target_id = Json_get_int( request, "id" );
 
     GSList *liste = Cfg_http.liste_http_clients;
     while(liste)
      { struct HTTP_CLIENT_SESSION *target = liste->data;
-       if ( !strcmp(target->username, target_username) &&
-            !strcmp(target->appareil, target_appareil)
-          )
+       if ( target->id == target_id )
         { if ( session->access_level>target->access_level || !strcmp(session->username,target->username) )
            { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, target );
-             Audit_log ( session, "Session '%s' on '%s' killed", target->username, target->appareil );
+             Audit_log ( session, "Session '%d' for '%s' on '%s' killed", target->id, target->username, target->appareil );
              g_free(target);
              soup_message_set_status (msg, SOUP_STATUS_OK );
            }
@@ -393,6 +390,7 @@
              Json_node_add_string ( session_node, "appareil", sess->appareil );
              Json_node_add_string ( session_node, "useragent", sess->useragent );
              Json_node_add_string ( session_node, "host", sess->host );
+             Json_node_add_int    ( session_node, "id", sess->id );
              Json_node_add_int    ( session_node, "access_level", sess->access_level );
              Json_node_add_int    ( session_node, "last_request", sess->last_request );
              Json_array_add_element ( sessions, session_node );

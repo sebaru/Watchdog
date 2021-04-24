@@ -126,10 +126,10 @@
  static void Http_Save_and_close_sessions ( void )
   { while ( Cfg_http.liste_http_clients )
      { struct HTTP_CLIENT_SESSION *session = Cfg_http.liste_http_clients->data;
-       SQL_Write_new ( "INSERT INTO users_sessions SET username='%s', appareil='%s', useragent='%s', "
+       SQL_Write_new ( "INSERT INTO users_sessions SET id='%d', username='%s', appareil='%s', useragent='%s', "
                        "wtd_session='%s', host='%s', last_request='%d' "
                        "ON DUPLICATE KEY UPDATE last_request=VALUES(last_request)",
-                       session->username, session->appareil, session->useragent,
+                       session->id, session->username, session->appareil, session->useragent,
                        session->wtd_session, session->host, session->last_request );
        Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
        Http_destroy_session(session);
@@ -149,9 +149,11 @@
     g_snprintf( session->useragent,   sizeof(session->useragent),   "%s", Json_get_string ( element, "useragent" ) );
     g_snprintf( session->wtd_session, sizeof(session->wtd_session), "%s", Json_get_string ( element, "wtd_session" ) );
     g_snprintf( session->host,        sizeof(session->host),        "%s", Json_get_string ( element, "host" ) );
+    session->id           = Json_get_int ( element, "id" );
     session->access_level = Json_get_int ( element, "access_level" );
     session->last_request = Json_get_int ( element, "last_request" );
     Cfg_http.liste_http_clients = g_slist_prepend ( Cfg_http.liste_http_clients, session );
+    if (session->id >= Cfg_http.num_session) Cfg_http.num_session = session->id+1;            /* Calcul du MAX du num session */
   }
 /******************************************************************************************************************************/
 /* Http_Load_sessions: Charge les sessions en base de données                                                                 */
@@ -164,6 +166,7 @@
                                                     "FROM users_sessions AS session "
                                                     "INNER JOIN users AS user ON session.username = user.username"
                             );
+    Cfg_http.num_session = 0;
     if (Json_has_member ( RootNode, "sessions" ))
      { Json_node_foreach_array_element ( RootNode, "sessions", Http_Load_one_session, NULL ); }
     json_node_unref(RootNode);
@@ -202,7 +205,7 @@
     GSList *cookies, *liste;
 
     if ( Config.instance_is_master == FALSE )
-     { static struct HTTP_CLIENT_SESSION Slave_session = { "system_user", "internal device", "Watchdog Server", "none", "no_sid", 9, 0 };
+     { static struct HTTP_CLIENT_SESSION Slave_session = { -1, "system_user", "internal device", "Watchdog Server", "none", "no_sid", 9, 0 };
        return(&Slave_session);
      }
 
@@ -430,6 +433,10 @@
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
+
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                                  /* On prend un numéro de session tout neuf */
+    session->id = Cfg_http.num_session++;
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
 
     g_snprintf( session->username, sizeof(session->username), "%s", db->row[0] );
     gchar *useragent = Normaliser_chaine ( Json_get_string ( request, "useragent" ) );

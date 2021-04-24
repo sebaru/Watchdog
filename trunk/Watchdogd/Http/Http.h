@@ -44,7 +44,8 @@
   };
 
  struct HTTP_CLIENT_SESSION
-  { gchar username[32];
+  { gint id;
+    gchar username[32];
     gchar appareil[32];
     gchar useragent[128];
     gchar host[32];
@@ -66,6 +67,7 @@
     gchar ssl_private_key_filepath[80];
     GSList *liste_http_clients;
     gint wtd_session_expiry;
+    gint num_session;
  };
 
 /******************************************************************************************************************************/

@@ -98,7 +98,6 @@
      }
 
     gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: '%s' received from '%s'", __func__, zmq_tag, client->http_session->username );
 
     if(!strcasecmp(zmq_tag,"CONNECT"))
      { if ( ! (Json_has_member( response, "wtd_session") ))

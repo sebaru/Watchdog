@@ -78,7 +78,7 @@
         { bodymain.append ( $("<h4></h4>" ).text( horloge.libelle ).addClass("text-white align-items-center") )
                   .append ( $("<table></table>").
                               attr("id","idTableHorloge_"+horloge.id).
-                              addClass("table table-dark table-striped table-bordered table-hover"))
+                              addClass("table table-dark table-bordered"))
                   .append("<hr>");
 
           $("#idTableHorloge_"+horloge.id).DataTable(
