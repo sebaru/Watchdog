@@ -165,6 +165,8 @@
     if (builder == NULL) return;
     Json_add_string ( builder, "username", client->username );
     Json_add_string ( builder, "password", client->password );
+    Json_add_string ( builder, "useragent", "Client Lourd Watchdog" );
+    Json_add_string ( builder, "appareil", g_get_host_name() );
     Envoi_json_au_serveur ( client, "POST", builder, "/api/connect", Connecter_au_serveur_CB );
   }
 /******************************************************************************************************************************/
