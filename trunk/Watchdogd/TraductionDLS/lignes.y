@@ -43,7 +43,7 @@
        };
 
 %token <val>    T_ERROR PVIRGULE VIRGULE T_DPOINTS DONNE EQUIV T_MOINS T_POUV T_PFERM T_EGAL T_PLUS ET BARRE T_FOIS
-%token <val>    T_SWITCH T_ACCOUV T_ACCFERM T_PIPE
+%token <val>    T_SWITCH T_ACCOUV T_ACCFERM T_PIPE T_DIFFERE
 %token <val>    T_DEFINE
 
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_SBIEN_ALE_FUGITIVE T_TOP_ALERTE T_TOP_ALERTE_FUGITIVE
@@ -155,6 +155,35 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                    if ($4->sinon) g_free($4->sinon);
                    g_free($4->alors);
                    g_free($4);
+                   g_free($2);
+                }}
+                | T_MOINS expr T_DIFFERE ENTIER DONNE action PVIRGULE
+                {{ int taille;
+                   taille = strlen($2)+strlen($6->alors)+512;
+                   if ($6->sinon) taille += strlen($6->sinon);
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille,
+                               "vars->num_ligne = %d; /* une_instr différée----------*/\n"
+                               " { static gboolean counting=FALSE;\n"
+                               "   static time_t top;\n"
+                               "   if(%s)\n"
+                               "    { if (counting==FALSE)\n"
+                               "       { counting=TRUE; time(&top); }\n"
+                               "      else\n"
+                               "       { if ( difftime( time(NULL), top ) >= %d )\n"
+                               "          { %s"
+                               "          }\n"
+                               "       }\n"
+                               "    }\n"
+                               "   else\n"
+                               "    { counting = FALSE;\n"
+                               "      %s"
+                               "    }\n"
+                               " }\n\n",
+                               DlsScanner_get_lineno(), $2, $4, $6->alors, ($6->sinon ? $6->sinon : "") );
+                   if ($6->sinon) g_free($6->sinon);
+                   g_free($6->alors);
+                   g_free($6);
                    g_free($2);
                 }}
                 | T_MOINS expr T_MOINS T_POUV calcul_expr T_PFERM DONNE calcul_ea_result PVIRGULE

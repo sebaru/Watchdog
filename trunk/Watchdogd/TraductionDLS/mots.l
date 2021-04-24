@@ -185,6 +185,7 @@ newline       [\n\r]+
 "="                        { DlsScanner_lval.val = T_EGAL;      return T_EGAL;      }
 "<->"                      { DlsScanner_lval.val = EQUIV;       return EQUIV;       }
 "->"                       { DlsScanner_lval.val = DONNE;       return DONNE;       }
+"-/"                       { DlsScanner_lval.val = T_DIFFERE;   return T_DIFFERE;   }
 "<"                        { DlsScanner_lval.val = INF;         return INF;         }
 ">"                        { DlsScanner_lval.val = SUP;         return SUP;         }
 "<="                       { DlsScanner_lval.val = INF_OU_EGAL; return INF_OU_EGAL; }
