@@ -225,7 +225,10 @@
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
                      .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div")
-                     .append("<div id='tableaux' class='row mx-1 justify-content-center'></div");
+                     .append("<div id='tableaux' class='row mx-1 justify-content-center'></div>")
+                     .append("<hr><table id='idTableMessages' class='table table-dark table-bordered w-100'></table>");
+       Synoptique = null;
+       Messages_loaded=false;
        Charger_un_synoptique ( syn_id );
      });
   }
