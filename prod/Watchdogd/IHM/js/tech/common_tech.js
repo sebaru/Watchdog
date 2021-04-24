@@ -17,6 +17,7 @@
     if(instance!=null) json_request.instance=instance;
     Send_to_API ( "POST", "/api/process/reload", JSON.stringify(json_request), null, null);
   }
+
 /********************************************* Renvoi un Select d'archivage ***************************************************/
  function Bouton_Archivage ( id, fonction, selected )
   { return("<select id='"+id+"' class='custom-select'"+

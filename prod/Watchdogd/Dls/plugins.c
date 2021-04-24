@@ -327,9 +327,7 @@
     dls->compil_status = Compiler_source_dls( dls->tech_id );
     if (dls->compil_status<DLS_COMPIL_OK)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                "%s: Candidat '%s' CompilStatus failed", __func__, dls->tech_id );
-       Dls_stop_plugin_reel ( dls->tech_id, dls );
-       return(FALSE);
+                "%s: Candidat '%s' CompilStatus failed. Keeping old .so, if it exists.", __func__, dls->tech_id );
      }
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%s.so", dls->tech_id );

@@ -172,7 +172,7 @@
 /* Entrées: la liste des options, le type a rechercher                                                                        */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
- static gchar *Get_option_chaine( GList *liste_options, gint token )
+ static gchar *Get_option_chaine( GList *liste_options, gint token, gchar *defaut )
   { struct OPTION *option;
     GList *liste;
     liste = liste_options;
@@ -182,7 +182,7 @@
         { return (option->chaine); }
        liste = liste->next;
      }
-    return(NULL);
+    return(defaut);
   }
 /******************************************************************************************************************************/
 /* New_condition_bi: Prepare la chaine de caractere associée àla condition, en respectant les options                         */
@@ -648,7 +648,7 @@
     int taille, reset, ratio;
 
     reset = Get_option_entier ( options, RESET, 0 );
-    ratio = Get_option_entier ( options, RATIO, 1 );
+    ratio = Get_option_entier ( options, T_RATIO, 1 );
 
     taille = 256;
     action = New_action();
@@ -848,7 +848,7 @@ return(NULL);
 
     if (bit != MNEMO_MOTIF) return(TRUE);
 
-    gchar *forme_src = Get_option_chaine ( options, T_FORME );
+    gchar *forme_src = Get_option_chaine ( options, T_FORME, NULL );
     gchar ss_chaine[128], ss_acronyme[64], *ihm_reaction;
     GList *ss_options;
     if (!forme_src) return(TRUE);
@@ -1119,9 +1119,7 @@ return(NULL);
            }
                                                                        /* Alias Dynamiques, local et non permanent uniquement */
           if (!strcmp(alias->tech_id, Dls_plugin.tech_id) && alias->external == FALSE && alias->permanent == FALSE)
-           { gchar *libelle = Get_option_chaine( alias->options, T_LIBELLE );
-             if (!libelle) libelle="no libelle";
-
+           { gchar *libelle = Get_option_chaine( alias->options, T_LIBELLE, "no libelle" );
              switch(alias->classe)
               { case MNEMO_BUS:
                    break;
@@ -1169,7 +1167,7 @@ return(NULL);
                 case MNEMO_ENTREE_ANA:
                  { Mnemo_auto_create_AI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, NULL );
 
-                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN );
+                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
                    if (cadran)
                     { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, cadran,
                                                       Get_option_double ( alias->options, T_MIN, 0.0 ),
@@ -1207,10 +1205,10 @@ return(NULL);
                    break;
                  }
                 case MNEMO_REGISTRE:
-                 { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
+                 { gchar *unite = Get_option_chaine( alias->options, T_UNITE, "no unit" );
                    Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle, unite );
 
-                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN );
+                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
                    if (cadran)
                     { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, cadran,
                                                       Get_option_double ( alias->options, T_MIN, 0.0 ),
@@ -1238,13 +1236,14 @@ return(NULL);
                    break;
                  }
                 case MNEMO_MOTIF:
-                 { gchar *forme = Get_option_chaine( alias->options, T_FORME );
-                   if (!forme) forme="none";
+                 { gchar *forme = Get_option_chaine( alias->options, T_FORME, "none" );
                    Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme );
                    break;
                  }
                 case MNEMO_CPT_IMP:
-                 { Mnemo_auto_create_CI ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_CI ( Dls_plugin.tech_id, alias->acronyme, libelle,
+                                          Get_option_chaine ( alias->options, T_UNITE, "fois" ),
+                                          Get_option_double ( alias->options, T_MULTI, 1.0 ) );
                    if (!Liste_CI) Liste_CI = g_strconcat( "'", alias->acronyme, "'", NULL );
                    else
                     { old_liste = Liste_CI;

@@ -8,20 +8,10 @@
 <div id="toplevel" class="">
 </div>
 
-<hr>
-
-<div>
-  <table id="idTableMessages" class="table table-dark table-bordered w-100">
-    <thead class="">
-				</thead>
-			 <tbody>
-    </tbody>
-  </table>
-</div>
-
 </main>
 
 <script src="/js/index.js" type="text/javascript"></script>
 <script src="/js/home.js" type="text/javascript"></script>
 <script src="/js/tableau.js" type="text/javascript"></script>
 <script src="/js/horloge.js" type="text/javascript"></script>
+<script src="/js/user_sessions.js" type="text/javascript"></script>

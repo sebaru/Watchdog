@@ -228,7 +228,7 @@
           <a class="dropdown-item" href="/home/user" id="idHrefUsername" href="#"><i class="fas fa-user text-info"></i> Mon Profil</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="/home/users"><i class="fas fa-users-cog text-info"></i> <span>Utilisateurs</span></a>
-          <a class="dropdown-item" href="/tech/users_sessions"><i class="fas fa-list text-info"></i> <span>Sessions</span></a>
+          <a class="dropdown-item" type="button" onclick="Charger_page_user_sessions()"><i class="fas fa-list text-info"></i> <span>Mes appareils</span></a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" onclick="Logout()"><i class="fas fa-sign-out-alt text-danger"></i> <span>Sortir</span> </a>
         </div>

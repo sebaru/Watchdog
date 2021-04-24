@@ -148,7 +148,10 @@
              },
              { "data": "date_create", "title":"Apparition", "className": "align-middle text-center bg-dark d-none d-sm-table-cell" },
              { "data": "dls_shortname", "title":"Objet", "className": "align-middle text-center bg-dark " },
-             { "data": "libelle", "title":"Message", "className": "align-middle text-center bg-dark", },
+             { "data": null, "title":"Message", "className": "align-middle text-center bg-dark",
+               "render": function (item)
+                 { return( htmlEncode(item.libelle) ); }
+             },
              { "data": null, "title":"Acquit", "className": "align-middle text-center bg-dark d-none d-sm-table-cell",
                "render": function (item)
                  { if (item.typologie==0) return("-");                                                      /* Si INFO, pas de ACK */
@@ -222,7 +225,10 @@
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
                      .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div")
-                     .append("<div id='tableaux' class='row mx-1 justify-content-center'></div");
+                     .append("<div id='tableaux' class='row mx-1 justify-content-center'></div>")
+                     .append("<hr><table id='idTableMessages' class='table table-dark table-bordered w-100'></table>");
+       Synoptique = null;
+       Messages_loaded=false;
        Charger_un_synoptique ( syn_id );
      });
   }

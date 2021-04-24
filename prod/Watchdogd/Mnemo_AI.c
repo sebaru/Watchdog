@@ -45,7 +45,6 @@
   { gchar *acro, *libelle, *unite;
     gchar requete[1024];
     gboolean retour;
-    struct DB *db;
 
 /******************************************** Préparation de la base du mnemo *************************************************/
     acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
@@ -91,13 +90,7 @@
        g_free(unite);
      }
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
+    retour = SQL_Write_new ( requete );
     return (retour);
   }
 /******************************************************************************************************************************/

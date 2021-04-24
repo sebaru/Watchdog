@@ -61,7 +61,7 @@
     Cfg_http.tcp_port = 5560;
     Creer_configDB_int ( NOM_THREAD, "tcp_port", Cfg_http.tcp_port );
 
-    Cfg_http.wtd_session_expiry = 600; /* En secondes */
+    Cfg_http.wtd_session_expiry = 6000; /* En 1/10 secondes */
     Creer_configDB_int ( NOM_THREAD, "wtd_session_expiry", Cfg_http.wtd_session_expiry );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
@@ -124,11 +124,13 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Http_Save_and_close_sessions ( void )
-  { SQL_Write_new ( "DELETE FROM users_sessions" );
-    while ( Cfg_http.liste_http_clients )
+  { while ( Cfg_http.liste_http_clients )
      { struct HTTP_CLIENT_SESSION *session = Cfg_http.liste_http_clients->data;
-       SQL_Write_new ( "INSERT INTO users_sessions SET username='%s', wtd_session='%s', host='%s', last_request='%d'",
-                       session->username, session->wtd_session, session->host, session->last_request );
+       SQL_Write_new ( "INSERT INTO users_sessions SET id='%d', username='%s', appareil='%s', useragent='%s', "
+                       "wtd_session='%s', host='%s', last_request='%d' "
+                       "ON DUPLICATE KEY UPDATE last_request=VALUES(last_request)",
+                       session->id, session->username, session->appareil, session->useragent,
+                       session->wtd_session, session->host, session->last_request );
        Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
        Http_destroy_session(session);
      }
@@ -143,11 +145,15 @@
   { struct HTTP_CLIENT_SESSION *session = g_try_malloc0( sizeof ( struct HTTP_CLIENT_SESSION ) );
     if (!session) return;
     g_snprintf( session->username,    sizeof(session->username),    "%s", Json_get_string ( element, "username" ) );
+    g_snprintf( session->appareil,    sizeof(session->appareil),    "%s", Json_get_string ( element, "appareil" ) );
+    g_snprintf( session->useragent,   sizeof(session->useragent),   "%s", Json_get_string ( element, "useragent" ) );
     g_snprintf( session->wtd_session, sizeof(session->wtd_session), "%s", Json_get_string ( element, "wtd_session" ) );
     g_snprintf( session->host,        sizeof(session->host),        "%s", Json_get_string ( element, "host" ) );
+    session->id           = Json_get_int ( element, "id" );
     session->access_level = Json_get_int ( element, "access_level" );
     session->last_request = Json_get_int ( element, "last_request" );
     Cfg_http.liste_http_clients = g_slist_prepend ( Cfg_http.liste_http_clients, session );
+    if (session->id >= Cfg_http.num_session) Cfg_http.num_session = session->id+1;            /* Calcul du MAX du num session */
   }
 /******************************************************************************************************************************/
 /* Http_Load_sessions: Charge les sessions en base de données                                                                 */
@@ -160,6 +166,7 @@
                                                     "FROM users_sessions AS session "
                                                     "INNER JOIN users AS user ON session.username = user.username"
                             );
+    Cfg_http.num_session = 0;
     if (Json_has_member ( RootNode, "sessions" ))
      { Json_node_foreach_array_element ( RootNode, "sessions", Http_Load_one_session, NULL ); }
     json_node_unref(RootNode);
@@ -198,7 +205,7 @@
     GSList *cookies, *liste;
 
     if ( Config.instance_is_master == FALSE )
-     { static struct HTTP_CLIENT_SESSION Slave_session = { "system_user", "none", "no_sid", 9, 0 };
+     { static struct HTTP_CLIENT_SESSION Slave_session = { -1, "system_user", "internal device", "Watchdog Server", "none", "no_sid", 9, 0 };
        return(&Slave_session);
      }
 
@@ -249,9 +256,7 @@
               (session ? session->wtd_session : "none"),
               (session ? session->username : "none"), soup_client_context_get_host(client),
               (session ? session->access_level : -1), path
-               );
-    if (session) Http_add_cookie ( msg, "wtd_session", session->wtd_session, Cfg_http.wtd_session_expiry );
-
+            );
     return(session);
   }
 /******************************************************************************************************************************/
@@ -348,7 +353,10 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "password" ) ) )
+    if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "password" ) &&
+            Json_has_member ( request, "useragent" ) && Json_has_member ( request, "appareil" )
+           )
+       )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
@@ -426,7 +434,17 @@
        return;
      }
 
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                                  /* On prend un numéro de session tout neuf */
+    session->id = Cfg_http.num_session++;
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+
     g_snprintf( session->username, sizeof(session->username), "%s", db->row[0] );
+    gchar *useragent = Normaliser_chaine ( Json_get_string ( request, "useragent" ) );
+    g_snprintf( session->useragent, sizeof(session->useragent), "%s", useragent );
+    g_free(useragent);
+    gchar *appareil = Normaliser_chaine ( Json_get_string ( request, "appareil" ) );
+    g_snprintf( session->appareil, sizeof(session->appareil), "%s", appareil );
+    g_free(appareil);
     gchar *temp = g_inet_address_to_string ( g_inet_socket_address_get_address ( G_INET_SOCKET_ADDRESS(soup_client_context_get_remote_address (client) )) );
     g_snprintf( session->host, sizeof(session->host), "%s", temp );
     g_free(temp);
@@ -446,7 +464,7 @@
      }
     Cfg_http.liste_http_clients = g_slist_append ( Cfg_http.liste_http_clients, session );
 
-    Http_add_cookie ( msg, "wtd_session", session->wtd_session, Cfg_http.wtd_session_expiry );
+    Http_add_cookie ( msg, "wtd_session", session->wtd_session, 180*SOUP_COOKIE_MAX_AGE_ONE_DAY );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: User '%s:%s' connected", __func__,
               session->username, session->host );
 
@@ -728,7 +746,7 @@ reload:
           while(liste)
            { struct HTTP_CLIENT_SESSION *client = liste->data;
              liste = g_slist_next ( liste );
-             if (client->last_request + Cfg_http.wtd_session_expiry*10 < Partage->top )
+             if (client->last_request + Cfg_http.wtd_session_expiry < Partage->top )
               { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, client );
                 Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Session '%s' out of time", __func__, client->wtd_session );
                 Http_destroy_session ( client );

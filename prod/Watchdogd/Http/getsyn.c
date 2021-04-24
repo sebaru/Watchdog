@@ -607,7 +607,7 @@
                                     "SELECT cadran.*,dico.libelle FROM syns_cadrans AS cadran "
                                     "INNER JOIN syns AS syn ON cadran.syn_id=syn.id "
                                     "INNER JOIN dictionnaire AS dico ON (cadran.tech_id=dico.tech_id AND cadran.acronyme=dico.acronyme) "
-                                    "WHERE cadran.syn_id=%d AND syn.access_level<=%d",
+                                    "WHERE cadran.auto_create IS NULL AND cadran.syn_id=%d AND syn.access_level<=%d",
                                     syn_id, session->access_level ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref(synoptique);

@@ -43,9 +43,7 @@
 /******************************************************************************************************************************/
  gboolean Mnemo_auto_create_REGISTRE ( gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src )
   { gchar *acro, *libelle, *unite;
-    gchar requete[1024];
     gboolean retour;
-    struct DB *db;
 
 /******************************************** Préparation de la base du mnemo *************************************************/
     acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
@@ -63,41 +61,21 @@
        return(FALSE);
      }
 
-    if (unite_src)
-     { unite = Normaliser_chaine ( unite_src );                                               /* Formatage correct des chaines */
-       if ( !unite )
-         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                    "%s: Normalisation unite impossible. Mnemo NOT added nor modified.", __func__ );
-           g_free(libelle);
-           g_free(acro);
-           return(FALSE);
-         }
-     } else unite = NULL;
+    unite = Normaliser_chaine ( unite_src );                                               /* Formatage correct des chaines */
+    if ( !unite )
+      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                 "%s: Normalisation unite impossible. Mnemo NOT added nor modified.", __func__ );
+        g_free(libelle);
+        g_free(acro);
+        return(FALSE);
+      }
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_R SET tech_id='%s',acronyme='%s',libelle='%s'",
-                tech_id, acro, libelle );
+    retour = SQL_Write_new ( "INSERT INTO mnemos_R SET tech_id='%s',acronyme='%s',libelle='%s',unite='%s' "
+                             "ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), unite=VALUES(unite) ",
+                             tech_id, acro, libelle, unite );
     g_free(libelle);
     g_free(acro);
-
-    if (unite)
-     { gchar add[128];
-       g_snprintf( add, sizeof(add), ",unite='%s'", unite );
-       g_strlcat ( requete, add, sizeof(requete) );
-     }
-    g_strlcat ( requete, " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle) ", sizeof(requete) );
-    if (unite)
-     { g_strlcat ( requete, ",unite=VALUES(unite)", sizeof(requete) );
-       g_free(unite);
-     }
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
+    g_free(unite);
     return (retour);
   }
 /******************************************************************************************************************************/

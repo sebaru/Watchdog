@@ -2195,7 +2195,36 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5550;
+    if (database_version < 5576)
+     { g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_DI` SET map_thread='COMMAND_TEXT' WHERE map_thread='W-SMSG'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE `mnemos_DI` SET map_thread='COMMAND_TEXT' WHERE map_thread='SMSG'");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 5578)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `users_sessions` CHANGE `wtd_sessions` `wtd_session` VARCHAR(42) UNIQUE NOT NULL" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 5585)
+     { g_snprintf( requete, sizeof(requete), "DROP TABLE `users_sessions`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `users_sessions` ("
+                                             "`id` int(11) PRIMARY KEY,"
+                                             "`wtd_session` VARCHAR(42) UNIQUE NOT NULL,"
+                                             "`username` VARCHAR(32) NOT NULL,"
+                                             "`appareil` VARCHAR(32) NOT NULL,"
+                                             "`useragent` VARCHAR(128) NOT NULL,"
+                                             "`host` VARCHAR(32) NOT NULL,"
+                                             "`last_request` INT(11) NOT NULL,"
+                                             "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                                             "FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE"
+                                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5585;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

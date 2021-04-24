@@ -9,7 +9,7 @@
    <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Configuration des GSM</h3>
 
    <div class ="ml-auto btn-group align-items-center">
-        <button type="button" onclick="Redirect('/tech/smsg_map')" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
+        <button type="button" onclick="Redirect('/tech/command_text')" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
         <button type="button" onclick="SMS_Load_config()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
         <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
