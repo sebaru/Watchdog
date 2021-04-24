@@ -170,7 +170,7 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                                "    { if (counting==FALSE)\n"
                                "       { counting=TRUE; time(&top); }\n"
                                "      else\n"
-                               "       { if ( difftime( time(NULL), top ) >= %d )\n"
+                               "       { if ( difftime( time(NULL), top ) >= %d/10 )\n"
                                "          { %s"
                                "          }\n"
                                "       }\n"
