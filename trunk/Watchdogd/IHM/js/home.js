@@ -234,7 +234,7 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Creer_card ( Response )
-  { var card = $('<div></div>').addClass("row bg-transparent")
+  { var card = $('<div></div>').addClass("row bg-transparent mb-1")
                .append( $('<div></div>').addClass("col text-center")
                         .append( $('<div></div>').addClass("d-inline-block wtd-img-container")
                                  .append($('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
@@ -263,7 +263,7 @@
 /* Creer_cadran: Ajoute un cadran sur la page du synoptique                                                                   */
 /******************************************************************************************************************************/
  function Creer_cadran ( cadran )
-  { var card = $('<div></div>').addClass("row bg-transparent border border-info")
+  { var card = $('<div></div>').addClass("row bg-transparent mb-1 border border-info")
                .append( $('<div></div>').addClass("col text-center")
                         .append( $('<span></span>').addClass("text-white").text( "Cadran" )
                                )
@@ -376,7 +376,7 @@
     if (Response.ihm_reaction=="clic")
      { $(contenu).click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } ); }
 
-    var card = $('<div></div>').addClass("row bg-transparent mx-1")
+    var card = $('<div></div>').addClass("row bg-transparent mb-1")
                .append( $('<div></div>').addClass("col mt-2 text-center text-white")
                         .append( $('<p></p>').text (Response.dls_shortname )
                                              .attr ( "id", id+"-header-text" )
