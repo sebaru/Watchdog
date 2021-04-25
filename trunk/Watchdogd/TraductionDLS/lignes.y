@@ -189,7 +189,7 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                 | T_MOINS expr T_MOINS T_POUV calcul_expr T_PFERM DONNE calcul_ea_result PVIRGULE
                 {{ int taille;
                    if ($8)
-                    { taille = strlen($5)+strlen($2)+strlen($8->tech_id)+strlen($8->acronyme)+128;
+                    { taille = strlen($5)+strlen($2)+strlen($8->tech_id)+strlen($8->acronyme)+256;
                       $$ = New_chaine( taille );
                       if ($8->classe==MNEMO_SORTIE_ANA)
                        { g_snprintf( $$, taille,
