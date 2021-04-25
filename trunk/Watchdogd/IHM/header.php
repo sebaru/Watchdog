@@ -123,8 +123,8 @@
               max-width: 96px;
             }
            .wtd-vignette
-            { max-width: 16px;
-              max-height: 16px;
+            { max-width: 24px;
+              max-height: 24px;
             }
            .wtd-menu
              { max-width: 32px;

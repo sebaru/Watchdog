@@ -185,7 +185,7 @@
 
        if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg" ); }
                                 else { Changer_img_src ( 'idMenuImgAccueil', "/img/"+Response.image ); }
-       $('#idMenuImgAccueil').on("click", function () { Charger_page_synoptique ( Response.id ); } );
+       $('#idMenuImgAccueil').unbind('click').click ( function () { Charger_page_synoptique ( Response.id ); } );
 
        $.each ( Response.visuels, function (i, visuel)
                  { bodymain.append ( Creer_visuel ( visuel ) );
