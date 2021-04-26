@@ -87,12 +87,25 @@
     gtk_widget_destroy(client->window);
     g_free(client);
   }
+/******************************************************************************************************************************/
+/*!Menu_Recompiler: Lance et recompilation pour etre sur d'etre a la derniere version de prod
+ ******************************************************************************************************************************/
+ static void Menu_Recompiler (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
+  { gint pid;
+    pid = fork();
+    if (pid<0) return;
+    else if (!pid)                                                                       /* Lancement de la ligne de commande */
+     { system ("cd; svn co https://svn.abls-habitat.fr/repo/Watchdog/prod SRCRecompile;"
+               "cd SRCRecompile; ./autogen.sh; sudo make install; cd ..; rm -rf SRCRecompile; killall Watchdog-client-gtk3");
+     }
+  }
 
  static void Menu_Inspector (GSimpleAction *action, GVariant *parameter, gpointer user_data)
   { gtk_window_set_interactive_debugging (TRUE); }
 
  static void Menu_Quitter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
   { Fermer_client(user_data); }
+
 
  static void Menu_Go_to_wiki (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
   { gint pid;
@@ -201,6 +214,7 @@
        { "Inspector", Menu_Inspector, NULL, NULL, NULL },
        { "Go_to_wiki", Menu_Go_to_wiki, NULL, NULL, NULL },
        { "Quitter", Menu_Quitter, NULL, NULL, NULL },
+       { "Recompiler", Menu_Recompiler, NULL, NULL, NULL },
     //  { "new", new_activated, NULL, NULL, NULL }
      };
     int status;
