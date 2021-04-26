@@ -234,8 +234,8 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Creer_card ( Response )
-  { var card = $('<div></div>').addClass("row bg-transparent mb-1")
-               .append( $('<div></div>').addClass("col text-center")
+  { var card = $('<div></div>').addClass("row bg-transparent mb-3")
+               .append( $('<div></div>').addClass("col text-center mb-1")
                         .append( $('<div></div>').addClass("d-inline-block wtd-img-container")
                                  .append($('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
                                                                                            : "/img/"+Response.image) )
@@ -253,7 +253,7 @@
                                )
 	                     )
                .append( $('<div></div>').addClass('w-100') )
-               .append( $('<div></div>').addClass("col text-center mb-2")
+               .append( $('<div></div>').addClass("col text-center")
                         .append( $('<span></span>').addClass("text-white").text(" "+Response.libelle) )
                       );
 
@@ -326,32 +326,29 @@
     console.log("Changer_etat_visuel " + etat.tech_id + ":" + etat.acronyme + " -> mode ="+etat.mode +" couleur="+etat.color );
     console.debug(visuel);
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
-         if (etat.color=="darkgreen")
-     { Changer_img_src ( idimage, "/img/"+visuel.forme+"."+visuel.extension);
-       $("#"+idvisuel).css("border", "medium dashed darkgreen" );
-       $("#"+idheader).css("background-color", "darkgreen" );
-       $("#"+idfooter).css("background-color", "darkgreen" );
+    if (etat.mode.length>0) target = "/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension;
+                       else target = "/img/"+visuel.forme+"."+visuel.extension;
+    $("#"+idimage).removeClass("wtd-img-grayscale");
+
+         if (etat.mode=="hors_comm")
+     { target = "/img/"+visuel.forme+"."+visuel.extension;
+       etat.cligno = false;
+       $("#"+idimage).addClass("wtd-img-grayscale");
+       $("#"+idvisuel).addClass("bg-warning");
      }
 /*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
     else if (visuel.ihm_affichage=="cadre")
-     { Changer_img_src ( idimage, "/img/"+visuel.forme+"."+visuel.extension);
-       $("#"+idvisuel).css("border", "medium solid "+etat.color );
-       $("#"+idheader).css("background-color", "transparent" );
-       $("#"+idfooter).css("background-color", "transparent" );
+     { $("#"+idvisuel).css("border", "medium solid "+etat.color );
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else if (visuel.ihm_affichage=="2_modes")
-     { if (etat.mode>0) { target = "/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension; }
-                  else  { target = "/img/"+visuel.forme+"."+visuel.extension; }
-       Changer_img_src ( idimage, target );
-       $("#"+idvisuel).css("border", "none" );
-       $("#"+idheader).css("background-color", "transparent" );
-       $("#"+idfooter).css("background-color", "transparent" );
+     { $("#"+idvisuel).css("border", "none" );
      }
 /*-------------------------------------------------- Visuel commun -----------------------------------------------------------*/
+    Changer_img_src ( idimage, target );
     if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
                 else $("#"+idimage).removeClass("wtd-cligno");
-    $("#"+idvisuel).css("border-radius", "30px" );
+    /*$("#"+idvisuel).css("border-radius", "30px" );*/
   }
 /******************************************************************************************************************************/
 /* Création d'un visuel sur la page de travail                                                                                */
@@ -359,38 +356,29 @@
  function Creer_visuel ( Response )
   { var id = "wtd-visu-"+Response.tech_id+"-"+Response.acronyme;
     var contenu;
+    contenu = $('<img>').addClass("wtd-visuel").attr ( "id", id+"-img" );
 /*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
          if (Response.ihm_affichage=="cadre")
-     { contenu = $('<img>').addClass("wtd-visuel").attr ( "id", id+"-img" ); }
+     {  }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else if (Response.ihm_affichage=="2_modes")
-     { contenu = $('<img>');
-       $(contenu).addClass("wtd-visuel")
-                 .attr ( "id", id+"-img" )
-                 .attr ( "src", "/img/"+Response.forme+"."+Response.extension );
+     { contenu.attr ( "src", "/img/"+Response.forme+"."+Response.extension );
 
      }
     else
-     { contenu = $('<img>').addClass("wtd-visuel").attr ( "id", id+"-img" ); }
+     {  }
 
     if (Response.ihm_reaction=="clic")
      { $(contenu).click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } ); }
 
-    var card = $('<div></div>').addClass("row bg-transparent mb-1")
-               .append( $('<div></div>').addClass("col mt-2 text-center text-white")
-                        .append( $('<p></p>').text (Response.dls_shortname )
-                                             .attr ( "id", id+"-header-text" )
-                               )
-                      )
-               .append( $('<div></div>').addClass("w-100") )
-               .append( $('<div></div>').addClass("col text-center")
+    var card = $('<div></div>').addClass("row bg-transparent mb-3")
+               .append( $('<div></div>').addClass("col text-center mb-1")
                         .append( contenu )
                       )
-               .append( $('<div></div>').addClass("w-100") )
-               .append( $('<div></div>').addClass("col mt-2 text-center text-white")
-                        .append( $('<p></p>').text(Response.libelle)
-                                             .attr ( "id", id+"-footer-text" )
-                               )
+               .append( $('<div></div>').addClass('w-100') )
+               .append( $('<div></div>').addClass("col text-center")
+                                        .append ( $("<span></span>").addClass("text-white").text(Response.libelle ))
+                                        .attr ( "id", id+"-footer-text" )
                       )
                .attr ( "id", id );
     return(card);

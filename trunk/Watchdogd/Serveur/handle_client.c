@@ -43,7 +43,7 @@
 
 /**************************************** Création de la structure passée aux clients *****************************************/
     motif.num    = 0;
-    motif.etat   = visuel->mode;
+    /*motif.etat   = visuel->mode;*/
     g_snprintf( motif.tech_id,  sizeof(motif.tech_id),  "%s", visuel->tech_id );
     g_snprintf( motif.acronyme, sizeof(motif.acronyme), "%s", visuel->acronyme );
     g_snprintf( motif.color, sizeof(motif.color), "%s", visuel->color );

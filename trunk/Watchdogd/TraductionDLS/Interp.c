@@ -679,16 +679,17 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_action_icone: Prepare une struct action avec une commande SI                                                           */
+/* New_action_visuel: Prepare une struct action avec une commande SI                                                           */
 /* Entrées: numero du motif                                                                                                   */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_icone( struct ALIAS *alias, GList *options )
+ struct ACTION *New_action_visuel( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
     int taille, mode, coul, cligno;
     gchar *color;
 
-    mode   = Get_option_entier ( options, MODE, 0   );
+    gchar *mode_string = Get_option_chaine ( options, MODE, NULL );
+    if (mode_string == NULL) mode = Get_option_entier ( options, MODE, 0   );
     coul   = Get_option_entier ( options, COLOR, 0  );
     cligno = Get_option_entier ( options, CLIGNO, 0 );
     taille = 512;
@@ -705,9 +706,17 @@
        case KAKI    : color="darkgreen"; break;
        default      : color="black";
      }
-    g_snprintf( action->alors, taille,
-                "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, %d, \"%s\", %d );\n",
-                  alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno );
+    if (mode_string==NULL)
+     { g_snprintf( action->alors, taille,
+                   "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, \"%d\", \"%s\", %d );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno );
+     }
+    else
+     { g_snprintf( action->alors, taille,
+                   "  Dls_data_set_VISUEL_by_string( vars, \"%s\", \"%s\", &_%s_%s, \"%s\", \"%s\", %d );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode_string, color, cligno );
+     }
+
     return(action);
   }
 /******************************************************************************************************************************/

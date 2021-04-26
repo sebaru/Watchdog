@@ -125,7 +125,7 @@
                     visuel->tech_id, visuel->acronyme );
         }
 
-       init_etat.etat   = visuel->mode;
+       /*init_etat.etat   = visuel->mode;*/
        init_etat.cligno = visuel->cligno;
        g_snprintf( init_etat.color, sizeof(init_etat.color), "%s", visuel->color );
        g_snprintf( init_etat.tech_id, sizeof(init_etat.tech_id), "%s", visuel->tech_id );
@@ -180,17 +180,6 @@
         { memcpy ( &motifs->motif[motifs->nbr_motifs], motif, sizeof(struct CMD_TYPE_MOTIF) );
           motifs->nbr_motifs++;                              /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
 
-          if ( tag == TAG_SUPERVISION && motif->type_gestion != 0 /* TYPE_INERTE */ )
-           { struct DLS_VISUEL *visuel=NULL;
-             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "%s: searching for visuel %s:%s", __func__, motif->tech_id, motif->acronyme );
-             Dls_data_get_VISUEL ( motif->tech_id, motif->acronyme, (gpointer)&visuel );
-             if ( visuel && (! g_slist_find(liste_bit_init, visuel ) ) )
-              { liste_bit_init = g_slist_prepend( liste_bit_init, visuel );
-                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Envoyer_motif_tag: liste des bit_init_syn adding bit %s:%s", visuel->tech_id, visuel->acronyme );
-              }
-           }
           g_free(motif);
         }
 

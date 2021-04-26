@@ -101,8 +101,8 @@
         .wtd-visuel { border-radius: 20%;
                       width: auto;
                       height: auto;
-                      max-height: 96px;
-                      max-width: 96px;
+                      max-height: 128px;
+                      max-width: 128px;
                       cursor: pointer;
                     }
 

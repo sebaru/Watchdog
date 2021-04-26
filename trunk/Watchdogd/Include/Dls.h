@@ -194,7 +194,7 @@
  struct DLS_VISUEL
   { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gint     mode;
+    gchar    mode[16];
     gchar    color[16];
     gboolean cligno;
     gint     last_change;
@@ -304,7 +304,6 @@
  extern gboolean Dls_data_get_DO ( gchar *tech_id, gchar *acronyme, gpointer *dout_p );
  extern gboolean Dls_data_get_DO_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_DO_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern gint Dls_data_get_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p );
  extern void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme );
  extern void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_SYN *tree );
 

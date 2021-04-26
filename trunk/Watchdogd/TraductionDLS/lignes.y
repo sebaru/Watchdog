@@ -797,7 +797,7 @@ une_action:     T_ACT_DEF
                          case MNEMO_MONOSTABLE: $$=New_action_mono( alias );              break;
                          case MNEMO_CPTH      : $$=New_action_cpt_h( alias, options );    break;
                          case MNEMO_CPT_IMP   : $$=New_action_cpt_imp( alias, options );  break;
-                         case MNEMO_MOTIF     : $$=New_action_icone( alias, options );    break;
+                         case MNEMO_MOTIF     : $$=New_action_visuel( alias, options );    break;
                          case MNEMO_WATCHDOG  : $$=New_action_WATCHDOG( alias, options ); break;
                          default: { Emettre_erreur_new( "'%s:%s' syntax error", alias->tech_id, alias->acronyme );
                                     $$=New_action();
@@ -916,6 +916,12 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->token = $1;
                    $$->token_classe = ENTIER;
                    $$->val_as_int = $3;
+                }}
+                | MODE T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
+                   $$->chaine = $3;
                 }}
                 | COLOR T_EGAL couleur
                 {{ $$=New_option();

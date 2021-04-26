@@ -1523,8 +1523,8 @@ end:
 /* Dls_data_set_visuel : Gestion du positionnement des visuels en mode dynamique                                              */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
- void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *visu_p, gint mode,
-                            gchar *color, gboolean cligno )
+ void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *visu_p,
+                            gchar *mode, gchar *color, gboolean cligno )
   { struct DLS_VISUEL *visu;
 
     if (!visu_p || !*visu_p)
@@ -1554,19 +1554,21 @@ end:
       }
     else visu = (struct DLS_VISUEL *)*visu_p;
 
-    if (vars && Dls_data_get_MONO ( NULL, NULL, &vars->bit_comm )==FALSE) { color = "darkgreen", cligno = TRUE; }
+    if (vars && Dls_data_get_MONO ( NULL, NULL, &vars->bit_comm )==FALSE)
+     { mode = "hors_comm"; color = "darkgreen", cligno = TRUE;
+     }
 
-    if (visu->mode != mode || strcmp( visu->color, color ) || visu->cligno != cligno )
+    if ( strcmp ( visu->mode, mode ) || strcmp( visu->color, color ) || visu->cligno != cligno )
      { if ( visu->last_change + 50 <= Partage->top )                                 /* Si pas de change depuis plus de 5 sec */
         { visu->changes = 0; }
 
        if ( visu->changes <= 10 )                                                          /* Si moins de 10 changes en 5 sec */
         { if ( visu->changes == 10 )                                                /* Est-ce le dernier change avant blocage */
-           { visu->mode   = 0;                                                   /* Si oui, on passe le visuel en kaki cligno */
+           { g_snprintf( visu->mode,  sizeof(visu->mode),  "too_many_change" );
              g_snprintf( visu->color, sizeof(visu->color), "brown" );
              visu->cligno = 1;                                                                                  /* Clignotant */
            }
-          else { visu->mode   = mode;                                /* Sinon on recopie ce qui est demandé par le plugin DLS */
+          else { g_snprintf( visu->mode,  sizeof(visu->mode), mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
                  g_snprintf( visu->color, sizeof(visu->color), "%s", color );
                  visu->cligno = cligno;
                }
@@ -1576,36 +1578,12 @@ end:
           Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "%s: ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d", __func__,
+                    "%s: ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode %s color %s cligne %d", __func__,
                     (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno );
         }
        visu->changes++;                                                                                /* Un change de plus ! */
        Partage->audit_bit_interne_per_sec++;
      }
-  }
-/******************************************************************************************************************************/
-/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
-/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
-/******************************************************************************************************************************/
- gint Dls_data_get_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p )
-  { struct DLS_VISUEL *visu;
-    GSList *liste;
-    if (visu_p && *visu_p)                                                             /* Si pointeur d'acceleration disponible */
-     { visu = (struct DLS_VISUEL *)*visu_p;
-       return( visu->mode );
-     }
-    if (!tech_id || !acronyme) return(0);
-
-    liste = Partage->Dls_data_VISUEL;
-    while (liste)
-     { visu = (struct DLS_VISUEL *)liste->data;
-       if ( !strcasecmp ( visu->acronyme, acronyme ) && !strcasecmp( visu->tech_id, tech_id ) ) break;
-       liste = g_slist_next(liste);
-     }
-
-    if (!liste) return(0);
-    if (visu_p) *visu_p = (gpointer)visu;                                           /* Sauvegarde pour acceleration si besoin */
-    return( visu->mode );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_R: Positionne un registre                                                                                     */
