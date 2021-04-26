@@ -61,7 +61,7 @@
     gchar *period   = Normaliser_chaine ( Json_get_string ( request, "period" ) );
     gint periode = 450;
     interval = " ";
-         if (!strcasecmp(period, "HOUR"))  { periode = 450;   interval = " WHERE date_time>=NOW() - INTERVAL 4 HOUR"; }
+         if (!strcasecmp(period, "HOUR"))  { periode = 150;   interval = " WHERE date_time>=NOW() - INTERVAL 4 HOUR"; }
     else if (!strcasecmp(period, "DAY"))   { periode = 450;   interval = " WHERE date_time>=NOW() - INTERVAL 2 DAY"; }
     else if (!strcasecmp(period, "WEEK"))  { periode = 3600;  interval = " WHERE date_time>=NOW() - INTERVAL 2 WEEK"; }
     else if (!strcasecmp(period, "MONTH")) { periode = 43200; interval = " WHERE date_time>=NOW() - INTERVAL 9 WEEK"; }

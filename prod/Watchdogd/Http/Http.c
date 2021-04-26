@@ -480,12 +480,12 @@
     Json_node_add_bool   ( RootNode, "connected", TRUE );
     Json_node_add_string ( RootNode, "version",  WTD_VERSION );
     Json_node_add_string ( RootNode, "username", session->username );
+    Json_node_add_string ( RootNode, "appareil", session->appareil );
     Json_node_add_string ( RootNode, "instance", g_get_host_name() );
     Json_node_add_bool   ( RootNode, "instance_is_master", Config.instance_is_master );
     Json_node_add_bool   ( RootNode, "ssl", soup_server_is_https (server) );
     Json_node_add_int    ( RootNode, "access_level", session->access_level );
     Json_node_add_string ( RootNode, "wtd_session", session->wtd_session );
-    Json_node_add_int    ( RootNode, "wtd_session_expiry", Cfg_http.wtd_session_expiry );
     Json_node_add_string ( RootNode, "message", "Welcome back Home !" );
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
