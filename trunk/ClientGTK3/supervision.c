@@ -359,25 +359,25 @@
      { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "vert", 0, FALSE ); }
  }
 /******************************************************************************************************************************/
-/* Updater_les_syn_vars: Rafraichit toutes les passerelles de la page en fonction des syn_vars recu                           */
-/* Entrée: la page actuelle, les syn_vars recus                                                                               */
+/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
+/* Entrée: une reference sur le message                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Updater_les_syn_vars( struct PAGE_NOTEBOOK *page, JsonNode *syn_vars )
-  { GList *objet;
-printf ("%s pour syn_id=%d\n", __func__, Json_get_int ( syn_vars, "id" ) );
+ static void Updater_les_syn_vars (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct PAGE_NOTEBOOK *page = user_data;
+    if (!page) return;
     struct TYPE_INFO_SUPERVISION *infos = page->infos;
 
-    if ( Json_get_int ( syn_vars, "id" ) == Json_get_int ( infos->syn, "id" ) )
-     { Updater_etiquette ( infos, syn_vars ); }
+    printf ("%s pour syn_id=%d\n", __func__, Json_get_int ( element, "id" ) );
+    if ( Json_get_int ( element, "id" ) == Json_get_int ( infos->syn, "id" ) ) { Updater_etiquette ( infos, element ); }
 
-    objet = infos->Trame->trame_items;
+    GList *objet = infos->Trame->trame_items;
     while (objet)
      { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
         { case TYPE_PASSERELLE:
                 { struct TRAME_ITEM_PASS *trame_pass = objet->data;
-                  if (trame_pass->pass->syn_cible_id == Json_get_int ( syn_vars, "id" ))
-                   { Updater_un_syn_vars( trame_pass, syn_vars );
+                  if (trame_pass->pass->syn_cible_id == Json_get_int ( element, "id" ))
+                   { Updater_un_syn_vars( trame_pass, element );
                    }
                 }
                break;
@@ -385,17 +385,6 @@ printf ("%s pour syn_id=%d\n", __func__, Json_get_int ( syn_vars, "id" ) );
          }
         objet=objet->next;
      }
-  }
-/******************************************************************************************************************************/
-/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Updater_les_syn_vars_by_array (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct PAGE_NOTEBOOK *page = user_data;
-    if (!page) return;
-printf ("%s\n", __func__ );
-    Updater_les_syn_vars ( page, element );
   }
 /******************************************************************************************************************************/
 /* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MOTIF                                 */
@@ -414,6 +403,8 @@ printf ("%s\n", __func__ );
 
          if ( !strcasecmp ( zmq_tag, "DLS_CADRAN" ) ) { Updater_les_cadrans ( page, response ); }
     else if ( !strcasecmp ( zmq_tag, "DLS_VISUEL" ) ) { Updater_les_visuels  ( page, response ); }
+    else if ( !strcasecmp ( zmq_tag, "SET_SYN_VARS" ) )
+     { Json_node_foreach_array_element ( response, "syn_vars", Updater_les_syn_vars, page ); }
     else if ( !strcasecmp ( zmq_tag, "PULSE" ) ) { }
     else printf("%s: zmq_tag '%s' unknown\n", __func__, zmq_tag );
     json_node_unref(response);
@@ -571,7 +562,7 @@ printf ("%s\n", __func__ );
     json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),      Afficher_une_camera, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),      Afficher_un_cadran, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "etat_visuels" ), Updater_les_visuels_by_array, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "syn_vars" ),     Updater_les_syn_vars_by_array, page );
+    Json_node_foreach_array_element ( infos->syn, "syn_vars", Updater_les_syn_vars, page );
     gtk_widget_show_all( page->child );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(page->client->Notebook), page_num );
     gchar chaine[256];
