@@ -4,6 +4,10 @@
       <attribute name='label'>Fichier</attribute>
       <section>
         <item>
+          <attribute name='label' translatable='yes'>Recompiler</attribute>
+          <attribute name='action'>app.Recompiler</attribute>
+        </item>
+        <item>
           <attribute name='label' translatable='yes'>Quitter</attribute>
           <attribute name='action'>app.Quitter</attribute>
         </item>
