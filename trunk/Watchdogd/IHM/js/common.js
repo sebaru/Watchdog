@@ -173,29 +173,31 @@
     return(retour);
   }
 /********************************************* Affichage des vignettes ********************************************************/
- function Changer_img_src ( id, target )
+ function Changer_img_src ( id, target, cligno )
   { var image = $('#'+id);
     console.log("Changer_img_src "+id+" from '" + image.attr('src') + "' to "+ target );
 
+    if (cligno==false) { image.removeClass("wtd-cligno"); }
     if (image.attr('src')==target) return;
 
     if (image.attr('src') == "")
-     { console.log("Changer_img_src 1");
+     { console.log("Changer_img_src "+id+" 1");
        image.slideUp("fast", function()
-        { image.on("load", function() { image.slideDown("normal"); } );
+        { image.on("load", function() { image.slideDown("normal", function ()
+                                         { if (cligno==true) { image.addClass("wtd-cligno"); } } ); } );
           image.attr("src", target);
-          console.log("Changer_img_src 1 fin:" + image.attr("src") );
+          console.log("Changer_img_src "+id+" 1 fin:" + image.attr("src") );
         });
      }
     else
-     { console.log("Changer_img_src 2");
-       image.fadeOut("fast", function()
-        { image.on("load", function() { image.fadeIn("normal"); } );
+     { console.log("Changer_img_src "+id+" 2");
+       image.fadeTo("fast", 0, function()
+        { image.on("load", function() { image.fadeTo("normal", 1, function ()
+                                         { if (cligno==true) { image.addClass("wtd-cligno"); } } ); } );
           image.attr("src", target);
-          console.log("Changer_img_src 2 fin:" + image.attr("src") );
+          console.log("Changer_img_src "+id+" 2 fin:" + image.attr("src") );
         });
      }
-
   }
 /********************************************* Remonte la page au top *********************************************************/
  function Scroll_to_top ()

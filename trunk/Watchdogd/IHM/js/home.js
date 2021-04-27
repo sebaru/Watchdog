@@ -24,86 +24,60 @@
      );
     Send_to_API ( 'POST', "/api/syn/clic", json_request, null, null );
   }
-/********************************************* Affichage des vignettes ********************************************************/
- function Set_vignette ( id, type, couleur, cligno )
-  { var src_actuelle = $('#'+id).attr("src");
-    var src_cible;
-    if (type == "activite")       { src_cible = "/img/pignon_"+couleur+".svg"; }
-    else if (type == "secu_bien") { src_cible = "/img/bouclier_"+couleur+".svg"; }
-    else if (type == "secu_pers") { src_cible = "/img/croix_rouge_"+couleur+".svg"; }
-    else console.log( "Set_vignette : type inconnu" );
-
-    if (src_actuelle != src_cible) { Changer_img_src ( id, src_cible ); }
-    if (cligno) $('#'+id).addClass("wtd-cligno");
-           else $('#'+id).removeClass("wtd-cligno");
-  }
 /******************************************************************************************************************************/
  function Set_syn_vars ( syn_id, syn_vars )
   { var vignette = $('#idVignette_'+syn_id);
 
     if (syn_vars.bit_comm == false)
      { $('#idImgSyn_'+syn_id).addClass("wtd-img-grayscale");
-       Changer_img_src ( "idVignetteComm_"+syn_id, "/img/syn_communication.png" );
-       $('#idVignetteComm_'+syn_id).addClass("wtd-cligno");
+       Changer_img_src ( "idVignetteComm_"+syn_id, "/img/syn_communication.png", true );
      }
     else
      { $('#idImgSyn_'+syn_id).removeClass("wtd-img-grayscale");
-       $('#idVignetteComm_'+syn_id).removeClass("wtd-cligno").slideUp();
+       $('#idVignetteComm_'+syn_id).removeClass("wtd-cligno").fadeTo(0);
      }
 
     if (syn_vars.bit_danger == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg" );
-       vignette.addClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg", true );
      }
     else if (syn_vars.bit_alerte == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg" );
-       vignette.addClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg", true );
      }
     else if (syn_vars.bit_alarme == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg" );
-       vignette.addClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg", true );
      }
     else if (syn_vars.bit_defaut == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg" );
-       vignette.addClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg", true );
      }
     else if (syn_vars.bit_derangement == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg" );
-       vignette.addClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg", true );
      }
     else if (syn_vars.bit_alerte_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg", false );
      }
     else if (syn_vars.bit_alarme_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg",false );
      }
     else if (syn_vars.bit_defaut_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg",false );
      }
     else if (syn_vars.bit_danger_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg",false );
      }
     else if (syn_vars.bit_derangement_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg", false );
      }
     else if (syn_vars.bit_veille_totale == true)
-     { vignette.slideUp().removeClass("wtd-cligno"); }
+     { vignette.removeClass("wtd-cligno").fadeTo(0);
+     }
     else if (syn_vars.bit_veille_partielle == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_jaune.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_jaune.svg", false );
      }
     else if (syn_vars.bit_veille_partielle == false)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_blanc.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_blanc.svg",false );
      }
     else
-     { /*Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_vert.svg" );*/
-       vignette.removeClass("wtd-cligno").slideUp();
+     { vignette.removeClass("wtd-cligno").fadeTo(0);
      }
   }
 /******************************************************************************************************************************/
@@ -183,8 +157,8 @@
                  { bodymain.append ( Creer_horloge ( horloge ) ); }
               );
 
-       if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg" ); }
-                                else { Changer_img_src ( 'idMenuImgAccueil', "/img/"+Response.image ); }
+       if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg", false ); }
+                                else { Changer_img_src ( 'idMenuImgAccueil', "/img/"+Response.image, false ); }
        $('#idMenuImgAccueil').unbind('click').click ( function () { Charger_page_synoptique ( Response.id ); } );
 
        $.each ( Response.visuels, function (i, visuel)
