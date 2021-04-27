@@ -188,11 +188,9 @@
        $('#idMenuImgAccueil').unbind('click').click ( function () { Charger_page_synoptique ( Response.id ); } );
 
        $.each ( Response.visuels, function (i, visuel)
-                 { bodymain.append ( Creer_visuel ( visuel ) );
-                 }
-              );
-       $.each ( Response.etat_visuels, function (i, etat_visuel)
-                 { Changer_etat_visuel ( etat_visuel );
+                 { var card = Creer_visuel ( visuel );
+                   bodymain.append ( card );
+                   Changer_etat_visuel ( visuel );
                  }
               );
 
@@ -263,7 +261,7 @@
 /* Creer_cadran: Ajoute un cadran sur la page du synoptique                                                                   */
 /******************************************************************************************************************************/
  function Creer_cadran ( cadran )
-  { var card = $('<div></div>').addClass("row bg-transparent mb-1 border border-info")
+  { var card = $('<div></div>').addClass("row bg-transparent mb-3 border border-info")
                .append( $('<div></div>').addClass("col text-center")
                         .append( $('<span></span>').addClass("text-white").text( "Cadran" )
                                )
@@ -316,39 +314,17 @@
 /******************************************************************************************************************************/
  function Changer_etat_visuel ( etat )
   { if (Synoptique==null) return;
-    var idvisuel = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme;
-    var idimage  = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme+"-img";
-    var idheader = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme+"-header-text";
-    var idfooter = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme+"-footer-text";
     visuels = Synoptique.visuels.filter( function (item) { return(item.tech_id==etat.tech_id && item.acronyme==etat.acronyme); });
     if (visuels.length!=1) return;
     visuel = visuels[0];
-    console.log("Changer_etat_visuel " + etat.tech_id + ":" + etat.acronyme + " -> mode ="+etat.mode +" couleur="+etat.color );
-    console.debug(visuel);
-/*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
-    if (etat.mode.length>0) target = "/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension;
-                       else target = "/img/"+visuel.forme+"."+visuel.extension;
-    $("#"+idimage).removeClass("wtd-img-grayscale");
-
-         if (etat.mode=="hors_comm")
-     { target = "/img/"+visuel.forme+"."+visuel.extension;
-       etat.cligno = false;
-       $("#"+idimage).addClass("wtd-img-grayscale");
-       $("#"+idvisuel).addClass("bg-warning");
-     }
-/*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
-    else if (visuel.ihm_affichage=="cadre")
-     { $("#"+idvisuel).css("border", "medium solid "+etat.color );
-     }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
-    else if (visuel.ihm_affichage=="2_modes")
-     { $("#"+idvisuel).css("border", "none" );
+console.log("Changer_etat_visuel " + visuel.ihm_affichage );
+    if (visuel.ihm_affichage=="cadre")
+     { Changer_etat_visuel_cadre ( visuel, etat );
      }
-/*-------------------------------------------------- Visuel commun -----------------------------------------------------------*/
-    Changer_img_src ( idimage, target );
-    if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
-                else $("#"+idimage).removeClass("wtd-cligno");
-    /*$("#"+idvisuel).css("border-radius", "30px" );*/
+    else if (visuel.ihm_affichage=="simple")
+     { Changer_etat_visuel_simple ( visuel, etat );
+     }
   }
 /******************************************************************************************************************************/
 /* Création d'un visuel sur la page de travail                                                                                */
@@ -356,20 +332,22 @@
  function Creer_visuel ( Response )
   { var id = "wtd-visu-"+Response.tech_id+"-"+Response.acronyme;
     var contenu;
-    contenu = $('<img>').addClass("wtd-visuel").attr ( "id", id+"-img" );
+    if (Response.mode == undefined) Response.mode = "hors_comm";
 /*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
          if (Response.ihm_affichage=="cadre")
-     {  }
+     { contenu = $('<img>').addClass("wtd-visuel p-2")
+                           .attr ( "id", id+"-img" )
+                           .attr("src", "/img/"+Response.forme+"."+Response.extension);
+     }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
-    else if (Response.ihm_affichage=="2_modes")
-     { contenu.attr ( "src", "/img/"+Response.forme+"."+Response.extension );
-
+    else if (Response.ihm_affichage=="simple")
+     { contenu = $('<img>').addClass("wtd-visuel")
+                           .attr ( "id", id+"-img" )
+                           .attr("src", "/img/"+Response.forme+"_"+Response.mode+"."+Response.extension)
+                           .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
      }
     else
      {  }
-
-    if (Response.ihm_reaction=="clic")
-     { $(contenu).click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } ); }
 
     var card = $('<div></div>').addClass("row bg-transparent mb-3")
                .append( $('<div></div>').addClass("col text-center mb-1")

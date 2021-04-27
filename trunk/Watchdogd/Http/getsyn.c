@@ -470,6 +470,20 @@
     else { g_free(http_cadran); }                                                                         /* Si pas trouvé... */
   }
 /******************************************************************************************************************************/
+/* Http_add_etat_visuel: Ajoute les états de chaque visuels du tableau                                                        */
+/* Entrées : Le tableau, l'element a compléter                                                                                */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Http_add_etat_visuel_to_json ( JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { GSList *dls_visuels = Partage->Dls_data_VISUEL;
+    while(dls_visuels)                      /* Parcours tous les visuels et envoie ceux relatifs aux DLS du synoptique chargé */
+     { struct DLS_VISUEL *dls_visuel = dls_visuels->data;
+       if (!strcasecmp( dls_visuel->tech_id, Json_get_string(element, "tech_id") ))
+        { Dls_VISUEL_to_json ( element, dls_visuel ); }
+       dls_visuels = g_slist_next(dls_visuels);
+     }
+  }
+/******************************************************************************************************************************/
 /* Http_traiter_syn_show: Fourni une list JSON des elements d'un synoptique                                                   */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
@@ -674,6 +688,9 @@
           return;
         }
      }
+/*------------------------------------------------- Envoi l'état de tous les visuels du synoptique ---------------------------*/
+    Json_node_foreach_array_element ( synoptique, "visuels", Http_add_etat_visuel_to_json, NULL );
+
 /*-------------------------------------------------- Envoi les horloges de la page -------------------------------------------*/
     if (SQL_Select_to_json_node ( synoptique, "horloges",
                                  "SELECT DISTINCT horloge.tech_id, dls.name as dls_name FROM mnemos_HORLOGE AS horloge "
@@ -685,25 +702,6 @@
        json_node_unref(synoptique);
        return;
      }
-/*------------------------------------------------- Envoi l'état de tous les visuels du synoptique ---------------------------*/
-    JsonArray *etat_visuels = Json_node_add_array ( synoptique, "etat_visuels" );
-    GList *syn_visuels      = Json_get_array_as_list ( synoptique, "visuels" );
-    GSList *dls_visuels     = Partage->Dls_data_VISUEL;
-    while(dls_visuels)                      /* Parcours tous les visuels et envoie ceux relatifs aux DLS du synoptique chargé */
-     { struct DLS_VISUEL *dls_visuel=dls_visuels->data;
-       GList *visuels = syn_visuels;
-       while (visuels)
-        { JsonNode *visuel = visuels->data;
-          if (!strcasecmp( Json_get_string(visuel, "tech_id"), dls_visuel->tech_id))
-           { JsonNode *element = Json_node_create ();
-             Dls_VISUEL_to_json ( element, dls_visuel );
-             Json_array_add_element ( etat_visuels, element );
-           }
-          visuels = g_list_next(visuels);
-        }
-       dls_visuels = g_slist_next(dls_visuels);
-     }
-    g_list_free(syn_visuels);
 
     gchar *buf = Json_node_to_string ( synoptique );
     json_node_unref(synoptique);

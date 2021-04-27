@@ -10,6 +10,7 @@
 
 </main>
 
+<script src="/js/visuels.js" type="text/javascript"></script>
 <script src="/js/index.js" type="text/javascript"></script>
 <script src="/js/home.js" type="text/javascript"></script>
 <script src="/js/tableau.js" type="text/javascript"></script>

@@ -98,7 +98,7 @@
                           cursor: pointer;
                         }
 
-        .wtd-visuel { border-radius: 20%;
+        .wtd-visuel { /*border-radius: 20%;*/
                       width: auto;
                       height: auto;
                       max-height: 128px;

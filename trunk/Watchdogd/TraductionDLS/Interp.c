@@ -713,7 +713,7 @@
      }
     else
      { g_snprintf( action->alors, taille,
-                   "  Dls_data_set_VISUEL_by_string( vars, \"%s\", \"%s\", &_%s_%s, \"%s\", \"%s\", %d );\n",
+                   "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, \"%s\", \"%s\", %d );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode_string, color, cligno );
      }
 
@@ -858,7 +858,7 @@ return(NULL);
     if (bit != MNEMO_MOTIF) return(TRUE);
 
     gchar *forme_src = Get_option_chaine ( options, T_FORME, NULL );
-    gchar ss_chaine[128], ss_acronyme[64], *ihm_reaction;
+    gchar ss_chaine[128], ss_acronyme[64];
     GList *ss_options;
     if (!forme_src) return(TRUE);
 
@@ -866,10 +866,10 @@ return(NULL);
     if (!forme) return(TRUE);
 
     JsonNode *RootNode = Json_node_create();
-    SQL_Select_to_json_node ( RootNode, NULL, "SELECT ihm_reaction FROM icone WHERE forme='%s'", forme );
-    ihm_reaction = Json_get_string ( RootNode, "ihm_reaction" );
-    if (ihm_reaction)
-     { if (!strcasecmp ( ihm_reaction, "clic" ))
+    SQL_Select_to_json_node ( RootNode, NULL, "SELECT ihm_affichage FROM icone WHERE forme='%s'", forme );
+    gchar *ihm_affichage = Json_get_string ( RootNode, "ihm_affichage" );
+    if (ihm_affichage)
+     { if (!strcasecmp ( ihm_affichage, "simple" ))
         { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
           g_snprintf( ss_chaine, sizeof(ss_chaine), "Clic sur l'icone depuis l'IHM" );
           ss_options = g_list_append ( NULL, New_option_chaine ( T_LIBELLE, ss_chaine ) );
