@@ -102,8 +102,8 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_foreach: Parcours l'arbre DLS et execute des commandes en parametres                                                   */
-/* Entrée : les fonctions a appliquer                                                                                         */
+/* Dls_search_syn: Recherche le synoptique dont l'id est en parametre dans l'arbre des synoptiques                            */
+/* Entrée : l'id du synoptique                                                                                                */
 /* Sortie : rien                                                                                                              */
 /******************************************************************************************************************************/
  struct DLS_SYN *Dls_search_syn ( gint id )
@@ -321,13 +321,15 @@
 /* Entrée: Le plugin D.L.S                                                                                                    */
 /* Sortie: FALSE si problème                                                                                                  */
 /******************************************************************************************************************************/
- static gboolean Dls_Charger_un_plugin ( struct DLS_PLUGIN *dls )
+ static gboolean Dls_Charger_un_plugin ( struct DLS_PLUGIN *dls, gboolean compil )
   { gchar nom_fichier_absolu[60];
 
-    dls->compil_status = Compiler_source_dls( dls->tech_id );
-    if (dls->compil_status<DLS_COMPIL_OK)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                "%s: Candidat '%s' CompilStatus failed. Keeping old .so, if it exists.", __func__, dls->tech_id );
+    if (compil)
+     { dls->compil_status = Compiler_source_dls( dls->tech_id );
+       if (dls->compil_status<DLS_COMPIL_OK)
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
+                   "%s: Candidat '%s' CompilStatus failed. Keeping old .so, if it exists.", __func__, dls->tech_id );
+        }
      }
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%s.so", dls->tech_id );
@@ -457,7 +459,7 @@
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: plugin '%s' (%s) unloaded", __func__,
                     plugin->tech_id, plugin->shortname );
         }
-       Dls_Charger_un_plugin ( plugin );
+       Dls_Charger_un_plugin ( plugin, TRUE );
        plugin->vars.resetted = TRUE;                                             /* au chargement, le bit de start vaut 1 ! */
        return;
      }
@@ -524,7 +526,7 @@
     struct CMD_TYPE_SYNOPTIQUE *syn;
     while ( (syn = Recuperer_synoptiqueDB_suite( &db )) != NULL )
      { if (syn->id != 1)                                                          /* Pas de bouclage sur le synoptique root ! */
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
                     "%s: Loading sub syns for syn '%d' '%s' (parent '%d')", __func__, syn->id, syn->page, id );
           dls_syn->Dls_sub_syns = g_slist_append( dls_syn->Dls_sub_syns, Dls_recalculer_arbre_syn_for_id ( syn->id ) );
         }
@@ -570,13 +572,13 @@
 /* Entrée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- void Dls_Charger_plugins ( void )
+ void Dls_Charger_plugins ( gboolean compil )
   { struct DB *db;
     pthread_mutex_lock( &Partage->com_dls.synchro );
     if ( Recuperer_plugins_dlsDB ( &db ) )
      { struct DLS_PLUGIN *dls;
        while ( (dls = Recuperer_plugins_dlsDB_suite( &db )) != NULL )
-        { Dls_Charger_un_plugin( dls );                                                               /* Chargement du plugin */
+        { Dls_Charger_un_plugin( dls, compil );                                                       /* Chargement du plugin */
           Partage->com_dls.Dls_plugins = g_slist_append( Partage->com_dls.Dls_plugins, dls );
         }
      }

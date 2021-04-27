@@ -215,7 +215,7 @@
 /****************************************** Escape les " et ' *****************************************************************/
  function htmlEncode ( string )
   { if (string===null) return("null");
-    return ( string.replace(/'/g,'&#39').replace(/"/g,'&#34') ).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return ( string.replace(/'/g,'&apos;').replace(/"/g,'&quote;') ).replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 /****************************************** Are you sure **********************************************************************/
  function Show_modal_del ( titre, message, details, fonction )

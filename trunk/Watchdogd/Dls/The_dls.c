@@ -1883,7 +1883,7 @@ end:
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: update library error" ); }
      }
 
-    Dls_Charger_plugins();                                                                      /* Chargement des modules dls */
+    Dls_Charger_plugins(TRUE);                                                                  /* Chargement des modules dls */
     Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
     Dls_recalculer_arbre_dls_syn();
 
@@ -1922,7 +1922,7 @@ end:
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
           Dls_Lire_config();
           Dls_Decharger_plugins();
-          Dls_Charger_plugins();
+          Dls_Charger_plugins(FALSE);
           Dls_recalculer_arbre_comm();                                                  /* Calcul de l'arbre de communication */
           Dls_recalculer_arbre_dls_syn();
           Partage->com_dls.Thread_reload = FALSE;

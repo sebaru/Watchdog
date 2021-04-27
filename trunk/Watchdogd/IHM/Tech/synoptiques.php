@@ -63,42 +63,6 @@
      					</div>
        </div>
 
-       <div class="col form-group">
-					     <div class="input-group align-items-center">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Image pré-établie</label>
-						     <select id="idModalSynEditImageSelect" class="col-5 col-sm-6 form-control-file custom-select">
-             <option value='custom'>custom</option>
-             <option value='syn_maison.png'>Accueil</option>
-             <option value='syn_buanderie.png'>Buanderie</option>
-             <option value='syn_camera.png'>Camera</option>
-             <option value='syn_chambre_double.png'>Chambre 2p</option>
-             <option value='syn_chambre_simple.png'>Chambre 1p</option>
-             <option value='syn_communication.png'>Communications</option>
-             <option value='syn_confort.png'>Confort</option>
-             <option value='syn_cuisine.png'>Cuisine</option>
-             <option value='syn_ampoule.png'>Eclairage</option>
-             <option value='syn_energie.png'>Energie</option>
-             <option value='syn_electricite.png'>Electricité</option>
-             <option value='syn_garage.png'>Garage</option>
-             <option value='syn_jardin.png'>Jardin</option>
-             <option value='syn_luminaires.png'>Luminaires</option>
-             <option value='syn_panneau_solaire.png'>Panneaux Solaires</option>
-             <option value='syn_salle_de_bain.png'>Salle de bain</option>
-             <option value='syn_jeux.png'>Salle de jeux</option>
-             <option value='syn_salon.png'>Salon</option>
-             <option value='syn_volets.png'>Volets Roulants</option>
-           </select>
-           <img id="idModalSynEditImage" src='' class="ml-2 text-center col-2 border border-info">
-     					</div>
-       </div>
-
-       <div class="col form-group align-items-center">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Image du synoptique</label>
-						     <input id="idModalSynEditImageCustom" type="file" accept="image/jpg" class="col-8 form-control-file" placeholder="Choisissez une image">
-     					</div>
-       </div>
-
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
@@ -107,5 +71,24 @@
     </div>
   </div>
 </div>
+
+<!----------------------------------------------------------------------------------------------------------------------------->
+<div id="idSynEditImage" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content ">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idSynEditImageTitre"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div id="idSynEditImageListe" class="col">
+        </div>
+    </div>
+  </div>
+</div>
+
 
 <script src="/js/tech/synoptiques.js" type="text/javascript"></script>

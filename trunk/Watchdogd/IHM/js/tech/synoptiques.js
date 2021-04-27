@@ -24,19 +24,13 @@
          access_level: $('#idModalSynEditAccessLevel').val()
        };
     if (syn_id>0) json_request.syn_id = syn_id;                                                         /* Ajout ou édition ? */
-
-    fichierSelectionne = $('#idModalSynEditImageCustom')[0].files[0];
-
-    if (fichierSelectionne!=null)
-     { json_request.image = "custom"; }
-    else
-     { json_request.image = $('#idModalSynEditImageSelect').val(); }
+    else json_request.image = "maison";
 
     Send_to_API ( "POST", "/api/syn/set", JSON.stringify(json_request), function(Response)
-     { if (fichierSelectionne == null) $('#idTableSyn').DataTable().ajax.reload(null, false);
+     { $('#idTableSyn').DataTable().ajax.reload(null, false);
      }, null );
 
-    if (syn_id>0 && fichierSelectionne != null)
+/*    if (syn_id>0 && fichierSelectionne != null)
      { var reader = new FileReader();
        reader.onloadend = function()
         { Send_to_API ( "POSTFILE", "/api/upload?filename=syn_"+syn_id+"&type="+fichierSelectionne.type+"&thumb=100", reader.result, function(Response)
@@ -44,7 +38,7 @@
            }, null );
         };
        reader.readAsArrayBuffer(fichierSelectionne);
-     }
+     }*/
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Syn_Add ( syn_id )
@@ -64,25 +58,9 @@
     $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page(null)");
     Synoptique_set_controle_page (null)
     $('#idModalSynEditDescription').val("");
-    $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") );
-    $('#idModalSynEditAccessLevel').val(0);
+    $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") ).val(0);
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('0')" );
-    $('#idModalSynEditImageSelect').val("Accueil");
-    $('#idModalSynEditImage').attr("src", "/img/syn_maison.png");
-    $('#idModalSynEditImage').css("max-width", "100px");
-    $('#idModalSynEditImageSelect').change ( function () { Select_image_changed(syn_id) } );
-    $('#idModalSynEditImageCustom').val('');
     $('#idModalSynEdit').modal("show");
-  }
-/******************************************************************************************************************************/
- function Select_image_changed( syn_id )
-  { table = $('#idTableSyn').DataTable();
-    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
-    if ($('#idModalSynEditImageSelect').val() != "custom")
-     { $('#idModalSynEditImage').attr("src", "/img/"+$('#idModalSynEditImageSelect').val()); }
-    else
-     { $('#idModalSynEditImage').attr("src", "/upload/syn_"+selection.id+".jpg"); }
-
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Syn_Edit ( syn_id )
@@ -104,17 +82,9 @@
     $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page('"+selection.page+"')");
     Synoptique_set_controle_page (selection.page)
     $('#idModalSynEditDescription').val( selection.libelle );
-    $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") );
-    $('#idModalSynEditAccessLevel').val( selection.access_level );
+    $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") )
+                                   .val( selection.access_level );
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('"+selection.id+"')" );
-    $('#idModalSynEditImageSelect').val(selection.image);
-    $('#idModalSynEditImageSelect').change ( function () { Select_image_changed(syn_id) } );
-    if (selection.image != "custom")
-     { $('#idModalSynEditImage').attr("src", "/img/"+selection.image); }
-    else
-     { $('#idModalSynEditImage').attr("src", "/upload/syn_"+selection.id+".jpg"); }
-    $('#idModalSynEditImage').css("max-width", "100px");
-    $('#idModalSynEditImageCustom').val('');
     $('#idModalSynEdit').modal("show");
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -133,6 +103,38 @@
                      selection.page+" - "+selection.libelle,
                       "Valide_del_synoptique("+syn_id+")" );
   }
+
+/******************************************************************************************************************************/
+ function Valide_edit_image ( syn_id, image_name )
+  { var json_request = { syn_id: syn_id, image: image_name };
+    console.debug ( json_request );
+    Send_to_API ( "POST", "/api/syn/set", JSON.stringify(json_request), function(Response)
+     { $('#idTableSyn').DataTable().ajax.reload(null, false);
+     }, null );
+    $('#idSynEditImage').modal("hide");
+  }
+
+ function Show_modal_edit_image ( syn_id )
+  { table = $('#idTableSyn').DataTable();
+    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
+    $('#idSynEditImageTitre').text ( "Modifier l'image pour " + htmlEncode(selection.libelle) );
+
+    images = [ "syn_maison.png", "syn_buanderie.png", "syn_camera.png", "syn_chambre_double.png", "syn_chambre_simple.png",
+               "syn_communication.png", "syn_confort.png", "syn_cuisine.png", "syn_energie.png", "syn_electricite.png",
+               "syn_garage.png", "syn_jardin.png", "syn_luminaires.png", "syn_panneau_solaire.png", "syn_salle_de_bain.png",
+               "syn_jeux.png", "syn_salon.png", "syn_volets.png" ];
+
+    liste = $("#idSynEditImageListe");
+    liste.empty();
+    images.forEach ( function (element)
+                      { liste.append( $("<img>").addClass("wtd-synoptique-preview m-1")
+                             .attr("name", element).attr("src", "/img/"+element)
+                             .click ( function () { Valide_edit_image(syn_id, element); } ) );
+                      } );
+    $('#idSynEditImage').modal("show");
+  }
+
+
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_syn ()
   { console.log ("in load synoptique !");
@@ -144,11 +146,11 @@
                },
          rowId: "id",
          columns:
-          [ { "data": null, "title":"Aperçu", "className": "align-middle text-center",
+          [ { "data": "id", "title": "#", "className": "align-middle text-center" },
+            { "data": null, "title":"Aperçu", "className": "align-middle text-center",
               "render": function (item)
-                { if(item.image=="custom") target="/upload/syn_"+item.id+".jpg";
-                  else target = "/img/"+item.image;
-                  return( Lien( '/'+item.page, "Voir le synoptique", "<img src='"+target+"' height=80px loading=lazy alt='No Image !' >" ) ); }
+                { target = "/img/"+item.image;
+                  return( "<img src='"+target+"' class='wtd-synoptique-preview' loading=lazy alt='No Image !' onclick='Show_modal_edit_image("+item.id+")' />" ); }
             },
             { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",
               "render": function (item)

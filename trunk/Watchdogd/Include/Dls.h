@@ -282,7 +282,7 @@
  extern gboolean Save_source_dls_to_DB( gchar *tech_id, gchar *buffer, gint taille );
  extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *nom );
 
- extern void Dls_Charger_plugins ( void );                                                                  /* Dans plugins.c */
+ extern void Dls_Charger_plugins ( gboolean compil );                                                       /* Dans plugins.c */
  extern void Dls_Decharger_plugins ( void );
  extern void Dls_Debug_plugin ( gchar *tech_id, gboolean actif );
  extern void Dls_Activer_plugin ( gchar *tech_id, gboolean actif );

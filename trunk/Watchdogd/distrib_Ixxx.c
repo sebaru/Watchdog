@@ -49,7 +49,7 @@
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: Recu VISUEL %s:%s mode=%d, color=%s, cligno=%d. Reste a traiter %03d", __func__,
+                 "%s: Recu VISUEL %s:%s mode=%s, color=%s, cligno=%d. Reste a traiter %03d", __func__,
                  visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno, reste
                );
        Zmq_Send_as_raw ( Partage->com_msrv.zmq_motif, visu, sizeof(struct DLS_VISUEL) );
