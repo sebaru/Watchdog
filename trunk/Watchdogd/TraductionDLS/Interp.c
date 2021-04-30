@@ -407,11 +407,33 @@
              return(NULL);
            }
           g_snprintf ( partie_g, sizeof(partie_g),
-                       "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) && "
+                       "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) && "
                        " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
                        alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme,
                        alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
           break;
+        }
+       case MNEMO_REGISTRE :
+        { g_snprintf ( partie_g, sizeof(partie_g),
+                       "(Dls_data_get_R (\"%s\",\"%s\",&_%s_%s) ",
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
+          break;
+        }
+       case MNEMO_CPT_IMP :
+        { g_snprintf ( partie_g, sizeof(partie_g),
+                       "(Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ",
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
+          break;
+        }
+       case MNEMO_CPTH :
+        { g_snprintf ( partie_g, sizeof(partie_g),
+                       "(Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ",
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
+          break;
+        }
+              default:
+        { Emettre_erreur_new( "'%s:%s' n'est pas implémenté en comparaison", alias_g->tech_id, alias_g->acronyme );
+          return(NULL);
         }
      }
 
@@ -425,22 +447,66 @@
     if (comparateur->token_classe == ID)
      { switch(alias_d->classe)                              /* On traite que ce qui peut passer en "condition" */
         { case MNEMO_ENTREE_ANA :
-           { gint in_range = Get_option_entier ( comparateur->alias->options, T_IN_RANGE, 0 );
+           { gint in_range = Get_option_entier ( alias_d->options, T_IN_RANGE, 0 );
              if (in_range==1)
               { Emettre_erreur_new( "'%s'(in_range) ne peut s'utiliser dans une comparaison", alias_d->acronyme ); }
              g_snprintf ( partie_d, sizeof(partie_d),
                           "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)) && "
-                          " Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) )",
+                          " Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) ",
                           alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme,
                           alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
              break;
            }
+          case MNEMO_REGISTRE :
+           { g_snprintf ( partie_d, sizeof(partie_d),
+                          "Dls_data_get_R (\"%s\",\"%s\",&_%s_%s) ) ",
+                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
+             break;
+           }
+          case MNEMO_CPT_IMP :
+           { g_snprintf ( partie_d, sizeof(partie_d),
+                          "Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ) ",
+                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
+             break;
+           }
+          case MNEMO_CPTH :
+           { g_snprintf ( partie_d, sizeof(partie_d),
+                          "Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ) ",
+                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
+             break;
+           }
+          default:
+           { Emettre_erreur_new( "'%s:%s' n'est pas implémenté en comparaison", alias_g->tech_id, alias_g->acronyme );
+             return(NULL);
+           }
         }
      }
     else if (comparateur->token_classe == T_VALF)
-     { g_snprintf( partie_d, sizeof(partie_d), "%f )", comparateur->valf ); }
-     
+     { g_snprintf( partie_d, sizeof(partie_d), "%f) ", comparateur->valf ); }
+
     return( g_strconcat( partie_g, partie_d, NULL ) );
+  }
+/******************************************************************************************************************************/
+/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_simple_entree_ana( int barre, struct ALIAS *alias, GList *options )
+  { gint taille, in_range = Get_option_entier ( options, T_IN_RANGE, 0 );
+    gchar *result;
+
+    if (in_range==1)
+     { taille = 256;
+       result = New_chaine( taille ); /* 10 caractères max */
+       if (barre) g_snprintf( result, taille, "!Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
+                              alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+             else g_snprintf( result, taille, "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
+                              alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+       return(result);
+     }
+    Emettre_erreur_new( "'%s' ne peut s'utiliser qu'avec une comparaison, ou avec l'option (in_range)",
+                        DlsScanner_get_lineno(), alias->acronyme );
+    return(NULL);
   }
 /******************************************************************************************************************************/
 /* New_condition_comparateur: Prepare la chaine de caractere associée à la condition de comparateur                           */
@@ -468,7 +534,8 @@
          alias->classe!=MNEMO_BISTABLE &&
          alias->classe!=MNEMO_MONOSTABLE &&
          alias->classe!=MNEMO_HORLOGE &&
-         alias->classe!=MNEMO_WATCHDOG
+         alias->classe!=MNEMO_WATCHDOG &&
+         alias->classe!=MNEMO_ENTREE_ANA
        )
      { Emettre_erreur_new( "'%s' ne peut s'utiliser seul (avec une comparaison ?)", acro );
        return(NULL);
@@ -481,6 +548,7 @@
         case MNEMO_MONOSTABLE: return ( New_condition_mono( barre, alias, options ) );
         case MNEMO_HORLOGE:    return ( New_condition_horloge( barre, alias, options ) );
         case MNEMO_WATCHDOG:   return ( New_condition_WATCHDOG( barre, alias, options ) );
+        case MNEMO_ENTREE_ANA: return ( New_condition_simple_entree_ana( barre, alias, options ) );
         default:
          { Emettre_erreur_new( "'%s' n'est pas une condition valide", acro );
            return(NULL);

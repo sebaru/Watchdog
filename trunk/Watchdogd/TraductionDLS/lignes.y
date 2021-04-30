@@ -126,9 +126,11 @@ alias_classe:     T_BI        {{ $$=MNEMO_BISTABLE;   }}
 
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
-                {{ int taille = ($1 ? strlen($1) : 0) + ($2 ? strlen($2) : 0) + 1;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "%s%s", $1, $2 );
+                {{ if ($1 && $2)
+                    { int taille = strlen($1) + strlen($2) + 1;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille, "%s%s", $1, $2 );
+                    } else $$ = NULL;
                    if ($1) g_free($1);
                    if ($2) g_free($2);
                 }}
@@ -138,24 +140,27 @@ listeInstr:     une_instr listeInstr
 
 une_instr:      T_MOINS expr DONNE action PVIRGULE
                 {{ int taille;
-                   taille = strlen($2)+strlen($4->alors)+100;
-                   if ($4->sinon)
-                    { taille += (strlen($4->sinon) + 10);
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille,
-                                  "vars->num_ligne = %d; /* une_instr-------------*/\nif(%s)\n { %s }\nelse\n { %s }\n\n",
-                                  DlsScanner_get_lineno(), $2, $4->alors, $4->sinon );
+                   if ($2 && $4)
+                    { taille = strlen($2)+strlen($4->alors)+100;
+                      if ($4->sinon)
+                       { taille += (strlen($4->sinon) + 10);
+                         $$ = New_chaine( taille );
+                         g_snprintf( $$, taille,
+                                     "vars->num_ligne = %d; /* une_instr-------------*/\nif(%s)\n { %s }\nelse\n { %s }\n\n",
+                                     DlsScanner_get_lineno(), $2, $4->alors, $4->sinon );
+                       }
+                      else
+                       { $$ = New_chaine( taille );
+                         g_snprintf( $$, taille, "vars->num_ligne = %d;/* une_instr-------------*/\nif(%s)\n { %s }\n\n",
+                                     DlsScanner_get_lineno(), $2, $4->alors );
+                       }
+                    } else $$=NULL;
+                   if ($4)
+                    { if ($4->sinon) g_free($4->sinon);
+                      g_free($4->alors);
+                      g_free($4);
                     }
-                   else
-                    { $$ = New_chaine( taille );
-                      g_snprintf( $$, taille, "vars->num_ligne = %d;/* une_instr-------------*/\nif(%s)\n { %s }\n\n",
-                                  DlsScanner_get_lineno(), $2, $4->alors );
-                    }
-
-                   if ($4->sinon) g_free($4->sinon);
-                   g_free($4->alors);
-                   g_free($4);
-                   g_free($2);
+                   if ($2) g_free($2);
                 }}
                 | T_MOINS expr T_DIFFERE ENTIER DONNE action PVIRGULE
                 {{ int taille;
@@ -265,38 +270,49 @@ listeCase:      T_PIPE T_MOINS expr DONNE action PVIRGULE listeCase
 /****************************************************** Partie CALCUL *********************************************************/
 calcul_expr:    calcul_expr T_PLUS calcul_expr2
                 {{ int taille;
-                   taille = strlen($1) + strlen($3) + 4;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "(%s+%s)", $1, $3 );
-                   g_free($1); g_free($3);
+                   if ($1 && $3)
+                    { taille = strlen($1) + strlen($3) + 4;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille, "(%s+%s)", $1, $3 );
+                    } else $$ = NULL;
+                   if ($1) g_free($1);
+                   if ($3) g_free($3);
                 }}
                 | calcul_expr T_MOINS calcul_expr2
                 {{ int taille;
-                   taille = strlen($1) + strlen($3) + 4;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "(%s-%s)", $1, $3 );
-                   g_free($1); g_free($3);
+                   if ($1 && $3)
+                    { taille = strlen($1) + strlen($3) + 4;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille, "(%s-%s)", $1, $3 );
+                    } else $$ = NULL;
+                   if ($1) g_free($1);
+                   if ($3) g_free($3);
                 }}
                 | calcul_expr2
                 ;
 calcul_expr2:   calcul_expr2 T_FOIS calcul_expr3
                 {{ int taille;
-                   taille = strlen($1) + strlen($3) + 4;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "(%s*%s)", $1, $3 );
-                   g_free($1); g_free($3);
+                   if ($1 && $3)
+                    { taille = strlen($1) + strlen($3) + 4;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille, "(%s*%s)", $1, $3 );
+                    } else $$ = NULL;
+                   if ($1) g_free($1);
+                   if ($3) g_free($3);
                 }}
                 | calcul_expr2 BARRE calcul_expr3
                 {{ int taille;
-                   taille = strlen($1) + strlen($3) + 4;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "(%s/%s)", $1, $3 );
-                   g_free($1); g_free($3);
+                   if ($1 && $3)
+                    { taille = strlen($1) + strlen($3) + 4;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille, "(%s/%s)", $1, $3 );
+                    } else $$ = NULL;
+                   if ($1) g_free($1);
+                   if ($3) g_free($3);
                 }}
                 | calcul_expr3
                 ;
-calcul_expr3:   T_POUV calcul_expr T_PFERM
-                {{ $$=$2; }}
+calcul_expr3:   T_POUV calcul_expr T_PFERM {{ $$=$2; }}
                 | T_VALF
                 {{ int taille;
                    taille = 15;
@@ -416,22 +432,28 @@ calcul_ea_result: ID
 /******************************************************* Partie LOGIQUE *******************************************************/
 expr:           expr T_PLUS facteur
                 {{ int taille;
-                   taille = strlen($1)+strlen($3)+7;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "(%s || %s)", $1, $3 );
-                   g_free($1); g_free($3);
+                   if ($1 && $3)
+                    { taille = strlen($1)+strlen($3)+7;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille, "(%s || %s)", $1, $3 );
+                    } else $$ = NULL;
+                   if ($1) g_free($1);
+                   if ($3) g_free($3);
                 }}
 
                 | facteur
                 ;
 facteur:        facteur ET unite
                 {{ int taille;
-                   taille = strlen($1)+strlen($3)+7;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "(%s && %s)", $1, $3 );
-                   g_free($1); g_free($3);
+                   if ($1 && $3)
+                    { taille = strlen($1)+strlen($3)+7;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille, "(%s && %s)", $1, $3 );
+                    } else $$=NULL;
+                   if ($1) g_free($1);
+                   if ($3) g_free($3);
                 }}
-                | unite
+                | unite {{ $$ = $1; }}
                 ;
 
 unite:          modulateur ENTIER HEURE ENTIER
@@ -532,7 +554,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                 }}
 /************************************** Partie Logique : gestion des comparaisons *********************************************/
                 | barre ID suffixe liste_options comparateur                                            /* Gestion des comparaisons */
-                {{ if ($4)
+                {{ if ($5)
                     { if ($1)
                        { Emettre_erreur_new( "'/' interdit dans une comparaison" );
                          $$ = NULL;
@@ -541,9 +563,8 @@ unite:          modulateur ENTIER HEURE ENTIER
                     }
                    else
                     { $$ = New_condition_simple ( $1, $2, $3, $4 ); }
-                   if ($2) g_free($2);                                                   /* Libération du prefixe s'il existe */
-                   if ($3) g_free($3);                                                   /* Libération du prefixe s'il existe */
                    g_free($2);                                                         /* On n'a plus besoin de l'identifiant */
+                   if ($3) g_free($3);                                                   /* Libération du prefixe s'il existe */
                    Liberer_options($4);
                 }}
                 ;

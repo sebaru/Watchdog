@@ -59,9 +59,7 @@
     gboolean has_tech_id;
     gchar tech_id[32];
     gchar acronyme[64];
-    union { gdouble valf;
-            struct ALIAS *alias;
-          };
+    gdouble valf;
   };
 
  struct ALIAS
