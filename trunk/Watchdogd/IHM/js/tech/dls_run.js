@@ -203,7 +203,7 @@
            },
            { "data": null, "title":"Valeur",     "className": "text-center align-middle",
              "render": function (item)
-               { return ( item.valeur/10 + "s = " + (Math.floor(item.valeur/36000)) + "h" );
+               { return ( item.valeur + "s = " + (Math.floor(item.valeur/3600)) + "h" );
                },
            },         ],
        /*order: [ [0, "desc"] ],*/
