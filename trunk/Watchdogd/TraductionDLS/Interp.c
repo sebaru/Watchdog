@@ -233,66 +233,7 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
-/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
-/* Sortie: la chaine de caractere en C                                                                                        */
-/******************************************************************************************************************************/
- gchar *New_condition_entree_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur )
-  { gint taille, in_range = Get_option_entier ( options, T_IN_RANGE, 0 );
-    gchar *result;
-
-    if (in_range==1)
-     { taille = 256;
-       result = New_chaine( taille ); /* 10 caractères max */
-       if (barre) g_snprintf( result, taille, "!Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
-                              alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-             else g_snprintf( result, taille, "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
-                              alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-       return(result);
-     }
-    if (!comparateur)                                                    /* Vérification des bits obligatoirement comparables */
-     { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser qu'avec une comparaison", DlsScanner_get_lineno(), alias->acronyme );
-       result=New_chaine(2);
-       g_snprintf( result, 2, "0" );
-       return(result);
-     }
-
-    if (comparateur->type == T_EGAL)
-     { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser avec le comparateur '='", DlsScanner_get_lineno(), alias->acronyme );
-       result=New_chaine(2);
-       g_snprintf( result, 2, "0" );
-       return(result);
-     }
-
-    taille = 512;
-    result = New_chaine( taille ); /* 10 caractères max */
-    setlocale(LC_ALL, "C");
-    switch(comparateur->type)
-     { case INF:         g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
-                                                     " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<%f))",
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case SUP:         g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
-                                                     " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>%f))",
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case INF_OU_EGAL: g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
-                                                     " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<=%f))",
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case SUP_OU_EGAL: g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
-                                                     " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>=%f))",
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-     }
-    return(result);
-  }
-/******************************************************************************************************************************/
-/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
+/* New_condition_sortie_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -310,7 +251,7 @@
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
     setlocale(LC_ALL, "C");
-    switch(comparateur->type)
+    switch(comparateur->ordre)
      { case T_EGAL:      g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)==%f",
                                      alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
                          break;
@@ -400,6 +341,152 @@
          }
    return(result);
  }
+/******************************************************************************************************************************/
+/* New_condition_comparateur: Prepare la chaine de caractere associée à la condition de comparateur                           */
+/* Entrées: le tech_id/acronyme, ses options, son comparateur                                                                 */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_comparateur( gchar *id, gchar *suffixe, GList *options_g, struct COMPARATEUR *comparateur )
+  { struct ALIAS *alias_g, *alias_d;
+    gchar *tech_id_g, *acro_g, *tech_id_d, *acro_d;
+
+    if (suffixe) { tech_id_g = id;   acro_g = suffixe; }
+            else { tech_id_g = NULL; acro_g = id; }
+
+    alias_g = Get_alias_par_acronyme(tech_id_g,acro_g);                                                /* On recupere l'alias */
+    if (!alias_g)
+     { alias_g = Set_new_external_alias(tech_id_g,acro_g); }                         /* Si dependance externe, on va chercher */
+
+    if (!alias_g)
+     { if (tech_id_g) Emettre_erreur_new( "'%s:%s' is not defined", tech_id_g, acro_g );/* si l'alias n'existe pas */
+                 else Emettre_erreur_new( "'%s' is not defined", acro_g );          /* si l'alias n'existe pas */
+       return(NULL);
+     }
+
+    if (alias_g->classe!=MNEMO_SORTIE_ANA &&                     /* Vérification des bits non comparables */
+        alias_g->classe!=MNEMO_ENTREE_ANA &&
+        alias_g->classe!=MNEMO_REGISTRE &&
+        alias_g->classe!=MNEMO_CPT_IMP &&
+        alias_g->classe!=MNEMO_CPTH
+       )
+     { Emettre_erreur_new( "'%s:%s' n'est pas comparable", alias_g->tech_id, alias_g->acronyme );
+       return(NULL);
+     }
+
+    if (comparateur->token_classe == ID )
+     { if (comparateur->has_tech_id) { tech_id_d = comparateur->tech_id; acro_d = comparateur->acronyme; }
+                                else { tech_id_d = NULL;                 acro_d = comparateur->acronyme; }
+
+       alias_d = Get_alias_par_acronyme(tech_id_d,acro_d);                                             /* On recupere l'alias */
+       if (!alias_d)
+        { alias_d = Set_new_external_alias(tech_id_d,acro_d); }                      /* Si dependance externe, on va chercher */
+
+       if (!alias_d)
+        { if (tech_id_d) Emettre_erreur_new( "'%s:%s' is not defined", tech_id_d, acro_d );        /* si l'alias n'existe pas */
+                    else Emettre_erreur_new( "'%s' is not defined", acro_d );                      /* si l'alias n'existe pas */
+          return(NULL);
+        }
+
+       if (alias_d->classe!=MNEMO_SORTIE_ANA &&                     /* Vérification des bits non comparables */
+           alias_d->classe!=MNEMO_ENTREE_ANA &&
+           alias_d->classe!=MNEMO_REGISTRE &&
+           alias_d->classe!=MNEMO_CPT_IMP &&
+           alias_d->classe!=MNEMO_CPTH
+          )
+        { Emettre_erreur_new( "'%s:%s' n'est pas comparable", alias_d->tech_id, alias_d->acronyme );
+          return(NULL);
+        }
+     }
+
+    gchar partie_g[512], partie_d[512];
+    switch(alias_g->classe)                                                /* On traite que ce qui peut passer en "condition" */
+     { case MNEMO_ENTREE_ANA :
+        { gint in_range = Get_option_entier ( options_g, T_IN_RANGE, 0 );
+          if (in_range==1)
+           { Emettre_erreur_new( "'%s'(in_range) ne peut s'utiliser dans une comparaison", alias_g->acronyme );
+             return(NULL);
+           }
+          g_snprintf ( partie_g, sizeof(partie_g),
+                       "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) && "
+                       " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme,
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
+          break;
+        }
+     }
+
+    switch(comparateur->ordre)
+     { case INF:         g_strlcat ( partie_g, " < ", sizeof(partie_g) ); break;
+       case SUP:         g_strlcat ( partie_g, " > ", sizeof(partie_g) ); break;
+       case INF_OU_EGAL: g_strlcat ( partie_g, " <= ", sizeof(partie_g) ); break;
+       case SUP_OU_EGAL: g_strlcat ( partie_g, " >= ", sizeof(partie_g) ); break;
+     }
+
+    if (comparateur->token_classe == ID)
+     { switch(alias_d->classe)                              /* On traite que ce qui peut passer en "condition" */
+        { case MNEMO_ENTREE_ANA :
+           { gint in_range = Get_option_entier ( comparateur->alias->options, T_IN_RANGE, 0 );
+             if (in_range==1)
+              { Emettre_erreur_new( "'%s'(in_range) ne peut s'utiliser dans une comparaison", alias_d->acronyme ); }
+             g_snprintf ( partie_d, sizeof(partie_d),
+                          "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)) && "
+                          " Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) )",
+                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme,
+                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
+             break;
+           }
+        }
+     }
+    else if (comparateur->token_classe == T_VALF)
+     { g_snprintf( partie_d, sizeof(partie_d), "%f )", comparateur->valf ); }
+     
+    return( g_strconcat( partie_g, partie_d, NULL ) );
+  }
+/******************************************************************************************************************************/
+/* New_condition_comparateur: Prepare la chaine de caractere associée à la condition de comparateur                           */
+/* Entrées: le tech_id/acronyme, ses options, son comparateur                                                                 */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_simple( gint barre, gchar *id, gchar *suffixe, GList *options )
+  { gchar *tech_id, *acro;
+    struct ALIAS *alias;
+    if (suffixe) { tech_id = id; acro = suffixe; }
+            else { tech_id = NULL; acro = id; }
+
+    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
+    if (!alias)
+     { alias = Set_new_external_alias(tech_id,acro); }                /* Si dependance externe, on va chercher */
+
+    if (!alias)
+     { if (tech_id) Emettre_erreur_new( "'%s:%s' is not defined", tech_id, acro );/* si l'alias n'existe pas */
+               else Emettre_erreur_new( "'%s' is not defined", acro );/* si l'alias n'existe pas */
+       return(NULL);
+     }
+
+    if ( alias->classe!=MNEMO_TEMPO &&
+         alias->classe!=MNEMO_ENTREE &&
+         alias->classe!=MNEMO_BISTABLE &&
+         alias->classe!=MNEMO_MONOSTABLE &&
+         alias->classe!=MNEMO_HORLOGE &&
+         alias->classe!=MNEMO_WATCHDOG
+       )
+     { Emettre_erreur_new( "'%s' ne peut s'utiliser seul (avec une comparaison ?)", acro );
+       return(NULL);
+     }
+
+     switch(alias->classe)                              /* On traite que ce qui peut passer en "condition" */
+      { case MNEMO_TEMPO :     return ( New_condition_tempo( barre, alias, options ) );
+        case MNEMO_ENTREE:     return ( New_condition_entree( barre, alias, options ) );
+        case MNEMO_BISTABLE:   return ( New_condition_bi( barre, alias, options ) );
+        case MNEMO_MONOSTABLE: return ( New_condition_mono( barre, alias, options ) );
+        case MNEMO_HORLOGE:    return ( New_condition_horloge( barre, alias, options ) );
+        case MNEMO_WATCHDOG:   return ( New_condition_WATCHDOG( barre, alias, options ) );
+        default:
+         { Emettre_erreur_new( "'%s' n'est pas une condition valide", acro );
+           return(NULL);
+         }
+      }
+  }
 /******************************************************************************************************************************/
 /* New_calcul_PID: Calcul un PID                                                                                              */
 /* Entrées: la liste d'option associée au PID                                                                                 */
@@ -924,10 +1011,12 @@ return(NULL);
        alias->acronyme = g_strdup(acronyme);
        alias->classe   = type;
      }
-    else
-     { g_free(alias);
-       return(NULL);
+    else if ( (type=Rechercher_DICO_type ( "SYS", acronyme )) != -1 )
+     { alias->tech_id  = g_strdup(tech_id);
+       alias->acronyme = g_strdup(acronyme);
+       alias->classe   = type;
      }
+    else { g_free(alias); return(NULL); }                                          /* Si pas trouvé en externe, retourne NULL */
     Alias = g_slist_prepend( Alias, alias );
     return(alias);
   }

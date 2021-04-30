@@ -81,9 +81,9 @@
 %type  <option>      une_option
 %type  <chaine>      unite facteur expr suffixe unSwitch listeCase une_instr listeInstr
 %type  <action>      action une_action
-%type  <comparateur> comparateur
 %type  <chaine>      calcul_expr calcul_expr2 calcul_expr3
 %type  <t_alias>     calcul_ea_result
+%type  <comparateur> comparateur
 
 %%
 fichier: ligne_source_dls;
@@ -530,166 +530,21 @@ unite:          modulateur ENTIER HEURE ENTIER
                    else    { g_snprintf( $$, taille, "(%s)", $3 ); }
                    g_free($3);
                 }}
-                | barre ID suffixe liste_options comparateur
-                {{ struct ALIAS *alias;
-                   char *tech_id, *acro;
-                   int taille;
-
-                   if ($3) { tech_id = $2; acro = $3; }
-                      else { tech_id = NULL; acro = $2; }
-
-                   alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
-                   if (!alias)
-                    { alias = Set_new_external_alias(tech_id,acro); }                /* Si dependance externe, on va chercher */
-
-                   if (alias)
-                    { if ($5 && (alias->classe==MNEMO_TEMPO ||                              /* Vérification des bits non comparables */
-                                 alias->classe==MNEMO_ENTREE ||
-                                 alias->classe==MNEMO_SORTIE ||
-                                 alias->classe==MNEMO_BISTABLE ||
-                                 alias->classe==MNEMO_MONOSTABLE ||
-                                 alias->classe==MNEMO_DIGITAL_OUTPUT ||
-                                 alias->classe==MNEMO_WATCHDOG ||
-                                 alias->classe==MNEMO_HORLOGE)
-                         )
-                       { Emettre_erreur_new( "'%s' ne peut s'utiliser dans une comparaison", $3 );
-                         $$=New_chaine(2);
-                         g_snprintf( $$, 2, "0" );
-                       } else
-                      if (!$5 && (alias->classe==MNEMO_SORTIE_ANA ||
-                                  alias->classe==MNEMO_REGISTRE ||
-                                  alias->classe==MNEMO_CPT_IMP ||
-                                  alias->classe==MNEMO_CPTH)
-                         )
-                       { Emettre_erreur_new( "'%s' ne peut s'utiliser qu'avec une comparaison", $3 );
-                         $$=New_chaine(2);
-                         g_snprintf( $$, 2, "0" );
+/************************************** Partie Logique : gestion des comparaisons *********************************************/
+                | barre ID suffixe liste_options comparateur                                            /* Gestion des comparaisons */
+                {{ if ($4)
+                    { if ($1)
+                       { Emettre_erreur_new( "'/' interdit dans une comparaison" );
+                         $$ = NULL;
                        }
-                      else switch(alias->classe)                              /* On traite que ce qui peut passer en "condition" */
-                       { case MNEMO_TEMPO :
-                          { $$ = New_condition_tempo( $1, alias, $4 );
-                            break;
-                          }
-                         case MNEMO_ENTREE:
-                          { $$ = New_condition_entree( $1, alias, $4 );
-                            break;
-                          }
-                         case MNEMO_BISTABLE:
-                          { $$ = New_condition_bi( $1, alias, $4 );
-                            break;
-                          }
-                         case MNEMO_MONOSTABLE:
-                          { $$ = New_condition_mono( $1, alias, $4 );
-                            break;
-                          }
-                         case MNEMO_HORLOGE:
-                          { $$ = New_condition_horloge( $1, alias, $4 );
-                            break;
-                          }
-                         case MNEMO_WATCHDOG:
-                          { $$ = New_condition_WATCHDOG( $1, alias, $4 );
-                            break;
-                          }
-                         case MNEMO_ENTREE_ANA:
-                          { $$ = New_condition_entree_ana( $1, alias, $4, $5 );
-                            break;
-                          }
-                         case MNEMO_SORTIE_ANA:
-                          { $$ = New_condition_sortie_ana( $1, alias, $4, $5 );
-                            break;
-                          }
-                         case MNEMO_REGISTRE:
-                          { taille = 256;
-                            $$ = New_chaine( taille );
-                            switch( $5->type )
-                             { case INF        : g_snprintf( $$, taille, "Dls_data_get_R(\"%s\",\"%s\",&_%s_%s)<%f",
-                                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                                 break;
-                               case SUP        : g_snprintf( $$, taille, "Dls_data_get_R(\"%s\",\"%s\",&_%s_%s)>%f",
-                                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                                 break;
-                               case INF_OU_EGAL: g_snprintf( $$, taille, "Dls_data_get_R(\"%s\",\"%s\",&_%s_%s)<=%f",
-                                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                                 break;
-                               case SUP_OU_EGAL: g_snprintf( $$, taille, "Dls_data_get_R(\"%s\",\"%s\",&_%s_%s)>=%f",
-                                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                                 break;
-                               case T_EGAL     : g_snprintf( $$, taille, "Dls_data_get_R(\"%s\",\"%s\",&_%s_%s)==%f",
-                                                              alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                                 break;
-                             }
-                            break;
-                           }
-                         case MNEMO_CPT_IMP:
-                          { taille = 256;
-                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
-                            switch($5->type)
-                             { case INF:
-                                 g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)<%f",
-                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                 break;
-                               case SUP:
-                                 g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)>%f",
-                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                 break;
-                               case INF_OU_EGAL:
-                                 g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)<=%f",
-                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                 break;
-                               case SUP_OU_EGAL:
-                                 g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)>=%f",
-                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                 break;
-                               case T_EGAL:
-                                 g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)==%f",
-                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                 break;
-                             }
-                            break;
-                          }
-                         case MNEMO_CPTH:
-                          { taille = 256;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            switch($5->type)
-                             { case INF:
-                                 g_snprintf( $$, taille, "Dls_data_get_CH(\"%s\",\"%s\",&_%s_%s)<%f",
-                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                 break;
-                               case SUP:
-                                 g_snprintf( $$, taille, "Dls_data_get_CH(\"%s\",\"%s\",&_%s_%s)>%f",
-                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                 break;
-                               case INF_OU_EGAL:
-                                 g_snprintf( $$, taille, "Dls_data_get_CH(\"%s\",\"%s\",&_%s_%s)<=%f",
-                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                 break;
-                               case SUP_OU_EGAL:
-                                 g_snprintf( $$, taille, "Dls_data_get_CH(\"%s\",\"%s\",&_%s_%s)>=%f",
-                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                 break;
-                               case T_EGAL:
-                                 g_snprintf( $$, taille, "Dls_data_get_CH(\"%s\",\"%s\",&_%s_%s)==%f",
-                                             alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
-                                 break;
-                             }
-                            break;
-                          }
-                         default:
-                          { Emettre_erreur_new( "'%s' n'est pas une condition valide", acro );
-                            $$=New_chaine(2);
-                            g_snprintf( $$, 2, "0" );
-                          }
-                       }
+                      else $$ = New_condition_comparateur ( $2, $3, $4, $5 );
                     }
-                   else { if (tech_id) Emettre_erreur_new( "'%s:%s' is not defined", tech_id, acro );/* si l'alias n'existe pas */
-                                  else Emettre_erreur_new( "'%s' is not defined", acro );/* si l'alias n'existe pas */
-                          $$=New_chaine(2);
-                          g_snprintf( $$, 2, "0" );
-                        }
+                   else
+                    { $$ = New_condition_simple ( $1, $2, $3, $4 ); }
+                   if ($2) g_free($2);                                                   /* Libération du prefixe s'il existe */
                    if ($3) g_free($3);                                                   /* Libération du prefixe s'il existe */
                    g_free($2);                                                         /* On n'a plus besoin de l'identifiant */
                    Liberer_options($4);
-                   if ($5) g_free($5);                                               /* Libération du comparateur s'il existe */
                 }}
                 ;
 
@@ -815,12 +670,35 @@ une_action:     T_ACT_DEF
                 }}
                 ;
 
-comparateur:    ordre T_VALF
+comparateur:    ordre ID suffixe
                 {{ $$ = New_comparateur();
-                   $$->type = $1;
+                   $$->ordre = $1;
+                   $$->token_classe = ID;
+                   if ($3)
+                    { $$->has_tech_id = TRUE;
+                      g_snprintf ( $$->tech_id, sizeof($$->tech_id), "%s", $2 );
+                      g_snprintf ( $$->acronyme, sizeof($$->acronyme), "%s", $3 );
+                    }
+                   else
+                    { $$->has_tech_id = FALSE;
+                      g_snprintf ( $$->acronyme, sizeof($$->acronyme), "%s", $2 );
+                    }
+                   if ($3) g_free($3);
+                   g_free($2);
+                }}
+                | ordre ENTIER
+                {{ $$ = New_comparateur();
+                   $$->ordre = $1;
+                   $$->token_classe = T_VALF;
+                   $$->valf = 1.0*$2;
+                }}
+                | ordre T_VALF
+                {{ $$ = New_comparateur();
+                   $$->ordre = $1;
+                   $$->token_classe = T_VALF;
                    $$->valf = $2;
                 }}
-                |     {{ $$=NULL; }}
+                | {{ $$=NULL; }}
                 ;
 
 barre:          BARRE {{ $$=1; }}

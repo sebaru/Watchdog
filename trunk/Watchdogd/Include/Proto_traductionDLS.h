@@ -54,9 +54,13 @@
   };
 
  struct COMPARATEUR
-  { gint type;
-    union { gint val;
-            gfloat valf;
+  { gint ordre;
+    gint token_classe;
+    gboolean has_tech_id;
+    gchar tech_id[32];
+    gchar acronyme[64];
+    union { gdouble valf;
+            struct ALIAS *alias;
           };
   };
 
@@ -77,16 +81,10 @@
  extern void Emettre_erreur_new( gchar *format, ... );
  extern void Emettre_init_alias( void );
  extern struct COMPARATEUR *New_comparateur( void );
- extern gchar *New_condition_entree( int barre, struct ALIAS *alias, GList *options );
- extern gchar *New_condition_entree_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur );
- extern gchar *New_condition_sortie_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur );
- extern gchar *New_condition_bi( int barre, struct ALIAS *alias, GList *options );
- extern gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options );
- extern gchar *New_condition_tempo( int barre, struct ALIAS *alias, GList *options );
- extern gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options );
- extern gchar *New_condition_WATCHDOG( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_vars( int barre, gchar *nom );
  extern gchar *New_calcul_PID ( GList *options );
+ extern gchar *New_condition_comparateur( gchar *id, gchar *suffixe, GList *options_g, struct COMPARATEUR *comparateur );
+ extern gchar *New_condition_simple( gint barre, gchar *id, gchar *suffixe, GList *options );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options );
