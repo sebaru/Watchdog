@@ -2224,7 +2224,12 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5585;
+    if (database_version < 5612)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI ADD `archivage` INT(11) NOT NULL DEFAULT '1'");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5612;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

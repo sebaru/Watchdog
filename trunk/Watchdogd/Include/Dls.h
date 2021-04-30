@@ -107,7 +107,8 @@
     gfloat  val_avant_ech;
     guint   last_arch;                                                                         /* Date de la derniere archive */
     guint   inrange;
-  };
+    guint   archivage;
+   };
 
  struct DLS_AO
   { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];

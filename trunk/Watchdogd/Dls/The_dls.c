@@ -831,7 +831,6 @@ end:
 /******************************************************************************************************************************/
  void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech, gboolean in_range )
   { struct DLS_AI *ai;
-    gboolean need_arch;
 
     if (!ai_p || !*ai_p)
      { GSList *liste;
@@ -860,10 +859,8 @@ end:
       }
     else ai = (struct DLS_AI *)*ai_p;
 
-    need_arch = FALSE;
     if ( (ai->val_avant_ech != val_avant_ech) || (ai->inrange != in_range) )
      { ai->val_avant_ech = val_avant_ech;                                           /* Archive au mieux toutes les 5 secondes */
-       if ( ai->last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top ) { need_arch = TRUE; }
 
        switch ( ai->type )
         { case ENTREEANA_NON_INTERP:
@@ -909,11 +906,13 @@ end:
                ai->inrange = 0;
         }
      }
-    else if ( ai->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
-     { need_arch = TRUE; }                                                               /* Archive au pire toutes les 10 min */
 
-    if (need_arch)
-     { Ajouter_arch_by_nom( ai->acronyme, ai->tech_id, ai->val_ech );                              /* Archivage si besoin */
+    if ( (ai->archivage == 1 && ai->last_arch + 50     <= Partage->top) ||
+         (ai->archivage == 2 && ai->last_arch + 600    <= Partage->top) ||
+         (ai->archivage == 3 && ai->last_arch + 36000  <= Partage->top) ||
+         (ai->archivage == 4 && ai->last_arch + 864000 <= Partage->top)
+       )
+     { Ajouter_arch_by_nom( ai->acronyme, ai->tech_id, ai->val_ech );                                  /* Archivage si besoin */
        ai->last_arch = Partage->top;
      }
   }
@@ -923,7 +922,6 @@ end:
 /******************************************************************************************************************************/
  void Dls_data_set_AO ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *ao_p, float val_avant_ech )
   { struct DLS_AO *ao;
-    gboolean need_arch;
 
     if (!ao_p || !*ao_p)
      { GSList *liste;
@@ -952,50 +950,13 @@ end:
       }
     else ao = (struct DLS_AO *)*ao_p;
 
-    need_arch = FALSE;
     if (ao->val_avant_ech != val_avant_ech)
      { ao->val_avant_ech = val_avant_ech;                                           /* Archive au mieux toutes les 5 secondes */
-       if ( ao->last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top ) { need_arch = TRUE; }
 
        switch ( ao->type )
         { case 0: /*SORTIEANA_NON_INTERP:*/
                ao->val_ech = val_avant_ech;                                                        /* Pas d'interprétation !! */
                break;
-#ifdef bouh
-          case ENTREEANA_4_20_MA_10BITS:
-               if (val_avant_ech < 100)                                                /* 204) Modification du range pour 4mA */
-                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */
-                  ai->inrange = 0;
-                }
-               else
-                { if (val_avant_ech < 204) val_avant_ech = 204;                                         /* Valeur à l'echelle */
-                  ai->val_ech = (gfloat) ((val_avant_ech-204)*(ai->max - ai->min))/820.0 + ai->min;
-                  ai->inrange = 1;
-                }
-               break;
-          case ENTREEANA_4_20_MA_12BITS:
-               if (val_avant_ech < 400)
-                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */
-                  ai->inrange = 0;
-                }
-               else
-                { if (val_avant_ech < 816) val_avant_ech = 816;                                         /* Valeur à l'echelle */
-                  ai->val_ech = (gfloat) ((val_avant_ech-816)*(ai->max - ai->min))/3280.0 + ai->min;
-                  ai->inrange = 1;
-                }
-               break;
-          case ENTREEANA_WAGO_750455:                                                                              /* 4/20 mA */
-               ai->val_ech = (gfloat) (val_avant_ech*(ai->max - ai->min))/4095.0 + ai->min;
-               ai->inrange = 1;
-               break;
-          case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
-               if (val_avant_ech > -32767 && val_avant_ech < 8500)
-                { ai->val_ech = (gfloat)(val_avant_ech/10.0);                                           /* Valeur à l'echelle */
-                  ai->inrange = 1;
-                }
-               else ai->inrange = 0;
-               break;
-#endif
           default:
                ao->val_ech = 0.0;
         }
@@ -1006,13 +967,9 @@ end:
                  "%s: ligne %04d: Changing DLS_AO '%s:%s'=%f/%f", __func__,
                  (vars ? vars->num_ligne : -1), ao->tech_id, ao->acronyme, ao->val_avant_ech, ao->val_ech );
      }
-    else if ( ao->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
-     { need_arch = TRUE; }                                                               /* Archive au pire toutes les 10 min */
 
-    if (need_arch)
-     { Ajouter_arch_by_nom( ao->acronyme, ao->tech_id, ao->val_ech );                                  /* Archivage si besoin */
-       ao->last_arch = Partage->top;
-     }
+ /* Pensez a ajouter l'archivage */
+
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_INT: Positionne un integer dans la mémoire DLS                                                                */
@@ -1050,13 +1007,11 @@ end:
       }
     else cpt_imp = (struct DLS_CI *)*cpt_imp_p;
 
-    gboolean need_arch = FALSE;
     if (etat)
      { if (reset)                                                                       /* Le compteur doit-il etre resetté ? */
         { if (cpt_imp->valeur!=0)
            { cpt_imp->val_en_cours1 = 0;                                           /* Valeur transitoire pour gérer les ratio */
              cpt_imp->valeur = 0;                                                  /* Valeur transitoire pour gérer les ratio */
-             need_arch = TRUE;
            }
         }
        else if ( cpt_imp->etat == FALSE )                                                                 /* Passage en actif */
@@ -1066,7 +1021,6 @@ end:
           if (cpt_imp->val_en_cours1>=ratio)
            { cpt_imp->valeur++;
              cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
-             need_arch = TRUE;
              Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                        "%s: ligne %04d: Changing DLS_CI '%s:%s'=%d", __func__,
                        (vars ? vars->num_ligne : -1), cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
@@ -1082,7 +1036,7 @@ end:
        cpt_imp->imp_par_minute = cpt_imp->valeur - cpt_imp->valeurs[0];
      }
 
-    if ( (cpt_imp->archivage == 1 && need_arch == TRUE) ||
+    if ( (cpt_imp->archivage == 1 && cpt_imp->last_arch + 50     <= Partage->top) ||
          (cpt_imp->archivage == 2 && cpt_imp->last_arch + 600    <= Partage->top) ||
          (cpt_imp->archivage == 3 && cpt_imp->last_arch + 36000  <= Partage->top) ||
          (cpt_imp->archivage == 4 && cpt_imp->last_arch + 864000 <= Partage->top)
@@ -1621,17 +1575,15 @@ end:
       }
     else reg = (struct DLS_REGISTRE *)*r_p;
 
-    gboolean need_arch = FALSE;
     if (valeur != reg->valeur)
      { reg->valeur = valeur;
-       need_arch = TRUE;
        Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "%s: ligne %04d: Changing DLS_REGISTRE '%s:%s'=%f", __func__,
                  (vars ? vars->num_ligne : -1), reg->tech_id, reg->acronyme, reg->valeur );
        Partage->audit_bit_interne_per_sec++;
      }
 
-    if ( (reg->archivage == 1 && need_arch == TRUE) ||
+    if ( (reg->archivage == 1 && reg->last_arch + 50     <= Partage->top) ||
          (reg->archivage == 2 && reg->last_arch + 600    <= Partage->top) ||
          (reg->archivage == 3 && reg->last_arch + 36000  <= Partage->top) ||
          (reg->archivage == 4 && reg->last_arch + 864000 <= Partage->top)

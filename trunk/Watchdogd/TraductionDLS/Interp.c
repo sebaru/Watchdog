@@ -407,27 +407,27 @@
              return(NULL);
            }
           g_snprintf ( partie_g, sizeof(partie_g),
-                       "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) && "
-                       " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
+                       "( Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) && "
+                       "  (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
                        alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme,
                        alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
           break;
         }
        case MNEMO_REGISTRE :
         { g_snprintf ( partie_g, sizeof(partie_g),
-                       "(Dls_data_get_R (\"%s\",\"%s\",&_%s_%s) ",
+                       "( (Dls_data_get_R (\"%s\",\"%s\",&_%s_%s) ",
                        alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
           break;
         }
        case MNEMO_CPT_IMP :
         { g_snprintf ( partie_g, sizeof(partie_g),
-                       "(Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ",
+                       "( (Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ",
                        alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
           break;
         }
        case MNEMO_CPTH :
         { g_snprintf ( partie_g, sizeof(partie_g),
-                       "(Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ",
+                       "( (Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ",
                        alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
           break;
         }
@@ -452,26 +452,26 @@
               { Emettre_erreur_new( "'%s'(in_range) ne peut s'utiliser dans une comparaison", alias_d->acronyme ); }
              g_snprintf ( partie_d, sizeof(partie_d),
                           "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)) && "
-                          " Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) ",
+                          " Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) )",
                           alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme,
                           alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
              break;
            }
           case MNEMO_REGISTRE :
            { g_snprintf ( partie_d, sizeof(partie_d),
-                          "Dls_data_get_R (\"%s\",\"%s\",&_%s_%s) ) ",
+                          "Dls_data_get_R (\"%s\",\"%s\",&_%s_%s) ) )",
                           alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
              break;
            }
           case MNEMO_CPT_IMP :
            { g_snprintf ( partie_d, sizeof(partie_d),
-                          "Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ) ",
+                          "Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ) )",
                           alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
              break;
            }
           case MNEMO_CPTH :
            { g_snprintf ( partie_d, sizeof(partie_d),
-                          "Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ) ",
+                          "Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ) )",
                           alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
              break;
            }
@@ -482,7 +482,7 @@
         }
      }
     else if (comparateur->token_classe == T_VALF)
-     { g_snprintf( partie_d, sizeof(partie_d), "%f) ", comparateur->valf ); }
+     { g_snprintf( partie_d, sizeof(partie_d), "%f) )", comparateur->valf ); }
 
     return( g_strconcat( partie_g, partie_d, NULL ) );
   }

@@ -23,7 +23,7 @@
   { return("<select id='"+id+"' class='custom-select'"+
            "onchange="+fonction+">"+
            "<option value='0' "+(selected==0 ? "selected" : "")+">Aucun</option>"+
-           "<option value='1' "+(selected==1 ? "selected" : "")+">En temps reél</option>"+
+           "<option value='1' "+(selected==1 ? "selected" : "")+">Un pour 5 secondes</option>"+
            "<option value='2' "+(selected==2 ? "selected" : "")+">Un par minute</option>"+
            "<option value='3' "+(selected==3 ? "selected" : "")+">Un par heure</option>"+
            "<option value='4' "+(selected==4 ? "selected" : "")+">Un par jour</option>"+
