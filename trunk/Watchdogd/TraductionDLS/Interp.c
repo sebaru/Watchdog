@@ -650,6 +650,35 @@
     return(chaine);
   }
 /******************************************************************************************************************************/
+/* New_calcul_PID: Calcul un PID                                                                                              */
+/* Entrées: la liste d'option associée au PID                                                                                 */
+/* Sortie: la chaine de calcul DLS                                                                                            */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_PID ( GList *options )
+  { gint reset = Get_option_entier ( options, T_RESET, 0 );
+    if (reset==0)
+     { Emettre_erreur_new ( "PID : En action, l'option 'reset' est nécessaire." );
+       return(NULL);
+     }
+
+    struct ALIAS *input = Get_option_alias ( options, T_INPUT );
+    if (!input)
+     { Emettre_erreur_new ( "PID : input unknown. Select one input (R or AI)." );
+       return(NULL);
+     }
+    if ( ! (input->classe == MNEMO_REGISTRE /*|| input->classe == MNEMO_ENTREE_ANA*/ ) )
+     { Emettre_erreur_new ( "PID : input must be R or AI." );
+       return(NULL);
+     }
+
+    struct ACTION *action = New_action();
+    gint taille = 256;
+    action->alors = New_chaine( taille );
+    g_snprintf( action->alors, taille, "Dls_PID_reset ( \"%s\", \"%s\", &_%s_%s ) ",
+                input->tech_id, input->acronyme, input->tech_id, input->acronyme );
+    return(action);
+  }
+/******************************************************************************************************************************/
 /* New_condition_vars: formate une condition avec le nom de variable en parametre                                             */
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
@@ -779,10 +808,9 @@
 /******************************************************************************************************************************/
  struct ACTION *New_action_cpt_h( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
-    int taille, reset;
 
-    reset = Get_option_entier ( options, RESET, 0 );
-    taille = 256;
+    gint reset = Get_option_entier ( options, T_RESET, 0 );
+    gint taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -800,12 +828,11 @@
 /******************************************************************************************************************************/
  struct ACTION *New_action_cpt_imp( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
-    int taille, reset, ratio;
 
-    reset = Get_option_entier ( options, RESET, 0 );
-    ratio = Get_option_entier ( options, T_RATIO, 1 );
+    gint reset = Get_option_entier ( options, T_RESET, 0 );
+    gint ratio = Get_option_entier ( options, T_RATIO, 1 );
 
-    taille = 256;
+    gint taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -1183,7 +1210,7 @@ return(NULL);
     pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
 
     Alias = NULL;                                                                                  /* Par défaut, pas d'alias */
-    DlsScanner_set_lineno(1);                                                                     /* Reset du numéro de ligne */
+    DlsScanner_set_lineno(1);                                                                     /* reset du numéro de ligne */
     nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR_NO_FILE;

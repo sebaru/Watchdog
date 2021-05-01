@@ -51,7 +51,7 @@
 %token <val>    T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_OK
 %token <val>    T_BUS T_HOST T_THREAD T_TAG
 
-%token <val>    MODE COLOR CLIGNO RESET T_RATIO T_MULTI T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
+%token <val>    MODE COLOR CLIGNO T_RESET T_RATIO T_MULTI T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
 %token <val>    T_CADRAN T_MIN T_MAX T_DECIMAL
 %token <val>    T_PID T_KP T_KI T_KD T_INPUT
 %token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM T_UPDATE T_CONSIGNE T_ALIAS
@@ -632,6 +632,10 @@ une_action:     T_ACT_DEF
                   {{ $$=New_action_vars_mono("vars->bit_danger"); }}
                 | T_SPERS_DANF
                   {{ $$=New_action_vars_mono("vars->bit_danger_fixe"); }}
+                | T_PID liste_options
+                  {{ $$=New_action_PID($2);
+                     Liberer_options($2);
+                  }}
                 | barre ID suffixe liste_options
                 {{ struct ALIAS *alias;                                                   /* Definition des actions via alias */
                    gchar *tech_id, *acro;
@@ -857,13 +861,13 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->val_as_int = $3;
                 }}
                 ;
-                | RESET
+                | T_RESET
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ENTIER;
                    $$->val_as_int = 1;
                 }}
-                | RESET T_EGAL ENTIER
+                | T_RESET T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ENTIER;

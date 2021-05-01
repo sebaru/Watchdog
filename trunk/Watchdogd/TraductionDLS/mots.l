@@ -126,7 +126,7 @@ newline       [\n\r]+
 "kaki"                     { DlsScanner_lval.val = KAKI;        return KAKI;        }
  /************************************************* Options ************************************************/
 "mode"                     { DlsScanner_lval.val = MODE;        return MODE;        }
-"reset"                    { DlsScanner_lval.val = RESET;       return RESET;       }
+"reset"                    { DlsScanner_lval.val = T_RESET;     return T_RESET;     }
 "multi"                    { DlsScanner_lval.val = T_MULTI;     return T_MULTI;     }
 "ratio"                    { DlsScanner_lval.val = T_RATIO;     return T_RATIO;     }
 "color"                    { DlsScanner_lval.val = COLOR;       return COLOR;       }

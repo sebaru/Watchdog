@@ -1620,6 +1620,20 @@ end:
 /* Dls_data_get_reg: Remonte l'etat d'un registre                                                                             */
 /* Sortie : TRUE sur le regean est UP                                                                                         */
 /******************************************************************************************************************************/
+ void Dls_PID_reset ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input )
+  { Dls_data_get_R ( input_tech_id, input_acronyme, r_input );
+    if ( ! (r_input) ) return;
+
+    struct DLS_REGISTRE *input = *r_input;
+    if ( ! (input) ) return;
+
+    input->pid_somme_erreurs = 0.0;
+    input->pid_prev_erreur   = 0.0;
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_reg: Remonte l'etat d'un registre                                                                             */
+/* Sortie : TRUE sur le regean est UP                                                                                         */
+/******************************************************************************************************************************/
  gdouble Dls_PID ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input,
                    gchar *consigne_tech_id, gchar *consigne_acronyme, gpointer *r_consigne,
                    gchar *kp_tech_id, gchar *kp_acronyme, gpointer *r_kp,

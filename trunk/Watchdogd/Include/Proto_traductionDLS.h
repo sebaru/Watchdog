@@ -97,6 +97,7 @@
  extern struct ACTION *New_action_cpt_h( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_cpt_imp( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_WATCHDOG( struct ALIAS *alias, GList *options );
+ extern struct ACTION *New_action_PID ( GList *options );
  extern gboolean New_alias( gchar *tech_id, gchar *acronyme, gint bit, GList *options );
  extern struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme );
  extern struct ALIAS *Get_alias_par_acronyme( gchar *tech_id, gchar *acronyme );
