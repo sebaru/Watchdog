@@ -83,6 +83,7 @@
  extern gchar *New_calcul_PID ( GList *options );
  extern gchar *New_condition_comparateur( gchar *id, gchar *suffixe, GList *options_g, struct COMPARATEUR *comparateur );
  extern gchar *New_condition_simple( gint barre, gchar *id, gchar *suffixe, GList *options );
+ extern gint Get_option_entier( GList *liste_options, gint token, gint defaut );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options );

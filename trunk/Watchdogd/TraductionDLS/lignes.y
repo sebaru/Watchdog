@@ -162,33 +162,43 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                     }
                    if ($2) g_free($2);
                 }}
-                | T_MOINS expr T_DIFFERE ENTIER DONNE action PVIRGULE
+                | T_MOINS expr T_DIFFERE options DONNE action PVIRGULE
                 {{ int taille;
                    taille = strlen($2)+strlen($6->alors)+512;
                    if ($6->sinon) taille += strlen($6->sinon);
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille,
                                "vars->num_ligne = %d; /* une_instr différée----------*/\n"
-                               " { static gboolean counting=FALSE;\n"
+                               " { static gboolean counting_on=FALSE;\n"
                                "   static time_t top;\n"
                                "   if(%s)\n"
-                               "    { if (counting==FALSE)\n"
-                               "       { counting=TRUE; time(&top); }\n"
+                               "    { counting_off=FALSE;\n"
+                               "      if (counting_on==FALSE)\n"
+                               "       { counting_on=TRUE; time(&top); }\n"
                                "      else\n"
-                               "       { if ( difftime( time(NULL), top ) >= %d/10 )\n"
-                               "          { %s"
+                               "       { if ( difftime( time(NULL), top ) >= %d )\n"
+                               "          { %s\n"
                                "          }\n"
                                "       }\n"
                                "    }\n"
                                "   else\n"
-                               "    { counting = FALSE;\n"
-                               "      %s"
+                               "    { counting_on = FALSE;\n"
+                               "      if (counting_off==FALSE)\n"
+                               "       { counting_off=TRUE; time(&top); }\n"
+                               "      else\n"
+                               "       { if ( difftime( time(NULL), top ) >= %d )\n"
+                               "          { %s\n"
+                               "          }\n"
+                               "       }\n"
                                "    }\n"
                                " }\n\n",
-                               DlsScanner_get_lineno(), $2, $4, $6->alors, ($6->sinon ? $6->sinon : "") );
+                               DlsScanner_get_lineno(), $2,
+                               Get_option_entier($4, T_DAA, 0), $6->alors,
+                               Get_option_entier($4, T_DAD, 0),($6->sinon ? $6->sinon : "") );
                    if ($6->sinon) g_free($6->sinon);
                    g_free($6->alors);
                    g_free($6);
+                   Liberer_options($4);
                    g_free($2);
                 }}
                 | T_MOINS expr T_MOINS T_POUV calcul_expr T_PFERM DONNE calcul_ea_result PVIRGULE

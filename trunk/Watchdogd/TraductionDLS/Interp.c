@@ -138,7 +138,7 @@
 /* Entrées: la liste des options, le type a rechercher                                                                        */
 /* Sortie: -1 si pas trouvé                                                                                                   */
 /******************************************************************************************************************************/
- static int Get_option_entier( GList *liste_options, gint token, gint defaut )
+ gint Get_option_entier( GList *liste_options, gint token, gint defaut )
   { struct OPTION *option;
     GList *liste;
     liste = liste_options;
