@@ -41,7 +41,10 @@
 /* Sortie: FALSE si erreu                                                                                                     */
 /******************************************************************************************************************************/
  gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *forme_src,
-                                          gdouble min, gdouble max, gint nb_decimal )
+                                          gdouble min, gdouble max,
+                                          gdouble seuil_ntb, gdouble seuil_nb,
+                                          gdouble seuil_nh, gdouble seuil_nth,
+                                          gint nb_decimal )
   { gchar *acro, *forme;
 /******************************************** Préparation de la base du mnemo *************************************************/
     acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
@@ -62,13 +65,19 @@
     gboolean retour;
     retour = SQL_Write_new
                ("INSERT INTO syns_cadrans SET "
-                "syn_id=%d, tech_id='%s', acronyme='%s', forme='%s', minimum='%f', maximum='%f', nb_decimal='%d', auto_create=1 "
-                "ON DUPLICATE KEY UPDATE forme=VALUES(forme), minimum=VALUES(minimum), maximum=VALUES(maximum)",
-                plugin->syn_id, plugin->tech_id, acro, forme, min, max, nb_decimal );
+                "syn_id=%d, tech_id='%s', acronyme='%s', forme='%s', minimum='%f', maximum='%f', "
+                "seuil_ntb='%f', seuil_nb='%f', seuil_nh='%f', seuil_nth='%f', "
+                "nb_decimal='%d', auto_create=1 "
+                "ON DUPLICATE KEY UPDATE forme=VALUES(forme), "
+                "minimum=VALUES(minimum), maximum=VALUES(maximum), nb_decimal=VALUES(nb_decimal), "
+                "seuil_ntb=VALUES(seuilb_ntb), seuil_nb=VALUES(seuilb_nb), seuil_nh=VALUES(seuilb_nh), seuil_nth=VALUES(seuilb_nth)",
+                plugin->syn_id, plugin->tech_id, acro, forme, min, max, seuil_ntb, seuil_nb, seuil_nh, seuil_nth, nb_decimal );
 
-    SQL_Write_new ("UPDATE syns_cadrans SET forme='%s', minimum='%f', maximum='%f', nb_decimal='%d' "
+    SQL_Write_new ("UPDATE syns_cadrans SET forme='%s', minimum='%f', maximum='%f', "
+                   "seuil_ntb='%f', seuil_nb='%f', seuil_nh='%f', seuil_nth='%f', "
+                   "nb_decimal='%d', auto_create=1 "
                    "WHERE tech_id='%s' AND acronyme='%s';",
-                   forme, min, max, nb_decimal, plugin->tech_id, acro );
+                   forme, min, max, seuil_ntb, seuil_nb, seuil_nh, seuil_nth, nb_decimal, plugin->tech_id, acro );
 
     g_free(forme);
     g_free(acro);

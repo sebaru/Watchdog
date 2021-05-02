@@ -2229,7 +2229,20 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5612;
+
+    if (database_version < 5616)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `seuil_ntb` FLOAT NOT NULL DEFAULT '5'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `seuil_nb` FLOAT NOT NULL DEFAULT '10'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `seuil_nh` FLOAT NOT NULL DEFAULT '90'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `seuil_nth` FLOAT NOT NULL DEFAULT '95'");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+  
+    database_version = 5616;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

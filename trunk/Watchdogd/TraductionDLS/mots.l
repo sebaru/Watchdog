@@ -164,6 +164,10 @@ newline       [\n\r]+
 "kd"                       { DlsScanner_lval.val = T_KD;        return T_KD;        }
 "min"                      { DlsScanner_lval.val = T_MIN;       return T_MIN;       }
 "max"                      { DlsScanner_lval.val = T_MAX;       return T_MAX;       }
+"seuil_ntb"                { DlsScanner_lval.val = T_SEUIL_NTB; return T_SEUIL_NTB; }
+"seuil_nb"                 { DlsScanner_lval.val = T_SEUIL_NB;  return T_SEUIL_NB;  }
+"seuil_nh"                 { DlsScanner_lval.val = T_SEUIL_NH;  return T_SEUIL_NH;  }
+"seuil_nth"                { DlsScanner_lval.val = T_SEUIL_NTH; return T_SEUIL_NTH; }
 "decimal"                  { DlsScanner_lval.val = T_DECIMAL;   return T_DECIMAL;   }
 
  /*********************************************** Le reste ************************************************/

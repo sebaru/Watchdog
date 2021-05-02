@@ -240,28 +240,63 @@
                         .append( $('<span></span>').addClass("text-white").text( "Cadran" )
                                )
                       )
-               .append( $('<div></div>').addClass('w-100') )
-               .append( $('<div></div>').addClass("col")
-                        .append( $('<div></div>').addClass("progress")
-                                 .append( $('<div></div>').addClass("progress-bar")
-                                          .attr("wtd-cadran-forme", cadran.forme)
-                                          .attr("role", "progressbar" )
-                                          .attr("aria-valuemin", cadran.minimum )
-                                          .attr("aria-valuemax", cadran.maximum )
-                                          .attr("id", "wtd-cadran-forme-"+cadran.tech_id+"-"+cadran.acronyme)
-                                        )
-                               )
-	                     )
-               .append( $('<div></div>').addClass('w-100') )
-               .append( $('<div></div>').addClass("col text-center")
-                        .append( $('<h4></h4>').addClass("text-white").text( "Loading" )
-                                 .attr("id", "wtd-cadran-texte-"+cadran.tech_id+"-"+cadran.acronyme)
-                               )
-                      )
-               .append( $('<div></div>').addClass('w-100') )
-               .append( $('<div></div>').addClass("col text-center mb-2")
-                        .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
-                      );
+               .append( $('<div></div>').addClass('w-100') );
+    var barre_cadran = $('<div></div>').addClass("col");
+    card.append(barre_cadran);
+    
+    if (cadran.forme=="progress")
+     { barres.append( $('<div></div>').addClass("progress")
+                      .append( $('<div></div>').addClass("progress-bar")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                    )
+     }
+    else if (cadran.forme=="progress-rovor")
+     { barres.append( $('<div></div>').addClass("progress")
+                      .append( $('<div></div>').addClass("progress-bar bg-danger")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre1")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-warning")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre2")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-success")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre3")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-warning")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre4")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-danger")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre5")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                    )
+     }
+    card.append( $('<div></div>').addClass('w-100') )
+        .append( $('<div></div>').addClass("col text-center")
+                 .append( $('<h4></h4>').addClass("text-white").text( "Loading" )
+                          .attr("id", "wtd-cadran-texte-"+cadran.tech_id+"-"+cadran.acronyme)
+                        )
+               )
+        .append( $('<div></div>').addClass('w-100') )
+        .append( $('<div></div>').addClass("col text-center mb-2")
+        .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) );
 
     return(card);
   }
@@ -270,18 +305,62 @@
 /******************************************************************************************************************************/
  function Changer_etat_cadran ( etat )
   { if (Synoptique==null) return;
-    var idcadranforme = "wtd-cadran-forme-"+etat.tech_id+"-"+etat.acronyme;
-    var idcadrantexte = "wtd-cadran-texte-"+etat.tech_id+"-"+etat.acronyme;
     cadrans = Synoptique.cadrans.filter( function (item) { return(item.tech_id==etat.tech_id && item.acronyme==etat.acronyme); });
     if (cadrans.length!=1) return;
     cadran = cadrans[0];
     console.debug(etat);
     etat.valeur = etat.valeur.toFixed(cadran.nb_decimal);
-    $('#'+idcadrantexte).text( etat.valeur + " " + etat.unite );
+    var position = 100*(etat.valeur-cadran.minimum)/(cadran.maximum-cadran.minimum);
+
     if (cadran.forme=="progress")
-     { var position = 100*(etat.valeur-cadran.minimum)/(cadran.maximum-cadran.minimum);
+     { var idcadranforme = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre";
+       var position = 100*(etat.valeur-cadran.minimum)/(cadran.maximum-cadran.minimum);
        $('#'+idcadranforme).css("width", position+"%").attr("aria-valuenow", position);
      }
+    else if (cadran.forme=="progress-rovor")
+     { var idcadranbarre1 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre1";
+       var idcadranbarre2 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre2";
+       var idcadranbarre3 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre3";
+       var idcadranbarre4 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre4";
+       var idcadranbarre5 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre5";
+       if (etat.valeur<=cadran.seuil_ntb)
+        { $('#'+idcadranbarre1).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre4).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre5).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else if (etat.valeur<=cadran.seuil_nb)
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre4).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre5).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else if (etat.valeur<=cadran.seuil_nh)
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre4).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre5).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else if (etat.valeur<=cadran.seuil_nth)
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre4).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre5).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre4).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre5).css("width", position+"%").attr("aria-valuenow", position);
+        }
+     }
+    var idcadrantexte = "wtd-cadran-texte-"+etat.tech_id+"-"+etat.acronyme;
+    $('#'+idcadrantexte).text( etat.valeur + " " + etat.unite );
   }
 /******************************************************************************************************************************/
 /* Changer_etat_visuel: Appeler par la websocket pour changer un visuel d'etat                                                */

@@ -52,7 +52,6 @@
 %token <val>    T_BUS T_HOST T_THREAD T_TAG
 
 %token <val>    MODE COLOR CLIGNO T_RESET T_RATIO T_MULTI T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
-%token <val>    T_CADRAN T_MIN T_MAX T_DECIMAL
 %token <val>    T_PID T_KP T_KI T_KD T_INPUT
 %token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM T_UPDATE T_CONSIGNE T_ALIAS
 
@@ -71,6 +70,8 @@
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_EDGE_DOWN T_IN_RANGE
 %type  <val>    couleur
+
+%token <val>    T_CADRAN T_MIN T_MAX T_SEUIL_NTB T_SEUIL_NB T_SEUIL_NH T_SEUIL_NTH T_DECIMAL
 
 %token <chaine> ID T_CHAINE
 %token <val>    ENTIER
@@ -939,19 +940,67 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->token_classe = T_VALF;
                    $$->val_as_double = 1.0*$3;
                 }}
-                | T_MAX T_EGAL ENTIER
-                {{ $$=New_option();
-                   $$->token = $1;
-                   $$->token_classe = T_VALF;
-                   $$->val_as_double = 1.0*$3;
-                }}
                 | T_MIN T_EGAL T_VALF
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = T_VALF;
                    $$->val_as_double = $3;
                 }}
+                | T_MAX T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = 1.0*$3;
+                }}
                 | T_MAX T_EGAL T_VALF
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = $3;
+                }}
+                | T_SEUIL_NTB T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = 1.0*$3;
+                }}
+                | T_SEUIL_NTB T_EGAL T_VALF
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = $3;
+                }}
+                | T_SEUIL_NB T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = 1.0*$3;
+                }}
+                | T_SEUIL_NB T_EGAL T_VALF
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = $3;
+                }}
+                | T_SEUIL_NH T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = 1.0*$3;
+                }}
+                | T_SEUIL_NH T_EGAL T_VALF
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = $3;
+                }}
+                | T_SEUIL_NTH T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_VALF;
+                   $$->val_as_double = 1.0*$3;
+                }}
+                | T_SEUIL_NTH T_EGAL T_VALF
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = T_VALF;

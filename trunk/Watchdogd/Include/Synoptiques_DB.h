@@ -86,7 +86,10 @@
  extern struct CMD_TYPE_CADRAN *Rechercher_cadranDB ( guint id );
  extern gboolean Modifier_cadranDB( struct CMD_TYPE_CADRAN *cadran );
  extern gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *forme_src,
-                                                 gdouble min, gdouble max, gint nb_decimal );
+                                          gdouble min, gdouble max,
+                                          gdouble seuil_ntb, gdouble seuil_nb,
+                                          gdouble seuil_nh, gdouble seuil_nth,
+                                          gint nb_decimal );
 
  extern gboolean Retirer_camera_supDB ( gint id );
  extern gint Ajouter_camera_supDB ( struct CMD_TYPE_CAMERASUP *camera_sup );
