@@ -674,7 +674,7 @@
     struct ACTION *action = New_action();
     gint taille = 256;
     action->alors = New_chaine( taille );
-    g_snprintf( action->alors, taille, "Dls_PID_reset ( \"%s\", \"%s\", &_%s_%s ) ",
+    g_snprintf( action->alors, taille, "Dls_PID_reset ( \"%s\", \"%s\", &_%s_%s ); ",
                 input->tech_id, input->acronyme, input->tech_id, input->acronyme );
     return(action);
   }

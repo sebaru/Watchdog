@@ -70,7 +70,7 @@
                 "nb_decimal='%d', auto_create=1 "
                 "ON DUPLICATE KEY UPDATE forme=VALUES(forme), "
                 "minimum=VALUES(minimum), maximum=VALUES(maximum), nb_decimal=VALUES(nb_decimal), "
-                "seuil_ntb=VALUES(seuilb_ntb), seuil_nb=VALUES(seuilb_nb), seuil_nh=VALUES(seuilb_nh), seuil_nth=VALUES(seuilb_nth)",
+                "seuil_ntb=VALUES(seuil_ntb), seuil_nb=VALUES(seuil_nb), seuil_nh=VALUES(seuil_nh), seuil_nth=VALUES(seuil_nth)",
                 plugin->syn_id, plugin->tech_id, acro, forme, min, max, seuil_ntb, seuil_nb, seuil_nh, seuil_nth, nb_decimal );
 
     SQL_Write_new ("UPDATE syns_cadrans SET forme='%s', minimum='%f', maximum='%f', "

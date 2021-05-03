@@ -241,9 +241,9 @@
                                )
                       )
                .append( $('<div></div>').addClass('w-100') );
-    var barre_cadran = $('<div></div>').addClass("col");
-    card.append(barre_cadran);
-    
+    var barres = $('<div></div>').addClass("col");
+    card.append(barres);
+
     if (cadran.forme=="progress")
      { barres.append( $('<div></div>').addClass("progress")
                       .append( $('<div></div>').addClass("progress-bar")
@@ -252,7 +252,7 @@
                                .attr("aria-valuemin", cadran.minimum )
                                .attr("aria-valuemax", cadran.maximum )
                              )
-                    )
+                    );
      }
     else if (cadran.forme=="progress-rovor")
      { barres.append( $('<div></div>').addClass("progress")
@@ -286,8 +286,9 @@
                                .attr("aria-valuemin", cadran.minimum )
                                .attr("aria-valuemax", cadran.maximum )
                              )
-                    )
+                    );
      }
+
     card.append( $('<div></div>').addClass('w-100') )
         .append( $('<div></div>').addClass("col text-center")
                  .append( $('<h4></h4>').addClass("text-white").text( "Loading" )
@@ -296,7 +297,8 @@
                )
         .append( $('<div></div>').addClass('w-100') )
         .append( $('<div></div>').addClass("col text-center mb-2")
-        .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) );
+                 .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
+               );
 
     return(card);
   }
