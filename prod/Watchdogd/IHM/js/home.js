@@ -24,86 +24,60 @@
      );
     Send_to_API ( 'POST', "/api/syn/clic", json_request, null, null );
   }
-/********************************************* Affichage des vignettes ********************************************************/
- function Set_vignette ( id, type, couleur, cligno )
-  { var src_actuelle = $('#'+id).attr("src");
-    var src_cible;
-    if (type == "activite")       { src_cible = "/img/pignon_"+couleur+".svg"; }
-    else if (type == "secu_bien") { src_cible = "/img/bouclier_"+couleur+".svg"; }
-    else if (type == "secu_pers") { src_cible = "/img/croix_rouge_"+couleur+".svg"; }
-    else console.log( "Set_vignette : type inconnu" );
-
-    if (src_actuelle != src_cible) { Changer_img_src ( id, src_cible ); }
-    if (cligno) $('#'+id).addClass("wtd-cligno");
-           else $('#'+id).removeClass("wtd-cligno");
-  }
 /******************************************************************************************************************************/
  function Set_syn_vars ( syn_id, syn_vars )
   { var vignette = $('#idVignette_'+syn_id);
 
     if (syn_vars.bit_comm == false)
      { $('#idImgSyn_'+syn_id).addClass("wtd-img-grayscale");
-       Changer_img_src ( "idVignetteComm_"+syn_id, "/img/syn_communication.png" );
-       $('#idVignetteComm_'+syn_id).addClass("wtd-cligno");
+       Changer_img_src ( "idVignetteComm_"+syn_id, "/img/syn_communication.png", true );
      }
     else
      { $('#idImgSyn_'+syn_id).removeClass("wtd-img-grayscale");
-       $('#idVignetteComm_'+syn_id).removeClass("wtd-cligno").slideUp();
+       $('#idVignetteComm_'+syn_id).removeClass("wtd-cligno").fadeTo(0);
      }
 
     if (syn_vars.bit_danger == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg" );
-       vignette.addClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg", true );
      }
     else if (syn_vars.bit_alerte == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg" );
-       vignette.addClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg", true );
      }
     else if (syn_vars.bit_alarme == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg" );
-       vignette.addClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg", true );
      }
     else if (syn_vars.bit_defaut == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg" );
-       vignette.addClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg", true );
      }
     else if (syn_vars.bit_derangement == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg" );
-       vignette.addClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg", true );
      }
     else if (syn_vars.bit_alerte_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg", false );
      }
     else if (syn_vars.bit_alarme_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg",false );
      }
     else if (syn_vars.bit_defaut_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg",false );
      }
     else if (syn_vars.bit_danger_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg",false );
      }
     else if (syn_vars.bit_derangement_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg", false );
      }
     else if (syn_vars.bit_veille_totale == true)
-     { vignette.slideUp().removeClass("wtd-cligno"); }
+     { vignette.removeClass("wtd-cligno").fadeTo(0);
+     }
     else if (syn_vars.bit_veille_partielle == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_jaune.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_jaune.svg", false );
      }
     else if (syn_vars.bit_veille_partielle == false)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_blanc.svg" );
-       vignette.removeClass("wtd-cligno");
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_blanc.svg",false );
      }
     else
-     { /*Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_vert.svg" );*/
-       vignette.removeClass("wtd-cligno").slideUp();
+     { vignette.removeClass("wtd-cligno").fadeTo(0);
      }
   }
 /******************************************************************************************************************************/
@@ -114,7 +88,7 @@
     else $('#idTableMessages').DataTable(
         { pageLength : 25,
           fixedHeader: true, searching: false, paging:false,
-          ajax: {	url: "/api/histo/alive?syn_id="+syn_id, type : "GET", dataSrc: "enregs",
+          ajax: { url: "/api/histo/alive?syn_id="+syn_id, type : "GET", dataSrc: "enregs",
                   error: function ( xhr, status, error ) { /*Show_Error(xhr.statusText);*/ }
                 },
           rowId: "id",
@@ -183,21 +157,19 @@
                  { bodymain.append ( Creer_horloge ( horloge ) ); }
               );
 
-       if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg" ); }
-                                else { Changer_img_src ( 'idMenuImgAccueil', "/img/"+Response.image ); }
+       if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg", false ); }
+                                else { Changer_img_src ( 'idMenuImgAccueil', "/img/"+Response.image, false ); }
        $('#idMenuImgAccueil').unbind('click').click ( function () { Charger_page_synoptique ( Response.id ); } );
 
        $.each ( Response.visuels, function (i, visuel)
-                 { bodymain.append ( Creer_visuel ( visuel ) );
-                 }
-              );
-       $.each ( Response.etat_visuels, function (i, etat_visuel)
-                 { Changer_etat_visuel ( etat_visuel );
+                 { var card = Creer_visuel ( visuel );
+                   bodymain.append ( card );
+                   Changer_etat_visuel ( visuel );
                  }
               );
 
        $.each ( Response.cadrans, function (i, cadran)
-                 { bodymain.append( $('<div></div>').addClass('w-100') ).append ( Creer_cadran ( cadran ) );
+                 { bodymain.append( Creer_cadran ( cadran ) );
                  }
               );
 
@@ -234,26 +206,26 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Creer_card ( Response )
-  { var card = $('<div></div>').addClass("row bg-transparent mb-1")
-               .append( $('<div></div>').addClass("col text-center")
+  { var card = $('<div></div>').addClass("row bg-transparent mb-3")
+               .append( $('<div></div>').addClass("col text-center mb-1")
                         .append( $('<div></div>').addClass("d-inline-block wtd-img-container")
                                  .append($('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
                                                                                            : "/img/"+Response.image) )
                                                    .attr("onclick", "Charger_page_synoptique("+Response.id+")")
                                                    .attr("id", "idImgSyn_"+Response.id)
-		                              	                  .addClass("wtd-synoptique") )
+                                                   .addClass("wtd-synoptique") )
                                  .append($('<img>').attr("id", "idVignetteComm_"+Response.id)
-				                                               /*.attr("src","/img/pignon_vert.svg")*/
+                                                   /*.attr("src","/img/pignon_vert.svg")*/
                                                    .addClass("wtd-vignette wtd-img-superpose-bas-droite").slideUp()
                                         )
                                  .append($('<img>').attr("id", "idVignette_"+Response.id)
-				                                               /*.attr("src","")*/
+                                                   /*.attr("src","")*/
                                                    .addClass("wtd-vignette wtd-img-superpose-haut-droite").slideUp()
                                         )
                                )
-	                     )
+                      )
                .append( $('<div></div>').addClass('w-100') )
-               .append( $('<div></div>').addClass("col text-center mb-2")
+               .append( $('<div></div>').addClass("col text-center")
                         .append( $('<span></span>').addClass("text-white").text(" "+Response.libelle) )
                       );
 
@@ -263,33 +235,110 @@
 /* Creer_cadran: Ajoute un cadran sur la page du synoptique                                                                   */
 /******************************************************************************************************************************/
  function Creer_cadran ( cadran )
-  { var card = $('<div></div>').addClass("row bg-transparent mb-1 border border-info")
-               .append( $('<div></div>').addClass("col text-center")
-                        .append( $('<span></span>').addClass("text-white").text( "Cadran" )
-                               )
-                      )
-               .append( $('<div></div>').addClass('w-100') )
-               .append( $('<div></div>').addClass("col")
-                        .append( $('<div></div>').addClass("progress")
-                                 .append( $('<div></div>').addClass("progress-bar")
-                                          .attr("wtd-cadran-forme", cadran.forme)
-                                          .attr("role", "progressbar" )
-                                          .attr("aria-valuemin", cadran.minimum )
-                                          .attr("aria-valuemax", cadran.maximum )
-                                          .attr("id", "wtd-cadran-forme-"+cadran.tech_id+"-"+cadran.acronyme)
-                                        )
-                               )
-	                     )
-               .append( $('<div></div>').addClass('w-100') )
-               .append( $('<div></div>').addClass("col text-center")
-                        .append( $('<h4></h4>').addClass("text-white").text( "Loading" )
-                                 .attr("id", "wtd-cadran-texte-"+cadran.tech_id+"-"+cadran.acronyme)
-                               )
-                      )
-               .append( $('<div></div>').addClass('w-100') )
+  { var card = $('<div></div>').addClass("row bg-transparent mb-3 border border-info")
                .append( $('<div></div>').addClass("col text-center mb-2")
                         .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
-                      );
+                      )
+               .append( $('<div></div>').addClass('w-100') );
+    var barres = $('<div></div>').addClass("col");
+    card.append(barres);
+
+    if (cadran.forme=="progress")
+     { barres.append( $('<div></div>').addClass("progress")
+                      .append( $('<div></div>').addClass("progress-bar")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                    );
+     }
+    else if (cadran.forme=="progress-rovor")
+     { barres.append( $('<div></div>').addClass("progress")
+                      .append( $('<div></div>').addClass("progress-bar bg-danger")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre1")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-warning")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre2")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-success")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre3")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-warning")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre4")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-danger")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre5")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                    );
+     }
+    else if (cadran.forme=="progress-vor")
+     { barres.append( $('<div></div>').addClass("progress")
+                      .append( $('<div></div>').addClass("progress-bar bg-success")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre1")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-warning")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre2")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-danger")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre3")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                    );
+     }
+    else if (cadran.forme=="progress-rov")
+     { barres.append( $('<div></div>').addClass("progress")
+                      .append( $('<div></div>').addClass("progress-bar bg-danger")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre1")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-warning")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre2")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-success")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre3")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                    );
+     }
+
+    card.append( $('<div></div>').addClass('w-100') )
+        .append( $('<div></div>').addClass("col text-center")
+                 .append( $('<h4></h4>').addClass("text-white").text( "Loading" )
+                          .attr("id", "wtd-cadran-texte-"+cadran.tech_id+"-"+cadran.acronyme)
+                        )
+               )
+        .append( $('<div></div>').addClass('w-100') );
 
     return(card);
   }
@@ -298,60 +347,102 @@
 /******************************************************************************************************************************/
  function Changer_etat_cadran ( etat )
   { if (Synoptique==null) return;
-    var idcadranforme = "wtd-cadran-forme-"+etat.tech_id+"-"+etat.acronyme;
-    var idcadrantexte = "wtd-cadran-texte-"+etat.tech_id+"-"+etat.acronyme;
     cadrans = Synoptique.cadrans.filter( function (item) { return(item.tech_id==etat.tech_id && item.acronyme==etat.acronyme); });
     if (cadrans.length!=1) return;
     cadran = cadrans[0];
     console.debug(etat);
-    etat.valeur = etat.valeur.toFixed(cadran.nb_decimal);
-    $('#'+idcadrantexte).text( etat.valeur + " " + etat.unite );
+    if (etat.valeur>cadran.maximum) etat.valeur=cadran.maximum;
+    if (etat.valeur<cadran.minimum) etat.valeur=cadran.minimum;
+    var position = 100*(etat.valeur-cadran.minimum)/(cadran.maximum-cadran.minimum);
+
+console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.seuil_ntb+" nb="+cadran.seuil_nb+" nh="+cadran.seuil_nh+" nth="+cadran.seuil_nth);
+
     if (cadran.forme=="progress")
-     { var position = 100*(etat.valeur-cadran.minimum)/(cadran.maximum-cadran.minimum);
+     { var idcadranforme = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre";
        $('#'+idcadranforme).css("width", position+"%").attr("aria-valuenow", position);
      }
+    else if (cadran.forme=="progress-rovor")
+     { var idcadranbarre1 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre1";
+       var idcadranbarre2 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre2";
+       var idcadranbarre3 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre3";
+       var idcadranbarre4 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre4";
+       var idcadranbarre5 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre5";
+       if (etat.valeur<=cadran.seuil_ntb)
+        { $('#'+idcadranbarre1).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre4).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre5).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else if (etat.valeur<=cadran.seuil_nb)
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre4).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre5).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else if (etat.valeur<=cadran.seuil_nh)
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre4).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre5).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else if (etat.valeur<=cadran.seuil_nth)
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre4).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre5).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre4).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre5).css("width", position+"%").attr("aria-valuenow", position);
+        }
+     }
+    else if (cadran.forme=="progress-vor" || cadran.forme=="progress-rov")
+     { var idcadranbarre1 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre1";
+       var idcadranbarre2 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre2";
+       var idcadranbarre3 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre3";
+            if (etat.valeur<=cadran.seuil_nb)
+        { $('#'+idcadranbarre1).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else if (etat.valeur<=cadran.seuil_nh)
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", position+"%").attr("aria-valuenow", position);
+        }
+     }
+    var idcadrantexte = "wtd-cadran-texte-"+etat.tech_id+"-"+etat.acronyme;
+    texte = etat.valeur.toFixed(cadran.nb_decimal);
+    $('#'+idcadrantexte).text( texte + " " + etat.unite );
   }
 /******************************************************************************************************************************/
 /* Changer_etat_visuel: Appeler par la websocket pour changer un visuel d'etat                                                */
 /******************************************************************************************************************************/
  function Changer_etat_visuel ( etat )
   { if (Synoptique==null) return;
-    var idvisuel = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme;
-    var idimage  = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme+"-img";
-    var idheader = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme+"-header-text";
-    var idfooter = "wtd-visu-"+etat.tech_id+"-"+etat.acronyme+"-footer-text";
     visuels = Synoptique.visuels.filter( function (item) { return(item.tech_id==etat.tech_id && item.acronyme==etat.acronyme); });
     if (visuels.length!=1) return;
     visuel = visuels[0];
-    console.log("Changer_etat_visuel " + etat.tech_id + ":" + etat.acronyme + " -> mode ="+etat.mode +" couleur="+etat.color );
-    console.debug(visuel);
-/*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
-         if (etat.color=="darkgreen")
-     { Changer_img_src ( idimage, "/img/"+visuel.forme+"."+visuel.extension);
-       $("#"+idvisuel).css("border", "medium dashed darkgreen" );
-       $("#"+idheader).css("background-color", "darkgreen" );
-       $("#"+idfooter).css("background-color", "darkgreen" );
-     }
-/*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
-    else if (visuel.ihm_affichage=="cadre")
-     { Changer_img_src ( idimage, "/img/"+visuel.forme+"."+visuel.extension);
-       $("#"+idvisuel).css("border", "medium solid "+etat.color );
-       $("#"+idheader).css("background-color", "transparent" );
-       $("#"+idfooter).css("background-color", "transparent" );
-     }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
-    else if (visuel.ihm_affichage=="2_modes")
-     { if (etat.mode>0) { target = "/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension; }
-                  else  { target = "/img/"+visuel.forme+"."+visuel.extension; }
-       Changer_img_src ( idimage, target );
-       $("#"+idvisuel).css("border", "none" );
-       $("#"+idheader).css("background-color", "transparent" );
-       $("#"+idfooter).css("background-color", "transparent" );
+console.log("Changer_etat_visuel " + visuel.ihm_affichage );
+    if (visuel.ihm_affichage=="cadre")
+     { Changer_etat_visuel_cadre ( visuel, etat );
      }
-/*-------------------------------------------------- Visuel commun -----------------------------------------------------------*/
-    if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
-                else $("#"+idimage).removeClass("wtd-cligno");
-    $("#"+idvisuel).css("border-radius", "30px" );
+    else if (visuel.ihm_affichage=="simple")
+     { Changer_etat_visuel_simple ( visuel, etat );
+     }
   }
 /******************************************************************************************************************************/
 /* Création d'un visuel sur la page de travail                                                                                */
@@ -359,38 +450,31 @@
  function Creer_visuel ( Response )
   { var id = "wtd-visu-"+Response.tech_id+"-"+Response.acronyme;
     var contenu;
+    if (Response.mode == undefined) Response.mode = "hors_comm";
 /*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
          if (Response.ihm_affichage=="cadre")
-     { contenu = $('<img>').addClass("wtd-visuel").attr ( "id", id+"-img" ); }
+     { contenu = $('<img>').addClass("wtd-visuel p-2")
+                           .attr ( "id", id+"-img" )
+                           .attr("src", "/img/"+Response.forme+"."+Response.extension);
+     }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
-    else if (Response.ihm_affichage=="2_modes")
-     { contenu = $('<img>');
-       $(contenu).addClass("wtd-visuel")
-                 .attr ( "id", id+"-img" )
-                 .attr ( "src", "/img/"+Response.forme+"."+Response.extension );
-
+    else if (Response.ihm_affichage=="simple")
+     { contenu = $('<img>').addClass("wtd-visuel")
+                           .attr ( "id", id+"-img" )
+                           .attr("src", "/img/"+Response.forme+"_"+Response.mode+"."+Response.extension)
+                           .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
      }
     else
-     { contenu = $('<img>').addClass("wtd-visuel").attr ( "id", id+"-img" ); }
+     {  }
 
-    if (Response.ihm_reaction=="clic")
-     { $(contenu).click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } ); }
-
-    var card = $('<div></div>').addClass("row bg-transparent mb-1")
-               .append( $('<div></div>').addClass("col mt-2 text-center text-white")
-                        .append( $('<p></p>').text (Response.dls_shortname )
-                                             .attr ( "id", id+"-header-text" )
-                               )
-                      )
-               .append( $('<div></div>').addClass("w-100") )
-               .append( $('<div></div>').addClass("col text-center")
+    var card = $('<div></div>').addClass("row bg-transparent mb-3")
+               .append( $('<div></div>').addClass("col text-center mb-1")
                         .append( contenu )
                       )
-               .append( $('<div></div>').addClass("w-100") )
-               .append( $('<div></div>').addClass("col mt-2 text-center text-white")
-                        .append( $('<p></p>').text(Response.libelle)
-                                             .attr ( "id", id+"-footer-text" )
-                               )
+               .append( $('<div></div>').addClass('w-100') )
+               .append( $('<div></div>').addClass("col text-center")
+                                        .append ( $("<span></span>").addClass("text-white").text(Response.libelle ))
+                                        .attr ( "id", id+"-footer-text" )
                       )
                .attr ( "id", id );
     return(card);

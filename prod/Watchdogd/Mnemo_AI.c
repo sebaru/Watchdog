@@ -196,7 +196,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT a.tech_id, a.acronyme, a.valeur, a.min, a.max, a.type, a.unite"
+                "SELECT a.tech_id, a.acronyme, a.valeur, a.min, a.max, a.type, a.unite, a.archivage"
                 " FROM mnemos_AI as a"
               );
     if (tech_id && acronyme)
@@ -213,10 +213,11 @@
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
      { ai = NULL;
        Dls_data_set_AI ( db->row[0], db->row[1], (void *)&ai, atoi(db->row[2]), FALSE );
-       ai->min      = atof(db->row[3]);
-       ai->max      = atof(db->row[4]);
-       ai->type     = atoi(db->row[5]);
+       ai->min       = atof(db->row[3]);
+       ai->max       = atof(db->row[4]);
+       ai->type      = atoi(db->row[5]);
        g_snprintf( ai->unite, sizeof(ai->unite), "%s", db->row[6] );
+       ai->archivage = atoi(db->row[7]);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s'=%f %s loaded", __func__,
                  ai->tech_id, ai->acronyme, ai->val_avant_ech, ai->unite );
      }
@@ -272,5 +273,6 @@
     Json_node_add_int    ( element, "type",         bit->type );
     Json_node_add_int    ( element, "in_range",     bit->inrange );
     Json_node_add_int    ( element, "last_arch",    bit->last_arch );
+    Json_node_add_int    ( element, "archivage",    bit->archivage );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -2224,7 +2224,25 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5585;
+    if (database_version < 5612)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AI ADD `archivage` INT(11) NOT NULL DEFAULT '1'");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+
+    if (database_version < 5616)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `seuil_ntb` FLOAT NOT NULL DEFAULT '5'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `seuil_nb` FLOAT NOT NULL DEFAULT '10'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `seuil_nh` FLOAT NOT NULL DEFAULT '90'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `seuil_nth` FLOAT NOT NULL DEFAULT '95'");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+  
+    database_version = 5616;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );
@@ -2233,19 +2251,18 @@ fin:
                                           "`id` int(11) NOT NULL AUTO_INCREMENT,"
                                           "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
                                           "`ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
-                                          "`ihm_reaction` VARCHAR(32) NOT NULL DEFAULT 'clic',"
                                           "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
                                           "PRIMARY KEY (`id`)"
                                           ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
     Lancer_requete_SQL ( db, requete );
 
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='wago_750342', ihm_affichage='cadre', ihm_reaction='none', extension='webp'" );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='wago_750342', ihm_affichage='cadre', extension='webp'" );
     Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='satellite', ihm_affichage='cadre', ihm_reaction='none', extension='svg'" );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='satellite', ihm_affichage='cadre', extension='svg'" );
     Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='sms', ihm_affichage='cadre', ihm_reaction='none', extension='jpg'" );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='sms', ihm_affichage='cadre', extension='jpg'" );
     Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='ampoule', ihm_affichage='2_modes', ihm_reaction='clic', extension='png'" );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='ampoule', ihm_affichage='simple', extension='png'" );
     Lancer_requete_SQL ( db, requete );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "

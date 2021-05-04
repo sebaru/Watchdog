@@ -138,7 +138,7 @@
 /* Entrées: la liste des options, le type a rechercher                                                                        */
 /* Sortie: -1 si pas trouvé                                                                                                   */
 /******************************************************************************************************************************/
- static int Get_option_entier( GList *liste_options, gint token, gint defaut )
+ gint Get_option_entier( GList *liste_options, gint token, gint defaut )
   { struct OPTION *option;
     GList *liste;
     liste = liste_options;
@@ -233,66 +233,7 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
-/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
-/* Sortie: la chaine de caractere en C                                                                                        */
-/******************************************************************************************************************************/
- gchar *New_condition_entree_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur )
-  { gint taille, in_range = Get_option_entier ( options, T_IN_RANGE, 0 );
-    gchar *result;
-
-    if (in_range==1)
-     { taille = 256;
-       result = New_chaine( taille ); /* 10 caractères max */
-       if (barre) g_snprintf( result, taille, "!Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
-                              alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-             else g_snprintf( result, taille, "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
-                              alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-       return(result);
-     }
-    if (!comparateur)                                                    /* Vérification des bits obligatoirement comparables */
-     { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser qu'avec une comparaison", DlsScanner_get_lineno(), alias->acronyme );
-       result=New_chaine(2);
-       g_snprintf( result, 2, "0" );
-       return(result);
-     }
-
-    if (comparateur->type == T_EGAL)
-     { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser avec le comparateur '='", DlsScanner_get_lineno(), alias->acronyme );
-       result=New_chaine(2);
-       g_snprintf( result, 2, "0" );
-       return(result);
-     }
-
-    taille = 512;
-    result = New_chaine( taille ); /* 10 caractères max */
-    setlocale(LC_ALL, "C");
-    switch(comparateur->type)
-     { case INF:         g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
-                                                     " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<%f))",
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case SUP:         g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
-                                                     " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>%f))",
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case INF_OU_EGAL: g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
-                                                     " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<=%f))",
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case SUP_OU_EGAL: g_snprintf( result, taille, "(Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) &&"
-                                                     " (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>=%f))",
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme,
-                                     alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-     }
-    return(result);
-  }
-/******************************************************************************************************************************/
-/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
+/* New_condition_sortie_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -310,7 +251,7 @@
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
     setlocale(LC_ALL, "C");
-    switch(comparateur->type)
+    switch(comparateur->ordre)
      { case T_EGAL:      g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)==%f",
                                      alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
                          break;
@@ -400,6 +341,220 @@
          }
    return(result);
  }
+/******************************************************************************************************************************/
+/* New_condition_comparateur: Prepare la chaine de caractere associée à la condition de comparateur                           */
+/* Entrées: le tech_id/acronyme, ses options, son comparateur                                                                 */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_comparateur( gchar *id, gchar *suffixe, GList *options_g, struct COMPARATEUR *comparateur )
+  { struct ALIAS *alias_g, *alias_d;
+    gchar *tech_id_g, *acro_g, *tech_id_d, *acro_d;
+
+    if (suffixe) { tech_id_g = id;   acro_g = suffixe; }
+            else { tech_id_g = NULL; acro_g = id; }
+
+    alias_g = Get_alias_par_acronyme(tech_id_g,acro_g);                                                /* On recupere l'alias */
+    if (!alias_g)
+     { alias_g = Set_new_external_alias(tech_id_g,acro_g); }                         /* Si dependance externe, on va chercher */
+
+    if (!alias_g)
+     { if (tech_id_g) Emettre_erreur_new( "'%s:%s' is not defined", tech_id_g, acro_g );/* si l'alias n'existe pas */
+                 else Emettre_erreur_new( "'%s' is not defined", acro_g );          /* si l'alias n'existe pas */
+       return(NULL);
+     }
+
+    if (alias_g->classe!=MNEMO_SORTIE_ANA &&                     /* Vérification des bits non comparables */
+        alias_g->classe!=MNEMO_ENTREE_ANA &&
+        alias_g->classe!=MNEMO_REGISTRE &&
+        alias_g->classe!=MNEMO_CPT_IMP &&
+        alias_g->classe!=MNEMO_CPTH
+       )
+     { Emettre_erreur_new( "'%s:%s' n'est pas comparable", alias_g->tech_id, alias_g->acronyme );
+       return(NULL);
+     }
+
+    if (comparateur->token_classe == ID )
+     { if (comparateur->has_tech_id) { tech_id_d = comparateur->tech_id; acro_d = comparateur->acronyme; }
+                                else { tech_id_d = NULL;                 acro_d = comparateur->acronyme; }
+
+       alias_d = Get_alias_par_acronyme(tech_id_d,acro_d);                                             /* On recupere l'alias */
+       if (!alias_d)
+        { alias_d = Set_new_external_alias(tech_id_d,acro_d); }                      /* Si dependance externe, on va chercher */
+
+       if (!alias_d)
+        { if (tech_id_d) Emettre_erreur_new( "'%s:%s' is not defined", tech_id_d, acro_d );        /* si l'alias n'existe pas */
+                    else Emettre_erreur_new( "'%s' is not defined", acro_d );                      /* si l'alias n'existe pas */
+          return(NULL);
+        }
+
+       if (alias_d->classe!=MNEMO_SORTIE_ANA &&                     /* Vérification des bits non comparables */
+           alias_d->classe!=MNEMO_ENTREE_ANA &&
+           alias_d->classe!=MNEMO_REGISTRE &&
+           alias_d->classe!=MNEMO_CPT_IMP &&
+           alias_d->classe!=MNEMO_CPTH
+          )
+        { Emettre_erreur_new( "'%s:%s' n'est pas comparable", alias_d->tech_id, alias_d->acronyme );
+          return(NULL);
+        }
+     }
+
+    gchar partie_g[512], partie_d[512];
+    switch(alias_g->classe)                                                /* On traite que ce qui peut passer en "condition" */
+     { case MNEMO_ENTREE_ANA :
+        { gint in_range = Get_option_entier ( options_g, T_IN_RANGE, 0 );
+          if (in_range==1)
+           { Emettre_erreur_new( "'%s'(in_range) ne peut s'utiliser dans une comparaison", alias_g->acronyme );
+             return(NULL);
+           }
+          g_snprintf ( partie_g, sizeof(partie_g),
+                       "( Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) && "
+                       "  (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme,
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
+          break;
+        }
+       case MNEMO_REGISTRE :
+        { g_snprintf ( partie_g, sizeof(partie_g),
+                       "( (Dls_data_get_R (\"%s\",\"%s\",&_%s_%s) ",
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
+          break;
+        }
+       case MNEMO_CPT_IMP :
+        { g_snprintf ( partie_g, sizeof(partie_g),
+                       "( (Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ",
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
+          break;
+        }
+       case MNEMO_CPTH :
+        { g_snprintf ( partie_g, sizeof(partie_g),
+                       "( (Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ",
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
+          break;
+        }
+              default:
+        { Emettre_erreur_new( "'%s:%s' n'est pas implémenté en comparaison", alias_g->tech_id, alias_g->acronyme );
+          return(NULL);
+        }
+     }
+
+    switch(comparateur->ordre)
+     { case INF:         g_strlcat ( partie_g, " < ", sizeof(partie_g) ); break;
+       case SUP:         g_strlcat ( partie_g, " > ", sizeof(partie_g) ); break;
+       case INF_OU_EGAL: g_strlcat ( partie_g, " <= ", sizeof(partie_g) ); break;
+       case SUP_OU_EGAL: g_strlcat ( partie_g, " >= ", sizeof(partie_g) ); break;
+     }
+
+    if (comparateur->token_classe == ID)
+     { switch(alias_d->classe)                              /* On traite que ce qui peut passer en "condition" */
+        { case MNEMO_ENTREE_ANA :
+           { gint in_range = Get_option_entier ( alias_d->options, T_IN_RANGE, 0 );
+             if (in_range==1)
+              { Emettre_erreur_new( "'%s'(in_range) ne peut s'utiliser dans une comparaison", alias_d->acronyme ); }
+             g_snprintf ( partie_d, sizeof(partie_d),
+                          "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)) && "
+                          " Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) )",
+                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme,
+                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
+             break;
+           }
+          case MNEMO_REGISTRE :
+           { g_snprintf ( partie_d, sizeof(partie_d),
+                          "Dls_data_get_R (\"%s\",\"%s\",&_%s_%s) ) )",
+                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
+             break;
+           }
+          case MNEMO_CPT_IMP :
+           { g_snprintf ( partie_d, sizeof(partie_d),
+                          "Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ) )",
+                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
+             break;
+           }
+          case MNEMO_CPTH :
+           { g_snprintf ( partie_d, sizeof(partie_d),
+                          "Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ) )",
+                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
+             break;
+           }
+          default:
+           { Emettre_erreur_new( "'%s:%s' n'est pas implémenté en comparaison", alias_g->tech_id, alias_g->acronyme );
+             return(NULL);
+           }
+        }
+     }
+    else if (comparateur->token_classe == T_VALF)
+     { g_snprintf( partie_d, sizeof(partie_d), "%f) )", comparateur->valf ); }
+
+    return( g_strconcat( partie_g, partie_d, NULL ) );
+  }
+/******************************************************************************************************************************/
+/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_simple_entree_ana( int barre, struct ALIAS *alias, GList *options )
+  { gint taille, in_range = Get_option_entier ( options, T_IN_RANGE, 0 );
+    gchar *result;
+
+    if (in_range==1)
+     { taille = 256;
+       result = New_chaine( taille ); /* 10 caractères max */
+       if (barre) g_snprintf( result, taille, "!Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
+                              alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+             else g_snprintf( result, taille, "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
+                              alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+       return(result);
+     }
+    Emettre_erreur_new( "'%s' ne peut s'utiliser qu'avec une comparaison, ou avec l'option (in_range)",
+                        DlsScanner_get_lineno(), alias->acronyme );
+    return(NULL);
+  }
+/******************************************************************************************************************************/
+/* New_condition_comparateur: Prepare la chaine de caractere associée à la condition de comparateur                           */
+/* Entrées: le tech_id/acronyme, ses options, son comparateur                                                                 */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_simple( gint barre, gchar *id, gchar *suffixe, GList *options )
+  { gchar *tech_id, *acro;
+    struct ALIAS *alias;
+    if (suffixe) { tech_id = id; acro = suffixe; }
+            else { tech_id = NULL; acro = id; }
+
+    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
+    if (!alias)
+     { alias = Set_new_external_alias(tech_id,acro); }                /* Si dependance externe, on va chercher */
+
+    if (!alias)
+     { if (tech_id) Emettre_erreur_new( "'%s:%s' is not defined", tech_id, acro );/* si l'alias n'existe pas */
+               else Emettre_erreur_new( "'%s' is not defined", acro );/* si l'alias n'existe pas */
+       return(NULL);
+     }
+
+    if ( alias->classe!=MNEMO_TEMPO &&
+         alias->classe!=MNEMO_ENTREE &&
+         alias->classe!=MNEMO_BISTABLE &&
+         alias->classe!=MNEMO_MONOSTABLE &&
+         alias->classe!=MNEMO_HORLOGE &&
+         alias->classe!=MNEMO_WATCHDOG &&
+         alias->classe!=MNEMO_ENTREE_ANA
+       )
+     { Emettre_erreur_new( "'%s' ne peut s'utiliser seul (avec une comparaison ?)", acro );
+       return(NULL);
+     }
+
+     switch(alias->classe)                              /* On traite que ce qui peut passer en "condition" */
+      { case MNEMO_TEMPO :     return ( New_condition_tempo( barre, alias, options ) );
+        case MNEMO_ENTREE:     return ( New_condition_entree( barre, alias, options ) );
+        case MNEMO_BISTABLE:   return ( New_condition_bi( barre, alias, options ) );
+        case MNEMO_MONOSTABLE: return ( New_condition_mono( barre, alias, options ) );
+        case MNEMO_HORLOGE:    return ( New_condition_horloge( barre, alias, options ) );
+        case MNEMO_WATCHDOG:   return ( New_condition_WATCHDOG( barre, alias, options ) );
+        case MNEMO_ENTREE_ANA: return ( New_condition_simple_entree_ana( barre, alias, options ) );
+        default:
+         { Emettre_erreur_new( "'%s' n'est pas une condition valide", acro );
+           return(NULL);
+         }
+      }
+  }
 /******************************************************************************************************************************/
 /* New_calcul_PID: Calcul un PID                                                                                              */
 /* Entrées: la liste d'option associée au PID                                                                                 */
@@ -493,6 +648,35 @@
                 output_min->tech_id, output_min->acronyme, output_min->tech_id, output_min->acronyme,
                 output_max->tech_id, output_max->acronyme, output_max->tech_id, output_max->acronyme );
     return(chaine);
+  }
+/******************************************************************************************************************************/
+/* New_calcul_PID: Calcul un PID                                                                                              */
+/* Entrées: la liste d'option associée au PID                                                                                 */
+/* Sortie: la chaine de calcul DLS                                                                                            */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_PID ( GList *options )
+  { gint reset = Get_option_entier ( options, T_RESET, 0 );
+    if (reset==0)
+     { Emettre_erreur_new ( "PID : En action, l'option 'reset' est nécessaire." );
+       return(NULL);
+     }
+
+    struct ALIAS *input = Get_option_alias ( options, T_INPUT );
+    if (!input)
+     { Emettre_erreur_new ( "PID : input unknown. Select one input (R or AI)." );
+       return(NULL);
+     }
+    if ( ! (input->classe == MNEMO_REGISTRE /*|| input->classe == MNEMO_ENTREE_ANA*/ ) )
+     { Emettre_erreur_new ( "PID : input must be R or AI." );
+       return(NULL);
+     }
+
+    struct ACTION *action = New_action();
+    gint taille = 256;
+    action->alors = New_chaine( taille );
+    g_snprintf( action->alors, taille, "Dls_PID_reset ( \"%s\", \"%s\", &_%s_%s ); ",
+                input->tech_id, input->acronyme, input->tech_id, input->acronyme );
+    return(action);
   }
 /******************************************************************************************************************************/
 /* New_condition_vars: formate une condition avec le nom de variable en parametre                                             */
@@ -624,10 +808,9 @@
 /******************************************************************************************************************************/
  struct ACTION *New_action_cpt_h( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
-    int taille, reset;
 
-    reset = Get_option_entier ( options, RESET, 0 );
-    taille = 256;
+    gint reset = Get_option_entier ( options, T_RESET, 0 );
+    gint taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -645,12 +828,11 @@
 /******************************************************************************************************************************/
  struct ACTION *New_action_cpt_imp( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
-    int taille, reset, ratio;
 
-    reset = Get_option_entier ( options, RESET, 0 );
-    ratio = Get_option_entier ( options, T_RATIO, 1 );
+    gint reset = Get_option_entier ( options, T_RESET, 0 );
+    gint ratio = Get_option_entier ( options, T_RATIO, 1 );
 
-    taille = 256;
+    gint taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -679,16 +861,17 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_action_icone: Prepare une struct action avec une commande SI                                                           */
+/* New_action_visuel: Prepare une struct action avec une commande SI                                                           */
 /* Entrées: numero du motif                                                                                                   */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_icone( struct ALIAS *alias, GList *options )
+ struct ACTION *New_action_visuel( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
     int taille, mode, coul, cligno;
     gchar *color;
 
-    mode   = Get_option_entier ( options, MODE, 0   );
+    gchar *mode_string = Get_option_chaine ( options, MODE, NULL );
+    if (mode_string == NULL) mode = Get_option_entier ( options, MODE, 0   );
     coul   = Get_option_entier ( options, COLOR, 0  );
     cligno = Get_option_entier ( options, CLIGNO, 0 );
     taille = 512;
@@ -705,9 +888,17 @@
        case KAKI    : color="darkgreen"; break;
        default      : color="black";
      }
-    g_snprintf( action->alors, taille,
-                "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, %d, \"%s\", %d );\n",
-                  alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno );
+    if (mode_string==NULL)
+     { g_snprintf( action->alors, taille,
+                   "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, \"%d\", \"%s\", %d );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno );
+     }
+    else
+     { g_snprintf( action->alors, taille,
+                   "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, \"%s\", \"%s\", %d );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode_string, color, cligno );
+     }
+
     return(action);
   }
 /******************************************************************************************************************************/
@@ -849,7 +1040,7 @@ return(NULL);
     if (bit != MNEMO_MOTIF) return(TRUE);
 
     gchar *forme_src = Get_option_chaine ( options, T_FORME, NULL );
-    gchar ss_chaine[128], ss_acronyme[64], *ihm_reaction;
+    gchar ss_chaine[128], ss_acronyme[64];
     GList *ss_options;
     if (!forme_src) return(TRUE);
 
@@ -857,10 +1048,10 @@ return(NULL);
     if (!forme) return(TRUE);
 
     JsonNode *RootNode = Json_node_create();
-    SQL_Select_to_json_node ( RootNode, NULL, "SELECT ihm_reaction FROM icone WHERE forme='%s'", forme );
-    ihm_reaction = Json_get_string ( RootNode, "ihm_reaction" );
-    if (ihm_reaction)
-     { if (!strcasecmp ( ihm_reaction, "clic" ))
+    SQL_Select_to_json_node ( RootNode, NULL, "SELECT ihm_affichage FROM icone WHERE forme='%s'", forme );
+    gchar *ihm_affichage = Json_get_string ( RootNode, "ihm_affichage" );
+    if (ihm_affichage)
+     { if (!strcasecmp ( ihm_affichage, "simple" ))
         { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
           g_snprintf( ss_chaine, sizeof(ss_chaine), "Clic sur l'icone depuis l'IHM" );
           ss_options = g_list_append ( NULL, New_option_chaine ( T_LIBELLE, ss_chaine ) );
@@ -915,10 +1106,12 @@ return(NULL);
        alias->acronyme = g_strdup(acronyme);
        alias->classe   = type;
      }
-    else
-     { g_free(alias);
-       return(NULL);
+    else if ( (type=Rechercher_DICO_type ( "SYS", acronyme )) != -1 )
+     { alias->tech_id  = g_strdup(tech_id);
+       alias->acronyme = g_strdup(acronyme);
+       alias->classe   = type;
      }
+    else { g_free(alias); return(NULL); }                                          /* Si pas trouvé en externe, retourne NULL */
     Alias = g_slist_prepend( Alias, alias );
     return(alias);
   }
@@ -1017,7 +1210,7 @@ return(NULL);
     pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
 
     Alias = NULL;                                                                                  /* Par défaut, pas d'alias */
-    DlsScanner_set_lineno(1);                                                                     /* Reset du numéro de ligne */
+    DlsScanner_set_lineno(1);                                                                     /* reset du numéro de ligne */
     nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR_NO_FILE;
@@ -1172,6 +1365,10 @@ return(NULL);
                     { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, cadran,
                                                       Get_option_double ( alias->options, T_MIN, 0.0 ),
                                                       Get_option_double ( alias->options, T_MAX, 100.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 2 )
                                                     );
                     }
@@ -1213,6 +1410,10 @@ return(NULL);
                     { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, cadran,
                                                       Get_option_double ( alias->options, T_MIN, 0.0 ),
                                                       Get_option_double ( alias->options, T_MAX, 100.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 2 )
                                                     );
                     }

@@ -27,6 +27,8 @@
                           background-color: #48BBC0;
                         }
         .courbe-dashboard { height: 300px; }
+
+        .wtd-synoptique-preview { height: 80px; }
       </style>
 
     </head>

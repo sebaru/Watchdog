@@ -54,10 +54,12 @@
   };
 
  struct COMPARATEUR
-  { gint type;
-    union { gint val;
-            gfloat valf;
-          };
+  { gint ordre;
+    gint token_classe;
+    gboolean has_tech_id;
+    gchar tech_id[32];
+    gchar acronyme[64];
+    gdouble valf;
   };
 
  struct ALIAS
@@ -77,16 +79,11 @@
  extern void Emettre_erreur_new( gchar *format, ... );
  extern void Emettre_init_alias( void );
  extern struct COMPARATEUR *New_comparateur( void );
- extern gchar *New_condition_entree( int barre, struct ALIAS *alias, GList *options );
- extern gchar *New_condition_entree_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur );
- extern gchar *New_condition_sortie_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur );
- extern gchar *New_condition_bi( int barre, struct ALIAS *alias, GList *options );
- extern gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options );
- extern gchar *New_condition_tempo( int barre, struct ALIAS *alias, GList *options );
- extern gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options );
- extern gchar *New_condition_WATCHDOG( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_vars( int barre, gchar *nom );
  extern gchar *New_calcul_PID ( GList *options );
+ extern gchar *New_condition_comparateur( gchar *id, gchar *suffixe, GList *options_g, struct COMPARATEUR *comparateur );
+ extern gchar *New_condition_simple( gint barre, gchar *id, gchar *suffixe, GList *options );
+ extern gint Get_option_entier( GList *liste_options, gint token, gint defaut );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options );
@@ -94,12 +91,13 @@
  extern struct ACTION *New_action_vars_mono( gchar *nom );
  extern struct ACTION *New_action_bus( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_mono( struct ALIAS *alias );
- extern struct ACTION *New_action_icone( struct ALIAS *alias, GList *options );
+ extern struct ACTION *New_action_visuel( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_tempo( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_bi( struct ALIAS *alias, gint barre );
  extern struct ACTION *New_action_cpt_h( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_cpt_imp( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_WATCHDOG( struct ALIAS *alias, GList *options );
+ extern struct ACTION *New_action_PID ( GList *options );
  extern gboolean New_alias( gchar *tech_id, gchar *acronyme, gint bit, GList *options );
  extern struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme );
  extern struct ALIAS *Get_alias_par_acronyme( gchar *tech_id, gchar *acronyme );

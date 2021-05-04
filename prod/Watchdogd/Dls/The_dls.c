@@ -831,7 +831,6 @@ end:
 /******************************************************************************************************************************/
  void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech, gboolean in_range )
   { struct DLS_AI *ai;
-    gboolean need_arch;
 
     if (!ai_p || !*ai_p)
      { GSList *liste;
@@ -860,10 +859,8 @@ end:
       }
     else ai = (struct DLS_AI *)*ai_p;
 
-    need_arch = FALSE;
     if ( (ai->val_avant_ech != val_avant_ech) || (ai->inrange != in_range) )
      { ai->val_avant_ech = val_avant_ech;                                           /* Archive au mieux toutes les 5 secondes */
-       if ( ai->last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top ) { need_arch = TRUE; }
 
        switch ( ai->type )
         { case ENTREEANA_NON_INTERP:
@@ -909,11 +906,13 @@ end:
                ai->inrange = 0;
         }
      }
-    else if ( ai->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
-     { need_arch = TRUE; }                                                               /* Archive au pire toutes les 10 min */
 
-    if (need_arch)
-     { Ajouter_arch_by_nom( ai->acronyme, ai->tech_id, ai->val_ech );                              /* Archivage si besoin */
+    if ( (ai->archivage == 1 && ai->last_arch + 50     <= Partage->top) ||
+         (ai->archivage == 2 && ai->last_arch + 600    <= Partage->top) ||
+         (ai->archivage == 3 && ai->last_arch + 36000  <= Partage->top) ||
+         (ai->archivage == 4 && ai->last_arch + 864000 <= Partage->top)
+       )
+     { Ajouter_arch_by_nom( ai->acronyme, ai->tech_id, ai->val_ech );                                  /* Archivage si besoin */
        ai->last_arch = Partage->top;
      }
   }
@@ -923,7 +922,6 @@ end:
 /******************************************************************************************************************************/
  void Dls_data_set_AO ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *ao_p, float val_avant_ech )
   { struct DLS_AO *ao;
-    gboolean need_arch;
 
     if (!ao_p || !*ao_p)
      { GSList *liste;
@@ -952,50 +950,13 @@ end:
       }
     else ao = (struct DLS_AO *)*ao_p;
 
-    need_arch = FALSE;
     if (ao->val_avant_ech != val_avant_ech)
      { ao->val_avant_ech = val_avant_ech;                                           /* Archive au mieux toutes les 5 secondes */
-       if ( ao->last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top ) { need_arch = TRUE; }
 
        switch ( ao->type )
         { case 0: /*SORTIEANA_NON_INTERP:*/
                ao->val_ech = val_avant_ech;                                                        /* Pas d'interprétation !! */
                break;
-#ifdef bouh
-          case ENTREEANA_4_20_MA_10BITS:
-               if (val_avant_ech < 100)                                                /* 204) Modification du range pour 4mA */
-                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */
-                  ai->inrange = 0;
-                }
-               else
-                { if (val_avant_ech < 204) val_avant_ech = 204;                                         /* Valeur à l'echelle */
-                  ai->val_ech = (gfloat) ((val_avant_ech-204)*(ai->max - ai->min))/820.0 + ai->min;
-                  ai->inrange = 1;
-                }
-               break;
-          case ENTREEANA_4_20_MA_12BITS:
-               if (val_avant_ech < 400)
-                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */
-                  ai->inrange = 0;
-                }
-               else
-                { if (val_avant_ech < 816) val_avant_ech = 816;                                         /* Valeur à l'echelle */
-                  ai->val_ech = (gfloat) ((val_avant_ech-816)*(ai->max - ai->min))/3280.0 + ai->min;
-                  ai->inrange = 1;
-                }
-               break;
-          case ENTREEANA_WAGO_750455:                                                                              /* 4/20 mA */
-               ai->val_ech = (gfloat) (val_avant_ech*(ai->max - ai->min))/4095.0 + ai->min;
-               ai->inrange = 1;
-               break;
-          case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
-               if (val_avant_ech > -32767 && val_avant_ech < 8500)
-                { ai->val_ech = (gfloat)(val_avant_ech/10.0);                                           /* Valeur à l'echelle */
-                  ai->inrange = 1;
-                }
-               else ai->inrange = 0;
-               break;
-#endif
           default:
                ao->val_ech = 0.0;
         }
@@ -1006,13 +967,9 @@ end:
                  "%s: ligne %04d: Changing DLS_AO '%s:%s'=%f/%f", __func__,
                  (vars ? vars->num_ligne : -1), ao->tech_id, ao->acronyme, ao->val_avant_ech, ao->val_ech );
      }
-    else if ( ao->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
-     { need_arch = TRUE; }                                                               /* Archive au pire toutes les 10 min */
 
-    if (need_arch)
-     { Ajouter_arch_by_nom( ao->acronyme, ao->tech_id, ao->val_ech );                                  /* Archivage si besoin */
-       ao->last_arch = Partage->top;
-     }
+ /* Pensez a ajouter l'archivage */
+
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_INT: Positionne un integer dans la mémoire DLS                                                                */
@@ -1050,13 +1007,11 @@ end:
       }
     else cpt_imp = (struct DLS_CI *)*cpt_imp_p;
 
-    gboolean need_arch = FALSE;
     if (etat)
      { if (reset)                                                                       /* Le compteur doit-il etre resetté ? */
         { if (cpt_imp->valeur!=0)
            { cpt_imp->val_en_cours1 = 0;                                           /* Valeur transitoire pour gérer les ratio */
              cpt_imp->valeur = 0;                                                  /* Valeur transitoire pour gérer les ratio */
-             need_arch = TRUE;
            }
         }
        else if ( cpt_imp->etat == FALSE )                                                                 /* Passage en actif */
@@ -1066,7 +1021,6 @@ end:
           if (cpt_imp->val_en_cours1>=ratio)
            { cpt_imp->valeur++;
              cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
-             need_arch = TRUE;
              Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                        "%s: ligne %04d: Changing DLS_CI '%s:%s'=%d", __func__,
                        (vars ? vars->num_ligne : -1), cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
@@ -1082,7 +1036,7 @@ end:
        cpt_imp->imp_par_minute = cpt_imp->valeur - cpt_imp->valeurs[0];
      }
 
-    if ( (cpt_imp->archivage == 1 && need_arch == TRUE) ||
+    if ( (cpt_imp->archivage == 1 && cpt_imp->last_arch + 50     <= Partage->top) ||
          (cpt_imp->archivage == 2 && cpt_imp->last_arch + 600    <= Partage->top) ||
          (cpt_imp->archivage == 3 && cpt_imp->last_arch + 36000  <= Partage->top) ||
          (cpt_imp->archivage == 4 && cpt_imp->last_arch + 864000 <= Partage->top)
@@ -1523,8 +1477,8 @@ end:
 /* Dls_data_set_visuel : Gestion du positionnement des visuels en mode dynamique                                              */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
- void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *visu_p, gint mode,
-                            gchar *color, gboolean cligno )
+ void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *visu_p,
+                            gchar *mode, gchar *color, gboolean cligno )
   { struct DLS_VISUEL *visu;
 
     if (!visu_p || !*visu_p)
@@ -1554,19 +1508,21 @@ end:
       }
     else visu = (struct DLS_VISUEL *)*visu_p;
 
-    if (vars && Dls_data_get_MONO ( NULL, NULL, &vars->bit_comm )==FALSE) { color = "darkgreen", cligno = TRUE; }
+    if (vars && Dls_data_get_MONO ( NULL, NULL, &vars->bit_comm )==FALSE)
+     { mode = "hors_comm"; color = "darkgreen", cligno = TRUE;
+     }
 
-    if (visu->mode != mode || strcmp( visu->color, color ) || visu->cligno != cligno )
+    if ( strcmp ( visu->mode, mode ) || strcmp( visu->color, color ) || visu->cligno != cligno )
      { if ( visu->last_change + 50 <= Partage->top )                                 /* Si pas de change depuis plus de 5 sec */
         { visu->changes = 0; }
 
        if ( visu->changes <= 10 )                                                          /* Si moins de 10 changes en 5 sec */
         { if ( visu->changes == 10 )                                                /* Est-ce le dernier change avant blocage */
-           { visu->mode   = 0;                                                   /* Si oui, on passe le visuel en kaki cligno */
+           { g_snprintf( visu->mode,  sizeof(visu->mode),  "too_many_change" );
              g_snprintf( visu->color, sizeof(visu->color), "brown" );
              visu->cligno = 1;                                                                                  /* Clignotant */
            }
-          else { visu->mode   = mode;                                /* Sinon on recopie ce qui est demandé par le plugin DLS */
+          else { g_snprintf( visu->mode,  sizeof(visu->mode), mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
                  g_snprintf( visu->color, sizeof(visu->color), "%s", color );
                  visu->cligno = cligno;
                }
@@ -1576,36 +1532,12 @@ end:
           Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "%s: ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode %d color %s cligne %d", __func__,
+                    "%s: ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode %s color %s cligne %d", __func__,
                     (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno );
         }
        visu->changes++;                                                                                /* Un change de plus ! */
        Partage->audit_bit_interne_per_sec++;
      }
-  }
-/******************************************************************************************************************************/
-/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
-/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
-/******************************************************************************************************************************/
- gint Dls_data_get_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p )
-  { struct DLS_VISUEL *visu;
-    GSList *liste;
-    if (visu_p && *visu_p)                                                             /* Si pointeur d'acceleration disponible */
-     { visu = (struct DLS_VISUEL *)*visu_p;
-       return( visu->mode );
-     }
-    if (!tech_id || !acronyme) return(0);
-
-    liste = Partage->Dls_data_VISUEL;
-    while (liste)
-     { visu = (struct DLS_VISUEL *)liste->data;
-       if ( !strcasecmp ( visu->acronyme, acronyme ) && !strcasecmp( visu->tech_id, tech_id ) ) break;
-       liste = g_slist_next(liste);
-     }
-
-    if (!liste) return(0);
-    if (visu_p) *visu_p = (gpointer)visu;                                           /* Sauvegarde pour acceleration si besoin */
-    return( visu->mode );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_R: Positionne un registre                                                                                     */
@@ -1643,17 +1575,15 @@ end:
       }
     else reg = (struct DLS_REGISTRE *)*r_p;
 
-    gboolean need_arch = FALSE;
     if (valeur != reg->valeur)
      { reg->valeur = valeur;
-       need_arch = TRUE;
        Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "%s: ligne %04d: Changing DLS_REGISTRE '%s:%s'=%f", __func__,
                  (vars ? vars->num_ligne : -1), reg->tech_id, reg->acronyme, reg->valeur );
        Partage->audit_bit_interne_per_sec++;
      }
 
-    if ( (reg->archivage == 1 && need_arch == TRUE) ||
+    if ( (reg->archivage == 1 && reg->last_arch + 50     <= Partage->top) ||
          (reg->archivage == 2 && reg->last_arch + 600    <= Partage->top) ||
          (reg->archivage == 3 && reg->last_arch + 36000  <= Partage->top) ||
          (reg->archivage == 4 && reg->last_arch + 864000 <= Partage->top)
@@ -1690,6 +1620,20 @@ end:
 /* Dls_data_get_reg: Remonte l'etat d'un registre                                                                             */
 /* Sortie : TRUE sur le regean est UP                                                                                         */
 /******************************************************************************************************************************/
+ void Dls_PID_reset ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input )
+  { Dls_data_get_R ( input_tech_id, input_acronyme, r_input );
+    if ( ! (r_input) ) return;
+
+    struct DLS_REGISTRE *input = *r_input;
+    if ( ! (input) ) return;
+
+    input->pid_somme_erreurs = 0.0;
+    input->pid_prev_erreur   = 0.0;
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_reg: Remonte l'etat d'un registre                                                                             */
+/* Sortie : TRUE sur le regean est UP                                                                                         */
+/******************************************************************************************************************************/
  gdouble Dls_PID ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input,
                    gchar *consigne_tech_id, gchar *consigne_acronyme, gpointer *r_consigne,
                    gchar *kp_tech_id, gchar *kp_acronyme, gpointer *r_kp,
@@ -1701,8 +1645,8 @@ end:
   { Dls_data_get_R ( input_tech_id, input_acronyme, r_input );
     Dls_data_get_R ( consigne_tech_id, consigne_acronyme, r_consigne );
     Dls_data_get_R ( kp_tech_id, kp_acronyme, r_kp );
-    Dls_data_get_R ( kp_tech_id, kp_acronyme, r_kp );
-    Dls_data_get_R ( kp_tech_id, kp_acronyme, r_kp );
+    Dls_data_get_R ( kp_tech_id, ki_acronyme, r_ki );
+    Dls_data_get_R ( kp_tech_id, kd_acronyme, r_kd );
     Dls_data_get_R ( outputmin_tech_id, outputmin_acronyme, r_outputmin );
     Dls_data_get_R ( outputmax_tech_id, outputmax_acronyme, r_outputmax );
     if ( ! (r_input && r_consigne && r_kp && r_ki && r_kd && r_outputmin && r_outputmax) ) return(0.0);
@@ -1905,7 +1849,7 @@ end:
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: update library error" ); }
      }
 
-    Dls_Charger_plugins();                                                                      /* Chargement des modules dls */
+    Dls_Charger_plugins(TRUE);                                                                  /* Chargement des modules dls */
     Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
     Dls_recalculer_arbre_dls_syn();
 
@@ -1944,7 +1888,7 @@ end:
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
           Dls_Lire_config();
           Dls_Decharger_plugins();
-          Dls_Charger_plugins();
+          Dls_Charger_plugins(FALSE);
           Dls_recalculer_arbre_comm();                                                  /* Calcul de l'arbre de communication */
           Dls_recalculer_arbre_dls_syn();
           Partage->com_dls.Thread_reload = FALSE;

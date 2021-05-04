@@ -107,7 +107,8 @@
     gfloat  val_avant_ech;
     guint   last_arch;                                                                         /* Date de la derniere archive */
     guint   inrange;
-  };
+    guint   archivage;
+   };
 
  struct DLS_AO
   { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
@@ -194,7 +195,7 @@
  struct DLS_VISUEL
   { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gint     mode;
+    gchar    mode[16];
     gchar    color[16];
     gboolean cligno;
     gint     last_change;
@@ -282,7 +283,7 @@
  extern gboolean Save_source_dls_to_DB( gchar *tech_id, gchar *buffer, gint taille );
  extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *nom );
 
- extern void Dls_Charger_plugins ( void );                                                                  /* Dans plugins.c */
+ extern void Dls_Charger_plugins ( gboolean compil );                                                       /* Dans plugins.c */
  extern void Dls_Decharger_plugins ( void );
  extern void Dls_Debug_plugin ( gchar *tech_id, gboolean actif );
  extern void Dls_Activer_plugin ( gchar *tech_id, gboolean actif );
@@ -304,7 +305,6 @@
  extern gboolean Dls_data_get_DO ( gchar *tech_id, gchar *acronyme, gpointer *dout_p );
  extern gboolean Dls_data_get_DO_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_DO_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern gint Dls_data_get_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p );
  extern void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme );
  extern void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_SYN *tree );
 

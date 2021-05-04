@@ -22,7 +22,7 @@ Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 # rdynamic pour autoriser l'utilsation des fonctions du thread principal par les librairies dlopened
 Watchdogd_LDFLAGS = -rdynamic -lpopt -ldl \
                    `pkg-config --libs glib-2.0 gthread-2.0 libcurl openssl libsoup-2.4 json-glib-1.0` -lzmq \
-                   `libgcrypt-config --libs` \
+                   `libgcrypt-config --libs` -ldl \
                    `mysql_config --libs`
 
 Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl openssl libsoup-2.4 json-glib-1.0` \

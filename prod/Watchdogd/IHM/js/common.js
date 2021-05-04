@@ -173,18 +173,29 @@
     return(retour);
   }
 /********************************************* Affichage des vignettes ********************************************************/
- function Changer_img_src ( id, target )
+ function Changer_img_src ( id, target, cligno )
   { var image = $('#'+id);
+    console.log("Changer_img_src "+id+" from '" + image.attr('src') + "' to "+ target );
+
+    if (cligno==false) { image.removeClass("wtd-cligno"); }
+    if (image.attr('src')==target) return;
+
     if (image.attr('src') == "")
-     { image.slideUp("fast", function()
-        { image.on("load", function() { image.slideDown("normal"); } );
+     { console.log("Changer_img_src "+id+" 1");
+       image.slideUp("fast", function()
+        { image.on("load", function() { image.slideDown("normal", function ()
+                                         { if (cligno==true) { image.addClass("wtd-cligno"); } } ); } );
           image.attr("src", target);
+          console.log("Changer_img_src "+id+" 1 fin:" + image.attr("src") );
         });
      }
     else
-     { image.fadeOut("fast", function()
-        { image.on("load", function() { image.fadeIn("normal"); } );
+     { console.log("Changer_img_src "+id+" 2");
+       image.fadeTo("fast", 0, function()
+        { image.on("load", function() { image.fadeTo("normal", 1, function ()
+                                         { if (cligno==true) { image.addClass("wtd-cligno"); } } ); } );
           image.attr("src", target);
+          console.log("Changer_img_src "+id+" 2 fin:" + image.attr("src") );
         });
      }
   }
@@ -204,7 +215,7 @@
 /****************************************** Escape les " et ' *****************************************************************/
  function htmlEncode ( string )
   { if (string===null) return("null");
-    return ( string.replace(/'/g,'&#39').replace(/"/g,'&#34') ).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return ( string.replace(/'/g,'&apos;').replace(/"/g,'&quote;') ).replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 /****************************************** Are you sure **********************************************************************/
  function Show_modal_del ( titre, message, details, fonction )

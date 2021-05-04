@@ -13,6 +13,22 @@
   }
 
 /******************************************************************************************************************************/
+ function Mnemos_AI_set_archivage ( acronyme )
+  { table = $('#idTableEntreeAna').DataTable();
+    selection = table.ajax.json().AI.filter( function(item) { return (item.acronyme==acronyme) } )[0];
+    var json_request = JSON.stringify(
+       { classe   : "AI",
+         tech_id  : selection.tech_id,
+         acronyme : selection.acronyme,
+         archivage: $('#idAIArchivage'+acronyme).val()
+       }
+     );
+
+    Send_to_API ( 'POST', "/api/mnemos/set", json_request, function ()
+     { $('#idTableEntreeAna').DataTable().ajax.reload(null, false);
+     });
+  }
+/******************************************************************************************************************************/
  function Mnemos_CI_set_archivage ( acronyme )
   { table = $('#idTableCptImp').DataTable();
     selection = table.ajax.json().CI.filter( function(item) { return (item.acronyme==acronyme) } )[0];
@@ -63,34 +79,6 @@
      });
   }
 /******************************************************************************************************************************/
- function Mnemos_DI_set ( acronyme )
-  { table = $('#idTableEntreeTor').DataTable();
-    selection = table.ajax.json().DI.filter( function(item) { return (item.acronyme==acronyme) } )[0];
-    var json_request = JSON.stringify(
-       { classe   : "DI",
-         tech_id  : selection.tech_id,
-         acronyme : selection.acronyme,
-         etat     : true
-       }
-     );
-
-    Send_to_API ( 'POST', "/api/mnemos/set", json_request, null, null );
-  }
-/******************************************************************************************************************************/
- function Mnemos_DI_reset ( acronyme )
-  { table = $('#idTableEntreeTor').DataTable();
-    selection = table.ajax.json().DI.filter( function(item) { return (item.acronyme==acronyme) } )[0];
-    var json_request = JSON.stringify(
-       { classe   : "DI",
-         tech_id  : selection.tech_id,
-         acronyme : selection.acronyme,
-         etat     : false
-       }
-     );
-
-    Send_to_API ( 'POST', "/api/mnemos/set", json_request, null, null );
-  }
-/******************************************************************************************************************************/
  function Mnemos_HORLOGE_set ( acronyme )
   { table = $('#idTableHorloge').DataTable();
     selection = table.ajax.json().HORLOGE.filter( function(item) { return (item.acronyme==acronyme) } )[0];
@@ -127,15 +115,6 @@
              { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
              { "data": "map_tech_id","title":"map_tech_id","className": "align-middle " },
              { "data": "map_tag",    "title":"map_tag",   "className": "align-middle " },
-             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
-               "render": function (item)
-                  { boutons = Bouton_actions_start ();
-                    boutons += Bouton_actions_add ( "outline-success", "Activer cette entrée", "Mnemos_DI_set", item.acronyme, "power-off", null );
-                    boutons += Bouton_actions_add ( "outline-secondary", "Désactiver cette entrée", "Mnemos_DI_reset", item.acronyme, "power-off", null );
-                    boutons += Bouton_actions_end ();
-                    return(boutons);
-                  },
-             }
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -165,6 +144,10 @@
              { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
              { "data": "map_tech_id","title":"map_tech_id","className": "align-middle " },
              { "data": "map_tag",    "title":"map_tag",   "className": "align-middle " },
+             { "data": null, "title":"Archivage", "className": "",
+               "render": function (item)
+                 { return(Bouton_Archivage ( "idAIArchivage"+item.acronyme, "Mnemos_AI_set_archivage('"+item.acronyme+"')", item.archivage )); }
+             },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,

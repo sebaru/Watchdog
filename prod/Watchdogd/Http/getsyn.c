@@ -32,33 +32,7 @@
  #include "watchdogd.h"
  #include "Http.h"
  extern struct HTTP_CONFIG Cfg_http;
-#ifdef bouh
-/******************************************************************************************************************************/
-/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_Acquitter_synoptique_reel ( gpointer user_data, struct DLS_SYN *dls_syn )
-  { gint syn_id = GPOINTER_TO_INT(user_data);
-    if (dls_syn->syn_vars.syn_id == syn_id)
-     { GSList *liste = dls_syn->Dls_plugins;
-       while (liste)
-        { struct DLS_PLUGIN *plugin = liste->data;
-          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Synoptique %d -> plugin '%s' (%s) acquitté", __func__,
-                    plugin->syn_id, plugin->tech_id, plugin->shortname );
-          plugin->vars.bit_acquit = TRUE;
-          liste = g_slist_next( liste );
-        }
-     }
-  }
-/******************************************************************************************************************************/
-/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Http_Acquitter_synoptique ( gint id )
-  { Dls_foreach_syns ( GINT_TO_POINTER(id), Http_Acquitter_synoptique_reel ); }
-#endif
+
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -197,38 +171,64 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( ! (Json_has_member ( request, "libelle" ) && Json_has_member ( request, "page" ) &&
-            Json_has_member ( request, "parent_id" ) && Json_has_member ( request, "access_level" ) &&
-            Json_has_member ( request, "image" )
-           ) )
+    if ( Json_has_member ( request, "syn_id" ) )
+     { if (Json_has_member ( request, "image" ) )
+        { gchar *chaine = Normaliser_chaine ( Json_get_string ( request, "image" ) );
+          SQL_Write_new ( "UPDATE syns SET image='%s' WHERE id='%d' AND access_level<='%d'",
+                          chaine, Json_get_int ( request, "syn_id" ), session->access_level );
+          g_free(chaine);
+        }
+
+       if ( Json_has_member ( request, "libelle" ) )
+        { gchar *chaine = Normaliser_chaine ( Json_get_string ( request, "libelle" ) );
+          SQL_Write_new ( "UPDATE syns SET libelle='%s' WHERE id='%d' AND access_level<='%d'",
+                          chaine, Json_get_int ( request, "syn_id" ), session->access_level );
+          g_free(chaine);
+        }
+
+       if ( Json_has_member ( request, "page" ) )
+        { gchar *chaine = Normaliser_chaine ( Json_get_string ( request, "page" ) );
+          SQL_Write_new ( "UPDATE syns SET page='%s' WHERE id='%d' AND access_level<='%d'",
+                          chaine, Json_get_int ( request, "syn_id" ), session->access_level );
+          g_free(chaine);
+        }
+
+       if ( Json_has_member ( request, "access_level" ) )
+        { SQL_Write_new ( "UPDATE syns SET access_level='%d' WHERE id='%d' AND access_level<='%d'",
+                          Json_get_int ( request, "access_level" ), Json_get_int ( request, "syn_id" ), session->access_level );
+        }
+
+       if ( Json_has_member ( request, "parent_id" ) )
+        { SQL_Write_new ( "UPDATE syns SET parent_id='%d' WHERE id='%d' AND access_level<='%d'",
+                          Json_get_int ( request, "parent_id" ), Json_get_int ( request, "syn_id" ), session->access_level );
+          Partage->com_dls.Thread_reload = TRUE;                                                               /* Relance DLS */
+        }
+       soup_message_set_status (msg, SOUP_STATUS_OK);
+       goto end;
+     }
+    else if ( ! (Json_has_member ( request, "libelle" ) && Json_has_member ( request, "page" ) &&                 /* Si ajout */
+                 Json_has_member ( request, "parent_id" ) && Json_has_member ( request, "access_level" ) &&
+                 Json_has_member ( request, "image" )
+                ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    gint  access_level = Json_get_int ( request, "access_level" );
+    gint access_level  = Json_get_int ( request, "access_level" );
     if (access_level>session->access_level)
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-    gint  parent_id    = Json_get_int ( request, "parent_id" );
+    gint   parent_id   = Json_get_int ( request, "parent_id" );
     gchar *libelle     = Normaliser_chaine ( Json_get_string( request, "libelle" ) );
     gchar *page        = Normaliser_chaine ( Json_get_string( request, "page" ) );
     gchar *image       = Normaliser_chaine ( Json_get_string( request, "image" ) );
 
-    if ( Json_has_member ( request, "syn_id" ) )                                                                   /* Edition */
-     { gint syn_id = Json_get_int(request,"syn_id");
-       if (syn_id==1) parent_id = 1;                                                 /* On ne peut changer le parent du syn 1 */
-       g_snprintf( requete, sizeof(requete),
-                  "UPDATE syns SET libelle='%s', page='%s', parent_id=%d, image='%s', access_level='%d' WHERE id='%d' AND access_level<='%d'",
-                   libelle, page, parent_id, image, access_level, syn_id, session->access_level );
-     }
-    else
-     { g_snprintf( requete, sizeof(requete),
-                  "INSERT INTO syns SET libelle='%s', parent_id=%d, page='%s', image='%s', "
-                  "access_level='%d'", libelle, parent_id, page, image, access_level );
-     }
+    g_snprintf( requete, sizeof(requete),
+               "INSERT INTO syns SET libelle='%s', parent_id=%d, page='%s', image='%s', "
+                "access_level='%d'", libelle, parent_id, page, image, access_level );
 
     if (SQL_Write (requete))
      { soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -243,6 +243,8 @@
     g_free(libelle);
     g_free(page);
     g_free(image);
+
+end:
     json_node_unref(request);
   }
 /******************************************************************************************************************************/
@@ -470,6 +472,20 @@
     else { g_free(http_cadran); }                                                                         /* Si pas trouvé... */
   }
 /******************************************************************************************************************************/
+/* Http_add_etat_visuel: Ajoute les états de chaque visuels du tableau                                                        */
+/* Entrées : Le tableau, l'element a compléter                                                                                */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Http_add_etat_visuel_to_json ( JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { GSList *dls_visuels = Partage->Dls_data_VISUEL;
+    while(dls_visuels)                      /* Parcours tous les visuels et envoie ceux relatifs aux DLS du synoptique chargé */
+     { struct DLS_VISUEL *dls_visuel = dls_visuels->data;
+       if (!strcasecmp( dls_visuel->tech_id, Json_get_string(element, "tech_id") ))
+        { Dls_VISUEL_to_json ( element, dls_visuel ); }
+       dls_visuels = g_slist_next(dls_visuels);
+     }
+  }
+/******************************************************************************************************************************/
 /* Http_traiter_syn_show: Fourni une list JSON des elements d'un synoptique                                                   */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
@@ -674,6 +690,9 @@
           return;
         }
      }
+/*------------------------------------------------- Envoi l'état de tous les visuels du synoptique ---------------------------*/
+    Json_node_foreach_array_element ( synoptique, "visuels", Http_add_etat_visuel_to_json, NULL );
+
 /*-------------------------------------------------- Envoi les horloges de la page -------------------------------------------*/
     if (SQL_Select_to_json_node ( synoptique, "horloges",
                                  "SELECT DISTINCT horloge.tech_id, dls.name as dls_name FROM mnemos_HORLOGE AS horloge "
@@ -685,25 +704,6 @@
        json_node_unref(synoptique);
        return;
      }
-/*------------------------------------------------- Envoi l'état de tous les visuels du synoptique ---------------------------*/
-    JsonArray *etat_visuels = Json_node_add_array ( synoptique, "etat_visuels" );
-    GList *syn_visuels      = Json_get_array_as_list ( synoptique, "visuels" );
-    GSList *dls_visuels     = Partage->Dls_data_VISUEL;
-    while(dls_visuels)                      /* Parcours tous les visuels et envoie ceux relatifs aux DLS du synoptique chargé */
-     { struct DLS_VISUEL *dls_visuel=dls_visuels->data;
-       GList *visuels = syn_visuels;
-       while (visuels)
-        { JsonNode *visuel = visuels->data;
-          if (!strcasecmp( Json_get_string(visuel, "tech_id"), dls_visuel->tech_id))
-           { JsonNode *element = Json_node_create ();
-             Dls_VISUEL_to_json ( element, dls_visuel );
-             Json_array_add_element ( etat_visuels, element );
-           }
-          visuels = g_list_next(visuels);
-        }
-       dls_visuels = g_slist_next(dls_visuels);
-     }
-    g_list_free(syn_visuels);
 
     gchar *buf = Json_node_to_string ( synoptique );
     json_node_unref(synoptique);

@@ -200,6 +200,13 @@
     return(retour);
   }
 /******************************************************************************************************************************/
+/* Json_node_foreach_array_element: Lance une fonction sur chaque element d'un tableau                                        */
+/* Entrée: la query, le nom du parametre                                                                                      */
+/* Sortie: la chaine de caractere                                                                                             */
+/******************************************************************************************************************************/
+ void Json_node_foreach_array_element ( JsonNode *RootNode, gchar *nom, JsonArrayForeach fonction, gpointer data )
+  { json_array_foreach_element ( Json_get_array ( RootNode, nom ), fonction, data ); }
+/******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */

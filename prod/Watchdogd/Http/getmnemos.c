@@ -168,12 +168,17 @@
         }
 	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
      }
-    else if ( ! strcasecmp ( classe, "DI" ) )
-     { struct DLS_DI *di=NULL;
-       if ( Json_has_member ( request, "etat" ) )
-        { gboolean etat = Json_get_bool ( request, "etat" );
-          Dls_data_set_DI ( NULL, tech_id, acronyme, (gpointer)&di, etat );  /* Si le bit existe, on change sa running config */
-          Audit_log ( session, "Mnemos %s:%s -> set to '%d'", tech_id, acronyme, etat );
+    else if ( ! strcasecmp ( classe, "AI" ) )
+     { struct DLS_AI *ai=NULL;
+       Dls_data_get_AI ( tech_id, acronyme, (gpointer)&ai );
+       if ( Json_has_member ( request, "archivage" ) )
+        { gchar chaine[128];
+          gint archivage = Json_get_int ( request, "archivage" );
+          if (ai) { ai->archivage = archivage; }                             /* Si le bit existe, on change sa running config */
+          g_snprintf( chaine, sizeof(chaine), "UPDATE mnemos_AI SET archivage='%d' WHERE tech_id='%s' AND acronyme='%s'",
+                      archivage, tech_id, acronyme );
+          SQL_Write ( chaine );                                                   /* Qu'il existe ou non, ou met a jour la DB */
+          Audit_log ( session, "Mnemos %s:%s -> archivage = '%d'", tech_id, acronyme, archivage );
         }
 	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
      }

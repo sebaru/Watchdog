@@ -612,7 +612,7 @@
     g_free(target);
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_dls_source: Fourni une list JSON de la source DLS                                                             */
+/* Http_traiter_dls_set: Positionne les parametres du module DLS                                                              */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
