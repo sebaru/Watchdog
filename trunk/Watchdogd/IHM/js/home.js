@@ -312,8 +312,10 @@
     cadran = cadrans[0];
     console.debug(etat);
     etat.valeur = etat.valeur.toFixed(cadran.nb_decimal);
+    if (etat.valeur>cadran.maximum) etat.valeur=cadran.maximum;
+    if (etat.valeur<cadran.minimum) etat.valeur=cadran.minimum;	  
     var position = 100*(etat.valeur-cadran.minimum)/(cadran.maximum-cadran.minimum);
-
+console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.seuil_ntb+" nb="+cadran.seuil_nb+" nh="+cadran.seuil_nh+" nth="+cadran.seuil_nth);
     if (cadran.forme=="progress")
      { var idcadranforme = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre";
        var position = 100*(etat.valeur-cadran.minimum)/(cadran.maximum-cadran.minimum);
