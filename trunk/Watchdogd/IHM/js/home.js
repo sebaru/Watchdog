@@ -169,7 +169,7 @@
               );
 
        $.each ( Response.cadrans, function (i, cadran)
-                 { bodymain.append( $('<div></div>').addClass('w-100') ).append ( Creer_cadran ( cadran ) );
+                 { bodymain.append( Creer_cadran ( cadran ) );
                  }
               );
 
@@ -288,6 +288,50 @@
                              )
                     );
      }
+    else if (cadran.forme=="progress-vor")
+     { barres.append( $('<div></div>').addClass("progress")
+                      .append( $('<div></div>').addClass("progress-bar bg-success")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre1")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-warning")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre2")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-danger")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre3")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                    );
+     }
+    else if (cadran.forme=="progress-rov")
+     { barres.append( $('<div></div>').addClass("progress")
+                      .append( $('<div></div>').addClass("progress-bar bg-danger")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre1")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-warning")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre2")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                      .append( $('<div></div>').addClass("progress-bar bg-success")
+                               .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre3")
+                               .attr("role", "progressbar" )
+                               .attr("aria-valuemin", cadran.minimum )
+                               .attr("aria-valuemax", cadran.maximum )
+                             )
+                    );
+     }
 
     card.append( $('<div></div>').addClass('w-100') )
         .append( $('<div></div>').addClass("col text-center")
@@ -311,14 +355,14 @@
     if (cadrans.length!=1) return;
     cadran = cadrans[0];
     console.debug(etat);
-    etat.valeur = etat.valeur.toFixed(cadran.nb_decimal);
     if (etat.valeur>cadran.maximum) etat.valeur=cadran.maximum;
-    if (etat.valeur<cadran.minimum) etat.valeur=cadran.minimum;	  
+    if (etat.valeur<cadran.minimum) etat.valeur=cadran.minimum;
     var position = 100*(etat.valeur-cadran.minimum)/(cadran.maximum-cadran.minimum);
+
 console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.seuil_ntb+" nb="+cadran.seuil_nb+" nh="+cadran.seuil_nh+" nth="+cadran.seuil_nth);
+
     if (cadran.forme=="progress")
      { var idcadranforme = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre";
-       var position = 100*(etat.valeur-cadran.minimum)/(cadran.maximum-cadran.minimum);
        $('#'+idcadranforme).css("width", position+"%").attr("aria-valuenow", position);
      }
     else if (cadran.forme=="progress-rovor")
@@ -363,8 +407,28 @@ console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.se
           $('#'+idcadranbarre5).css("width", position+"%").attr("aria-valuenow", position);
         }
      }
+    else if (cadran.forme=="progress-vor" || cadran.forme=="progress-rov")
+     { var idcadranbarre1 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre1";
+       var idcadranbarre2 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre2";
+       var idcadranbarre3 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre3";
+            if (etat.valeur<=cadran.seuil_nb)
+        { $('#'+idcadranbarre1).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else if (etat.valeur<=cadran.seuil_nh)
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", position+"%").attr("aria-valuenow", position);
+        }
+     }
     var idcadrantexte = "wtd-cadran-texte-"+etat.tech_id+"-"+etat.acronyme;
-    $('#'+idcadrantexte).text( etat.valeur + " " + etat.unite );
+    $('#'+idcadrantexte).text( etat.valeur.toFixed(cadran.nb_decimal) + " " + etat.unite );
   }
 /******************************************************************************************************************************/
 /* Changer_etat_visuel: Appeler par la websocket pour changer un visuel d'etat                                                */
