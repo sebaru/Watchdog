@@ -269,7 +269,6 @@
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                             /* TRUE si le thread doit tout logguer */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
-    gchar Library_version[12];                       /* Version de librairie. Si différent, impose une recompilation complete */
     guint temps_sched;                                          /* Delai d'attente DLS pour assurer 100 tours max par seconde */
     gboolean Top_check_horaire;                                                    /* True le controle horaire est réalisable */
   };

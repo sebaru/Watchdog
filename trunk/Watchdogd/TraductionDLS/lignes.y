@@ -171,6 +171,7 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                    g_snprintf( $$, taille,
                                "vars->num_ligne = %d; /* une_instr différée----------*/\n"
                                " { static gboolean counting_on=FALSE;\n"
+                               "   static gboolean counting_off=FALSE;\n"
                                "   static time_t top;\n"
                                "   if(%s)\n"
                                "    { counting_off=FALSE;\n"
