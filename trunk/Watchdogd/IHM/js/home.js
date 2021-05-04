@@ -428,7 +428,8 @@ console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.se
         }
      }
     var idcadrantexte = "wtd-cadran-texte-"+etat.tech_id+"-"+etat.acronyme;
-    $('#'+idcadrantexte).text( etat.valeur.toFixed(cadran.nb_decimal) + " " + etat.unite );
+    texte = etat.valeur.toFixed(cadran.nb_decimal);
+    $('#'+idcadrantexte).text( texte + " " + etat.unite );
   }
 /******************************************************************************************************************************/
 /* Changer_etat_visuel: Appeler par la websocket pour changer un visuel d'etat                                                */
