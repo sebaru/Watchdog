@@ -442,6 +442,7 @@
        case SUP:         g_strlcat ( partie_g, " > ", sizeof(partie_g) ); break;
        case INF_OU_EGAL: g_strlcat ( partie_g, " <= ", sizeof(partie_g) ); break;
        case SUP_OU_EGAL: g_strlcat ( partie_g, " >= ", sizeof(partie_g) ); break;
+       case T_EGAL     : g_strlcat ( partie_g, " == ", sizeof(partie_g) ); break;
      }
 
     if (comparateur->token_classe == ID)
