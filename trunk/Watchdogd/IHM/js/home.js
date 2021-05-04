@@ -88,7 +88,7 @@
     else $('#idTableMessages').DataTable(
         { pageLength : 25,
           fixedHeader: true, searching: false, paging:false,
-          ajax: {	url: "/api/histo/alive?syn_id="+syn_id, type : "GET", dataSrc: "enregs",
+          ajax: { url: "/api/histo/alive?syn_id="+syn_id, type : "GET", dataSrc: "enregs",
                   error: function ( xhr, status, error ) { /*Show_Error(xhr.statusText);*/ }
                 },
           rowId: "id",
@@ -213,17 +213,17 @@
                                                                                            : "/img/"+Response.image) )
                                                    .attr("onclick", "Charger_page_synoptique("+Response.id+")")
                                                    .attr("id", "idImgSyn_"+Response.id)
-		                              	                  .addClass("wtd-synoptique") )
+                                                   .addClass("wtd-synoptique") )
                                  .append($('<img>').attr("id", "idVignetteComm_"+Response.id)
-				                                               /*.attr("src","/img/pignon_vert.svg")*/
+                                                   /*.attr("src","/img/pignon_vert.svg")*/
                                                    .addClass("wtd-vignette wtd-img-superpose-bas-droite").slideUp()
                                         )
                                  .append($('<img>').attr("id", "idVignette_"+Response.id)
-				                                               /*.attr("src","")*/
+                                                   /*.attr("src","")*/
                                                    .addClass("wtd-vignette wtd-img-superpose-haut-droite").slideUp()
                                         )
                                )
-	                     )
+                      )
                .append( $('<div></div>').addClass('w-100') )
                .append( $('<div></div>').addClass("col text-center")
                         .append( $('<span></span>').addClass("text-white").text(" "+Response.libelle) )
@@ -236,10 +236,8 @@
 /******************************************************************************************************************************/
  function Creer_cadran ( cadran )
   { var card = $('<div></div>').addClass("row bg-transparent mb-3 border border-info")
-               .append( $('<div></div>').addClass("col text-center")
-                        .append( $('<span></span>').addClass("text-white").text( "Cadran" )
-                               )
-                      )
+               .append( $('<div></div>').addClass("col text-center mb-2")
+                        .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
                .append( $('<div></div>').addClass('w-100') );
     var barres = $('<div></div>').addClass("col");
     card.append(barres);
@@ -339,10 +337,7 @@
                           .attr("id", "wtd-cadran-texte-"+cadran.tech_id+"-"+cadran.acronyme)
                         )
                )
-        .append( $('<div></div>').addClass('w-100') )
-        .append( $('<div></div>').addClass("col text-center mb-2")
-                 .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
-               );
+        .append( $('<div></div>').addClass('w-100') );
 
     return(card);
   }
