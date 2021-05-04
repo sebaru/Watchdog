@@ -238,6 +238,7 @@
   { var card = $('<div></div>').addClass("row bg-transparent mb-3 border border-info")
                .append( $('<div></div>').addClass("col text-center mb-2")
                         .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
+                      )
                .append( $('<div></div>').addClass('w-100') );
     var barres = $('<div></div>').addClass("col");
     card.append(barres);
