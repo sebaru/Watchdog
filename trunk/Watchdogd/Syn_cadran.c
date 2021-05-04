@@ -75,8 +75,8 @@
 
     SQL_Write_new ("UPDATE syns_cadrans SET forme='%s', minimum='%f', maximum='%f', "
                    "seuil_ntb='%f', seuil_nb='%f', seuil_nh='%f', seuil_nth='%f', "
-                   "nb_decimal='%d', auto_create=1 "
-                   "WHERE tech_id='%s' AND acronyme='%s';",
+                   "nb_decimal='%d' "
+                   "WHERE tech_id='%s' AND acronyme='%s' AND auto_create=1;",
                    forme, min, max, seuil_ntb, seuil_nb, seuil_nh, seuil_nth, nb_decimal, plugin->tech_id, acro );
 
     g_free(forme);
