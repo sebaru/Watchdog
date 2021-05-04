@@ -165,7 +165,7 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                 }}
                 | T_MOINS expr T_DIFFERE options DONNE action PVIRGULE
                 {{ int taille;
-                   taille = strlen($2)+strlen($6->alors)+512;
+                   taille = strlen($2)+strlen($6->alors)+1024;
                    if ($6->sinon) taille += strlen($6->sinon);
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille,
