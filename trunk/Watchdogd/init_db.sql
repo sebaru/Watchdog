@@ -243,7 +243,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `map_question_vocale` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `map_reponse_vocale` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun',
-  `archivage` INT(11) NOT NULL DEFAULT '1',
+  `archivage` INT(11) NOT NULL DEFAULT '3',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   UNIQUE (`map_tech_id`,`map_tag`),
@@ -290,7 +290,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_CI` (
   `valeur` INT(11) NOT NULL DEFAULT '0',
   `multi` float NOT NULL DEFAULT '1',
   `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'fois',
-  `archivage` INT(11) NOT NULL DEFAULT '1',
+  `archivage` INT(11) NOT NULL DEFAULT '4',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
