@@ -29,7 +29,6 @@
  #define _SMSG_H_
 
  #include <gammu.h>
- #include <curl/curl.h>
 
  #define NOM_THREAD                    "smsg"
  #define SMSG_TEMPS_UPDATE_COMM        300
