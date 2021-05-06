@@ -189,7 +189,7 @@
 /* Entrée: une reference sur le message                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Updater_un_visuel( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *motif )
+ void Updater_un_visuel( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *motif )
   {
     printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
            Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );
@@ -214,7 +214,7 @@
        case TYPE_PROGRESSIF:
             Trame_peindre_motif ( trame_motif, trame_motif->color );
             break;
-       default: printf("Changer_etat_motif: type gestion non géré %d\n",
+       default: printf("Updater_un_visuel: type gestion non géré %d\n",
                         trame_motif->motif->type_gestion );
      }
   }

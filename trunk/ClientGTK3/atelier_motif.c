@@ -88,6 +88,7 @@
                          G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
        g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
                          G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
+       Updater_un_visuel ( trame_motif, element );
      }
     else if (page->type == TYPE_PAGE_ATELIER)
      { struct TYPE_INFO_ATELIER *infos=page->infos;
