@@ -165,12 +165,13 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                 }}
                 | T_MOINS expr T_DIFFERE options DONNE action PVIRGULE
                 {{ int taille;
-                   taille = strlen($2)+strlen($6->alors)+512;
+                   taille = strlen($2)+strlen($6->alors)+1024;
                    if ($6->sinon) taille += strlen($6->sinon);
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille,
                                "vars->num_ligne = %d; /* une_instr différée----------*/\n"
                                " { static gboolean counting_on=FALSE;\n"
+                               "   static gboolean counting_off=FALSE;\n"
                                "   static time_t top;\n"
                                "   if(%s)\n"
                                "    { counting_off=FALSE;\n"

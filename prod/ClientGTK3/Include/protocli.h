@@ -320,6 +320,7 @@
 
 #endif
  extern void Afficher_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data);/* Dans atelier_motif.c */
+ extern void Updater_un_visuel( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *motif );
 #ifdef bouh
 
  extern void Creer_fenetre_ajout_motif ( void );

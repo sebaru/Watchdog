@@ -480,8 +480,10 @@ end:
   { GSList *dls_visuels = Partage->Dls_data_VISUEL;
     while(dls_visuels)                      /* Parcours tous les visuels et envoie ceux relatifs aux DLS du synoptique chargé */
      { struct DLS_VISUEL *dls_visuel = dls_visuels->data;
-       if (!strcasecmp( dls_visuel->tech_id, Json_get_string(element, "tech_id") ))
-        { Dls_VISUEL_to_json ( element, dls_visuel ); }
+       if ( !strcasecmp( dls_visuel->tech_id, Json_get_string(element, "tech_id") ) &&
+            !strcasecmp( dls_visuel->acronyme, Json_get_string(element, "acronyme") )
+          )
+        { Dls_VISUEL_to_json ( element, dls_visuel ); return; }
        dls_visuels = g_slist_next(dls_visuels);
      }
   }
