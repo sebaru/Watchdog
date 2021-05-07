@@ -1055,7 +1055,7 @@ return(NULL);
      { if (!strcasecmp ( ihm_affichage, "simple" ))
         { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
           g_snprintf( ss_chaine, sizeof(ss_chaine), "Clic sur l'icone depuis l'IHM" );
-          ss_options = g_list_append ( NULL, New_option_chaine ( T_LIBELLE, ss_chaine ) );
+          ss_options = g_list_append ( NULL, New_option_chaine ( T_LIBELLE, g_strdup(ss_chaine) ) );
           New_alias ( tech_id, ss_acronyme, MNEMO_ENTREE, ss_options );
         }
      }
