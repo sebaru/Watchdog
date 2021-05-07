@@ -83,7 +83,7 @@
 %type  <chaine>      unite facteur expr suffixe unSwitch listeCase une_instr listeInstr
 %type  <action>      action une_action
 %type  <chaine>      calcul_expr calcul_expr2 calcul_expr3
-%type  <t_alias>     calcul_ea_result
+%type  <t_alias>     calcul_alias_result
 %type  <comparateur> comparateur
 
 %%
@@ -203,9 +203,9 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                    Liberer_options($4);
                    g_free($2);
                 }}
-                | T_MOINS expr T_MOINS T_POUV calcul_expr T_PFERM DONNE calcul_ea_result PVIRGULE
+                | T_MOINS expr T_MOINS T_POUV calcul_expr T_PFERM DONNE calcul_alias_result PVIRGULE
                 {{ int taille;
-                   if ($8)
+                   if ($2 && $5 && $8)
                     { taille = strlen($5);
                       taille+= strlen($2);
                       taille+= strlen($8->tech_id);
@@ -226,10 +226,10 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                        }
                       else
                        { Emettre_erreur_new( "'%s:%s' is unknown", $8->tech_id, $8->acronyme ); }
-                      g_free($8);
                     } else $$=g_strdup("/* test ! */");
-                   g_free($2);
-                   g_free($5);
+                   if ($2) g_free($2);
+                   if ($5) g_free($5);
+                   /* $8 est un alias, et ne doit pas etre g_freer */
                 }}
                 | T_MOINS expr DONNE T_ACCOUV listeInstr T_ACCFERM
                 {{ int taille;
@@ -247,40 +247,47 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
 /****************************************************** Partie SWITCH *********************************************************/
 unSwitch:       T_SWITCH listeCase
                 {{ gint taille;
-                   taille = strlen($2)+100;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "/* Ligne %d (CASE BEGIN)------------*/\n"
-                                           "%s\n"
-                                           "/* Ligne %d (CASE END)--------------*/\n",
-                                           DlsScanner_get_lineno(), $2, DlsScanner_get_lineno() );
-                   g_free($2);
+                   if ($2)
+                    { taille = strlen($2)+100;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille, "/* Ligne %d (CASE BEGIN)------------*/\n"
+                                              "%s\n"
+                                             "/* Ligne %d (CASE END)--------------*/\n",
+                                              DlsScanner_get_lineno(), $2, DlsScanner_get_lineno() );
+                    } else $$=NULL;
+                   if ($2) g_free($2);
                 }}
                 ;
 
 listeCase:      T_PIPE T_MOINS expr DONNE action PVIRGULE listeCase
                 {{ int taille;
-                   taille = strlen($3)+strlen($5->alors)+strlen($7)+100;
-                   if ($5->sinon) taille+=strlen($5->sinon);
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille,
-                               "/* Ligne %d (CASE INSIDE)----------*/\n"
-                               "if(%s)\n { %s }\nelse\n { %s\n%s }\n",
-                               DlsScanner_get_lineno(), $3, $5->alors, ($5->sinon ? $5->sinon : ""), $7 );
-
-                   if ($5->sinon) g_free($5->sinon);
-                   g_free($5->alors); g_free($5);
-                   g_free($3);
-                   g_free($7);
+                   if ($3 && $5 && $7)
+                    { taille = strlen($3)+strlen($5->alors)+strlen($7)+100;
+                      if ($5->sinon) taille+=strlen($5->sinon);
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille,
+                                  "/* Ligne %d (CASE INSIDE)----------*/\n"
+                                  "if(%s)\n { %s }\nelse\n { %s\n%s }\n",
+                                  DlsScanner_get_lineno(), $3, $5->alors, ($5->sinon ? $5->sinon : ""), $7 );
+                    } else $$=NULL;
+                   if ($5 && $5->sinon) g_free($5->sinon);
+                   if ($5 && $5->alors) g_free($5->alors);
+                   if ($5) g_free($5);
+                   if ($3) g_free($3);
+                   if ($7) g_free($7);
                 }}
                 | T_PIPE T_MOINS DONNE action PVIRGULE
                 {{ int taille;
-                   taille = strlen($4->alors)+100;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille,
-                               "/* Ligne %d (CASE INSIDE DEFAULT)--*/\n"
-                               "  %s", DlsScanner_get_lineno(), $4->alors );
-                   if ($4->sinon) g_free($4->sinon);
-                   g_free($4->alors); g_free($4);
+                   if ($4)
+                    { taille = strlen($4->alors)+100;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille,
+                                  "/* Ligne %d (CASE INSIDE DEFAULT)--*/\n"
+                                 "  %s", DlsScanner_get_lineno(), $4->alors );
+                    } else $$=NULL;
+                   if ($4 && $4->sinon) g_free($4->sinon);
+                   if ($4 && $4->alors) g_free($4->alors);
+                   if ($4) g_free($4);
                 }}
                 | {{ $$=strdup(""); }}
                 ;
@@ -423,7 +430,7 @@ calcul_expr3:   T_POUV calcul_expr T_PFERM {{ $$=$2; }}
                 }}
                 ;
 
-calcul_ea_result: ID
+calcul_alias_result: ID
                 {{ struct ALIAS *alias;
                    alias = Get_alias_par_acronyme(NULL,$1);                                            /* On recupere l'alias */
                    if (alias)

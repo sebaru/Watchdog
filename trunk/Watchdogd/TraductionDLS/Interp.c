@@ -523,7 +523,6 @@
     alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
     if (!alias)
      { alias = Set_new_external_alias(tech_id,acro); }                /* Si dependance externe, on va chercher */
-
     if (!alias)
      { if (tech_id) Emettre_erreur_new( "'%s:%s' is not defined", tech_id, acro );/* si l'alias n'existe pas */
                else Emettre_erreur_new( "'%s' is not defined", acro );/* si l'alias n'existe pas */
@@ -1129,8 +1128,15 @@ return(NULL);
     liste = Alias;
     while(liste)
      { alias = (struct ALIAS *)liste->data;
-       if (!strcmp(alias->acronyme, acronyme) && (tech_id==NULL || !strcmp(alias->tech_id,tech_id)) )
-        { alias->used++; return(alias); }                                          /* Si deja present, on fait ++ sur le used */
+       if (!alias->tech_id)
+        { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: error tech_id is NULL for %s.", __func__, alias->acronyme ); }
+       else
+        { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: checking tid %s.", __func__, alias->tech_id );
+          if (!strcmp(alias->acronyme, acronyme) &&
+                    (tech_id==NULL ||
+                     !strcmp(alias->tech_id,tech_id)) )
+           { alias->used++; return(alias); }                                          /* Si deja present, on fait ++ sur le used */
+        }
        liste = liste->next;
      }
     return(NULL);

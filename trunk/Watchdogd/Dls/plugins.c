@@ -381,6 +381,8 @@
 /******************************************************************************************************************************/
  static void Reseter_all_bit_interne ( struct DLS_PLUGIN *plugin )
   { GSList *liste_bit;
+
+    Charger_confDB_Registre ( plugin->tech_id );
     pthread_mutex_lock( &Partage->com_dls.synchro_data );                                 /* Décharge tous les bits du module */
     liste_bit = Partage->Dls_data_TEMPO;
     while(liste_bit)
@@ -392,7 +394,6 @@
         }
        liste_bit = g_slist_next(liste_bit);
      }
-    Charger_confDB_Registre ( plugin->tech_id );
 
     liste_bit = Partage->Dls_data_MSG;                                                /* Decharge tous les messages du module */
     while(liste_bit)
