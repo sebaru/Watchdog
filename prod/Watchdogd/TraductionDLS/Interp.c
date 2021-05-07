@@ -523,7 +523,6 @@
     alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
     if (!alias)
      { alias = Set_new_external_alias(tech_id,acro); }                /* Si dependance externe, on va chercher */
-
     if (!alias)
      { if (tech_id) Emettre_erreur_new( "'%s:%s' is not defined", tech_id, acro );/* si l'alias n'existe pas */
                else Emettre_erreur_new( "'%s' is not defined", acro );/* si l'alias n'existe pas */
@@ -1078,10 +1077,11 @@ return(NULL);
     alias->tech_id   = g_strdup(Dls_plugin.tech_id);
     alias->acronyme  = g_strdup(acronyme);
     alias->classe    = bit;
-    struct OPTION *option = New_option_chaine ( T_LIBELLE, strdup(libelle) );
+    struct OPTION *option = New_option_chaine ( T_LIBELLE, g_strdup(libelle) );
     alias->options   = g_list_append ( NULL, option );
     alias->used      = 1;                                                      /* Un bit internal est obligatoirement utilisé */
     alias->permanent = 1;                                                      /* Un bit internal est obligatoirement utilisé */
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
     Alias = g_slist_prepend( Alias, alias );
     return(TRUE);
   }
@@ -1092,7 +1092,7 @@ return(NULL);
 /******************************************************************************************************************************/
  struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme )
   { struct ALIAS *alias;
-    gint type;
+    gint classe;
 
     alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
     if (!alias) { return(NULL); }
@@ -1102,17 +1102,18 @@ return(NULL);
 
     if (!tech_id) tech_id=Dls_plugin.tech_id;
 
-    if ( (type=Rechercher_DICO_type ( tech_id, acronyme )) != -1 )
+    if ( (classe=Rechercher_DICO_type ( tech_id, acronyme )) != -1 )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->classe   = type;
+       alias->classe   = classe;
      }
-    else if ( (type=Rechercher_DICO_type ( "SYS", acronyme )) != -1 )
+    else if ( (classe=Rechercher_DICO_type ( "SYS", acronyme )) != -1 )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->classe   = type;
+       alias->classe   = classe;
      }
     else { g_free(alias); return(NULL); }                                          /* Si pas trouvé en externe, retourne NULL */
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
     Alias = g_slist_prepend( Alias, alias );
     return(alias);
   }
@@ -1127,6 +1128,7 @@ return(NULL);
     liste = Alias;
     while(liste)
      { alias = (struct ALIAS *)liste->data;
+       Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: checking tid %s.", __func__, alias->tech_id );
        if (!strcmp(alias->acronyme, acronyme) && (tech_id==NULL || !strcmp(alias->tech_id,tech_id)) )
         { alias->used++; return(alias); }                                          /* Si deja present, on fait ++ sur le used */
        liste = liste->next;
