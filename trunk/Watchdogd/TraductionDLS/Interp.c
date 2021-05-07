@@ -1128,15 +1128,9 @@ return(NULL);
     liste = Alias;
     while(liste)
      { alias = (struct ALIAS *)liste->data;
-       if (!alias->tech_id)
-        { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: error tech_id is NULL for %s.", __func__, alias->acronyme ); }
-       else
-        { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: checking tid %s.", __func__, alias->tech_id );
-          if (!strcmp(alias->acronyme, acronyme) &&
-                    (tech_id==NULL ||
-                     !strcmp(alias->tech_id,tech_id)) )
-           { alias->used++; return(alias); }                                          /* Si deja present, on fait ++ sur le used */
-        }
+       Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: checking tid %s.", __func__, alias->tech_id );
+       if (!strcmp(alias->acronyme, acronyme) && (tech_id==NULL || !strcmp(alias->tech_id,tech_id)) )
+        { alias->used++; return(alias); }                                          /* Si deja present, on fait ++ sur le used */
        liste = liste->next;
      }
     return(NULL);
