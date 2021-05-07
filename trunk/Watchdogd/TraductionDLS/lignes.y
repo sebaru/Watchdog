@@ -206,7 +206,11 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                 | T_MOINS expr T_MOINS T_POUV calcul_expr T_PFERM DONNE calcul_ea_result PVIRGULE
                 {{ int taille;
                    if ($8)
-                    { taille = strlen($5)+strlen($2)+strlen($8->tech_id)+strlen($8->acronyme)+256;
+                    { taille = strlen($5);
+                      taille+= strlen($2);
+                      taille+= strlen($8->tech_id);
+                      taille+= strlen($8->acronyme);
+                      taille+= 256;
                       $$ = New_chaine( taille );
                       if ($8->classe==MNEMO_SORTIE_ANA)
                        { g_snprintf( $$, taille,
@@ -222,6 +226,7 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                        }
                       else
                        { Emettre_erreur_new( "'%s:%s' is unknown", $8->tech_id, $8->acronyme ); }
+                      g_free($8);
                     } else $$=g_strdup("/* test ! */");
                    g_free($2);
                    g_free($5);
