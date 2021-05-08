@@ -58,7 +58,7 @@
  function Creer_horloge ( Response )
   { var card = $('<div></div>').addClass("row bg-transparent")
                .append( $('<div></div>').addClass("col text-center")
-                        .append( $('<img>').attr("src", "/img/calendar.svg" )
+                        .append( $('<img>').attr("src", "/img/syn_horloge.svg" )
                                            .attr("onclick", "Charger_page_horloge('"+Response.tech_id+"')")
                                            .addClass("wtd-synoptique")
                                )

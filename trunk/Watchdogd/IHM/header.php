@@ -204,11 +204,11 @@
     <img src="/img/syn_maison.png" alt="Accueil" class="wtd-menu">
   </a>
 
-  <a class="nav-item"><img id="idMenuImgAccueil" src="" alt="Accueil" class="wtd-menu mr-1"></a>
   <!--<a class="nav-item"><img id="idMasterVignetteActivite" class="wtd-menu mr-1" src=""></a>
   <a class="nav-item"><img id="idMasterVignetteSecuBien" class="wtd-menu mr-1" src=""></a>
   <a class="nav-item"><img id="idMasterVignetteSecuPers" class="wtd-menu mr-1" src=""></a>-->
   <ul class="navbar-nav">
+    <a class="nav-item rounded"><img id="idMenuImgAccueil" src="" alt="Accueil" class="wtd-menu mr-1"></a>
     <a class="nav-link rounded d-none d-sm-inline" href="#"> <span id="idPageTitle">Loading...</span></a>
   </ul>
 
@@ -217,10 +217,10 @@
   </button>
 
   <div class="collapse navbar-collapse" id="navbar-toggled">
-    <ul class="navbar-nav  ml-auto">
-      <a class="nav-link rounded" href="/tech/dashboard"><i class="fas fa-tachometer-alt"></i> <span>Mode Technicien</span></a>
+    <ul class="navbar-nav ml-auto">
+      <a class="nav-item rounded mr-1" href="/tech/dashboard"><img src="/img/menu_parametres.png" alt="Parametres" class="wtd-menu"></a>
       <li class="nav-item dropdown">
-        <a class="nav-link rounded dropdown-toggle" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link rounded align-items-middle dropdown-toggle" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-user text-white"></i> <span id="idUsername">-</span>
         </a>
 
