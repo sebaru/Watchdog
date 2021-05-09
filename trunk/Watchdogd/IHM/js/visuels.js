@@ -15,7 +15,7 @@
      { /*target = "/img/"+visuel.forme+"_default."+visuel.extension;*/
        etat.cligno = false;
        $("#"+idimage).addClass("wtd-img-grayscale");
-       $("#"+idfooter).removeClass("text-white").addClass("text-warning");
+       $("#"+idfooter).removeClass("text-white").addClass("text-warning").text("Hors Comm");
        /*Changer_img_src ( idimage, target );*/
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
@@ -26,7 +26,7 @@
 
     if (etat.mode!="hors_comm")
      { $("#"+idimage).removeClass("wtd-img-grayscale");
-       $("#"+idfooter).addClass("text-white").removeClass("text-warning");
+       $("#"+idfooter).addClass("text-white").removeClass("text-warning").text(etat.libelle);
      }
 /*-------------------------------------------------- Visuel commun -----------------------------------------------------------*/
     if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
