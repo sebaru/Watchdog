@@ -33,7 +33,7 @@
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
    inkscape:window-width="1920"
-   inkscape:window-height="1043"
+   inkscape:window-height="979"
    id="namedview125"
    showgrid="false"
    inkscape:zoom="6.203125"
@@ -353,11 +353,11 @@
    id="g116">
 				<polygon
    class="st9"
-   points="34.6,44.9 34.6,75.7 46.3,75.7 70.6,44.9 "
+   points="46.3,75.7 70.6,44.9 34.6,44.9 34.6,75.7 "
    id="polygon112" />
 				<polygon
    class="st10"
-   points="93.4,44.9 70.6,44.9 46.3,75.7 93.4,75.7 "
+   points="46.3,75.7 93.4,75.7 93.4,44.9 70.6,44.9 "
    id="polygon114" />
 			</g>
 		</g>
