@@ -77,9 +77,9 @@
     return(id);
   }
 /******************************************************************************************************************************/
-/* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
-/* Entrée: l'id a récupérer                                                                                                   */
-/* Sortie: une structure hébergeant l'entrée analogique                                                                       */
+/* Charger_confDB_MSG: Recupération de la conf des messages                                                                   */
+/* Entrée: néant                                                                                                              */
+/* Sortie: le message est chargé en mémoire                                                                                   */
 /******************************************************************************************************************************/
  void Charger_confDB_MSG ( void )
   { gchar requete[512];

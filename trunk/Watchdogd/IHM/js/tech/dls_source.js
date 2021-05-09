@@ -42,8 +42,8 @@
     Send_to_API ( "PUT", "/api/dls/source", json_request, function(Response)
      { SourceCode.getDoc().setValue(Response.sourcecode);
        $("#idErrorLog").html(Response.errorlog.replace(/(?:\r\n|\r|\n)/g, '<br>'));
-            if (Response.compil_status==7) { $("#idErrorLog").addClass("alert-success"); }                              /* OK */
-       else if (Response.compil_status==8) { $("#idErrorLog").addClass("alert-warning"); }                         /* Warning */
+            if (Response.compil_status==6) { $("#idErrorLog").addClass("alert-success"); }                              /* OK */
+       else if (Response.compil_status==7) { $("#idErrorLog").addClass("alert-warning"); }                         /* Warning */
        else $("#idErrorLog").addClass("alert-danger");
      }, null);
   }

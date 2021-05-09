@@ -199,6 +199,7 @@
     gboolean cligno;
     gint     last_change;
     gint     changes;
+    gchar   *libelle; /* libelle issu du plugin DLS */
   };
 
  struct DLS_MESSAGES

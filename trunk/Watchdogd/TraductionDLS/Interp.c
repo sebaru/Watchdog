@@ -867,14 +867,15 @@
 /******************************************************************************************************************************/
  struct ACTION *New_action_visuel( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
-    int taille, mode, coul, cligno;
+    int taille, mode;
     gchar *color;
 
     gchar *mode_string = Get_option_chaine ( options, MODE, NULL );
     if (mode_string == NULL) mode = Get_option_entier ( options, MODE, 0   );
-    coul   = Get_option_entier ( options, COLOR, 0  );
-    cligno = Get_option_entier ( options, CLIGNO, 0 );
-    taille = 512;
+    gint   coul    = Get_option_entier ( options, COLOR, 0  );
+    gint   cligno  = Get_option_entier ( options, CLIGNO, 0 );
+    gchar *libelle = Get_option_chaine ( options, T_LIBELLE, "pas de libellé" );
+    taille = 768;
     action = New_action();
     action->alors = New_chaine( taille );
     switch (coul)
@@ -890,13 +891,13 @@
      }
     if (mode_string==NULL)
      { g_snprintf( action->alors, taille,
-                   "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, \"%d\", \"%s\", %d );\n",
-                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno );
+                   "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, \"%d\", \"%s\", %d, \"%s\" );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno, libelle );
      }
     else
      { g_snprintf( action->alors, taille,
-                   "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, \"%s\", \"%s\", %d );\n",
-                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode_string, color, cligno );
+                   "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, \"%s\", \"%s\", %d, \"%s\" );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode_string, color, cligno, libelle );
      }
 
     return(action);

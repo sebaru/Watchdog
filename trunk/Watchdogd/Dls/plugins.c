@@ -425,7 +425,7 @@
      { struct DLS_VISUEL *visu = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(visu->tech_id, plugin->tech_id))
-        { Dls_data_set_VISUEL ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&visu, 0, "black", FALSE ); }
+        { Dls_data_set_VISUEL ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&visu, 0, "black", FALSE, "resetted" ); }
      }
 
     liste_bit = Partage->Dls_data_DO;                                            /* Decharge toutes les sorties TOR du module */
