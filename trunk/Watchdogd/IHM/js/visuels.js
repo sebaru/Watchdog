@@ -12,11 +12,11 @@
     console.debug(visuel);
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
          if (etat.mode=="hors_comm")
-     { target = "/img/"+visuel.forme+"_default."+visuel.extension;
+     { /*target = "/img/"+visuel.forme+"_default."+visuel.extension;*/
        etat.cligno = false;
        $("#"+idimage).addClass("wtd-img-grayscale");
        $("#"+idfooter).removeClass("text-white").addClass("text-warning");
-       Changer_img_src ( idimage, target );
+       /*Changer_img_src ( idimage, target );*/
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else
