@@ -277,7 +277,7 @@ console.log("Changer_etat_visuel " + visuel.ihm_affichage );
                       )
                .append( $('<div></div>').addClass('w-100') )
                .append( $('<div></div>').addClass("col text-center")
-                                        .append ( $("<span></span>").addClass("text-white").text(Response.libelle ))
+                                        .append ( $("<span></span>").addClass("text-white").text(Response.libelle))
                                         .attr ( "id", id+"-footer-text" )
                       )
                .attr ( "id", id );

@@ -118,9 +118,11 @@
     if (cadrans.length!=1) return;
     cadran = cadrans[0];
     console.debug(etat);
-    if (etat.valeur>cadran.maximum) etat.valeur=cadran.maximum;
-    if (etat.valeur<cadran.minimum) etat.valeur=cadran.minimum;
-    var position = 100*(etat.valeur-cadran.minimum)/(cadran.maximum-cadran.minimum);
+    minimum = parseFloat(cadran.minimum);
+    maximum = parseFloat(cadran.maximum);
+    if (etat.valeur<minimum) etat.valeur=minimum;
+    if (etat.valeur>maximum) etat.valeur=maximum;
+    var position = 100*(etat.valeur-minimum)/(maximum-minimum);
 
 console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.seuil_ntb+" nb="+cadran.seuil_nb+" nh="+cadran.seuil_nh+" nth="+cadran.seuil_nth);
 
