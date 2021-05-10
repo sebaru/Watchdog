@@ -249,6 +249,10 @@
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Classe du Capteur</label>
 						     <select id="idModalEditAICapteur" class="custom-select border-info" placeholder="Classe du capteur">
+             <option value="AC-CURRENT-10A">AC Current 0-10 A</option>
+             <option value="AC-CURRENT-25A">AC Current 0-25 A</option>
+             <option value="AC-CURRENT-50A">AC Current 0-50 A</option>
+             <option value="AC-CURRENT-100A">AC Current 0-100 A</option>
              <option value="ADP1000-ORP" selected>ADP1000 - ORP</option>
              <option value="ADP1000-PH">ADP1000 - PHSensor</option>
              <option value="TMP1200_0-PT100-3850">TMP1200 - PT100 (3850ppm)</option>

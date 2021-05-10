@@ -214,13 +214,33 @@
                               break;
           case "TMP1200_0-PT100-3850":
                               $('#idModalEditAIUnite').val("°C").prop('disabled', true).trigger('change');
-                              $('#idModalEditAIMin').val("-200.0").prop('disabled', true);
-                              $('#idModalEditAIMax').val("850.0").prop('disabled', true);
+                              $('#idModalEditAIMin').val("-200,0").prop('disabled', true);
+                              $('#idModalEditAIMax').val("850,0").prop('disabled', true);
                               break;
           case "TMP1200_0-PT100-3920":
                               $('#idModalEditAIUnite').val("°C").prop('disabled', true).trigger('change');
-                              $('#idModalEditAIMin').val("-200.0").prop('disabled', true);
-                              $('#idModalEditAIMax').val("850.0").prop('disabled', true);
+                              $('#idModalEditAIMin').val("-200,0").prop('disabled', true);
+                              $('#idModalEditAIMax').val("850,0").prop('disabled', true);
+                              break;
+          case "AC-CURRENT-10A":
+                              $('#idModalEditAIUnite').val("A").prop('disabled', true).trigger('change');
+                              $('#idModalEditAIMin').val("0,0").prop('disabled', true);
+                              $('#idModalEditAIMax').val("10,0").prop('disabled', true);
+                              break;
+          case "AC-CURRENT-25A":
+                              $('#idModalEditAIUnite').val("A").prop('disabled', true).trigger('change');
+                              $('#idModalEditAIMin').val("0,0").prop('disabled', true);
+                              $('#idModalEditAIMax').val("25,0").prop('disabled', true);
+                              break;
+          case "AC-CURRENT-50A":
+                              $('#idModalEditAIUnite').val("A").prop('disabled', true).trigger('change');
+                              $('#idModalEditAIMin').val("0,0").prop('disabled', true);
+                              $('#idModalEditAIMax').val("50,0").prop('disabled', true);
+                              break;
+          case "AC-CURRENT-100A":
+                              $('#idModalEditAIUnite').val("A").prop('disabled', true).trigger('change');
+                              $('#idModalEditAIMin').val("0,0").prop('disabled', true);
+                              $('#idModalEditAIMax').val("100,0").prop('disabled', true);
                               break;
           default           : $('#idModalEditAIUnite').prop('disabled', false);
                               $('#idModalEditAIMin').prop('disabled', false);
