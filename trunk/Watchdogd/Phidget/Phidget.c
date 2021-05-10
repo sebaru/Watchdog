@@ -177,7 +177,7 @@ end:
 /* Entrée: le channel, le contexte, et la description de l'erreur                                                             */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void CCONV Phidget_onVoltableInputError (PhidgetHandle ph, void *ctx, Phidget_ErrorEventCode code, const char* description)
+ static void CCONV Phidget_onAIError (PhidgetHandle ph, void *ctx, Phidget_ErrorEventCode code, const char* description)
   { struct PHIDGET_ANALOGINPUT *canal = ctx;
     if (!canal->dls_ai)
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
@@ -193,6 +193,21 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void CCONV Phidget_onVoltableInputChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur )
+  { struct PHIDGET_ANALOGINPUT *canal = ctx;
+    if (!canal->dls_ai)
+     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
+       return;
+     }
+    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
+              "%s: '%s':'%s' = %f %s", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur, canal->dls_ai->unite );
+    Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
+  }
+/******************************************************************************************************************************/
+/* Phidget_onTemperatureSensorChange: Appelé quand un module I/O Temperaute a changé de valeur                                */
+/* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void CCONV Phidget_onTemperatureSensorChange ( PhidgetTemperatureSensorHandle handle, void *ctx, double valeur )
   { struct PHIDGET_ANALOGINPUT *canal = ctx;
     if (!canal->dls_ai)
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
@@ -226,6 +241,14 @@ end:
 
     if (!strcasecmp(canal->capteur, "ADP1000-ORP"))
      { if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_2V ) != EPHIDGET_OK )
+        { Phidget_print_error(); }
+     }
+    else if (!strcasecmp(canal->capteur, "TMP1200_0-PT100-3850"))
+     { if ( PhidgetTemperatureSensor_setRTDType( (PhidgetTemperatureSensorHandle)canal->handle, RTD_TYPE_PT100_3850 ) != EPHIDGET_OK )
+        { Phidget_print_error(); }
+     }
+    else if (!strcasecmp(canal->capteur, "TMP1200_0-PT100-3920"))
+     { if ( PhidgetTemperatureSensor_setRTDType( (PhidgetTemperatureSensorHandle)canal->handle, RTD_TYPE_PT100_3920 ) != EPHIDGET_OK )
         { Phidget_print_error(); }
      }
   }
@@ -334,13 +357,25 @@ end:
     else if (!strcasecmp(capteur, "ADP1000-PH"))
      { if ( PhidgetPHSensor_create( (PhidgetPHSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( PhidgetPHSensor_setOnPHChangeHandler( (PhidgetPHSensorHandle)canal->handle, Phidget_onPHSensorChange, canal ) ) goto error;
-       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onVoltableInputError, canal ) ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) ) goto error;
      }
     else if (!strcasecmp(capteur, "ADP1000-ORP"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
    	   if ( PhidgetVoltageInput_setOnVoltageChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
                                                             Phidget_onVoltableInputChange, canal ) != EPHIDGET_OK ) goto error;
-       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onVoltableInputError, canal ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+     }
+    else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850"))
+     { if ( PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+   	   if ( PhidgetTemperatureSensor_setOnTemperatureChangeHandler( (PhidgetTemperatureSensorHandle)canal->handle,
+                                                                     Phidget_onTemperatureSensorChange, canal ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+     }
+    else if (!strcasecmp(capteur, "TMP1200_0-PT100-3920"))
+     { if ( PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+   	   if ( PhidgetTemperatureSensor_setOnTemperatureChangeHandler( (PhidgetTemperatureSensorHandle)canal->handle,
+                                                                     Phidget_onTemperatureSensorChange, canal ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
      }
     else
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,

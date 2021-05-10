@@ -251,6 +251,8 @@
 						     <select id="idModalEditAICapteur" class="custom-select border-info" placeholder="Classe du capteur">
              <option value="ADP1000-ORP" selected>ADP1000 - ORP</option>
              <option value="ADP1000-PH">ADP1000 - PHSensor</option>
+             <option value="TMP1200_0-PT100-3850">TMP1200 - PT100 (3850ppm)</option>
+             <option value="TMP1200_0-PT100-3920">TMP1200 - PT100 (3920ppm)</option>
              <option value="autre">Autre</option>
            </select>
      					</div>

@@ -276,6 +276,8 @@
     gchar *phidget_classe;
          if (!strcasecmp ( capteur, "ADP1000-ORP" )) phidget_classe="VoltageInput";
     else if (!strcasecmp ( capteur, "ADP1000-PH" ))  phidget_classe="PHSensor";
+    else if (!strcasecmp ( capteur, "TMP1200_0-PT100-3850" ))  phidget_classe="TemperatureSensor";
+    else if (!strcasecmp ( capteur, "TMP1200_0-PT100-3920" ))  phidget_classe="TemperatureSensor";
     else phidget_classe="Unknown";
 
 /*    if (! strcasecmp( classe, "DI" ) )

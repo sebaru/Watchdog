@@ -212,6 +212,16 @@
                               $('#idModalEditAIMin').val("0").prop('disabled', true);
                               $('#idModalEditAIMax').val("14").prop('disabled', true);
                               break;
+          case "TMP1200_0-PT100-3850":
+                              $('#idModalEditAIUnite').val("°C").prop('disabled', true).trigger('change');
+                              $('#idModalEditAIMin').val("-200.0").prop('disabled', true);
+                              $('#idModalEditAIMax').val("850.0").prop('disabled', true);
+                              break;
+          case "TMP1200_0-PT100-3920":
+                              $('#idModalEditAIUnite').val("°C").prop('disabled', true).trigger('change');
+                              $('#idModalEditAIMin').val("-200.0").prop('disabled', true);
+                              $('#idModalEditAIMax').val("850.0").prop('disabled', true);
+                              break;
           default           : $('#idModalEditAIUnite').prop('disabled', false);
                               $('#idModalEditAIMin').prop('disabled', false);
                               $('#idModalEditAIMax').prop('disabled', false);
