@@ -259,14 +259,14 @@ end:
      { if (Phidget_setDataInterval( handle, canal->intervalle*1000 ) != EPHIDGET_OK)	Phidget_print_error(); }
 
     if (!strcasecmp(canal->capteur, "ADP1000-PH"))
-     { if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_400mV ) != EPHIDGET_OK )
-        { Phidget_print_error(); }
+     { /*if ( PhidgetVoltageInput_setVoltageRange( (PhidgetPHSensorHandle)canal->handle, VOLTAGE_RANGE_400mV ) != EPHIDGET_OK )
+        { Phidget_print_error(); }*/
        if ( PhidgetVoltageInput_setSensorType( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_1130_PH ) != EPHIDGET_OK )
         { Phidget_print_error(); }
      }
     else if (!strcasecmp(canal->capteur, "ADP1000-ORP"))
-     { if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_2V ) != EPHIDGET_OK )
-        { Phidget_print_error(); }
+     { /*if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_2V ) != EPHIDGET_OK )
+        { Phidget_print_error(); }*/
        if ( PhidgetVoltageInput_setSensorType( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_1130_ORP ) != EPHIDGET_OK )
         { Phidget_print_error(); }
      }
