@@ -157,6 +157,21 @@ end:
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Phidget_onAIError: Appelé quand une erreur est constatée sur le module Phidget                                             */
+/* Entrée: le channel, le contexte, et la description de l'erreur                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void CCONV Phidget_onAIError (PhidgetHandle ph, void *ctx, Phidget_ErrorEventCode code, const char* description)
+  { struct PHIDGET_ANALOGINPUT *canal = ctx;
+    if (!canal->dls_ai)
+     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
+       return;
+     }
+    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;", __func__,
+              canal->dls_ai->tech_id, canal->dls_ai->acronyme, description, code );
+    canal->dls_ai->inrange = FALSE;
+  }
+/******************************************************************************************************************************/
 /* Phidget_onPHSensorChange: Appelé quand un module I/O PHSensor a changé de valeur                                           */
 /* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
 /* Sortie: néant                                                                                                              */
@@ -172,21 +187,6 @@ end:
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
   }
 
-/******************************************************************************************************************************/
-/* Phidget_onVoltableInputError: Appelé quand une erreur est constatée sur le module Phidget                                  */
-/* Entrée: le channel, le contexte, et la description de l'erreur                                                             */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void CCONV Phidget_onAIError (PhidgetHandle ph, void *ctx, Phidget_ErrorEventCode code, const char* description)
-  { struct PHIDGET_ANALOGINPUT *canal = ctx;
-    if (!canal->dls_ai)
-     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
-       return;
-     }
-    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;", __func__,
-              canal->dls_ai->tech_id, canal->dls_ai->acronyme, description, code );
-    canal->dls_ai->inrange = FALSE;
-  }
 /******************************************************************************************************************************/
 /* Phidget_onTemperatureSensorChange: Appelé quand un module I/O Temperaute a changé de valeur                                */
 /* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
@@ -207,29 +207,25 @@ end:
 /* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void CCONV Phidget_onVoltageInputChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur_avant_ech )
+ static void CCONV Phidget_onVoltageInputChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur,
+                                                  Phidget_UnitInfo *sensorUnit )
   { struct PHIDGET_ANALOGINPUT *canal = ctx;
-    gdouble valeur;
     if (!canal->dls_ai)
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
        return;
      }
-         if (!strcasecmp(canal->capteur, "AC-CURRENT-10A"))  { valeur = 10.0  * valeur_avant_ech / 5.0; }
-    else if (!strcasecmp(canal->capteur, "AC-CURRENT-25A"))  { valeur = 25.0  * valeur_avant_ech / 5.0; }
-    else if (!strcasecmp(canal->capteur, "AC-CURRENT-50A"))  { valeur = 50.0  * valeur_avant_ech / 5.0; }
-    else if (!strcasecmp(canal->capteur, "AC-CURRENT-100A")) { valeur = 100.0 * valeur_avant_ech / 5.0; }
-    else valeur = 0.0;
 
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %f %s", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur, canal->dls_ai->unite );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
   }
 /******************************************************************************************************************************/
-/* Phidget_onSensorChange: Appelé quand un module I/O RatioInput a changé de valeur                                           */
+/* Phidget_onVoltageRatoiInputChange: Appelé quand un module I/O RatioInput a changé de valeur                                */
 /* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void CCONV Phidget_onSensorChange ( PhidgetVoltageRatioInputHandle ch, void *ctx, double valeur, Phidget_UnitInfo *sensorUnit)
+ static void CCONV Phidget_onVoltageRatioInputChange ( PhidgetVoltageRatioInputHandle ch, void *ctx, double valeur,
+                                                       Phidget_UnitInfo *sensorUnit)
   { struct PHIDGET_ANALOGINPUT *canal = ctx;
     if (!canal->dls_ai)
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
@@ -262,8 +258,16 @@ end:
     if (canal->intervalle)
      { if (Phidget_setDataInterval( handle, canal->intervalle*1000 ) != EPHIDGET_OK)	Phidget_print_error(); }
 
-    if (!strcasecmp(canal->capteur, "ADP1000-ORP"))
+    if (!strcasecmp(canal->capteur, "ADP1000-PH"))
+     { if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_400mV ) != EPHIDGET_OK )
+        { Phidget_print_error(); }
+       if ( PhidgetVoltageInput_setSensorType( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_1130_PH ) != EPHIDGET_OK )
+        { Phidget_print_error(); }
+     }
+    else if (!strcasecmp(canal->capteur, "ADP1000-ORP"))
      { if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_2V ) != EPHIDGET_OK )
+        { Phidget_print_error(); }
+       if ( PhidgetVoltageInput_setSensorType( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_1130_ORP ) != EPHIDGET_OK )
         { Phidget_print_error(); }
      }
     else if (!strcasecmp(canal->capteur, "TMP1200_0-PT100-3850"))
@@ -412,14 +416,14 @@ end:
      }
     else if (!strcasecmp(classe, "VoltageInput"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
-   	   if ( PhidgetVoltageInput_setOnVoltageChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
-                                                            Phidget_onVoltageInputChange, canal ) != EPHIDGET_OK ) goto error;
+   	   if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
+                                                           Phidget_onVoltageInputChange, canal ) != EPHIDGET_OK ) goto error;
        if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
      }
     else if (!strcasecmp(classe, "VoltageRatioInput"))
      { if ( PhidgetVoltageRatioInput_create( (PhidgetVoltageRatioInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
    	   if ( PhidgetVoltageRatioInput_setOnSensorChangeHandler( (PhidgetVoltageRatioInputHandle)canal->handle,
-                                                                Phidget_onSensorChange, canal ) != EPHIDGET_OK ) goto error;
+                                                                Phidget_onVoltageRatioInputChange, canal ) != EPHIDGET_OK ) goto error;
        if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
      }
     else
