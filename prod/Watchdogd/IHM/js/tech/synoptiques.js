@@ -121,9 +121,9 @@
 
     images = [ "syn_maison.png", "syn_buanderie.png", "syn_camera.png", "syn_chambre_double.png", "syn_chambre_simple.png",
                "syn_communication.png", "syn_confort.png", "syn_cuisine.png", "syn_energie.png", "syn_electricite.png",
-               "syn_garage.png", "syn_jardin.png", "syn_piscine.svg", "syn_luminaires.png", "syn_panneau_solaire.png",
-               "syn_salle_de_bain.png", "syn_jeux.png", "syn_salon.png", "syn_volets.png", "syn_spot.svg",
-               "syn_maintenance.svg", "syn_parametres.svg" ];
+               "syn_garage.png", "syn_jardin.png", "syn_piscine.png", "syn_luminaires.png", "syn_panneau_solaire.png",
+               "syn_salle_de_bain.png", "syn_jeux.png", "syn_salon.png", "syn_volets.png", "syn_spot.png",
+               "syn_maintenance.png", "syn_parametres.png", "syn_horloge.png", "syn_reseau.png", "syn_sonorisation.png" ];
 
     liste = $("#idSynEditImageListe");
     liste.empty();

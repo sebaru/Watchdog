@@ -2241,7 +2241,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-  
+
     database_version = 5616;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
@@ -2263,6 +2263,10 @@ fin:
     g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='sms', ihm_affichage='cadre', extension='jpg'" );
     Lancer_requete_SQL ( db, requete );
     g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='ampoule', ihm_affichage='simple', extension='png'" );
+    Lancer_requete_SQL ( db, requete );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='chaudiere_gaz', ihm_affichage='simple', extension='svg'" );
+    Lancer_requete_SQL ( db, requete );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='auto_manu', ihm_affichage='simple', extension='svg'" );
     Lancer_requete_SQL ( db, requete );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "

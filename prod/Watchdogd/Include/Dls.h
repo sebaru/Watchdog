@@ -39,7 +39,6 @@
     DLS_COMPIL_ERROR_LOAD_LOG,
     DLS_COMPIL_SYNTAX_ERROR,
     DLS_COMPIL_ERROR_FORK_GCC,
-    DLS_COMPIL_ERROR_NEED_RECOMPIL,
     DLS_COMPIL_OK,
     DLS_COMPIL_OK_WITH_WARNINGS,
     NBR_DLS_COMPIL_STATUS
@@ -200,6 +199,7 @@
     gboolean cligno;
     gint     last_change;
     gint     changes;
+    gchar   *libelle; /* libelle issu du plugin DLS */
   };
 
  struct DLS_MESSAGES

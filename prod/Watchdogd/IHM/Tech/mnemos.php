@@ -14,37 +14,37 @@
 <hr>
           <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#idTabEntreeTor">
-                  <img style="width: 30px" data-toggle="tooltip" title="Entrées TOR"
+                  <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Entrées TOR"
                        src="/img/entree.png" />Entrées TOR</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabEntreeAna">
-                  <img style="width: 30px" data-toggle="tooltip" title="Entrées ANA"
+                  <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Entrées ANA"
                        src="/img/entree_analogique.png" />Entrées ANA</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieTor">
-                  <img style="width: 30px" data-toggle="tooltip" title="Sorties TOR"
+                  <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Sorties TOR"
                        src="/img/sortie.png" />Sorties TOR</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieAna">
-                  <img style="width: 30px" data-toggle="tooltip" title="Sorties ANA"
+                  <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Sorties ANA"
                        src="/img/sortie_analogique.png" />Sorties ANA</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabRegistre">
-                  <img style="width: 30px" data-toggle="tooltip" title="Registres"
+                  <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Registres"
                        src="/img/calculatrice.png" />Registres</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabCptImp">
-                  <img style="width: 30px" data-toggle="tooltip" title="Compteurs d'impulsion"
+                  <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Compteurs d'impulsion"
                        src="/img/front_montant.png" />Compteurs d'impulsion</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabCptH">
-                  <img style="width: 30px" data-toggle="tooltip" title="Compteurs horaire"
+                  <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Compteurs horaire"
                        src="/img/compteur_horaire.png" />Compteurs horaire</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabTempo">
-                  <img style="width: 30px" data-toggle="tooltip" title="Temporisations"
+                  <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Temporisations"
                        src="/img/sablier.png" />Tempos</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabHorloge">
-                  <img style="width: 30px" data-toggle="tooltip" title="Horloges"
-                       src="/img/calendar.svg" /> Horloges</a></li>
+                  <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Horloges"
+                       src="/img/bit_horloge.png" /> Horloges</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabWatchdog">
-                  <img style="width: 30px" data-toggle="tooltip" title="Watchdogs"
+                  <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Watchdogs"
                        src="/img/countdown.svg" /> Watchdogs</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabMessage">
-                  <img style="width: 30px" data-toggle="tooltip" title="Messages"
+                  <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Messages"
                        src="/img/message.png" /> Messages</a></li>
           </ul>
 

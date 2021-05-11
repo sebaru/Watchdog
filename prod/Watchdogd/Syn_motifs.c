@@ -360,5 +360,6 @@
     Json_node_add_string ( RootNode, "mode",      bit->mode  );
     Json_node_add_string ( RootNode, "color",     bit->color );
     Json_node_add_bool   ( RootNode, "cligno",    bit->cligno );
+    Json_node_add_string ( RootNode, "libelle",   bit->libelle );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

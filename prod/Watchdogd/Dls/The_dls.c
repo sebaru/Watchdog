@@ -1472,7 +1472,7 @@ end:
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
  void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *visu_p,
-                            gchar *mode, gchar *color, gboolean cligno )
+                            gchar *mode, gchar *color, gboolean cligno, gchar *libelle )
   { struct DLS_VISUEL *visu;
 
     if (!visu_p || !*visu_p)
@@ -1518,7 +1518,8 @@ end:
            }
           else { g_snprintf( visu->mode,  sizeof(visu->mode), mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
                  g_snprintf( visu->color, sizeof(visu->color), "%s", color );
-                 visu->cligno = cligno;
+                 visu->cligno  = cligno;
+                 visu->libelle = libelle;
                }
 
           visu->last_change = Partage->top;                                                             /* Date de la photo ! */

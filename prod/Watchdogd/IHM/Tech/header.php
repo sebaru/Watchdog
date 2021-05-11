@@ -29,6 +29,7 @@
         .courbe-dashboard { height: 300px; }
 
         .wtd-synoptique-preview { height: 80px; }
+        .wtd-img-bit-interne { width: 40px; }
       </style>
 
     </head>

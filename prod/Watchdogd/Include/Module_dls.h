@@ -85,7 +85,7 @@
  extern gfloat Dls_data_get_R ( gchar *tech_id, gchar *acronyme, gpointer *r_p );
  extern gchar *Dls_dyn_string ( gchar *format, gint type_bit, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p );
  extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *visuel_p,
-                                   gchar *mode, gchar *color, gboolean cligno );
+                                   gchar *mode, gchar *color, gboolean cligno, gchar *libelle );
  extern void Dls_PID_reset ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input );
  extern gdouble Dls_PID ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input,
                           gchar *consigne_tech_id, gchar *consigne_acronyme, gpointer *r_consigne,

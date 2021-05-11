@@ -339,7 +339,6 @@
     if (!dls->handle)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                    "%s: Candidat '%s' dlopen failed (%s)", __func__, dls->tech_id, dlerror() );
-       Set_compil_status_plugin_dlsDB( dls->tech_id, DLS_COMPIL_ERROR_NEED_RECOMPIL, "Function Missing" );
        Dls_stop_plugin_reel ( dls->tech_id, dls );
        return(FALSE);
      }
@@ -348,7 +347,6 @@
     if (!dls->go)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                  "%s: Candidat '%s' failed sur absence GO", __func__, dls->tech_id );
-       Set_compil_status_plugin_dlsDB( dls->tech_id, DLS_COMPIL_ERROR_NEED_RECOMPIL, "Function Missing" );
        Dls_stop_plugin_reel ( dls->tech_id, dls );
        dlclose( dls->handle );
        dls->handle = NULL;
@@ -358,7 +356,6 @@
     if (!dls->version)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                 "%s: Candidat '%s' does not provide version function", __func__, dls->tech_id );
-       Set_compil_status_plugin_dlsDB( dls->tech_id, DLS_COMPIL_ERROR_NEED_RECOMPIL, "Function Missing" );
        Dls_stop_plugin_reel ( dls->tech_id, dls );
        dlclose( dls->handle );
        dls->handle = NULL;
@@ -428,7 +425,7 @@
      { struct DLS_VISUEL *visu = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(visu->tech_id, plugin->tech_id))
-        { Dls_data_set_VISUEL ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&visu, 0, "black", FALSE ); }
+        { Dls_data_set_VISUEL ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&visu, 0, "black", FALSE, "resetted" ); }
      }
 
     liste_bit = Partage->Dls_data_DO;                                            /* Decharge toutes les sorties TOR du module */

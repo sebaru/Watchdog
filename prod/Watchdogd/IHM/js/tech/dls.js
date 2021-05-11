@@ -6,7 +6,6 @@
                        [ "Error loading log file", "outline-danger" ],
                        [ "Syntax error", "outline-danger" ],
                        [ "Error Fork GCC", "outline-danger" ],
-                       [ "Error: Need compiling again", "outline-danger" ],
                        [ "OK", "success" ],
                        [ "Warnings", "outline-warning" ],
                      ];
