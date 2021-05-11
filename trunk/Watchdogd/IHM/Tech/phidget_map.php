@@ -257,7 +257,7 @@
              <option value="ADP1000-PH">ADP1000 - PHSensor</option>
              <option value="TMP1200_0-PT100-3850">TMP1200 - PT100 (3850ppm)</option>
              <option value="TMP1200_0-PT100-3920">TMP1200 - PT100 (3920ppm)</option>
-             <option value="autre">Autre</option>
+             <option value="TEMP_1124_0">TEMP 1124_0</option>
            </select>
      					</div>
   					</div>

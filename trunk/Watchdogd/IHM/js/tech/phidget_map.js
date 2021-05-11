@@ -242,6 +242,11 @@
                               $('#idModalEditAIMin').val("0,0").prop('disabled', true);
                               $('#idModalEditAIMax').val("100,0").prop('disabled', true);
                               break;
+          case "TEMP_1124_0":
+                              $('#idModalEditAIUnite').val("°C").prop('disabled', true).trigger('change');
+                              $('#idModalEditAIMin').val("-30,0").prop('disabled', true);
+                              $('#idModalEditAIMax').val("80,0").prop('disabled', true);
+                              break;
           default           : $('#idModalEditAIUnite').prop('disabled', false);
                               $('#idModalEditAIMin').prop('disabled', false);
                               $('#idModalEditAIMax').prop('disabled', false);
