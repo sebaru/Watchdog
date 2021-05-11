@@ -570,11 +570,13 @@ unite:          modulateur ENTIER HEURE ENTIER
                   {{ $$=New_condition_vars( $1, "vars->bit_danger_fixe"); }}
                 | barre T_POUV expr T_PFERM
                 {{ int taille;
-                   taille = strlen($3)+5;
-                   $$ = New_chaine( taille );
-                   if ($1) { g_snprintf( $$, taille, "!(%s)", $3 ); }
-                   else    { g_snprintf( $$, taille, "(%s)", $3 ); }
-                   g_free($3);
+                   if ($3)
+                    { taille = strlen($3)+5;
+                      $$ = New_chaine( taille );
+                      if ($1) { g_snprintf( $$, taille, "!(%s)", $3 ); }
+                      else    { g_snprintf( $$, taille, "(%s)", $3 ); }
+                    } else $$=NULL;
+                   if ($3) g_free($3);
                 }}
 /************************************** Partie Logique : gestion des comparaisons *********************************************/
                 | barre ID suffixe liste_options comparateur                                            /* Gestion des comparaisons */
