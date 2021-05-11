@@ -117,14 +117,14 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Phidget_print_error ( struct PHIDGET_ANALOGINPUT *canal )
-  {	PhidgetReturnCode errorCode;
+  { PhidgetReturnCode errorCode;
     size_t errorDetailLen = 256;
     const gchar* errorString;
     gchar errorDetail[errorDetailLen];
     Phidget_getLastError(&errorCode, &errorString, errorDetail, &errorDetailLen);
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR,
               "%s: Phidget Error %d for '%s' (%s) : %s - %s", __func__, errorCode, canal->capteur, canal->classe, errorString, errorDetail );
- 	}
+  }
 /******************************************************************************************************************************/
 /* Charger_un_Hub: Charge un Hub dans la librairie                                                                            */
 /* Entrée: La structure Json representant le hub                                                                              */
@@ -182,7 +182,7 @@ end:
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
        return;
      }
-	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
+    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %f", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
   }
@@ -203,12 +203,27 @@ end:
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
   }
 /******************************************************************************************************************************/
+/* Phidget_onVoltableInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                  */
+/* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void CCONV Phidget_onVoltageInputChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur )
+  { struct PHIDGET_ANALOGINPUT *canal = ctx;
+    if (!canal->dls_ai)
+     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
+       return;
+     }
+    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
+              "%s: '%s':'%s' = %f %s", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur, canal->dls_ai->unite );
+    Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
+  }
+/******************************************************************************************************************************/
 /* Phidget_onVoltageInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                   */
 /* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void CCONV Phidget_onVoltageInputChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur,
-                                                  Phidget_UnitInfo *sensorUnit )
+ static void CCONV Phidget_onVoltageSensorChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur,
+                                                   Phidget_UnitInfo *sensorUnit )
   { struct PHIDGET_ANALOGINPUT *canal = ctx;
     if (!canal->dls_ai)
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
@@ -224,8 +239,8 @@ end:
 /* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void CCONV Phidget_onVoltageRatioInputChange ( PhidgetVoltageRatioInputHandle ch, void *ctx, double valeur,
-                                                       Phidget_UnitInfo *sensorUnit)
+ static void CCONV Phidget_onVoltageRatioSensorChange ( PhidgetVoltageRatioInputHandle ch, void *ctx, double valeur,
+                                                        Phidget_UnitInfo *sensorUnit)
   { struct PHIDGET_ANALOGINPUT *canal = ctx;
     if (!canal->dls_ai)
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
@@ -243,7 +258,7 @@ end:
 /******************************************************************************************************************************/
  static void CCONV Phidget_onAnalogInputAttachHandler ( PhidgetHandle handle, void *ctx )
   { struct PHIDGET_ANALOGINPUT *canal = ctx;
-	   int serial_number, nbr_canaux, port, num_canal;
+    int serial_number, nbr_canaux, port, num_canal;
     const char *classe;
 
     Phidget_getDeviceSerialNumber(handle, &serial_number);
@@ -252,22 +267,17 @@ end:
     Phidget_getChannel( handle, &num_canal );
     Phidget_getChannelClassName( handle, &classe );
 
-	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
+    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
               "%s: Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached with intervalle %d (sec). %d channels available.",
               __func__, serial_number, port, classe, num_canal, canal->intervalle, nbr_canaux );
     if (canal->intervalle)
-     { if (Phidget_setDataInterval( handle, canal->intervalle*1000 ) != EPHIDGET_OK)	Phidget_print_error(canal); }
+     { if (Phidget_setDataInterval( handle, canal->intervalle*1000 ) != EPHIDGET_OK) Phidget_print_error(canal); }
 
     if (!strcasecmp(canal->capteur, "ADP1000-PH"))
-     { /*if ( PhidgetVoltageInput_setVoltageRange( (PhidgetPHSensorHandle)canal->handle, VOLTAGE_RANGE_400mV ) != EPHIDGET_OK )
-        { Phidget_print_error(canal); }*/
-       if ( PhidgetVoltageInput_setSensorType( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_1130_PH ) != EPHIDGET_OK )
-        { Phidget_print_error(canal); }
+     { /**/
      }
     else if (!strcasecmp(canal->capteur, "ADP1000-ORP"))
-     { /*if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_2V ) != EPHIDGET_OK )
-        { Phidget_print_error(canal); }*/
-       if ( PhidgetVoltageInput_setSensorType( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_1130_ORP ) != EPHIDGET_OK )
+     { if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_2V ) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "TMP1200_0-PT100-3850"))
@@ -306,7 +316,7 @@ end:
 /******************************************************************************************************************************/
  static void CCONV Phidget_onAnalogInputDetachHandler ( PhidgetHandle handle, void *ctx )
   { struct PHIDGET_ANALOGINPUT *canal = ctx;
-	   //You can access the Phidget that fired the event by using the first parameter
+    //You can access the Phidget that fired the event by using the first parameter
     //of the event handler
     int serial_number, nbr_canaux, port, num_canal;
     const char *classe;
@@ -317,7 +327,7 @@ end:
     Phidget_getChannel( handle, &num_canal );
     Phidget_getChannelClassName( handle, &classe );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, 0.0, FALSE );
-	   Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
+    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
               "%s: Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') detached . %d channels available.",
               __func__, serial_number, port, classe, num_canal, nbr_canaux );
   }
@@ -328,23 +338,23 @@ end:
 /******************************************************************************************************************************/
  static void Phidget_set_config ( struct PHIDGET_ANALOGINPUT *canal, gint serial, gint port, gboolean is_hub_port )
    { if (Phidget_setDeviceSerialNumber((PhidgetHandle)canal->handle, serial) != EPHIDGET_OK)
-      {	Phidget_print_error(canal);
+      { Phidget_print_error(canal);
         return;
-    	 }
-   	 if (Phidget_setIsHubPortDevice((PhidgetHandle)canal->handle, is_hub_port) != EPHIDGET_OK)
-      {	Phidget_print_error(canal);
+      }
+     if (Phidget_setIsHubPortDevice((PhidgetHandle)canal->handle, is_hub_port) != EPHIDGET_OK)
+      { Phidget_print_error(canal);
         return;
-    	 }
+      }
 
-   	 if (Phidget_setHubPort((PhidgetHandle)canal->handle, port) != EPHIDGET_OK)
-      {	Phidget_print_error(canal);
+     if (Phidget_setHubPort((PhidgetHandle)canal->handle, port) != EPHIDGET_OK)
+      { Phidget_print_error(canal);
         return;
-    	 }
+      }
 
-   	 if (Phidget_setIsRemote((PhidgetHandle)canal->handle, 1) != EPHIDGET_OK)
-      {	Phidget_print_error(canal);
+     if (Phidget_setIsRemote((PhidgetHandle)canal->handle, 1) != EPHIDGET_OK)
+      { Phidget_print_error(canal);
         return;
-    	 }
+      }
    }
 /******************************************************************************************************************************/
 /* Charger_un_AI: Charge une IO dans la librairie                                                                             */
@@ -376,54 +386,57 @@ end:
     Charger_confDB_AI ( tech_id, acronyme );
     Dls_data_get_AI ( tech_id, acronyme, (gpointer)&canal->dls_ai );                      /* Récupération de l'élément DLS_AI */
 
-    if (!strcasecmp(capteur, "test"))
-     { /*PhidgetVoltageRatioInputHandle handle;
-      	PhidgetVoltageRatioInput_create(&handle);
-   	   /*PhidgetVoltageRatioInput_setOnVoltageRatioChangeHandler(handle, Phidget_onVoltageRatioChange, NULL);*/
-   	   /*PhidgetVoltageRatioInput_setOnVoltageRatioChangeHandler(handle, Phidget_onVoltageRatioChange, NULL);*/
-       /*Phidget_set_config ( (PhidgetHandle)handle, serial, port, TRUE );
-       Phidget_setOnAttachHandler((PhidgetHandle)handle, Phidget_onAttachHandler, NULL);
-       Phidget_setOnDetachHandler((PhidgetHandle)handle, Phidget_onDetachHandler, NULL);
-	      //Open your Phidgets and wait for attachment
-   	   if (Phidget_open ((PhidgetHandle)handle) != EPHIDGET_OK)
-        {	Phidget_print_error(canal);
-          return;
-        }*/
-     }
-    /* else if (!strcasecmp(classe, "VoltageInput"))
-     { PhidgetVoltageRatioInputHandle handle;
-      	PhidgetVoltageRatioInput_create(&handle);
-   	   PhidgetVoltageRatioInput_setOnVoltageRatioChangeHandler(handle, Phidget_onVoltageRatioChange, NULL);
-       Phidget_set_config ( (PhidgetHandle)handle, serial, port, TRUE );
-       Phidget_setOnAttachHandler((PhidgetHandle)handle, Phidget_onAttachHandler, NULL);
-       Phidget_setOnDetachHandler((PhidgetHandle)handle, Phidget_onDetachHandler, NULL);
-	      //Open your Phidgets and wait for attachment
-   	   if (Phidget_open ((PhidgetHandle)handle) != EPHIDGET_OK)
-        {	Phidget_print_error(canal);
-          return;
-        }
-     }*/
-    else if (!strcasecmp(classe, "PHSensor"))
+    if (!strcasecmp(capteur, "ADP1000-PH"))
      { if ( PhidgetPHSensor_create( (PhidgetPHSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( PhidgetPHSensor_setOnPHChangeHandler( (PhidgetPHSensorHandle)canal->handle, Phidget_onPHSensorChange, canal ) ) goto error;
        if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) ) goto error;
      }
-    else if (!strcasecmp(classe, "TemperatureSensor"))
+    else if (!strcasecmp(capteur, "ADP1000-ORP"))
+     { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( PhidgetVoltageInput_setOnVoltageChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
+                                                            Phidget_onVoltageInputChange, canal ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+     }
+    else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850"))
      { if ( PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
-   	   if ( PhidgetTemperatureSensor_setOnTemperatureChangeHandler( (PhidgetTemperatureSensorHandle)canal->handle,
+       if ( PhidgetTemperatureSensor_setOnTemperatureChangeHandler( (PhidgetTemperatureSensorHandle)canal->handle,
                                                                      Phidget_onTemperatureSensorChange, canal ) != EPHIDGET_OK ) goto error;
        if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
      }
-    else if (!strcasecmp(classe, "VoltageInput"))
-     { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
-   	   if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
-                                                           Phidget_onVoltageInputChange, canal ) != EPHIDGET_OK ) goto error;
+    else if (!strcasecmp(capteur, "TMP1200_0-PT100-3920"))
+     { if ( PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( PhidgetTemperatureSensor_setOnTemperatureChangeHandler( (PhidgetTemperatureSensorHandle)canal->handle,
+                                                                     Phidget_onTemperatureSensorChange, canal ) != EPHIDGET_OK ) goto error;
        if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
      }
-    else if (!strcasecmp(classe, "VoltageRatioInput"))
+    else if (!strcasecmp(capteur, "AC-CURRENT-10A"))
+     { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
+                                                           Phidget_onVoltageSensorChange, canal ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+     }
+    else if (!strcasecmp(capteur, "AC-CURRENT-25A"))
+     { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
+                                                           Phidget_onVoltageSensorChange, canal ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+     }
+    else if (!strcasecmp(capteur, "AC-CURRENT-50A"))
+     { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
+                                                           Phidget_onVoltageSensorChange, canal ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+     }
+    else if (!strcasecmp(capteur, "AC-CURRENT-100A"))
+     { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
+                                                           Phidget_onVoltageSensorChange, canal ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+     }
+    else if (!strcasecmp(capteur, "TEMP_1124_0"))
      { if ( PhidgetVoltageRatioInput_create( (PhidgetVoltageRatioInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
-   	   if ( PhidgetVoltageRatioInput_setOnSensorChangeHandler( (PhidgetVoltageRatioInputHandle)canal->handle,
-                                                                Phidget_onVoltageRatioInputChange, canal ) != EPHIDGET_OK ) goto error;
+       if ( PhidgetVoltageRatioInput_setOnSensorChangeHandler( (PhidgetVoltageRatioInputHandle)canal->handle,
+                                                                Phidget_onVoltageRatioSensorChange, canal ) != EPHIDGET_OK ) goto error;
        if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
      }
     else
@@ -439,7 +452,7 @@ end:
     Cfg_phidget.Liste_sensors = g_slist_prepend ( Cfg_phidget.Liste_sensors, canal );
     return;
 error:
-  	 Phidget_print_error(canal);
+    Phidget_print_error(canal);
     g_free(canal);
   }
 /******************************************************************************************************************************/
