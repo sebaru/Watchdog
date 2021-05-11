@@ -116,14 +116,14 @@ end:
 /* Entrée: La structure Json representant le hub                                                                              */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Phidget_print_error ( void )
+ static void Phidget_print_error ( struct PHIDGET_ANALOGINPUT *canal )
   {	PhidgetReturnCode errorCode;
     size_t errorDetailLen = 256;
     const gchar* errorString;
     gchar errorDetail[errorDetailLen];
     Phidget_getLastError(&errorCode, &errorString, errorDetail, &errorDetailLen);
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR,
-              "%s: Phidget Error %d : %s - %s", __func__, errorCode, errorString, errorDetail );
+              "%s: Phidget Error %d for '%s' (%s) : %s - %s", __func__, errorCode, canal->capteur, canal->classe, errorString, errorDetail );
  	}
 /******************************************************************************************************************************/
 /* Charger_un_Hub: Charge un Hub dans la librairie                                                                            */
@@ -256,47 +256,47 @@ end:
               "%s: Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached with intervalle %d (sec). %d channels available.",
               __func__, serial_number, port, classe, num_canal, canal->intervalle, nbr_canaux );
     if (canal->intervalle)
-     { if (Phidget_setDataInterval( handle, canal->intervalle*1000 ) != EPHIDGET_OK)	Phidget_print_error(); }
+     { if (Phidget_setDataInterval( handle, canal->intervalle*1000 ) != EPHIDGET_OK)	Phidget_print_error(canal); }
 
     if (!strcasecmp(canal->capteur, "ADP1000-PH"))
      { /*if ( PhidgetVoltageInput_setVoltageRange( (PhidgetPHSensorHandle)canal->handle, VOLTAGE_RANGE_400mV ) != EPHIDGET_OK )
-        { Phidget_print_error(); }*/
+        { Phidget_print_error(canal); }*/
        if ( PhidgetVoltageInput_setSensorType( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_1130_PH ) != EPHIDGET_OK )
-        { Phidget_print_error(); }
+        { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "ADP1000-ORP"))
      { /*if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_2V ) != EPHIDGET_OK )
-        { Phidget_print_error(); }*/
+        { Phidget_print_error(canal); }*/
        if ( PhidgetVoltageInput_setSensorType( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_1130_ORP ) != EPHIDGET_OK )
-        { Phidget_print_error(); }
+        { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "TMP1200_0-PT100-3850"))
      { if ( PhidgetTemperatureSensor_setRTDType( (PhidgetTemperatureSensorHandle)canal->handle, RTD_TYPE_PT100_3850 ) != EPHIDGET_OK )
-        { Phidget_print_error(); }
+        { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "TMP1200_0-PT100-3920"))
      { if ( PhidgetTemperatureSensor_setRTDType( (PhidgetTemperatureSensorHandle)canal->handle, RTD_TYPE_PT100_3920 ) != EPHIDGET_OK )
-        { Phidget_print_error(); }
+        { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->classe, "AC-CURRENT-10A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3500 ) != EPHIDGET_OK )
-        { Phidget_print_error(); }
+        { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "AC-CURRENT-25A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3501 ) != EPHIDGET_OK )
-        { Phidget_print_error(); }
+        { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "AC-CURRENT-50A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3502 ) != EPHIDGET_OK )
-        { Phidget_print_error(); }
+        { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "AC-CURRENT-100A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3503 ) != EPHIDGET_OK )
-        { Phidget_print_error(); }
+        { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "TEMP_1124_0"))
      { if ( PhidgetVoltageRatioInput_setSensorType ( (PhidgetVoltageRatioInputHandle)canal->handle, SENSOR_TYPE_1124 ) != EPHIDGET_OK )
-        { Phidget_print_error(); }
+        { Phidget_print_error(canal); }
      }
   }
 /******************************************************************************************************************************/
@@ -326,23 +326,23 @@ end:
 /* Entrée: La structure Json representant l'i/o                                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Phidget_set_config ( PhidgetHandle handle, gint serial, gint port, gboolean is_hub_port )
-   { if (Phidget_setDeviceSerialNumber((PhidgetHandle)handle, serial) != EPHIDGET_OK)
-      {	Phidget_print_error();
+ static void Phidget_set_config ( struct PHIDGET_ANALOGINPUT *canal, gint serial, gint port, gboolean is_hub_port )
+   { if (Phidget_setDeviceSerialNumber((PhidgetHandle)canal->handle, serial) != EPHIDGET_OK)
+      {	Phidget_print_error(canal);
         return;
     	 }
-   	 if (Phidget_setIsHubPortDevice((PhidgetHandle)handle, is_hub_port) != EPHIDGET_OK)
-      {	Phidget_print_error();
-        return;
-    	 }
-
-   	 if (Phidget_setHubPort((PhidgetHandle)handle, port) != EPHIDGET_OK)
-      {	Phidget_print_error();
+   	 if (Phidget_setIsHubPortDevice((PhidgetHandle)canal->handle, is_hub_port) != EPHIDGET_OK)
+      {	Phidget_print_error(canal);
         return;
     	 }
 
-   	 if (Phidget_setIsRemote((PhidgetHandle)handle, 1) != EPHIDGET_OK)
-      {	Phidget_print_error();
+   	 if (Phidget_setHubPort((PhidgetHandle)canal->handle, port) != EPHIDGET_OK)
+      {	Phidget_print_error(canal);
+        return;
+    	 }
+
+   	 if (Phidget_setIsRemote((PhidgetHandle)canal->handle, 1) != EPHIDGET_OK)
+      {	Phidget_print_error(canal);
         return;
     	 }
    }
@@ -386,7 +386,7 @@ end:
        Phidget_setOnDetachHandler((PhidgetHandle)handle, Phidget_onDetachHandler, NULL);
 	      //Open your Phidgets and wait for attachment
    	   if (Phidget_open ((PhidgetHandle)handle) != EPHIDGET_OK)
-        {	Phidget_print_error();
+        {	Phidget_print_error(canal);
           return;
         }*/
      }
@@ -399,7 +399,7 @@ end:
        Phidget_setOnDetachHandler((PhidgetHandle)handle, Phidget_onDetachHandler, NULL);
 	      //Open your Phidgets and wait for attachment
    	   if (Phidget_open ((PhidgetHandle)handle) != EPHIDGET_OK)
-        {	Phidget_print_error();
+        {	Phidget_print_error(canal);
           return;
         }
      }*/
@@ -432,14 +432,14 @@ end:
        goto error;
      }
 
-    Phidget_set_config ( (PhidgetHandle)canal->handle, serial, port, FALSE );
+    Phidget_set_config ( canal, serial, port, FALSE );
     Phidget_setOnAttachHandler((PhidgetHandle)canal->handle, Phidget_onAnalogInputAttachHandler, canal);
     Phidget_setOnDetachHandler((PhidgetHandle)canal->handle, Phidget_onAnalogInputDetachHandler, canal);
     if (Phidget_open ((PhidgetHandle)canal->handle) != EPHIDGET_OK) goto error;
     Cfg_phidget.Liste_sensors = g_slist_prepend ( Cfg_phidget.Liste_sensors, canal );
     return;
 error:
-  	 Phidget_print_error();
+  	 Phidget_print_error(canal);
     g_free(canal);
   }
 /******************************************************************************************************************************/
