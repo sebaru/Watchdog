@@ -174,7 +174,7 @@
               );
 
        if (Response.nbr_tableaux>0)
-        { bodymain.append("<hr>");
+        { $('#toplevel').append("<hr>");
           $.each ( Response.tableaux, function (i, tableau)
            { var id = "idTableau-"+tableau.id;
              tableaux.append( $("<div></div>").append("<canvas id='"+id+"'></canvas>").addClass("col wtd-courbe mx-1") );

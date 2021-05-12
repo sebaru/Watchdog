@@ -2,11 +2,9 @@
 /* Creer_cadran: Ajoute un cadran sur la page du synoptique                                                                   */
 /******************************************************************************************************************************/
  function Creer_cadran ( cadran )
-  { var card = $('<div></div>').addClass("row bg-transparent mx-1 mb-2")
-               .append( $('<div></div>').addClass("col text-center m-1")
-                        .append( $('<h4></h4>').addClass("text-white").text( "Loading" )
-                                 .attr("id", "wtd-cadran-texte-"+cadran.tech_id+"-"+cadran.acronyme)
-                               )
+  { var card = $('<div></div>').addClass("row bg-transparent m-1")
+               .append( $('<div></div>').addClass("col text-center")
+                        .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
                       )
                .append( $('<div></div>').addClass('w-100') );
 
@@ -111,7 +109,9 @@
      }
 
     card.append( $('<div></div>').addClass("col text-center")
-                 .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
+                 .append( $('<h4></h4>').addClass("text-white").text( "Loading" )
+                          .attr("id", "wtd-cadran-texte-"+cadran.tech_id+"-"+cadran.acronyme)
+                        )
                );
 
     return(card);
