@@ -123,8 +123,10 @@
     console.debug(etat);
     minimum = parseFloat(cadran.minimum);
     maximum = parseFloat(cadran.maximum);
-    if (etat.valeur<minimum) etat.valeur=minimum;
-    if (etat.valeur>maximum) etat.valeur=maximum;
+    if (etat.forme.startsWith("progress"))
+     { if (etat.valeur<minimum) etat.valeur=minimum;
+       if (etat.valeur>maximum) etat.valeur=maximum;
+     }
     var position = 100*(etat.valeur-minimum)/(maximum-minimum);
 
 console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.seuil_ntb+" nb="+cadran.seuil_nb+" nh="+cadran.seuil_nh+" nth="+cadran.seuil_nth);
@@ -175,16 +177,16 @@ console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.se
           $('#'+idcadranbarre5).css("width", position+"%").attr("aria-valuenow", position);
         }
      }
-    else if (cadran.forme=="progress-vor" || cadran.forme=="progress-rov")
+    else if (cadran.forme=="progress-rov")
      { var idcadranbarre1 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre1";
        var idcadranbarre2 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre2";
        var idcadranbarre3 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre3";
-            if (etat.valeur<=cadran.seuil_nb)
+            if (etat.valeur<=cadran.seuil_ntb)
         { $('#'+idcadranbarre1).css("width", position+"%").attr("aria-valuenow", position);
           $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
         }
-       else if (etat.valeur<=cadran.seuil_nh)
+       else if (etat.valeur<=cadran.seuil_nb)
         { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre2).css("width", position+"%").attr("aria-valuenow", position);
           $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
@@ -195,6 +197,27 @@ console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.se
           $('#'+idcadranbarre3).css("width", position+"%").attr("aria-valuenow", position);
         }
      }
+    else if (cadran.forme=="progress-vor")
+     { var idcadranbarre1 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre1";
+       var idcadranbarre2 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre2";
+       var idcadranbarre3 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre3";
+            if (etat.valeur<=cadran.seuil_nh)
+        { $('#'+idcadranbarre1).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else if (etat.valeur<=cadran.seuil_nth)
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", position+"%").attr("aria-valuenow", position);
+          $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
+        }
+       else
+        { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
+          $('#'+idcadranbarre3).css("width", position+"%").attr("aria-valuenow", position);
+        }
+     }
+
     var idcadrantexte = "wtd-cadran-texte-"+etat.tech_id+"-"+etat.acronyme;
     texte = etat.valeur.toFixed(cadran.nb_decimal);
     $('#'+idcadrantexte).text( texte + " " + etat.unite );
