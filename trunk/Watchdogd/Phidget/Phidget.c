@@ -261,6 +261,11 @@ end:
     int serial_number, nbr_canaux, port, num_canal;
     const char *classe;
 
+    if (!canal->dls_ai)
+     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
+       return;
+     }
+
     Phidget_getDeviceSerialNumber(handle, &serial_number);
     Phidget_getDeviceChannelCount(handle, PHIDCHCLASS_NOTHING, &nbr_canaux );
     Phidget_getHubPort(handle, &port );
@@ -268,8 +273,8 @@ end:
     Phidget_getChannelClassName( handle, &classe );
 
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
-              "%s: Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached with intervalle %d (sec). %d channels available.",
-              __func__, serial_number, port, classe, num_canal, canal->intervalle, nbr_canaux );
+              "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached with intervalle %d (sec). %d channels available.",
+              __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, serial_number, port, classe, num_canal, canal->intervalle, nbr_canaux );
     if (canal->intervalle)
      { if (Phidget_setDataInterval( handle, canal->intervalle*1000 ) != EPHIDGET_OK) Phidget_print_error(canal); }
 
@@ -288,7 +293,7 @@ end:
      { if ( PhidgetTemperatureSensor_setRTDType( (PhidgetTemperatureSensorHandle)canal->handle, RTD_TYPE_PT100_3920 ) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
      }
-    else if (!strcasecmp(canal->classe, "AC-CURRENT-10A"))
+    else if (!strcasecmp(canal->capteur, "AC-CURRENT-10A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3500 ) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
      }
@@ -389,55 +394,55 @@ end:
     if (!strcasecmp(capteur, "ADP1000-PH"))
      { if ( PhidgetPHSensor_create( (PhidgetPHSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( PhidgetPHSensor_setOnPHChangeHandler( (PhidgetPHSensorHandle)canal->handle, Phidget_onPHSensorChange, canal ) ) goto error;
-       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) ) goto error;
+       Phidget_set_config ( canal, serial, port, FALSE );
      }
     else if (!strcasecmp(capteur, "ADP1000-ORP"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( PhidgetVoltageInput_setOnVoltageChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
                                                             Phidget_onVoltageInputChange, canal ) != EPHIDGET_OK ) goto error;
-       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+       Phidget_set_config ( canal, serial, port, FALSE );
      }
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850"))
      { if ( PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( PhidgetTemperatureSensor_setOnTemperatureChangeHandler( (PhidgetTemperatureSensorHandle)canal->handle,
                                                                      Phidget_onTemperatureSensorChange, canal ) != EPHIDGET_OK ) goto error;
-       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+       Phidget_set_config ( canal, serial, port, FALSE );
      }
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3920"))
      { if ( PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( PhidgetTemperatureSensor_setOnTemperatureChangeHandler( (PhidgetTemperatureSensorHandle)canal->handle,
                                                                      Phidget_onTemperatureSensorChange, canal ) != EPHIDGET_OK ) goto error;
-       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+       Phidget_set_config ( canal, serial, port, FALSE );
      }
     else if (!strcasecmp(capteur, "AC-CURRENT-10A"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
                                                            Phidget_onVoltageSensorChange, canal ) != EPHIDGET_OK ) goto error;
-       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+       Phidget_set_config ( canal, serial, port, FALSE );
      }
     else if (!strcasecmp(capteur, "AC-CURRENT-25A"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
                                                            Phidget_onVoltageSensorChange, canal ) != EPHIDGET_OK ) goto error;
-       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+       Phidget_set_config ( canal, serial, port, FALSE );
      }
     else if (!strcasecmp(capteur, "AC-CURRENT-50A"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
                                                            Phidget_onVoltageSensorChange, canal ) != EPHIDGET_OK ) goto error;
-       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+       Phidget_set_config ( canal, serial, port, FALSE );
      }
     else if (!strcasecmp(capteur, "AC-CURRENT-100A"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
                                                            Phidget_onVoltageSensorChange, canal ) != EPHIDGET_OK ) goto error;
-       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+       Phidget_set_config ( canal, serial, port, FALSE );
      }
     else if (!strcasecmp(capteur, "TEMP_1124_0"))
      { if ( PhidgetVoltageRatioInput_create( (PhidgetVoltageRatioInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( PhidgetVoltageRatioInput_setOnSensorChangeHandler( (PhidgetVoltageRatioInputHandle)canal->handle,
                                                                 Phidget_onVoltageRatioSensorChange, canal ) != EPHIDGET_OK ) goto error;
-       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) != EPHIDGET_OK ) goto error;
+       Phidget_set_config ( canal, serial, port, TRUE );
      }
     else
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
@@ -445,7 +450,7 @@ end:
        goto error;
      }
 
-    Phidget_set_config ( canal, serial, port, FALSE );
+    if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onAIError, canal ) ) goto error;
     Phidget_setOnAttachHandler((PhidgetHandle)canal->handle, Phidget_onAnalogInputAttachHandler, canal);
     Phidget_setOnDetachHandler((PhidgetHandle)canal->handle, Phidget_onAnalogInputDetachHandler, canal);
     if (Phidget_open ((PhidgetHandle)canal->handle) != EPHIDGET_OK) goto error;
