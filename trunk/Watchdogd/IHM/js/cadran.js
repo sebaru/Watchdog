@@ -2,9 +2,11 @@
 /* Creer_cadran: Ajoute un cadran sur la page du synoptique                                                                   */
 /******************************************************************************************************************************/
  function Creer_cadran ( cadran )
-  { var card = $('<div></div>').addClass("row bg-transparent mb-3")
-               .append( $('<div></div>').addClass("col text-center mb-2")
-                        .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
+  { var card = $('<div></div>').addClass("row bg-transparent m-1")
+               .append( $('<div></div>').addClass("col text-center m-1")
+                        .append( $('<h4></h4>').addClass("text-white").text( "Loading" )
+                                 .attr("id", "wtd-cadran-texte-"+cadran.tech_id+"-"+cadran.acronyme)
+                               )
                       )
                .append( $('<div></div>').addClass('w-100') );
     var barres = $('<div></div>').addClass("col");
@@ -104,11 +106,8 @@
 
     card.append( $('<div></div>').addClass('w-100') )
         .append( $('<div></div>').addClass("col text-center")
-                 .append( $('<h4></h4>').addClass("text-white").text( "Loading" )
-                          .attr("id", "wtd-cadran-texte-"+cadran.tech_id+"-"+cadran.acronyme)
-                        )
-               )
-        .append( $('<div></div>').addClass('w-100') );
+                 .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
+               );
 
     return(card);
   }
