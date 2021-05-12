@@ -123,7 +123,7 @@
     console.debug(etat);
     minimum = parseFloat(cadran.minimum);
     maximum = parseFloat(cadran.maximum);
-    if (etat.forme.startsWith("progress"))
+    if (cadran.forme.startsWith("progress"))
      { if (etat.valeur<minimum) etat.valeur=minimum;
        if (etat.valeur>maximum) etat.valeur=maximum;
      }
