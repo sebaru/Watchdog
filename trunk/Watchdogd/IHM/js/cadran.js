@@ -125,13 +125,14 @@
     if (cadrans.length!=1) return;
     cadran = cadrans[0];
     console.debug(etat);
-    minimum = parseFloat(cadran.minimum);
-    maximum = parseFloat(cadran.maximum);
+    var minimum = parseFloat(cadran.minimum);
+    var maximum = parseFloat(cadran.maximum);
+    var valeur  = etat.valeur;
     if (cadran.forme.startsWith("progress"))
-     { if (etat.valeur<minimum) etat.valeur=minimum;
-       if (etat.valeur>maximum) etat.valeur=maximum;
+     { if (valeur<minimum) valeur=minimum;
+       if (valeur>maximum) valeur=maximum;
+       var position = 100*(valeur-minimum)/(maximum-minimum);
      }
-    var position = 100*(etat.valeur-minimum)/(maximum-minimum);
 
 console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.seuil_ntb+" nb="+cadran.seuil_nb+" nh="+cadran.seuil_nh+" nth="+cadran.seuil_nth);
 
@@ -145,28 +146,28 @@ console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.se
        var idcadranbarre3 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre3";
        var idcadranbarre4 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre4";
        var idcadranbarre5 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre5";
-       if (etat.valeur<=cadran.seuil_ntb)
+       if (valeur<=cadran.seuil_ntb)
         { $('#'+idcadranbarre1).css("width", position+"%").attr("aria-valuenow", position);
           $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre4).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre5).css("width", "0%").attr("aria-valuenow", 0);
         }
-       else if (etat.valeur<=cadran.seuil_nb)
+       else if (valeur<=cadran.seuil_nb)
         { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre2).css("width", position+"%").attr("aria-valuenow", position);
           $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre4).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre5).css("width", "0%").attr("aria-valuenow", 0);
         }
-       else if (etat.valeur<=cadran.seuil_nh)
+       else if (valeur<=cadran.seuil_nh)
         { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre3).css("width", position+"%").attr("aria-valuenow", position);
           $('#'+idcadranbarre4).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre5).css("width", "0%").attr("aria-valuenow", 0);
         }
-       else if (etat.valeur<=cadran.seuil_nth)
+       else if (valeur<=cadran.seuil_nth)
         { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
@@ -185,12 +186,12 @@ console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.se
      { var idcadranbarre1 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre1";
        var idcadranbarre2 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre2";
        var idcadranbarre3 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre3";
-            if (etat.valeur<=cadran.seuil_ntb)
+            if (valeur<=cadran.seuil_ntb)
         { $('#'+idcadranbarre1).css("width", position+"%").attr("aria-valuenow", position);
           $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
         }
-       else if (etat.valeur<=cadran.seuil_nb)
+       else if (valeur<=cadran.seuil_nb)
         { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre2).css("width", position+"%").attr("aria-valuenow", position);
           $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
@@ -205,12 +206,12 @@ console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.se
      { var idcadranbarre1 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre1";
        var idcadranbarre2 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre2";
        var idcadranbarre3 = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre3";
-            if (etat.valeur<=cadran.seuil_nh)
+            if (valeur<=cadran.seuil_nh)
         { $('#'+idcadranbarre1).css("width", position+"%").attr("aria-valuenow", position);
           $('#'+idcadranbarre2).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
         }
-       else if (etat.valeur<=cadran.seuil_nth)
+       else if (valeur<=cadran.seuil_nth)
         { $('#'+idcadranbarre1).css("width", "0%").attr("aria-valuenow", 0);
           $('#'+idcadranbarre2).css("width", position+"%").attr("aria-valuenow", position);
           $('#'+idcadranbarre3).css("width", "0%").attr("aria-valuenow", 0);
@@ -223,6 +224,6 @@ console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.se
      }
 
     var idcadrantexte = "wtd-cadran-texte-"+etat.tech_id+"-"+etat.acronyme;
-    texte = etat.valeur.toFixed(cadran.nb_decimal);
+    texte = etat.valeur.toFixed(cadran.nb_decimal);                                            /* Affiche la valeur non capée */
     $('#'+idcadrantexte).text( texte + " " + etat.unite );
   }
