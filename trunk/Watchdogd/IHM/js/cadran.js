@@ -9,14 +9,13 @@
                                )
                       )
                .append( $('<div></div>').addClass('w-100') );
-    var barres = $('<div></div>').addClass("col");
-    card.append(barres);
 
     if (cadran.forme=="simple")
      { /**/
      }
     else if (cadran.forme=="progress")
-     { barres.append( $('<div></div>').addClass("progress")
+     { var barres = $('<div></div>').addClass("col");
+       barres.append( $('<div></div>').addClass("progress")
                       .append( $('<div></div>').addClass("progress-bar")
                                .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre")
                                .attr("role", "progressbar" )
@@ -24,9 +23,11 @@
                                .attr("aria-valuemax", cadran.maximum )
                              )
                     );
+       card.append(barres).append( $('<div></div>').addClass('w-100') );
      }
     else if (cadran.forme=="progress-rovor")
-     { barres.append( $('<div></div>').addClass("progress")
+     { var barres = $('<div></div>').addClass("col");
+       barres.append( $('<div></div>').addClass("progress")
                       .append( $('<div></div>').addClass("progress-bar bg-danger")
                                .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre1")
                                .attr("role", "progressbar" )
@@ -58,9 +59,11 @@
                                .attr("aria-valuemax", cadran.maximum )
                              )
                     );
+       card.append(barres).append( $('<div></div>').addClass('w-100') );
      }
     else if (cadran.forme=="progress-vor")
-     { barres.append( $('<div></div>').addClass("progress")
+     { var barres = $('<div></div>').addClass("col");
+       barres.append( $('<div></div>').addClass("progress")
                       .append( $('<div></div>').addClass("progress-bar bg-success")
                                .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre1")
                                .attr("role", "progressbar" )
@@ -80,9 +83,11 @@
                                .attr("aria-valuemax", cadran.maximum )
                              )
                     );
+       card.append(barres).append( $('<div></div>').addClass('w-100') );
      }
     else if (cadran.forme=="progress-rov")
-     { barres.append( $('<div></div>').addClass("progress")
+     { var barres = $('<div></div>').addClass("col");
+       barres.append( $('<div></div>').addClass("progress")
                       .append( $('<div></div>').addClass("progress-bar bg-danger")
                                .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre1")
                                .attr("role", "progressbar" )
@@ -102,10 +107,10 @@
                                .attr("aria-valuemax", cadran.maximum )
                              )
                     );
+       card.append(barres).append( $('<div></div>').addClass('w-100') );
      }
 
-    card.append( $('<div></div>').addClass('w-100') )
-        .append( $('<div></div>').addClass("col text-center")
+    card.append( $('<div></div>').addClass("col text-center")
                  .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
                );
 
