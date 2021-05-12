@@ -2,7 +2,7 @@
 /* Creer_cadran: Ajoute un cadran sur la page du synoptique                                                                   */
 /******************************************************************************************************************************/
  function Creer_cadran ( cadran )
-  { var card = $('<div></div>').addClass("row bg-transparent mb-3 border border-info")
+  { var card = $('<div></div>').addClass("row bg-transparent mb-3")
                .append( $('<div></div>').addClass("col text-center mb-2")
                         .append( $('<span></span>').addClass("text-white").text( cadran.libelle ) )
                       )
@@ -10,7 +10,10 @@
     var barres = $('<div></div>').addClass("col");
     card.append(barres);
 
-    if (cadran.forme=="progress")
+    if (cadran.forme=="simple")
+     { /**/
+     }
+    else if (cadran.forme=="progress")
      { barres.append( $('<div></div>').addClass("progress")
                       .append( $('<div></div>').addClass("progress-bar")
                                .attr("id", "wtd-cadran-"+cadran.tech_id+"-"+cadran.acronyme+"-barre")
