@@ -288,9 +288,13 @@ end:
     else if (!strcasecmp(canal->capteur, "TMP1200_0-PT100-3850"))
      { if ( PhidgetTemperatureSensor_setRTDType( (PhidgetTemperatureSensorHandle)canal->handle, RTD_TYPE_PT100_3850 ) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
+       if ( PhidgetTemperatureSensor_setRTDWireSetup( (PhidgetTemperatureSensorHandle)canal->handle, RTD_WIRE_SETUP_2WIRE ) != EPHIDGET_OK )
+        { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "TMP1200_0-PT100-3920"))
      { if ( PhidgetTemperatureSensor_setRTDType( (PhidgetTemperatureSensorHandle)canal->handle, RTD_TYPE_PT100_3920 ) != EPHIDGET_OK )
+        { Phidget_print_error(canal); }
+       if ( PhidgetTemperatureSensor_setRTDWireSetup( (PhidgetTemperatureSensorHandle)canal->handle, RTD_WIRE_SETUP_2WIRE ) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "AC-CURRENT-10A"))
