@@ -292,9 +292,9 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Intervalle d'acquisition</label>
-						     <input id="idModalEditAIIntervalle" type="number" required min=0 max=1000 class="form-control" placeholder="Fréquence d'acquisition">
+						     <input id="idModalEditAIIntervalle" type="number" required min=0 max=60000 class="form-control" placeholder="Fréquence d'acquisition">
 						     <div class="input-group-append">
-							     <span class="input-group-text">seconde(s)</span>
+							     <span class="input-group-text">ms</span>
 						     </div>
      					</div>
   					</div>

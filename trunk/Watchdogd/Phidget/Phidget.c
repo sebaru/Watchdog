@@ -107,8 +107,11 @@
        goto end;
      }
 
+    if (database_version < 2)
+     { SQL_Write( "ALTER TABLE phidget_AI SET intervalle=intervalle*1000"); }
+       
 end:
-    database_version = 1;
+    database_version = 2;
     Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
   }
 /******************************************************************************************************************************/
@@ -273,10 +276,10 @@ end:
     Phidget_getChannelClassName( handle, &classe );
 
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
-              "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached with intervalle %d (sec). %d channels available.",
+              "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached with intervalle %d (ms). %d channels available.",
               __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, serial_number, port, classe, num_canal, canal->intervalle, nbr_canaux );
     if (canal->intervalle)
-     { if (Phidget_setDataInterval( handle, canal->intervalle*1000 ) != EPHIDGET_OK) Phidget_print_error(canal); }
+     { if (Phidget_setDataInterval( handle, canal->intervalle ) != EPHIDGET_OK) Phidget_print_error(canal); }
 
     if (!strcasecmp(canal->capteur, "ADP1000-PH"))
      { /**/
