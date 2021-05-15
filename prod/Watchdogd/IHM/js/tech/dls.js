@@ -161,7 +161,7 @@
                    { return( Bouton ( "success", "Désactiver le plugin",
                                       "Dls_stop_plugin", item.tech_id, "Actif" ) );
                    }
-                  if (item.compil_status>=7) /* Si compil OK ou warning */
+                  if (item.compil_status>=6) /* Si compil OK ou warning */
                    { return( Bouton ( "outline-secondary", "Activer le plugin",
                                       "Dls_start_plugin", item.tech_id, "Désactivé" ) );
                    }

@@ -379,7 +379,6 @@
  static void Reseter_all_bit_interne ( struct DLS_PLUGIN *plugin )
   { GSList *liste_bit;
 
-    Charger_confDB_Registre ( plugin->tech_id );
     pthread_mutex_lock( &Partage->com_dls.synchro_data );                                 /* Décharge tous les bits du module */
     liste_bit = Partage->Dls_data_TEMPO;
     while(liste_bit)
@@ -456,7 +455,8 @@
                     plugin->tech_id, plugin->shortname );
         }
        Dls_Charger_un_plugin ( plugin, TRUE );
-       plugin->vars.resetted = TRUE;                                             /* au chargement, le bit de start vaut 1 ! */
+       Charger_confDB_Registre ( plugin->tech_id );                           /* Chargement conf a faire apres la compilation */
+       plugin->vars.resetted = TRUE;                                               /* au chargement, le bit de start vaut 1 ! */
        return;
      }
   }

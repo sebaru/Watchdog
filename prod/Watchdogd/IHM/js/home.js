@@ -174,9 +174,9 @@
               );
 
        if (Response.nbr_tableaux>0)
-        { $.each ( Response.tableaux, function (i, tableau)
-           { tableaux.append("<hr>");
-             var id = "idTableau-"+tableau.id;
+        { tableaux.prepend("<hr>");
+          $.each ( Response.tableaux, function (i, tableau)
+           { var id = "idTableau-"+tableau.id;
              tableaux.append( $("<div></div>").append("<canvas id='"+id+"'></canvas>").addClass("col wtd-courbe mx-1") );
              maps = Response.tableaux_map.filter ( function (item) { return(item.tableau_id==tableau.id) } );
              Charger_plusieurs_courbes ( id, maps, "HOUR" );
@@ -196,7 +196,7 @@
     Scroll_to_top();
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
-                     .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div")
+                     .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div>")
                      .append("<div id='tableaux' class='row mx-1 justify-content-center'></div>")
                      .append("<hr><table id='idTableMessages' class='table table-dark table-bordered w-100'></table>");
        Synoptique = null;
