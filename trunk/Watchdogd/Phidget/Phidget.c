@@ -109,7 +109,7 @@
 
     if (database_version < 2)
      { SQL_Write( "ALTER TABLE phidget_AI SET intervalle=intervalle*1000"); }
-       
+
 end:
     database_version = 2;
     Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
@@ -262,7 +262,6 @@ end:
  static void CCONV Phidget_onAnalogInputAttachHandler ( PhidgetHandle handle, void *ctx )
   { struct PHIDGET_ANALOGINPUT *canal = ctx;
     int serial_number, nbr_canaux, port, num_canal;
-    const char *classe;
 
     if (!canal->dls_ai)
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
@@ -273,11 +272,11 @@ end:
     Phidget_getDeviceChannelCount(handle, PHIDCHCLASS_NOTHING, &nbr_canaux );
     Phidget_getHubPort(handle, &port );
     Phidget_getChannel( handle, &num_canal );
-    Phidget_getChannelClassName( handle, &classe );
 
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
               "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached with intervalle %d (ms). %d channels available.",
-              __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, serial_number, port, classe, num_canal, canal->intervalle, nbr_canaux );
+              __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, serial_number, port, canal->classe,
+              num_canal, canal->intervalle, nbr_canaux );
     if (canal->intervalle)
      { if (Phidget_setDataInterval( handle, canal->intervalle ) != EPHIDGET_OK) Phidget_print_error(canal); }
 
