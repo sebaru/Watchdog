@@ -302,17 +302,25 @@ end:
     else if (!strcasecmp(canal->capteur, "AC-CURRENT-10A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3500 ) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
+       if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_AUTO) != EPHIDGET_OK )
+        { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "AC-CURRENT-25A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3501 ) != EPHIDGET_OK )
+        { Phidget_print_error(canal); }
+       if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_AUTO) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "AC-CURRENT-50A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3502 ) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
+       if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_AUTO) != EPHIDGET_OK )
+        { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "AC-CURRENT-100A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3503 ) != EPHIDGET_OK )
+        { Phidget_print_error(canal); }
+       if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_AUTO) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "TEMP_1124_0"))
