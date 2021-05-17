@@ -302,25 +302,25 @@ end:
     else if (!strcasecmp(canal->capteur, "AC-CURRENT-10A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3500 ) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
-       if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_AUTO) != EPHIDGET_OK )
+       if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_5V) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "AC-CURRENT-25A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3501 ) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
-       if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_AUTO) != EPHIDGET_OK )
+       if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_5V) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "AC-CURRENT-50A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3502 ) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
-       if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_AUTO) != EPHIDGET_OK )
+       if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_5V) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "AC-CURRENT-100A"))
      { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_3503 ) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
-       if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_AUTO) != EPHIDGET_OK )
+       if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_5V) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(canal->capteur, "TEMP_1124_0"))
@@ -342,7 +342,7 @@ end:
 
     Phidget_getDeviceSerialNumber(handle, &serial_number);
     Phidget_getDeviceChannelCount(handle, PHIDCHCLASS_NOTHING, &nbr_canaux );
-    Phidget_getHubPort(handle, &port );
+    Phidget_getHubPort( handle, &port );
     Phidget_getChannel( handle, &num_canal );
     Phidget_getChannelClassName( handle, &classe );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, 0.0, FALSE );
@@ -360,6 +360,7 @@ end:
       { Phidget_print_error(canal);
         return;
       }
+
      if (Phidget_setIsHubPortDevice((PhidgetHandle)canal->handle, is_hub_port) != EPHIDGET_OK)
       { Phidget_print_error(canal);
         return;
