@@ -1109,7 +1109,7 @@ return(NULL);
        alias->classe   = classe;
      }
     else if ( (classe=Rechercher_DICO_type ( "SYS", acronyme )) != -1 )
-     { alias->tech_id  = g_strdup(tech_id);
+     { alias->tech_id  = g_strdup("SYS");
        alias->acronyme = g_strdup(acronyme);
        alias->classe   = classe;
      }
