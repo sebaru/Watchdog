@@ -327,9 +327,9 @@ calcul_expr2:   calcul_expr2 T_FOIS calcul_expr3
                 | calcul_expr2 BARRE calcul_expr3
                 {{ int taille;
                    if ($1 && $3)
-                    { taille = strlen($1) + 2*strlen($3) + 16;
+                    { taille = strlen($1) + 2*strlen($3) + 40;
                       $$ = New_chaine( taille );
-                      g_snprintf( $$, taille, "(%s==0 ? 1 : (%s/%s))", $3, $1, $3 );
+                      g_snprintf( $$, taille, "((gdouble)%s==0.0 ? 1.0 : ((gdouble)%s/%s))", $3, $1, $3 );
                     } else $$ = NULL;
                    if ($1) g_free($1);
                    if ($3) g_free($3);
