@@ -83,6 +83,7 @@ newline       [\n\r]+
 "_TOP_ALERTE_FUGITIVE"     { DlsScanner_lval.val = T_TOP_ALERTE_FUGITIVE;return T_TOP_ALERTE_FUGITIVE;}
 "_BUS"                     { DlsScanner_lval.val = T_BUS;           return T_BUS;           }
 "_PID"                     { DlsScanner_lval.val = T_PID;           return T_PID;           }
+"_NOP"                     { DlsScanner_lval.val = T_NOP;           return T_NOP;           }
 
  /***************************************** Methodes speciales ********************************************/
 "_HEURE"                   { DlsScanner_lval.val = HEURE;       return HEURE;       }

@@ -58,7 +58,7 @@
 %token <val>    T_TYPE T_INFO T_ATTENTE T_DEFAUT T_ALARME T_VEILLE T_ALERTE T_DERANGEMENT T_DANGER
 %type  <val>    type_msg
 
-%token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
+%token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE T_NOP
 %type  <val>    ordre
 
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
@@ -624,7 +624,9 @@ action:         action VIRGULE une_action
                 | une_action {{ $$=$1; }}
                 ;
 
-une_action:     T_ACT_DEF
+une_action:     T_NOP
+                  {{ $$=New_action(); $$->alors=g_strdup(""); }}
+                | T_ACT_DEF
                   {{ $$=New_action_vars_mono("vars->bit_defaut"); }}
                 | T_ACT_DEFF
                   {{ $$=New_action_vars_mono("vars->bit_defaut_fixe"); }}
