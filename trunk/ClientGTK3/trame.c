@@ -992,7 +992,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame->page = page;
     trame->trame_widget = goo_canvas_new();
     g_object_set( trame->trame_widget, "background-color", coul, "anchor", GOO_CANVAS_ANCHOR_CENTER, NULL );
-    g_object_set( trame->trame_widget, "has-tooltip", TRUE, NULL );
+    /* Désactivation ToolTIP Trame g_object_set( trame->trame_widget, "has-tooltip", TRUE, NULL );*/
     goo_canvas_set_bounds (GOO_CANVAS (trame->trame_widget), 0, 0, taille_x+80, taille_y);
     trame->canvas_root = goo_canvas_get_root_item (GOO_CANVAS (trame->trame_widget));
     trame->fond = goo_canvas_rect_new ( trame->canvas_root, 0.0, 0.0, (double) taille_x, (double) taille_y,
