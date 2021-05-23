@@ -83,6 +83,7 @@ newline       [\n\r]+
 "_TOP_ALERTE_FUGITIVE"     { DlsScanner_lval.val = T_TOP_ALERTE_FUGITIVE;return T_TOP_ALERTE_FUGITIVE;}
 "_BUS"                     { DlsScanner_lval.val = T_BUS;           return T_BUS;           }
 "_PID"                     { DlsScanner_lval.val = T_PID;           return T_PID;           }
+"_NOP"                     { DlsScanner_lval.val = T_NOP;           return T_NOP;           }
 
  /***************************************** Methodes speciales ********************************************/
 "_HEURE"                   { DlsScanner_lval.val = HEURE;       return HEURE;       }
@@ -154,7 +155,7 @@ newline       [\n\r]+
 "derangement"              { DlsScanner_lval.val = T_DERANGEMENT;return T_DERANGEMENT;}
 "danger"                   { DlsScanner_lval.val = T_DANGER;    return T_DANGER;    }
 "host"                     { DlsScanner_lval.val = T_HOST;      return T_HOST;      }
-"thread"                   { DlsScanner_lval.val = T_THREAD;    return T_THREAD;    }
+"tech_id"                  { DlsScanner_lval.val = T_TECH_ID;   return T_TECH_ID;   }
 "tag"                      { DlsScanner_lval.val = T_TAG;       return T_TAG;       }
 "forme"                    { DlsScanner_lval.val = T_FORME;     return T_FORME;     }
 "cadran"                   { DlsScanner_lval.val = T_CADRAN;    return T_CADRAN;    }

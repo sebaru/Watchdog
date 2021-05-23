@@ -336,13 +336,15 @@ again:
  static void Traiter_histo_ws_CB ( SoupWebsocketConnection *self, gint type, GBytes *message_brut, gpointer user_data )
   { gsize taille;
     struct CLIENT *client = user_data;
-    printf("%s: Recu WS: %s %p\n", __func__, g_bytes_get_data ( message_brut, &taille ), client );
+    /*printf("%s: Recu WS: %s %p\n", __func__, g_bytes_get_data ( message_brut, &taille ), client );*/
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
 
     gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
     if (zmq_tag)
      {      if(!strcasecmp(zmq_tag,"DLS_HISTO"))         { Updater_histo( client, response ); }
+       else if(!strcasecmp(zmq_tag,"DLS_VISUEL"))        { }
+       else if(!strcasecmp(zmq_tag,"DLS_CADRAN"))        { }
        else if(!strcasecmp(zmq_tag,"PULSE"))             { Set_progress_pulse( client ); }
        else printf("%s: tag '%s' inconnu\n", __func__, zmq_tag );
      }

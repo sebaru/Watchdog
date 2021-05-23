@@ -1291,18 +1291,12 @@ end:
 /* Dls_data_set_bus : Envoi un message sur le bus système                                                                     */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et les paramètres du message                                  */
 /******************************************************************************************************************************/
- void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
-                         gchar *host, gchar *thread, gchar *tag, gchar *param1)
-  { Dls_data_set_BI ( NULL, tech_id, acronyme, bus_p, etat );                                   /* Utilisation d'un boolean */
-#ifdef bouh
+ void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p,
+                         gchar *target_tech_id, gchar *tag, gchar *param)
+  {  Dls_data_set_MONO ( NULL, tech_id, acronyme, bus_p, TRUE );                                  /* Utilisation d'un boolean */
+
     if (Dls_data_get_bool_up(tech_id, acronyme, bus_p))
-     { if (param1)
-        { Zmq_Send_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
-       else
-        { Zmq_Send_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, NULL, 0 ); }
-     }
-#endif
-    if (param1) g_free(param1);                                       /* Param1 est issu d'un g_strdup ou d'un Dls_dyn_string */
+     { Zmq_Send_json_node ( Partage->com_dls.zmq_to_master, "DLS", "*", target_tech_id, tag, NULL/*JsonNode *RootNode*/ ); }
   }
 /******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */

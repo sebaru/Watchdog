@@ -256,8 +256,10 @@ printf("Afficher_propriete: debut\n");
                                        y = ((struct TRAME_ITEM_MOTIF *)infos->Selection->data)->motif->position_y;
                                        break;
                                   case TYPE_CADRAN:
-                                       x = ((struct TRAME_ITEM_CADRAN *)infos->Selection->data)->cadran->position_x;
-                                       y = ((struct TRAME_ITEM_CADRAN *)infos->Selection->data)->cadran->position_y;
+                                        { JsonNode *cadran = infos->Selection->data;
+                                          x = Json_get_float ( cadran, "position_x" );
+                                          y = Json_get_float ( cadran, "position_y" );
+                                        }
                                        break;
                                   case TYPE_CAMERA_SUP:
                                        x = ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection->data)->camera_sup->posx;

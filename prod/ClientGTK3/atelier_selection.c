@@ -220,18 +220,16 @@
 
           case TYPE_CADRAN:
                trame_cadran = ((struct TRAME_ITEM_CADRAN *)(selection->data));
-               new_x = trame_cadran->cadran->position_x+dx;
-               new_y = trame_cadran->cadran->position_y+dy;
+               new_x = Json_get_float( trame_cadran->cadran, "position_x" ) + dx;
+               new_y = Json_get_float( trame_cadran->cadran, "position_y" ) + dy;
 
                if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(infos->Check_grid)))
                 { new_x = new_x/largeur_grille * largeur_grille;
                   new_y = new_y/largeur_grille * largeur_grille;
                 }
 
-               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X )
-                { trame_cadran->cadran->position_x = new_x; }
-               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y )
-                { trame_cadran->cadran->position_y = new_y; }
+               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X ) { Json_node_add_double ( trame_cadran->cadran, "position_x", new_x ); }
+               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y ) { Json_node_add_double ( trame_cadran->cadran, "position_y", new_y ); }
 
                Trame_rafraichir_cadran(trame_cadran);                                                       /* Refresh visuel */
                break;
@@ -477,9 +475,9 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
  void Rotationner_selection ( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_ATELIER *infos = page->infos;
     GSList *selection;
-    gfloat angle;
+    gdouble angle;
 
-    angle = (gfloat) gtk_adjustment_get_value ( infos->Adj_angle );
+    angle = gtk_adjustment_get_value ( infos->Adj_angle );
 
     selection = infos->Selection;                                                        /* Pour tous les objets selectionnés */
     while(selection)
@@ -504,7 +502,7 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
           }
          case TYPE_CADRAN:
           { struct TRAME_ITEM_CADRAN *trame_cadran = selection->data;
-            trame_cadran->cadran->angle = angle;
+            Json_node_add_double ( trame_cadran->cadran, "angle", angle );
             Trame_rafraichir_cadran(trame_cadran);
             break;
           }

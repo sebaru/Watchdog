@@ -403,7 +403,7 @@
                 { return( item.hub_hostname+" - "+item.hub_description ); }
             },
             { "data": "port", "title":"Port", "className": "align-middle text-center" },
-            { "data": "intervalle", "title":"Acquisition (s)", "className": "align-middle text-center" },
+            { "data": "intervalle", "title":"Acquisition (ms)", "className": "align-middle text-center" },
             { "data": null, "title":"Capteur", "className": "align-middle text-center",
               "render": function (item)
                 { return( item.capteur+" - "+item.classe ); }

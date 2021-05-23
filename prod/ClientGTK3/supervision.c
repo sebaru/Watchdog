@@ -148,7 +148,7 @@
     if (event->type == GDK_BUTTON_PRESS)
      { if (trame_motif->motif->type_gestion == TYPE_BOUTON && (trame_motif->last_clic + 1 <= time(NULL)) )
         { printf("Appui sur bouton num_image=%d\n", trame_motif->num_image );
-          //if ( (trame_motif->num_image % 3) == 1 )
+          if ( trame_motif->num_image == 1 )
            { Trame_choisir_frame( trame_motif, trame_motif->num_image + 1,                          /* Frame 2: bouton appuyé */
                                   trame_motif->color );
            }
@@ -157,7 +157,7 @@
      }
     else if (event->type == GDK_BUTTON_RELEASE)
      { if (trame_motif->motif->type_gestion == TYPE_BOUTON)                               /* On met la frame 1: bouton relevé */
-        { if ( (trame_motif->num_image % 3) == 2 )
+        { if ( trame_motif->num_image == 2 )
            { Trame_choisir_frame( trame_motif, trame_motif->num_image - 1, trame_motif->color );
              switch ( trame_motif->motif->type_dialog )
               { case ACTION_IMMEDIATE: Envoyer_action_immediate( trame_motif ); break;
@@ -226,8 +226,8 @@
  static void Updater_les_visuels( struct PAGE_NOTEBOOK *page, JsonNode *motif )
   { struct TYPE_INFO_SUPERVISION *infos = page->infos;
     gint cpt;
-    printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
-           Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );
+    /*printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
+           Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );*/
 
     if (!infos->Trame) return;
     GList *liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de la page */

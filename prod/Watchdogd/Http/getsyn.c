@@ -622,7 +622,7 @@ end:
 /*-------------------------------------------------- Envoi les cadrans de la page --------------------------------------------*/
     if (full_syn)
      { if (SQL_Select_to_json_node ( synoptique, "cadrans",
-                                    "SELECT cadran.*,dico.libelle FROM syns_cadrans AS cadran "
+                                    "SELECT cadran.*, dico.classe, dico.libelle FROM syns_cadrans AS cadran "
                                     "INNER JOIN syns AS syn ON cadran.syn_id=syn.id "
                                     "INNER JOIN dictionnaire AS dico ON (cadran.tech_id=dico.tech_id AND cadran.acronyme=dico.acronyme) "
                                     "WHERE cadran.auto_create IS NULL AND cadran.syn_id=%d AND syn.access_level<=%d",
@@ -634,7 +634,7 @@ end:
      }
     else
      { if (SQL_Select_to_json_node ( synoptique, "cadrans",
-                                    "SELECT cadran.*,dico.libelle FROM syns_cadrans AS cadran "
+                                    "SELECT cadran.*, dico.classe, dico.libelle FROM syns_cadrans AS cadran "
                                     "INNER JOIN syns AS syn ON cadran.syn_id=syn.id "
                                     "INNER JOIN dictionnaire AS dico ON (cadran.tech_id=dico.tech_id AND cadran.acronyme=dico.acronyme) "
                                     "WHERE cadran.auto_create=1 AND cadran.syn_id=%d AND syn.access_level<=%d",

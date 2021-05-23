@@ -484,6 +484,7 @@
  extern void Json_end_object ( JsonBuilder *builder );
  extern void Json_add_array ( JsonBuilder *builder, gchar *name );
  extern void Json_end_array ( JsonBuilder *builder );
+ extern void Json_node_add_double ( JsonNode *RootNode, gchar *name, gdouble valeur );
  extern gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p );
  extern JsonNode *Json_get_from_string ( gchar *chaine );
  extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );

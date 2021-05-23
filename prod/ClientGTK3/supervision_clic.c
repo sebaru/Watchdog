@@ -160,42 +160,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* Clic_sur_cadran_supervision_action: Appelé pour lancer un firefox sur la periode en parametre                              */
-/* Entrée: période d'affichage                                                                                                */
-/* Sortie :rien                                                                                                               */
-/******************************************************************************************************************************/
- static void Clic_cadran_supervision_action ( gchar *period )
-  { gint pid;
-    printf( "Clic_sur_cadran_supervision : Lancement d'un firefox type=%d, %s:%s\n",
-             appui_cadran->cadran->type, appui_cadran->cadran->tech_id, appui_cadran->cadran->acronyme );
-    pid = fork();
-    if (pid<0) return;
-    else if (!pid)                                                                       /* Lancement de la ligne de commande */
-     { gchar chaine[256];
-       g_snprintf( chaine, sizeof(chaine),
-                  "https://%s.abls-habitat.fr/archive/show/%s/%s/%s",
-                   Client.host, appui_cadran->cadran->tech_id, appui_cadran->cadran->acronyme, period );
-       execlp( "firefox", "firefox", chaine, NULL );
-       printf("Lancement de firefox failed\n");
-       _exit(0);
-     }
-  }
-/******************************************************************************************************************************/
-/* Clic_sur_cadran_supervision_xxx: Appelé quand le menu last xxx est cliqué                                                  */
-/* Entrée: rien                                                                                                               */
-/* Sortie :rien                                                                                                               */
-/******************************************************************************************************************************/
- static void Clic_cadran_supervision_hour ( void )
-  { Clic_cadran_supervision_action ( "HOUR" ); }
- static void Clic_cadran_supervision_day ( void )
-  { Clic_cadran_supervision_action ( "DAY" ); }
- static void Clic_cadran_supervision_week ( void )
-  { Clic_cadran_supervision_action ( "WEEK" ); }
- static void Clic_cadran_supervision_month ( void )
-  { Clic_cadran_supervision_action ( "MONTH" ); }
- static void Clic_cadran_supervision_year ( void )
-  { Clic_cadran_supervision_action ( "YEAR" ); }
-/******************************************************************************************************************************/
 /* CB_Cadran_Set_registre: Fonction appelée qd on appuie sur un des boutons de l'interface de modification de consigne        */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
 /* sortie: TRUE                                                                                                               */
@@ -226,7 +190,7 @@
  static void Clic_cadran_set_registre ( struct TRAME_ITEM_CADRAN *trame_cadran )
   { GtkWidget *frame, *table, *texte, *hboite;
     gint i;
-    F_set_registre = gtk_dialog_new_with_buttons( _("Change Register"), GTK_WINDOW(F_client),
+    F_set_registre = gtk_dialog_new_with_buttons( _("Changer un registre"), GTK_WINDOW(F_client),
                                                   GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                                   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                                                   GTK_STOCK_OK, GTK_RESPONSE_OK,
@@ -265,28 +229,14 @@
  void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                      GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran )
   { static GtkWidget *Popup = NULL;
-    static GnomeUIInfo Popup_cadran[]=
-     { GNOMEUIINFO_ITEM_STOCK( N_("Last Hour"),  NULL, Clic_cadran_supervision_hour, GNOME_STOCK_PIXMAP_BOOK_OPEN ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Last Day"),   NULL, Clic_cadran_supervision_day, GNOME_STOCK_PIXMAP_BOOK_RED ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Last Week"),  NULL, Clic_cadran_supervision_week, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Last Month"), NULL, Clic_cadran_supervision_month, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Last Year"),  NULL, Clic_cadran_supervision_year, GNOME_STOCK_PIXMAP_BOOK_YELLOW ),
-       GNOMEUIINFO_END
-     };
 
     if (!(trame_cadran && event)) return;
     appui_cadran = trame_cadran;
 
     if (event->type == GDK_BUTTON_PRESS)
      { if ( ((GdkEventButton *)event)->button == 1 )                              /* Release sur le motif qui a été appuyé ?? */
-        { if (trame_cadran->cadran->type != MNEMO_REGISTRE)
-           { Clic_cadran_supervision_hour (); }
-          else
+        { if (trame_cadran->cadran->type == MNEMO_REGISTRE)
            { Clic_cadran_set_registre ( trame_cadran ); }
-        }
-       else if (event->button.button == 3)
-        { if (!Popup) Popup = gnome_popup_menu_new( Popup_cadran );                                          /* Creation menu */
-          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
         }
      }
   }

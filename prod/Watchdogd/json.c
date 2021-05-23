@@ -59,7 +59,7 @@
     json_object_set_boolean_member ( object, name, valeur );
   }
 /******************************************************************************************************************************/
-/* Json_add_string: Ajoute un enregistrement name/string dans le RootNode                                                     */
+/* Json_node_add_double: Ajoute un enregistrement name/double dans le RootNode                                                */
 /* Entrée: le RootNode, le nom du parametre, la valeur                                                                        */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/

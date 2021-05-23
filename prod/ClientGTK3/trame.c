@@ -276,11 +276,11 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
 
     cairo_matrix_init_identity ( &trame_cadran->transform );
     cairo_matrix_translate ( &trame_cadran->transform,
-                             (gdouble)trame_cadran->cadran->position_x,
-                             (gdouble)trame_cadran->cadran->position_y
+                             Json_get_float ( trame_cadran->cadran, "position_x" ),
+                             Json_get_float ( trame_cadran->cadran, "position_y" )
                            );
 
-    cairo_matrix_rotate ( &trame_cadran->transform, (gdouble)trame_cadran->cadran->angle*FACTEUR_PI );
+    cairo_matrix_rotate ( &trame_cadran->transform, Json_get_float ( trame_cadran->cadran, "angle" )*FACTEUR_PI );
     cairo_matrix_scale  ( &trame_cadran->transform, 1.0, 1.0 );
     goo_canvas_item_set_transform ( trame_cadran->item_groupe, &trame_cadran->transform );
   }
@@ -935,8 +935,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 /* Entrée: une structure cadran, la trame de reference                                                                        */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
-                                                struct CMD_TYPE_CADRAN *cadran )
+ struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame, JsonNode *cadran )
   { struct TRAME_ITEM_CADRAN *trame_cadran;
     gchar *couleur_bordure;
 
@@ -949,8 +948,10 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame_cadran->item_groupe = goo_canvas_group_new ( trame->canvas_root,                                   /* Groupe cadran */
                                                         NULL);
 
-    if (cadran->type == MNEMO_REGISTRE) { couleur_bordure = "red"; }
-                                   else { couleur_bordure = "green"; }
+    if (!g_ascii_strcasecmp(Json_get_string(cadran,"classe"), "REGISTRE") )
+         { couleur_bordure = "blue"; }
+    else { couleur_bordure = "green"; }
+
     trame_cadran->item_carre = goo_canvas_rect_new (trame_cadran->item_groupe,
                                                     -55.0, -15.0, 110.0, 30.0,
                                                     "fill_color", "gray",
@@ -992,7 +993,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame->page = page;
     trame->trame_widget = goo_canvas_new();
     g_object_set( trame->trame_widget, "background-color", coul, "anchor", GOO_CANVAS_ANCHOR_CENTER, NULL );
-    g_object_set( trame->trame_widget, "has-tooltip", TRUE, NULL );
+    /* Désactivation ToolTIP Trame g_object_set( trame->trame_widget, "has-tooltip", TRUE, NULL );*/
     goo_canvas_set_bounds (GOO_CANVAS (trame->trame_widget), 0, 0, taille_x+80, taille_y);
     trame->canvas_root = goo_canvas_get_root_item (GOO_CANVAS (trame->trame_widget));
     trame->fond = goo_canvas_rect_new ( trame->canvas_root, 0.0, 0.0, (double) taille_x, (double) taille_y,

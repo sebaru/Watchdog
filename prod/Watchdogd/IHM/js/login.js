@@ -2,6 +2,13 @@
 
  function Load_page ( )
   { $('#idMainContainer').fadeIn("slow");
+    $('#appareil').focus();
+    $('#appareil').on("change", function () { $('#username').focus(); } );
+    $('#username').on("change", function () { $('#password').focus(); } );
+    $('#password').keypress( function(event)
+     { var keycode = (event.keyCode ? event.keyCode : event.which);
+       if(keycode == '13') { Send_credential(); }
+     });
   }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Send_credential ()
