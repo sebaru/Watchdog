@@ -198,7 +198,7 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                                   DlsScanner_get_lineno(), $2,
                                   Get_option_entier($4, T_DAA, 0), $6->alors,
                                   Get_option_entier($4, T_DAD, 0),($6->sinon ? $6->sinon : "") );
-                     }
+                     } else $$=NULL;
                    if ($6 && $6->sinon) g_free($6->sinon);
                    if ($6 && $6->alors) g_free($6->alors);
                    if ($6) g_free($6);
