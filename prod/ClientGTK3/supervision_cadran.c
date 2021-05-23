@@ -88,7 +88,7 @@
 /******************************************************************************************************************************/
  static void Updater_un_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran, JsonNode *cadran )
   { gchar libelle[25];
-    trame_cadran->valeur = Json_get_float ( cadran, "valeur" );
+    trame_cadran->valeur = Json_get_double ( cadran, "valeur" );
     switch(Json_get_int(cadran,"classe"))
      { case MNEMO_ENTREE:
        case MNEMO_BISTABLE:

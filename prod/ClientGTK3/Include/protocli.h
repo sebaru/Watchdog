@@ -488,7 +488,7 @@
  extern gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p );
  extern JsonNode *Json_get_from_string ( gchar *chaine );
  extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );
- extern gfloat Json_get_float ( JsonNode *query, gchar *chaine );
+ extern gdouble Json_get_double ( JsonNode *query, gchar *chaine );
  extern gint Json_get_int ( JsonNode *query, gchar *chaine );
  extern gboolean Json_get_bool ( JsonNode *query, gchar *chaine );
  extern void Json_node_foreach_array_element ( JsonNode *RootNode, gchar *nom, JsonArrayForeach fonction, gpointer data );

@@ -43,7 +43,7 @@
  extern gchar *Json_node_to_string ( JsonNode *RootNode );
  extern JsonNode *Json_get_from_string ( gchar *chaine );
  extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );
- extern gfloat Json_get_float ( JsonNode *query, gchar *chaine );
+ extern gdouble Json_get_double ( JsonNode *query, gchar *chaine );
  extern gboolean Json_get_bool ( JsonNode *query, gchar *chaine );
  extern gint Json_get_int ( JsonNode *query, gchar *chaine );
  extern JsonArray *Json_get_array ( JsonNode *query, gchar *chaine );

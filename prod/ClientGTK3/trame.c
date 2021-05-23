@@ -273,14 +273,14 @@ printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->positi
 /******************************************************************************************************************************/
  void Trame_rafraichir_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran )
   { if (!(trame_cadran && trame_cadran->cadran)) return;
-
+printf("%s : posx %f, posy %f\n", __func__, Json_get_double ( trame_cadran->cadran, "posx" ), Json_get_double ( trame_cadran->cadran, "posy" ) );
     cairo_matrix_init_identity ( &trame_cadran->transform );
     cairo_matrix_translate ( &trame_cadran->transform,
-                             Json_get_float ( trame_cadran->cadran, "position_x" ),
-                             Json_get_float ( trame_cadran->cadran, "position_y" )
+                             Json_get_double ( trame_cadran->cadran, "posx" ),
+                             Json_get_double ( trame_cadran->cadran, "posy" )
                            );
 
-    cairo_matrix_rotate ( &trame_cadran->transform, Json_get_float ( trame_cadran->cadran, "angle" )*FACTEUR_PI );
+    cairo_matrix_rotate ( &trame_cadran->transform, Json_get_double ( trame_cadran->cadran, "angle" )*FACTEUR_PI );
     cairo_matrix_scale  ( &trame_cadran->transform, 1.0, 1.0 );
     goo_canvas_item_set_transform ( trame_cadran->item_groupe, &trame_cadran->transform );
   }

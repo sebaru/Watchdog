@@ -37,7 +37,12 @@
  void Afficher_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct PAGE_NOTEBOOK *page=user_data;
     struct TRAME_ITEM_CADRAN *trame_cadran;
-    struct CMD_TYPE_CADRAN *cadran;
+printf("%s : %s:%s posx %f, posy %f min=%f, max=%f nb_decimal=%d\n",
+        __func__, Json_get_string( element, "tech_id" ), Json_get_string ( element, "acronyme" ),
+                                        Json_get_double ( element, "posx" ), Json_get_double ( element, "posy" ),
+                                        Json_get_double ( element, "minimum" ), Json_get_double ( element, "maximum" ),
+Json_get_int ( element, "nb_decimal" )
+      );
 
     if (!page) return;
     if (page->type == TYPE_PAGE_SUPERVISION)

@@ -297,7 +297,7 @@
  extern struct DLS_SYN *Dls_search_syn ( gint id );
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
- extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech, gboolean in_range );
+ extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, gdouble val_avant_ech, gboolean in_range );
  extern void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur );
  extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p );
  extern void Dls_data_set_MSG_init ( gchar *tech_id, gchar *acronyme, gboolean etat );
