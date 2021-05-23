@@ -226,8 +226,8 @@
  static void Updater_les_visuels( struct PAGE_NOTEBOOK *page, JsonNode *motif )
   { struct TYPE_INFO_SUPERVISION *infos = page->infos;
     gint cpt;
-    printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
-           Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );
+    /*printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
+           Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );*/
 
     if (!infos->Trame) return;
     GList *liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de la page */

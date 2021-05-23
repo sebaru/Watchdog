@@ -75,6 +75,15 @@
     json_builder_add_double_value ( builder, valeur );
   }
 /******************************************************************************************************************************/
+/* Json_node_add_double: Ajoute un enregistrement name/double dans le RootNode                                                */
+/* Entrée: le RootNode, le nom du parametre, la valeur                                                                        */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_node_add_double ( JsonNode *RootNode, gchar *name, gdouble valeur )
+  { JsonObject *object = json_node_get_object (RootNode);
+    json_object_set_double_member ( object, name, valeur );
+  }
+/******************************************************************************************************************************/
 /* Json_add_object: Ajoute un enregistrement de type object dans le builder                                                   */
 /* Entrée: le builder, le nom du parametre                                                                                    */
 /* Sortie: néant                                                                                                              */

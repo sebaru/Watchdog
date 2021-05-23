@@ -40,30 +40,15 @@
     struct CMD_TYPE_CADRAN *cadran;
 
     if (!page) return;
-    cadran = (struct CMD_TYPE_CADRAN *)g_try_malloc0( sizeof(struct CMD_TYPE_CADRAN) );
-    if (!cadran)
-     { return;
-     }
-
-    cadran->id         = Json_get_int ( element, "id" );
-    cadran->syn_id     = Json_get_int ( element, "syn_id" );
-    cadran->position_x = Json_get_int ( element, "posx" );
-    cadran->position_y = Json_get_int ( element, "posy" );
-    cadran->angle      = Json_get_int ( element, "angle" );
-    cadran->nb_decimal = Json_get_int ( element, "nb_decimal" );
-    //cadran->font_size    = atoi(Json_get_string ( element, "bleu" ));
-    g_snprintf( cadran->tech_id,  sizeof(cadran->tech_id),  "%s", Json_get_string ( element, "tech_id" ));
-    g_snprintf( cadran->acronyme, sizeof(cadran->acronyme), "%s", Json_get_string ( element, "acronyme" ));
-
     if (page->type == TYPE_PAGE_SUPERVISION)
      { struct TYPE_INFO_SUPERVISION *infos=page->infos;
-       trame_cadran = Trame_ajout_cadran ( FALSE, infos->Trame, cadran );
+       trame_cadran = Trame_ajout_cadran ( FALSE, infos->Trame, element );
        g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "button-press-event",
                          G_CALLBACK(Clic_sur_cadran_supervision), trame_cadran );
      }
     else if (page->type == TYPE_PAGE_ATELIER)
      { struct TYPE_INFO_ATELIER *infos=page->infos;
-       trame_cadran = Trame_ajout_cadran ( TRUE, infos->Trame_atelier, cadran );
+       trame_cadran = Trame_ajout_cadran ( TRUE, infos->Trame_atelier, element );
      }
   }
 
