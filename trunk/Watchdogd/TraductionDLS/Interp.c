@@ -910,28 +910,19 @@
  struct ACTION *New_action_bus( struct ALIAS *alias, GList *options )
   { struct ACTION *result;
     gint taille;
-    gchar *host, *thread, *tag, *param1;
-#ifdef bouh
-    host   = Get_option_chaine ( options, T_HOST   ); if(!host) host="*";
-    thread = Get_option_chaine ( options, T_THREAD ); if (!thread) thread="*";
-    tag    = Get_option_chaine ( options, T_TAG    ); if (!tag) tag="no tag";
-/*  param1 = Get_option_chaine ( options, T_PARAM1 );                            /* Param1 est un appel de fonction ou NULL ! */
+
+    gchar *target_tech_id = Get_option_chaine ( options, T_TECH_ID, "*" );
+    gchar *target_tag     = Get_option_chaine ( options, T_TAG, "ping" );
+    /*gchar *target_param   = Get_option_chaine ( options, T_PARAM, "" );*/
 
     result = New_action();
-    taille = 256;
+    taille = 256+strlen(target_tech_id)+strlen(target_tag)/*+strlen(target_param)*/;
     result->alors = New_chaine( taille );
     g_snprintf( result->alors, taille,
-                "   Dls_data_set_bus ( \"%s\", \"%s\", &_%s_%s, 1, \"%s\", \"%s\", \"%s\", %s );\n",
+                 "   Dls_data_set_bus ( \"%s\", \"%s\", &_%s_%s, \"%s\", \"%s\", \"%s\" );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
-                host, thread, tag, (param1?param1:"NULL") );
-    result->sinon = New_chaine( taille );
-    g_snprintf( result->sinon, taille,
-                "   Dls_data_set_bus ( \"%s\", \"%s\", &_%s_%s, 0, \"%s\", \"%s\", \"%s\", NULL );\n",
-                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
-                host, thread, tag );
+                target_tech_id, target_tag, ""/*target_param*/ );
     return(result);
-#endif
-return(NULL);
   }
 /******************************************************************************************************************************/
 /* New_action_tempo: Prepare une struct action avec une commande TR                                                           */

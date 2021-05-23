@@ -49,7 +49,7 @@
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_SBIEN_ALE_FUGITIVE T_TOP_ALERTE T_TOP_ALERTE_FUGITIVE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_SPERS_OK T_OSYN_ACQ
 %token <val>    T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_OK
-%token <val>    T_BUS T_HOST T_THREAD T_TAG
+%token <val>    T_BUS T_HOST T_TECH_ID T_TAG
 
 %token <val>    MODE COLOR CLIGNO T_RESET T_RATIO T_MULTI T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
 %token <val>    T_PID T_KP T_KI T_KD T_INPUT
@@ -165,43 +165,45 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                 }}
                 | T_MOINS expr T_DIFFERE options DONNE action PVIRGULE
                 {{ int taille;
-                   taille = strlen($2)+strlen($6->alors)+1024;
-                   if ($6->sinon) taille += strlen($6->sinon);
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille,
-                               "vars->num_ligne = %d; /* une_instr différée----------*/\n"
-                               " { static gboolean counting_on=FALSE;\n"
-                               "   static gboolean counting_off=FALSE;\n"
-                               "   static time_t top;\n"
-                               "   if(%s)\n"
-                               "    { counting_off=FALSE;\n"
-                               "      if (counting_on==FALSE)\n"
-                               "       { counting_on=TRUE; time(&top); }\n"
-                               "      else\n"
-                               "       { if ( difftime( time(NULL), top ) >= %d )\n"
-                               "          { %s\n"
-                               "          }\n"
-                               "       }\n"
-                               "    }\n"
-                               "   else\n"
-                               "    { counting_on = FALSE;\n"
-                               "      if (counting_off==FALSE)\n"
-                               "       { counting_off=TRUE; time(&top); }\n"
-                               "      else\n"
-                               "       { if ( difftime( time(NULL), top ) >= %d )\n"
-                               "          { %s\n"
-                               "          }\n"
-                               "       }\n"
-                               "    }\n"
-                               " }\n\n",
-                               DlsScanner_get_lineno(), $2,
-                               Get_option_entier($4, T_DAA, 0), $6->alors,
-                               Get_option_entier($4, T_DAD, 0),($6->sinon ? $6->sinon : "") );
-                   if ($6->sinon) g_free($6->sinon);
-                   g_free($6->alors);
-                   g_free($6);
+                   if ($2 && $6)
+                    { taille = strlen($2)+strlen($6->alors)+1024;
+                      if ($6->sinon) taille += strlen($6->sinon);
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille,
+                                  "vars->num_ligne = %d; /* une_instr différée----------*/\n"
+                                  " { static gboolean counting_on=FALSE;\n"
+                                  "   static gboolean counting_off=FALSE;\n"
+                                  "   static time_t top;\n"
+                                  "   if(%s)\n"
+                                  "    { counting_off=FALSE;\n"
+                                  "      if (counting_on==FALSE)\n"
+                                  "       { counting_on=TRUE; time(&top); }\n"
+                                  "      else\n"
+                                  "       { if ( difftime( time(NULL), top ) >= %d )\n"
+                                  "          { %s\n"
+                                  "          }\n"
+                                  "       }\n"
+                                  "    }\n"
+                                  "   else\n"
+                                  "    { counting_on = FALSE;\n"
+                                  "      if (counting_off==FALSE)\n"
+                                  "       { counting_off=TRUE; time(&top); }\n"
+                                  "      else\n"
+                                  "       { if ( difftime( time(NULL), top ) >= %d )\n"
+                                  "          { %s\n"
+                                  "          }\n"
+                                  "       }\n"
+                                  "    }\n"
+                                  " }\n\n",
+                                  DlsScanner_get_lineno(), $2,
+                                  Get_option_entier($4, T_DAA, 0), $6->alors,
+                                  Get_option_entier($4, T_DAD, 0),($6->sinon ? $6->sinon : "") );
+                     }
+                   if ($6 && $6->sinon) g_free($6->sinon);
+                   if ($6 && $6->alors) g_free($6->alors);
+                   if ($6) g_free($6);
                    Liberer_options($4);
-                   g_free($2);
+                   if ($2) g_free($2);
                 }}
                 | T_MOINS expr T_MOINS T_POUV calcul_expr T_PFERM DONNE calcul_alias_result PVIRGULE
                 {{ int taille;
@@ -830,7 +832,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
-                | T_THREAD T_EGAL T_CHAINE
+                | T_TECH_ID T_EGAL T_CHAINE
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = T_CHAINE;
