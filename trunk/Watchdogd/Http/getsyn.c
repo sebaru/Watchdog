@@ -372,76 +372,57 @@ end:
 /******************************************************************************************************************************/
  void Http_Formater_cadran( struct HTTP_CADRAN *cadran )
   { if (!cadran) return;
-    switch(cadran->classe)
-     { /*case MNEMO_BISTABLE:
-            cadran->in_range = TRUE;
-            cadran->valeur = 1.0 * Dls_data_get_BI/MONO ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-            break;
-       case MNEMO_ENTREE:
-            cadran->in_range = TRUE;
-            cadran->valeur = 1.0 * Dls_data_get_DI ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-            break;*/
-       case MNEMO_ENTREE_ANA:
-             { struct DLS_AI *ai;
-               cadran->valeur = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-               if (!cadran->dls_data)                            /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-                { cadran->in_range = FALSE;
-                  break;
-                }
-               ai = (struct DLS_AI *)cadran->dls_data;
-               cadran->in_range = ai->inrange;
-               cadran->valeur = ai->val_ech;
-               g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ai->unite );
-             }
-            break;
-       case MNEMO_CPTH:
-             { cadran->in_range = TRUE;
-               cadran->valeur = Dls_data_get_CH(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-             }
-            break;
-       case MNEMO_CPT_IMP:
-             { cadran->valeur = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-               struct DLS_CI *ci=cadran->dls_data;
-               if (!ci)                                          /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-                { cadran->in_range = FALSE;
-                  break;
-                }
-               cadran->in_range = TRUE;
-               cadran->valeur *= ci->multi;                                                               /* Multiplication ! */
-               g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ci->unite );
-             }
-            break;
-       case MNEMO_REGISTRE:
-             { struct DLS_REGISTRE *registre;
-               cadran->valeur = Dls_data_get_R(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-               if (!cadran->dls_data)                      /* si Registre pas trouvée, on remonte le nom du cadran en libellé */
-                { cadran->in_range = FALSE;
-                  break;
-                }
-               registre = (struct DLS_REGISTRE *)cadran->dls_data;
-               cadran->in_range = TRUE;
-               cadran->valeur = registre->valeur;
-               g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", registre->unite );
-             }
-            break;
-       case MNEMO_TEMPO:
-            Dls_data_get_tempo ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-            struct DLS_TEMPO *tempo = cadran->dls_data;
-            if (!tempo)
-             { cadran->in_range = FALSE;
-               break;
-             }
-            cadran->in_range = FALSE;
-
-            if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON)                     /* Temporisation Retard en train de compter */
-             { cadran->valeur = (tempo->date_on - Partage->top); }
-            else if (tempo->status == DLS_TEMPO_NOT_COUNTING)                  /* Tempo ne compte pas: on affiche la consigne */
-             { cadran->valeur = tempo->delai_on; }
-            break;
-       default:
-            cadran->in_range = FALSE;
-            break;
+    if ( ! strcmp ( cadran->classe, "AI" ) )
+     { cadran->valeur = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+       struct DLS_AI *ai=cadran->dls_data;
+       if (!ai)                                                  /* si AI pas trouvée, on remonte le nom du cadran en libellé */
+        { cadran->in_range = FALSE; }
+       else
+        { cadran->in_range = ai->inrange;
+          cadran->valeur   = ai->val_ech;
+          g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ai->unite );
+        }
+     }
+    else if ( !strcmp ( cadran->classe, "CH" ) )
+     { cadran->in_range = TRUE;
+       cadran->valeur = Dls_data_get_CH(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+     }
+    else if ( !strcmp ( cadran->classe, "CI" ) )
+     { cadran->valeur = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+       struct DLS_CI *ci=cadran->dls_data;
+       if (!ci)                                                  /* si AI pas trouvée, on remonte le nom du cadran en libellé */
+        { cadran->in_range = FALSE; }
+       else
+        { cadran->in_range = TRUE;
+          cadran->valeur *= ci->multi;                                                                    /* Multiplication ! */
+          g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ci->unite );
+        }
+     }
+    else if ( !strcmp ( cadran->classe, "REGISTRE" ) )
+     { cadran->valeur = Dls_data_get_R(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+       struct DLS_REGISTRE *registre=cadran->dls_data;
+       if (!registre)                                      /* si Registre pas trouvée, on remonte le nom du cadran en libellé */
+        { cadran->in_range = FALSE; }
+       else
+        { cadran->in_range = TRUE;
+          cadran->valeur = registre->valeur;
+          g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", registre->unite );
+        }
+     }
+    else if ( !strcmp ( cadran->classe, "T" ) )
+     { Dls_data_get_tempo ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+       struct DLS_TEMPO *tempo = cadran->dls_data;
+       if (!tempo)
+        { cadran->in_range = FALSE; }
+       else
+        { cadran->in_range = TRUE;
+          if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON)                     /* Temporisation Retard en train de compter */
+           { cadran->valeur = (tempo->date_on - Partage->top); }
+          else if (tempo->status == DLS_TEMPO_NOT_COUNTING)                  /* Tempo ne compte pas: on affiche la consigne */
+           { cadran->valeur = tempo->delai_on; }
+        }
       }
+     else { cadran->in_range = FALSE; }
   }
 /******************************************************************************************************************************/
 /* Http_abonner_cadran: Abonne un client à un cadran particulier                                                              */
@@ -458,18 +439,15 @@ end:
        if ( !strcasecmp( tech_id, cadran->tech_id ) && !strcasecmp( acronyme, cadran->acronyme ) ) break;
        liste = g_slist_next(liste);
      }
-    if (liste) return;                                      /* si le cadran n'est pas trouvé, on l'ajoute a la liste d'abonné */
+    if (liste) return;                                      /* si le cadran n'est pas trouvé, on l'ajoute à la liste d'abonné */
     struct HTTP_CADRAN *http_cadran = g_try_malloc0(sizeof(struct HTTP_CADRAN));
     if (!http_cadran) return;
     g_snprintf( http_cadran->tech_id,  sizeof(http_cadran->tech_id),  "%s", tech_id  );
     g_snprintf( http_cadran->acronyme, sizeof(http_cadran->acronyme), "%s", acronyme );
-    http_cadran->classe = Rechercher_DICO_type ( http_cadran->tech_id, http_cadran->acronyme );
-    if (http_cadran->classe!=-1)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au CADRAN %s:%s", __func__,
-                 session->username, http_cadran->tech_id, http_cadran->acronyme );
-       session->Liste_bit_cadrans = g_slist_prepend( session->Liste_bit_cadrans, http_cadran );
-     }
-    else { g_free(http_cadran); }                                                                         /* Si pas trouvé... */
+    g_snprintf( http_cadran->classe,   sizeof(http_cadran->classe),   "%s", Json_get_string( new_cadran, "classe" ) );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au CADRAN %s:%s", __func__,
+              session->username, http_cadran->tech_id, http_cadran->acronyme );
+    session->Liste_bit_cadrans = g_slist_prepend( session->Liste_bit_cadrans, http_cadran );
   }
 /******************************************************************************************************************************/
 /* Http_add_etat_visuel: Ajoute les états de chaque visuels du tableau                                                        */

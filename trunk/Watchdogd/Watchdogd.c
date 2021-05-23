@@ -160,9 +160,9 @@
                  "%s: SET_AI from %s/%s to %s/%s : '%s:%s'=%f (range=%d)", __func__,
                  zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
-                 Json_get_float ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
+                 Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
        Dls_data_set_AI ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), NULL,
-                         Json_get_float ( request, "valeur" ),   Json_get_bool ( request, "in_range" ) );
+                         Json_get_double ( request, "valeur" ),  Json_get_bool ( request, "in_range" ) );
      }
     else if ( !strcasecmp( zmq_tag, "SET_CDE") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )

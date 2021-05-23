@@ -142,9 +142,18 @@
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
- gfloat Json_get_float ( JsonNode *query, gchar *chaine )
-  { JsonObject *object = json_node_get_object (query);
-    return((gfloat)json_object_get_double_member ( object, chaine ));
+ gdouble Json_get_double ( JsonNode *query, gchar *chaine )
+  { GValue valeur = G_VALUE_INIT;
+    gint retour;
+    JsonObject *object = json_node_get_object (query);
+    JsonNode *node = json_object_get_member ( object, chaine );
+    if (!node) { return(0.0); }
+    json_node_get_value ( node, &valeur );
+         if ( G_VALUE_HOLDS_STRING (&valeur) ) { retour = atof(g_value_get_string (&valeur)); }
+    else if ( G_VALUE_HOLDS_DOUBLE (&valeur) ) { retour = g_value_get_double(&valeur); }
+    else { printf("%s: Erreur getting '%s'\n", __func__, chaine ); retour = -1; }
+    g_value_unset ( &valeur );
+    return(retour);
   }
 /******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */

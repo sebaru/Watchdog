@@ -257,8 +257,8 @@ printf("Afficher_propriete: debut\n");
                                        break;
                                   case TYPE_CADRAN:
                                         { JsonNode *cadran = infos->Selection->data;
-                                          x = Json_get_float ( cadran, "position_x" );
-                                          y = Json_get_float ( cadran, "position_y" );
+                                          x = Json_get_double ( cadran, "posx" );
+                                          y = Json_get_double ( cadran, "posy" );
                                         }
                                        break;
                                   case TYPE_CAMERA_SUP:

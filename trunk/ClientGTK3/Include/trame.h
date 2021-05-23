@@ -157,7 +157,7 @@
     JsonNode *cadran;
     gint   layer;                                                                      /* Groupe de deplacement du motif */
     gint   selection;
-    gfloat valeur;
+    gdouble valeur;
   };
 
  struct TRAME_ITEM_CAMERA_SUP

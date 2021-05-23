@@ -220,16 +220,16 @@
 
           case TYPE_CADRAN:
                trame_cadran = ((struct TRAME_ITEM_CADRAN *)(selection->data));
-               new_x = Json_get_float( trame_cadran->cadran, "position_x" ) + dx;
-               new_y = Json_get_float( trame_cadran->cadran, "position_y" ) + dy;
+               new_x = Json_get_double( trame_cadran->cadran, "posx" ) + dx;
+               new_y = Json_get_double( trame_cadran->cadran, "posy" ) + dy;
 
                if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(infos->Check_grid)))
                 { new_x = new_x/largeur_grille * largeur_grille;
                   new_y = new_y/largeur_grille * largeur_grille;
                 }
 
-               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X ) { Json_node_add_double ( trame_cadran->cadran, "position_x", new_x ); }
-               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y ) { Json_node_add_double ( trame_cadran->cadran, "position_y", new_y ); }
+               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X ) { Json_node_add_double ( trame_cadran->cadran, "posx", new_x ); }
+               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y ) { Json_node_add_double ( trame_cadran->cadran, "posy", new_y ); }
 
                Trame_rafraichir_cadran(trame_cadran);                                                       /* Refresh visuel */
                break;

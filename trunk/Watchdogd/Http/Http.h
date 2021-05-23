@@ -75,7 +75,7 @@
   { gchar tech_id[32];
     gchar acronyme[64];
     gchar unite[32];
-    gint classe;
+    gchar classe[12];
     gpointer dls_data;
     gdouble  valeur;
     gboolean in_range;
