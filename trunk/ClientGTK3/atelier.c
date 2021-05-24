@@ -189,7 +189,7 @@
     infos = page->infos = (struct TYPE_INFO_ATELIER *)g_try_malloc0( sizeof(struct TYPE_INFO_ATELIER) );
     if (!page->infos) { g_free(page); return; }
 
-    page->type   = TYPE_PAGE_ATELIER;
+    page->type           = TYPE_PAGE_ATELIER;
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     infos->syn = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
@@ -366,11 +366,12 @@
     g_snprintf( titre, sizeof(titre), "Atelier/%s", Json_get_string( infos->syn, "libelle" ) );
     gint page_num = gtk_notebook_append_page( GTK_NOTEBOOK(client->Notebook), page->child, gtk_label_new ( titre ) );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(client->Notebook), page_num );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ),      Afficher_un_motif, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Afficher_un_commentaire, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, page );
+
+    Json_node_foreach_array_element ( infos->syn, "visuels",     Afficher_un_motif, page );
+    Json_node_foreach_array_element ( infos->syn, "passerelles", Afficher_une_passerelle, page );
+    Json_node_foreach_array_element ( infos->syn, "comments",    Afficher_un_commentaire, page );
+    Json_node_foreach_array_element ( infos->syn, "cameras",     Afficher_une_camera, page );
+    Json_node_foreach_array_element ( infos->syn, "cadrans",     Afficher_un_cadran, page );
   }
 #ifdef bouh
 /******************************************************************************************************************************/

@@ -51,11 +51,11 @@
     struct TRAME_ITEM_MOTIF *trame_motif;
     struct CMD_TYPE_MOTIF *motif;
 
+printf("%s : %s:%s\n", __func__, Json_get_string( element, "tech_id" ), Json_get_string ( element, "acronyme" ) );
     if (!page) return;
 
     motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif) return;
-
     motif->position_x   = Json_get_int ( element, "posx" );
     motif->position_y   = Json_get_int ( element, "posy" );
     motif->largeur      = Json_get_int ( element, "larg" );

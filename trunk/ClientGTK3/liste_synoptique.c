@@ -244,11 +244,10 @@
     gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                   /* Recup du id */
 
-    JsonBuilder *builder = Json_create ();
-    if (builder)
-     { Json_add_int ( builder, "syn_id", id );
-       Envoi_json_au_serveur( page->client, "PUT", builder, "/api/syn/edit", Show_Proprietes_synoptique_CB );
-     }
+    gchar chaine[64];
+    g_snprintf ( chaine, sizeof(chaine), "/api/syn/get?syn_id=%d", id  );
+    Envoi_json_au_serveur( page->client, "GET", NULL, chaine, Show_Proprietes_synoptique_CB );
+
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -390,11 +389,9 @@
      { gint id;
        gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                /* Recup du id */
-       JsonBuilder *builder = Json_create ();
-       if (builder)
-        { Json_add_int (builder, "syn_id", id);
-          Envoi_json_au_serveur ( page->client, "PUT", builder, "/api/syn/show", Creer_page_atelier_CB );
-        }
+       gchar chaine[64];
+       g_snprintf( chaine, sizeof(chaine), "/api/syn/show?syn_id=%d&full=1", id  );
+       Envoi_json_au_serveur ( page->client, "GET", NULL, chaine, Creer_page_atelier_CB );
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
      }
@@ -620,12 +617,12 @@
     gtk_widget_set_tooltip_text ( bouton, "Ajouter un synoptique fils" );
     g_signal_connect_swapped ( bouton, "clicked", G_CALLBACK (Menu_Want_Add_synoptique), page );
 
-    bouton = gtk_button_new_with_label( "Imprimer" );
+/*    bouton = gtk_button_new_with_label( "Imprimer" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "document-print", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
     gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Imprimer la liste des synoptiques" );
-    //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_exporter_plugin_dls), NULL );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_exporter_plugin_dls), NULL );*/
 
     separateur = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );

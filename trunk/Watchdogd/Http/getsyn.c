@@ -254,24 +254,20 @@ end:
 /******************************************************************************************************************************/
  void Http_traiter_syn_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                             SoupClientContext *client, gpointer user_data )
-  {if (msg->method != SOUP_METHOD_PUT)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
 
-    if ( ! (Json_has_member ( request, "syn_id" ) ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+    gint syn_id;
+    gchar *syn_id_src = g_hash_table_lookup ( query, "syn_id" );
+    if (syn_id_src) { syn_id = atoi (syn_id_src); }
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
-
-    gint syn_id = Json_get_int ( request, "syn_id" );
-    json_node_unref(request);
 
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();

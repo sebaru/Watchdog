@@ -230,8 +230,11 @@
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
  JsonArray *Json_get_array ( JsonNode *query, gchar *chaine )
-  { JsonObject *object = json_node_get_object (query);
-    return(json_object_get_array_member ( object, chaine ));
+  { JsonArray *array;
+    JsonObject *object = json_node_get_object (query);
+    array = json_object_get_array_member ( object, chaine );
+    if (!array) printf("%s : Warning : Array '%s' unknown\n", __func__, chaine );
+    return(array);
   }
 /******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */

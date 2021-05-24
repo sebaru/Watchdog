@@ -485,13 +485,13 @@
  extern void Json_add_array ( JsonBuilder *builder, gchar *name );
  extern void Json_end_array ( JsonBuilder *builder );
  extern void Json_node_add_double ( JsonNode *RootNode, gchar *name, gdouble valeur );
+ extern void Json_node_foreach_array_element ( JsonNode *RootNode, gchar *nom, JsonArrayForeach fonction, gpointer data );
  extern gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p );
  extern JsonNode *Json_get_from_string ( gchar *chaine );
  extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );
  extern gdouble Json_get_double ( JsonNode *query, gchar *chaine );
  extern gint Json_get_int ( JsonNode *query, gchar *chaine );
  extern gboolean Json_get_bool ( JsonNode *query, gchar *chaine );
- extern void Json_node_foreach_array_element ( JsonNode *RootNode, gchar *nom, JsonArrayForeach fonction, gpointer data );
  extern JsonArray *Json_get_array ( JsonNode *query, gchar *chaine );
  extern gboolean Json_has_member ( JsonNode *query, gchar *chaine );
  extern JsonObject *Json_get_object_as_object ( JsonNode *query, gchar *chaine );
