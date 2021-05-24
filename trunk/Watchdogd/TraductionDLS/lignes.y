@@ -223,7 +223,7 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                       else if ($8->classe==MNEMO_REGISTRE)
                        { g_snprintf( $$, taille,
                                      "vars->num_ligne = %d; /* une_instr-------------*/\n"
-                                     "if(%s)\n { Dls_data_set_R ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n }\n",
+                                     "if(%s)\n { Dls_data_set_REGISTRE ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n }\n",
                                      DlsScanner_get_lineno(), $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
                        }
                       else
