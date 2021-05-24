@@ -64,7 +64,7 @@
         }
        case MNEMO_REGISTRE:
         { gfloat valeur;
-          valeur = Dls_data_get_R ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+          valeur = Dls_data_get_REGISTRE ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
           return( cadran->valeur != valeur );
         }
        default: return(FALSE);
@@ -125,7 +125,7 @@
              }
             break;
        case MNEMO_REGISTRE:
-             { cadran->valeur = Dls_data_get_R (cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+             { cadran->valeur = Dls_data_get_REGISTRE (cadran->tech_id, cadran->acronyme, &cadran->dls_data );
                struct DLS_REGISTRE *registre=cadran->dls_data;
                if (!registre)                                       /* si AI pas trouvée, on remonte le nom du cadran en libellé */
                 { cadran->in_range = FALSE;

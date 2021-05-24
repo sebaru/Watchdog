@@ -161,7 +161,7 @@
     struct DLS_REGISTRE *reg;
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
      { reg = NULL;
-       Dls_data_set_R ( NULL, db->row[0], db->row[1], (gpointer)&reg, atof(db->row[2]) );
+       Dls_data_set_REGISTRE ( NULL, db->row[0], db->row[1], (gpointer)&reg, atof(db->row[2]) );
        g_snprintf( reg->unite, sizeof(reg->unite), "%s", db->row[3] );
        reg->archivage = atoi(db->row[4]);
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: REGISTRE '%s:%s'=%f %s loaded (archivage=%d)", __func__,

@@ -399,7 +399,7 @@ end:
         }
      }
     else if ( !strcmp ( cadran->classe, "REGISTRE" ) )
-     { cadran->valeur = Dls_data_get_R(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+     { cadran->valeur = Dls_data_get_REGISTRE(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
        struct DLS_REGISTRE *registre=cadran->dls_data;
        if (!registre)                                      /* si Registre pas trouvée, on remonte le nom du cadran en libellé */
         { cadran->in_range = FALSE; }

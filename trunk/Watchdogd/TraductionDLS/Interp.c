@@ -415,7 +415,7 @@
         }
        case MNEMO_REGISTRE :
         { g_snprintf ( partie_g, sizeof(partie_g),
-                       "( (Dls_data_get_R (\"%s\",\"%s\",&_%s_%s) ",
+                       "( (Dls_data_get_REGISTRE (\"%s\",\"%s\",&_%s_%s) ",
                        alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
           break;
         }
@@ -460,7 +460,7 @@
            }
           case MNEMO_REGISTRE :
            { g_snprintf ( partie_d, sizeof(partie_d),
-                          "Dls_data_get_R (\"%s\",\"%s\",&_%s_%s) ) )",
+                          "Dls_data_get_REGISTRE (\"%s\",\"%s\",&_%s_%s) ) )",
                           alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
              break;
            }

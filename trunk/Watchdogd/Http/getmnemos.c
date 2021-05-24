@@ -156,7 +156,7 @@
      }
     else if ( ! strcasecmp ( classe, "R" ) )
      { struct DLS_REGISTRE *reg=NULL;
-       Dls_data_get_R ( tech_id, acronyme, (gpointer)&reg );
+       Dls_data_get_REGISTRE ( tech_id, acronyme, (gpointer)&reg );
        if ( Json_has_member ( request, "archivage" ) )
         { gchar chaine[128];
           gint archivage = Json_get_int ( request, "archivage" );
