@@ -369,7 +369,7 @@ calcul_expr3:   T_POUV calcul_expr T_PFERM {{ $$=$2; }}
                        { case MNEMO_REGISTRE:
                           { taille = 256;
                             $$ = New_chaine( taille ); /* 10 caractères max */
-                            g_snprintf( $$, taille, "Dls_data_get_R(\"%s\",\"%s\",&_%s_%s)",
+                            g_snprintf( $$, taille, "Dls_data_get_REGISTRE(\"%s\",\"%s\",&_%s_%s)",
                                         alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                             break;
                           }
