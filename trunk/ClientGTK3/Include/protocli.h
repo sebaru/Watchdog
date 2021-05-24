@@ -178,6 +178,7 @@
  extern void Connecter ( struct CLIENT *Client );                                                           /* Dans connect.c */
  extern void Deconnecter ( struct CLIENT *Client );
  extern void Envoi_json_au_serveur ( struct CLIENT *client, gchar *methode, JsonBuilder *builder, gchar *URI, SoupSessionCallback callback );
+ extern void Envoi_json_au_serveur_new ( struct CLIENT *client, gchar *methode, JsonNode *RootNode, gchar *URI, SoupSessionCallback callback );
  extern void Envoi_ws_au_serveur ( struct CLIENT *client, SoupWebsocketConnection *ws, JsonBuilder *builder );
 
 #ifdef bouh

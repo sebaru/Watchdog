@@ -295,11 +295,11 @@ end:
     Audit_log ( session, "Synoptique '%d' get", syn_id );
   }
 /******************************************************************************************************************************/
-/* Http_get_syn_save_un_motif: Enregistre un motif en base de données                                                         */
+/* Http_get_syn_save_un_visuel: Enregistre un motif en base de données                                                        */
 /* Entrée: les données JSON recu de la requete HTTP                                                                           */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Http_syn_save_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+ static void Http_syn_save_un_visuel (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct HTTP_CLIENT_SESSION *session = user_data;
     if ( ! (Json_has_member ( element, "id" ) &&
             Json_has_member ( element, "posx" ) &&
@@ -316,12 +316,12 @@ end:
            ) )
      { return; }
 
-    gchar *libelle = Normaliser_chaine( Json_get_string ( element, "libelle" ) );
-    gchar *tech_id  = Normaliser_chaine( Json_get_string ( element, "tech_id" ) );
-    gchar *acronyme = Normaliser_chaine( Json_get_string ( element, "acronyme" ) );
+    gchar *libelle       = Normaliser_chaine( Json_get_string ( element, "libelle" ) );
+    gchar *tech_id       = Normaliser_chaine( Json_get_string ( element, "tech_id" ) );
+    gchar *acronyme      = Normaliser_chaine( Json_get_string ( element, "acronyme" ) );
     gchar *clic_tech_id  = Normaliser_chaine( Json_get_string ( element, "clic_tech_id" ) );
     gchar *clic_acronyme = Normaliser_chaine( Json_get_string ( element, "clic_acronyme" ) );
-    gchar *def_color = Normaliser_chaine( Json_get_string ( element, "def_color" ) );
+    gchar *def_color     = Normaliser_chaine( Json_get_string ( element, "def_color" ) );
 
     SQL_Write_new( "UPDATE syns_motifs AS m INNER JOIN syns AS s ON m.syn_id = s.id SET m.libelle='%s', "
                    "m.tech_id='%s', m.acronyme='%s', "
@@ -329,7 +329,7 @@ end:
                    "m.def_color='%s', m.angle='%s', m.scale='%s', m.gestion='%d' "
                    " WHERE id='%d' AND s.access_level<'%d'",
                    libelle, tech_id, acronyme, clic_tech_id, clic_acronyme, def_color,
-                   Json_get_string( element, "angle" ), Json_get_string(element,"scale"), Json_get_int(element,"gestion"),
+                   Json_get_int( element, "angle" ), Json_get_int(element,"scale"), Json_get_int(element,"gestion"),
                    Json_get_int(element,"id"), session->access_level );
 
     g_free(libelle);
@@ -340,12 +340,31 @@ end:
     g_free(def_color);
  }
 /******************************************************************************************************************************/
+/* Http_get_syn_save_un_cadran: Enregistre un cadran en base de données                                                       */
+/* Entrée: les données JSON recu de la requete HTTP                                                                           */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_syn_save_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct HTTP_CLIENT_SESSION *session = user_data;
+    if ( ! (Json_has_member ( element, "id" ) &&
+            Json_has_member ( element, "posx" ) &&
+            Json_has_member ( element, "posy" ) &&
+            Json_has_member ( element, "angle" )
+           ) )
+     { return; }
+
+    SQL_Write_new( "UPDATE syns_cadrans INNER JOIN syns ON syns.id=syns_cadrans.syn_id "
+                   "SET posx='%d', posy='%d', angle='%d' WHERE syns_cadrans.id='%d' AND syns.access_level<='%d'",
+                   Json_get_int( element, "posx" ), Json_get_int(element,"posy"), Json_get_int(element,"angle"),
+                   Json_get_int(element,"id"), session->access_level );
+ }
+/******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_syn_update_motifs ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                       SoupClientContext *client, gpointer user_data )
+ void Http_traiter_syn_save ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                              SoupClientContext *client, gpointer user_data )
   { if ( msg->method != SOUP_METHOD_POST )
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -356,8 +375,11 @@ end:
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( Json_has_member ( request, "motifs" ) )
-     { json_array_foreach_element ( Json_get_array ( request, "motifs" ), Http_syn_save_un_motif, session ); }
+    if ( Json_has_member ( request, "visuels" ) )
+     { Json_node_foreach_array_element ( request, "visuels", Http_syn_save_un_visuel, session ); }
+
+    if ( Json_has_member ( request, "cadrans" ) )
+     { Json_node_foreach_array_element ( request, "cadrans", Http_syn_save_un_cadran, session ); }
 
     json_node_unref(request);
   }
