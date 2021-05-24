@@ -70,7 +70,7 @@
  static void HTTP_CADRAN_to_json ( JsonNode *node, struct HTTP_CADRAN *http_cadran )
   { Json_node_add_string ( node, "tech_id",  http_cadran->tech_id );
     Json_node_add_string ( node, "acronyme", http_cadran->acronyme );
-    Json_node_add_int    ( node, "classe",   http_cadran->classe );
+    Json_node_add_string ( node, "classe",   http_cadran->classe );
     Json_node_add_bool   ( node, "in_range", http_cadran->in_range );
     Json_node_add_double ( node, "valeur",   http_cadran->valeur );
     Json_node_add_string ( node, "unite",    http_cadran->unite );
