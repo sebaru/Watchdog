@@ -326,7 +326,7 @@ end:
     SQL_Write_new( "UPDATE syns_motifs AS m INNER JOIN syns AS s ON m.syn_id = s.id SET m.libelle='%s', "
                    "m.tech_id='%s', m.acronyme='%s', "
                    "m.clic_tech_id='%s', m.clic_acronyme='%s', "
-                   "m.def_color='%s', m.angle='%s', m.scale='%s', m.gestion='%d' "
+                   "m.def_color='%s', m.angle='%d', m.scale='%d', m.gestion='%d' "
                    " WHERE id='%d' AND s.access_level<'%d'",
                    libelle, tech_id, acronyme, clic_tech_id, clic_acronyme, def_color,
                    Json_get_int( element, "angle" ), Json_get_int(element,"scale"), Json_get_int(element,"gestion"),
