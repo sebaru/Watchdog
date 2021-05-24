@@ -1529,10 +1529,10 @@ end:
      }
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_R: Positionne un registre                                                                                     */
+/* Dls_data_set_REGISTRE: Positionne un registre                                                                                     */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_R ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *r_p, gfloat valeur )
+ void Dls_data_set_REGISTRE ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *r_p, gdouble valeur )
   { struct DLS_REGISTRE *reg;
 
     if (!r_p || !*r_p)
@@ -1585,7 +1585,7 @@ end:
 /* Dls_data_get_reg: Remonte l'etat d'un registre                                                                             */
 /* Sortie : TRUE sur le regean est UP                                                                                         */
 /******************************************************************************************************************************/
- gfloat Dls_data_get_R ( gchar *tech_id, gchar *acronyme, gpointer *r_p )
+ gdouble Dls_data_get_REGISTRE ( gchar *tech_id, gchar *acronyme, gpointer *r_p )
   { struct DLS_REGISTRE *reg;
     GSList *liste;
     if (r_p && *r_p)                                                             /* Si pointeur d'acceleration disponible */
@@ -1610,7 +1610,7 @@ end:
 /* Sortie : TRUE sur le regean est UP                                                                                         */
 /******************************************************************************************************************************/
  void Dls_PID_reset ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input )
-  { Dls_data_get_R ( input_tech_id, input_acronyme, r_input );
+  { Dls_data_get_REGISTRE ( input_tech_id, input_acronyme, r_input );
     if ( ! (r_input) ) return;
 
     struct DLS_REGISTRE *input = *r_input;
@@ -1631,13 +1631,13 @@ end:
                    gchar *outputmin_tech_id, gchar *outputmin_acronyme, gpointer *r_outputmin,
                    gchar *outputmax_tech_id, gchar *outputmax_acronyme, gpointer *r_outputmax
                  )
-  { Dls_data_get_R ( input_tech_id, input_acronyme, r_input );
-    Dls_data_get_R ( consigne_tech_id, consigne_acronyme, r_consigne );
-    Dls_data_get_R ( kp_tech_id, kp_acronyme, r_kp );
-    Dls_data_get_R ( kp_tech_id, ki_acronyme, r_ki );
-    Dls_data_get_R ( kp_tech_id, kd_acronyme, r_kd );
-    Dls_data_get_R ( outputmin_tech_id, outputmin_acronyme, r_outputmin );
-    Dls_data_get_R ( outputmax_tech_id, outputmax_acronyme, r_outputmax );
+  { Dls_data_get_REGISTRE ( input_tech_id, input_acronyme, r_input );
+    Dls_data_get_REGISTRE ( consigne_tech_id, consigne_acronyme, r_consigne );
+    Dls_data_get_REGISTRE ( kp_tech_id, kp_acronyme, r_kp );
+    Dls_data_get_REGISTRE ( kp_tech_id, ki_acronyme, r_ki );
+    Dls_data_get_REGISTRE ( kp_tech_id, kd_acronyme, r_kd );
+    Dls_data_get_REGISTRE ( outputmin_tech_id, outputmin_acronyme, r_outputmin );
+    Dls_data_get_REGISTRE ( outputmax_tech_id, outputmax_acronyme, r_outputmax );
     if ( ! (r_input && r_consigne && r_kp && r_ki && r_kd && r_outputmin && r_outputmax) ) return(0.0);
 
     struct DLS_REGISTRE *input = *r_input;

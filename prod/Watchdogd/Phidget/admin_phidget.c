@@ -329,7 +329,8 @@
 
        if (SQL_Write_new ( "INSERT INTO phidget_AI SET hub_id=%d, port=%d, intervalle=%d, classe='%s', capteur='%s',"
                            "mnemo_id=(SELECT id FROM mnemos_AI WHERE tech_id='%s' AND acronyme='%s') "
-                           "ON DUPLICATE KEY UPDATE mnemo_id=VALUES(mnemo_id), intervalle=VALUES(intervalle)",
+                           "ON DUPLICATE KEY UPDATE mnemo_id=VALUES(mnemo_id), intervalle=VALUES(intervalle),"
+                           "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
                            Json_get_int( request, "hub_id"), Json_get_int( request, "port"), Json_get_int( request, "intervalle" ),
                            phidget_classe, capteur,
                            tech_id, acronyme

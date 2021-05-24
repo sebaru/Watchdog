@@ -797,6 +797,12 @@
        Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
+    else if ( !strcasecmp ( classe, "REGISTRE" ) )
+     { gdouble valeur = Json_get_double ( request, "valeur" );
+       Dls_data_set_REGISTRE ( NULL, tech_id, acronyme, NULL, valeur );
+       Audit_log ( session, "DLS %s '%s:%s' set to %f", classe, tech_id, acronyme, valeur );
+       soup_message_set_status (msg, SOUP_STATUS_OK );
+     }
     else soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Wrong Class" );
     json_node_unref(request);
     g_free(tech_id);

@@ -89,7 +89,7 @@
 /*               g_snprintf( chaine, sizeof(chaine), "%d heure et %d minute", tm.tm_hour, tm.tm_min );*/
 /*            break;
        case MNEMO_REGISTRE:
-             { Dls_data_get_R ( tech_id, acronyme, dlsdata_p );
+             { Dls_data_get_REGISTRE ( tech_id, acronyme, dlsdata_p );
                struct DLS_REGISTRE *reg = *dlsdata_p;
                if (reg)
                 { if (reg->valeur-roundf(reg->valeur) == 0.0)

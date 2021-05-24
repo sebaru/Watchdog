@@ -223,7 +223,7 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                       else if ($8->classe==MNEMO_REGISTRE)
                        { g_snprintf( $$, taille,
                                      "vars->num_ligne = %d; /* une_instr-------------*/\n"
-                                     "if(%s)\n { Dls_data_set_R ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n }\n",
+                                     "if(%s)\n { Dls_data_set_REGISTRE ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n }\n",
                                      DlsScanner_get_lineno(), $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
                        }
                       else
@@ -369,7 +369,7 @@ calcul_expr3:   T_POUV calcul_expr T_PFERM {{ $$=$2; }}
                        { case MNEMO_REGISTRE:
                           { taille = 256;
                             $$ = New_chaine( taille ); /* 10 caractères max */
-                            g_snprintf( $$, taille, "Dls_data_get_R(\"%s\",\"%s\",&_%s_%s)",
+                            g_snprintf( $$, taille, "Dls_data_get_REGISTRE(\"%s\",\"%s\",&_%s_%s)",
                                         alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
                             break;
                           }
