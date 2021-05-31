@@ -155,7 +155,6 @@
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     JsonNode *cadran;
-    gint   layer;                                                                      /* Groupe de deplacement du motif */
     gint   selection;
     gdouble valeur;
   };
