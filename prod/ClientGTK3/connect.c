@@ -94,6 +94,31 @@
 /* Entrée: des infos sur le paquet à envoyer                                                                                  */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
+ void Envoi_json_au_serveur_new ( struct CLIENT *client, gchar *methode, JsonNode *RootNode, gchar *URI, SoupSessionCallback callback )
+  { gchar target[128];
+    printf("%s : sending %s\n", __func__, URI );
+    g_snprintf( target, sizeof(target), "https://%s:5560%s", client->hostname, URI );
+    SoupMessage *msg = soup_message_new ( methode, target );
+    client->network_size_sent = 0;
+    g_signal_connect ( G_OBJECT(msg), "got-chunk", G_CALLBACK(Update_progress_bar), client );
+
+    gchar *buf = Json_node_to_string ( RootNode );
+/*************************************************** Envoi au client **********************************************************/
+    client->network_size_to_send = strlen(buf);
+    soup_message_set_request ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, client->network_size_to_send );
+
+    SoupCookie *wtd_session = soup_cookie_new ( "wtd_session", client->wtd_session, "/", NULL, 0 );
+    GSList *liste = g_slist_append ( NULL, wtd_session );
+    soup_cookies_to_request ( liste, msg );
+    g_slist_free(liste);
+    if (!msg) { Log( client, "Erreur envoi au serveur"); Deconnecter_sale(client); }
+    else soup_session_queue_message (client->connexion, msg, callback, client);
+  }
+/******************************************************************************************************************************/
+/* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
+/* Entrée: des infos sur le paquet à envoyer                                                                                  */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Envoi_ws_au_serveur ( struct CLIENT *client, SoupWebsocketConnection *ws, JsonBuilder *builder )
   { gsize taille_buf;
     gchar *buf = Json_get_buf (builder, &taille_buf);

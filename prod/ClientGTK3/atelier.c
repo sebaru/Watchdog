@@ -91,58 +91,19 @@
 /******************************************************************************************************************************/
  static void Menu_effacer_motif ( void )
   { Effacer_selection(); }
+#endif
 /******************************************************************************************************************************/
 /* Menu_enregistrer_synoptique: Envoi des données au serveur                                                                  */
 /* Entrée: rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Menu_enregistrer_synoptique ( struct TYPE_INFO_ATELIER *infos )
-  { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TRAME_ITEM_COMMENT *trame_comment;
-    struct TRAME_ITEM_PASS *trame_pass;
-    struct TRAME_ITEM_CADRAN *trame_cadran;
-    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
-    GList *objet;
-    if ( !(infos && infos->Trame_atelier && infos->Trame_atelier->trame_items) )
+ static void Menu_enregistrer_synoptique ( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    if ( !(page && page->infos) )
      { printf("Erreur parametre Menu_enregistrer_synoptique\n"); return; }
 
-    objet = infos->Trame_atelier->trame_items;
-    while (objet)
-     { printf("Menu_enregistrer_synoptique type=%d\n", *((gint *)objet->data) );
-       switch( *((gint *)objet->data) )
-        { case TYPE_MOTIF:
-               trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_MOTIF,
-                              (gchar *)trame_motif->motif, sizeof(struct CMD_TYPE_MOTIF) );
-               break;
-
-          case TYPE_COMMENTAIRE:
-               trame_comment = (struct TRAME_ITEM_COMMENT *)objet->data;
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_COMMENT,
-                              (gchar *)trame_comment->comment, sizeof(struct CMD_TYPE_COMMENT) );
-               break;
-
-          case TYPE_PASSERELLE:
-               trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_PASS,
-                              (gchar *)trame_pass->pass, sizeof(struct CMD_TYPE_PASSERELLE) );
-               break;
-          case TYPE_CADRAN:
-               trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CADRAN,
-                              (gchar *)trame_cadran->cadran, sizeof(struct CMD_TYPE_CADRAN) );
-               break;
-          case TYPE_CAMERA_SUP:
-               trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,
-                              (gchar *)trame_camera_sup->camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
-               break;
-          default: printf("Enregistrer_synoptique: type inconnu\n" );
-        }
-       objet=objet->next;
-     }
+     Envoi_json_au_serveur_new ( page->client, "POST", infos->syn, "/api/syn/save", NULL );
   }
-#endif
 /******************************************************************************************************************************/
 /* Changer_option_zoom: Change le niveau de zoom du canvas                                                                    */
 /* Entrée: la page en question                                                                                                */
@@ -189,7 +150,7 @@
     infos = page->infos = (struct TYPE_INFO_ATELIER *)g_try_malloc0( sizeof(struct TYPE_INFO_ATELIER) );
     if (!page->infos) { g_free(page); return; }
 
-    page->type   = TYPE_PAGE_ATELIER;
+    page->type           = TYPE_PAGE_ATELIER;
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     infos->syn = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
@@ -260,7 +221,7 @@
     gtk_button_set_image ( GTK_BUTTON(bouton), gtk_image_new_from_icon_name ( "document-save", GTK_ICON_SIZE_LARGE_TOOLBAR ) );
     gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Sauvegarder les modifications" );
-    //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_enregistrer_synoptique), page );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_enregistrer_synoptique), page );
 
     separateur = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
@@ -366,11 +327,12 @@
     g_snprintf( titre, sizeof(titre), "Atelier/%s", Json_get_string( infos->syn, "libelle" ) );
     gint page_num = gtk_notebook_append_page( GTK_NOTEBOOK(client->Notebook), page->child, gtk_label_new ( titre ) );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(client->Notebook), page_num );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "motifs" ),      Afficher_un_motif, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ), Afficher_une_passerelle, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),    Afficher_un_commentaire, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),     Afficher_une_camera, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),     Afficher_un_cadran, page );
+
+    Json_node_foreach_array_element ( infos->syn, "visuels",     Afficher_un_motif, page );
+    Json_node_foreach_array_element ( infos->syn, "passerelles", Afficher_une_passerelle, page );
+    Json_node_foreach_array_element ( infos->syn, "comments",    Afficher_un_commentaire, page );
+    Json_node_foreach_array_element ( infos->syn, "cameras",     Afficher_une_camera, page );
+    Json_node_foreach_array_element ( infos->syn, "cadrans",     Afficher_un_cadran, page );
   }
 #ifdef bouh
 /******************************************************************************************************************************/

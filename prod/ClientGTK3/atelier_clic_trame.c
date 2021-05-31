@@ -256,9 +256,9 @@ printf("Afficher_propriete: debut\n");
                                        y = ((struct TRAME_ITEM_MOTIF *)infos->Selection->data)->motif->position_y;
                                        break;
                                   case TYPE_CADRAN:
-                                        { JsonNode *cadran = infos->Selection->data;
-                                          x = Json_get_double ( cadran, "posx" );
-                                          y = Json_get_double ( cadran, "posy" );
+                                        { struct TRAME_ITEM_CADRAN *trame_cadran = infos->Selection->data;
+                                          x = 1.0*Json_get_int ( trame_cadran->cadran, "posx" );
+                                          y = 1.0*Json_get_int ( trame_cadran->cadran, "posy" );
                                         }
                                        break;
                                   case TYPE_CAMERA_SUP:
@@ -466,7 +466,6 @@ printf("Afficher_propriete: debut\n");
 /*    else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
   /*            event->type == GDK_2BUTTON_PRESS) Afficher_propriete();*/
   }
-#ifdef bouh
 /******************************************************************************************************************************/
 /* Clic_sur_cadran: Appelé quand un evenement est capté sur un cadran                                                         */
 /* Entrée: une structure Event                                                                                                */
@@ -474,48 +473,118 @@ printf("Afficher_propriete: debut\n");
 /******************************************************************************************************************************/
  void Clic_sur_cadran ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                       struct TRAME_ITEM_CADRAN *trame_cadran )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    gchar chaine[100];
-    static GtkWidget *Popup = NULL;
-    static GnomeUIInfo Popup_cadran[]=
+  { gchar chaine[256];
+    if (!(trame_cadran && event)) return;
+
+    struct PAGE_NOTEBOOK *page = trame_cadran->page;
+
+    Clic_general( page, event, Json_get_int ( trame_cadran->cadran, "layer" ) );                     /* Fonction de base clic */
+    Mettre_a_jour_position( page, Json_get_int ( trame_cadran->cadran, "posx" ),
+                                  Json_get_int ( trame_cadran->cadran, "posy" ),
+                                  Json_get_int ( trame_cadran->cadran, "angle" ) );
+
+    g_snprintf( chaine, sizeof(chaine), "%s:%s - %s",
+                Json_get_string ( trame_cadran->cadran, "tech_id" ),
+                Json_get_string ( trame_cadran->cadran, "acronyme" ),
+                Json_get_string ( trame_cadran->cadran, "libelle" )
+              );
+    Mettre_a_jour_description( trame_cadran->page, -1, chaine );
+
+  //  else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
+    //          event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
+
+    if (event->type == GDK_BUTTON_PRESS && event->button.button == 1)
+     { if (trame_cadran->select_mi) goo_canvas_item_raise( trame_cadran->select_mi, NULL );
+       return;
+     }
+
+    if ( ! (event->type == GDK_BUTTON_PRESS && event->button.button == 3)) return;
+    GtkWidget *Popup = gtk_menu_new();
+    GtkWidget *item, *submenu;
+
+    item = Menu ( "Propriétés", "preferences-system" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Afficher_propriete), client );
+
+    item = Menu ( "Couleur par défaut", "applications-graphics" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    /*g_signal_connect_swapped ( item, "activate", G_CALLBACK (Changer_couleur_directe), page );*/
+
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), gtk_separator_menu_item_new () );
+
+    item = Menu ( "Scale", "insert-link" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    submenu = gtk_menu_new();
+    gtk_menu_item_set_submenu ( GTK_MENU_ITEM(item), submenu );
+
+      item = Menu ( "Scale to 1:1", "zoom-original" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Mettre_echelle_selection_1_1), page );
+
+      item = Menu ( "Scale to 1:Y", "object-flip-horizontal" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Mettre_echelle_selection_1_Y), page );
+
+      item = Menu ( "Scale to X:1", "object-flip-vertical" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Mettre_echelle_selection_X_1), page );
+
+
+    item = Menu ( "Raise/Lower", "insert-link" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    submenu = gtk_menu_new();
+    gtk_menu_item_set_submenu ( GTK_MENU_ITEM(item), submenu );
+
+      item = Menu ( "Raise to top", "go-top" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Raise_to_top), page );
+
+      item = Menu ( "Lower to bottom", "go-bottom" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Lower_to_bottom), page );
+
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), gtk_separator_menu_item_new () );
+
+    item = Menu ( "Détacher la sélection", "view-restore" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Detacher_selection), client );
+
+    item = Menu ( "Fusionner la sélection", "view-fullscreen" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Fusionner_selection), client );
+
+    item = Menu ( "Dupliquer la sélection", "edit-copy" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Dupliquer_selection), client );
+
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), gtk_separator_menu_item_new () );
+
+    item = Menu ( "Supprimer la sélection", "edit-delete" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Effacer_selection), client );
+
+    gtk_widget_show_all(Popup);
+    gtk_menu_popup_at_pointer ( GTK_MENU(Popup), (GdkEvent *)event );
+
+
+
+
+/*    static GnomeUIInfo Popup_cadran[]=
      { GNOMEUIINFO_ITEM_STOCK( N_("Properties"), NULL, Afficher_propriete, GNOME_STOCK_PIXMAP_PROPERTIES ),
        GNOMEUIINFO_SEPARATOR,
        /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
-       GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
+       /*GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
        GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_TEXT_BULLETED_LIST ),
        GNOMEUIINFO_ITEM_STOCK( N_("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),
        GNOMEUIINFO_SEPARATOR,
        GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
        GNOMEUIINFO_END
-     };
-    if (!(trame_cadran && event)) return;
+     };*/
 
-    page = Page_actuelle();                                                                   /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;                                   /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;                             /* Pointeur sur les infos de la page atelier */
-
-    infos->Selection.type = TYPE_CADRAN;
-    infos->Selection.groupe = trame_cadran->groupe_dpl;
-    infos->Selection.trame_cadran = trame_cadran;
-
-    Clic_general( infos, event );                                                                    /* Fonction de base clic */
-
-    g_snprintf(chaine, sizeof(chaine), "%s:%s", trame_cadran->cadran->tech_id, trame_cadran->cadran->acronyme );
-    Mettre_a_jour_description( infos, 0, chaine );
-    if (event->type == GDK_BUTTON_PRESS)
-     { if ( event->button.button == 1)
-        { goo_canvas_item_raise( trame_cadran->select_mi, NULL );
-        }
-       else if (event->button.button == 3)
-        { if (!Popup) Popup = gnome_popup_menu_new( Popup_cadran );                       /* Creation menu */
-          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
-
-        }
-     }
-    else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
-              event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
+/*    else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
+  /*            event->type == GDK_2BUTTON_PRESS) Afficher_propriete();*/
   }
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Clic_sur_camera_sup: Appelé quand un evenement est capté sur une camera de supervision                                     */
 /* Entrée: une structure Event                                                                                                */

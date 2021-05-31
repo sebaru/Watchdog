@@ -141,9 +141,11 @@
                 break;
            case TYPE_CADRAN:
                 trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
-                if (trame_cadran->layer == layer)
+printf("%s: layer=%d, local=%d. selection=%d\n", __func__, layer, Json_get_int ( trame_cadran->cadran, "layer" ) , trame_cadran->selection );
+                if ( Json_get_int ( trame_cadran->cadran, "layer" ) == layer)
                  { if (!trame_cadran->selection)
                     { g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+printf("%s: layer=%d selected\n", __func__, layer );
                       trame_cadran->selection = TRUE;
                       infos->Selection = g_slist_prepend( infos->Selection, objet->data );
                     }
@@ -220,16 +222,16 @@
 
           case TYPE_CADRAN:
                trame_cadran = ((struct TRAME_ITEM_CADRAN *)(selection->data));
-               new_x = Json_get_double( trame_cadran->cadran, "posx" ) + dx;
-               new_y = Json_get_double( trame_cadran->cadran, "posy" ) + dy;
+               new_x = 1.0*Json_get_int( trame_cadran->cadran, "posx" ) + dx;
+               new_y = 1.0*Json_get_int( trame_cadran->cadran, "posy" ) + dy;
 
                if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(infos->Check_grid)))
                 { new_x = new_x/largeur_grille * largeur_grille;
                   new_y = new_y/largeur_grille * largeur_grille;
                 }
 
-               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X ) { Json_node_add_double ( trame_cadran->cadran, "posx", new_x ); }
-               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y ) { Json_node_add_double ( trame_cadran->cadran, "posy", new_y ); }
+               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X ) { Json_node_add_int ( trame_cadran->cadran, "posx", new_x ); }
+               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y ) { Json_node_add_int ( trame_cadran->cadran, "posy", new_y ); }
 
                Trame_rafraichir_cadran(trame_cadran);                                                       /* Refresh visuel */
                break;

@@ -178,6 +178,7 @@
  extern void Connecter ( struct CLIENT *Client );                                                           /* Dans connect.c */
  extern void Deconnecter ( struct CLIENT *Client );
  extern void Envoi_json_au_serveur ( struct CLIENT *client, gchar *methode, JsonBuilder *builder, gchar *URI, SoupSessionCallback callback );
+ extern void Envoi_json_au_serveur_new ( struct CLIENT *client, gchar *methode, JsonNode *RootNode, gchar *URI, SoupSessionCallback callback );
  extern void Envoi_ws_au_serveur ( struct CLIENT *client, SoupWebsocketConnection *ws, JsonBuilder *builder );
 
 #ifdef bouh
@@ -475,6 +476,17 @@
 #endif
 
 /************************************************ Définitions des prototypes **************************************************/
+ extern JsonNode *Json_node_create ( void );
+ extern void Json_node_add_string ( JsonNode *RootNode, gchar *name, gchar *chaine );
+ extern void Json_node_add_bool ( JsonNode *RootNode, gchar *name, gboolean valeur );
+ extern void Json_node_add_int ( JsonNode *RootNode, gchar *name, gint64 valeur );
+ extern void Json_node_add_double ( JsonNode *RootNode, gchar *name, gdouble valeur );
+ extern JsonArray *Json_node_add_array ( JsonNode *RootNode, gchar *name );
+ extern JsonNode *Json_node_add_objet ( JsonNode *RootNode, gchar *name );
+ extern void Json_array_add_element ( JsonArray *array, JsonNode *element );
+ extern void Json_node_foreach_array_element ( JsonNode *RootNode, gchar *nom, JsonArrayForeach fonction, gpointer data );
+ extern gchar *Json_node_to_string ( JsonNode *RootNode );
+
  extern JsonBuilder *Json_create ( void );
  extern void Json_add_string ( JsonBuilder *builder, gchar *name, gchar *chaine );
  extern void Json_add_int ( JsonBuilder *builder, gchar *name, gint valeur );
@@ -484,14 +496,12 @@
  extern void Json_end_object ( JsonBuilder *builder );
  extern void Json_add_array ( JsonBuilder *builder, gchar *name );
  extern void Json_end_array ( JsonBuilder *builder );
- extern void Json_node_add_double ( JsonNode *RootNode, gchar *name, gdouble valeur );
  extern gchar *Json_get_buf ( JsonBuilder *builder, gsize *taille_buf_p );
  extern JsonNode *Json_get_from_string ( gchar *chaine );
  extern gchar *Json_get_string ( JsonNode *query, gchar *chaine );
  extern gdouble Json_get_double ( JsonNode *query, gchar *chaine );
  extern gint Json_get_int ( JsonNode *query, gchar *chaine );
  extern gboolean Json_get_bool ( JsonNode *query, gchar *chaine );
- extern void Json_node_foreach_array_element ( JsonNode *RootNode, gchar *nom, JsonArrayForeach fonction, gpointer data );
  extern JsonArray *Json_get_array ( JsonNode *query, gchar *chaine );
  extern gboolean Json_has_member ( JsonNode *query, gchar *chaine );
  extern JsonObject *Json_get_object_as_object ( JsonNode *query, gchar *chaine );

@@ -44,6 +44,7 @@ printf("%s : %s:%s posx %f, posy %f min=%f, max=%f nb_decimal=%d\n",
 Json_get_int ( element, "nb_decimal" )
       );
 
+
     if (!page) return;
     if (page->type == TYPE_PAGE_SUPERVISION)
      { struct TYPE_INFO_SUPERVISION *infos=page->infos;
@@ -54,6 +55,16 @@ Json_get_int ( element, "nb_decimal" )
     else if (page->type == TYPE_PAGE_ATELIER)
      { struct TYPE_INFO_ATELIER *infos=page->infos;
        trame_cadran = Trame_ajout_cadran ( TRUE, infos->Trame_atelier, element );
+       g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "button-press-event",
+                         G_CALLBACK(Clic_sur_cadran), trame_cadran );
+       g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "button-release-event",
+                         G_CALLBACK(Clic_sur_cadran), trame_cadran );
+       g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "enter-notify-event",
+                         G_CALLBACK(Clic_sur_cadran), trame_cadran );
+       g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "leave-notify-event",
+                         G_CALLBACK(Clic_sur_cadran), trame_cadran );
+       g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "motion-notify-event",
+                         G_CALLBACK(Clic_sur_cadran), trame_cadran );
      }
   }
 
