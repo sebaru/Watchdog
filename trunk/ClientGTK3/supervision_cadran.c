@@ -89,43 +89,36 @@
  static void Updater_un_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran, JsonNode *cadran )
   { gchar libelle[25];
     trame_cadran->valeur = Json_get_double ( cadran, "valeur" );
-    switch(Json_get_int(cadran,"classe"))
-     { case MNEMO_ENTREE:
-       case MNEMO_BISTABLE:
-            g_snprintf( libelle, sizeof(libelle), "%s", (trame_cadran->valeur ? "TRUE" : "FALSE") );
-            break;
-       case MNEMO_REGISTRE:
-       case MNEMO_ENTREE_ANA:
-            if (!Json_get_bool(cadran,"in_range")) g_snprintf(libelle, sizeof(libelle), "not in range" );
-            else
-             { gchar *digit, format[24];
-               if(-1000000.0<trame_cadran->valeur && trame_cadran->valeur<1000000.0) digit = "%6"; else digit="%8";
-               g_snprintf( format, sizeof(format), "%s.%df %%s", digit, Json_get_int ( trame_cadran->cadran, "nb_decimal" ) );
-               g_snprintf( libelle, sizeof(libelle), format, trame_cadran->valeur, Json_get_string(cadran, "unite") );
-             }
-            break;
-       case MNEMO_CPTH:
-            if (trame_cadran->valeur < 3600)
-             { g_snprintf( libelle, sizeof(libelle), "%02dm%02ds", (int)trame_cadran->valeur/60, ((int)trame_cadran->valeur%60) ); }
-            else
-             { g_snprintf( libelle, sizeof(libelle), "%04dh%02dm", (int)trame_cadran->valeur/3600, ((int)trame_cadran->valeur%3600)/60 ); }
-            break;
-       case MNEMO_CPT_IMP:
-            g_snprintf( libelle, sizeof(libelle), "%8.2f %s", trame_cadran->valeur, Json_get_string(cadran, "unite") );
-            break;
-       case MNEMO_TEMPO:
-             { gint src, heure, minute, seconde;
-               src = trame_cadran->valeur/10;
-               heure = src / 3600;
-               minute = (src - heure*3600) / 60;
-               seconde = src - heure*3600 - minute*60;
-               g_snprintf( libelle, sizeof(libelle), "%02d:%02d:%02d", heure, minute, seconde );
-             }
-            break;
-       default:
-            g_snprintf( libelle, sizeof(libelle), "unknown" );
-            break;
-      }
+    gchar *classe        = Json_get_string ( trame_cadran->cadran, "classe" );
+
+    if (!strcasecmp ( classe, "DI" ) || !strcasecmp ( classe, "BI" ) )
+     { g_snprintf( libelle, sizeof(libelle), "%s", (trame_cadran->valeur ? "TRUE" : "FALSE") ); }
+    else if (!strcasecmp ( classe, "REGISTRE" ) || !strcasecmp ( classe, "AI" ) )
+     { if (!Json_get_bool(cadran,"in_range")) g_snprintf(libelle, sizeof(libelle), "not in range" );
+       else
+        { gchar *digit, format[24];
+          if(-1000000.0<trame_cadran->valeur && trame_cadran->valeur<1000000.0) digit = "%6"; else digit="%8";
+          g_snprintf( format, sizeof(format), "%s.%df %%s", digit, Json_get_int ( trame_cadran->cadran, "nb_decimal" ) );
+          g_snprintf( libelle, sizeof(libelle), format, trame_cadran->valeur, Json_get_string(cadran, "unite") );
+        }
+     }
+    else if (!strcasecmp ( classe, "CH" ) )
+     { if (trame_cadran->valeur < 3600)
+        { g_snprintf( libelle, sizeof(libelle), "%02dm%02ds", (int)trame_cadran->valeur/60, ((int)trame_cadran->valeur%60) ); }
+       else
+        { g_snprintf( libelle, sizeof(libelle), "%04dh%02dm", (int)trame_cadran->valeur/3600, ((int)trame_cadran->valeur%3600)/60 ); }
+     }
+    else if (!strcasecmp ( classe, "CI" ) )
+     { g_snprintf( libelle, sizeof(libelle), "%8.2f %s", trame_cadran->valeur, Json_get_string(cadran, "unite") ); }
+    else if (!strcasecmp ( classe, "TEMPO" ) )
+     { gint src, heure, minute, seconde;
+       src = trame_cadran->valeur/10;
+       heure = src / 3600;
+       minute = (src - heure*3600) / 60;
+       seconde = src - heure*3600 - minute*60;
+       g_snprintf( libelle, sizeof(libelle), "%02d:%02d:%02d", heure, minute, seconde );
+     }
+    else { g_snprintf( libelle, sizeof(libelle), "unknown" ); }
     /*printf("%s: update cadran %s:%s to %s\n", __func__,
            trame_cadran->cadran->tech_id, trame_cadran->cadran->acronyme, libelle );*/
     g_object_set( trame_cadran->item_entry, "text", libelle, NULL );
