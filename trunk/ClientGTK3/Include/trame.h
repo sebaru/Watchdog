@@ -112,8 +112,7 @@
     gint   cligno;                                                                                    /* Etat cligno du motif */
     time_t last_clic;
 
-    struct CMD_TYPE_MOTIF *motif;
-    gint   layer;                                                                      /* Groupe de deplacement du motif */
+    JsonNode *visuel;
     gint selection;                                                                                      /* Encore utilisé ?? */
   };
 
@@ -204,7 +203,7 @@
  extern void Trame_set_svg ( struct TRAME_ITEM_SVG *trame_svg, gchar *couleur, gint mode, gboolean cligno );
  extern void Charger_gif ( struct TRAME_ITEM_MOTIF *trame_item, gchar *nom_fichier );
  extern void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier );
- extern struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame, struct CMD_TYPE_MOTIF *motif );
+ extern struct TRAME_ITEM_MOTIF *Trame_ajout_visuel ( gint flag, struct TRAME *trame, JsonNode *visuel );
  extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame,
                                                             struct CMD_TYPE_COMMENT *comm );
  extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,

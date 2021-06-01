@@ -47,7 +47,7 @@
 /* Sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static void Timer_motif( struct TRAME_ITEM_MOTIF *trame_motif, gint cligno )
-  { switch( trame_motif->motif->type_gestion )
+  { switch( Json_get_int ( trame_motif->visuel, "gestion" ) )
      { case TYPE_INERTE    : return;
        case TYPE_STATIQUE  : break;
 

@@ -40,8 +40,6 @@
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 
  static struct TRAME_ITEM_MOTIF *appui = NULL;
- static struct TRAME_ITEM_CADRAN *appui_cadran = NULL;
- static struct TRAME_ITEM_CAMERA_SUP *appui_camera_sup = NULL;
 
  static GtkWidget *F_set_registre;                                                         /* Widget de l'interface graphique */
  static GtkWidget *Spin_valeur;                                                                         /* Valeur du registre */
@@ -120,7 +118,7 @@
      { appui = trame_motif;                                                      /* Sauvegarde en attendant la release button */
        if (trame_motif->motif->type_gestion == TYPE_BOUTON && (trame_motif->last_clic + 1 <= time(NULL)) )
         { printf("Appui sur bouton num_image=%d\n", trame_motif->num_image );
-          if ( (trame_motif->num_image % 3) == 1 )
+          if ( trame_motif->num_image == 1 )
            { Trame_choisir_frame( trame_motif, trame_motif->num_image + 1,                          /* Frame 2: bouton appuyé */
                                   trame_motif->rouge,
                                   trame_motif->vert,
@@ -131,7 +129,7 @@
      }
     else if (event->type == GDK_BUTTON_RELEASE && appui)
      { if (appui->motif->type_gestion == TYPE_BOUTON)                                     /* On met la frame 1: bouton relevé */
-        { if ( (trame_motif->num_image % 3) == 2 )
+        { if ( trame_motif->num_image == 2 )
            { Trame_choisir_frame( appui, trame_motif->num_image - 1, appui->rouge, appui->vert, appui->bleu );
              switch ( trame_motif->motif->type_dialog )
               { case ACTION_IMMEDIATE: Envoyer_action_immediate( trame_motif ); break;
@@ -231,7 +229,6 @@
   { static GtkWidget *Popup = NULL;
 
     if (!(trame_cadran && event)) return;
-    appui_cadran = trame_cadran;
 
     if (event->type == GDK_BUTTON_PRESS)
      { if ( ((GdkEventButton *)event)->button == 1 )                              /* Release sur le motif qui a été appuyé ?? */
