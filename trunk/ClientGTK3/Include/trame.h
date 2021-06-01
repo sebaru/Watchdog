@@ -156,7 +156,6 @@
     cairo_matrix_t transform;
     JsonNode *cadran;
     gint   selection;
-    gdouble valeur;
   };
 
  struct TRAME_ITEM_CAMERA_SUP
