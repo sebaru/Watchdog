@@ -50,13 +50,14 @@
            { switch ( *((gint *)liste->data) )
               { case TYPE_MOTIF:
                  { struct TRAME_ITEM_MOTIF *item= liste->data;
-                   if (item->motif->layer > layer) layer = item->motif->layer;
+                   gint item_layer = Json_get_int ( item->visuel, "layer" );
+                   if (item_layer > layer) layer = item_layer;
                    break;
                  }
               }
              liste = liste->next;
            }
-          trame_motif->motif->layer = layer + 1;
+          Json_node_add_int ( trame_motif->visuel, "layer", layer + 1 );
           break;
         }
        case TYPE_CADRAN:
@@ -91,17 +92,17 @@
            { switch ( *((gint *)liste->data) )
               { case TYPE_MOTIF:
                  { struct TRAME_ITEM_MOTIF *item= liste->data;
-                   if (item->motif->type_gestion == TYPE_FOND)
+                   if ( Json_get_int ( item->visuel, "gestion" ) == TYPE_FOND)
                     { goo_canvas_item_lower ( item->item_groupe, NULL );
-                      item->motif->layer = 0;
+                      Json_node_add_int ( item->visuel, "layer", 0 );
                     }
-                   else item->motif->layer++;
+                   else Json_node_add_int ( item->visuel, "layer", Json_get_int ( item->visuel, "layer" ) + 1 );
                    break;
                  }
               }
              liste = liste->next;
            }
-          trame_motif->motif->layer = 1;
+          Json_node_add_int ( trame_motif->visuel, "layer", 1 );
          break;
         }
        case TYPE_CADRAN:
@@ -252,8 +253,10 @@ printf("Afficher_propriete: debut\n");
                                        y = ((struct TRAME_ITEM_COMMENT *)infos->Selection->data)->comment->position_y;
                                        break;
                                   case TYPE_MOTIF:
-                                       x = ((struct TRAME_ITEM_MOTIF *)infos->Selection->data)->motif->position_x;
-                                       y = ((struct TRAME_ITEM_MOTIF *)infos->Selection->data)->motif->position_y;
+                                        { struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
+                                          x = 1.0*Json_get_int ( trame_motif->visuel, "posx" );
+                                          y = 1.0*Json_get_int ( trame_motif->visuel, "posy" );
+                                        }
                                        break;
                                   case TYPE_CADRAN:
                                         { struct TRAME_ITEM_CADRAN *trame_cadran = infos->Selection->data;
@@ -286,16 +289,20 @@ printf("Afficher_propriete: debut\n");
 
     struct PAGE_NOTEBOOK *page = trame_motif->page;
 
-    if (trame_motif->motif->type_gestion == TYPE_FOND)
+    if ( Json_get_int ( trame_motif->visuel, "gestion" ) == TYPE_FOND)
      { Clic_sur_fond( page, event, NULL );
        Mettre_a_jour_position( page, event->motion.x_root, event->motion.y_root, 0 );
      }
     else
-     { Clic_general( page, event, trame_motif->layer );                                              /* Fonction de base clic */
-       Mettre_a_jour_position( page, trame_motif->motif->position_x, trame_motif->motif->position_y, trame_motif->motif->angle );
+     { Clic_general( page, event, Json_get_int ( trame_motif->visuel, "layer") );                    /* Fonction de base clic */
+       Mettre_a_jour_position( page, Json_get_int ( trame_motif->visuel, "posx" ),
+                                     Json_get_int ( trame_motif->visuel, "posy" ),
+                                     Json_get_int ( trame_motif->visuel, "angle" ) );
      }
 
-    Mettre_a_jour_description( trame_motif->page, trame_motif->motif->icone_id, trame_motif->motif->libelle );
+    Mettre_a_jour_description( trame_motif->page,
+                               Json_get_int ( trame_motif->visuel, "icone" ),
+                               Json_get_string ( trame_motif->visuel, "libelle" ) );
 
   //  else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
     //          event->type == GDK_2BUTTON_PRESS) Afficher_propriete();

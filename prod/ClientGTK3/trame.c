@@ -145,67 +145,62 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Trame_rafraichir_motif ( struct TRAME_ITEM_MOTIF *trame_motif )
-  { if (!(trame_motif && trame_motif->motif)) return;
-printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->position_x, trame_motif->motif->position_y );
+  { if (!(trame_motif && trame_motif->visuel)) return;
+
+    gint position_x = Json_get_int ( trame_motif->visuel, "posx" );
+    gint position_y = Json_get_int ( trame_motif->visuel, "posy" );
+    gint largeur    = Json_get_int ( trame_motif->visuel, "larg" );
+    gint hauteur    = Json_get_int ( trame_motif->visuel, "haut" );
+    gint angle      = Json_get_int ( trame_motif->visuel, "angle" );
+
     cairo_matrix_init_identity ( &trame_motif->transform );
-    cairo_matrix_translate ( &trame_motif->transform,
-                             (gdouble)trame_motif->motif->position_x,
-                             (gdouble)trame_motif->motif->position_y
-                           );
-    cairo_matrix_rotate ( &trame_motif->transform, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
+    cairo_matrix_translate ( &trame_motif->transform, (gdouble)position_x, (gdouble)position_y );
+
+    cairo_matrix_rotate ( &trame_motif->transform, (gdouble)angle*FACTEUR_PI );
     cairo_matrix_scale  ( &trame_motif->transform,
-                           (gdouble)trame_motif->motif->largeur/trame_motif->gif_largeur,
-                           (gdouble)trame_motif->motif->hauteur/trame_motif->gif_hauteur
+                           (gdouble)largeur/trame_motif->gif_largeur,
+                           (gdouble)hauteur/trame_motif->gif_hauteur
                         );
     goo_canvas_item_set_transform ( trame_motif->item_groupe, &trame_motif->transform );
 
     if (trame_motif->select_hd)
      {
        cairo_matrix_init_identity ( &trame_motif->transform_hd );
+       cairo_matrix_translate ( &trame_motif->transform_hd, (gdouble)position_x, (gdouble)position_y );
+
+       cairo_matrix_rotate ( &trame_motif->transform_hd, (gdouble)angle*FACTEUR_PI );
        cairo_matrix_translate ( &trame_motif->transform_hd,
-                                (gdouble)trame_motif->motif->position_x,
-                                (gdouble)trame_motif->motif->position_y
-                              );
-       cairo_matrix_rotate ( &trame_motif->transform_hd, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
-       cairo_matrix_translate ( &trame_motif->transform_hd,
-                                ((gdouble)trame_motif->motif->largeur/2),
-                                -((gdouble)trame_motif->motif->hauteur/2) - 9
+                                ((gdouble)largeur/2),
+                                -((gdouble)hauteur/2) - 9
                               );
        goo_canvas_item_set_transform ( trame_motif->select_hd, &trame_motif->transform_hd );
 
        cairo_matrix_init_identity ( &trame_motif->transform_bd );
+       cairo_matrix_translate ( &trame_motif->transform_bd, (gdouble)position_x, (gdouble)position_y );
+       cairo_matrix_rotate ( &trame_motif->transform_bd, (gdouble)angle*FACTEUR_PI );
        cairo_matrix_translate ( &trame_motif->transform_bd,
-                                (gdouble)trame_motif->motif->position_x,
-                                (gdouble)trame_motif->motif->position_y
-                              );
-       cairo_matrix_rotate ( &trame_motif->transform_bd, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
-       cairo_matrix_translate ( &trame_motif->transform_bd,
-                                ((gdouble)trame_motif->motif->largeur/2),
-                                ((gdouble)trame_motif->motif->hauteur/2)
+                                ((gdouble)largeur/2),
+                                ((gdouble)hauteur/2)
                               );
        goo_canvas_item_set_transform ( trame_motif->select_bd, &trame_motif->transform_bd );
 
        cairo_matrix_init_identity ( &trame_motif->transform_hg );
+       cairo_matrix_translate ( &trame_motif->transform_hg, (gdouble)position_x, (gdouble)position_y );
+
+       cairo_matrix_rotate ( &trame_motif->transform_hg, (gdouble)angle*FACTEUR_PI );
        cairo_matrix_translate ( &trame_motif->transform_hg,
-                                (gdouble)trame_motif->motif->position_x,
-                                (gdouble)trame_motif->motif->position_y
-                              );
-       cairo_matrix_rotate ( &trame_motif->transform_hg, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
-       cairo_matrix_translate ( &trame_motif->transform_hg,
-                                -((gdouble)trame_motif->motif->largeur/2) - 9,
-                                -((gdouble)trame_motif->motif->hauteur/2) - 9
+                                -((gdouble)largeur/2) - 9,
+                                -((gdouble)hauteur/2) - 9
                               );
        goo_canvas_item_set_transform ( trame_motif->select_hg, &trame_motif->transform_hg );
 
        cairo_matrix_init_identity ( &trame_motif->transform_bg );
+       cairo_matrix_translate ( &trame_motif->transform_bg, (gdouble)position_x, (gdouble)position_y );
+
+       cairo_matrix_rotate ( &trame_motif->transform_bg, (gdouble)angle*FACTEUR_PI );
        cairo_matrix_translate ( &trame_motif->transform_bg,
-                                (gdouble)trame_motif->motif->position_x,
-                                (gdouble)trame_motif->motif->position_y
-                              );
-       cairo_matrix_rotate ( &trame_motif->transform_bg, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
-       cairo_matrix_translate ( &trame_motif->transform_bg,
-                                -((gdouble)trame_motif->motif->largeur/2) - 9,
-                                ((gdouble)trame_motif->motif->hauteur/2)
+                                -((gdouble)largeur/2) - 9,
+                                ((gdouble)hauteur/2)
                               );
        goo_canvas_item_set_transform ( trame_motif->select_bg, &trame_motif->transform_bg );
      }
@@ -294,7 +289,7 @@ printf("%s : posx %d, posy %d\n", __func__, Json_get_int ( trame_cadran->cadran,
     guchar *buffer;
 
     /*printf("%s: %s:%s => %s\n", __func__, trame_motif->motif->tech_id, trame_motif->motif->acronyme, color );*/
-    if (!(trame_motif && trame_motif->motif && trame_motif->image)) return;
+    if (!(trame_motif && trame_motif->visuel && trame_motif->image)) return;
     max = trame_motif->gif_largeur*trame_motif->gif_hauteur;
 
     if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
@@ -368,7 +363,7 @@ printf("%s : posx %d, posy %d\n", __func__, Json_get_int ( trame_cadran->cadran,
  void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num, gchar *color )
   { GList *frame;
 
-    if (!(trame_motif && trame_motif->motif)) { printf ("Niet\n"); return; }
+    if (!(trame_motif && trame_motif->visuel)) { printf ("Niet\n"); return; }
 
     frame = g_list_nth( trame_motif->images, num );
     if (!frame) { frame = trame_motif->images;                                                          /* Bouclage si erreur */
@@ -661,26 +656,26 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame, struct CMD_TYPE_MOTIF *motif )
+ struct TRAME_ITEM_MOTIF *Trame_ajout_visuel ( gint flag, struct TRAME *trame, JsonNode *visuel )
   { struct TRAME_ITEM_MOTIF *trame_motif;
 
-    if (!(trame && motif)) return(NULL);
+    if (!(trame && visuel)) return(NULL);
 
     trame_motif = Trame_new_item();
     if (!trame_motif) { printf("Trame_ajout_motif: Erreur mémoire\n"); return(NULL); }
 
-    trame_motif->motif = motif;
-    trame_motif->page = trame->page;
-    trame_motif->type = TYPE_MOTIF;
+    trame_motif->visuel = visuel;
+    trame_motif->page   = trame->page;
+    trame_motif->type   = TYPE_MOTIF;
 
-    Charger_pixbuf_id( trame_motif, motif->icone_id );
+    Charger_pixbuf_id( trame_motif, Json_get_int ( visuel, "icone" ) );
     if (!trame_motif->images)                                                                  /* En cas de probleme, on sort */
      { Trame_del_item(trame_motif);
        g_free(trame_motif);
        return(NULL);
      }
 
-    Trame_peindre_motif( trame_motif, motif->def_color );
+    Trame_peindre_motif( trame_motif, Json_get_string ( visuel, "def_color" ) );
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
@@ -688,8 +683,8 @@ printf("Charger_pixbuf_file: %s\n", fichier );
                                                (-(gdouble)(trame_motif->gif_hauteur/2)),
                                                NULL );
 
-    if (!motif->largeur) motif->largeur = trame_motif->gif_largeur;
-    if (!motif->hauteur) motif->hauteur = trame_motif->gif_hauteur;
+    if (!Json_has_member ( visuel, "larg" )) Json_node_add_int ( visuel, "larg", trame_motif->gif_largeur );
+    if (!Json_has_member ( visuel, "haut" )) Json_node_add_int ( visuel, "haut", trame_motif->gif_hauteur );
 
     if ( flag )
      { GdkPixbuf *pixbuf;
@@ -719,11 +714,11 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     Trame_rafraichir_motif ( trame_motif );
 
     trame->trame_items = g_list_append( trame->trame_items, trame_motif );
-    if (trame_motif->motif->type_gestion == TYPE_FOND)
+    if ( Json_get_int ( visuel, "gestion" ) == TYPE_FOND )
      { goo_canvas_item_lower( trame_motif->item_groupe, NULL );
        goo_canvas_item_lower( trame->fond, NULL );
      }
-    else if (!flag) g_object_set ( G_OBJECT(trame_motif->item_groupe), "tooltip", motif->libelle, NULL );
+    else if (!flag) g_object_set ( G_OBJECT(trame_motif->item_groupe), "tooltip", Json_get_string ( visuel, "libelle" ), NULL );
     return(trame_motif);
   }
 /******************************************************************************************************************************/
@@ -778,7 +773,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
                                    struct TRAME_ITEM_MOTIF *trame_motif )
   { trame_motif->image = trame_motif->images;
 
-    Trame_choisir_frame( trame_motif, 0, trame_motif->motif->def_color );
+    Trame_choisir_frame( trame_motif, 0, Json_get_string ( trame_motif->visuel, "def_color" ) );
 #ifdef DEBUG_TRAME
 printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->motif->hauteur );
 #endif

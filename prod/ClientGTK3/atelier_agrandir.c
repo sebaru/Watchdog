@@ -40,15 +40,15 @@
  static void Agrandir_general_motif ( struct TRAME_ITEM_MOTIF *trame_motif, gdouble dx, gdouble dy,
                                       gdouble dposx, gdouble dposy )
   {
-       if (   trame_motif->motif->largeur + dx > (trame_motif->gif_largeur>>1)
-           && trame_motif->motif->hauteur + dy > (trame_motif->gif_hauteur>>1)
-           && trame_motif->motif->largeur + dx < (gdouble)TAILLE_SYNOPTIQUE_X
-           && trame_motif->motif->hauteur + dy < (gdouble)TAILLE_SYNOPTIQUE_Y )
+       if (   Json_get_int ( trame_motif->visuel, "larg" ) + dx > (trame_motif->gif_largeur>>1)
+           && Json_get_int ( trame_motif->visuel, "haut" ) + dy > (trame_motif->gif_hauteur>>1)
+           && Json_get_int ( trame_motif->visuel, "larg" ) + dx < (gdouble)TAILLE_SYNOPTIQUE_X
+           && Json_get_int ( trame_motif->visuel, "haut" ) + dy < (gdouble)TAILLE_SYNOPTIQUE_Y )
         {
-          trame_motif->motif->position_x += (dposx/2);            /* /2 car milieu de motif > dpl moindre */
-          trame_motif->motif->position_y += (dposy/2);
-          trame_motif->motif->largeur    += dx;
-          trame_motif->motif->hauteur    += dy;
+          Json_node_add_int ( trame_motif->visuel, "posx", Json_get_int ( trame_motif->visuel, "posx" ) + (dposx/2) );/* /2 car milieu de motif > dpl moindre */
+          Json_node_add_int ( trame_motif->visuel, "posy", Json_get_int ( trame_motif->visuel, "posy" ) + (dposy/2) );
+          Json_node_add_int ( trame_motif->visuel, "larg", Json_get_int ( trame_motif->visuel, "larg" )+dx );
+          Json_node_add_int ( trame_motif->visuel, "haut", Json_get_int ( trame_motif->visuel, "haut" )+dy );
 
           Trame_rafraichir_motif(trame_motif);
         }
@@ -78,8 +78,9 @@
     else if (event->type == GDK_MOTION_NOTIFY && (event->motion.state & 0x100) && Appui)
      { dx_trame = (event->motion.x_root - Clic_x);
        dy_trame = (event->motion.y_root - Clic_y);
-       cosinus  = cos(trame_motif->motif->angle*PI/180);
-       sinus    = sin(trame_motif->motif->angle*PI/180);
+       gint angle = Json_get_int ( trame_motif->visuel, "angle" );
+       cosinus  = cos(angle*PI/180);
+       sinus    = sin(angle*PI/180);
 
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
@@ -115,8 +116,9 @@
     else if (event->type == GDK_MOTION_NOTIFY && (event->motion.state & 0x100) && Appui)
      { dx_trame = (event->motion.x_root - Clic_x);
        dy_trame = (event->motion.y_root - Clic_y);
-       cosinus  = cos(trame_motif->motif->angle*PI/180);
-       sinus    = sin(trame_motif->motif->angle*PI/180);
+       gint angle = Json_get_int ( trame_motif->visuel, "angle" );
+       cosinus  = cos(angle*PI/180);
+       sinus    = sin(angle*PI/180);
 
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
@@ -152,8 +154,9 @@
     else if (event->type == GDK_MOTION_NOTIFY && (event->motion.state & 0x100) && Appui)
      { dx_trame = (event->motion.x_root - Clic_x);
        dy_trame = (event->motion.y_root - Clic_y);
-       cosinus  = cos(trame_motif->motif->angle*PI/180);
-       sinus    = sin(trame_motif->motif->angle*PI/180);
+       gint angle = Json_get_int ( trame_motif->visuel, "angle" );
+       cosinus  = cos(angle*PI/180);
+       sinus    = sin(angle*PI/180);
 
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
@@ -189,8 +192,9 @@
     else if (event->type == GDK_MOTION_NOTIFY && (event->motion.state & 0x100) && Appui)
      { dx_trame = (event->motion.x_root - Clic_x);
        dy_trame = (event->motion.y_root - Clic_y);
-       cosinus  = cos(trame_motif->motif->angle*PI/180);
-       sinus    = sin(trame_motif->motif->angle*PI/180);
+       gint angle = Json_get_int ( trame_motif->visuel, "angle" );
+       cosinus  = cos(angle*PI/180);
+       sinus    = sin(angle*PI/180);
 
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;

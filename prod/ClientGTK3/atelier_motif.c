@@ -49,39 +49,18 @@
  void Afficher_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct PAGE_NOTEBOOK *page = user_data;
     struct TRAME_ITEM_MOTIF *trame_motif;
-    struct CMD_TYPE_MOTIF *motif;
 
 printf("%s : %s:%s\n", __func__, Json_get_string( element, "tech_id" ), Json_get_string ( element, "acronyme" ) );
     if (!page) return;
 
-    motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
-    if (!motif) return;
-    motif->position_x   = Json_get_int ( element, "posx" );
-    motif->position_y   = Json_get_int ( element, "posy" );
-    motif->largeur      = Json_get_int ( element, "larg" );
-    motif->hauteur      = Json_get_int ( element, "haut" );
-    motif->angle        = Json_get_int ( element, "angle" );
-    motif->icone_id     = Json_get_int ( element, "icone" );
-    motif->type_dialog  = Json_get_int ( element, "dialog" );
-    motif->type_gestion = Json_get_int ( element, "gestion" );
-    motif->layer        = Json_get_int ( element, "layer" );
-    g_snprintf( motif->def_color,     sizeof(motif->def_color),     "%s", Json_get_string( element, "def_color" ) );
-    g_snprintf( motif->tech_id,       sizeof(motif->tech_id),       "%s", Json_get_string( element, "tech_id" ) );
-    g_snprintf( motif->acronyme,      sizeof(motif->acronyme),      "%s", Json_get_string( element, "acronyme" ) );
-    g_snprintf( motif->clic_tech_id,  sizeof(motif->clic_tech_id),  "%s", Json_get_string( element, "clic_tech_id" ) );
-    g_snprintf( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", Json_get_string( element, "clic_acronyme" ) );
-    g_snprintf( motif->libelle,       sizeof(motif->libelle),       "%s", Json_get_string( element, "libelle" ) );
-    motif->access_level = Json_get_int ( element, "access_level" );
-    motif->rafraich     = Json_get_int ( element, "rafraich" );
-
     if (page->type == TYPE_PAGE_SUPERVISION)
      { struct TYPE_INFO_SUPERVISION *infos=page->infos;
-       trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
+       trame_motif = Trame_ajout_visuel ( FALSE, infos->Trame, element );
        if (!trame_motif)
         { printf("Erreur creation d'un nouveau motif\n");
           return;                                                          /* Ajout d'un test anti seg-fault */
         }
-       g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", motif->def_color );
+       g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( element, "def_color" ) );
        trame_motif->mode   = 0;                                                     /* Sauvegarde etat motif */
        trame_motif->cligno = 0;                                                     /* Sauvegarde etat motif */
        g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
@@ -92,9 +71,8 @@ printf("%s : %s:%s\n", __func__, Json_get_string( element, "tech_id" ), Json_get
      }
     else if (page->type == TYPE_PAGE_ATELIER)
      { struct TYPE_INFO_ATELIER *infos=page->infos;
-       trame_motif = Trame_ajout_motif ( TRUE, infos->Trame_atelier, motif );
-       if (!trame_motif) { g_free(motif); return; }                                                            /* Si probleme */
-       trame_motif->layer = infos->new_layer++;
+       trame_motif = Trame_ajout_visuel ( TRUE, infos->Trame_atelier, element );
+       if (!trame_motif) { return; }                                                                           /* Si probleme */
        g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
        g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
        g_signal_connect( G_OBJECT(trame_motif->item), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );

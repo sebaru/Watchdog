@@ -108,7 +108,7 @@
      { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
         { case TYPE_MOTIF:
                trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
-               if (trame_motif->layer == layer)
+               if (Json_get_int ( trame_motif->visuel, "layer" ) == layer)
                 { if (!trame_motif->selection)
                    { g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                      g_object_set( trame_motif->select_hd, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
@@ -238,18 +238,16 @@ printf("%s: layer=%d selected\n", __func__, layer );
 
           case TYPE_MOTIF:
                trame_motif = ((struct TRAME_ITEM_MOTIF *)(selection->data));
-               new_x = trame_motif->motif->position_x+dx;
-               new_y = trame_motif->motif->position_y+dy;
+               new_x = Json_get_int ( trame_motif->visuel, "posx" ) + dx;
+               new_y = Json_get_int ( trame_motif->visuel, "posy" ) + dy;
 
                if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(infos->Check_grid)))
                 { new_x = new_x/largeur_grille * largeur_grille;
                   new_y = new_y/largeur_grille * largeur_grille;
                 }
 printf("newx=%d, newy=%d\n", new_x, new_y);
-               if ( 0<new_x && new_x<TAILLE_SYNOPTIQUE_X )
-                { trame_motif->motif->position_x = new_x; }
-               if ( 0<new_y && new_y<TAILLE_SYNOPTIQUE_Y )
-                { trame_motif->motif->position_y = new_y; }
+               if ( 0<new_x && new_x<TAILLE_SYNOPTIQUE_X ) { Json_node_add_int ( trame_motif->visuel, "posx", new_x); }
+               if ( 0<new_y && new_y<TAILLE_SYNOPTIQUE_Y ) { Json_node_add_int ( trame_motif->visuel, "posy", new_y); }
                Trame_rafraichir_motif(trame_motif);                                                         /* Refresh visuel */
                break;
           case TYPE_CAMERA_SUP:
@@ -486,7 +484,7 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
      { switch ( *((gint *)selection->data) )
        { case TYPE_MOTIF:
           { struct TRAME_ITEM_MOTIF *trame_motif = selection->data;
-            trame_motif->motif->angle = angle;
+            Json_node_add_int ( trame_motif->visuel, "angle", angle );
             Trame_rafraichir_motif(trame_motif);
             break;
           }
@@ -528,8 +526,8 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
      { switch ( *((gint *)selection->data) )
         { case TYPE_MOTIF:
            { struct TRAME_ITEM_MOTIF *trame_motif = selection->data;
-             trame_motif->motif->largeur = (gfloat)trame_motif->gif_largeur;
-             trame_motif->motif->hauteur = (gfloat)trame_motif->gif_hauteur;
+             Json_node_add_int ( trame_motif->visuel, "larg", trame_motif->gif_largeur );
+             Json_node_add_int ( trame_motif->visuel, "haut", trame_motif->gif_hauteur );
              Trame_rafraichir_motif(trame_motif);
              break;
            }
@@ -552,7 +550,7 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
      { switch ( *((gint *)selection->data) )
         { case TYPE_MOTIF:
            { struct TRAME_ITEM_MOTIF *trame_motif = selection->data;
-             trame_motif->motif->largeur = (gfloat)trame_motif->gif_largeur;
+             Json_node_add_int ( trame_motif->visuel, "larg", trame_motif->gif_largeur );
              Trame_rafraichir_motif(trame_motif);
              break;
            }
@@ -575,7 +573,7 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
      { switch ( *((gint *)selection->data) )
         { case TYPE_MOTIF:
            { struct TRAME_ITEM_MOTIF *trame_motif = selection->data;
-             trame_motif->motif->hauteur = (gfloat)trame_motif->gif_hauteur;
+             Json_node_add_int ( trame_motif->visuel, "haut", trame_motif->gif_hauteur );
              Trame_rafraichir_motif(trame_motif);
              break;
            }

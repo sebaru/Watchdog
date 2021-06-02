@@ -84,7 +84,7 @@
                 "INSERT INTO %s SET "
                 "syn_id=%d, tech_id='%s', acronyme='%s', forme='%s', icone='-1', libelle='%s', access_level=0, "
                 "posx='150', posy='150', larg='-1', haut='-1', angle='0', auto_create=1 "
-                "ON DUPLICATE KEY UPDATE forme=VALUES(forme), libelle=VALUES(libelle)",
+                "ON DUPLICATE KEY UPDATE syn_id=VALUES(syn_id), forme=VALUES(forme), libelle=VALUES(libelle)",
                 NOM_TABLE_MOTIF, plugin->syn_id, plugin->tech_id, acro, forme, libelle );
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
 

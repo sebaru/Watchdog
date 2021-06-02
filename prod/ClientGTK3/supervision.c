@@ -130,10 +130,10 @@
  static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
   { JsonBuilder *builder = Json_create ();
     if (!builder) return;
-    Json_add_string ( builder, "tech_id", trame_motif->motif->clic_tech_id );
-    Json_add_string ( builder, "acronyme", trame_motif->motif->clic_acronyme );
+    Json_add_string ( builder, "tech_id",  Json_get_string ( trame_motif->visuel, "clic_tech_id" ) );
+    Json_add_string ( builder, "acronyme", Json_get_string ( trame_motif->visuel, "clic_acronyme" ) );
     printf("%s: envoi syn_clic '%s':'%s'\n", __func__,
-           trame_motif->motif->clic_tech_id, trame_motif->motif->clic_acronyme );
+           Json_get_string ( trame_motif->visuel, "clic_tech_id" ), Json_get_string ( trame_motif->visuel, "clic_acronyme" ) );
     Envoi_json_au_serveur ( trame_motif->page->client, "POST", builder, "/api/syn/clic", NULL );
   }
 /******************************************************************************************************************************/
@@ -146,7 +146,7 @@
   { if (!(trame_motif && event)) return;
 
     if (event->type == GDK_BUTTON_PRESS)
-     { if (trame_motif->motif->type_gestion == TYPE_BOUTON && (trame_motif->last_clic + 1 <= time(NULL)) )
+     { if ( Json_get_int ( trame_motif->visuel, "gestion" ) == TYPE_BOUTON && (trame_motif->last_clic + 1 <= time(NULL)) )
         { printf("Appui sur bouton num_image=%d\n", trame_motif->num_image );
           if ( trame_motif->num_image == 1 )
            { Trame_choisir_frame( trame_motif, trame_motif->num_image + 1,                          /* Frame 2: bouton appuyé */
@@ -156,10 +156,10 @@
         }
      }
     else if (event->type == GDK_BUTTON_RELEASE)
-     { if (trame_motif->motif->type_gestion == TYPE_BOUTON)                               /* On met la frame 1: bouton relevé */
+     { if ( Json_get_int ( trame_motif->visuel, "gestion" ) == TYPE_BOUTON)               /* On met la frame 1: bouton relevé */
         { if ( trame_motif->num_image == 2 )
            { Trame_choisir_frame( trame_motif, trame_motif->num_image - 1, trame_motif->color );
-             switch ( trame_motif->motif->type_dialog )
+             switch ( Json_get_int ( trame_motif->visuel, "dialog" ) )
               { case ACTION_IMMEDIATE: Envoyer_action_immediate( trame_motif ); break;
                 //case ACTION_CONFIRME : Envoyer_action_confirme( trame_motif );  break;
                 default: break;
@@ -167,7 +167,7 @@
            }
         }
        else if ( ((GdkEventButton *)event)->button == 1)                          /* Release sur le motif qui a été appuyé ?? */
-        { switch( trame_motif->motif->type_dialog )
+        { switch( Json_get_int ( trame_motif->visuel, "dialog" ) )
            { case ACTION_SANS:      printf("action sans !!\n");
                                     break;
              case ACTION_IMMEDIATE: printf("action immediate !!\n");
@@ -197,7 +197,7 @@
     trame_motif->cligno = Json_get_bool(motif,"cligno");                                             /* Sauvegarde etat motif */
     g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string(motif,"color") );/* Sauvegarde etat motif */
 
-    switch( trame_motif->motif->type_gestion )
+    switch( Json_get_int ( trame_motif->visuel, "gestion" ) )
      { case TYPE_INERTE: break;                                              /* Si le motif est inerte, nous n'y touchons pas */
        case TYPE_STATIQUE:
             Trame_choisir_frame( trame_motif, 0, trame_motif->color );
@@ -214,8 +214,7 @@
        case TYPE_PROGRESSIF:
             Trame_peindre_motif ( trame_motif, trame_motif->color );
             break;
-       default: printf("Updater_un_visuel: type gestion non géré %d\n",
-                        trame_motif->motif->type_gestion );
+       default: printf("Updater_un_visuel: type gestion non géré\n" );
      }
   }
 /******************************************************************************************************************************/
@@ -236,8 +235,8 @@
         { case TYPE_MOTIF:
            { cpt++;
              struct TRAME_ITEM_MOTIF *trame_motif = liste_motifs->data;
-             if ( (!strcmp( Json_get_string(motif,"tech_id"), trame_motif->motif->tech_id) &&
-                   !strcmp( Json_get_string(motif,"acronyme"), trame_motif->motif->acronyme))
+             if ( (!strcmp( Json_get_string(motif,"tech_id"), Json_get_string(trame_motif->visuel, "tech_id")) &&
+                   !strcmp( Json_get_string(motif,"acronyme"), Json_get_string(trame_motif->visuel, "acronyme")))
                 )
               { Updater_un_visuel ( trame_motif, motif ); }
              break;

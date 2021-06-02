@@ -323,14 +323,16 @@ end:
     gchar *clic_acronyme = Normaliser_chaine( Json_get_string ( element, "clic_acronyme" ) );
     gchar *def_color     = Normaliser_chaine( Json_get_string ( element, "def_color" ) );
 
-    SQL_Write_new( "UPDATE syns_motifs AS m INNER JOIN syns AS s ON m.syn_id = s.id SET m.libelle='%s', "
-                   "m.tech_id='%s', m.acronyme='%s', "
+    SQL_Write_new( "UPDATE syns_motifs AS m INNER JOIN syns AS s ON m.syn_id = s.id SET "
+                   "m.posx='%d', m.posy='%d', "
+                   "m.libelle='%s', m.tech_id='%s', m.acronyme='%s', "
                    "m.clic_tech_id='%s', m.clic_acronyme='%s', "
                    "m.def_color='%s', m.angle='%d', m.scale='%d', m.gestion='%d' "
-                   " WHERE id='%d' AND s.access_level<'%d'",
+                   " WHERE m.id='%d' AND s.access_level<'%d'",
+                   Json_get_int( element, "posx" ), Json_get_int( element, "posy" ),
                    libelle, tech_id, acronyme, clic_tech_id, clic_acronyme, def_color,
                    Json_get_int( element, "angle" ), Json_get_int(element,"scale"), Json_get_int(element,"gestion"),
-                   Json_get_int(element,"id"), session->access_level );
+                   Json_get_int( element,"id" ), session->access_level );
 
     g_free(libelle);
     g_free(tech_id);
@@ -355,8 +357,8 @@ end:
 
     SQL_Write_new( "UPDATE syns_cadrans INNER JOIN syns ON syns.id=syns_cadrans.syn_id "
                    "SET posx='%d', posy='%d', angle='%d' WHERE syns_cadrans.id='%d' AND syns.access_level<='%d'",
-                   Json_get_int( element, "posx" ), Json_get_int(element,"posy"), Json_get_int(element,"angle"),
-                   Json_get_int(element,"id"), session->access_level );
+                   Json_get_int( element, "posx" ), Json_get_int( element,"posy" ), Json_get_int( element,"angle" ),
+                   Json_get_int( element,"id" ), session->access_level );
  }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
