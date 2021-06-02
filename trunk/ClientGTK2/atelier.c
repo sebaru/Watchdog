@@ -158,6 +158,42 @@
     if ( !(infos && infos->Trame_atelier && infos->Trame_atelier->trame_items) )
      { printf("Erreur parametre Menu_enregistrer_synoptique\n"); return; }
 
+    objet = infos->Trame_atelier->trame_items;
+    while (objet)
+     { printf("Menu_enregistrer_synoptique type=%d\n", *((gint *)objet->data) );
+       switch( *((gint *)objet->data) )
+        { case TYPE_MOTIF:
+               trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_MOTIF,
+                              (gchar *)trame_motif->motif, sizeof(struct CMD_TYPE_MOTIF) );
+               break;
+
+          case TYPE_COMMENTAIRE:
+               trame_comment = (struct TRAME_ITEM_COMMENT *)objet->data;
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_COMMENT,
+                              (gchar *)trame_comment->comment, sizeof(struct CMD_TYPE_COMMENT) );
+               break;
+
+          case TYPE_PASSERELLE:
+               trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_PASS,
+                              (gchar *)trame_pass->pass, sizeof(struct CMD_TYPE_PASSERELLE) );
+               break;
+          case TYPE_CADRAN:
+               trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CADRAN,
+                              (gchar *)trame_cadran->cadran, sizeof(struct CMD_TYPE_CADRAN) );
+               break;
+          case TYPE_CAMERA_SUP:
+               trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,
+                              (gchar *)trame_camera_sup->camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
+               break;
+          default: printf("Enregistrer_synoptique: type inconnu\n" );
+        }
+       objet=objet->next;
+     }
+
   }
 /******************************************************************************************************************************/
 /* Changer_option_zoom: Change le niveau de zoom du canvas                                                                    */
