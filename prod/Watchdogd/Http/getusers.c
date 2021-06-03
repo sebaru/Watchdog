@@ -50,7 +50,7 @@
     for (gint i=0; i<16; i++)
      { gchar chaine[3];
        g_snprintf(chaine, sizeof(chaine), "%02x", salt_bin[i] );
-       g_strlcat( salt, chaine, sizeof(salt) );
+       g_strlcat( salt, chaine, USER_TAILLE_SALT );
      }
     return(salt);
   }
@@ -73,7 +73,7 @@
     for (gint i=0; i<md_len; i++)
      { gchar chaine[3];
        g_snprintf(chaine, sizeof(chaine), "%02x", hash_bin[i] );
-       g_strlcat( hash, chaine, sizeof(hash) );
+       g_strlcat( hash, chaine, USER_TAILLE_HASH );
      }
     return(hash);
   }

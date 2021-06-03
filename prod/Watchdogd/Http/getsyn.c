@@ -429,6 +429,19 @@ end:
           g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", registre->unite );
         }
      }
+    else if ( !strcmp ( cadran->classe, "WATCHDOG" ) )
+     { Dls_data_get_WATCHDOG(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+       struct DLS_WATCHDOG *wtd=cadran->dls_data;
+       if (!wtd)                                      /* si Registre pas trouvée, on remonte le nom du cadran en libellé */
+        { cadran->in_range = FALSE; }
+       else
+        { cadran->in_range = TRUE;
+          gint gap = wtd->top - Partage->top;
+          if (gap>=0) cadran->valeur = gap/10;
+                 else cadran->valeur = 0;
+          g_snprintf( cadran->unite, sizeof(cadran->unite), "s" );
+        }
+     }
     else if ( !strcmp ( cadran->classe, "T" ) )
      { Dls_data_get_tempo ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
        struct DLS_TEMPO *tempo = cadran->dls_data;

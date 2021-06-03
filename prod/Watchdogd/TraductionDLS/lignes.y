@@ -235,13 +235,15 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                 }}
                 | T_MOINS expr DONNE T_ACCOUV listeInstr T_ACCFERM
                 {{ int taille;
-                   taille = strlen($2)+strlen($5)+100;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille,
-                               "/* Ligne %d une_instr if----------*/\nif(%s)\n { %s }\n\n",
-                                  DlsScanner_get_lineno(), $2, $5 );
-                   g_free($5);
-                   g_free($2);
+                   if ($2 && $5)
+                    { taille = strlen($2)+strlen($5)+100;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille,
+                                  "/* Ligne %d une_instr if----------*/\nif(%s)\n { %s }\n\n",
+                                     DlsScanner_get_lineno(), $2, $5 );
+                    } else $$=NULL;
+                   if ($5) g_free($5);
+                   if ($2) g_free($2);
                 }}
                 | unSwitch {{ $$=$1; }}
                 ;
