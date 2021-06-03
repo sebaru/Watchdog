@@ -1423,6 +1423,19 @@
                  }
                 case MNEMO_WATCHDOG:
                  { Mnemo_auto_create_WATCHDOG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
+                   if (cadran)
+                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->acronyme, cadran,
+                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
+                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
+                                                      Get_option_entier ( alias->options, T_DECIMAL, 0 )
+                                                    );
+                    }
+
                    if (!Liste_WATCHDOG) Liste_WATCHDOG = g_strconcat( "'", alias->acronyme, "'", NULL );
                    else
                     { old_liste = Liste_WATCHDOG;
