@@ -859,7 +859,7 @@
 
        g_snprintf( action->alors, taille,
                    "   Dls_data_set_WATCHDOG ( vars, \"%s\", \"%s\", &_%s_%s, \n"
-                   "                           Dls_data_get_REGISTRE ( vars, \"%s\", \"%s\", &_%s_%s ) );\n",
+                   "                           Dls_data_get_REGISTRE ( \"%s\", \"%s\", &_%s_%s ) );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
                    alias_consigne->tech_id, alias_consigne->acronyme, alias_consigne->tech_id, alias_consigne->acronyme
                  );
