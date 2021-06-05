@@ -46,9 +46,7 @@
 %token <val>    T_SWITCH T_ACCOUV T_ACCFERM T_PIPE T_DIFFERE
 %token <val>    T_DEFINE
 
-%token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_SBIEN_ALE_FUGITIVE T_TOP_ALERTE T_TOP_ALERTE_FUGITIVE
-%token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_SPERS_OK T_OSYN_ACQ
-%token <val>    T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_OK
+%token <val>    T_TOP_ALERTE T_TOP_ALERTE_FUGITIVE
 %token <val>    T_BUS T_HOST T_TECH_ID T_TAG
 
 %token <val>    MODE COLOR CLIGNO T_RESET T_RATIO T_MULTI T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
@@ -102,7 +100,7 @@ listeDefinitions:
                 ;
 
 une_definition: T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
-                {{ if ( New_alias(NULL, $2, $4, $5) == FALSE )                                               /* Deja defini ? */
+                {{ if ( ! New_alias(NULL, $2, $4, $5) )                                                      /* Deja defini ? */
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
                 }}
@@ -538,41 +536,6 @@ unite:          modulateur ENTIER HEURE ENTIER
                    if ($1) g_snprintf( $$, taille, "(!Dls_get_top_alerte_fugitive())" );
                    else    g_snprintf( $$, taille, "( Dls_get_top_alerte_fugitive())" );
                 }}
-                | T_OSYN_ACQ
-                {{ $$ = g_strdup("vars->bit_acquit");
-                }}
-                | barre T_ACT_OK
-                {{ if ($1) $$ = g_strdup("!vars->bit_activite_ok");
-                      else $$ = g_strdup("vars->bit_activite_ok");
-                }}
-                | barre T_SPERS_OK
-                {{ if ($1) $$ = g_strdup("!vars->bit_secupers_ok");
-                      else $$ = g_strdup("vars->bit_secupers_ok");
-                }}
-                | barre T_ACT_DEF
-                  {{ $$=New_condition_vars( $1, "vars->bit_defaut"); }}
-                | barre T_ACT_DEFF
-                  {{ $$=New_condition_vars( $1, "vars->bit_defaut_fixe"); }}
-                | barre T_ACT_ALA
-                  {{ $$=New_condition_vars( $1, "vars->bit_alarme"); }}
-                | barre T_ACT_ALAF
-                  {{ $$=New_condition_vars( $1, "vars->bit_alarme_fixe"); }}
-                | barre T_SBIEN_VEILLE
-                  {{ $$=New_condition_vars( $1, "vars->bit_veille"); }}
-                | barre T_SBIEN_ALE
-                  {{ $$=New_condition_vars( $1, "vars->bit_alerte"); }}
-                | barre T_SBIEN_ALE_FUGITIVE
-                  {{ $$=New_condition_vars( $1, "vars->bit_alerte_fugitive"); }}
-                | barre T_SBIEN_ALEF
-                  {{ $$=New_condition_vars( $1, "vars->bit_alerte_fixe"); }}
-                | barre T_SPERS_DER
-                  {{ $$=New_condition_vars( $1, "vars->bit_derangement"); }}
-                | barre T_SPERS_DERF
-                  {{ $$=New_condition_vars( $1, "vars->bit_derangement_fixe"); }}
-                | barre T_SPERS_DAN
-                  {{ $$=New_condition_vars( $1, "vars->bit_danger"); }}
-                | barre T_SPERS_DANF
-                  {{ $$=New_condition_vars( $1, "vars->bit_danger_fixe"); }}
                 | barre T_POUV expr T_PFERM
                 {{ int taille;
                    if ($3)
@@ -631,30 +594,6 @@ action:         action VIRGULE une_action
 
 une_action:     T_NOP
                   {{ $$=New_action(); $$->alors=g_strdup(""); }}
-                | T_ACT_DEF
-                  {{ $$=New_action_vars_mono("vars->bit_defaut"); }}
-                | T_ACT_DEFF
-                  {{ $$=New_action_vars_mono("vars->bit_defaut_fixe"); }}
-                | T_ACT_ALA
-                  {{ $$=New_action_vars_mono("vars->bit_alarme"); }}
-                | T_ACT_ALAF
-                  {{ $$=New_action_vars_mono("vars->bit_alarme_fixe"); }}
-                | T_SBIEN_VEILLE
-                  {{ $$=New_action_vars_mono("vars->bit_veille"); }}
-                | T_SBIEN_ALE
-                  {{ $$=New_action_vars_mono("vars->bit_alerte"); }}
-                | T_SBIEN_ALEF
-                  {{ $$=New_action_vars_mono("vars->bit_alerte_fixe"); }}
-                | T_SBIEN_ALE_FUGITIVE
-                  {{ $$=New_action_vars_mono("vars->bit_alerte_fugitive"); }}
-                | T_SPERS_DER
-                  {{ $$=New_action_vars_mono("vars->bit_derangement"); }}
-                | T_SPERS_DERF
-                  {{ $$=New_action_vars_mono("vars->bit_derangement_fixe"); }}
-                | T_SPERS_DAN
-                  {{ $$=New_action_vars_mono("vars->bit_danger"); }}
-                | T_SPERS_DANF
-                  {{ $$=New_action_vars_mono("vars->bit_danger_fixe"); }}
                 | T_PID liste_options
                   {{ $$=New_action_PID($2);
                      Liberer_options($2);

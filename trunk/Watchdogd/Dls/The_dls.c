@@ -1708,21 +1708,21 @@ end:
      { struct DLS_PLUGIN *plugin = liste->data;
 /*----------------------------------------------- Calcul des synthèses -------------------------------------------------------*/
        bit_comm             &= Dls_data_get_MONO ( plugin->tech_id, "COMM", &plugin->vars.bit_comm );                                                /* Bit de synthese activite */
-       bit_defaut           |= plugin->vars.bit_defaut;
-       bit_defaut_fixe      |= plugin->vars.bit_defaut_fixe;
-       bit_alarme           |= plugin->vars.bit_alarme;
-       bit_alarme_fixe      |= plugin->vars.bit_alarme_fixe;
+       bit_defaut           |= Dls_data_get_MONO ( plugin->tech_id, "MEMSA_DEFAUT", &plugin->vars.bit_defaut );
+       bit_defaut_fixe      |= Dls_data_get_MONO ( plugin->tech_id, "MEMSA_DEFAUT_FIXE", &plugin->vars.bit_defaut_fixe );
+       bit_alarme           |= Dls_data_get_MONO ( plugin->tech_id, "MEMSA_ALARME", &plugin->vars.bit_alarme );
+       bit_alarme_fixe      |= Dls_data_get_MONO ( plugin->tech_id, "MEMSA_ALARME_FIXE", &plugin->vars.bit_alarme_fixe );
 
-       bit_veille_partielle |= plugin->vars.bit_veille;
-       bit_veille_totale    &= plugin->vars.bit_veille;
-       bit_alerte           |= plugin->vars.bit_alerte;
-       bit_alerte_fixe      |= plugin->vars.bit_alerte_fixe;
-       bit_alerte_fugitive  |= plugin->vars.bit_alerte_fugitive;
+       bit_veille_partielle |= Dls_data_get_MONO ( plugin->tech_id, "MEMSSB_VEILLE", &plugin->vars.bit_veille );
+       bit_veille_totale    &= Dls_data_get_MONO ( plugin->tech_id, "MEMSSB_VEILLE", &plugin->vars.bit_veille );
+       bit_alerte           |= Dls_data_get_MONO ( plugin->tech_id, "MEMSSB_ALERTE", &plugin->vars.bit_alerte );
+       bit_alerte_fixe      |= Dls_data_get_MONO ( plugin->tech_id, "MEMSSB_ALERTE_FIXE", &plugin->vars.bit_alerte_fixe );
+       bit_alerte_fugitive  |= Dls_data_get_MONO ( plugin->tech_id, "MEMSSB_ALERTE_FUGITIVE", &plugin->vars.bit_alerte_fugitive );
 
-       bit_derangement      |= plugin->vars.bit_derangement;
-       bit_derangement_fixe |= plugin->vars.bit_derangement_fixe;
-       bit_danger           |= plugin->vars.bit_danger;
-       bit_danger_fixe      |= plugin->vars.bit_danger_fixe;
+       bit_derangement      |= Dls_data_get_MONO ( plugin->tech_id, "MEMSSP_DERANGEMENT", &plugin->vars.bit_derangement );
+       bit_derangement_fixe |= Dls_data_get_MONO ( plugin->tech_id, "MEMSSP_DERANGEMENT_FIXE", &plugin->vars.bit_derangement_fixe );
+       bit_danger           |= Dls_data_get_MONO ( plugin->tech_id, "MEMSSP_DANGER", &plugin->vars.bit_danger );
+       bit_danger_fixe      |= Dls_data_get_MONO ( plugin->tech_id, "MEMSSP_DANGER_FIXE", &plugin->vars.bit_danger_fixe );
        liste = liste->next;
      }
     liste = dls_syn->Dls_sub_syns;
@@ -1798,10 +1798,23 @@ end:
        liste = g_slist_next ( liste );
      }
     Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
-    plugin->vars.bit_activite_ok = bit_comm_module && !(plugin->vars.bit_defaut || plugin->vars.bit_defaut_fixe ||
-                                                        plugin->vars.bit_alarme || plugin->vars.bit_alarme_fixe);
-    plugin->vars.bit_secupers_ok = !(plugin->vars.bit_derangement || plugin->vars.bit_derangement_fixe ||
-                                     plugin->vars.bit_danger || plugin->vars.bit_danger_fixe);
+    Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "MEMSA_OK", &plugin->vars.bit_activite_ok,
+                        bit_comm_module &&
+                        !( Dls_data_get_MONO( plugin->tech_id, "MEMSA_DEFAUT", &plugin->vars.bit_defaut ) ||
+                           Dls_data_get_MONO( plugin->tech_id, "MEMSA_DEFAUT_FIXE", &plugin->vars.bit_defaut_fixe ) ||
+                           Dls_data_get_MONO( plugin->tech_id, "MEMSA_ALARME", &plugin->vars.bit_alarme ) ||
+                           Dls_data_get_MONO( plugin->tech_id, "MEMSA_ALARME_FIXE", &plugin->vars.bit_alarme_fixe )
+                         )
+
+                      );
+
+    Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "MEMSSP_OK", &plugin->vars.bit_secupers_ok,
+                        !( Dls_data_get_MONO( plugin->tech_id, "MEMSSP_DERANGEMENT", &plugin->vars.bit_derangement ) ||
+                           Dls_data_get_MONO( plugin->tech_id, "MEMSSP_DERANGEMENT_FIXE", &plugin->vars.bit_derangement_fixe ) ||
+                           Dls_data_get_MONO( plugin->tech_id, "MEMSSP_DANGER", &plugin->vars.bit_danger ) ||
+                           Dls_data_get_MONO( plugin->tech_id, "MEMSSP_DANGER_FIXE", &plugin->vars.bit_danger_fixe )
+                         )
+                      );
 
 /*----------------------------------------------- Mise a jour des messages de comm -------------------------------------------*/
     Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
