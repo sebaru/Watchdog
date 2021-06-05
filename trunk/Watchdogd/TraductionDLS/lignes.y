@@ -83,46 +83,47 @@
 %type  <chaine>      unite facteur expr suffixe unSwitch listeCase une_instr listeInstr
 %type  <action>      action une_action
 %type  <chaine>      calcul_expr calcul_expr2 calcul_expr3
-%type  <t_alias>     calcul_alias_result
+%type  <t_alias>     un_alias calcul_alias_result
 %type  <comparateur> comparateur
 
 %%
 fichier: ligne_source_dls;
 
-ligne_source_dls:         listeAlias listeInstr {{ if($2) { Emettre( $2 ); g_free($2); } }}
-                        | listeAlias
+ligne_source_dls:         listeDefinitions listeInstr {{ if($2) { Emettre( $2 ); g_free($2); } }}
+                        | listeDefinitions
                         | listeInstr {{ if($1) { Emettre( $1 ); g_free($1); } }}
                         |
                         ;
 
 /*************************************************** Gestion des alias ********************************************************/
-listeAlias:     un_alias listeAlias
-                | un_alias
+listeDefinitions:
+                  une_definition listeDefinitions
+                | une_definition
                 ;
 
-un_alias:       T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
+une_definition: T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
                 {{ if ( New_alias(NULL, $2, $4, $5) == FALSE )                                               /* Deja defini ? */
                     { Emettre_erreur_new( "'%s' is already defined", $2 ); }
                    g_free($2);
                 }}
                 ;
 
-alias_classe:     T_BI        {{ $$=MNEMO_BISTABLE;   }}
-                | T_MONO      {{ $$=MNEMO_MONOSTABLE; }}
-                | T_ENTREE    {{ $$=MNEMO_ENTREE;     }}
-                | SORTIE      {{ $$=MNEMO_SORTIE;     }}
-                | T_MSG       {{ $$=MNEMO_MSG;        }}
-                | T_TEMPO     {{ $$=MNEMO_TEMPO;      }}
-                | T_VISUEL    {{ $$=MNEMO_MOTIF;      }}
-                | T_CPT_H     {{ $$=MNEMO_CPTH;       }}
-                | T_CPT_IMP   {{ $$=MNEMO_CPT_IMP;    }}
+alias_classe:     T_BI             {{ $$=MNEMO_BISTABLE;   }}
+                | T_MONO           {{ $$=MNEMO_MONOSTABLE; }}
+                | T_ENTREE         {{ $$=MNEMO_ENTREE;     }}
+                | SORTIE           {{ $$=MNEMO_SORTIE;     }}
+                | T_MSG            {{ $$=MNEMO_MSG;        }}
+                | T_TEMPO          {{ $$=MNEMO_TEMPO;      }}
+                | T_VISUEL         {{ $$=MNEMO_MOTIF;      }}
+                | T_CPT_H          {{ $$=MNEMO_CPTH;       }}
+                | T_CPT_IMP        {{ $$=MNEMO_CPT_IMP;    }}
                 | T_ANALOG_INPUT   {{ $$=MNEMO_ENTREE_ANA; }}
                 | T_ANALOG_OUTPUT  {{ $$=MNEMO_SORTIE_ANA;     }}
                 | T_DIGITAL_OUTPUT {{ $$=MNEMO_DIGITAL_OUTPUT; }}
-                | T_REGISTRE  {{ $$=MNEMO_REGISTRE;   }}
-                | T_HORLOGE   {{ $$=MNEMO_HORLOGE;    }}
-                | T_BUS       {{ $$=MNEMO_BUS;        }}
-                | T_WATCHDOG  {{ $$=MNEMO_WATCHDOG;   }}
+                | T_REGISTRE       {{ $$=MNEMO_REGISTRE;   }}
+                | T_HORLOGE        {{ $$=MNEMO_HORLOGE;    }}
+                | T_BUS            {{ $$=MNEMO_BUS;        }}
+                | T_WATCHDOG       {{ $$=MNEMO_WATCHDOG;   }}
                 ;
 
 /**************************************************** Gestion des instructions ************************************************/
@@ -1033,13 +1034,11 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->token_classe = ENTIER;
                    $$->val_as_int = $3;
                 }}
-                | T_CONSIGNE T_EGAL ID
+                | T_CONSIGNE T_EGAL un_alias
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ID;
-                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
-                   if (!$$->val_as_alias)
-                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                   $$->val_as_alias = $3;
                 }}
                 | T_INPUT T_EGAL ID
                 {{ $$=New_option();
@@ -1103,6 +1102,19 @@ type_msg:         T_INFO    {{ $$=MSG_ETAT; }}
                 | T_DERANGEMENT {{ $$=MSG_DERANGEMENT; }}
                 ;
 
+un_alias:       ID
+                {{ $$ = Get_alias_par_acronyme ( NULL, $1 );
+                   if (!$$)
+                    { Emettre_erreur_new( "'%s' is not defined", $1 ); }
+                   g_free($1);
+                }}
+                | ID T_DPOINTS ID
+                {{ $$ = Get_alias_par_acronyme ( $1, $3 );
+                   if (!$$)
+                    { Emettre_erreur_new( "'%s:%s' is not defined", $1, $3 ); }
+                   g_free($1);
+                   g_free($3);
+                }}
 %%
 
 /*----------------------------------------------------------------------------------------------------------------------------*/

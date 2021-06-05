@@ -851,6 +851,21 @@
  struct ACTION *New_action_WATCHDOG( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
 
+    struct ALIAS *alias_consigne = Get_option_alias ( options, T_CONSIGNE );
+    if (alias_consigne)
+     { gint taille = 512;
+       action = New_action();
+       action->alors = New_chaine( taille );
+
+       g_snprintf( action->alors, taille,
+                   "   Dls_data_set_WATCHDOG ( vars, \"%s\", \"%s\", &_%s_%s, \n"
+                   "                           Dls_data_get_REGISTRE ( vars, \"%s\", \"%s\", &_%s_%s ) );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
+                   alias_consigne->tech_id, alias_consigne->acronyme, alias_consigne->tech_id, alias_consigne->acronyme
+                 );
+       return(action);
+     }
+
     gint consigne = Get_option_entier ( options, T_CONSIGNE, 600 );
     gint taille = 256;
     action = New_action();
