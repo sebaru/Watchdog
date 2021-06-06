@@ -142,7 +142,7 @@
   { struct OPTION *option;
     option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
     if (!options) return(options);
-    
+
     option->token        = token;
     option->token_classe = T_CHAINE;
     option->chaine       = chaine;
@@ -157,7 +157,7 @@
   { struct OPTION *option;
     option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
     if (!options) return(options);
-    
+
     option->token        = token;
     option->token_classe = ENTIER;
     option->val_as_int   = entier;
@@ -1031,9 +1031,6 @@
  struct ALIAS *New_alias ( gchar *tech_id, gchar *acronyme, gint classe, GList *options )
   { struct ALIAS *alias;
 
-    alias = Get_alias_par_acronyme( tech_id, acronyme );
-    if (alias) return(NULL);                                                                            /* ID deja definit ? */
-
     alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
     if (!alias) { return(NULL); }
     if (!tech_id) alias->tech_id = g_strdup(Dls_plugin.tech_id);
@@ -1063,7 +1060,8 @@
         { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
           g_snprintf( ss_chaine, sizeof(ss_chaine), "Clic sur l'icone depuis l'IHM" );
           ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(ss_chaine) );
-          New_alias ( tech_id, ss_acronyme, MNEMO_ENTREE, ss_options );
+          if ( ! Get_alias_par_acronyme ( tech_id, ss_acronyme ) )                                      /* Si pas déjà défini */
+           { New_alias ( tech_id, ss_acronyme, MNEMO_ENTREE, ss_options ); }
         }
      }
     g_free(forme);
@@ -1086,30 +1084,22 @@
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
  struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme )
-  { struct ALIAS *alias;
+  { struct ALIAS *alias=NULL;
     gint classe;
 
-    alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
-    if (!alias) { return(NULL); }
-    alias->options  = NULL;
-    alias->used     = 1;
-    alias->external = TRUE;
-
-    if (!tech_id) tech_id=Dls_plugin.tech_id;
+    if (!tech_id) tech_id=Dls_plugin.tech_id;     /* Cas d'usage : bit créé par un thread, n'ayant pas été defini dans le DLS */
 
     if ( (classe=Rechercher_DICO_type ( tech_id, acronyme )) != -1 )
-     { alias->tech_id  = g_strdup(tech_id);
-       alias->acronyme = g_strdup(acronyme);
-       alias->classe   = classe;
-     }
+     { alias = New_alias ( tech_id, acronyme, classe, NULL ); }
     else if ( (classe=Rechercher_DICO_type ( "SYS", acronyme )) != -1 )
-     { alias->tech_id  = g_strdup("SYS");
-       alias->acronyme = g_strdup(acronyme);
-       alias->classe   = classe;
+     { alias = New_alias ( "SYS", acronyme, classe, NULL ); }
+    else { return(NULL); }                                                         /* Si pas trouvé en externe, retourne NULL */
+
+    if (alias)
+     { alias->external = TRUE;
+       alias->used     = 1;
+       Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
      }
-    else { g_free(alias); return(NULL); }                                          /* Si pas trouvé en externe, retourne NULL */
-    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
-    Alias = g_slist_prepend( Alias, alias );
     return(alias);
   }
 /******************************************************************************************************************************/
@@ -1127,7 +1117,9 @@
     while(liste)
      { alias = (struct ALIAS *)liste->data;
        /*Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: checking tid %s.", __func__, alias->tech_id );*/
-       if (!strcmp(alias->acronyme, acronyme) && !strcmp(alias->tech_id,tech_id))
+       if (!strcmp(alias->acronyme, acronyme) &&
+            ( !strcmp(alias->tech_id,tech_id) || !strcmp(alias->tech_id,"SYS") )
+          )
         { alias->used++; return(alias); }                                          /* Si deja present, on fait ++ sur le used */
        liste = liste->next;
      }
@@ -1222,7 +1214,7 @@
 /*---------------------------------------- Création des mnemoniques permanents -----------------------------------------------*/
        options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Statut de la Communication de l'I/O Thread lié au module") );
        New_alias_permanent ( NULL, "IO_COMM", MNEMO_MONOSTABLE, options );
-       
+
        options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Statut de Synthèse de la communication du module"));
        New_alias_permanent ( NULL, "COMM", MNEMO_MONOSTABLE, options );
 

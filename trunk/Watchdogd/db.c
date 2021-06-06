@@ -2249,6 +2249,8 @@ encore:
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "UPDATE dls SET sourcecode = REPLACE(`sourcecode`,'_MEMSSP','MEMSSP');" );
        Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE dls SET sourcecode = REPLACE(`sourcecode`,'_OSYN_ACQUIT','OSYN_ACQUIT');" );
+       Lancer_requete_SQL ( db, requete );
      }
 
     database_version = 5728;

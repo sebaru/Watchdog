@@ -100,8 +100,9 @@ listeDefinitions:
                 ;
 
 une_definition: T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
-                {{ if ( ! New_alias(NULL, $2, $4, $5) )                                                      /* Deja defini ? */
-                    { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                {{ if ( Get_alias_par_acronyme(NULL, $2) )                                                   /* Deja defini ? */
+                        { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                   else { New_alias(NULL, $2, $4, $5); }
                    g_free($2);
                 }}
                 ;
@@ -607,7 +608,7 @@ une_action:     T_NOP
 
                    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
                    if (!alias)
-                    { alias = Set_new_external_alias(tech_id,acro); }      /* Si dependance externe, on va chercher */
+                    { alias = Set_new_external_alias(tech_id,acro); }                /* Si dependance externe, on va chercher */
 
                    if (!alias)
                     { if ($3) Emettre_erreur_new( "'%s:%s' is not defined", $2, $3 );
