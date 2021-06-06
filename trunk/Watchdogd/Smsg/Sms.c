@@ -222,7 +222,7 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Smsg_Send_CB (GSM_StateMachine *sm, int status, int MessageReference, void * user_data)
-  {	if (status==0) {	Cfg_smsg.gammu_send_status = ERR_NONE; }
+  { if (status==0) { Cfg_smsg.gammu_send_status = ERR_NONE; }
     else Cfg_smsg.gammu_send_status = ERR_UNKNOWN;
   }
 /******************************************************************************************************************************/
@@ -233,13 +233,13 @@ end:
  static void Smsg_disconnect ( void )
   { GSM_Error error;
     if (GSM_IsConnected(Cfg_smsg.gammu_machine))
-   	 { error = GSM_TerminateConnection(Cfg_smsg.gammu_machine);                                       /* Terminate connection */
-	      if (error != ERR_NONE)
+     { error = GSM_TerminateConnection(Cfg_smsg.gammu_machine);                                       /* Terminate connection */
+       if (error != ERR_NONE)
         { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                    "%s: TerminateConnection Failed (%s)", __func__, GSM_ErrorString(error) );
         }
      }
-    GSM_FreeStateMachine(Cfg_smsg.gammu_machine);                                                     	/* Free up used memory */
+    GSM_FreeStateMachine(Cfg_smsg.gammu_machine);                                                      /* Free up used memory */
     Cfg_smsg.gammu_machine = NULL;
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Disconnected", __func__ );
     Zmq_Send_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", 0 );
@@ -259,45 +259,45 @@ end:
        return(FALSE);
      }
 
-	   error = GSM_FindGammuRC(&Cfg_smsg.gammu_cfg, NULL);
-	   if (error != ERR_NONE)
+    error = GSM_FindGammuRC(&Cfg_smsg.gammu_cfg, NULL);
+    if (error != ERR_NONE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: FindGammuRC Failed (%s)", __func__, GSM_ErrorString(error) );
-   	   Smsg_disconnect();
+       Smsg_disconnect();
        return(FALSE);
      }
 
-   	error = GSM_ReadConfig(Cfg_smsg.gammu_cfg, GSM_GetConfig(Cfg_smsg.gammu_machine, 0), 0);
-	   if (error != ERR_NONE)
+    error = GSM_ReadConfig(Cfg_smsg.gammu_cfg, GSM_GetConfig(Cfg_smsg.gammu_machine, 0), 0);
+    if (error != ERR_NONE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                 "%s: ReadConfig Failed (%s)", __func__, GSM_ErrorString(error) );
-   	   Smsg_disconnect();
+       Smsg_disconnect();
        return(FALSE);
      }
 
-   	INI_Free(Cfg_smsg.gammu_cfg);
-   	GSM_SetConfigNum(Cfg_smsg.gammu_machine, 1);
+    INI_Free(Cfg_smsg.gammu_cfg);
+    GSM_SetConfigNum(Cfg_smsg.gammu_machine, 1);
 
-   	error = GSM_InitConnection(Cfg_smsg.gammu_machine, 1);
-	   if (error != ERR_NONE)
+    error = GSM_InitConnection(Cfg_smsg.gammu_machine, 1);
+    if (error != ERR_NONE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: InitConnection Failed (%s)", __func__, GSM_ErrorString(error) );
-   	   Smsg_disconnect();
+       Smsg_disconnect();
        return(FALSE);
      }
     GSM_SetSendSMSStatusCallback(Cfg_smsg.gammu_machine, Smsg_Send_CB, NULL);
 
     gchar constructeur[64];
     error = GSM_GetManufacturer(Cfg_smsg.gammu_machine, constructeur);
-	   if (error != ERR_NONE)
+    if (error != ERR_NONE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: GSM_GetManufacturer Failed (%s)", __func__, GSM_ErrorString(error) );
-   	   Smsg_disconnect();
+       Smsg_disconnect();
        return(FALSE);
      }
 
     gchar model[64];
     error = GSM_GetModel(Cfg_smsg.gammu_machine, model);
-	   if (error != ERR_NONE)
+    if (error != ERR_NONE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: GSM_GetModel Failed (%s)", __func__, GSM_ErrorString(error) );
-   	   Smsg_disconnect();
+       Smsg_disconnect();
        return(FALSE);
      }
 
@@ -322,41 +322,41 @@ end:
      }
 
     GSM_InitLocales(NULL);
-   	memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
-	   sms.PDU = SMS_Submit;                                                                        /* We want to submit message */
-	   sms.UDH.Type = UDH_NoUDH;                                                                 /* No UDH, just a plain message */
-	   sms.Coding = SMS_Coding_Unicode_No_Compression;                                        /* We used default coding for text */
-   	sms.Class = 1;                                                                                /* Class 1 message (normal) */
+    memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
+    sms.PDU = SMS_Submit;                                                                        /* We want to submit message */
+    sms.UDH.Type = UDH_NoUDH;                                                                 /* No UDH, just a plain message */
+    sms.Coding = SMS_Coding_Unicode_No_Compression;                                        /* We used default coding for text */
+    sms.Class = 1;                                                                                /* Class 1 message (normal) */
     g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
     EncodeUnicode( sms.Text, libelle, strlen(libelle));                                                /* Encode message text */
     EncodeUnicode( sms.Number, telephone, strlen(telephone));
 
 
-	/*debug_info = GSM_GetDebug(s);
-	GSM_SetDebugGlobal(FALSE, debug_info);
-	GSM_SetDebugFileDescriptor(stderr, TRUE, debug_info);
-	GSM_SetDebugLevel("textall", debug_info);*/
+ /*debug_info = GSM_GetDebug(s);
+ GSM_SetDebugGlobal(FALSE, debug_info);
+ GSM_SetDebugFileDescriptor(stderr, TRUE, debug_info);
+ GSM_SetDebugLevel("textall", debug_info);*/
 
-	   PhoneSMSC.Location = 1;                                                                   	/* We need to know SMSC number */
-   	error = GSM_GetSMSC(Cfg_smsg.gammu_machine, &PhoneSMSC);
-	   if (error != ERR_NONE)
+    PhoneSMSC.Location = 1;                                                                    /* We need to know SMSC number */
+    error = GSM_GetSMSC(Cfg_smsg.gammu_machine, &PhoneSMSC);
+    if (error != ERR_NONE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                 "%s: GetSMSC Failed (%s)", __func__, GSM_ErrorString(error) );
        Smsg_disconnect ();
        return(FALSE);
      }
 
-	   CopyUnicodeString(sms.SMSC.Number, PhoneSMSC.Number);                                       /* Set SMSC number in message */
+    CopyUnicodeString(sms.SMSC.Number, PhoneSMSC.Number);                                       /* Set SMSC number in message */
 
-   	Cfg_smsg.gammu_send_status = ERR_TIMEOUT;
-	   error = GSM_SendSMS(Cfg_smsg.gammu_machine, &sms); 	                                                      /* Send message */
-	   if (error != ERR_NONE)
+    Cfg_smsg.gammu_send_status = ERR_TIMEOUT;
+    error = GSM_SendSMS(Cfg_smsg.gammu_machine, &sms);                                                        /* Send message */
+    if (error != ERR_NONE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: SendSMS Failed (%s)", __func__, GSM_ErrorString(error) );
        Smsg_disconnect();
        return(FALSE);
      }
 
-	   while ( Cfg_smsg.gammu_send_status == ERR_TIMEOUT ) {	GSM_ReadDevice(Cfg_smsg.gammu_machine, TRUE); }
+    while ( Cfg_smsg.gammu_send_status == ERR_TIMEOUT ) { GSM_ReadDevice(Cfg_smsg.gammu_machine, TRUE); }
 
     if (Cfg_smsg.gammu_send_status == ERR_NONE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Envoi SMS Ok to %s (%s)", __func__, telephone, libelle );
@@ -611,18 +611,18 @@ end:
     GSM_MultiSMSMessage sms;
     GSM_Error error;
 
-   	memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
+    memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
 
 /* Read all messages */
-   	error = ERR_NONE;
-	   sms.Number = 0;
-	   sms.SMS[0].Location = 0;
-	   sms.SMS[0].Folder = 0;
+    error = ERR_NONE;
+    sms.Number = 0;
+    sms.SMS[0].Location = 0;
+    sms.SMS[0].Folder = 0;
     error = GSM_GetNextSMS(Cfg_smsg.gammu_machine, &sms, TRUE);
     if (error == ERR_NONE)
      { gint i;
        for (i = 0; i < sms.Number; i++)
-			     { g_snprintf( from, sizeof(from), "%s", DecodeUnicodeConsole(sms.SMS[i].Number) );
+        { g_snprintf( from, sizeof(from), "%s", DecodeUnicodeConsole(sms.SMS[i].Number) );
           g_snprintf( texte, sizeof(texte), "%s", DecodeUnicodeConsole(sms.SMS[i].Text) );
           sms.SMS[0].Folder = 0;/* https://github.com/gammu/gammu/blob/ed2fec4a382e7ac4b5dfc92f5b10811f76f4817e/gammu/message.c */
           if (sms.SMS[i].State == SMS_UnRead)                                /* Pour tout nouveau message, nous le processons */
@@ -638,7 +638,7 @@ end:
                        texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder, GSM_ErrorString(error) );
            }
          }
-	     }
+      }
      else if (error != ERR_EMPTY)
       { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error Reading SMS: '%s' !", __func__, GSM_ErrorString(error) );
       }
@@ -716,7 +716,7 @@ reload:
           json_node_unref(request);
         }
      }
-	   Smsg_disconnect();
+    Smsg_disconnect();
     Zmq_Close ( zmq_from_bus );
     Zmq_Close ( Cfg_smsg.zmq_to_master );
 

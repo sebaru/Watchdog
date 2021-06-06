@@ -23,7 +23,7 @@
             { "data": null, "title":"Acronyme", "className": "align-middle ",
               "render": function (item)
                 { if (item.classe=="MESSAGE")
-                   { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+                   { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.acronyme ) ); }
                   else if (item.classe=="CI")
                    { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme, "Voir le graphe", item.acronyme ) ); }
                   else if (item.classe=="AI")
