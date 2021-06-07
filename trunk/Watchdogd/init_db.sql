@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `syns` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) NOT NULL,
   `libelle` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
-  `image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'home',
+  `image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'syn_maison.png',
   `page` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),

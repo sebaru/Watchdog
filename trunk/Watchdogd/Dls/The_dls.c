@@ -1293,9 +1293,9 @@ end:
 /******************************************************************************************************************************/
  void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p,
                          gchar *target_tech_id, gchar *tag, gchar *param)
-  {  Dls_data_set_MONO ( NULL, tech_id, acronyme, bus_p, TRUE );                                  /* Utilisation d'un boolean */
+  { /* Dls_data_set_MONO ( NULL, tech_id, acronyme, bus_p, TRUE );                                  /* Utilisation d'un boolean */
 
-    if (Dls_data_get_bool_up(tech_id, acronyme, bus_p))
+    /*if (Dls_data_get_bool_up(tech_id, acronyme, bus_p))*/
      { Zmq_Send_json_node ( Partage->com_dls.zmq_to_master, "DLS", "*", target_tech_id, tag, NULL/*JsonNode *RootNode*/ ); }
   }
 /******************************************************************************************************************************/

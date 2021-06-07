@@ -50,6 +50,7 @@
     GBytes *request_brute;
     struct stat stat_buf;
     struct passwd *pwd;
+    gchar *db_schema;
     gsize taille;
 
     if (msg->method != SOUP_METHOD_POST)
@@ -93,11 +94,14 @@
        return;
      }
 
+    gboolean is_master = Json_get_int(request,"is_master");
+/******************************************* Creation du user *****************************************************************/
     g_snprintf( chaine, sizeof(chaine), "useradd -m -c 'WatchdogServer' %s", Json_get_string(request, "run_as") );
     system(chaine);
     g_snprintf( chaine, sizeof(chaine), "usermod -a -G audio,dialout %s", Json_get_string(request, "run_as") );
     system(chaine);
 
+/******************************************* Creation du home *****************************************************************/
     pwd = getpwnam ( Json_get_string(request, "run_as" ) );
     if (!pwd)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Wrong Run_AS");
@@ -111,48 +115,51 @@
     chown ( home, pwd->pw_uid, pwd->pw_gid );
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Home '%s' directory'", __func__, home );
 
-    g_snprintf( chaine, sizeof(chaine), "%s/Dls", home );
-    mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
-    chown ( chaine, pwd->pw_uid, pwd->pw_gid );
-    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Dls '%s' directory'", __func__, chaine );
+    if (is_master)
+     { g_snprintf( chaine, sizeof(chaine), "%s/Dls", home );
+       mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
+       chown ( chaine, pwd->pw_uid, pwd->pw_gid );
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Dls '%s' directory'", __func__, chaine );
 
-    g_snprintf( chaine, sizeof(chaine), "%s/Upload", home );
-    mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
-    chown ( chaine, pwd->pw_uid, pwd->pw_gid );
-    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Upload '%s' directory'", __func__, chaine );
-
+       g_snprintf( chaine, sizeof(chaine), "%s/Upload", home );
+       mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
+       chown ( chaine, pwd->pw_uid, pwd->pw_gid );
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Upload '%s' directory'", __func__, chaine );
+     }
 /******************************************* Test accès Database **************************************************************/
-    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Loading DB Schema'", __func__ );
-    gchar *DB_SCHEMA = "/usr/local/share/Watchdog/init_db.sql";
-    if (stat ( DB_SCHEMA, &stat_buf)==-1)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Stat DB Schema Error" );
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Stat DB Schema Error", __func__ );
-       return;
-     }
+    if (is_master)
+     { Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Loading DB Schema'", __func__ );
+       gchar *DB_SCHEMA = "/usr/local/share/Watchdog/init_db.sql";
+       if (stat ( DB_SCHEMA, &stat_buf)==-1)
+        { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Stat DB Schema Error" );
+          Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Stat DB Schema Error", __func__ );
+          return;
+        }
 
-    gchar *db_schema = g_try_malloc0 ( stat_buf.st_size+1 );
-    if (!db_schema)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory DB Schema Error" );
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Memory DB Schema Error", __func__ );
-       return;
-     }
+       db_schema = g_try_malloc0 ( stat_buf.st_size+1 );
+       if (!db_schema)
+        { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory DB Schema Error" );
+          Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Memory DB Schema Error", __func__ );
+          return;
+        }
 
-    gint fd = open ( DB_SCHEMA, O_RDONLY );
-    if (!fd)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Open DB Schema Error" );
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Open DB Schema Error", __func__ );
-       g_free(db_schema);
-       return;
+       gint fd = open ( DB_SCHEMA, O_RDONLY );
+       if (!fd)
+        { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Open DB Schema Error" );
+          Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Open DB Schema Error", __func__ );
+          g_free(db_schema);
+          return;
+        }
+       if (read ( fd, db_schema, stat_buf.st_size ) != stat_buf.st_size)
+        { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Read DB Schema Error" );
+          Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Read DB Schema Error", __func__ );
+         g_free(db_schema);
+          return;
+        }
+       close(fd);
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema Loaded. Connecting to DB.", __func__ );
      }
-    if (read ( fd, db_schema, stat_buf.st_size ) != stat_buf.st_size)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Read DB Schema Error" );
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Read DB Schema Error", __func__ );
-       g_free(db_schema);
-       return;
-     }
-    close(fd);
-
-    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema Loaded. Connecting to DB.'", __func__ );
+    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Connecting to DB.", __func__ );
     struct DB *db = Init_DB_SQL_with ( Json_get_string(request, "db_hostname"), Json_get_string(request, "db_username"),
                                        Json_get_string(request, "db_password"), Json_get_string(request, "db_database"),
                                        Json_get_int(request, "db_port" ), TRUE );
@@ -163,14 +170,17 @@
        g_free(db_schema);
        return;
      }
-    Lancer_requete_SQL ( db, db_schema );                                                               /* Création du schéma */
-    g_free(db_schema);
-    Liberer_resultat_SQL ( db );
+    if (is_master)
+     { Lancer_requete_SQL ( db, db_schema );                                                            /* Création du schéma */
+       g_free(db_schema);
+       Liberer_resultat_SQL ( db );
+     }
+
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema OK. Starting update.", __func__ );
 
     g_snprintf( chaine, sizeof(chaine),
                "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
-               "nom='instance_is_master',valeur='%s' ", g_get_host_name(), (Json_get_int(request,"is_master") ? "true" : "false") );
+               "nom='instance_is_master',valeur='%s' ", g_get_host_name(), (is_master ? "true" : "false") );
     Lancer_requete_SQL ( db, chaine );
 
     gchar *master_host = Normaliser_chaine ( Json_get_string(request,"master_host") );
@@ -185,8 +195,10 @@
                "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
                "nom='description',valeur='%s' ", g_get_host_name(), description );
     Lancer_requete_SQL ( db, chaine );
-    g_snprintf( chaine, sizeof(chaine), "UPDATE syns SET libelle='%s' WHERE id='1'", description );
-    Lancer_requete_SQL ( db, chaine );
+    if (is_master)
+     { g_snprintf( chaine, sizeof(chaine), "UPDATE syns SET libelle='%s' WHERE id='1'", description );
+       Lancer_requete_SQL ( db, chaine );
+     }
     g_free(description);
 
     g_snprintf( chaine, sizeof(chaine),
@@ -206,7 +218,7 @@
 /******************************************* Création fichier de config *******************************************************/
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Creating config file '%s'", __func__, fichier );
 
-    fd = creat ( fichier, S_IRUSR | S_IWUSR );
+    gint fd = creat ( fichier, S_IRUSR | S_IWUSR );
     if (fd==-1)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "File Create Error");
        return;
