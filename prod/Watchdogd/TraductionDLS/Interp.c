@@ -134,6 +134,36 @@
     return(option);
   }
 /******************************************************************************************************************************/
+/* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ GList *New_option_chaine( GList *options, gint token, gchar *chaine )
+  { struct OPTION *option;
+    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
+    if (!options) return(options);
+
+    option->token        = token;
+    option->token_classe = T_CHAINE;
+    option->chaine       = chaine;
+    return ( g_list_append ( options, option ) );
+  }
+/******************************************************************************************************************************/
+/* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ GList *New_option_entier( GList *options, gint token, gint entier )
+  { struct OPTION *option;
+    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
+    if (!options) return(options);
+
+    option->token        = token;
+    option->token_classe = ENTIER;
+    option->val_as_int   = entier;
+    return ( g_list_append ( options, option ) );
+  }
+/******************************************************************************************************************************/
 /* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
 /* Entrées: la liste des options, le type a rechercher                                                                        */
 /* Sortie: -1 si pas trouvé                                                                                                   */
@@ -679,21 +709,6 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_condition_vars: formate une condition avec le nom de variable en parametre                                             */
-/* Entrées: numero du monostable, sa logique                                                                                  */
-/* Sortie: la structure action                                                                                                */
-/******************************************************************************************************************************/
- gchar *New_condition_vars( int barre, gchar *nom )
-  { gchar *result;
-    int taille;
-
-    taille = strlen(nom)+5;
-    result = New_chaine( taille ); /* 10 caractères max */
-    if (!barre) { g_snprintf( result, taille, "%s", nom ); }
-           else { g_snprintf( result, taille, "(!%s)", nom ); }
-    return(result);
-  }
-/******************************************************************************************************************************/
 /* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
 /* Entrées: rien                                                                                                              */
 /* Sortie: NULL si probleme                                                                                                   */
@@ -851,6 +866,21 @@
  struct ACTION *New_action_WATCHDOG( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
 
+    struct ALIAS *alias_consigne = Get_option_alias ( options, T_CONSIGNE );
+    if (alias_consigne)
+     { gint taille = 512;
+       action = New_action();
+       action->alors = New_chaine( taille );
+
+       g_snprintf( action->alors, taille,
+                   "   Dls_data_set_WATCHDOG ( vars, \"%s\", \"%s\", &_%s_%s, \n"
+                   "                           Dls_data_get_REGISTRE ( \"%s\", \"%s\", &_%s_%s ) );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
+                   alias_consigne->tech_id, alias_consigne->acronyme, alias_consigne->tech_id, alias_consigne->acronyme
+                 );
+       return(action);
+     }
+
     gint consigne = Get_option_entier ( options, T_CONSIGNE, 600 );
     gint taille = 256;
     action = New_action();
@@ -977,21 +1007,6 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
-/* Entrées: rien                                                                                                              */
-/* Sortie: NULL si probleme                                                                                                   */
-/******************************************************************************************************************************/
- struct OPTION *New_option_chaine( gint token, gchar *chaine )
-  { struct OPTION *option;
-    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
-    if (option)
-     { option->token        = token;
-       option->token_classe = T_CHAINE;
-       option->chaine       = chaine;
-     }
-    return(option);
-  }
-/******************************************************************************************************************************/
 /* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
 /* Entrées: la liste des options, le type a rechercher                                                                        */
 /* Sortie: -1 si pas trouvé                                                                                                   */
@@ -1013,31 +1028,29 @@
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
- gboolean New_alias ( gchar *tech_id, gchar *acronyme, gint bit, GList *options )
+ struct ALIAS *New_alias ( gchar *tech_id, gchar *acronyme, gint classe, GList *options )
   { struct ALIAS *alias;
 
-    if (Get_alias_par_acronyme( tech_id, acronyme )) return(FALSE);                                      /* ID deja definit ? */
-
     alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
-    if (!alias) { return(FALSE); }
+    if (!alias) { return(NULL); }
     if (!tech_id) alias->tech_id = g_strdup(Dls_plugin.tech_id);
              else alias->tech_id = g_strdup(tech_id);
     alias->acronyme = g_strdup(acronyme);
-    alias->classe   = bit;
+    alias->classe   = classe;
     alias->options  = options;
     alias->used     = 0;
     Alias = g_slist_prepend( Alias, alias );
     Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
 
-    if (bit != MNEMO_MOTIF) return(TRUE);
+    if (classe != MNEMO_MOTIF) return(alias);
 
     gchar *forme_src = Get_option_chaine ( options, T_FORME, NULL );
     gchar ss_chaine[128], ss_acronyme[64];
     GList *ss_options;
-    if (!forme_src) return(TRUE);
+    if (!forme_src) return(alias);
 
     gchar *forme = Normaliser_chaine ( forme_src );
-    if (!forme) return(TRUE);
+    if (!forme) return(alias);
 
     JsonNode *RootNode = Json_node_create();
     SQL_Select_to_json_node ( RootNode, NULL, "SELECT ihm_affichage FROM icone WHERE forme='%s'", forme );
@@ -1046,36 +1059,24 @@
      { if (!strcasecmp ( ihm_affichage, "simple" ))
         { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
           g_snprintf( ss_chaine, sizeof(ss_chaine), "Clic sur l'icone depuis l'IHM" );
-          ss_options = g_list_append ( NULL, New_option_chaine ( T_LIBELLE, g_strdup(ss_chaine) ) );
-          New_alias ( tech_id, ss_acronyme, MNEMO_ENTREE, ss_options );
+          ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(ss_chaine) );
+          if ( ! Get_alias_par_acronyme ( tech_id, ss_acronyme ) )                                      /* Si pas déjà défini */
+           { New_alias ( tech_id, ss_acronyme, MNEMO_ENTREE, ss_options ); }
         }
      }
     g_free(forme);
     json_node_unref(RootNode);
-    return(TRUE);
+    return(alias);
   }
 /******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
- static gboolean New_alias_permanent ( gchar *acronyme, gint bit, gchar *libelle )
-  { struct ALIAS *alias;
-
-    if (Get_alias_par_acronyme( Dls_plugin.tech_id, acronyme )) return(FALSE);                           /* ID deja definit ? */
-
-    alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
-    if (!alias) { return(FALSE); }
-    alias->tech_id   = g_strdup(Dls_plugin.tech_id);
-    alias->acronyme  = g_strdup(acronyme);
-    alias->classe    = bit;
-    struct OPTION *option = New_option_chaine ( T_LIBELLE, g_strdup(libelle) );
-    alias->options   = g_list_append ( NULL, option );
-    alias->used      = 1;                                                      /* Un bit internal est obligatoirement utilisé */
-    alias->permanent = 1;                                                      /* Un bit internal est obligatoirement utilisé */
-    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
-    Alias = g_slist_prepend( Alias, alias );
-    return(TRUE);
+ static struct ALIAS *New_alias_permanent ( gchar *tech_id, gchar *acronyme, gint classe, GList *options )
+  { struct ALIAS *alias = New_alias ( tech_id, acronyme, classe, options );
+    if (alias) { alias->used=1;}                                                      /* Un alias permanent est toujours used */
+    return(alias);
   }
 /******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
@@ -1083,30 +1084,22 @@
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
  struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme )
-  { struct ALIAS *alias;
+  { struct ALIAS *alias=NULL;
     gint classe;
 
-    alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
-    if (!alias) { return(NULL); }
-    alias->options  = NULL;
-    alias->used     = 1;
-    alias->external = TRUE;
-
-    if (!tech_id) tech_id=Dls_plugin.tech_id;
+    if (!tech_id) tech_id=Dls_plugin.tech_id;     /* Cas d'usage : bit créé par un thread, n'ayant pas été defini dans le DLS */
 
     if ( (classe=Rechercher_DICO_type ( tech_id, acronyme )) != -1 )
-     { alias->tech_id  = g_strdup(tech_id);
-       alias->acronyme = g_strdup(acronyme);
-       alias->classe   = classe;
-     }
+     { alias = New_alias ( tech_id, acronyme, classe, NULL ); }
     else if ( (classe=Rechercher_DICO_type ( "SYS", acronyme )) != -1 )
-     { alias->tech_id  = g_strdup("SYS");
-       alias->acronyme = g_strdup(acronyme);
-       alias->classe   = classe;
+     { alias = New_alias ( "SYS", acronyme, classe, NULL ); }
+    else { return(NULL); }                                                         /* Si pas trouvé en externe, retourne NULL */
+
+    if (alias)
+     { alias->external = TRUE;
+       alias->used     = 1;
+       Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
      }
-    else { g_free(alias); return(NULL); }                                          /* Si pas trouvé en externe, retourne NULL */
-    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
-    Alias = g_slist_prepend( Alias, alias );
     return(alias);
   }
 /******************************************************************************************************************************/
@@ -1124,7 +1117,9 @@
     while(liste)
      { alias = (struct ALIAS *)liste->data;
        /*Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: checking tid %s.", __func__, alias->tech_id );*/
-       if (!strcmp(alias->acronyme, acronyme) && !strcmp(alias->tech_id,tech_id))
+       if (!strcmp(alias->acronyme, acronyme) &&
+            ( !strcmp(alias->tech_id,tech_id) || !strcmp(alias->tech_id,"SYS") )
+          )
         { alias->used++; return(alias); }                                          /* Si deja present, on fait ++ sur le used */
        liste = liste->next;
      }
@@ -1213,25 +1208,68 @@
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR_NO_FILE;
     else
-     { gchar *libelle;
+     { GList *options;
        setlocale(LC_ALL, "C");
 
 /*---------------------------------------- Création des mnemoniques permanents -----------------------------------------------*/
-       libelle = "Statut de la Communication de l'I/O Thread lié au module";
-       New_alias_permanent ( "IO_COMM", MNEMO_MONOSTABLE, libelle );
-       Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, Dls_plugin.tech_id, "IO_COMM", libelle );
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Statut de la Communication de l'I/O Thread lié au module") );
+       New_alias_permanent ( NULL, "IO_COMM", MNEMO_MONOSTABLE, options );
 
-       libelle = "Statut de Synthèse de la communication du module";
-       New_alias_permanent ( "COMM", MNEMO_MONOSTABLE, libelle );
-       Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, Dls_plugin.tech_id, "COMM", libelle );
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Statut de Synthèse de la communication du module"));
+       New_alias_permanent ( NULL, "COMM", MNEMO_MONOSTABLE, options );
 
-       libelle = "Communication OK";
-       New_alias_permanent ( "MSG_COMM_OK", MNEMO_MSG, libelle );
-       Mnemo_auto_create_MSG ( FALSE, Dls_plugin.tech_id, "MSG_COMM_OK", libelle, MSG_ETAT );
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des défauts et alarmes"));
+       New_alias_permanent ( NULL, "MEMSA_OK", MNEMO_MONOSTABLE, options );
 
-       libelle = "Communication Hors Service";
-       New_alias_permanent ( "MSG_COMM_HS", MNEMO_MSG, libelle );
-       Mnemo_auto_create_MSG ( FALSE, Dls_plugin.tech_id, "MSG_COMM_HS", libelle, MSG_DEFAUT );
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des défauts fixes"));
+       New_alias_permanent ( NULL, "MEMSA_DEFAUT_FIXE", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des défauts"));
+       New_alias_permanent ( NULL, "MEMSA_DEFAUT", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des alarmes fixes"));
+       New_alias_permanent ( NULL, "MEMSA_ALARME_FIXE", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des alarmes"));
+       New_alias_permanent ( NULL, "MEMSA_ALARME", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Statut de la veille"));
+       New_alias_permanent ( NULL, "MEMSSB_VEILLE", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des alertes fixes"));
+       New_alias_permanent ( NULL, "MEMSSB_ALERTE_FIXE", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des alertes fugitives"));
+       New_alias_permanent ( NULL, "MEMSSB_ALERTE_FUGITIVE", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des alertes"));
+       New_alias_permanent ( NULL, "MEMSSB_ALERTE", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des dangers et dérangements"));
+       New_alias_permanent ( NULL, "MEMSSP_OK", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des dérangements fixes"));
+       New_alias_permanent ( NULL, "MEMSSP_DERANGEMENT_FIXE", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des dérangements"));
+       New_alias_permanent ( NULL, "MEMSSP_DERANGEMENT", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des dangers fixes"));
+       New_alias_permanent ( NULL, "MEMSSP_DANGER_FIXE", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Synthèse des dangers"));
+       New_alias_permanent ( NULL, "MEMSSP_DANGER", MNEMO_MONOSTABLE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Acquit via synoptique"));
+       New_alias_permanent ( NULL, "OSYN_ACQUIT", MNEMO_ENTREE, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Communication OK"));
+       options = New_option_entier ( options, T_TYPE, MSG_ETAT );
+       New_alias_permanent ( NULL, "MSG_COMM_OK", MNEMO_MSG, options );
+
+       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Communication Hors Service"));
+       options = New_option_entier ( options, T_TYPE, MSG_DEFAUT );
+       New_alias_permanent ( NULL, "MSG_COMM_HS", MNEMO_MSG, options );
 
        DlsScanner_debug = Config.log_trad;
        DlsScanner_restart(rc);
@@ -1308,8 +1346,8 @@
            { Emettre_erreur_new( "Warning: %s not used", alias->acronyme );
              retour = TRAD_DLS_WARNING;
            }
-                                                                       /* Alias Dynamiques, local et non permanent uniquement */
-          if (!strcmp(alias->tech_id, Dls_plugin.tech_id) && alias->external == FALSE && alias->permanent == FALSE)
+                                                                                        /* Alias Dynamiques, local uniquement */
+          if (!strcmp(alias->tech_id, Dls_plugin.tech_id) && alias->external == FALSE)
            { gchar *libelle = Get_option_chaine( alias->options, T_LIBELLE, "no libelle" );
              switch(alias->classe)
               { case MNEMO_BUS:

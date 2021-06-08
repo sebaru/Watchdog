@@ -98,23 +98,6 @@ newline       [\n\r]+
 "_DIMANCHE"                { DlsScanner_lval.val = DIMANCHE;    return DIMANCHE;    }
 
 
- /**************************************************** Status des vignette ****************************************************/
-"_MEMSA_DEFAUT_FIXE"       { DlsScanner_lval.val = T_ACT_DEFF;   return T_ACT_DEFF;   }
-"_MEMSA_DEFAUT"            { DlsScanner_lval.val = T_ACT_DEF;    return T_ACT_DEF;    }
-"_MEMSA_ALARME_FIXE"       { DlsScanner_lval.val = T_ACT_ALAF;   return T_ACT_ALAF;   }
-"_MEMSA_ALARME"            { DlsScanner_lval.val = T_ACT_ALA;    return T_ACT_ALA;    }
-"_MEMSA_OK"                { DlsScanner_lval.val = T_ACT_OK;     return T_ACT_OK;     }
-"_MEMSSB_VEILLE"           { DlsScanner_lval.val = T_SBIEN_VEILLE;return T_SBIEN_VEILLE; }
-"_MEMSSB_ALERTE_FIXE"      { DlsScanner_lval.val = T_SBIEN_ALEF; return T_SBIEN_ALEF; }
-"_MEMSSB_ALERTE_FUGITIVE"  { DlsScanner_lval.val = T_SBIEN_ALE_FUGITIVE; return T_SBIEN_ALE_FUGITIVE; }
-"_MEMSSB_ALERTE"           { DlsScanner_lval.val = T_SBIEN_ALE;  return T_SBIEN_ALE;  }
-"_MEMSSP_DERANGEMENT_FIXE" { DlsScanner_lval.val = T_SPERS_DERF; return T_SPERS_DERF; }
-"_MEMSSP_DERANGEMENT"      { DlsScanner_lval.val = T_SPERS_DER;  return T_SPERS_DER;  }
-"_MEMSSP_DANGER_FIXE"      { DlsScanner_lval.val = T_SPERS_DANF; return T_SPERS_DANF; }
-"_MEMSSP_DANGER"           { DlsScanner_lval.val = T_SPERS_DAN;  return T_SPERS_DAN;  }
-"_MEMSSP_OK"               { DlsScanner_lval.val = T_SPERS_OK;   return T_SPERS_OK;   }
-"_OSYN_ACQUIT"             { DlsScanner_lval.val = T_OSYN_ACQ;   return T_OSYN_ACQ;   }
-
  /************************************************ Couleurs ***********************************************/
 "rouge"                    { DlsScanner_lval.val = ROUGE;       return ROUGE;       }
 "vert"                     { DlsScanner_lval.val = VERT;        return VERT;        }

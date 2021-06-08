@@ -60,22 +60,22 @@
     Json_node_add_double ( element, "conso", dls->conso );
     Json_node_add_bool   ( element, "debug",                dls->vars.debug );
     Json_node_add_bool   ( element, "bit_comm",             Dls_data_get_MONO ( dls->tech_id, "COMM", &dls->vars.bit_comm ) );
-    Json_node_add_bool   ( element, "bit_defaut",           dls->vars.bit_defaut );
-    Json_node_add_bool   ( element, "bit_defaut_fixe",      dls->vars.bit_defaut_fixe );
-    Json_node_add_bool   ( element, "bit_alarme",           dls->vars.bit_alarme );
-    Json_node_add_bool   ( element, "bit_alarme_fixe",      dls->vars.bit_alarme_fixe );
-    Json_node_add_bool   ( element, "bit_activite_ok",      dls->vars.bit_activite_ok );
+    Json_node_add_bool   ( element, "bit_defaut",           Dls_data_get_MONO ( dls->tech_id, "MEMSA_DEFAUT", &dls->vars.bit_defaut ) );
+    Json_node_add_bool   ( element, "bit_defaut_fixe",      Dls_data_get_MONO ( dls->tech_id, "MEMSA_DEFAUT_FIXE", &dls->vars.bit_defaut_fixe ) );
+    Json_node_add_bool   ( element, "bit_alarme",           Dls_data_get_MONO ( dls->tech_id, "MEMSA_ALARME", &dls->vars.bit_alarme ) );
+    Json_node_add_bool   ( element, "bit_alarme_fixe",      Dls_data_get_MONO ( dls->tech_id, "MEMSA_ALARME_FIXE", &dls->vars.bit_alarme_fixe ) );
+    Json_node_add_bool   ( element, "bit_activite_ok",      Dls_data_get_MONO ( dls->tech_id, "MEMSA_OK", &dls->vars.bit_activite_ok ) );
 
-    Json_node_add_bool   ( element, "bit_alerte",           dls->vars.bit_alerte );
-    Json_node_add_bool   ( element, "bit_alerte_fixe",      dls->vars.bit_alerte_fixe );
-    Json_node_add_bool   ( element, "bit_alerte_fugitive",  dls->vars.bit_alerte_fugitive );
-    Json_node_add_bool   ( element, "bit_veille",           dls->vars.bit_veille );
+    Json_node_add_bool   ( element, "bit_alerte",           Dls_data_get_MONO ( dls->tech_id, "MEMSSB_ALERTE", &dls->vars.bit_alerte ) );
+    Json_node_add_bool   ( element, "bit_alerte_fixe",      Dls_data_get_MONO ( dls->tech_id, "MEMSSB_ALERTE_FIXE", &dls->vars.bit_alerte_fixe ) );
+    Json_node_add_bool   ( element, "bit_alerte_fugitive",  Dls_data_get_MONO ( dls->tech_id, "MEMSSB_ALERTE_FUGITIVE", &dls->vars.bit_alerte_fugitive ) );
+    Json_node_add_bool   ( element, "bit_veille",           Dls_data_get_MONO ( dls->tech_id, "MEMSSB_VEILLE", &dls->vars.bit_veille ) );
 
-    Json_node_add_bool   ( element, "bit_derangement",      dls->vars.bit_derangement );
-    Json_node_add_bool   ( element, "bit_derangement_fixe", dls->vars.bit_derangement_fixe );
-    Json_node_add_bool   ( element, "bit_danger",           dls->vars.bit_danger );
-    Json_node_add_bool   ( element, "bit_danger_fixe",      dls->vars.bit_danger_fixe );
-    Json_node_add_bool   ( element, "bit_secu_pers_ok",     dls->vars.bit_secupers_ok );
+    Json_node_add_bool   ( element, "bit_derangement",      Dls_data_get_MONO ( dls->tech_id, "MEMSSP_DERANGEMENT", &dls->vars.bit_derangement ) );
+    Json_node_add_bool   ( element, "bit_derangement_fixe", Dls_data_get_MONO ( dls->tech_id, "MEMSSP_DERANGEMENT_FIXE", &dls->vars.bit_derangement_fixe ) );
+    Json_node_add_bool   ( element, "bit_danger",           Dls_data_get_MONO ( dls->tech_id, "MEMSSP_DANGER", &dls->vars.bit_danger ) );
+    Json_node_add_bool   ( element, "bit_danger_fixe",      Dls_data_get_MONO ( dls->tech_id, "MEMSSP_DANGER_FIXE", &dls->vars.bit_danger_fixe ) );
+    Json_node_add_bool   ( element, "bit_secu_pers_ok",     Dls_data_get_MONO ( dls->tech_id, "MEMSSP_OK", &dls->vars.bit_secupers_ok ) );
 
     Json_node_add_bool   ( element, "bit_acquit",           dls->vars.bit_acquit );
     JsonArray *io_comm_array = Json_node_add_array  ( element, "bit_IO_Comms" );

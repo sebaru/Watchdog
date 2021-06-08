@@ -24,7 +24,7 @@
          access_level: $('#idModalSynEditAccessLevel').val()
        };
     if (syn_id>0) json_request.syn_id = syn_id;                                                         /* Ajout ou édition ? */
-    else json_request.image = "maison";
+    else json_request.image = "syn_maison.png";
 
     Send_to_API ( "POST", "/api/syn/set", JSON.stringify(json_request), function(Response)
      { $('#idTableSyn').DataTable().ajax.reload(null, false);

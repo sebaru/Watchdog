@@ -2242,7 +2242,18 @@ encore:
      }
 
 
-    database_version = 5616;
+    if (database_version < 5728)
+     { g_snprintf( requete, sizeof(requete), "UPDATE dls SET sourcecode = REPLACE(`sourcecode`,'_MEMSA','MEMSA');" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE dls SET sourcecode = REPLACE(`sourcecode`,'_MEMSSB','MEMSSB');" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE dls SET sourcecode = REPLACE(`sourcecode`,'_MEMSSP','MEMSSP');" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE dls SET sourcecode = REPLACE(`sourcecode`,'_OSYN_ACQUIT','OSYN_ACQUIT');" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5728;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );
