@@ -631,7 +631,7 @@
     if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
      { Info_new( Config.log, plugin->vars.debug, LOG_NOTICE,
                  "%s: '%s' acquitté ('%s')", __func__, plugin->tech_id, plugin->shortname );
-       plugin->vars.bit_acquit = TRUE;
+       Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "OSYN_ACQUIT", &plugin->vars.bit_acquit, TRUE );
      }
   }
 /******************************************************************************************************************************/
@@ -654,7 +654,7 @@
      { struct DLS_PLUGIN *plugin = plugins->data;
        Info_new( Config.log, plugin->vars.debug, LOG_NOTICE,
                  "%s: '%s' acquitté ('%s')", __func__, plugin->tech_id, plugin->shortname );
-       plugin->vars.bit_acquit = TRUE;
+       Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "OSYN_ACQUIT", &plugin->vars.bit_acquit, TRUE );
        plugins=g_slist_next(plugins);
      }
   }

@@ -47,10 +47,10 @@
     gpointer bit_derangement_fixe;
     gpointer bit_danger;
     gpointer bit_danger_fixe;
-    gboolean bit_acquit;
     gpointer bit_activite_ok;
     gpointer bit_secupers_ok;
     gpointer bit_alerte_fugitive;
+    gpointer bit_acquit;
   };
 
  extern gboolean Dls_get_top_alerte ( void );

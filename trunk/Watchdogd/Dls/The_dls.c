@@ -1827,8 +1827,6 @@ end:
     gettimeofday( &tv_apres, NULL );
     plugin->conso+=Chrono( &tv_avant, &tv_apres );
     plugin->vars.resetted = FALSE;
-    plugin->vars.bit_acquit = 0;                                                           /* On arrete l'acquit du plugin */
-
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du DLS                                                                                           */
