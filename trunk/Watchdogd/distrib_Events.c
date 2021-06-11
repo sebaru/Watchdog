@@ -56,8 +56,8 @@
     RootNode = Json_node_create ();
     if (RootNode)
      { Dls_DO_to_json ( RootNode, dout );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*", "SET_DO", RootNode );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*", "SET_DO", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "SET_DO", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "SET_DO", RootNode );
        json_node_unref ( RootNode );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }
@@ -76,8 +76,8 @@ suite_AO:
     RootNode = Json_node_create ();
     if (RootNode)
      { Dls_AO_to_json ( RootNode, ao );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "*", "SET_AO", RootNode );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "*", "SET_AO", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "SET_AO", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", "SET_AO", RootNode );
        json_node_unref ( RootNode );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }

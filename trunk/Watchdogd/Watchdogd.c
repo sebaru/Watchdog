@@ -129,21 +129,19 @@
 /******************************************************************************************************************************/
  static void Handle_zmq_for_master ( JsonNode *request )
   { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-    gchar *zmq_src_instance = Json_get_string ( request, "zmq_src_instance" );
-    gchar *zmq_src_thread   = Json_get_string ( request, "zmq_src_thread" );
-    gchar *zmq_dst_instance = Json_get_string ( request, "zmq_dst_instance" );
-    gchar *zmq_dst_thread   = Json_get_string ( request, "zmq_dst_thread" );
+    gchar *zmq_src_tech_id = Json_get_string ( request, "zmq_src_tech_id" );
+    gchar *zmq_dst_tech_id = Json_get_string ( request, "zmq_dst_tech_id" );
 
          if ( !strcasecmp( zmq_tag, "SET_WATCHDOG") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
               Json_has_member ( request, "consigne" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_WATCHDOG : wrong parameters from %s", __func__, zmq_src_instance );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_WATCHDOG : wrong parameters from %s", __func__, zmq_src_tech_id );
           return;
         }
 
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "%s: SET_WATCHDOG from %s/%s to %s/%s : '%s:%s'+=%d", __func__,
-                 zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
+                 "%s: SET_WATCHDOG from %s to %s : '%s:%s'+=%d", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                  Json_get_int ( request, "consigne" ) );
        Dls_data_set_WATCHDOG ( NULL, Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), NULL,
@@ -152,13 +150,13 @@
     else if ( !strcasecmp( zmq_tag, "SET_AI") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
               Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" )) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_AI : wrong parameters from %s", __func__, zmq_src_instance );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_AI : wrong parameters from %s", __func__, zmq_src_tech_id );
           return;
         }
 
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "%s: SET_AI from %s/%s to %s/%s : '%s:%s'=%f (range=%d)", __func__,
-                 zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
+                 "%s: SET_AI from %s to %s : '%s:%s'=%f (range=%d)", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                  Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
        Dls_data_set_AI ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), NULL,
@@ -166,40 +164,40 @@
      }
     else if ( !strcasecmp( zmq_tag, "SET_CDE") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_CDE : wrong parameters from %s", __func__, zmq_src_instance );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_CDE : wrong parameters from %s", __func__, zmq_src_tech_id );
           return;
         }
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "%s: SET_CDE=1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
-                 zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
+                 "%s: SET_CDE=1 from %s to %s : bit techid %s acronyme %s", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
        Envoyer_commande_dls_data ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
      }
     else if ( !strcasecmp( zmq_tag, "SET_DI") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_DI : wrong parameters from %s", __func__, zmq_src_instance );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_DI : wrong parameters from %s", __func__, zmq_src_tech_id );
           return;
         }
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "%s: SET_DI from %s/%s to %s/%s : '%s:%s'=%d", __func__,
-                 zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread,
+                 "%s: SET_DI from %s to %s : '%s:%s'=%d", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), Json_get_bool ( request, "etat" ) );
        Dls_data_set_DI ( NULL, Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                          NULL, Json_get_bool ( request, "etat" ) );
      }
     else if ( !strcasecmp( zmq_tag, "SLAVE_STOP") )
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' stopped !", __func__, zmq_src_instance ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' stopped !", __func__, zmq_src_tech_id ); }
     else if ( !strcasecmp( zmq_tag, "SLAVE_START") )
      { struct DLS_AO *ao;
        GSList *liste;
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' started. Sending AO !", __func__, zmq_src_instance );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' started. Sending AO !", __func__, zmq_src_tech_id );
        liste = Partage->Dls_data_AO;
        while (liste)
         { ao = (struct DLS_AO *)Partage->com_msrv.Liste_AO->data;            /* Recuperation du numero de a */
           JsonNode *RootNode = Json_node_create ();
           if (RootNode)
            { Dls_AO_to_json( RootNode, ao );
-             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", zmq_src_instance, "*", "SET_AO", RootNode );
+             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "SET_AO", RootNode );
              json_node_unref(RootNode);
            }
           liste = g_slist_next(liste);
@@ -208,19 +206,18 @@
     else if ( !strcasecmp( zmq_tag, "SUDO") )
      { gchar chaine[80];
        if (! (Json_has_member ( request, "commande" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_instance );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
           return;
         }
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s/%s", __func__,
-                 zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, Json_get_string ( request, "commande" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s to %s/%s", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "commande" ) );
        g_snprintf( chaine, sizeof(chaine), "sudo -n %s", Json_get_string ( request, "commande" ) );
        system(chaine);
      }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s/%s to %s/%s/%s",
-           __func__, Json_get_string ( request, "zmq_src_instance" ), Json_get_string ( request, "zmq_src_thread" ),
-                     Json_get_string ( request, "zmq_dst_instance" ), Json_get_string ( request, "zmq_dst_thread" ),
-                     zmq_tag );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
+                 __func__, Json_get_string ( request, "zmq_src_tech_id" ), Json_get_string ( request, "zmq_dst_tech_id" ),
+                 zmq_tag );
      }
   }
 /******************************************************************************************************************************/
@@ -230,30 +227,27 @@
 /******************************************************************************************************************************/
  static void Handle_zmq_for_slave ( JsonNode *request )
   { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-    gchar *zmq_src_instance = Json_get_string ( request, "zmq_src_instance" );
-    gchar *zmq_src_thread   = Json_get_string ( request, "zmq_src_thread" );
-    gchar *zmq_dst_instance = Json_get_string ( request, "zmq_dst_instance" );
-    gchar *zmq_dst_thread   = Json_get_string ( request, "zmq_dst_thread" );
+    gchar *zmq_src_tech_id   = Json_get_string ( request, "zmq_src_tech_id" );
+    gchar *zmq_dst_tech_id   = Json_get_string ( request, "zmq_dst_tech_id" );
 
          if ( !strcasecmp( zmq_tag, "PING") )
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src_instance );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src_tech_id );
      }
     else if ( !strcasecmp( zmq_tag, "SUDO") )
      { gchar chaine[80];
        if (! (Json_has_member ( request, "commande" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_instance );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
           return;
         }
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s/%s", __func__,
-                 zmq_src_instance, zmq_src_thread, zmq_dst_instance, zmq_dst_thread, Json_get_string ( request, "commande" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s to %s/%s", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "commande" ) );
        g_snprintf( chaine, sizeof(chaine), "sudo -n %s", Json_get_string ( request, "commande" ) );
        system(chaine);
      }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s/%s to %s/%s/%s",
-           __func__, Json_get_string ( request, "zmq_src_instance" ), Json_get_string ( request, "zmq_src_thread" ),
-                     Json_get_string ( request, "zmq_dst_instance" ), Json_get_string ( request, "zmq_dst_thread" ),
-                     zmq_tag );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
+           __func__, Json_get_string ( request, "zmq_src_tech_id" ), Json_get_string ( request, "zmq_dst_tech_id" ),
+           zmq_tag );
      }
   }
 /******************************************************************************************************************************/
@@ -317,7 +311,7 @@
 
        request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { if (!strcasecmp( Json_get_string ( request, "zmq_dst_thread" ), "msrv"))
+        { if (!strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), "msrv"))
            { Handle_zmq_for_master( request ); }
           else
            { gint taille = strlen(buffer);
@@ -333,7 +327,7 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "msrv", "ping", NULL );
+        { Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "msrv", "ping", NULL );
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
@@ -406,7 +400,7 @@
 
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
-    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_START", NULL );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "msrv", "SLAVE_START", NULL );
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
      { gchar buffer[2048];
        JsonNode *request;
@@ -414,7 +408,7 @@
 
        request = Recv_zmq_with_json( zmq_from_master, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { if (!strcasecmp( Json_get_string ( request, "zmq_dst_thread" ), "msrv"))
+        { if (!strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), "msrv"))
            { Handle_zmq_for_slave( request ); }
           else
            { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );          /* Sinon on envoi aux threads */
@@ -443,7 +437,7 @@
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );
-    Zmq_Send_json_node( Partage->com_msrv.zmq_to_master, "msrv", "*", "msrv", "SLAVE_STOP", NULL );
+    Zmq_Send_json_node( Partage->com_msrv.zmq_to_master, "msrv",  "msrv", "SLAVE_STOP", NULL );
 end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */

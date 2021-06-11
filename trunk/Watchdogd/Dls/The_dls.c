@@ -1296,7 +1296,7 @@ end:
   { /* Dls_data_set_MONO ( NULL, tech_id, acronyme, bus_p, TRUE );                                  /* Utilisation d'un boolean */
 
     /*if (Dls_data_get_bool_up(tech_id, acronyme, bus_p))*/
-     { Zmq_Send_json_node ( Partage->com_dls.zmq_to_master, "DLS", "*", target_tech_id, tag, NULL/*JsonNode *RootNode*/ ); }
+     { Zmq_Send_json_node ( Partage->com_dls.zmq_to_master, "DLS", target_tech_id, tag, NULL/*JsonNode *RootNode*/ ); }
   }
 /******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */
@@ -1777,7 +1777,7 @@ end:
        JsonNode *RootNode = Json_node_create ();
        JsonArray *array   = Json_node_add_array ( RootNode, "syn_vars" );
        Dls_syn_vars_to_json ( array, dls_syn );
-       Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "dls", "*", "*", "SET_SYN_VARS", RootNode );
+       Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", "SET_SYN_VARS", RootNode );
        json_node_unref (RootNode);
      }
  }
