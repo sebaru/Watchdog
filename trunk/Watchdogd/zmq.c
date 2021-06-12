@@ -132,11 +132,11 @@
   { if (!zmq) return(FALSE);
     if (zmq_send( zmq->socket, buf, taille, 0 ) == -1)
      { Info_new( Config.log, Config.log_zmq, LOG_ERR,
-                "%s: Send to ZMQ '%s' ('%s') failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
+                "%s: Send to ZMQ '%s' ('%s') failed (%s) for %s", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno), buf );
        return(FALSE);
      }
     Info_new( Config.log, Config.log_zmq, LOG_DEBUG,
-             "%s: Send to ZMQ '%s' ('%s') %d bytes", __func__, zmq->name, zmq->endpoint, taille );
+             "%s: Send to ZMQ '%s' ('%s') : %s", __func__, zmq->name, zmq->endpoint, buf );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -145,34 +145,23 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Zmq_Send_json_node ( struct ZMQUEUE *zmq, const gchar *zmq_src_tech_id,
-                               const gchar *zmq_dst_tech_id, const gchar *zmq_tag, JsonNode *RootNode )
+                               const gchar *zmq_dst_tech_id, JsonNode *RootNode )
   { gboolean own_node=FALSE;
     if (!zmq) return(FALSE);
 
     if (!RootNode) { RootNode = Json_node_create(); own_node = TRUE; }
 
     Json_node_add_string ( RootNode, "zmq_src_tech_id", zmq_src_tech_id );
-    Json_node_add_string ( RootNode, "zmq_tag", zmq_tag );
 
-    if (!zmq_dst_tech_id)  zmq_dst_tech_id  ="*";
+    if (!zmq_dst_tech_id) zmq_dst_tech_id  ="*";
     Json_node_add_string ( RootNode, "zmq_dst_tech_id", zmq_dst_tech_id );
-
-    Info_new( Config.log, Config.log_zmq, LOG_DEBUG, "%s: '%s' ('%s') : SENDING %s -> %s/%s", __func__,
-              zmq->name, zmq->endpoint, zmq_src_tech_id, zmq_dst_tech_id, zmq_tag );
 
     gboolean retour;
     gchar *buf = Json_node_to_string ( RootNode );
     if (own_node) json_node_unref(RootNode);
     retour = Zmq_Send_as_raw( zmq, buf, strlen(buf) );
     g_free(buf);
-
-    if (retour==FALSE)
-     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
-                "%s: '%s' ('%s') : ERROR SENDING %s -> %s/%s", __func__, zmq->name, zmq->endpoint,
-                 zmq_src_tech_id, zmq_dst_tech_id, zmq_tag );
-       return(FALSE);
-     }
-    return(TRUE);
+    return(retour);
   }
 /******************************************************************************************************************************/
 /* Recv_zmq: Receptionne un message sur le file en paremetre (sans attendre)                                                  */
@@ -247,10 +236,11 @@
   { if (!zmq) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
+    Json_node_add_string ( body, "zmq_tag", "SET_DI" );
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_bool   ( body, "etat", etat );
-    Zmq_Send_json_node ( zmq, my_tech_id, "msrv", "SET_DI", body );
+    Zmq_Send_json_node ( zmq, my_tech_id, "msrv", body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -262,11 +252,12 @@
   { if (!zmq) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
+    Json_node_add_string ( body, "zmq_tag", "SET_AI" );
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_double ( body, "valeur", valeur );
     Json_node_add_bool   ( body, "in_range", in_range );
-    Zmq_Send_json_node ( zmq, my_tech_id, "msrv", "SET_AI", body );
+    Zmq_Send_json_node ( zmq, my_tech_id, "msrv", body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -278,9 +269,10 @@
   { if (!zmq) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
+    Json_node_add_string ( body, "zmq_tag", "SET_CDE" );
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
-    Zmq_Send_json_node ( zmq, my_tech_id, "msrv", "SET_CDE", body );
+    Zmq_Send_json_node ( zmq, my_tech_id, "msrv", body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -292,10 +284,11 @@
   { if (!zmq) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
+    Json_node_add_string ( body, "zmq_tag", "SET_WATCHDOG" );
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_int    ( body, "consigne", consigne );
-    Zmq_Send_json_node ( zmq, my_tech_id, "msrv", "SET_WATCHDOG", body );
+    Zmq_Send_json_node ( zmq, my_tech_id, "msrv", body );
     json_node_unref(body);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

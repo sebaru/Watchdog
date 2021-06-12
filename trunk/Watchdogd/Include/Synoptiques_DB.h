@@ -85,7 +85,7 @@
  extern struct CMD_TYPE_CADRAN *Recuperer_cadranDB_suite( struct DB **db );
  extern struct CMD_TYPE_CADRAN *Rechercher_cadranDB ( guint id );
  extern gboolean Modifier_cadranDB( struct CMD_TYPE_CADRAN *cadran );
- extern gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *forme_src,
+ extern gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *tech_id, gchar *acronyme, gchar *forme_src,
                                           gdouble min, gdouble max,
                                           gdouble seuil_ntb, gdouble seuil_nb,
                                           gdouble seuil_nh, gdouble seuil_nth,

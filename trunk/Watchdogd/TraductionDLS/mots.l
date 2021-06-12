@@ -140,6 +140,7 @@ newline       [\n\r]+
 "host"                     { DlsScanner_lval.val = T_HOST;      return T_HOST;      }
 "tech_id"                  { DlsScanner_lval.val = T_TECH_ID;   return T_TECH_ID;   }
 "tag"                      { DlsScanner_lval.val = T_TAG;       return T_TAG;       }
+"target"                   { DlsScanner_lval.val = T_TARGET;    return T_TARGET;    }
 "forme"                    { DlsScanner_lval.val = T_FORME;     return T_FORME;     }
 "cadran"                   { DlsScanner_lval.val = T_CADRAN;    return T_CADRAN;    }
 "input"                    { DlsScanner_lval.val = T_INPUT;     return T_INPUT;     }
@@ -156,6 +157,7 @@ newline       [\n\r]+
 
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }
+"#link"                    { DlsScanner_lval.val = T_LINK;      return T_LINK;      }
 "switch"                   { DlsScanner_lval.val = T_SWITCH;    return T_SWITCH;    }
 "."                        { DlsScanner_lval.val = ET;          return ET;          }
 "+"                        { DlsScanner_lval.val = T_PLUS;      return T_PLUS;      }

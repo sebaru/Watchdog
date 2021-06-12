@@ -111,8 +111,9 @@
     Json_node_add_bool   ( histo, "alive", TRUE );
     Ajouter_histo_msgsDB( histo );                                                                     /* Si ajout dans DB OK */
 /******************************************************* Envoi du histo aux librairies abonnées *******************************/
-    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*","DLS_HISTO", histo );
-    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*","DLS_HISTO", histo );
+    Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", histo );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", histo );
     json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
@@ -144,8 +145,9 @@
     Json_node_add_bool   ( histo, "alive", FALSE );
     Retirer_histo_msgsDB( histo );
 /******************************************************* Envoi du histo aux librairies abonnées *******************************/
-    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*","DLS_HISTO", histo );
-    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*","DLS_HISTO", histo );
+    Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", histo );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", histo );
     json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/

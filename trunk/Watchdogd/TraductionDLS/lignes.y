@@ -44,10 +44,10 @@
 
 %token <val>    T_ERROR PVIRGULE VIRGULE T_DPOINTS DONNE EQUIV T_MOINS T_POUV T_PFERM T_EGAL T_PLUS ET BARRE T_FOIS
 %token <val>    T_SWITCH T_ACCOUV T_ACCFERM T_PIPE T_DIFFERE
-%token <val>    T_DEFINE
+%token <val>    T_DEFINE T_LINK
 
 %token <val>    T_TOP_ALERTE T_TOP_ALERTE_FUGITIVE
-%token <val>    T_BUS T_HOST T_TECH_ID T_TAG
+%token <val>    T_BUS T_HOST T_TECH_ID T_TAG T_TARGET
 
 %token <val>    MODE COLOR CLIGNO T_RESET T_RATIO T_MULTI T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
 %token <val>    T_PID T_KP T_KI T_KD T_INPUT
@@ -105,24 +105,33 @@ une_definition: T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
                    else { New_alias(NULL, $2, $4, $5); }
                    g_free($2);
                 }}
+                | T_LINK ID T_DPOINTS ID liste_options PVIRGULE
+                {{ if ($2 && $3)
+                    { if ( Get_alias_par_acronyme($2, $4) )                                                  /* Deja defini ? */
+                       { Emettre_erreur_new( "'%s:%s' is already defined", $2, $3 ); }
+                     else { Set_new_external_alias($2, $4); }
+                     g_free($2);
+                     g_free($4);
+                    }
+                }}
                 ;
 
-alias_classe:     T_BI             {{ $$=MNEMO_BISTABLE;   }}
-                | T_MONO           {{ $$=MNEMO_MONOSTABLE; }}
-                | T_ENTREE         {{ $$=MNEMO_ENTREE;     }}
-                | SORTIE           {{ $$=MNEMO_SORTIE;     }}
-                | T_MSG            {{ $$=MNEMO_MSG;        }}
-                | T_TEMPO          {{ $$=MNEMO_TEMPO;      }}
-                | T_VISUEL         {{ $$=MNEMO_MOTIF;      }}
-                | T_CPT_H          {{ $$=MNEMO_CPTH;       }}
-                | T_CPT_IMP        {{ $$=MNEMO_CPT_IMP;    }}
-                | T_ANALOG_INPUT   {{ $$=MNEMO_ENTREE_ANA; }}
+alias_classe:     T_BI             {{ $$=MNEMO_BISTABLE;       }}
+                | T_MONO           {{ $$=MNEMO_MONOSTABLE;     }}
+                | T_ENTREE         {{ $$=MNEMO_ENTREE;         }}
+                | SORTIE           {{ $$=MNEMO_SORTIE;         }}
+                | T_MSG            {{ $$=MNEMO_MSG;            }}
+                | T_TEMPO          {{ $$=MNEMO_TEMPO;          }}
+                | T_VISUEL         {{ $$=MNEMO_MOTIF;          }}
+                | T_CPT_H          {{ $$=MNEMO_CPTH;           }}
+                | T_CPT_IMP        {{ $$=MNEMO_CPT_IMP;        }}
+                | T_ANALOG_INPUT   {{ $$=MNEMO_ENTREE_ANA;     }}
                 | T_ANALOG_OUTPUT  {{ $$=MNEMO_SORTIE_ANA;     }}
                 | T_DIGITAL_OUTPUT {{ $$=MNEMO_DIGITAL_OUTPUT; }}
-                | T_REGISTRE       {{ $$=MNEMO_REGISTRE;   }}
-                | T_HORLOGE        {{ $$=MNEMO_HORLOGE;    }}
-                | T_BUS            {{ $$=MNEMO_BUS;        }}
-                | T_WATCHDOG       {{ $$=MNEMO_WATCHDOG;   }}
+                | T_REGISTRE       {{ $$=MNEMO_REGISTRE;       }}
+                | T_HORLOGE        {{ $$=MNEMO_HORLOGE;        }}
+                | T_BUS            {{ $$=MNEMO_BUS;            }}
+                | T_WATCHDOG       {{ $$=MNEMO_WATCHDOG;       }}
                 ;
 
 /**************************************************** Gestion des instructions ************************************************/
@@ -782,6 +791,12 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->chaine = $3;
                 }}
                 | T_TAG T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
+                   $$->chaine = $3;
+                }}
+                | T_TARGET T_EGAL T_CHAINE
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = T_CHAINE;

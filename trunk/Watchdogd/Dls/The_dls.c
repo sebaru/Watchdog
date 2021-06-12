@@ -1292,11 +1292,13 @@ end:
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et les paramètres du message                                  */
 /******************************************************************************************************************************/
  void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p,
-                         gchar *target_tech_id, gchar *tag, gchar *param)
+                         gchar *target_tech_id, gchar *json_parametre )
   { /* Dls_data_set_MONO ( NULL, tech_id, acronyme, bus_p, TRUE );                                  /* Utilisation d'un boolean */
-
-    /*if (Dls_data_get_bool_up(tech_id, acronyme, bus_p))*/
-     { Zmq_Send_json_node ( Partage->com_dls.zmq_to_master, "DLS", target_tech_id, tag, NULL/*JsonNode *RootNode*/ ); }
+    JsonNode *RootNode = Json_get_from_string ( json_parametre );
+    if (RootNode)
+     { Zmq_Send_json_node ( Partage->com_dls.zmq_to_master, "DLS", target_tech_id, RootNode );
+       json_node_unref(RootNode);
+     }
   }
 /******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */
@@ -1777,7 +1779,8 @@ end:
        JsonNode *RootNode = Json_node_create ();
        JsonArray *array   = Json_node_add_array ( RootNode, "syn_vars" );
        Dls_syn_vars_to_json ( array, dls_syn );
-       Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", "SET_SYN_VARS", RootNode );
+       Json_node_add_string ( RootNode, "zmq_tag", "SET_SYN_VARS" );
+       Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
        json_node_unref (RootNode);
      }
  }

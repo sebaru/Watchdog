@@ -355,7 +355,9 @@ end:
            ) )
      { return; }
 
-    SQL_Write_new( "UPDATE syns_cadrans INNER JOIN syns ON syns.id=syns_cadrans.syn_id "
+    SQL_Write_new( "UPDATE syns_cadrans "
+                   "INNER JOIN dls ON syns_cadrans.dls_id=dls.id "
+                   "INNER JOIN syns ON syns.id=dls.syn_id "
                    "SET posx='%d', posy='%d', angle='%d' WHERE syns_cadrans.id='%d' AND syns.access_level<='%d'",
                    Json_get_int( element, "posx" ), Json_get_int( element,"posy" ), Json_get_int( element,"angle" ),
                    Json_get_int( element,"id" ), session->access_level );
@@ -631,30 +633,18 @@ end:
      }
 
 /*-------------------------------------------------- Envoi les cadrans de la page --------------------------------------------*/
-    if (full_syn)
-     { if (SQL_Select_to_json_node ( synoptique, "cadrans",
-                                    "SELECT cadran.*, dico.classe, dico.libelle FROM syns_cadrans AS cadran "
-                                    "INNER JOIN syns AS syn ON cadran.syn_id=syn.id "
-                                    "INNER JOIN dictionnaire AS dico ON (cadran.tech_id=dico.tech_id AND cadran.acronyme=dico.acronyme) "
-                                    "WHERE cadran.auto_create IS NULL AND cadran.syn_id=%d AND syn.access_level<=%d",
-                                    syn_id, session->access_level ) == FALSE)
-        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref(synoptique);
-          return;
-        }
+    if (SQL_Select_to_json_node ( synoptique, "cadrans",
+                                 "SELECT cadran.*, dico.classe, dico.libelle FROM syns_cadrans AS cadran "
+                                 "INNER JOIN dls AS dls ON cadran.dls_id=dls.id "
+                                 "INNER JOIN syns AS syn ON dls.syn_id=syn.id "
+                                 "INNER JOIN dictionnaire AS dico ON (cadran.tech_id=dico.tech_id AND cadran.acronyme=dico.acronyme) "
+                                 "WHERE syn.id=%d AND syn.access_level<=%d",
+                                 syn_id, session->access_level ) == FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       json_node_unref(synoptique);
+       return;
      }
-    else
-     { if (SQL_Select_to_json_node ( synoptique, "cadrans",
-                                    "SELECT cadran.*, dico.classe, dico.libelle FROM syns_cadrans AS cadran "
-                                    "INNER JOIN syns AS syn ON cadran.syn_id=syn.id "
-                                    "INNER JOIN dictionnaire AS dico ON (cadran.tech_id=dico.tech_id AND cadran.acronyme=dico.acronyme) "
-                                    "WHERE cadran.auto_create=1 AND cadran.syn_id=%d AND syn.access_level<=%d",
-                                    syn_id, session->access_level ) == FALSE)
-        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref(synoptique);
-          return;
-        }
-     }
+
     Json_node_foreach_array_element ( synoptique, "cadrans", Http_abonner_cadran, session );
 /*-------------------------------------------------- Envoi les tableaux de la page -------------------------------------------*/
     if (SQL_Select_to_json_node ( synoptique, "tableaux",

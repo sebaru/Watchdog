@@ -2253,7 +2253,39 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5728;
+    if (database_version < 5733)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD dls_id INT(11) NOT NULL DEFAULT 0 AFTER syn_id;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD layer INT(11) NOT NULL DEFAULT 0 AFTER dls_id;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE syns_cadrans SET layer=100*id;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE syns_cadrans INNER JOIN dls on dls.tech_id=syns_cadrans.tech_id SET dls_id=dls.id;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans "
+                                             "ADD FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "DELETE FROM syns_cadrans WHERE tech_id='SYS'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans DROP type" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans DROP CONSTRAINT `syns_cadrans_ibfk_1`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans DROP syn_id" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans DROP INDEX tech_id;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans DROP CONSTRAINT `tech_id`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans DROP `auto_create`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD UNIQUE (`tech_id`, `acronyme`, `dls_id`);");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "DELETE syns_cadrans FROM syns_cadrans INNER JOIN dls ON syns_cadrans.dls_id = dls.id WHERE dls.actif=0");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5733;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

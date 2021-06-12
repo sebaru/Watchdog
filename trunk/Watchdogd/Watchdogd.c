@@ -197,7 +197,8 @@
           JsonNode *RootNode = Json_node_create ();
           if (RootNode)
            { Dls_AO_to_json( RootNode, ao );
-             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", "SET_AO", RootNode );
+             Json_node_add_string ( RootNode, "zmq_tag", "SET_AO" );
+             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", RootNode );
              json_node_unref(RootNode);
            }
           liste = g_slist_next(liste);
@@ -327,7 +328,12 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "msrv", "ping", NULL );
+        { JsonNode *RootNode = Json_node_create();
+          if (RootNode)
+           { Json_node_add_string ( RootNode, "zmq_tag", "PING" );
+             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "msrv", RootNode );
+             json_node_unref(RootNode);
+           }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
@@ -400,7 +406,12 @@
 
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
-    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "msrv", "SLAVE_START", NULL );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode)
+     { Json_node_add_string ( RootNode, "zmq_tag", "SLAVE_START" );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "msrv", RootNode );
+       json_node_unref ( RootNode );
+     }
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
      { gchar buffer[2048];
        JsonNode *request;
@@ -437,7 +448,12 @@
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );
-    Zmq_Send_json_node( Partage->com_msrv.zmq_to_master, "msrv",  "msrv", "SLAVE_STOP", NULL );
+    RootNode = Json_node_create ();
+    if (RootNode)
+     { Json_node_add_string ( RootNode, "zmq_tag", "SLAVE_STOP" );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "msrv", RootNode );
+       json_node_unref ( RootNode );
+     }
 end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
