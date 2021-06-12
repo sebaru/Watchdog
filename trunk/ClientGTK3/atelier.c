@@ -161,33 +161,33 @@
 /******************************************************* L'atelier ************************************************************/
     vboite = gtk_box_new( GTK_ORIENTATION_VERTICAL, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), vboite, TRUE, TRUE, 0 );
-    table = gtk_grid_new();                                                                        /* Barre de controle trame */
-    gtk_grid_set_row_spacing( GTK_GRID(table), 5 );
-    //gtk_grid_set_column_homogeneous( GTK_GRID(table), TRUE );
-    gtk_grid_set_column_spacing( GTK_GRID(table), 5 );
-    gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
+
+    GtkWidget *control_box = gtk_box_new ( GTK_ORIENTATION_HORIZONTAL, 6 );
+    gtk_box_pack_start( GTK_BOX(vboite), control_box, FALSE, FALSE, 0 );
 
     texte = gtk_label_new( "Position X/Y" );                                                        /* Affichage des abcisses */
-    gtk_grid_attach( GTK_GRID(table), texte, 0, 0, 1, 1 );
+    gtk_box_pack_start( GTK_BOX(control_box), texte, FALSE, FALSE, 0 );
+
     infos->Entry_posxy = gtk_entry_new();
     gtk_editable_set_editable ( GTK_EDITABLE(infos->Entry_posxy), FALSE );
     gtk_widget_set_tooltip_text ( infos->Entry_posxy, "Position de l'élément sélectionné" );
-    gtk_grid_attach( GTK_GRID(table), infos->Entry_posxy, 1, 0, 2, 1 );
+    gtk_box_pack_start( GTK_BOX(control_box), infos->Entry_posxy, FALSE, FALSE, 0 );
 
     texte = gtk_label_new( "Rotate" );
-    gtk_grid_attach( GTK_GRID(table), texte, 3, 0, 1, 1 );
+    gtk_box_pack_start( GTK_BOX(control_box), texte, FALSE, FALSE, 0 );
+
     infos->Adj_angle = (GtkAdjustment *)gtk_adjustment_new( 0.0, -180.0, +180.0, 0.5, 10.0, 0.0 );
     spin = gtk_spin_button_new(infos->Adj_angle, 1.0, 1);
     gtk_widget_set_tooltip_text ( spin, "Angle de l'élément sélectionné" );
-    gtk_grid_attach( GTK_GRID(table), spin, 4, 0, 1, 1 );
+    gtk_box_pack_start( GTK_BOX(control_box), spin, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(infos->Adj_angle), "value_changed", G_CALLBACK(Rotationner_selection), page );
 
     texte = gtk_label_new( "Description" );
-    gtk_grid_attach( GTK_GRID(table), texte, 5, 0, 1, 1 );
+    gtk_box_pack_start( GTK_BOX(control_box), texte, FALSE, FALSE, 0 );
     infos->Entry_libelle = gtk_entry_new();
     gtk_editable_set_editable ( GTK_EDITABLE(infos->Entry_libelle), FALSE );
     gtk_widget_set_tooltip_text ( infos->Entry_libelle, "Description de l'élément sélectionné" );
-    gtk_grid_attach( GTK_GRID(table), infos->Entry_libelle, 6, 0, 4, 1 );
+    gtk_box_pack_start( GTK_BOX(control_box), infos->Entry_libelle, TRUE, TRUE, 0 );
 
 /*************************************************** Trame proprement dite ****************************************************/
 
