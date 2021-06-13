@@ -101,18 +101,22 @@ listeDefinitions:
 
 une_definition: T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
                 {{ if ( Get_alias_par_acronyme(NULL, $2) )                                                   /* Deja defini ? */
-                        { Emettre_erreur_new( "'%s' is already defined", $2 ); }
+                        { Emettre_erreur_new( "'%s' is already defined", $2 );
+                          Liberer_options($5);
+                        }
                    else { New_alias(NULL, $2, $4, $5); }
                    g_free($2);
                 }}
                 | T_LINK ID T_DPOINTS ID liste_options PVIRGULE
-                {{ if ($2 && $3)
+                {{ if ($2 && $4)
                     { if ( Get_alias_par_acronyme($2, $4) )                                                  /* Deja defini ? */
-                       { Emettre_erreur_new( "'%s:%s' is already defined", $2, $3 ); }
-                     else { Set_new_external_alias($2, $4); }
-                     g_free($2);
-                     g_free($4);
+                       { Emettre_erreur_new( "'%s:%s' is already defined", $2, $3 );
+                         Liberer_options($5);
+                       }
+                      else { Set_new_external_alias($2, $4, $5); }
                     }
+                   if ($2) g_free($2);
+                   if ($4) g_free($4);
                 }}
                 ;
 
@@ -373,7 +377,7 @@ calcul_expr3:   T_POUV calcul_expr T_PFERM {{ $$=$2; }}
                       else { tech_id = NULL; acro = $1; }
                    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
                    if (!alias)
-                    { alias = Set_new_external_alias(tech_id,acro); }      /* Si dependance externe, on va chercher */
+                    { alias = Set_new_external_alias(tech_id,acro,NULL); }           /* Si dependance externe, on va chercher */
 
                    if (alias)
                     { switch(alias->classe)               /* On traite que ce qui peut passer en "condition" */
@@ -617,7 +621,7 @@ une_action:     T_NOP
 
                    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
                    if (!alias)
-                    { alias = Set_new_external_alias(tech_id,acro); }                /* Si dependance externe, on va chercher */
+                    { alias = Set_new_external_alias(tech_id,acro, NULL); }          /* Si dependance externe, on va chercher */
 
                    if (!alias)
                     { if ($3) Emettre_erreur_new( "'%s:%s' is not defined", $2, $3 );

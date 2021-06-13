@@ -143,7 +143,7 @@
     fraction = 1.0*client->network_size_sent/client->network_size_to_send;
     gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (client->Barre_progress), fraction );
     if (fraction==1.0) g_snprintf( chaine, sizeof(chaine), "Ready" );
-                  else g_snprintf( chaine, sizeof(chaine), "%3.1f%% downloaded", 100.0*fraction );
+                  else g_snprintf( chaine, sizeof(chaine), "%3.1f%% of %d downloaded", 100.0*fraction, client->network_size_to_send );
     gtk_progress_bar_set_text( GTK_PROGRESS_BAR (client->Barre_progress), chaine );
     printf("Progress bar set to %s\n", chaine );
   }
