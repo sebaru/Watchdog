@@ -352,8 +352,8 @@
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
     menu_bouton = gtk_image_menu_item_new_with_label ( _("Passerelles") );
-    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
-                              G_CALLBACK(Menu_ajouter_passerelle), infos );
+    /*g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
+                              G_CALLBACK(Menu_ajouter_passerelle), infos );*/
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
     menu_bouton = gtk_image_menu_item_new_with_label ( _("Cadrans") );

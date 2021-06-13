@@ -125,6 +125,7 @@
     infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
     if (! (infos && infos->Trame) ) return(FALSE);
 
+    pthread_mutex_lock ( &infos->Trame->lock );
     liste_motifs = infos->Trame->trame_items;
     while (liste_motifs)
      { switch( *((gint *)liste_motifs->data) )
@@ -139,6 +140,7 @@
         }
        liste_motifs=liste_motifs->next;
      }
+    pthread_mutex_unlock ( &infos->Trame->lock );
 
     liste_timer = infos->Trame->Liste_timer;
     while (liste_timer)

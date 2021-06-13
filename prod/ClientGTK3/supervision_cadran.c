@@ -133,6 +133,7 @@
     GList *liste_cadrans;
     gint cpt;
 
+    pthread_mutex_lock ( &infos->Trame->lock );
     liste_cadrans = infos->Trame->trame_items;                                     /* On parcours tous les cadrans de la page */
     while (liste_cadrans)
      { switch( *((gint *)liste_cadrans->data) )
@@ -149,6 +150,7 @@
         }
        liste_cadrans=liste_cadrans->next;
      }
+    pthread_mutex_unlock ( &infos->Trame->lock );
     if (!cpt)                                       /* Si nous n'avons rien mis à jour, alors nous demandons le desabonnement */
      { /*Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_CADRAN_UNKNOWN,
                       (gchar *)etat_cadran, sizeof(struct CMD_ETAT_BIT_CADRAN) );*/

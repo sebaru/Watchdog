@@ -44,6 +44,7 @@
      { case TYPE_MOTIF:
         { struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
           goo_canvas_item_raise ( trame_motif->item_groupe, NULL );
+          pthread_mutex_lock ( &infos->Trame_atelier );
           liste = infos->Trame_atelier->trame_items;
           layer = 0;
           while (liste)
@@ -57,6 +58,7 @@
               }
              liste = liste->next;
            }
+          pthread_mutex_unlock ( &infos->Trame_atelier );
           Json_node_add_int ( trame_motif->visuel, "layer", layer + 1 );
           break;
         }
@@ -87,6 +89,7 @@
      { case TYPE_MOTIF:
         { struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
           goo_canvas_item_lower ( trame_motif->item_groupe, NULL );
+          pthread_mutex_lock ( &infos->Trame_atelier->lock );
           liste = infos->Trame_atelier->trame_items;
           while (liste)
            { switch ( *((gint *)liste->data) )
@@ -102,6 +105,7 @@
               }
              liste = liste->next;
            }
+          pthread_mutex_unlock ( &infos->Trame_atelier->lock );
           Json_node_add_int ( trame_motif->visuel, "layer", 1 );
          break;
         }

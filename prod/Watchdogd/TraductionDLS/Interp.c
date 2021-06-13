@@ -385,7 +385,7 @@
 
     alias_g = Get_alias_par_acronyme(tech_id_g,acro_g);                                                /* On recupere l'alias */
     if (!alias_g)
-     { alias_g = Set_new_external_alias(tech_id_g,acro_g); }                         /* Si dependance externe, on va chercher */
+     { alias_g = Set_new_external_alias(tech_id_g,acro_g,NULL); }                    /* Si dependance externe, on va chercher */
 
     if (!alias_g)
      { if (tech_id_g) Emettre_erreur_new( "'%s:%s' is not defined", tech_id_g, acro_g );/* si l'alias n'existe pas */
@@ -409,7 +409,7 @@
 
        alias_d = Get_alias_par_acronyme(tech_id_d,acro_d);                                             /* On recupere l'alias */
        if (!alias_d)
-        { alias_d = Set_new_external_alias(tech_id_d,acro_d); }                      /* Si dependance externe, on va chercher */
+        { alias_d = Set_new_external_alias(tech_id_d,acro_d,NULL); }                 /* Si dependance externe, on va chercher */
 
        if (!alias_d)
         { if (tech_id_d) Emettre_erreur_new( "'%s:%s' is not defined", tech_id_d, acro_d );        /* si l'alias n'existe pas */
@@ -552,7 +552,7 @@
 
     alias = Get_alias_par_acronyme(tech_id,acro);                                                      /* On recupere l'alias */
     if (!alias)
-     { alias = Set_new_external_alias(tech_id,acro); }                               /* Si dependance externe, on va chercher */
+     { alias = Set_new_external_alias(tech_id,acro,NULL); }                          /* Si dependance externe, on va chercher */
     if (!alias)
      { if (tech_id) Emettre_erreur_new( "'%s:%s' is not defined", tech_id, acro );                 /* si l'alias n'existe pas */
                else Emettre_erreur_new( "'%s' is not defined", acro );                             /* si l'alias n'existe pas */
@@ -1128,7 +1128,7 @@
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
- struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme )
+ struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme, GList *options )
   { struct ALIAS *alias=NULL;
     gint classe;
 
@@ -1140,9 +1140,9 @@
     if (!tech_id) tech_id=Dls_plugin.tech_id;     /* Cas d'usage : bit créé par un thread, n'ayant pas été defini dans le DLS */
 
     if ( (classe=Rechercher_DICO_type ( tech_id, acronyme )) != -1 )
-     { alias = New_alias ( tech_id, acronyme, classe, NULL ); }
+     { alias = New_alias ( tech_id, acronyme, classe, options ); }
     else if ( (classe=Rechercher_DICO_type ( "SYS", acronyme )) != -1 )
-     { alias = New_alias ( "SYS", acronyme, classe, NULL ); }
+     { alias = New_alias ( "SYS", acronyme, classe, options ); }
     else { return(NULL); }                                                         /* Si pas trouvé en externe, retourne NULL */
 
     if (alias)
@@ -1604,6 +1604,36 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 2 )
+                                                    );
+                    }
+                   break;
+                 }
+                case MNEMO_CPTH:
+                 { gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
+                   if (cadran)
+                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
+                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
+                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
+                                                      Get_option_entier ( alias->options, T_DECIMAL, 0 )
+                                                    );
+                    }
+                   break;
+                 }
+                case MNEMO_CPT_IMP:
+                 { gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
+                   if (cadran)
+                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
+                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
+                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
+                                                      Get_option_entier ( alias->options, T_DECIMAL, 0 )
                                                     );
                     }
                    break;

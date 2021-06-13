@@ -713,7 +713,9 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
     Trame_rafraichir_motif ( trame_motif );
 
+    pthread_mutex_lock ( &trame->lock );
     trame->trame_items = g_list_append( trame->trame_items, trame_motif );
+    pthread_mutex_unlock ( &trame->lock );
     if ( Json_get_int ( visuel, "gestion" ) == TYPE_FOND )
      { goo_canvas_item_lower( trame_motif->item_groupe, NULL );
        goo_canvas_item_lower( trame->fond, NULL );
@@ -761,7 +763,9 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     Trame_rafraichir_camera_sup ( trame_camera_sup );
 
     trame_camera_sup->type = TYPE_CAMERA_SUP;
+    pthread_mutex_lock ( &trame->lock );
     trame->trame_items = g_list_append( trame->trame_items, trame_camera_sup );
+    pthread_mutex_unlock ( &trame->lock );
     return(trame_camera_sup);
   }
 /**********************************************************************************************************/
@@ -788,7 +792,9 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
     trame_motif->type = TYPE_MOTIF;                                  /* Il s'agit d'un item de type motif */
     Trame_rafraichir_motif ( trame_motif );                                    /* Rafraichissement visuel */
 
+    pthread_mutex_lock ( &trame->lock );
     trame->trame_items = g_list_append( trame->trame_items, trame_motif );
+    pthread_mutex_unlock ( &trame->lock );
   }
 /**********************************************************************************************************/
 /* Trame_ajout_commentaire: Ajoute un commentaire sur le visuel                                           */
@@ -817,7 +823,9 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                NULL );
     trame_comm->comment = comm;
     trame_comm->type = TYPE_COMMENTAIRE;
+    pthread_mutex_lock ( &trame->lock );
     trame->trame_items = g_list_append( trame->trame_items, trame_comm );
+    pthread_mutex_unlock ( &trame->lock );
 
     if ( flag )
      { trame_comm->select_mi = goo_canvas_rect_new (trame_comm->item_groupe,
@@ -921,7 +929,9 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
     Trame_rafraichir_passerelle ( trame_pass );
 
+    pthread_mutex_lock ( &trame->lock );
     trame->trame_items = g_list_append( trame->trame_items, trame_pass );
+    pthread_mutex_unlock ( &trame->lock );
 
     return(trame_pass);
   }
@@ -969,7 +979,9 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     Trame_rafraichir_cadran ( trame_cadran );
 
     trame_cadran->type = TYPE_CADRAN;
+    pthread_mutex_lock ( &trame->lock );
     trame->trame_items = g_list_append( trame->trame_items, trame_cadran );
+    pthread_mutex_unlock ( &trame->lock );
 
     return(trame_cadran);
   }
@@ -1016,6 +1028,11 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
         }
      }
 
+    pthread_mutexattr_t attr;                                                          /* Initialisation des mutex de synchro */
+    pthread_mutexattr_init( &attr );
+    pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
+    pthread_mutex_init( &trame->lock, &attr );
+
     return(trame);
   }
 /******************************************************************************************************************************/
@@ -1031,6 +1048,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *objet;
 
+    pthread_mutex_lock ( &trame->lock );
     objet = trame->trame_items;                                              /* Destruction des items du synoptique precedent */
     while(objet)
      { switch ( *((gint *)objet->data) )
@@ -1063,6 +1081,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
      }
     g_list_free( trame->trame_items );                                                    /* Raz de la g_list correspondantes */
     trame->trame_items = NULL;
+    pthread_mutex_unlock ( &trame->lock );
 
     Trame_del_SVG ( trame->Logo );
     Trame_del_SVG ( trame->Vignette_activite );
