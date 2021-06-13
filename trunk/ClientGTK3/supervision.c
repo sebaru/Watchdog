@@ -229,6 +229,7 @@
            Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );*/
 
     if (!infos->Trame) return;
+    pthread_mutex_lock ( &infos->Trame->lock );
     GList *liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de la page */
     while (liste_motifs)
      { switch( *((gint *)liste_motifs->data) )
@@ -245,6 +246,7 @@
         }
        liste_motifs=liste_motifs->next;
      }
+    pthread_mutex_unlock ( &infos->Trame->lock );
     if (!cpt)                                       /* Si nous n'avons rien mis à jour, alors nous demandons le desabonnement */
      { /*Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_CADRAN_UNKNOWN,*/
 
@@ -370,6 +372,7 @@
     printf ("%s pour syn_id=%d\n", __func__, Json_get_int ( element, "id" ) );
     if ( Json_get_int ( element, "id" ) == Json_get_int ( infos->syn, "id" ) ) { Updater_etiquette ( infos, element ); }
 
+    pthread_mutex_lock ( &infos->Trame->lock );
     GList *objet = infos->Trame->trame_items;
     while (objet)
      { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
@@ -384,6 +387,7 @@
          }
         objet=objet->next;
      }
+    pthread_mutex_unlock ( &infos->Trame->lock );
   }
 /******************************************************************************************************************************/
 /* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MOTIF                                 */

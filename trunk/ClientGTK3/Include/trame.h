@@ -186,6 +186,7 @@
     GooCanvasItem *fond;
     GList *trame_items;
     GSList *Liste_timer;
+    pthread_mutex_t lock;                                                                 /* Bit de synchronisation processus */
     struct TRAME_ITEM_SVG *Logo;
     struct TRAME_ITEM_SVG *Vignette_activite;
     struct TRAME_ITEM_SVG *Vignette_secu_bien;
