@@ -47,10 +47,10 @@
     gpointer bit_derangement_fixe;
     gpointer bit_danger;
     gpointer bit_danger_fixe;
-    gboolean bit_acquit;
     gpointer bit_activite_ok;
     gpointer bit_secupers_ok;
     gpointer bit_alerte_fugitive;
+    gpointer bit_acquit;
   };
 
  extern gboolean Dls_get_top_alerte ( void );
@@ -73,7 +73,7 @@
  extern gboolean Dls_data_get_tempo     ( gchar *tech_id, gchar *acronyme, gpointer *tempo_p );
  extern gboolean Dls_data_get_WATCHDOG ( gchar *tech_id, gchar *acronyme, gpointer *wtd_p );
  extern void     Dls_data_set_WATCHDOG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *wtd_p, gint consigne );
- extern void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gchar *target_tech_id, gchar *tag, gchar *param);
+ extern void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gchar *target_tech_id, gchar *json_parametre );
  extern gfloat   Dls_data_get_AI        ( gchar *tech_id, gchar *acronyme, gpointer *ai_p );
  extern gboolean Dls_data_get_AI_inrange ( gchar *tech_id, gchar *acronyme, gpointer *ai_p );
  extern void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio );

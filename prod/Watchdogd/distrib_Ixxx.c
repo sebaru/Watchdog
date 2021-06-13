@@ -55,7 +55,8 @@
        Zmq_Send_as_raw ( Partage->com_msrv.zmq_motif, visu, sizeof(struct DLS_VISUEL) );
        JsonNode *element = Json_node_create ();
        Dls_VISUEL_to_json ( element, visu );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus, "msrv", "*", "*","DLS_VISUEL", element );
+       Json_node_add_string ( element, "zmq_tag", "DLS_VISUEL" );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus, "msrv", "*", element );
        json_node_unref ( element );
      }
   }

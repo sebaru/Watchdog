@@ -40,7 +40,7 @@
 /* Entrée: le plugin source, la cible, et les parametres du cadran                                                            */
 /* Sortie: FALSE si erreu                                                                                                     */
 /******************************************************************************************************************************/
- gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *forme_src,
+ gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *tech_id, gchar *acronyme, gchar *forme_src,
                                           gdouble min, gdouble max,
                                           gdouble seuil_ntb, gdouble seuil_nb,
                                           gdouble seuil_nh, gdouble seuil_nth,
@@ -65,19 +65,13 @@
     gboolean retour;
     retour = SQL_Write_new
                ("INSERT INTO syns_cadrans SET "
-                "syn_id=%d, tech_id='%s', acronyme='%s', forme='%s', minimum='%f', maximum='%f', "
+                "dls_id=%d, tech_id='%s', acronyme='%s', forme='%s', minimum='%f', maximum='%f', "
                 "seuil_ntb='%f', seuil_nb='%f', seuil_nh='%f', seuil_nth='%f', "
                 "nb_decimal='%d', auto_create=1 "
                 "ON DUPLICATE KEY UPDATE forme=VALUES(forme), "
                 "minimum=VALUES(minimum), maximum=VALUES(maximum), nb_decimal=VALUES(nb_decimal), "
                 "seuil_ntb=VALUES(seuil_ntb), seuil_nb=VALUES(seuil_nb), seuil_nh=VALUES(seuil_nh), seuil_nth=VALUES(seuil_nth)",
-                plugin->syn_id, plugin->tech_id, acro, forme, min, max, seuil_ntb, seuil_nb, seuil_nh, seuil_nth, nb_decimal );
-
-    SQL_Write_new ("UPDATE syns_cadrans SET forme='%s', minimum='%f', maximum='%f', "
-                   "seuil_ntb='%f', seuil_nb='%f', seuil_nh='%f', seuil_nth='%f', "
-                   "nb_decimal='%d' "
-                   "WHERE tech_id='%s' AND acronyme='%s' AND auto_create=1;",
-                   forme, min, max, seuil_ntb, seuil_nb, seuil_nh, seuil_nth, nb_decimal, plugin->tech_id, acro );
+                plugin->id, tech_id, acro, forme, min, max, seuil_ntb, seuil_nb, seuil_nh, seuil_nth, nb_decimal );
 
     g_free(forme);
     g_free(acro);

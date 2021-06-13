@@ -41,7 +41,7 @@
     if (plugin->syn_id == syn_id)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Synoptique %d -> plugin %s acquitté", __func__,
                  plugin->syn_id, plugin->nom );
-       plugin->vars.bit_acquit = TRUE;
+       /*plugin->vars.bit_acquit = TRUE;*/
      }
   }
 /******************************************************************************************************************************/
