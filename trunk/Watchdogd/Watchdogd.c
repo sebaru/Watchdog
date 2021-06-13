@@ -264,13 +264,13 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
 /************************************************* Socket ZMQ interne *********************************************************/
-    Partage->com_msrv.zmq_motif = Zmq_Bind ( ZMQ_PUB, "pub-int-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+    Partage->com_msrv.zmq_motif  = Zmq_Bind ( ZMQ_PUB, "pub-int-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
     Partage->com_msrv.zmq_to_bus = Zmq_Bind ( ZMQ_PUB, "pub-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_from_bus = Zmq_Bind ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    zmq_from_bus                 = Zmq_Bind ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
 /***************************************** Socket pour une instance master ****************************************************/
     Partage->com_msrv.zmq_to_slave = Zmq_Bind ( ZMQ_PUB, "pub-to-slave", "tcp", "*", 5555 );
-    zmq_from_slave = Zmq_Bind ( ZMQ_SUB, "listen-to-slave", "tcp", "*", 5556 );
+    zmq_from_slave                 = Zmq_Bind ( ZMQ_SUB, "listen-to-slave", "tcp", "*", 5556 );
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single)                                                                             /* Si demarrage des thread */

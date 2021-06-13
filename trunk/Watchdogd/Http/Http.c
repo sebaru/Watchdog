@@ -724,7 +724,7 @@ reload:
 
        Http_Envoyer_les_cadrans ();
 
-       JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
+       JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
        if (request)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
                if (!strcasecmp( zmq_tag, "DLS_HISTO" ))    { Http_ws_send_to_all( request ); }

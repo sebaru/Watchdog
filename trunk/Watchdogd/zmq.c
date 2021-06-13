@@ -146,10 +146,13 @@
 /******************************************************************************************************************************/
  gboolean Zmq_Send_json_node ( struct ZMQUEUE *zmq, const gchar *zmq_src_tech_id,
                                const gchar *zmq_dst_tech_id, JsonNode *RootNode )
-  { gboolean own_node=FALSE;
-    if (!zmq) return(FALSE);
+  { if (!zmq) return(FALSE);
 
-    if (!RootNode) { RootNode = Json_node_create(); own_node = TRUE; }
+    if (!RootNode)
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
+                 "%s: RootNode is null. Cannot send empty json", __func__ );
+       return(FALSE);
+     }
 
     Json_node_add_string ( RootNode, "zmq_src_tech_id", zmq_src_tech_id );
 
@@ -158,7 +161,6 @@
 
     gboolean retour;
     gchar *buf = Json_node_to_string ( RootNode );
-    if (own_node) json_node_unref(RootNode);
     retour = Zmq_Send_as_raw( zmq, buf, strlen(buf) );
     g_free(buf);
     return(retour);
@@ -205,18 +207,15 @@
        return(NULL);
      }
 
-    if (!Json_has_member( request, "zmq_tag"))
-     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_tag'. Dropping.", __func__ );
-       json_node_unref(request);
-       return(NULL);
-     }
-
+    gchar *zmq_src_tech_id = Json_get_string(request,"zmq_src_tech_id");
     gchar *zmq_dst_tech_id = Json_get_string(request,"zmq_dst_tech_id");
-    gchar *zmq_tag         = Json_get_string(request,"zmq_tag");
+    gchar *zmq_tag;
+    if (Json_has_member ( request, "zmq_tag" )) { zmq_tag = Json_get_string(request,"zmq_tag"); }
+    else zmq_tag = NULL;
 
     Info_new( Config.log, Config.log_zmq, LOG_DEBUG,
               "%s: '%s' ('%s') : %s -> %s/%s", __func__, zmq->name, zmq->endpoint,
-              Json_get_string(request,"zmq_src_tech_id"), zmq_dst_tech_id, zmq_tag );
+              zmq_src_tech_id, zmq_dst_tech_id, (zmq_tag ? zmq_tag : "no zmq_tag") );
 
     if ( strcasecmp( zmq_dst_tech_id, "*" ) && my_tech_id && strcasecmp ( zmq_dst_tech_id, my_tech_id ) )
      { Info_new( Config.log, Config.log_zmq, LOG_DEBUG, "%s: Pas pour nous, pour '%s'. Dropping",

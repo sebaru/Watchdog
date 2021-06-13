@@ -933,6 +933,39 @@
     return(action);
   }
 /******************************************************************************************************************************/
+/* Normaliser_chaine: Normalise les chaines ( remplace ' par \', " par "" )                                                   */
+/* Entrées: un commentaire (gchar *)                                                                                          */
+/* Sortie: boolean false si probleme                                                                                          */
+/******************************************************************************************************************************/
+ static gchar *Normaliser_chaine_for_dls( gchar *pre_comment )
+  { gchar *comment, *source, *cible;
+    gunichar car;
+
+    g_utf8_validate( pre_comment, -1, NULL );                                                           /* Validate la chaine */
+    comment = g_try_malloc0( (2*g_utf8_strlen(pre_comment, -1))*6 + 1 );                  /* Au pire, ts les car sont doublés */
+                                                                                                      /* *6 pour gerer l'utf8 */
+    if (!comment)
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: memory error %s", __func__, pre_comment );
+       return(NULL);
+     }
+    source = pre_comment;
+    cible  = comment;
+
+    while( (car = g_utf8_get_char( source )) )
+     { if ( car == '\"' )                                                                   /* Remplacement de la double cote */
+        { g_utf8_strncpy( cible, "\\", 1 ); cible = g_utf8_next_char( cible );
+          g_utf8_strncpy( cible, "\"", 1 ); cible = g_utf8_next_char( cible );
+        }
+       else if ( car == '\n' )                                                              /* Remplacement de la double cote */
+        { /* Supprime les \n */ }
+       else
+        { g_utf8_strncpy( cible, source, 1 ); cible = g_utf8_next_char( cible );
+        }
+       source = g_utf8_next_char(source);
+     }
+    return(comment);
+  }
+/******************************************************************************************************************************/
 /* New_action_tempo: Prepare une struct action avec une commande TR                                                           */
 /* Entrées: numero de la tempo, sa consigne                                                                                   */
 /* Sortie: la structure action                                                                                                */
@@ -946,13 +979,15 @@
 
     JsonNode *RootNode = Json_node_create ();
     option_chaine = Get_option_chaine ( options, T_TAG, "PING" );
-    if (option_chaine) Json_node_add_string ( RootNode, "TAG", option_chaine );
+    if (option_chaine) Json_node_add_string ( RootNode, "tag", option_chaine );
 
     option_chaine = Get_option_chaine ( options, T_TARGET, NULL );
-    if (option_chaine) Json_node_add_string ( RootNode, "TARGET", option_chaine );
+    if (option_chaine) Json_node_add_string ( RootNode, "target", option_chaine );
 
     gchar *json_buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
+    gchar *normalized_buf = Normaliser_chaine_for_dls ( json_buf );
+    g_free(json_buf);
 
     result = New_action();
     taille = 256+strlen(target_tech_id)+strlen(json_buf);
@@ -960,8 +995,8 @@
     g_snprintf( result->alors, taille,
                  "   Dls_data_set_bus ( \"%s\", \"%s\", &_%s_%s, \"%s\", \"%s\" );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
-                target_tech_id, json_buf );
-    g_free(json_buf);
+                target_tech_id, normalized_buf );
+    g_free(normalized_buf);
     return(result);
   }
 /******************************************************************************************************************************/
