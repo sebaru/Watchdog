@@ -1512,10 +1512,10 @@ end:
              g_snprintf( visu->color, sizeof(visu->color), "brown" );
              visu->cligno = 1;                                                                                  /* Clignotant */
            }
-          else { g_snprintf( visu->mode,  sizeof(visu->mode), mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
-                 g_snprintf( visu->color, sizeof(visu->color), "%s", color );
+          else { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
+                 g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
+                 g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle );
                  visu->cligno  = cligno;
-                 visu->libelle = libelle;
                }
 
           visu->last_change = Partage->top;                                                             /* Date de la photo ! */
