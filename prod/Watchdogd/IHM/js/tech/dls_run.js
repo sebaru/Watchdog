@@ -304,8 +304,9 @@
              },
        rowId: "id",
        columns:
-         [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-           { "data": "mode",       "title":"Mode",     "className": "align-middle text-center" },
+         [ { "data": "acronyme",   "title":"Acronyme",    "className": "align-middle text-center" },
+           { "data": "libelle",    "title":"Libellé",     "className": "align-middle text-center" },
+           { "data": "mode",       "title":"Mode",        "className": "align-middle text-center" },
            { "data": "color",      "title":"Couleur",     "className": "align-middle text-center" },
            { "data": null, "title":"Cligno", "className": "align-middle ",
              "render": function (item)

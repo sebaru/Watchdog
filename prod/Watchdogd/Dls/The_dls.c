@@ -1523,8 +1523,8 @@ end:
           Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "%s: ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode %s color %s cligne %d", __func__,
-                    (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno );
+                    "%s: ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode %s color %s cligno %d libelle = %s", __func__,
+                    (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno, visu->libelle );
         }
        visu->changes++;                                                                                /* Un change de plus ! */
        Partage->audit_bit_interne_per_sec++;

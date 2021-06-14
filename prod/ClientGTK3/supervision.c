@@ -43,22 +43,39 @@
 /* Entrée: la page en question                                                                                                */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Detruire_page_supervision( struct PAGE_NOTEBOOK *page )
-  { struct TYPE_INFO_SUPERVISION *infos = page->infos;
+ static void Detruire_page_supervision_2( SoupWebsocketConnection *connexion, gpointer user_data )
+  { struct PAGE_NOTEBOOK *page = user_data;
+    struct TYPE_INFO_SUPERVISION *infos = page->infos;
 
-    soup_websocket_connection_close ( infos->ws_motifs, 0, "Thanks, Bye !" );
+    printf("%s: close 2 page=%p!\n", __func__, page );
     json_node_unref( infos->syn );
-    g_source_remove( infos->timer_id );
     Trame_detruire_trame( infos->Trame );
 
+    printf("%s: close 3 page=%p!\n", __func__, page );
     gint num = gtk_notebook_page_num( GTK_NOTEBOOK(page->client->Notebook), GTK_WIDGET(page->child) );
     gtk_notebook_remove_page( GTK_NOTEBOOK(page->client->Notebook), num );
     page->client->Liste_pages = g_slist_remove( page->client->Liste_pages, page );
+
+    printf("%s: close 4 page=%p!\n", __func__, page );
     g_free(infos);                                                                     /* Libération des infos le cas échéant */
     g_free(page);
   }
 /******************************************************************************************************************************/
 /* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                                                */
+/* Entrée: la page en question                                                                                                */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Detruire_page_supervision( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_SUPERVISION *infos = page->infos;
+
+    printf("%s: close 1 page=%p!\n", __func__, page );
+    g_source_remove( infos->timer_id );
+    if ( soup_websocket_connection_get_state ( infos->ws_motifs ) == SOUP_WEBSOCKET_STATE_OPEN )
+     { soup_websocket_connection_close ( infos->ws_motifs, 0, "Thanks, Bye !" ); }
+    else Detruire_page_supervision_2 ( infos->ws_motifs, page );
+  }
+/******************************************************************************************************************************/
+/* Changer_option_zoom: L'utilisateur veut changer le niveau de zoom                                                          */
 /* Entrée: la page en question                                                                                                */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
@@ -412,14 +429,6 @@
     else printf("%s: zmq_tag '%s' unknown\n", __func__, zmq_tag );
     json_node_unref(response);
   }
-/******************************************************************************************************************************/
-/* Traiter_reception_websocket_CB: Opere le traitement d'un message recu par la WebSocket MSGS                                  */
-/* Entrée: rien                                                                                                               */
-/* Sortie: un widget boite                                                                                                    */
-/******************************************************************************************************************************/
- static void Traiter_visuel_ws_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { printf("%s\n", __func__ );
-  }
  static void Traiter_visuel_ws_on_error  ( SoupWebsocketConnection *connexion, GError *error, gpointer user_data )
   { /*struct PAGE_NOTEBOOK *page = user_data;*/
     printf("%s: WebSocket Error '%s' received !\n", __func__, error->message );
@@ -436,14 +445,14 @@
     printf("%s\n", __func__ );
 
     infos->ws_motifs = soup_session_websocket_connect_finish ( page->client->connexion, res, &error );
-    if (!infos->ws_motifs)                                                                    /* No limit on incoming packet ! */
+    if (!infos->ws_motifs)                                                                   /* No limit on incoming packet ! */
      { printf("%s: Error opening Websocket '%s' !\n", __func__, error->message);
        g_error_free (error);
        return;
      }
     g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );
     g_signal_connect ( infos->ws_motifs, "message", G_CALLBACK(Traiter_visuel_ws_CB), page );
-    g_signal_connect ( infos->ws_motifs, "closed",  G_CALLBACK(Traiter_visuel_ws_on_closed), page );
+    g_signal_connect ( infos->ws_motifs, "closed",  G_CALLBACK(Detruire_page_supervision_2), page );
     g_signal_connect ( infos->ws_motifs, "error",   G_CALLBACK(Traiter_visuel_ws_on_error), page );
 
     JsonBuilder *builder = Json_create ();
@@ -465,12 +474,10 @@
     struct PAGE_NOTEBOOK *page;
     GBytes *response_brute;
     gchar *reason_phrase;
+    gchar *buffer_brut;
     GtkAdjustment *adj;
     gint status_code;
     gsize taille;
-
-    g_object_get ( msg, "response-body-data", &response_brute, NULL );
-    printf("%s: Recu SYNS: %s %p\n", __func__, (gchar *)g_bytes_get_data ( response_brute, &taille ), client );
 
     g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
     if (status_code != 200)
@@ -479,6 +486,10 @@
        Log(client, chaine);
        return;
      }
+
+    g_object_get ( msg, "response-body-data", &response_brute, NULL );
+    buffer_brut = g_bytes_get_data ( response_brute, &taille );
+    printf("%s: Recu SYNS: %s %p\n", __func__, buffer_brut, client );
 
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
@@ -489,8 +500,7 @@
 
     page->type   = TYPE_PAGE_SUPERVISION;
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
-    g_object_get ( msg, "response-body-data", &response_brute, NULL );
-    infos->syn = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
+    infos->syn = Json_get_from_string ( buffer_brut );
     infos->syn_id = Json_get_int ( infos->syn, "id" );
     infos->timer_id = g_timeout_add( 500, Timer, page );
     printf("%s: ---- chargement id %d \n", __func__, infos->syn_id );

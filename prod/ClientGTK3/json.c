@@ -235,6 +235,7 @@
 /******************************************************************************************************************************/
  gchar *Json_get_string ( JsonNode *query, gchar *chaine )
   { JsonObject *object = json_node_get_object (query);
+    if (!object) printf("%s : Warning : Object unknown for '%s' unknown\n", __func__, chaine );
     return(json_object_get_string_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
@@ -255,6 +256,7 @@
   { GValue valeur = G_VALUE_INIT;
     gint retour;
     JsonObject *object = json_node_get_object (query);
+    if (!object) printf("%s : Warning : Object unknown for '%s' unknown\n", __func__, chaine );
     JsonNode *node = json_object_get_member ( object, chaine );
     if (!node) { return(-1); }
     json_node_get_value ( node, &valeur );
@@ -274,6 +276,7 @@
   { GValue valeur = G_VALUE_INIT;
     gint retour;
     JsonObject *object = json_node_get_object (query);
+    if (!object) printf("%s : Warning : Object unknown for '%s' unknown\n", __func__, chaine );
     JsonNode *node = json_object_get_member ( object, chaine );
     if (!node) { return(0.0); }
     json_node_get_value ( node, &valeur );
@@ -292,6 +295,7 @@
   { GValue valeur = G_VALUE_INIT;
     gint retour;
     JsonObject *object = json_node_get_object (query);
+    if (!object) printf("%s : Warning : Object unknown for '%s' unknown\n", __func__, chaine );
     JsonNode *node = json_object_get_member ( object, chaine );
     if (!node) { return(-1); }
     json_node_get_value ( node, &valeur );
