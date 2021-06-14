@@ -217,7 +217,7 @@
 /******************************************************************************************************************************/
  static gint Compiler_source_dls( gchar *tech_id )
   { gint retour, pidgcc, id_fichier;
-    gchar log_buffer[1024], log_file[20];
+    gchar log_buffer[1024], log_file[64];
     gchar chaine[128];
     gint taille_source;
     gchar *Source;
