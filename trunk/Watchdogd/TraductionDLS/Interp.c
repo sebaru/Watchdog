@@ -1443,7 +1443,9 @@
                    break;
                  }
                 case MNEMO_ENTREE_ANA:
-                 { Mnemo_auto_create_AI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, NULL );
+                 { Mnemo_auto_create_AI ( TRUE, Dls_plugin.tech_id, alias->acronyme,
+                                          Get_option_chaine( alias->options, T_LIBELLE, NULL ),
+                                          Get_option_chaine( alias->options, T_UNITE, NULL ) );
 
                    gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
                    if (cadran)
