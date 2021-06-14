@@ -474,12 +474,10 @@
     struct PAGE_NOTEBOOK *page;
     GBytes *response_brute;
     gchar *reason_phrase;
+    gchar *buffer_brut;
     GtkAdjustment *adj;
     gint status_code;
     gsize taille;
-
-    g_object_get ( msg, "response-body-data", &response_brute, NULL );
-    printf("%s: Recu SYNS: %s %p\n", __func__, (gchar *)g_bytes_get_data ( response_brute, &taille ), client );
 
     g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
     if (status_code != 200)
@@ -488,6 +486,10 @@
        Log(client, chaine);
        return;
      }
+
+    g_object_get ( msg, "response-body-data", &response_brute, NULL );
+    buffer_brut = g_bytes_get_data ( response_brute, &taille );
+    printf("%s: Recu SYNS: %s %p\n", __func__, buffer_brut, client );
 
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
@@ -498,8 +500,7 @@
 
     page->type   = TYPE_PAGE_SUPERVISION;
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
-    g_object_get ( msg, "response-body-data", &response_brute, NULL );
-    infos->syn = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
+    infos->syn = Json_get_from_string ( buffer_brut );
     infos->syn_id = Json_get_int ( infos->syn, "id" );
     infos->timer_id = g_timeout_add( 500, Timer, page );
     printf("%s: ---- chargement id %d \n", __func__, infos->syn_id );
