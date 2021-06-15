@@ -42,7 +42,7 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Mnemo_auto_create_AI ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src )
-  { gchar *acro, *libelle, *unite;
+  { gchar *acro, *libelle=NULL, *unite=NULL;
     gchar requete[1024];
     gboolean retour;
 
@@ -54,12 +54,14 @@
        return(FALSE);
      }
 
-    libelle    = Normaliser_chaine ( libelle_src );                                          /* Formatage correct des chaines */
-    if ( !libelle )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation libelle impossible. Mnemo NOT added nor modified.", __func__ );
-       g_free(acro);
-       return(FALSE);
+    if (libelle_src)
+     { libelle    = Normaliser_chaine ( libelle_src );                                        /* Formatage correct des chaines */
+       if ( !libelle )
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                   "%s: Normalisation libelle impossible. Mnemo NOT added nor modified.", __func__ );
+          g_free(acro);
+          return(FALSE);
+        }
      }
 
     if(unite_src)
@@ -68,26 +70,38 @@
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                    "%s: Normalisation unite impossible. Mnemo NOT added nor modified.", __func__ );
           g_free(acro);
-          g_free(libelle);
+          if (libelle) g_free(libelle);
           return(FALSE);
         }
      } else unite = NULL;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_AI SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s' ",
-                deletable, tech_id, acro, libelle );
-    g_free(libelle);
+                "INSERT INTO mnemos_AI SET deletable='%d', tech_id='%s',acronyme='%s' ",
+                deletable, tech_id, acro );
     g_free(acro);
+
+    if (libelle)
+     { gchar add[128];
+       g_snprintf( add, sizeof(add), ",libelle='%s'", libelle );
+       g_strlcat ( requete, add, sizeof(requete) );
+     }
 
     if (unite)
      { gchar add[128];
        g_snprintf( add, sizeof(add), ",unite='%s'", unite );
        g_strlcat ( requete, add, sizeof(requete) );
      }
-    g_strlcat ( requete, " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle) ", sizeof(requete) );
+
+    g_strlcat ( requete, " ON DUPLICATE KEY UPDATE acronyme=VALUES(acronyme) ", sizeof(requete) );
+
     if (unite)
      { g_strlcat ( requete, ",unite=VALUES(unite)", sizeof(requete) );
        g_free(unite);
+     }
+
+    if (libelle)
+     { g_strlcat ( requete, ",libelle=VALUES(libelle)", sizeof(requete) );
+       g_free(libelle);
      }
 
     retour = SQL_Write_new ( requete );
