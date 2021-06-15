@@ -129,8 +129,9 @@
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
  struct OPTION *New_option( void )
-  { struct OPTION *option;
-    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
+  { struct OPTION *option = g_try_malloc0( sizeof(struct OPTION) );
+    if (!option)
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: memory error", __func__ ); }
     return(option);
   }
 /******************************************************************************************************************************/
@@ -139,9 +140,12 @@
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
  GList *New_option_chaine( GList *options, gint token, gchar *chaine )
-  { struct OPTION *option;
-    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
-    if (!options) return(options);
+  { struct OPTION *option = g_try_malloc0( sizeof(struct OPTION) );
+    if (!option)
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: memory error for %s", __func__, chaine );
+       g_free(chaine);
+       return(options);
+     }
 
     option->token        = token;
     option->token_classe = T_CHAINE;
@@ -1209,6 +1213,17 @@
     Alias = NULL;
   }
 /******************************************************************************************************************************/
+/* Add_csv: Ajoute un membre dans une liste type CSV                                                                          */
+/* Entrées: la chaine actuelle, la chaine a ajouter                                                                           */
+/* Sortie: la nouvelle chaine complétée                                                                                       */
+/******************************************************************************************************************************/
+ static gchar *Add_csv ( gchar *source, gchar *to_add )
+  { if (!source) return ( g_strconcat( "'", to_add, "'", NULL ) );
+    gchar *new_source = g_strconcat ( source, ", '", to_add, "'", NULL );
+    g_free(source);
+    return(new_source);
+  }
+/******************************************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
 /* Entrée: l'id du modul                                                                                                      */
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */
@@ -1387,7 +1402,6 @@
        gchar *Liste_BOOL = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
        gchar *Liste_TEMPO = NULL, *Liste_HORLOGE = NULL, *Liste_REGISTRE = NULL, *Liste_WATCHDOG = NULL, *Liste_MESSAGE = NULL;
        gchar *Liste_CI = NULL, *Liste_CH = NULL;
-       gchar *old_liste = NULL;
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)
         { alias = (struct ALIAS *)liste->data;
@@ -1404,48 +1418,29 @@
                 case MNEMO_BISTABLE:
                 case MNEMO_MONOSTABLE:
                  { Mnemo_auto_create_BOOL ( TRUE, alias->classe, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   if (!Liste_BOOL) Liste_BOOL = g_strconcat( "'", alias->acronyme, "'", NULL );
-                   else
-                    { old_liste = Liste_BOOL;
-                      Liste_BOOL = g_strconcat ( Liste_BOOL, ", '", alias->acronyme, "'", NULL );
-                      g_free(old_liste);
-                    }
+                   Liste_BOOL = Add_csv ( Liste_BOOL, alias->acronyme );
                    break;
                  }
                 case MNEMO_ENTREE:
                  { Mnemo_auto_create_DI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   if (!Liste_DI) Liste_DI = g_strconcat( "'", alias->acronyme, "'", NULL );
-                   else
-                    { old_liste = Liste_DI;
-                      Liste_DI = g_strconcat ( Liste_DI, ", '", alias->acronyme, "'", NULL );
-                      g_free(old_liste);
-                    }
+                   Liste_DI = Add_csv ( Liste_DI, alias->acronyme );
                    break;
                  }
                 case MNEMO_SORTIE:
                  { Mnemo_auto_create_DO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   if (!Liste_DO) Liste_DO = g_strconcat( "'", alias->acronyme, "'", NULL );
-                   else
-                    { old_liste = Liste_DO;
-                      Liste_DO = g_strconcat ( Liste_DO, ", '", alias->acronyme, "'", NULL );
-                      g_free(old_liste);
-                    }
+                   Liste_DO = Add_csv ( Liste_DO, alias->acronyme );
                    break;
                  }
                 case MNEMO_SORTIE_ANA:
                  { Mnemo_auto_create_AO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   if (!Liste_AO) Liste_AO = g_strconcat( "'", alias->acronyme, "'", NULL );
-                   else
-                    { old_liste = Liste_AO;
-                      Liste_AO = g_strconcat ( Liste_AO, ", '", alias->acronyme, "'", NULL );
-                      g_free(old_liste);
-                    }
+                   Liste_AO = Add_csv ( Liste_AO, alias->acronyme );
                    break;
                  }
                 case MNEMO_ENTREE_ANA:
                  { Mnemo_auto_create_AI ( TRUE, Dls_plugin.tech_id, alias->acronyme,
                                           Get_option_chaine( alias->options, T_LIBELLE, NULL ),
                                           Get_option_chaine( alias->options, T_UNITE, NULL ) );
+                   Liste_AI = Add_csv ( Liste_AI, alias->acronyme );
 
                    gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
                    if (cadran)
@@ -1458,18 +1453,12 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 2 )
                                                     );
-                    }
-
-                   if (!Liste_AI) Liste_AI = g_strconcat( "'", alias->acronyme, "'", NULL );
-                   else
-                    { old_liste = Liste_AI;
-                      Liste_AI = g_strconcat ( Liste_AI, ", '", alias->acronyme, "'", NULL );
-                      g_free(old_liste);
                     }
                    break;
                  }
                 case MNEMO_TEMPO:
                  { Mnemo_auto_create_TEMPO ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                   Liste_TEMPO = Add_csv ( Liste_TEMPO, alias->acronyme );
 
                    gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
                    if (cadran)
@@ -1482,29 +1471,18 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 2 )
                                                     );
-                    }
-
-                   if (!Liste_TEMPO) Liste_TEMPO = g_strconcat( "'", alias->acronyme, "'", NULL );
-                   else
-                    { old_liste = Liste_TEMPO;
-                      Liste_TEMPO = g_strconcat ( Liste_TEMPO, ", '", alias->acronyme, "'", NULL );
-                      g_free(old_liste);
                     }
                    break;
                  }
                 case MNEMO_HORLOGE:
                  { Mnemo_auto_create_HORLOGE ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   if (!Liste_HORLOGE) Liste_HORLOGE = g_strconcat( "'", alias->acronyme, "'", NULL );
-                   else
-                    { old_liste = Liste_HORLOGE;
-                      Liste_HORLOGE = g_strconcat ( Liste_HORLOGE, ", '", alias->acronyme, "'", NULL );
-                      g_free(old_liste);
-                    }
+                   Liste_HORLOGE = Add_csv ( Liste_HORLOGE, alias->acronyme );
                    break;
                  }
                 case MNEMO_REGISTRE:
-                 { gchar *unite = Get_option_chaine( alias->options, T_UNITE, "no unit" );
-                   Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle, unite );
+                 { Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle,
+                                                Get_option_chaine( alias->options, T_UNITE, "no unit" ) );
+                   Liste_REGISTRE = Add_csv ( Liste_REGISTRE, alias->acronyme );
 
                    gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
                    if (cadran)
@@ -1518,17 +1496,12 @@
                                                       Get_option_entier ( alias->options, T_DECIMAL, 2 )
                                                     );
                     }
-
-                   if (!Liste_REGISTRE) Liste_REGISTRE = g_strconcat( "'", alias->acronyme, "'", NULL );
-                   else
-                    { old_liste = Liste_REGISTRE;
-                      Liste_REGISTRE = g_strconcat ( Liste_REGISTRE, ", '", alias->acronyme, "'", NULL );
-                      g_free(old_liste);
-                    }
                    break;
                  }
                 case MNEMO_WATCHDOG:
                  { Mnemo_auto_create_WATCHDOG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   Liste_WATCHDOG = Add_csv ( Liste_WATCHDOG, alias->acronyme );
+
                    gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
                    if (cadran)
                     { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
@@ -1540,13 +1513,6 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 0 )
                                                     );
-                    }
-
-                   if (!Liste_WATCHDOG) Liste_WATCHDOG = g_strconcat( "'", alias->acronyme, "'", NULL );
-                   else
-                    { old_liste = Liste_WATCHDOG;
-                      Liste_WATCHDOG = g_strconcat ( Liste_WATCHDOG, ", '", alias->acronyme, "'", NULL );
-                      g_free(old_liste);
                     }
                    break;
                  }
@@ -1559,6 +1525,7 @@
                  { Mnemo_auto_create_CI ( Dls_plugin.tech_id, alias->acronyme, libelle,
                                           Get_option_chaine ( alias->options, T_UNITE, "fois" ),
                                           Get_option_double ( alias->options, T_MULTI, 1.0 ) );
+                   Liste_CI = Add_csv ( Liste_CI, alias->acronyme );
 
                    gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
                    if (cadran)
@@ -1571,18 +1538,12 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 0 )
                                                     );
-                    }
-
-                   if (!Liste_CI) Liste_CI = g_strconcat( "'", alias->acronyme, "'", NULL );
-                   else
-                    { old_liste = Liste_CI;
-                      Liste_CI = g_strconcat ( Liste_CI, ", '", alias->acronyme, "'", NULL );
-                      g_free(old_liste);
                     }
                    break;
                  }
                 case MNEMO_CPTH:
                  { Mnemo_auto_create_CH ( Dls_plugin.tech_id, alias->acronyme, libelle );
+                   Liste_CH = Add_csv ( Liste_CH, alias->acronyme );
 
                    gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
                    if (cadran)
@@ -1595,13 +1556,6 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 0 )
                                                     );
-                    }
-
-                   if (!Liste_CH) Liste_CH = g_strconcat( "'", alias->acronyme, "'", NULL );
-                   else
-                    { old_liste = Liste_CH;
-                      Liste_CH = g_strconcat ( Liste_CH, ", '", alias->acronyme, "'", NULL );
-                      g_free(old_liste);
                     }
                    break;
                  }
@@ -1609,12 +1563,7 @@
                  { gint param;
                    param = Get_option_entier ( alias->options, T_TYPE, MSG_ETAT );
                    Mnemo_auto_create_MSG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, param );
-                   if (!Liste_MESSAGE) Liste_MESSAGE = g_strconcat( "'", alias->acronyme, "'", NULL );
-                   else
-                    { old_liste = Liste_MESSAGE;
-                      Liste_MESSAGE = g_strconcat ( Liste_MESSAGE, ", '", alias->acronyme, "'", NULL );
-                      g_free(old_liste);
-                    }
+                   Liste_MESSAGE = Add_csv ( Liste_MESSAGE, alias->acronyme );
                    break;
                  }
               }
