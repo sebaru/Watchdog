@@ -92,8 +92,7 @@
        g_strlcat ( requete, add, sizeof(requete) );
      }
 
-    if (libelle || unite)
-     { g_strlcat ( requete, " ON DUPLICATE KEY UPDATE acronyme=VALUES(acronyme) ", sizeof(requete) ); }
+    g_strlcat ( requete, " ON DUPLICATE KEY UPDATE acronyme=VALUES(acronyme) ", sizeof(requete) );
 
     if (unite)
      { g_strlcat ( requete, ",unite=VALUES(unite)", sizeof(requete) );
