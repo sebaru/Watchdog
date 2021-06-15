@@ -129,8 +129,9 @@
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
  struct OPTION *New_option( void )
-  { struct OPTION *option;
-    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
+  { struct OPTION *option = g_try_malloc0( sizeof(struct OPTION) );
+    if (!option)
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: memory error", __func__ ); }
     return(option);
   }
 /******************************************************************************************************************************/
@@ -139,9 +140,12 @@
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
  GList *New_option_chaine( GList *options, gint token, gchar *chaine )
-  { struct OPTION *option;
-    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
-    if (!options) return(options);
+  { struct OPTION *option = g_try_malloc0( sizeof(struct OPTION) );
+    if (!option)
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: memory error for %s", __func__, chaine );
+       g_free(chaine);
+       return(options);
+     }
 
     option->token        = token;
     option->token_classe = T_CHAINE;
