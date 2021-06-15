@@ -1470,6 +1470,20 @@
                  }
                 case MNEMO_TEMPO:
                  { Mnemo_auto_create_TEMPO ( Dls_plugin.tech_id, alias->acronyme, libelle );
+
+                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
+                   if (cadran)
+                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
+                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
+                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
+                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
+                                                      Get_option_entier ( alias->options, T_DECIMAL, 2 )
+                                                    );
+                    }
+
                    if (!Liste_TEMPO) Liste_TEMPO = g_strconcat( "'", alias->acronyme, "'", NULL );
                    else
                     { old_liste = Liste_TEMPO;
