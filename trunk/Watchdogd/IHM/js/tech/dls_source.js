@@ -16,11 +16,17 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Compiler ()
   { vars = window.location.pathname.split('/');
-    var json_request = JSON.stringify(
+    var json_request =
      { tech_id : vars[3],
        sourcecode: SourceCode.getDoc().getValue(),
-     });
-    Send_to_API ( "POST", "/api/dls/compil", json_request, function(Response)
+     };
+
+    if (json_request.sourcecode.length == 0)
+     { Show_Error ( "Un plugin vide n'est pas autorisé" );
+       return;
+     }
+
+    Send_to_API ( "POST", "/api/dls/compil", JSON.stringify(json_request), function(Response)
      { $("#idErrorLog").html(Response.errorlog.replace(/(?:\r\n|\r|\n)/g, '<br>'));
        $("#idErrorLog").removeClass("alert-info alert-warning alert-danger alert-success");
             if (Response.compil_status==6) { $("#idErrorLog").addClass("alert-success"); }                              /* OK */
