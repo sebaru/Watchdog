@@ -1224,6 +1224,20 @@
     return(new_source);
   }
 /******************************************************************************************************************************/
+/* Add_alias_csv: Ajoute un alias dans une liste type CSV                                                                     */
+/* Entrées: la chaine actuelle, la chaine a ajouter                                                                           */
+/* Sortie: la nouvelle chaine complétée                                                                                       */
+/******************************************************************************************************************************/
+ static gchar *Add_alias_csv ( gchar *source, gchar *tech_id, gchar *acronyme )
+  { if (!tech_id || !acronyme) return(source);
+    if (!source)
+     { return ( g_strconcat( "'", tech_id, ":", acronyme, "'", NULL ) ); }
+
+    gchar *new_source = g_strconcat ( source, ", '", tech_id, ":", acronyme, "'", NULL );
+    g_free(source);
+    return(new_source);
+  }
+/******************************************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
 /* Entrée: l'id du modul                                                                                                      */
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */
@@ -1402,6 +1416,7 @@
        gchar *Liste_BOOL = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
        gchar *Liste_TEMPO = NULL, *Liste_HORLOGE = NULL, *Liste_REGISTRE = NULL, *Liste_WATCHDOG = NULL, *Liste_MESSAGE = NULL;
        gchar *Liste_CI = NULL, *Liste_CH = NULL;
+       gchar *Liste_CADRANS = NULL;
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)
         { alias = (struct ALIAS *)liste->data;
@@ -1453,6 +1468,7 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 2 )
                                                     );
+                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
                     }
                    break;
                  }
@@ -1471,6 +1487,7 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 2 )
                                                     );
+                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
                     }
                    break;
                  }
@@ -1495,6 +1512,7 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 2 )
                                                     );
+                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
                     }
                    break;
                  }
@@ -1513,6 +1531,7 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 0 )
                                                     );
+                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
                     }
                    break;
                  }
@@ -1538,6 +1557,7 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 0 )
                                                     );
+                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
                     }
                    break;
                  }
@@ -1556,6 +1576,7 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 0 )
                                                     );
+                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
                     }
                    break;
                  }
@@ -1583,6 +1604,7 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 2 )
                                                     );
+                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
                     }
                    break;
                  }
@@ -1598,6 +1620,7 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 2 )
                                                     );
+                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
                     }
                    break;
                  }
@@ -1613,6 +1636,7 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 0 )
                                                     );
+                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
                     }
                    break;
                  }
@@ -1628,6 +1652,7 @@
                                                       Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
                                                       Get_option_entier ( alias->options, T_DECIMAL, 0 )
                                                     );
+                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
                     }
                    break;
                  }
@@ -1707,6 +1732,10 @@
        if (Liste_WATCHDOG) g_free(Liste_WATCHDOG);
        SQL_Write ( requete );
        g_free(requete);
+
+       SQL_Write_new ( "DELETE FROM syns_cadrans WHERE dls_id='%d' AND CONCAT(tech_id,':',acronyme) NOT IN (%s)",
+                       Dls_plugin.id, (Liste_CADRANS ? Liste_CADRANS: "''" ) );
+       if (Liste_CADRANS) g_free(Liste_CADRANS);
      }
     close(Id_log);
     Liberer_memoire();
