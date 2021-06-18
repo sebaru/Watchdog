@@ -2279,7 +2279,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans DROP `auto_create`" );
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD UNIQUE (`tech_id`, `acronyme`, `dls_id`);");
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD UNIQUE (`dls_id`, `tech_id`, `acronyme`);");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "DELETE syns_cadrans FROM syns_cadrans INNER JOIN dls ON syns_cadrans.dls_id = dls.id WHERE dls.actif=0");
        Lancer_requete_SQL ( db, requete );
@@ -2316,6 +2316,8 @@ fin:
     g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='film', ihm_affichage='cadre', extension='svg'" );
     Lancer_requete_SQL ( db, requete );
     g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='bouton_io', ihm_affichage='simple', extension='png'" );
+    Lancer_requete_SQL ( db, requete );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='encadre_1x1', ihm_affichage='complexe', extension='none'" );
     Lancer_requete_SQL ( db, requete );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "

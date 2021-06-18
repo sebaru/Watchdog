@@ -422,9 +422,9 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
 CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',
+  `dls_id` int(11) NOT NULL DEFAULT '0',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "SYS",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
-  `dls_id` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
@@ -438,7 +438,7 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `angle` int(11) NOT NULL DEFAULT '0',
   `nb_decimal` int(11) NOT NULL DEFAULT '2',
   PRIMARY KEY (`id`),
-  UNIQUE (`tech_id`, `acronyme`, `dls_id`),
+  UNIQUE (`dls_id`, `tech_id`, `acronyme`),
   FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
