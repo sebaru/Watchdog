@@ -115,21 +115,23 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget Hub</label>
-						     <select id="idModalEditDIPhidgetHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
+						     <select id="idModalEditDIHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">N° de port du HUB</label>
-						     <input id="idModalEditDIPhidgetPort" type="number" required min=0 max=6 class="form-control" placeholder="numéro">
+						     <input id="idModalEditDIPort" type="number" required min=0 max=6 class="form-control" placeholder="numéro">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Classe du Capteur</label>
-						     <select id="idModalEditDIClasse" class="custom-select border-info" placeholder="Classe du capteur"></select>
+						     <select id="idModalEditDICapteur" class="custom-select border-info" placeholder="Classe du capteur">
+             <option value="DIGITAL-INPUT">Digital Input</option>
+           </select>
      					</div>
   					</div>
 

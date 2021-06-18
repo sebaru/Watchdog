@@ -217,9 +217,19 @@
        return;
      }
 
-/*         if (! strcasecmp( classe, "DI" ) ) target = "mnemos_DI";
-    else if (! strcasecmp( classe, "DO" ) ) target = "mnemos_DO";
-    else*/ if (! strcasecmp( classe, "AI" ) )
+    if (! strcasecmp( classe, "DI" ) )
+     { if (SQL_Select_to_json_node ( RootNode, "mappings",
+                                    "SELECT m.tech_id, m.acronyme, m.libelle, "
+                                    "hub.hostname AS hub_hostname, hub.description AS hub_description, "
+                                    "di.* FROM phidget_DI AS di "
+                                    "INNER JOIN mnemos_DI AS m ON di.mnemo_id=m.id "
+                                    "INNER JOIN phidget_hub AS hub ON di.hub_id = hub.id " ) == FALSE)
+        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+          json_node_unref ( RootNode );
+          return;
+        }
+     }
+    else if (! strcasecmp( classe, "AI" ) )
      { if (SQL_Select_to_json_node ( RootNode, "mappings",
                                     "SELECT m.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale, m.min, m.max, m.unite, "
                                     "hub.hostname AS hub_hostname, hub.description AS hub_description, "
@@ -283,22 +293,32 @@
     else if (!strcasecmp ( capteur, "AC-CURRENT-50A" ))        phidget_classe="VoltageInput";
     else if (!strcasecmp ( capteur, "AC-CURRENT-100A" ))       phidget_classe="VoltageInput";
     else if (!strcasecmp ( capteur, "TEMP_1124_0" ))           phidget_classe="VoltageRatioInput";
+    else if (!strcasecmp ( capteur, "DIGITAL-INPUT" ))         phidget_classe="DigitalInput";
     else phidget_classe="Unknown";
 
-/*    if (! strcasecmp( classe, "DI" ) )
-     { SQL_Write_new ( "UPDATE mnemos_DI SET map_thread=NULL, map_tech_id=NULL, map_tag=NULL "
-                       " WHERE map_tech_id='%s' AND map_tag='%d';", NOM_THREAD, io_id );
+    if (! strcasecmp( classe, "DI" ) )
+     { SQL_Write_new ( "UPDATE mnemos_DI SET map_thread='PHIDGET', map_tech_id='PHIDGET' "
+                       "WHERE tech_id='%s' AND acronyme='%s'",
+                       tech_id, acronyme
+                     );
 
-       g_snprintf( requete, sizeof(requete),
-                   "UPDATE mnemos_DI SET map_thread='%s', map_tech_id='%s', map_tag='%d' "
-                   " WHERE tech_id='%s' AND acronyme='%s';", NOM_THREAD, NOM_THREAD, io_id, tech_id, acronyme );
+       SQL_Write_new ("UPDATE phidget_DI SET mnemo_id=NULL "
+                      "WHERE mnemo_id=(SELECT id FROM mnemos_DI WHERE tech_id='%s' AND acronyme='%s')",
+                       tech_id, acronyme
+                     );
 
-       if (SQL_Write_new ("UPDATE mnemos_DI SET map_thread='%s', map_tech_id='%s', map_tag='%d' "
-                          " WHERE tech_id='%s' AND acronyme='%s';", NOM_THREAD, NOM_THREAD, io_id, tech_id, acronyme))
+       if (SQL_Write_new ( "INSERT INTO phidget_DI SET hub_id=%d, port=%d, classe='%s', capteur='%s',"
+                           "mnemo_id=(SELECT id FROM mnemos_DI WHERE tech_id='%s' AND acronyme='%s') "
+                           "ON DUPLICATE KEY UPDATE mnemo_id=VALUES(mnemo_id),"
+                           "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
+                           Json_get_int( request, "hub_id"), Json_get_int( request, "port"),
+                           phidget_classe, capteur,
+                           tech_id, acronyme
+                         ))
           { soup_message_set_status (msg, SOUP_STATUS_OK); }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
-    else*/ if (! strcasecmp( classe, "AI" ) )
+    else if (! strcasecmp( classe, "AI" ) )
      { if ( ! (Json_has_member ( request, "intervalle" ) && Json_has_member ( request, "min" ) &&
                Json_has_member ( request, "max" ) && Json_has_member ( request, "unite" ) &&
                Json_has_member ( request, "map_question_vocale" ) && Json_has_member ( request, "map_reponse_vocale" )
