@@ -656,6 +656,55 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
+ static void Trame_ajout_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
+  { 
+    trame_motif->image  = NULL;
+    trame_motif->images = NULL;
+    trame_motif->nbr_images  = 0;
+    trame_motif->gif_largeur = 0;
+    trame_motif->gif_hauteur = 0;
+    GdkPixbuf *pixbuf = NULL;
+    
+    gchar *forme = Json_get_string ( visuel, "forme" );
+    if ( !strcmp ( forme, "encadre_1x1" ) )
+     { RsvgHandle *handle;
+       gchar encadre_1x1[512];
+       g_snprintf( encadre_1x1, sizeof(encadre_1x1),
+                   "<svg viewBox='0 0 150 170' >"
+                   "<text text-anchor='middle' x='75' y='12' "
+                   "      font-family='Verdana' font-size='14px' fill='white' stroke='white'>TEST test</text> "
+                   "<rect x='5' y='20' rx='20' width='140' height='140' "
+                   "      fill='none' stroke='white' stroke-width='2'  />"
+                   "</svg>"
+                 );
+       GError *error = NULL;
+       handle = rsvg_handle_new_from_data ( encadre_1x1, strlen(encadre_1x1), &error );
+       if (handle)
+        { pixbuf = rsvg_handle_get_pixbuf ( handle );
+          g_object_unref ( handle );
+          /*gdk_pixbuf_save ( pixbuf, "test.png", "png", NULL, NULL );*/
+        }
+       else
+        { printf("%s: Chargement visuel complexe '%s' failed: %s\n", __func__, forme, error->message );
+          g_error_free(error);
+        }
+     }
+
+    if (pixbuf)
+     { trame_motif->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
+       trame_motif->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
+       trame_motif->images = g_list_append( trame_motif->images, pixbuf );     /* Et ajout dans la liste */
+       trame_motif->image  = trame_motif->images;                          /* Synchro sur image numero 1 */
+       trame_motif->nbr_images++;
+       printf("%s : width = %d, height=%d\n", __func__, trame_motif->gif_largeur, trame_motif->gif_hauteur );
+     }
+    else { printf("%s: Chargement visuel complexe '%s' pixbuf failed\n", __func__, forme ); }
+  }
+/******************************************************************************************************************************/
+/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
  struct TRAME_ITEM_MOTIF *Trame_ajout_visuel ( gint flag, struct TRAME *trame, JsonNode *visuel )
   { struct TRAME_ITEM_MOTIF *trame_motif;
 
@@ -668,11 +717,15 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     trame_motif->page   = trame->page;
     trame_motif->type   = TYPE_MOTIF;
 
-    Charger_pixbuf_id( trame_motif, Json_get_int ( visuel, "icone" ) );
-    if (!trame_motif->images)                                                                  /* En cas de probleme, on sort */
-     { Trame_del_item(trame_motif);
-       g_free(trame_motif);
-       return(NULL);
+    if ( !strcasecmp( Json_get_string ( visuel, "ihm_affichage" ), "complexe" ) )
+     { Trame_ajout_visuel_complexe ( trame_motif, visuel ); }
+    else
+     { Charger_pixbuf_id( trame_motif, Json_get_int ( visuel, "icone" ) );
+       if (!trame_motif->images)                                                                  /* En cas de probleme, on sort */
+        { Trame_del_item(trame_motif);
+          g_free(trame_motif);
+          return(NULL);
+        }
      }
 
     Trame_peindre_motif( trame_motif, Json_get_string ( visuel, "def_color" ) );
@@ -683,8 +736,11 @@ printf("Charger_pixbuf_file: %s\n", fichier );
                                                (-(gdouble)(trame_motif->gif_hauteur/2)),
                                                NULL );
 
-    if (!Json_has_member ( visuel, "larg" )) Json_node_add_int ( visuel, "larg", trame_motif->gif_largeur );
-    if (!Json_has_member ( visuel, "haut" )) Json_node_add_int ( visuel, "haut", trame_motif->gif_hauteur );
+    if (!Json_has_member ( visuel, "larg" ) || Json_get_int ( visuel, "larg" )<=0 )
+     { Json_node_add_int ( visuel, "larg", trame_motif->gif_largeur ); }
+
+    if (!Json_has_member ( visuel, "haut" ) || Json_get_int ( visuel, "haut" )<=0 )
+     { Json_node_add_int ( visuel, "haut", trame_motif->gif_hauteur ); }
 
     if ( flag )
      { GdkPixbuf *pixbuf;

@@ -671,8 +671,9 @@ end:
 /*-------------------------------------------------- Envoi les visuels de la page --------------------------------------------*/
     if (full_syn)
      { if (SQL_Select_to_json_node ( synoptique, "visuels",
-                                    "SELECT visu.* FROM syns_motifs AS visu "
+                                    "SELECT visu.*,i.* FROM syns_motifs AS visu "
                                     "INNER JOIN syns AS syn ON visu.syn_id=syn.id "
+                                    "LEFT JOIN icone AS i ON i.forme=visu.forme "
                                     "WHERE syn.id='%d' AND syn.access_level<=%d ORDER BY layer",
                                      syn_id, session->access_level) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);

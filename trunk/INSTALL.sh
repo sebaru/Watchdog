@@ -14,7 +14,7 @@ if [ "$SOCLE" = "fedora" ]
   dnf install -y gtk3-devel goocanvas2-devel popt-devel libsoup-devel
   dnf install -y gtksourceview2-devel goocanvas-devel json-glib-devel gammu-devel
   dnf install -y mpg123 sox mosquitto-devel libusb-devel
-  dnf install -y libgnomeui-devel
+  dnf install -y libgnomeui-devel librsvg2-devel
   dnf install -y git
   git clone https://github.com/strophe/libstrophe.git
   cd libstrophe

@@ -121,7 +121,7 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Creer_page_atelier_CB (SoupSession *session, SoupMessage *msg, gpointer user_data)
-  { GtkWidget *bouton, *boite, *hboite, *vboite , *table, *scroll, *texte, *spin, *boite1, *separateur;
+  { GtkWidget *bouton, *boite, *hboite, *vboite, *scroll, *texte, *spin, *boite1, *separateur;
     struct CLIENT *client = user_data;
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;

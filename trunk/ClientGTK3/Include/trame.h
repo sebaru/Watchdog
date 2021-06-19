@@ -32,6 +32,7 @@
  #include <goocanvas.h>
  #include <gdk-pixbuf/gdk-pixbuf.h>                                                              /* Gestion des images/motifs */
  #include <json-glib/json-glib.h>
+ #include <librsvg/rsvg.h>
  #include "Reseaux.h"
 
  #define TAILLE_SYNOPTIQUE_X        1024                                  /* Généralités sur la taille de la Trame synoptique */

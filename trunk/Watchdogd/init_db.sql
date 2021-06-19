@@ -434,7 +434,6 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `seuil_nb` FLOAT NOT NULL DEFAULT '10',
   `seuil_nh` FLOAT NOT NULL DEFAULT '90',
   `seuil_nth` FLOAT NOT NULL DEFAULT '95',
-  `maximum` FLOAT NOT NULL DEFAULT '100',
   `angle` int(11) NOT NULL DEFAULT '0',
   `nb_decimal` int(11) NOT NULL DEFAULT '2',
   PRIMARY KEY (`id`),
