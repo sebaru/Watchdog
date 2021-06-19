@@ -672,10 +672,12 @@ printf("Charger_pixbuf_file: %s\n", fichier );
        g_snprintf( encadre_1x1, sizeof(encadre_1x1),
                    "<svg viewBox='0 0 150 170' >"
                    "<text text-anchor='middle' x='75' y='12' "
-                   "      font-family='Verdana' font-size='14px' fill='white' stroke='white'>TEST test</text> "
+                   "      font-family='Verdana' font-size='14px' fill='white' stroke='white'>%s</text> "
                    "<rect x='5' y='20' rx='20' width='140' height='140' "
-                   "      fill='none' stroke='white' stroke-width='2'  />"
-                   "</svg>"
+                   "      fill='none' stroke='%s' stroke-width='2'  />"
+                   "</svg>",
+                   Json_get_string ( visuel, "libelle" ),
+                   Json_get_string ( visuel, "def_color" )
                  );
        GError *error = NULL;
        handle = rsvg_handle_new_from_data ( encadre_1x1, strlen(encadre_1x1), &error );
