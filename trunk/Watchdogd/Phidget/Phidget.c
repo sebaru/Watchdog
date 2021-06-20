@@ -419,6 +419,7 @@ end:
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
               "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached. %d channels available.",
               __func__, tech_id, acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
+    Dls_data_set_WATCHDOG ( NULL, canal->hub_tech_id, "IO_COMM", &canal->bit_comm, 600 );
   }
 /******************************************************************************************************************************/
 /* Phidget_onAttachHandler: Appelé quand un canal estmodule I/O VoltageRatio a changé de valeur                               */
