@@ -294,6 +294,7 @@
     else if (!strcasecmp ( capteur, "AC-CURRENT-100A" ))       phidget_classe="VoltageInput";
     else if (!strcasecmp ( capteur, "TEMP_1124_0" ))           phidget_classe="VoltageRatioInput";
     else if (!strcasecmp ( capteur, "DIGITAL-INPUT" ))         phidget_classe="DigitalInput";
+    else if (!strcasecmp ( capteur, "REL2001_0" ))             phidget_classe="DigitalOutput";
     else phidget_classe="Unknown";
 
     if (! strcasecmp( classe, "DI" ) )
@@ -309,6 +310,28 @@
 
        if (SQL_Write_new ( "INSERT INTO phidget_DI SET hub_id=%d, port=%d, classe='%s', capteur='%s',"
                            "mnemo_id=(SELECT id FROM mnemos_DI WHERE tech_id='%s' AND acronyme='%s') "
+                           "ON DUPLICATE KEY UPDATE mnemo_id=VALUES(mnemo_id),"
+                           "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
+                           Json_get_int( request, "hub_id"), Json_get_int( request, "port"),
+                           phidget_classe, capteur,
+                           tech_id, acronyme
+                         ))
+          { soup_message_set_status (msg, SOUP_STATUS_OK); }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+     }
+    if (! strcasecmp( classe, "DO" ) )
+     { SQL_Write_new ( "UPDATE mnemos_DO SET map_thread='PHIDGET', map_tech_id='PHIDGET' "
+                       "WHERE tech_id='%s' AND acronyme='%s'",
+                       tech_id, acronyme
+                     );
+
+       SQL_Write_new ("UPDATE phidget_DO SET mnemo_id=NULL "
+                      "WHERE mnemo_id=(SELECT id FROM mnemos_DO WHERE tech_id='%s' AND acronyme='%s')",
+                       tech_id, acronyme
+                     );
+
+       if (SQL_Write_new ( "INSERT INTO phidget_DO SET hub_id=%d, port=%d, classe='%s', capteur='%s',"
+                           "mnemo_id=(SELECT id FROM mnemos_DO WHERE tech_id='%s' AND acronyme='%s') "
                            "ON DUPLICATE KEY UPDATE mnemo_id=VALUES(mnemo_id),"
                            "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
                            Json_get_int( request, "hub_id"), Json_get_int( request, "port"),

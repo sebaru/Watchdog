@@ -38,13 +38,14 @@
     GSList *Liste_sensors;
   };
 
- struct PHIDGET_INPUT
+ struct PHIDGET_ELEMENT
   { PhidgetHandle handle;
     gchar capteur[32];
     gchar classe[32];
     gint intervalle;
     union { struct DLS_AI *dls_ai;
             struct DLS_DI *dls_di;
+            struct DLS_DO *dls_do;
           };
   };
 
