@@ -115,7 +115,7 @@
                    "UNIQUE (hub_id, port, classe),"
                    "UNIQUE (mnemo_id),"
                    "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
-                   "FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_DI` (`id`) ON DELETE SET NULL ON UPDATE CASCADE"
+                   "FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_DO` (`id`) ON DELETE SET NULL ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
        goto end;
      }
@@ -153,7 +153,7 @@
                    "UNIQUE (hub_id, port, classe),"
                    "UNIQUE (mnemo_id),"
                    "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
-                   "FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_DI` (`id`) ON DELETE SET NULL ON UPDATE CASCADE"
+                   "FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_DO` (`id`) ON DELETE SET NULL ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
      }
 end:
@@ -736,7 +736,7 @@ error:
                                   "SELECT hub.serial AS hub_serial,hub.description AS hub_description, "
                                   "do.*,m.tech_id,m.acronyme FROM phidget_DO AS do "
                                   "INNER JOIN mnemos_DO AS m ON do.mnemo_id=m.id "
-                                  "INNER JOIN phidget_hub AS hub ON hub.id=di.hub_id "
+                                  "INNER JOIN phidget_hub AS hub ON hub.id=do.hub_id "
                                   "WHERE hub.enable=1" ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
