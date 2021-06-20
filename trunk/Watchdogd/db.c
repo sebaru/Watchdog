@@ -2331,7 +2331,7 @@ fin:
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
-                                          "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "
+                                          "(SELECT COUNT(*) FROM syns_visuels) AS nbr_syns_visuels, "
                                           "(SELECT COUNT(*) FROM syns_liens) AS nbr_syns_liens, "
                                           "(SELECT COUNT(*) FROM dls) AS nbr_dls, "
                                           "(SELECT COUNT(*) FROM mnemos_DI) AS nbr_dls_di, "

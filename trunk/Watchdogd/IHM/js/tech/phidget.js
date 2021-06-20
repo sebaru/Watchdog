@@ -37,6 +37,7 @@
  function Valider_Phidget_Hub_Set ( id )
   { var json_request =
        { enable     : false,
+         tech_id    : $('#idModalPhidgetHubTechID').val(),
          hostname   : $('#idModalPhidgetHubHostname').val(),
          description: $('#idModalPhidgetHubDescription').val(),
          password   : $('#idModalPhidgetHubPassword').val(),
@@ -52,6 +53,7 @@
   { table = $('#idTablePhidgetHub').DataTable();
     selection = table.ajax.json().hubs.filter( function(item) { return item.id==id } )[0];
     $('#idModalPhidgetHubTitre').text ( "Editer Phidget HUB - " + selection.hostname );
+    $('#idModalPhidgetHubTechID').val ( selection.tech_id );
     $('#idModalPhidgetHubHostname').val ( selection.hostname );
     $('#idModalPhidgetHubDescription').val( selection.description );
     $('#idModalPhidgetHubPassword').val( selection.password );
@@ -62,6 +64,7 @@
 /********************************************* Afichage du modal d'edition phidget ********************************************/
  function Show_Phidget_Hub_Add ()
   { $('#idModalPhidgetHubTitre').text ( "Ajouter un Hub Phidget" );
+    $('#idModalPhidgetHubTechID').val ( "" );
     $('#idModalPhidgetHubHostname').val ( "" );
     $('#idModalPhidgetHubDescription').val( "" );
     $('#idModalPhidgetHubPassword').val( "" );
@@ -94,6 +97,10 @@
                                       "Phidget_enable_hub", item.id, "Désactivé" ) );
                    }
                 },
+            },
+            { "data": null, "title":"Tech ID", "className": "align-middle text-center ",
+              "render": function (item)
+                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
             },
             { "data": "hostname", "title":"Hostname", "className": "align-middle text-center " },
             { "data": "description", "title":"Description", "className": "align-middle text-center " },
