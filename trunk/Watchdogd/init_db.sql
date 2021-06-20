@@ -469,11 +469,11 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `syns_motifs`
+-- Structure de la table `syns_visuels`
 --
 
-CREATE TABLE IF NOT EXISTS `syns_motifs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `syns_visuels` (
+  `visuel_id` int(11) NOT NULL AUTO_INCREMENT,
   `auto_create` tinyint(1) NULL DEFAULT NULL,
   `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',
   `icone` int(11) NOT NULL DEFAULT '0',

@@ -2285,7 +2285,16 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5733;
+    if (database_version < 5771)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs RENAME syns_visuels;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_visuels CHANGE `id` `visuel_id` int(11) NOT NULL AUTO_INCREMENT;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE syns_visuels SET layer=1000*id;" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5771;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );
@@ -2351,7 +2360,7 @@ fin:
        "SELECT id,'HORLOGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_HORLOGE UNION "
        "SELECT id,'TEMPO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_Tempo UNION "
        "SELECT id,'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_R UNION "
-       "SELECT id,'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM syns_motifs UNION "
+       "SELECT visuel_id,'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM syns_visuels UNION "
        "SELECT id,'WATCHDOG' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_WATCHDOG UNION "
        "SELECT id,'TABLEAU' AS classe, -1 AS classe_int, '' AS tech_id, '' AS acronyme, titre AS libelle, 'none' as unite FROM tableau UNION "
        "SELECT id,'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM msgs",

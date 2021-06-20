@@ -32,7 +32,7 @@
  #include "Db.h"
 
  #define NOM_TABLE_SYNOPTIQUE     "syns"
- #define NOM_TABLE_MOTIF          "syns_motifs"
+ #define NOM_TABLE_MOTIF          "syns_visuels"
  #define NOM_TABLE_COMMENT        "syns_comments"
  #define NOM_TABLE_PASSERELLE     "syns_pass"
  #define NOM_TABLE_PALETTE        "syns_palettes"

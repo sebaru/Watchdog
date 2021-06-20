@@ -301,7 +301,7 @@ end:
 /******************************************************************************************************************************/
  static void Http_syn_save_un_visuel (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct HTTP_CLIENT_SESSION *session = user_data;
-    if ( ! (Json_has_member ( element, "id" ) &&
+    if ( ! (Json_has_member ( element, "visuel_id" ) &&
             Json_has_member ( element, "posx" ) &&
             Json_has_member ( element, "posy" ) &&
             Json_has_member ( element, "def_color" ) &&
@@ -323,16 +323,16 @@ end:
     gchar *clic_acronyme = Normaliser_chaine( Json_get_string ( element, "clic_acronyme" ) );
     gchar *def_color     = Normaliser_chaine( Json_get_string ( element, "def_color" ) );
 
-    SQL_Write_new( "UPDATE syns_motifs AS m INNER JOIN syns AS s ON m.syn_id = s.id SET "
-                   "m.posx='%d', m.posy='%d', "
-                   "m.libelle='%s', m.tech_id='%s', m.acronyme='%s', "
-                   "m.clic_tech_id='%s', m.clic_acronyme='%s', "
-                   "m.def_color='%s', m.angle='%d', m.scale='%d', m.gestion='%d' "
-                   " WHERE m.id='%d' AND s.access_level<'%d'",
+    SQL_Write_new( "UPDATE syns_visuels AS visu INNER JOIN syns AS s ON visu.syn_id = s.id SET "
+                   "visu.posx='%d', visu.posy='%d', "
+                   "visu.libelle='%s', visu.tech_id='%s', visu.acronyme='%s', "
+                   "visu.clic_tech_id='%s', visu.clic_acronyme='%s', "
+                   "visu.def_color='%s', visu.angle='%d', visu.scale='%d', visu.gestion='%d' "
+                   " WHERE visu.visuel_id='%d' AND s.access_level<'%d'",
                    Json_get_int( element, "posx" ), Json_get_int( element, "posy" ),
                    libelle, tech_id, acronyme, clic_tech_id, clic_acronyme, def_color,
                    Json_get_int( element, "angle" ), Json_get_int(element,"scale"), Json_get_int(element,"gestion"),
-                   Json_get_int( element,"id" ), session->access_level );
+                   Json_get_int( element,"visuel_id" ), session->access_level );
 
     g_free(libelle);
     g_free(tech_id);
@@ -671,7 +671,7 @@ end:
 /*-------------------------------------------------- Envoi les visuels de la page --------------------------------------------*/
     if (full_syn)
      { if (SQL_Select_to_json_node ( synoptique, "visuels",
-                                    "SELECT visu.*,i.* FROM syns_motifs AS visu "
+                                    "SELECT visu.*,i.* FROM syns_visuels AS visu "
                                     "INNER JOIN syns AS syn ON visu.syn_id=syn.id "
                                     "LEFT JOIN icone AS i ON i.forme=visu.forme "
                                     "WHERE syn.id='%d' AND syn.access_level<=%d ORDER BY layer",
@@ -683,7 +683,7 @@ end:
      }
     else
      { if (SQL_Select_to_json_node ( synoptique, "visuels",
-                                    "SELECT visu.*,i.*,dls.shortname AS dls_shortname FROM syns_motifs AS visu "
+                                    "SELECT visu.*,i.*,dls.shortname AS dls_shortname FROM syns_visuels AS visu "
                                     "INNER JOIN dls on dls.tech_id=visu.tech_id "
                                     "INNER JOIN icone AS i ON i.forme=visu.forme "
                                     "INNER JOIN syns AS s ON dls.syn_id=s.id "

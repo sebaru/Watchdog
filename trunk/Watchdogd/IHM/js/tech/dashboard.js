@@ -7,7 +7,7 @@
     Send_to_API ( "GET", "/api/status", null, function (Response)
      { console.debug(Response);
        document.getElementById("idNbrSyns").innerHTML = Response.nbr_syns;
-       document.getElementById("idNbrSynsMotifs").innerHTML = Response.nbr_syns_motifs;
+       document.getElementById("idNbrSynsVisuels").innerHTML = Response.nbr_syns_visuels;
        document.getElementById("idNbrSynsLiens").innerHTML = Response.nbr_syns_liens;
        document.getElementById("idNbrDls").innerHTML = Response.nbr_dls;
        document.getElementById("idDlsBitparsec").innerHTML = Response.bit_par_sec;

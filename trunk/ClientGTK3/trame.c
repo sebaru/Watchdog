@@ -657,14 +657,14 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
  static void Trame_ajout_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
-  { 
+  {
     trame_motif->image  = NULL;
     trame_motif->images = NULL;
     trame_motif->nbr_images  = 0;
     trame_motif->gif_largeur = 0;
     trame_motif->gif_hauteur = 0;
     GdkPixbuf *pixbuf = NULL;
-    
+
     gchar *forme = Json_get_string ( visuel, "forme" );
     if ( !strcmp ( forme, "encadre_1x1" ) )
      { RsvgHandle *handle;
@@ -674,10 +674,10 @@ printf("Charger_pixbuf_file: %s\n", fichier );
                    "<text text-anchor='middle' x='75' y='12' "
                    "      font-family='Verdana' font-size='14px' fill='white' stroke='white'>%s</text> "
                    "<rect x='5' y='20' rx='20' width='140' height='140' "
-                   "      fill='none' stroke='%s' stroke-width='2'  />"
+                   "      fill='none' stroke='%s' stroke-width='4'  />"
                    "</svg>",
                    Json_get_string ( visuel, "libelle" ),
-                   Json_get_string ( visuel, "def_color" )
+                   Json_get_string ( visuel, "color" )
                  );
        GError *error = NULL;
        handle = rsvg_handle_new_from_data ( encadre_1x1, strlen(encadre_1x1), &error );
@@ -719,7 +719,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     trame_motif->page   = trame->page;
     trame_motif->type   = TYPE_MOTIF;
 
-    if ( !strcasecmp( Json_get_string ( visuel, "ihm_affichage" ), "complexe" ) )
+    if ( Json_has_member ( visuel, "ihm_affichage" ) && !strcasecmp( Json_get_string ( visuel, "ihm_affichage" ), "complexe" ) )
      { Trame_ajout_visuel_complexe ( trame_motif, visuel ); }
     else
      { Charger_pixbuf_id( trame_motif, Json_get_int ( visuel, "icone" ) );
