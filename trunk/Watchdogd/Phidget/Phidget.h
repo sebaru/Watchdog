@@ -36,6 +36,7 @@
  struct PHIDGET_CONFIG                                                                 /* Communication entre DLS et la Phidget */
   { struct LIBRAIRIE *lib;
     GSList *Liste_sensors;
+    void *zmq_from_bus;                                              /* Envoi des events au master si l'instance est un slave */
   };
 
  struct PHIDGET_ELEMENT

@@ -794,6 +794,8 @@ reload:
      }
     Phidget_Creer_DB();
 
+    Cfg_phidget.zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+
     if (Cfg_phidget.lib->Thread_debug) PhidgetLog_enable(PHIDGET_LOG_INFO, "phidgetlog.log");
 
     if ( Charger_tous_IO() == FALSE )                                                      /* Chargement des modules phidget */
@@ -802,12 +804,48 @@ reload:
      }
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { usleep(100000);
+     { gchar buffer[1024];
+       usleep(100000);
+
+       JsonNode *request = Recv_zmq_with_json( Cfg_phidget.zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
+       if (request)
+        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
+          if ( !strcasecmp( zmq_tag, "SET_DO" ) )
+           { if (!Json_has_member ( request, "tech_id"))
+              { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ ); }
+             else if (!Json_has_member ( request, "acronyme" ))
+              { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ ); }
+             else
+              { gchar *tech_id  = Json_get_string ( request, "tech_id" );
+                gchar *acronyme = Json_get_string ( request, "acronyme" );
+
+                Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s",
+                          __func__, tech_id, acronyme );
+
+                GSList *liste = Cfg_phidget.Liste_sensors;
+                while (liste)
+                 { struct PHIDGET_ELEMENT *canal = liste->data;
+                   if ( !strcasecmp ( canal->classe, "DigitalOutput" ) &&
+                        !strcasecmp ( canal->dls_do->tech_id, tech_id ) &&
+                        !strcasecmp ( canal->dls_do->acronyme, acronyme ) )
+                    { PhidgetDigitalOutput_setState( (PhidgetDigitalOutputHandle)&canal->handle,
+                                                     Json_get_bool ( request, "etat" )
+                                                   );
+                      break;
+                    }
+                   liste = g_slist_next(liste);
+                 }
+              }
+           }
+          json_node_unref (request);
+        }
      }
 
     Phidget_resetLibrary();
     g_slist_foreach ( Cfg_phidget.Liste_sensors, (GFunc) g_free, NULL );
     g_slist_free ( Cfg_phidget.Liste_sensors );
+
+    Zmq_Close ( Cfg_phidget.zmq_from_bus );
 
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
