@@ -232,7 +232,6 @@ end:
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %f", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
-    Dls_data_set_WATCHDOG ( NULL, canal->hub_tech_id, "IO_COMM", &canal->bit_comm, 600 );
   }
 /******************************************************************************************************************************/
 /* Phidget_onTemperatureSensorChange: Appelé quand un module I/O Temperaute a changé de valeur                                */
@@ -248,7 +247,6 @@ end:
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %f %s", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur, canal->dls_ai->unite );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
-    Dls_data_set_WATCHDOG ( NULL, canal->hub_tech_id, "IO_COMM", &canal->bit_comm, 600 );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltableInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                  */
@@ -264,7 +262,6 @@ end:
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %f %s", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur, canal->dls_ai->unite );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
-    Dls_data_set_WATCHDOG ( NULL, canal->hub_tech_id, "IO_COMM", &canal->bit_comm, 600 );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltageInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                   */
@@ -282,7 +279,6 @@ end:
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %f %s", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur, canal->dls_ai->unite );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
-    Dls_data_set_WATCHDOG ( NULL, canal->hub_tech_id, "IO_COMM", &canal->bit_comm, 600 );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltageRatoiInputChange: Appelé quand un module I/O RatioInput a changé de valeur                                */
@@ -300,8 +296,6 @@ end:
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %f %s", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur, canal->dls_ai->unite );
     Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
-    Dls_data_set_WATCHDOG ( NULL, canal->hub_tech_id, "IO_COMM", &canal->bit_comm, 600 );
-
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltableInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                  */
@@ -317,7 +311,6 @@ end:
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %d", __func__, canal->dls_di->tech_id, canal->dls_di->acronyme, valeur );
     Dls_data_set_DI ( NULL, canal->dls_di->tech_id, canal->dls_di->acronyme, (gpointer)&canal->dls_di, valeur );
-    Dls_data_set_WATCHDOG ( NULL, canal->hub_tech_id, "IO_COMM", &canal->bit_comm, 600 );
   }
 /******************************************************************************************************************************/
 /* Phidget_AnalogAttach: Appelé quand un canal analogique est en cours d'attachement                                          */
@@ -426,13 +419,13 @@ end:
     if (Dls_auto_create_plugin( canal->tech_id, description ) == FALSE)
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, canal->tech_id ); }
 
-    g_snprintf( description, sizeof(description), "Comunication du port %d sur le Hub %s", port, canal->hub_tech_id );
-    Mnemo_auto_create_WATCHDOG ( FALSE, canal->tech_id, "IO_COMM", description );
+    g_snprintf( description, sizeof(description), "Communication du port %d sur le Hub %s", port, canal->hub_tech_id );
+    Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, canal->tech_id, "IO_COMM", description );
 
     Dls_data_set_BI ( NULL, canal->tech_id, "IO_COMM", &canal->bit_comm, TRUE );
   }
 /******************************************************************************************************************************/
-/* Phidget_onAttachHandler: Appelé quand un canal estmodule I/O VoltageRatio a changé de valeur                               */
+/* Phidget_onAttachHandler: Appelé quand un canal est détaché                                                                 */
 /* Entrée: le channel, le contexte                                                                                            */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/

@@ -268,7 +268,6 @@ reload:
                              "%s: BufferOverflow, dropping trame (nbr_octet_lu=%d, cpt=%d, taille buffer=%d)",
                               __func__, nbr_octet_lu, cpt, TAILLE_BUFFER_TELEINFO  );
                   }
-
            }
         }
        if (!(Partage->top % 50))                                                                /* Test toutes les 5 secondes */

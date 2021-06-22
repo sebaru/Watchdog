@@ -1290,9 +1290,6 @@
        setlocale(LC_ALL, "C");
 
 /*---------------------------------------- Création des mnemoniques permanents -----------------------------------------------*/
-       options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Statut de la Communication de l'I/O Thread lié au module") );
-       New_alias_permanent ( NULL, "IO_COMM", MNEMO_MONOSTABLE, options );
-
        options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Statut de Synthèse de la communication du module"));
        New_alias_permanent ( NULL, "COMM", MNEMO_MONOSTABLE, options );
 

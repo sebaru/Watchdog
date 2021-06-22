@@ -1001,8 +1001,10 @@ end:
 
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s' Started", __func__, module->modbus.tech_id );
 
-    if (Dls_auto_create_plugin( module->modbus.tech_id, "Gestion du Wago" ) == FALSE)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->modbus.tech_id ); }
+    gchar description[128];
+    g_snprintf( description, sizeof(description), "Gestion du module Wago %s", module->modbus.tech_id );
+    if (Dls_auto_create_plugin( module->modbus.tech_id, description ) == FALSE)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, module->modbus.tech_id ); }
     Mnemo_auto_create_WATCHDOG ( FALSE, module->modbus.tech_id, "IO_COMM", "Statut de la communication avec le Wago" );
 
     while(Cfg_modbus.lib->Thread_run == TRUE && Cfg_modbus.lib->Thread_reload == FALSE)      /* On tourne tant que necessaire */

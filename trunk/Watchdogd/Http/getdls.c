@@ -78,13 +78,13 @@
     Json_node_add_bool   ( element, "bit_secu_pers_ok",     Dls_data_get_MONO ( dls->tech_id, "MEMSSP_OK", &dls->vars.bit_secupers_ok ) );
 
     Json_node_add_bool   ( element, "bit_acquit",           Dls_data_get_MONO ( dls->tech_id, "OSYN_ACQUIT", &dls->vars.bit_acquit ) );
-    JsonArray *io_comm_array = Json_node_add_array  ( element, "bit_IO_Comms" );
-    GSList *liste = dls->Arbre_IO_Comm;
+    JsonArray *comm_array = Json_node_add_array  ( element, "bit_Comms" );
+    GSList *liste = dls->Arbre_Comm;
     while(liste)
-     { gpointer wtd = liste->data;
-       JsonNode *io_comm = Json_node_create ();
-       Dls_WATCHDOG_to_json ( io_comm, wtd );
-       Json_array_add_element (io_comm_array, io_comm );
+     { gpointer comm = liste->data;
+       JsonNode *json_comm = Json_node_create ();
+       Dls_BOOL_to_json ( json_comm, comm );
+       Json_array_add_element (comm_array, json_comm );
        liste = g_slist_next( liste );
      }
     Json_array_add_element ( array, element );

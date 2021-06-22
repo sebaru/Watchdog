@@ -127,9 +127,9 @@
        return;
      }
 
-    if (dls->Arbre_IO_Comm)
-     { g_slist_free(dls->Arbre_IO_Comm);
-       dls->Arbre_IO_Comm = NULL;
+    if (dls->Arbre_Comm)
+     { g_slist_free(dls->Arbre_Comm);
+       dls->Arbre_Comm = NULL;
      }
 /*---------------------------- On recherche tous les tech_id des thread de DigitalInput --------------------------------------*/
     g_snprintf( chaine, sizeof(chaine), "SELECT DISTINCT(map_tech_id) FROM mnemos_DI "
@@ -141,18 +141,12 @@
      }
 
     while ( Recuperer_ligne_SQL ( db ) != NULL )
-     { gpointer wtd = NULL;
+     { gpointer comm = NULL;
        if (db->row[0])
-        { Dls_data_get_WATCHDOG ( db->row[0], "IO_COMM", &wtd );
-          if (wtd) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, wtd );
-          else { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, db->row[0] ); }
+        { Dls_data_get_MONO ( db->row[0], "COMM", &comm );
+          if (comm) dls->Arbre_Comm = g_slist_prepend ( dls->Arbre_Comm, comm );
+          else { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: %s:COMM not found !", __func__, db->row[0] ); }
         }
-     }
-    if (dls->is_thread)
-     { gpointer wtd = NULL;/* Le bit de synthèse comm du module dépend aussi de l'io_comm du module lui-meme si dependance thread */
-       Dls_data_get_WATCHDOG ( dls->tech_id, "IO_COMM", &wtd );
-       if (wtd) dls->Arbre_IO_Comm = g_slist_prepend ( dls->Arbre_IO_Comm, wtd );
-       else { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: %s:IO_COMM not found !", __func__, dls->tech_id ); }
      }
     Libere_DB_SQL ( &db );
   }
@@ -483,7 +477,7 @@
                     dlerror(), plugin->tech_id, plugin->shortname );
         }
        Partage->com_dls.Dls_plugins = g_slist_remove( Partage->com_dls.Dls_plugins, plugin );
-       if (plugin->Arbre_IO_Comm) g_slist_free(plugin->Arbre_IO_Comm);
+       if (plugin->Arbre_Comm) g_slist_free(plugin->Arbre_Comm);
                                                                              /* Destruction de l'entete associé dans la GList */
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin '%s' unloaded (%s)", __func__,
                  plugin->tech_id, plugin->nom );

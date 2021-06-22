@@ -1791,16 +1791,20 @@ end:
 /******************************************************************************************************************************/
  static void Dls_run_plugin ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { struct timeval tv_avant, tv_apres;
+    gboolean bit_comm_module = TRUE;
 
 /*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
-    gboolean bit_comm_module = TRUE;
-    GSList *liste = plugin->Arbre_IO_Comm;
-    while ( liste )
-     { gpointer wtd = liste->data;
-       bit_comm_module &= Dls_data_get_WATCHDOG( NULL, NULL, &wtd );
-       liste = g_slist_next ( liste );
+    if (!plugin->is_thread)
+     { GSList *liste = plugin->Arbre_Comm;
+       while ( liste )
+        { gpointer comm = liste->data;
+          bit_comm_module &= Dls_data_get_MONO( NULL, NULL, &comm );
+          liste = g_slist_next ( liste );
+        }
+       Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
      }
-    Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
+    else bit_comm_module = Dls_data_get_MONO ( plugin->tech_id, "COMM", &plugin->vars.bit_comm );
+
     Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "MEMSA_OK", &plugin->vars.bit_activite_ok,
                         bit_comm_module &&
                         !( Dls_data_get_MONO( plugin->tech_id, "MEMSA_DEFAUT", &plugin->vars.bit_defaut ) ||
@@ -1837,6 +1841,7 @@ end:
  void Run_dls ( void )
   { gint last_top_10sec, last_top_5sec, last_top_2sec, last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min;
     gint Update_heure=0;
+    gint wait;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
@@ -1844,6 +1849,11 @@ end:
     Partage->com_dls.Thread_run = TRUE;                                                                 /* Le thread tourne ! */
     Dls_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
+
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: Wait 10sec to let threads init", __func__ );
+    wait=10;                    /* On laisse 10 secondes pour charger tous les threads et préparer les eventuels DLS associés */
+    while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
+     { sleep(1); wait--; }
 
     Dls_Charger_plugins(TRUE);                                                                  /* Chargement des modules dls */
     Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
@@ -1866,9 +1876,10 @@ end:
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, "SYS", "FLIPFLOP_5HZ",  "Creneaux d'une durée d'un 5ième de seconde" );
 
-    gint wait=30;
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: Wait 20sec to let threads get I/Os", __func__ );
+    wait=20;
     while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
-     { sleep(1); wait--; }        /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
+     { sleep(1); wait--; }        /* attente 20 secondes pour initialisation des bit internes et collection des infos modules */
 
     Partage->com_dls.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
