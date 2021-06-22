@@ -41,6 +41,7 @@
 
  struct PHIDGET_ELEMENT
   { PhidgetHandle handle;
+    gchar tech_id[32];
     gchar hub_tech_id[32];
     gpointer bit_comm;
     gchar capteur[32];

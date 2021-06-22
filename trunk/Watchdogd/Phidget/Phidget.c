@@ -419,7 +419,17 @@ end:
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
               "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached. %d channels available.",
               __func__, tech_id, acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
-    Dls_data_set_WATCHDOG ( NULL, canal->hub_tech_id, "IO_COMM", &canal->bit_comm, 600 );
+
+    gchar description[64];
+    g_snprintf( description, sizeof(description), "Management du port %d sur le Hub %s", port, canal->hub_tech_id );
+
+    if (Dls_auto_create_plugin( canal->tech_id, description ) == FALSE)
+     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, canal->tech_id ); }
+
+    g_snprintf( description, sizeof(description), "Comunication du port %d sur le Hub %s", port, canal->hub_tech_id );
+    Mnemo_auto_create_WATCHDOG ( FALSE, canal->tech_id, "IO_COMM", description );
+
+    Dls_data_set_BI ( NULL, canal->tech_id, "IO_COMM", &canal->bit_comm, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onAttachHandler: Appelé quand un canal estmodule I/O VoltageRatio a changé de valeur                               */
@@ -471,7 +481,7 @@ end:
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
               "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') detached . %d channels available.",
               __func__, tech_id, acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
-    Dls_data_set_WATCHDOG ( NULL, canal->hub_tech_id, "IO_COMM", &canal->bit_comm, 0 );
+    Dls_data_set_BI ( NULL, canal->tech_id, "IO_COMM", &canal->bit_comm, FALSE );
   }
 /******************************************************************************************************************************/
 /* Charger_un_IO: Charge une IO dans la librairie                                                                             */
@@ -526,6 +536,7 @@ end:
      }
 
     g_snprintf( canal->capteur,     sizeof(canal->capteur), "%s", capteur );                 /* Sauvegarde du type de capteur */
+    g_snprintf( canal->tech_id,     sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );   /* Sauvegarde du type de capteur */
     g_snprintf( canal->hub_tech_id, sizeof(canal->hub_tech_id), "%s", hub_tech_id );         /* Sauvegarde du type de capteur */
     g_snprintf( canal->classe,      sizeof(canal->classe), "%s", classe );                   /* Sauvegarde du type de capteur */
 
@@ -631,6 +642,7 @@ error:
      }
 
     g_snprintf( canal->capteur,     sizeof(canal->capteur), "%s", capteur );                 /* Sauvegarde du type de capteur */
+    g_snprintf( canal->tech_id,     sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );   /* Sauvegarde du type de capteur */
     g_snprintf( canal->hub_tech_id, sizeof(canal->hub_tech_id), "%s", hub_tech_id );         /* Sauvegarde du type de capteur */
     g_snprintf( canal->classe,      sizeof(canal->classe), "%s", classe );                   /* Sauvegarde du type de capteur */
 
@@ -681,6 +693,7 @@ error:
      }
 
     g_snprintf( canal->capteur,     sizeof(canal->capteur), "%s", capteur );                 /* Sauvegarde du type de capteur */
+    g_snprintf( canal->tech_id,     sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );   /* Sauvegarde du type de capteur */
     g_snprintf( canal->hub_tech_id, sizeof(canal->hub_tech_id), "%s", hub_tech_id );         /* Sauvegarde du type de capteur */
     g_snprintf( canal->classe,      sizeof(canal->classe), "%s", classe );                   /* Sauvegarde du type de capteur */
     gchar *tech_id  = Json_get_string ( element, "tech_id" );
@@ -709,23 +722,13 @@ error:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Charger_un_hub (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { gchar chaine[256];
-
-    Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
+  { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
               "%s: Chargement du HUB '%s'('%s')", __func__,
               Json_get_string(element, "hostname"), Json_get_string(element, "description") );
 
     PhidgetNet_addServer( Json_get_string(element, "hostname"),
                           Json_get_string(element, "hostname"), 5661,
                           Json_get_string(element, "password"), 0);
-
-    g_snprintf( chaine, sizeof(chaine), "%s - %s",
-                Json_get_string ( element, "description" ), Json_get_string ( element, "hostname" ) );
-
-    gchar *tech_id = Json_get_string ( element, "tech_id" );
-    if (Dls_auto_create_plugin( tech_id, chaine ) == FALSE)
-     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, tech_id ); }
-    Mnemo_auto_create_WATCHDOG ( FALSE, tech_id, "IO_COMM", "Statut de la communication avec le Phidget" );
   }
 /******************************************************************************************************************************/
 /* Charger_tous_IO: Charge toutes les I/O Phidget                                                                             */

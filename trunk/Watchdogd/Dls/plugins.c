@@ -134,7 +134,7 @@
 /*---------------------------- On recherche tous les tech_id des thread de DigitalInput --------------------------------------*/
     g_snprintf( chaine, sizeof(chaine), "SELECT DISTINCT(map_tech_id) FROM mnemos_DI "
                                         "INNER JOIN thread_classe AS tc ON map_thread = tc.thread "
-                                        " WHERE tech_id='%s' AND tc.classe='I/O'", dls->tech_id );
+                                        "WHERE tech_id='%s' AND tc.classe='I/O'", dls->tech_id );
     if (!Lancer_requete_SQL ( db, chaine ))
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: DB request failed", __func__ );
        return;
