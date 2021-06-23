@@ -113,7 +113,7 @@
                    "%s: %s ->  sunset at %02d:%02d", __func__, city_name, heure, minute );
         }
        json_node_unref ( response );
-       Zmq_Send_WATCHDOG_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, "IO_COMM", METEO_POLLING+100 );
+       Zmq_Send_WATCHDOG_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, "IO_COMM", METEO_POLLING+100 );
      }
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
@@ -131,37 +131,37 @@
               "%s: day %02d -> temp_min=%02d, temp_max=%02d", __func__, day, temp_min, temp_max );
     gchar acronyme[64];
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", day );
-    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "tmin" ), TRUE );
+    Zmq_Send_AI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "tmin" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MAX", day );
-    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "tmax" ), TRUE );
+    Zmq_Send_AI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "tmax" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE", day );
-    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probarain" ), TRUE );
+    Zmq_Send_AI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probarain" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_GEL", day );
-    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probafrost" ), TRUE );
+    Zmq_Send_AI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probafrost" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_BROUILLARD", day );
-    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probafog" ), TRUE );
+    Zmq_Send_AI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probafog" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_70", day );
-    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probawind70" ), TRUE );
+    Zmq_Send_AI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probawind70" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_100", day );
-    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probawind100" ), TRUE );
+    Zmq_Send_AI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "probawind100" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT_SI_ORAGE", day );
-    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "gustx" ), TRUE );
+    Zmq_Send_AI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "gustx" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_VENT_A_10M", day );
-    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "wind10m" ), TRUE );
+    Zmq_Send_AI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "wind10m" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_DIRECTION_VENT", day );
-    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
+    Zmq_Send_AI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT", day );
-    Zmq_Send_AI_to_master ( Cfg_meteo.zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "gust10m" ), TRUE );
+    Zmq_Send_AI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, acronyme, 1.0*Json_get_int ( element, "gust10m" ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Meteo_get_forecast: Récupère le forecast auprès de meteoconcept                                                            */
@@ -199,7 +199,7 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct ZMQUEUE *zmq_from_bus;
+  {
 reload:
     memset( &Cfg_meteo, 0, sizeof(Cfg_meteo) );                                       /* Mise a zero de la structure de travail */
     Cfg_meteo.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
@@ -238,9 +238,6 @@ reload:
        Mnemo_auto_create_AI ( FALSE, Cfg_meteo.tech_id, acronyme,  "Vitesse des rafales de vent", "km/h" );
      }
 
-    zmq_from_bus            = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    Cfg_meteo.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
-
     Meteo_get_ephemeride();
     Meteo_get_forecast();
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
@@ -258,13 +255,11 @@ reload:
 
 /********************************************************* Envoi de SMS *******************************************************/
        JsonNode *request;
-       while ( (request=Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) )) != NULL)
+       while ( (request=Recv_zmq_with_json( lib->zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) )) != NULL)
         { /*gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );*/
           json_node_unref(request);
         }
      }
-    Zmq_Close ( zmq_from_bus );
-    Zmq_Close ( Cfg_meteo.zmq_to_master );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

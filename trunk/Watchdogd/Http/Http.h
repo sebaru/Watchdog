@@ -59,8 +59,6 @@
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;
 
-    struct ZMQUEUE *zmq_from_bus;                                                                       /* Envoi vers le msrv */
-    struct ZMQUEUE *zmq_to_master;                                                                      /* Envoi vers le msrv */
     gint tcp_port;                                           /* Port d'écoute TCP (HTTP ou HTTPS, selon le paramètre suivant) */
     gboolean ssl_enable;                                                                             /* TRUE si connexion SSL */
     gchar ssl_cert_filepath[80];

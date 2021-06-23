@@ -39,8 +39,6 @@
  struct UPS_CONFIG                                                    /* Communication entre DLS et l'UPS */
   { struct LIBRAIRIE *lib;
     GSList *Modules_UPS;
-    void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
-    void *zmq_from_bus;                                              /* Envoi des events au master si l'instance est un slave */
   };
 
  struct MODULE_UPS

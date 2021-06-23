@@ -791,8 +791,6 @@ reload:
      }
     Phidget_Creer_DB();
 
-    Cfg_phidget.zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-
     if (Cfg_phidget.lib->Thread_debug) PhidgetLog_enable(PHIDGET_LOG_INFO, "phidgetlog.log");
 
     if ( Charger_tous_IO() == FALSE )                                                      /* Chargement des modules phidget */
@@ -804,7 +802,7 @@ reload:
      { gchar buffer[1024];
        usleep(100000);
 
-       JsonNode *request = Recv_zmq_with_json( Cfg_phidget.zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
+       JsonNode *request = Recv_zmq_with_json( lib->zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
        if (request)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "SET_DO" ) )
@@ -841,8 +839,6 @@ reload:
     Phidget_resetLibrary();
     g_slist_foreach ( Cfg_phidget.Liste_sensors, (GFunc) g_free, NULL );
     g_slist_free ( Cfg_phidget.Liste_sensors );
-
-    Zmq_Close ( Cfg_phidget.zmq_from_bus );
 
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)

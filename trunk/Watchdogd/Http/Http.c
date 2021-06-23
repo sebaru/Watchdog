@@ -580,8 +580,7 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { void *zmq_motifs, *zmq_from_bus;
-    gint last_pulse = 0;
+  { gint last_pulse = 0;
     GError *error;
 
 reload:
@@ -708,9 +707,6 @@ reload:
     GMainContext *loop_context = g_main_loop_get_context ( loop );
 
     Http_Load_sessions ();
-    zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_motifs   = Zmq_Connect ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
-    Cfg_http.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { gchar buffer[2048];
@@ -724,7 +720,7 @@ reload:
 
        Http_Envoyer_les_cadrans ();
 
-       JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
+       JsonNode *request = Recv_zmq_with_json( Cfg_http.lib->zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
        if (request)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
                if (!strcasecmp( zmq_tag, "DLS_HISTO" ))    { Http_ws_send_to_all( request ); }
@@ -759,10 +755,6 @@ reload:
      }
 
     soup_server_disconnect (socket);                                                            /* Arret du serveur WebSocket */
-    /*Zmq_Close ( Cfg_http.zmq_from_bus );*/
-    Zmq_Close ( Cfg_http.zmq_to_master );
-    Zmq_Close ( zmq_motifs );
-    Zmq_Close ( zmq_from_bus );
     g_main_loop_unref(loop);
 
     Http_Save_and_close_sessions();

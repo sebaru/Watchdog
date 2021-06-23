@@ -651,7 +651,8 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct ZMQUEUE *zmq_from_bus;
+  {
+
 reload:
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                       /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
@@ -663,9 +664,6 @@ reload:
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_smsg.tech_id ); }
 
     Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_smsg.tech_id, "IO_COMM", "Statut de la communication avec le GSM" );
-
-    zmq_from_bus           = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    Cfg_smsg.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     /*Envoyer_smsg_gsm_text ( "SMS System is running" );*/
     Cfg_smsg.sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
@@ -692,14 +690,14 @@ reload:
 /****************************************************** Lecture de SMS ********************************************************/
        if (Cfg_smsg.lib->comm_status == TRUE)
         { if (Cfg_smsg.lib->comm_status == TRUE && Cfg_smsg.lib->comm_next_update < Partage->top)
-           { Zmq_Send_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", SMSG_TEMPS_UPDATE_COMM+200 );
+           { Zmq_Send_WATCHDOG_to_master ( lib->zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", SMSG_TEMPS_UPDATE_COMM+200 );
              Cfg_smsg.lib->comm_next_update = Partage->top + SMSG_TEMPS_UPDATE_COMM;
            }
           if (Lire_sms_gsm()==FALSE) { Smsg_disconnect(); }
         }
 /********************************************************* Envoi de SMS *******************************************************/
        JsonNode *request;
-       while ( (request=Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) )) != NULL)
+       while ( (request=Recv_zmq_with_json( lib->zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) )) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
@@ -717,8 +715,6 @@ reload:
         }
      }
     Smsg_disconnect();
-    Zmq_Close ( zmq_from_bus );
-    Zmq_Close ( Cfg_smsg.zmq_to_master );
 
     SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE instance='%s'", NOM_THREAD, Cfg_smsg.nbr_sms, g_get_host_name() );
 

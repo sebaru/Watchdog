@@ -65,7 +65,6 @@
   { static gint thread_count = 0;
     gchar nom[16];
     struct ZMQUEUE *zmq_motif;
-    struct ZMQUEUE *zmq_from_bus;
 
     client->ssrv_id = thread_count++;
     g_snprintf(nom, sizeof(nom), "W-SSRV-%03d", client->ssrv_id );
@@ -73,7 +72,6 @@
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
-    zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     zmq_motif    = Zmq_Connect ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
 
     while( Cfg_ssrv.lib->Thread_run == TRUE )                                                /* On tourne tant que necessaire */
@@ -134,7 +132,6 @@
      }
 /**************************************************** Arret du handle_client **************************************************/
     Zmq_Close ( zmq_motif );
-    Zmq_Close ( zmq_from_bus );
     Deconnecter(client);
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     pthread_exit( NULL );

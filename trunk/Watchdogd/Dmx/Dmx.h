@@ -68,8 +68,6 @@
     gint nbr_request;                                                                        /* Nombre de requete par seconde */
     gint fd;                                                                       /* File Descriptor d'accès au port USB DMX */
     gboolean comm_status;
-    void *zmq_from_bus;                                                              /* Reception des events depuis le master */
-    void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
     struct DLS_AO Canal[DMX_CHANNEL];                                          /* Tableau dynamique d'accès aux bits internes */
     gint taille_trame_dmx;
     struct TRAME_DMX Trame_dmx;
