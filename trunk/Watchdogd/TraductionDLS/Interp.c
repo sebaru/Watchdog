@@ -1101,20 +1101,12 @@
     gchar *forme = Normaliser_chaine ( forme_src );
     if (!forme) return(alias);
 
-    JsonNode *RootNode = Json_node_create();
-    SQL_Select_to_json_node ( RootNode, NULL, "SELECT ihm_affichage FROM icone WHERE forme='%s'", forme );
-    gchar *ihm_affichage = Json_get_string ( RootNode, "ihm_affichage" );
-    if (ihm_affichage)
-     { if (!strcasecmp ( ihm_affichage, "simple" ))
-        { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
-          g_snprintf( ss_chaine, sizeof(ss_chaine), "Clic sur l'icone depuis l'IHM" );
-          ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(ss_chaine) );
-          if ( ! Get_alias_par_acronyme ( tech_id, ss_acronyme ) )                                      /* Si pas déjà défini */
-           { New_alias ( tech_id, ss_acronyme, MNEMO_ENTREE, ss_options ); }
-        }
-     }
+    g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
+    g_snprintf( ss_chaine, sizeof(ss_chaine), "Clic sur l'icone depuis l'IHM" );
+    ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(ss_chaine) );
+    if ( ! Get_alias_par_acronyme ( tech_id, ss_acronyme ) )                                            /* Si pas déjà défini */
+     { New_alias ( tech_id, ss_acronyme, MNEMO_ENTREE, ss_options ); }
     g_free(forme);
-    json_node_unref(RootNode);
     return(alias);
   }
 /******************************************************************************************************************************/

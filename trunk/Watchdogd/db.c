@@ -2299,40 +2299,29 @@ fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );
 
-    g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `icone` ("
+    g_snprintf( requete, sizeof(requete), "CREATE TABLE `icone` ("
                                           "`id` int(11) NOT NULL AUTO_INCREMENT,"
                                           "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
-                                          "`ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
                                           "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
+                                          "`ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
                                           "PRIMARY KEY (`id`)"
                                           ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
     Lancer_requete_SQL ( db, requete );
 
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='wago_750342', ihm_affichage='cadre', extension='webp'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='satellite', ihm_affichage='cadre', extension='svg'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='sms', ihm_affichage='cadre', extension='jpg'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='ampoule', ihm_affichage='simple', extension='png'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='chaudiere_gaz', ihm_affichage='simple', extension='png'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='auto_manu', ihm_affichage='simple', extension='svg'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='kodi', ihm_affichage='cadre', extension='svg'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='film', ihm_affichage='cadre', extension='svg'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='bouton_io', ihm_affichage='simple', extension='png'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='fiche', ihm_affichage='simple', extension='png'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='voyant_moteur', ihm_affichage='simple', extension='png'" );
-    Lancer_requete_SQL ( db, requete );
-
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='encadre_1x1', ihm_affichage='complexe', extension='none'" );
-    Lancer_requete_SQL ( db, requete );
+    SQL_Write_new ( "INSERT INTO icone (`forme`, `extension`, `ihm_affichage`) VALUES"
+                    "('wago_750342',      'webp', 'static',      ),"
+                    "('satellite',        'svg',  'static',      ),"
+                    "('sms',              'jpg',  'static',      ),"
+                    "('ampoule',          'png',  'by_mode',     ),"
+                    "('chaudiere_gaz',    'png',  'by_mode',     ),"
+                    "('auto_manu',        'svg',  'by_mode',     ),"
+                    "('kodi',             'svg',  'static',      ),"
+                    "('film',             'svg',  'static',      ),"
+                    "('bouton_io',        'png',  'by_color',    ),"
+                    "('voyant_moteur',    'png',  'by_color',    ),"
+                    "('fiche',            'png',  'by_mode_color'),"
+                    "('encadre_1x1',      'none', 'complexe',    );'"
+                  );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

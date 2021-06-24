@@ -241,12 +241,14 @@
     visuel = visuels[0];
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
 console.log("Changer_etat_visuel " + visuel.ihm_affichage );
-    if (visuel.ihm_affichage=="cadre")
-     { Changer_etat_visuel_cadre ( visuel, etat );
-     }
-    else if (visuel.ihm_affichage=="simple")
-     { Changer_etat_visuel_simple ( visuel, etat );
-     }
+    if (visuel.ihm_affichage=="static")
+     { Changer_etat_visuel_static ( visuel, etat );  }
+    else if (visuel.ihm_affichage=="by_mode")
+     { Changer_etat_visuel_by_mode ( visuel, etat );   }
+    else if (visuel.ihm_affichage=="by_color")
+     { Changer_etat_visuel_by_color ( visuel, etat );   }
+    else if (visuel.ihm_affichage=="by_mode_color")
+     { Changer_etat_visuel_by_mode_color ( visuel, etat );   }
   }
 /******************************************************************************************************************************/
 /* Création d'un visuel sur la page de travail                                                                                */
@@ -256,16 +258,28 @@ console.log("Changer_etat_visuel " + visuel.ihm_affichage );
     var contenu;
     if (Response.mode == undefined) Response.mode = "hors_comm";
 /*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
-         if (Response.ihm_affichage=="cadre")
+         if (Response.ihm_affichage=="static")
      { contenu = $('<img>').addClass("wtd-visuel p-2")
                            .attr ( "id", id+"-img" )
                            .attr("src", "/img/"+Response.forme+"."+Response.extension);
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
-    else if (Response.ihm_affichage=="simple")
+    else if (Response.ihm_affichage=="by_mode")
      { contenu = $('<img>').addClass("wtd-visuel")
                            .attr ( "id", id+"-img" )
                            .attr("src", "/img/"+Response.forme+"_"+Response.mode+"."+Response.extension)
+                           .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
+     }
+    else if (Response.ihm_affichage=="by_color")
+     { contenu = $('<img>').addClass("wtd-visuel")
+                           .attr ( "id", id+"-img" )
+                           .attr("src", "/img/"+Response.forme+"_"+Response.color+"."+Response.extension)
+                           .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
+     }
+    else if (Response.ihm_affichage=="by_mode_color")
+     { contenu = $('<img>').addClass("wtd-visuel")
+                           .attr ( "id", id+"-img" )
+                           .attr("src", "/img/"+Response.forme+"_"+Response.mode+"_"+Response.color+"."+Response.extension)
                            .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
      }
     else
