@@ -2326,6 +2326,11 @@ fin:
     Lancer_requete_SQL ( db, requete );
     g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='bouton_io', ihm_affichage='simple', extension='png'" );
     Lancer_requete_SQL ( db, requete );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='fiche', ihm_affichage='simple', extension='png'" );
+    Lancer_requete_SQL ( db, requete );
+    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='voyant_moteur', ihm_affichage='simple', extension='png'" );
+    Lancer_requete_SQL ( db, requete );
+
     g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='encadre_1x1', ihm_affichage='complexe', extension='none'" );
     Lancer_requete_SQL ( db, requete );
 
