@@ -279,8 +279,9 @@ console.log("Changer_etat_visuel " + visuel.ihm_affichage );
     else if (Response.ihm_affichage=="by_mode_color")
      { contenu = $('<img>').addClass("wtd-visuel")
                            .attr ( "id", id+"-img" )
-                           .attr("src", "/img/"+Response.forme+"_"+Response.mode+"_"+Response.color+"."+Response.extension)
                            .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
+       if (Response.mode=="hors_comm") contenu.attr("src", "/img/"+Response.forme+"_source."+Response.extension);
+       else contenu.attr("src", "/img/"+Response.forme+"_"+Response.mode+"_"+Response.color+"."+Response.extension);
      }
     else
      {  }
