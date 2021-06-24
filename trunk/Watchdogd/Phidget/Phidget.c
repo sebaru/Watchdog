@@ -88,83 +88,48 @@
                    "`serial` INT(11) NOT NULL DEFAULT '0',"
                    "PRIMARY KEY (`id`),"
                    "UNIQUE (hostname),"
+                   "UNIQUE (tech_id),"
                    "UNIQUE (serial)"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
+       SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_AI` ("
+                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                   "`date_create` datetime NOT NULL DEFAULT NOW(),"
+                   "`hub_id` int(11) NOT NULL,"
+                   "`port` int(11) NOT NULL,"
+                   "`classe` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                   "`capteur` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                   "`intervalle` int(11) NOT NULL,"
+                   "PRIMARY KEY (`id`),"
+                   "UNIQUE (hub_id, port, classe),"
+                   "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
        SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_DI` ("
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                    "`hub_id` int(11) NOT NULL,"
-                   "`mnemo_id` int(11) NULL,"
+                   "`port` int(11) NOT NULL,"
                    "`classe` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                    "`capteur` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                   "`port` int(11) NOT NULL,"
                    "PRIMARY KEY (`id`),"
                    "UNIQUE (hub_id, port, classe),"
-                   "UNIQUE (mnemo_id),"
-                   "UNIQUE (tech_id),"
                    "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
-                   "FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_DI` (`id`) ON DELETE SET NULL ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
        SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_DO` ("
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                    "`hub_id` int(11) NOT NULL,"
-                   "`mnemo_id` int(11) NULL,"
+                   "`port` int(11) NOT NULL,"
                    "`classe` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                    "`capteur` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                   "`port` int(11) NOT NULL,"
                    "PRIMARY KEY (`id`),"
                    "UNIQUE (hub_id, port, classe),"
-                   "UNIQUE (mnemo_id),"
                    "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
-                   "FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_DO` (`id`) ON DELETE SET NULL ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
        goto end;
      }
 
-    if (database_version < 2)
-     { SQL_Write( "ALTER TABLE phidget_AI SET intervalle=intervalle*1000"); }
-
-    if (database_version < 3)
-     { SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_DI` ("
-                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
-                   "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                   "`hub_id` int(11) NOT NULL,"
-                   "`mnemo_id` int(11) NULL,"
-                   "`classe` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                   "`capteur` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                   "`port` int(11) NOT NULL,"
-                   "PRIMARY KEY (`id`),"
-                   "UNIQUE (hub_id, port, classe),"
-                   "UNIQUE (mnemo_id),"
-                   "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
-                   "FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_DI` (`id`) ON DELETE SET NULL ON UPDATE CASCADE"
-                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
-     }
-
-    if (database_version < 4)
-     { SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_DO` ("
-                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
-                   "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                   "`hub_id` int(11) NOT NULL,"
-                   "`mnemo_id` int(11) NULL,"
-                   "`classe` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                   "`capteur` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                   "`port` int(11) NOT NULL,"
-                   "PRIMARY KEY (`id`),"
-                   "UNIQUE (hub_id, port, classe),"
-                   "UNIQUE (mnemo_id),"
-                   "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
-                   "FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_DO` (`id`) ON DELETE SET NULL ON UPDATE CASCADE"
-                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
-     }
-
-    if (database_version < 5)
-     { SQL_Write ( "ALTER TABLE phidget_hub ADD `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' AFTER `enable`" );
-       SQL_Write ( "ALTER TABLE phidget_hub ADD UNIQUE (`tech_id`)" );
-     }
 end:
-    database_version = 5;
+    database_version = 1;
     Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
   }
 /******************************************************************************************************************************/
@@ -414,12 +379,12 @@ end:
               __func__, tech_id, acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
 
     gchar description[64];
-    g_snprintf( description, sizeof(description), "Management du port %d sur le Hub %s", port, canal->hub_tech_id );
+    g_snprintf( description, sizeof(description), "Management du module %s", canal->tech_id );
 
     if (Dls_auto_create_plugin( canal->tech_id, description ) == FALSE)
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, canal->tech_id ); }
 
-    g_snprintf( description, sizeof(description), "Communication du port %d sur le Hub %s", port, canal->hub_tech_id );
+    g_snprintf( description, sizeof(description), "Statud de la communication du module %s", canal->tech_id );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, canal->tech_id, "IO_COMM", description );
 
     Dls_data_set_BI ( NULL, canal->tech_id, "IO_COMM", &canal->bit_comm, TRUE );
@@ -517,7 +482,7 @@ end:
     gint intervalle = Json_get_int   (element, "intervalle");
 
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-              "%s: Hub  %s('%s') (S/N %d), port '%d' capteur '%s'",
+              "%s: Hub %s('%s') (S/N %d), port '%d' capteur '%s'",
               __func__, hub_tech_id, hub, serial, port, capteur );
 
     struct PHIDGET_ELEMENT *canal = g_try_malloc0 ( sizeof(struct PHIDGET_ELEMENT) );
@@ -530,7 +495,6 @@ end:
 
     g_snprintf( canal->capteur,     sizeof(canal->capteur), "%s", capteur );                 /* Sauvegarde du type de capteur */
     g_snprintf( canal->tech_id,     sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );   /* Sauvegarde du type de capteur */
-    g_snprintf( canal->hub_tech_id, sizeof(canal->hub_tech_id), "%s", hub_tech_id );         /* Sauvegarde du type de capteur */
     g_snprintf( canal->classe,      sizeof(canal->classe), "%s", classe );                   /* Sauvegarde du type de capteur */
 
     canal->intervalle = intervalle;                                               /* Sauvegarde de l'intervalle d'acquisition */
@@ -618,12 +582,12 @@ error:
   { gchar *capteur  = Json_get_string(element, "capteur");
     gchar *classe   = Json_get_string(element, "classe");
     gchar *hub_tech_id = Json_get_string(element, "hub_tech_id");
-    gint port       = Json_get_int   (element, "port");
     gchar *hub      = Json_get_string(element, "hub_description");
+    gint port       = Json_get_int   (element, "port");
     gint serial     = Json_get_int   (element, "hub_serial");
 
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-              "%s: Hub  %s('%s') (S/N %d), port '%d' capteur '%s'",
+              "%s: Hub %s('%s') (S/N %d), port '%d' capteur '%s'",
               __func__, hub_tech_id, hub, serial, port, capteur );
 
     struct PHIDGET_ELEMENT *canal = g_try_malloc0 ( sizeof(struct PHIDGET_ELEMENT) );
@@ -636,7 +600,6 @@ error:
 
     g_snprintf( canal->capteur,     sizeof(canal->capteur), "%s", capteur );                 /* Sauvegarde du type de capteur */
     g_snprintf( canal->tech_id,     sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );   /* Sauvegarde du type de capteur */
-    g_snprintf( canal->hub_tech_id, sizeof(canal->hub_tech_id), "%s", hub_tech_id );         /* Sauvegarde du type de capteur */
     g_snprintf( canal->classe,      sizeof(canal->classe), "%s", classe );                   /* Sauvegarde du type de capteur */
 
     gchar *tech_id  = Json_get_string ( element, "tech_id" );
@@ -674,7 +637,7 @@ error:
     gint serial        = Json_get_int   (element, "hub_serial");
 
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_INFO,
-              "%s: Hub  %s('%s') (S/N %d), port '%d' capteur '%s'",
+              "%s: Hub %s('%s') (S/N %d), port '%d' capteur '%s'",
               __func__, hub_tech_id, hub, serial, port, capteur );
 
     struct PHIDGET_ELEMENT *canal = g_try_malloc0 ( sizeof(struct PHIDGET_ELEMENT) );
@@ -687,7 +650,6 @@ error:
 
     g_snprintf( canal->capteur,     sizeof(canal->capteur), "%s", capteur );                 /* Sauvegarde du type de capteur */
     g_snprintf( canal->tech_id,     sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );   /* Sauvegarde du type de capteur */
-    g_snprintf( canal->hub_tech_id, sizeof(canal->hub_tech_id), "%s", hub_tech_id );         /* Sauvegarde du type de capteur */
     g_snprintf( canal->classe,      sizeof(canal->classe), "%s", classe );                   /* Sauvegarde du type de capteur */
     gchar *tech_id  = Json_get_string ( element, "tech_id" );
     gchar *acronyme = Json_get_string ( element, "acronyme" );
@@ -741,8 +703,8 @@ error:
     if (SQL_Select_to_json_node ( RootNode, "AI",
                                   "SELECT hub.serial AS hub_serial,hub.description AS hub_description, hub.tech_id AS hub_tech_id, "
                                   "ai.*,m.tech_id,m.acronyme FROM phidget_AI AS ai "
-                                  "INNER JOIN mnemos_AI AS m ON ai.mnemo_id=m.id "
                                   "INNER JOIN phidget_hub AS hub ON hub.id=ai.hub_id "
+                                  "INNER JOIN mnemos_AI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', di.port ) "
                                   "WHERE hub.enable=1" ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
@@ -752,8 +714,8 @@ error:
     if (SQL_Select_to_json_node ( RootNode, "DI",
                                   "SELECT hub.serial AS hub_serial,hub.description AS hub_description, hub.tech_id AS hub_tech_id, "
                                   "di.*,m.tech_id,m.acronyme FROM phidget_DI AS di "
-                                  "INNER JOIN mnemos_DI AS m ON di.mnemo_id=m.id "
                                   "INNER JOIN phidget_hub AS hub ON hub.id=di.hub_id "
+                                  "INNER JOIN mnemos_DI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', ai.port ) "
                                   "WHERE hub.enable=1" ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
@@ -763,8 +725,8 @@ error:
     if (SQL_Select_to_json_node ( RootNode, "DO",
                                   "SELECT hub.serial AS hub_serial,hub.description AS hub_description, hub.tech_id AS hub_tech_id, "
                                   "do.*,m.tech_id,m.acronyme FROM phidget_DO AS do "
-                                  "INNER JOIN mnemos_DO AS m ON do.mnemo_id=m.id "
                                   "INNER JOIN phidget_hub AS hub ON hub.id=do.hub_id "
+                                  "INNER JOIN mnemos_DO AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', do.port ) "
                                   "WHERE hub.enable=1" ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
