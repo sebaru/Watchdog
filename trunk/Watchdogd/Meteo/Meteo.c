@@ -91,7 +91,9 @@
 
     Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
     if (status_code!=200)
-     { Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_ERR, "%s: Error: %s\n", __func__, reason_phrase ); }
+     { Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_ERR, "%s: Error: %s\n", __func__, reason_phrase );
+       Zmq_Send_DI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, "IO_COMM", FALSE );
+     }
     else
      { gint heure, minute;
        JsonNode *response = Http_Response_Msg_to_Json ( soup_msg );
@@ -113,7 +115,7 @@
                    "%s: %s ->  sunset at %02d:%02d", __func__, city_name, heure, minute );
         }
        json_node_unref ( response );
-       Zmq_Send_WATCHDOG_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, "IO_COMM", METEO_POLLING+100 );
+       Zmq_Send_DI_to_master ( Cfg_meteo.lib->zmq_to_master, NOM_THREAD, Cfg_meteo.tech_id, "IO_COMM", TRUE );
      }
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
@@ -209,7 +211,7 @@ reload:
     if (Dls_auto_create_plugin( Cfg_meteo.tech_id, "Gestion de la météo" ) == FALSE)
      { Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_meteo.tech_id ); }
 
-    Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_meteo.tech_id, "IO_COMM", "Statut de la communication avec l'api meteo concept" );
+    Mnemo_auto_create_DI       ( FALSE, Cfg_meteo.tech_id, "IO_COMM", "Statut de la communication avec l'api meteo concept" );
     Mnemo_auto_create_HORLOGE  ( FALSE, Cfg_meteo.tech_id, "SUNRISE", "Horloge du levé du soleil" );
     Mnemo_auto_create_HORLOGE  ( FALSE, Cfg_meteo.tech_id, "SUNSET",  "Horloge du couché du soleil" );
     for (gint cpt=0; cpt<=13; cpt++)

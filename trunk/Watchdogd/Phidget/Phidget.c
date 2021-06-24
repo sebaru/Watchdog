@@ -385,9 +385,9 @@ end:
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, canal->tech_id ); }
 
     g_snprintf( description, sizeof(description), "Statud de la communication du module %s", canal->tech_id );
-    Mnemo_auto_create_BOOL ( FALSE, MNEMO_BISTABLE, canal->tech_id, "IO_COMM", description );
+    Mnemo_auto_create_DI ( FALSE, canal->tech_id, "IO_COMM", description );
 
-    Dls_data_set_BI ( NULL, canal->tech_id, "IO_COMM", &canal->bit_comm, TRUE );
+    Dls_data_set_DI ( NULL, canal->tech_id, "IO_COMM", &canal->bit_comm, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onAttachHandler: Appelé quand un canal est détaché                                                                 */
@@ -439,7 +439,7 @@ end:
     Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
               "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') detached . %d channels available.",
               __func__, tech_id, acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
-    Dls_data_set_BI ( NULL, canal->tech_id, "IO_COMM", &canal->bit_comm, FALSE );
+    Dls_data_set_DI ( NULL, canal->tech_id, "IO_COMM", &canal->bit_comm, FALSE );
   }
 /******************************************************************************************************************************/
 /* Charger_un_IO: Charge une IO dans la librairie                                                                             */

@@ -242,7 +242,7 @@ end:
     GSM_FreeStateMachine(Cfg_smsg.gammu_machine);                                                      /* Free up used memory */
     Cfg_smsg.gammu_machine = NULL;
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Disconnected", __func__ );
-    Zmq_Send_WATCHDOG_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", 0 );
+    Zmq_Send_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", FALSE );
     Cfg_smsg.lib->comm_status = FALSE;
   }
 /******************************************************************************************************************************/
@@ -663,7 +663,7 @@ reload:
     if (Dls_auto_create_plugin( Cfg_smsg.tech_id, "Gestion du GSM" ) == FALSE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_smsg.tech_id ); }
 
-    Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_smsg.tech_id, "IO_COMM", "Statut de la communication avec le GSM" );
+    Mnemo_auto_create_DI ( FALSE, Cfg_smsg.tech_id, "IO_COMM", "Statut de la communication avec le GSM" );
 
     /*Envoyer_smsg_gsm_text ( "SMS System is running" );*/
     Cfg_smsg.sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
@@ -690,7 +690,7 @@ reload:
 /****************************************************** Lecture de SMS ********************************************************/
        if (Cfg_smsg.lib->comm_status == TRUE)
         { if (Cfg_smsg.lib->comm_status == TRUE && Cfg_smsg.lib->comm_next_update < Partage->top)
-           { Zmq_Send_WATCHDOG_to_master ( lib->zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", SMSG_TEMPS_UPDATE_COMM+200 );
+           { Zmq_Send_DI_to_master ( lib->zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", SMSG_TEMPS_UPDATE_COMM+200 );
              Cfg_smsg.lib->comm_next_update = Partage->top + SMSG_TEMPS_UPDATE_COMM;
            }
           if (Lire_sms_gsm()==FALSE) { Smsg_disconnect(); }
