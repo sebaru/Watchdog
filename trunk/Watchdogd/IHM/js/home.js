@@ -256,7 +256,7 @@ console.log("Changer_etat_visuel " + visuel.ihm_affichage );
  function Creer_visuel ( Response )
   { var id = "wtd-visu-"+Response.tech_id+"-"+Response.acronyme;
     var contenu;
-    if (Response.mode == undefined) Response.mode = "hors_comm";
+
 /*-------------------------------------------------- Visuel mode cadre -------------------------------------------------------*/
          if (Response.ihm_affichage=="static")
      { contenu = $('<img>').addClass("wtd-visuel p-2")
