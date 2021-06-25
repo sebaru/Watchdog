@@ -704,7 +704,7 @@ error:
                                   "SELECT hub.serial AS hub_serial,hub.description AS hub_description, hub.tech_id AS hub_tech_id, "
                                   "ai.*,m.tech_id,m.acronyme FROM phidget_AI AS ai "
                                   "INNER JOIN phidget_hub AS hub ON hub.id=ai.hub_id "
-                                  "INNER JOIN mnemos_AI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', di.port ) "
+                                  "INNER JOIN mnemos_AI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', ai.port ) "
                                   "WHERE hub.enable=1" ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
@@ -715,7 +715,7 @@ error:
                                   "SELECT hub.serial AS hub_serial,hub.description AS hub_description, hub.tech_id AS hub_tech_id, "
                                   "di.*,m.tech_id,m.acronyme FROM phidget_DI AS di "
                                   "INNER JOIN phidget_hub AS hub ON hub.id=di.hub_id "
-                                  "INNER JOIN mnemos_DI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', ai.port ) "
+                                  "INNER JOIN mnemos_DI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', di.port ) "
                                   "WHERE hub.enable=1" ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);

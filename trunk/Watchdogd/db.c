@@ -2320,7 +2320,7 @@ fin:
                     "('bouton_io',        'png',  'by_color'     ),"
                     "('voyant_moteur',    'png',  'by_color'     ),"
                     "('check',            'png',  'by_mode'      ),"
-                    "('encadre_1x1',      'none', 'complexe'     );'"
+                    "('encadre_1x1',      'none', 'complexe'     );"
                   );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "

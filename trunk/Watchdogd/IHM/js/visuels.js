@@ -24,7 +24,7 @@
 /*-------------------------------------------------- Visuel commun -----------------------------------------------------------*/
     if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
                 else $("#"+idimage).removeClass("wtd-cligno");
-    $("#"+idfooter).text(etat.libelle);
+    $("#"+idfooter).addClass("text-white").text(etat.libelle);
 
   }
 /******************************************************************************************************************************/
@@ -53,7 +53,7 @@
 /*-------------------------------------------------- Visuel commun -----------------------------------------------------------*/
     if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
                 else $("#"+idimage).removeClass("wtd-cligno");
-    $("#"+idfooter).text(etat.libelle);
+    $("#"+idfooter).addClass("text-white").text(etat.libelle);
   }
 /******************************************************************************************************************************/
 /* Changer_etat_visuel: Appeler par la websocket pour changer un visuel d'etat                                                */
@@ -81,7 +81,7 @@
 /*-------------------------------------------------- Visuel commun -----------------------------------------------------------*/
     if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
                 else $("#"+idimage).removeClass("wtd-cligno");
-    $("#"+idfooter).text(etat.libelle);
+    $("#"+idfooter).addClass("text-white").text(etat.libelle);
   }
 /******************************************************************************************************************************/
 /* Changer_etat_visuel: Appeler par la websocket pour changer un visuel d'etat                                                */
