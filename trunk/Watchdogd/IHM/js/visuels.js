@@ -11,27 +11,21 @@
     console.log("Changer_etat_visuel_by_mode " + etat.tech_id + ":" + etat.acronyme + " -> mode = "+etat.mode +" couleur="+etat.color );
     console.debug(visuel);
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
-         if (etat.mode=="hors_comm")
-     { /*target = "/img/"+visuel.forme+"_default."+visuel.extension;*/
-       etat.cligno = false;
+    if (etat.mode=="hors_comm")
+     { etat.cligno = false;
        $("#"+idimage).addClass("wtd-img-grayscale");
-       $("#"+idfooter).removeClass("text-white").addClass("text-warning").text("Hors Comm");
-       /*Changer_img_src ( idimage, target );*/
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else
      { target = "/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension;
        Changer_img_src ( idimage, target );
-     }
-
-    if (etat.mode!="hors_comm")
-     { $("#"+idimage).removeClass("wtd-img-grayscale");
-       $("#"+idfooter).addClass("text-white").removeClass("text-warning").text(etat.libelle);
+       $("#"+idimage).removeClass("wtd-img-grayscale");
      }
 /*-------------------------------------------------- Visuel commun -----------------------------------------------------------*/
     if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
                 else $("#"+idimage).removeClass("wtd-cligno");
-    /*$("#"+idvisuel).css("border-radius", "30px" );*/
+    $("#"+idfooter).text(etat.libelle);
+
   }
 /******************************************************************************************************************************/
 /* Changer_etat_visuel: Appeler par la websocket pour changer un visuel d'etat                                                */
@@ -46,27 +40,20 @@
     console.log("Changer_etat_1_visuel_by_color " + etat.tech_id + ":" + etat.acronyme + " -> mode = "+etat.mode +" couleur="+etat.color );
     console.debug(visuel);
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
-         if (etat.mode=="hors_comm")
-     { /*target = "/img/"+visuel.forme+"_default."+visuel.extension;*/
-       etat.cligno = false;
+    if (etat.mode=="hors_comm")
+     { etat.cligno = false;
        $("#"+idimage).addClass("wtd-img-grayscale");
-       $("#"+idfooter).removeClass("text-white").addClass("text-warning").text("Hors Comm");
-       /*Changer_img_src ( idimage, target );*/
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else
      { target = "/img/"+visuel.forme+"_"+etat.color+"."+visuel.extension;
        Changer_img_src ( idimage, target );
-     }
-
-    if (etat.mode!="hors_comm")
-     { $("#"+idimage).removeClass("wtd-img-grayscale");
-       $("#"+idfooter).addClass("text-white").removeClass("text-warning").text(etat.libelle);
+       $("#"+idimage).removeClass("wtd-img-grayscale");
      }
 /*-------------------------------------------------- Visuel commun -----------------------------------------------------------*/
     if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
                 else $("#"+idimage).removeClass("wtd-cligno");
-    /*$("#"+idvisuel).css("border-radius", "30px" );*/
+    $("#"+idfooter).text(etat.libelle);
   }
 /******************************************************************************************************************************/
 /* Changer_etat_visuel: Appeler par la websocket pour changer un visuel d'etat                                                */
@@ -81,27 +68,20 @@
     console.log("Changer_etat_visuel_by_mode_color " + etat.tech_id + ":" + etat.acronyme + " -> mode = "+etat.mode +" couleur="+etat.color );
     console.debug(visuel);
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
-         if (etat.mode=="hors_comm")
-     { /*target = "/img/"+visuel.forme+"_default."+visuel.extension;*/
-       etat.cligno = false;
+    if (etat.mode=="hors_comm")
+     { etat.cligno = false;
        $("#"+idimage).addClass("wtd-img-grayscale");
-       $("#"+idfooter).removeClass("text-white").addClass("text-warning").text("Hors Comm");
-       /*Changer_img_src ( idimage, target );*/
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else
      { target = "/img/"+visuel.forme+"_"+etat.mode+"_"+etat.color+"."+visuel.extension;
        Changer_img_src ( idimage, target );
-     }
-
-    if (etat.mode!="hors_comm")
-     { $("#"+idimage).removeClass("wtd-img-grayscale");
-       $("#"+idfooter).addClass("text-white").removeClass("text-warning").text(etat.libelle);
+       $("#"+idimage).removeClass("wtd-img-grayscale");
      }
 /*-------------------------------------------------- Visuel commun -----------------------------------------------------------*/
     if (etat.cligno) $("#"+idimage).addClass("wtd-cligno");
                 else $("#"+idimage).removeClass("wtd-cligno");
-    /*$("#"+idvisuel).css("border-radius", "30px" );*/
+    $("#"+idfooter).text(etat.libelle);
   }
 /******************************************************************************************************************************/
 /* Changer_etat_visuel: Appeler par la websocket pour changer un visuel d'etat                                                */
@@ -117,17 +97,15 @@
     console.debug(visuel);
 
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
-         if (etat.mode=="hors_comm")
+    if (etat.mode=="hors_comm")
      { etat.cligno = false;
        $("#"+idimage).addClass("wtd-img-grayscale");
-       $("#"+idfooter).removeClass("text-white").addClass("text-warning");
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else
      { target = "/img/"+visuel.forme+"."+visuel.extension;
        Changer_img_src ( idimage, target );
        $("#"+idimage).removeClass("wtd-img-grayscale");
-       $("#"+idfooter).addClass("text-white").removeClass("text-warning");
      }
 
 /*-------------------------------------------------- Visuel commun -----------------------------------------------------------*/
