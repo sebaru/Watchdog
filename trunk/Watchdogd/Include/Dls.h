@@ -194,7 +194,7 @@
  struct DLS_VISUEL
   { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar    mode[16];
+    gchar    mode[32];
     gchar    color[16];
     gboolean cligno;
     gint     last_change;
