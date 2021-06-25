@@ -2319,7 +2319,7 @@ fin:
                     "('film',             'svg',  'static'       ),"
                     "('bouton_io',        'png',  'by_color'     ),"
                     "('voyant_moteur',    'png',  'by_color'     ),"
-                    "('fiche',            'png',  'by_mode_color'),"
+                    "('check',            'png',  'by_mode'      ),"
                     "('encadre_1x1',      'none', 'complexe'     );'"
                   );
 
