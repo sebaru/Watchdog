@@ -161,6 +161,7 @@
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */
+ extern void Convert_libelle_dynamique ( gchar *local_tech_id, gchar *libelle, gint taille_max );
 
  extern void Gerer_arrive_Ixxx_dls ( void );                                                           /* Dans distrib_Ixxx.c */
 
