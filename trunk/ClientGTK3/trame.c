@@ -297,17 +297,17 @@ printf("%s : posx %d, posy %d\n", __func__, Json_get_int ( trame_cadran->cadran,
     buffer = gdk_pixbuf_get_pixels( trame_motif->pixbuf );
 
     gint rouge = 0, vert = 0, bleu = 0;
-         if (!strcasecmp(color, "red"))       { rouge = 255; vert =   0; bleu =   0; }
-    else if (!strcasecmp(color, "lime"))      { rouge =   0; vert = 255; bleu =   0; }
-    else if (!strcasecmp(color, "blue"))      { rouge =   0; vert =   0; bleu = 255; }
-    else if (!strcasecmp(color, "yellow"))    { rouge = 255; vert = 255; bleu =   0; }
+         if (!strcasecmp(color, "rouge"))     { rouge = 255; vert =   0; bleu =   0; }
+    else if (!strcasecmp(color, "vert"))      { rouge =   0; vert = 255; bleu =   0; }
+    else if (!strcasecmp(color, "bleu"))      { rouge =   0; vert =   0; bleu = 255; }
+    else if (!strcasecmp(color, "jaune"))     { rouge = 255; vert = 255; bleu =   0; }
     else if (!strcasecmp(color, "orange"))    { rouge = 255; vert = 190; bleu =   0; }
-    else if (!strcasecmp(color, "white"))     { rouge = 255; vert = 255; bleu = 255; }
-    else if (!strcasecmp(color, "darkgreen")) { rouge =   0; vert = 100; bleu =   0; }
-    else if (!strcasecmp(color, "lightgray")) { rouge = 127; vert = 127; bleu = 127; }
-    else if (!strcasecmp(color, "brown"))     { rouge = 165; vert =  42; bleu =  42; }
-    else if (!strcasecmp(color, "kaki"))      { rouge = 100; vert = 100; bleu = 100; }
-    else if (!strcasecmp(color, "black"))     { rouge =   0; vert =   0; bleu =   0; }
+    else if (!strcasecmp(color, "blanc"))     { rouge = 255; vert = 255; bleu = 255; }
+    else if (!strcasecmp(color, "kaki"))      { rouge =   0; vert = 100; bleu =   0; }
+    else if (!strcasecmp(color, "gris"))      { rouge = 127; vert = 127; bleu = 127; }
+    else if (!strcasecmp(color, "marron"))    { rouge = 165; vert =  42; bleu =  42; }
+    else if (!strcasecmp(color, "grisfonce")) { rouge = 100; vert = 100; bleu = 100; }
+    else if (!strcasecmp(color, "noir"))      { rouge =   0; vert =   0; bleu =   0; }
     else if (!strcasecmp(color, "#000"))      { rouge =   0; vert =   0; bleu =   0; }
     else if (!strcasecmp(color, "#4A4A4A"))   { rouge = 0x4A; vert = 0x4A; bleu = 0x4A; }
     else if (!strcasecmp(color, "#4D4D4D"))   { rouge = 0x4D; vert = 0x4D; bleu = 0x4D; }

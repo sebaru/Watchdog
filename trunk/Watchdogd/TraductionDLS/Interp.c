@@ -913,15 +913,15 @@
     action = New_action();
     action->alors = New_chaine( taille );
     switch (coul)
-     { case ROUGE   : color="red"; break;
-       case VERT    : color="lime"; break;
-       case BLEU    : color="blue"; break;
-       case JAUNE   : color="yellow"; break;
+     { case ROUGE   : color="rouge"; break;
+       case VERT    : color="vert"; break;
+       case BLEU    : color="bleu"; break;
+       case JAUNE   : color="jaune"; break;
        case ORANGE  : color="orange"; break;
-       case BLANC   : color="white"; break;
-       case GRIS    : color="lightgray"; break;
-       case KAKI    : color="darkgreen"; break;
-       default      : color="black";
+       case BLANC   : color="blanc"; break;
+       case GRIS    : color="gris"; break;
+       case KAKI    : color="kaki"; break;
+       default      : color="noir";
      }
     if (mode_string==NULL)
      { g_snprintf( action->alors, taille,
