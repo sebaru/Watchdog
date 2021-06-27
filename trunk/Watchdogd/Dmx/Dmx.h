@@ -49,7 +49,6 @@
 
  #define DMX_RETRY       100                                             /* 10 secondes entre chaque retry si pb de connexion */
  #define DMX_CHANNEL     512
- #define NOM_THREAD      "dmx"
 
  struct TRAME_DMX                                                                               /* Definition d'une trame DMX */
   { guchar start_delimiter;                                                            /* Start of message delimiter, hex 7E. */
