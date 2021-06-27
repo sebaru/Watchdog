@@ -196,7 +196,7 @@ end:
 reload:
     memset( &Cfg_teleinfo, 0, sizeof(Cfg_teleinfo) );                               /* Mise a zero de la structure de travail */
     Cfg_teleinfo.lib = lib;                                        /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-TINFOEDF", "I/O", lib, WTD_VERSION, "Manage TELEINFOEDF Sensors" );
+    Thread_init ( "teleinfo", "I/O", lib, WTD_VERSION, "Manage TELEINFOEDF Sensors" );
     Teleinfo_Creer_DB ();                                                                   /* Création de la base de données */
     Teleinfo_Lire_config ();                                                /* Lecture de la configuration logiciel du thread */
 

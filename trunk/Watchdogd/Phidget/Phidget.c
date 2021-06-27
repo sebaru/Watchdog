@@ -53,8 +53,8 @@
 /******************************************************************************************************************************/
  static gboolean Phidget_Lire_config ( void )
   { gchar *result;
-    Creer_configDB ( NOM_THREAD, "debug", "false" );
-    result = Recuperer_configDB_by_nom ( NOM_THREAD, "debug" );
+    Creer_configDB ( Cfg_phidget.lib->name, "debug", "false" );
+    result = Recuperer_configDB_by_nom ( Cfg_phidget.lib->name, "debug" );
     Cfg_phidget.lib->Thread_debug = !g_ascii_strcasecmp(result, "true");
     g_free(result);
     return(TRUE);
@@ -67,7 +67,7 @@
  static void Phidget_Creer_DB ( void )
   { gint database_version;
 
-    gchar *database_version_string = Recuperer_configDB_by_nom( NOM_THREAD, "database_version" );
+    gchar *database_version_string = Recuperer_configDB_by_nom( Cfg_phidget.lib->name, "database_version" );
     if (database_version_string)
      { database_version = atoi( database_version_string );
        g_free(database_version_string);
@@ -130,7 +130,7 @@
 
 end:
     database_version = 1;
-    Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
+    Modifier_configDB_int ( Cfg_phidget.lib->name, "database_version", database_version );
   }
 /******************************************************************************************************************************/
 /* Charger_un_Hub: Charge un Hub dans la librairie                                                                            */
@@ -744,7 +744,7 @@ error:
 reload:
     memset( &Cfg_phidget, 0, sizeof(Cfg_phidget) );                                 /* Mise a zero de la structure de travail */
     Cfg_phidget.lib = lib;                                         /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-PHIDGET", "I/O", lib, WTD_VERSION, "Manage Phidget System" );
+    Thread_init ( "phidget", "I/O", lib, WTD_VERSION, "Manage Phidget System" );
     Phidget_Lire_config ();                                                 /* Lecture de la configuration logiciel du thread */
     if (Config.instance_is_master==FALSE)
      { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE,
@@ -761,11 +761,10 @@ reload:
      }
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { gchar buffer[1024];
-       usleep(100000);
+     { usleep(100000);
 
-       JsonNode *request = Recv_zmq_with_json( lib->zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
-       if (request)
+       JsonNode *request;
+       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "SET_DO" ) )
            { if (!Json_has_member ( request, "tech_id"))

@@ -31,8 +31,6 @@
  #include <json-glib/json-glib.h>
  #include <phidget22.h>
 
- #define NOM_THREAD                "phidget"
-
  struct PHIDGET_CONFIG                                                                 /* Communication entre DLS et la Phidget */
   { struct LIBRAIRIE *lib;
     GSList *Liste_sensors;
