@@ -262,6 +262,7 @@ reload:
         }
      }
 
+    Zmq_Send_DI_to_master ( Cfg_meteo.lib, Cfg_meteo.tech_id, "IO_COMM", FALSE );
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
