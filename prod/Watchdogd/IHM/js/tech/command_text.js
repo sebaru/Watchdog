@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', Load_page, false);
     $('#idModalEditDI').modal("hide");
     var json_request = JSON.stringify(
        { classe     : 'DI',
-         thread     : 'COMMAND_TXT',
+         thread     : 'COMMAND_TEXT',
          tech_id    : $('#idModalEditSelectTechID').val().toUpperCase(),
          acronyme   : $('#idModalEditSelectAcronyme').val().toUpperCase(),
          map_tag    : $('#idModalEditTXTTag').val().toUpperCase(),

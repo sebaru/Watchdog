@@ -20,7 +20,7 @@
     <div class="card-body">
       <ul>
       <li><h6 class="card-text"><span id="idNbrSyns">-</span> Synoptiques</h6></li>
-      <li><h6 class="card-text"><span id="idNbrSynsMotifs">-</span> Motifs</h6></li>
+      <li><h6 class="card-text"><span id="idNbrSynsVisuels">-</span> Motifs</h6></li>
       <li><h6 class="card-text"><span id="idNbrSynsLiens">-</span> Liens</h6></li>
       </ul>
       <!--<h3 class="card-text text-center"><strong>56</h3>-->

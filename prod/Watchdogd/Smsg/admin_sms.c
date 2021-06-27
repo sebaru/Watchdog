@@ -47,7 +47,7 @@
        return;
      }
 
-    SQL_Select_to_json_node ( RootNode, "gsms", "SELECT instance, tech_id, description FROM %s", NOM_THREAD );
+    SQL_Select_to_json_node ( RootNode, "gsms", "SELECT instance, tech_id, description FROM %s", Cfg_smsg.lib->name );
     gchar *buf = Json_node_to_string ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -121,7 +121,7 @@
 
     SQL_Write_new ( "UPDATE %s SET tech_id='%s', description='%s', ovh_service_name='%s', ovh_application_key='%s',"
                     "ovh_application_secret='%s', ovh_consumer_key='%s' "
-                    "WHERE instance='%s'", NOM_THREAD,
+                    "WHERE instance='%s'", Cfg_smsg.lib->name,
                     tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key, g_get_host_name() );
     json_node_unref(request);
     g_free(tech_id);

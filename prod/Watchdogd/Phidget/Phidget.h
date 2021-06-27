@@ -31,19 +31,22 @@
  #include <json-glib/json-glib.h>
  #include <phidget22.h>
 
- #define NOM_THREAD                "phidget"
-
  struct PHIDGET_CONFIG                                                                 /* Communication entre DLS et la Phidget */
   { struct LIBRAIRIE *lib;
     GSList *Liste_sensors;
   };
 
- struct PHIDGET_ANALOGINPUT
+ struct PHIDGET_ELEMENT
   { PhidgetHandle handle;
+    gchar tech_id[32];
+    gpointer bit_comm;
     gchar capteur[32];
     gchar classe[32];
     gint intervalle;
-    struct DLS_AI *dls_ai;
+    union { struct DLS_AI *dls_ai;
+            struct DLS_DI *dls_di;
+            struct DLS_DO *dls_do;
+          };
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/

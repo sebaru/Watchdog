@@ -166,7 +166,7 @@ end:
     if (module->DI) g_free(module->DI);
     if (module->AI) g_free(module->AI);
     if (module->DO) g_free(module->DO);
-    Dls_data_set_WATCHDOG ( NULL, module->modbus.tech_id, "IO_COMM", &module->bit_comm, 0 );
+    Dls_data_set_DI ( NULL, module->modbus.tech_id, "IO_COMM", &module->bit_comm, FALSE );
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s': Module disconnected", __func__, module->modbus.tech_id );
   }
 /******************************************************************************************************************************/
@@ -778,7 +778,7 @@ end:
     else
      { int cpt_byte, cpt_poid, cpt;
        module->date_last_reponse = Partage->top;                                                   /* Estampillage de la date */
-       Dls_data_set_WATCHDOG ( NULL, module->modbus.tech_id, "IO_COMM", &module->bit_comm, 600 );
+       Dls_data_set_DI ( NULL, module->modbus.tech_id, "IO_COMM", &module->bit_comm, TRUE );
        if (ntohs(module->response.transaction_id) != module->transaction_id)                              /* Mauvaise reponse */
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                    "%s: '%s': wrong transaction_id for module %d  attendu %d, recu %d", __func__, module->modbus.tech_id,
@@ -1001,9 +1001,11 @@ end:
 
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: '%s' Started", __func__, module->modbus.tech_id );
 
-    if (Dls_auto_create_plugin( module->modbus.tech_id, "Gestion du Wago" ) == FALSE)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", module->modbus.tech_id ); }
-    Mnemo_auto_create_WATCHDOG ( FALSE, module->modbus.tech_id, "IO_COMM", "Statut de la communication avec le Wago" );
+    gchar description[128];
+    g_snprintf( description, sizeof(description), "Gestion du module Wago %s", module->modbus.tech_id );
+    if (Dls_auto_create_plugin( module->modbus.tech_id, description ) == FALSE)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, module->modbus.tech_id ); }
+    Mnemo_auto_create_DI ( FALSE, module->modbus.tech_id, "IO_COMM", "Statut de la communication avec le Wago" );
 
     while(Cfg_modbus.lib->Thread_run == TRUE && Cfg_modbus.lib->Thread_reload == FALSE)      /* On tourne tant que necessaire */
      { sched_yield();
@@ -1149,7 +1151,7 @@ end:
 reload:
     memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );                                   /* Mise a zero de la structure de travail */
     Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-MODBUS", "I/O", lib, WTD_VERSION, "Manage Modbus System" );
+    Thread_init ( "modbus", "I/O", lib, WTD_VERSION, "Manage Modbus System" );
     Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
     if (Config.instance_is_master==FALSE)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
@@ -1167,6 +1169,10 @@ reload:
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { usleep(100000);
+
+       JsonNode *request;                                                                          /* Ecoute du Master Server */
+       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
+        { json_node_unref( request ); }
      }
     Decharger_tous_MODBUS();
 

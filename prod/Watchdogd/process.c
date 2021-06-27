@@ -46,35 +46,52 @@
 
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
-/* Entrée: Le nom du thread, son niveau de log                                                                                */
-/* Sortie: FALSE si erreur                                                                                                    */
+/* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Thread_init ( gchar *pr_name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description )
+ void Thread_init ( gchar *name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description )
   { gchar chaine[128];
-    prctl(PR_SET_NAME, pr_name, 0, 0, 0 );
+
+    g_snprintf( chaine, sizeof(chaine), "W-%s", name );
+    gchar *upper_name = g_ascii_strup ( chaine, -1 );
+    prctl(PR_SET_NAME, upper_name, 0, 0, 0 );
+    g_free(upper_name);
+
     lib->TID = pthread_self();                                                              /* Sauvegarde du TID pour le pere */
     lib->Thread_run = TRUE;                                                                             /* Le thread tourne ! */
     time ( &lib->start_time );
-    g_snprintf( lib->version,      sizeof(lib->version),      version );
-    g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   description );
-    Modifier_configDB ( lib->admin_prompt, "thread_version", lib->version );
+    g_snprintf( lib->name,        sizeof(lib->name),        name );
+    g_snprintf( lib->description, sizeof(lib->description), description );
+    g_snprintf( lib->version,     sizeof(lib->version),     version );
+    Modifier_configDB ( lib->name, "thread_version", lib->version );
     g_snprintf( chaine, sizeof(chaine), "INSERT INTO thread_classe SET thread=UPPER('%s'), classe=UPPER('%s') "
-                                        "ON DUPLICATE KEY UPDATE classe=VALUES(classe)", lib->admin_prompt, classe );
+                                        "ON DUPLICATE KEY UPDATE classe=VALUES(classe)", lib->name, classe );
     SQL_Write ( chaine );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Démarrage du thread '%s' (v%s) de classe '%s' -> TID = %p", __func__,
-              lib->admin_prompt, lib->version, classe, pthread_self() );
+              lib->name, lib->version, classe, pthread_self() );
+    lib->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    lib->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
   }
 /******************************************************************************************************************************/
-/* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
-/* Entrée: Le nom du thread, son niveau de log                                                                                */
-/* Sortie: FALSE si erreur                                                                                                    */
+/* Thread_end: appelé par chaque thread, lors de son arret                                                                    */
+/* Entrée: Le nom du thread                                                                                                   */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Thread_end ( struct LIBRAIRIE *lib )
-  { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: v%s Down . . . TID = %p", lib->admin_prompt, lib->version, pthread_self() );
+  { Zmq_Close ( lib->zmq_from_bus );
+    Zmq_Close ( lib->zmq_to_master );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: v%s Down . . . TID = %p", lib->name, lib->version, pthread_self() );
     lib->Thread_run = FALSE;                                                                    /* Le thread ne tourne plus ! */
     lib->TID = 0;                                                             /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
+/******************************************************************************************************************************/
+/* Thread_Listen_to_master: appelé par chaque thread pour écouter les messages ZMQ du master                                  */
+/* Entrée: La structure afférente                                                                                             */
+/* Sortie: JSonNode * sir il y a un message, sinon NULL                                                                       */
+/******************************************************************************************************************************/
+ JsonNode *Thread_Listen_to_master ( struct LIBRAIRIE *lib )
+  { return ( Recv_zmq_with_json( lib->zmq_from_bus, lib->name, (gchar *)&lib->zmq_buffer, sizeof(lib->zmq_buffer) ) ); }
 /******************************************************************************************************************************/
 /* Start_librairie: Demarre le thread en paremetre                                                                            */
 /* Entrée: La structure associée au thread                                                                                    */
@@ -134,16 +151,16 @@
     liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
-       if ( ! strcasecmp( prompt, lib->admin_prompt ) )
+       if ( ! strcasecmp( prompt, lib->name ) )
         { if (lib->Thread_run == FALSE)
            { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                       "%s: reloading '%s' -> Library found but not started. Please Start '%s' before reload",
-                      __func__, lib->admin_prompt, lib->admin_prompt );
+                      __func__, lib->name, lib->name );
              found = TRUE;
            }
           else
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                      "%s: reloading '%s' -> Library found. Sending Reload.", __func__, lib->admin_prompt );
+                      "%s: reloading '%s' -> Library found. Sending Reload.", __func__, lib->name );
              lib->Thread_reload = TRUE;
              sleep(1);                                                                  /* lui laisse le temps de demarrer */
            }
@@ -167,7 +184,7 @@
     while (liste)
      { struct LIBRAIRIE *lib;
        lib = (struct LIBRAIRIE *)liste->data;
-       if ( ! strcmp( lib->admin_prompt, prompt ) )
+       if ( ! strcmp( lib->name, prompt ) )
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Librairie %s already loaded", __func__, prompt );
           return(NULL);
         }
@@ -197,7 +214,7 @@
      }
 
     lib->Admin_json = dlsym( lib->dl_handle, "Admin_json" );                                      /* Recherche de la fonction */
-    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "%s", prompt );
+    g_snprintf( lib->name, sizeof(lib->name), "%s", prompt );
     g_snprintf( lib->nom_fichier,  sizeof(lib->nom_fichier),  "%s", nom_absolu );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: %s loaded", __func__, nom_absolu );
 
@@ -230,7 +247,7 @@
     while(liste)                                                                            /* Liberation mÃémoire des modules */
      { lib = (struct LIBRAIRIE *)liste->data;                                         /* RÃécupÃération des donnÃées de la liste */
 
-       if ( ! strcmp ( lib->admin_prompt, prompt ) )
+       if ( ! strcmp ( lib->name, prompt ) )
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: trying to unload %s", __func__, lib->nom_fichier );
 
           Stop_librairie(lib);
@@ -265,7 +282,7 @@
 
     while(Partage->com_msrv.Librairies)                                                     /* Liberation mémoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
-       Decharger_librairie_par_prompt (lib->admin_prompt);
+       Decharger_librairie_par_prompt (lib->name);
      }
   }
 /******************************************************************************************************************************/

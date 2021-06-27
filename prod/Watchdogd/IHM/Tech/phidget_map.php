@@ -115,21 +115,23 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget Hub</label>
-						     <select id="idModalEditDIPhidgetHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
+						     <select id="idModalEditDIHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">N° de port du HUB</label>
-						     <input id="idModalEditDIPhidgetPort" type="number" required min=0 max=6 class="form-control" placeholder="numéro">
+						     <input id="idModalEditDIPort" type="number" required min=0 max=6 class="form-control" placeholder="numéro">
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Classe du Capteur</label>
-						     <select id="idModalEditDIClasse" class="custom-select border-info" placeholder="Classe du capteur"></select>
+						     <select id="idModalEditDICapteur" class="custom-select border-info" placeholder="Classe du capteur">
+             <option value="DIGITAL-INPUT">Digital Input</option>
+           </select>
      					</div>
   					</div>
 
@@ -163,7 +165,7 @@
   </div>
 </div>
 
-<!------------------------------------------------- Modal Edit Digital Output ------------------------------------------------->
+<!------------------------------------------------- Modal Edit Digital Output-------------------------------------------------->
 <div id="idModalEditDO" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
@@ -177,15 +179,24 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget Tech_ID</label>
-						     <input id="idModalEditDOPhidgetTechID" type="text" class="form-control" placeholder="Module WAGO">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget Hub</label>
+						     <select id="idModalEditDOHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget DO</label>
-						     <input id="idModalEditDOPhidgetTag" type="number" required min=0 max=128 class="form-control" placeholder="DOxx">
+						     <label class="col-5 col-sm-4 col-form-label text-right">N° de port du HUB</label>
+						     <input id="idModalEditDOPort" type="number" required min=0 max=6 class="form-control" placeholder="numéro">
+     					</div>
+  					</div>
+
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Classe</label>
+						     <select id="idModalEditDOCapteur" class="custom-select border-info" placeholder="Classe du capteur">
+             <option value="REL2001_0">REL2001 - Digital Output</option>
+           </select>
      					</div>
   					</div>
 
@@ -199,14 +210,14 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditDOSelectTechID" onchange="PhidgetMap_Update_Choix_Acronyme('idModalEditDO', 'DO')" class="col-9 custom-select border-info"></select>
+						     <select id="idModalEditDOSelectTechID" required onchange="PhidgetMap_Update_Choix_Acronyme('idModalEditDO', 'DO')" class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditDOSelectAcronyme" class="col-9 custom-select border-info"></select>
+						     <select id="idModalEditDOSelectAcronyme" required class="col-9 custom-select border-info"></select>
      					</div>
   					</div>
 

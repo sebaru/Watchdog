@@ -47,15 +47,15 @@
 
     Cfg_audio.diffusion_enabled = TRUE;
     Cfg_audio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Creer_configDB ( NOM_THREAD, "debug", "false" );
+    Creer_configDB ( Cfg_audio.lib->name, "debug", "false" );
 
     g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", AUDIO_DEFAUT_LANGUAGE );
-    Creer_configDB ( NOM_THREAD, "language", Cfg_audio.language );
+    Creer_configDB ( Cfg_audio.lib->name, "language", Cfg_audio.language );
 
     g_snprintf( Cfg_audio.device,   sizeof(Cfg_audio.device), "plughw" );
-    Creer_configDB ( NOM_THREAD, "device", Cfg_audio.device );
+    Creer_configDB ( Cfg_audio.lib->name, "device", Cfg_audio.device );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, Cfg_audio.lib->name ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
                 "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
@@ -159,13 +159,11 @@
 /* Main: Fonction principale du Thread Audio                                                                                  */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct ZMQUEUE *zmq_from_bus;
-    struct ZMQUEUE *zmq_to_master;
-
+  {
 reload:
     memset( &Cfg_audio, 0, sizeof(Cfg_audio) );                                     /* Mise a zero de la structure de travail */
     Cfg_audio.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-AUDIO", "USER", lib, WTD_VERSION, "Manage Audio System" );
+    Thread_init ( "audio", "USER", lib, WTD_VERSION, "Manage Audio System" );
     Audio_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
     if (Config.instance_is_master)
@@ -175,22 +173,19 @@ reload:
        Mnemo_auto_create_DI ( FALSE, "AUDIO", "P_NONE", "Profil audio: All Hps disabled" );
      }
 
-    zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
-    Zmq_Send_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 900 );
+    Zmq_Send_WATCHDOG_to_master ( lib, "AUDIO", "IO_COMM", 900 );
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { gchar buffer[1024];
-       usleep(1000);
+     { usleep(1000);
        sched_yield();
 
        if (Cfg_audio.lib->comm_next_update < Partage->top)
-        { Zmq_Send_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 900 );
+        { Zmq_Send_WATCHDOG_to_master ( lib, "AUDIO", "IO_COMM", 900 );
           Cfg_audio.lib->comm_next_update = Partage->top + 600;
         }
 
-       JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
-       if (request)
+       JsonNode *request;
+       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) && Json_has_member ( request, "alive" ) &&
                Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
@@ -241,9 +236,7 @@ reload:
           json_node_unref ( request );
         }
      }
-    Zmq_Send_WATCHDOG_to_master ( zmq_to_master, NOM_THREAD, "AUDIO", "IO_COMM", 0 );
-    Zmq_Close ( zmq_from_bus );
-    Zmq_Close ( zmq_to_master );
+    Zmq_Send_WATCHDOG_to_master ( lib, "AUDIO", "IO_COMM", 0 );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

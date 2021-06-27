@@ -95,12 +95,12 @@
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
        element = Json_node_create();
-       Json_node_add_string ( element, "thread",  lib->admin_prompt );
+       Json_node_add_string ( element, "thread",  lib->name );
        Json_node_add_bool   ( element, "debug",   lib->Thread_debug );
        Json_node_add_bool   ( element, "started", lib->Thread_run );
        Json_node_add_string ( element, "version", lib->version );
        Json_node_add_int    ( element, "start_time", lib->start_time );
-       Json_node_add_string ( element, "objet",   lib->admin_help );
+       Json_node_add_string ( element, "objet",   lib->description );
        Json_array_add_element ( process, element );
 
        liste = liste->next;
@@ -166,7 +166,7 @@
        while(liste)
         { struct LIBRAIRIE *lib;
           lib = (struct LIBRAIRIE *)liste->data;
-          if ( ! strcasecmp( lib->admin_prompt, thread ) ) { lib->Thread_debug = status; }
+          if ( ! strcasecmp( lib->name, thread ) ) { lib->Thread_debug = status; }
           liste = liste->next;
         }
      }
@@ -236,7 +236,7 @@
        while(liste)
         { struct LIBRAIRIE *lib;
           lib = (struct LIBRAIRIE *)liste->data;
-          if ( ! strcasecmp( lib->admin_prompt, thread ) )
+          if ( ! strcasecmp( lib->name, thread ) )
            { if (status) Start_librairie(lib); else Stop_librairie(lib);
            }
           liste = liste->next;
@@ -365,18 +365,18 @@
        liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
        while(liste)
         { struct LIBRAIRIE *lib = liste->data;
-          if ( ! strncasecmp( path, lib->admin_prompt, strlen(lib->admin_prompt) ) )
+          if ( ! strncasecmp( path, lib->name, strlen(lib->name) ) )
            { if (!lib->Admin_json)
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                          "%s: library %s do not have Admin_json.", __func__, lib->admin_prompt );
+                          "%s: library %s do not have Admin_json.", __func__, lib->name );
                 soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Missing function admin_json" );
                 return;
               }
              else
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Admin_json called by '%s' for %s.",
                           __func__, session->username, path );
-                lib->Admin_json ( lib, msg, path+strlen(lib->admin_prompt), query, session->access_level );
-                Audit_log ( session, "Processus '%s': %s", lib->admin_prompt, path );
+                lib->Admin_json ( lib, msg, path+strlen(lib->name), query, session->access_level );
+                Audit_log ( session, "Processus '%s': %s", lib->name, path );
                 return;
               }
             }

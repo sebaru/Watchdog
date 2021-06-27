@@ -131,7 +131,7 @@
 
     if ( ! (Json_has_member ( request, "hostname" ) && Json_has_member ( request, "description" ) &&
             Json_has_member ( request, "password" ) && Json_has_member ( request, "enable" ) &&
-            Json_has_member ( request, "serial" )
+            Json_has_member ( request, "serial" ) && Json_has_member ( request, "tech_id" )
            )
        )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -139,28 +139,32 @@
        return;
      }
 
+    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
     gchar *password    = Normaliser_chaine ( Json_get_string( request, "password" ) );
 
     if (Json_has_member ( request, "id" ))
-     { retour = SQL_Write_new ( "UPDATE phidget_hub SET description='%s', hostname='%s', password='%s', serial='%d' WHERE id='%d'",
-                                description, hostname, password, Json_get_int ( request, "serial" ), Json_get_int ( request, "id" ) );
+     { retour = SQL_Write_new ( "UPDATE phidget_hub SET tech_id='%s', description='%s', hostname='%s', password='%s', serial='%d' "
+                                "WHERE id='%d'",
+                                tech_id, description, hostname, password, Json_get_int ( request, "serial" ), Json_get_int ( request, "id" ) );
      }
     else
-     { retour = SQL_Write_new ( "INSERT INTO phidget_hub SET description='%s', hostname='%s', password='%s', serial='%d'",
-                                description, hostname, password, Json_get_int ( request, "serial" ) );
+     { retour = SQL_Write_new ( "INSERT INTO phidget_hub SET tech_id='%s' description='%s', hostname='%s', password='%s', serial='%d'",
+                                tech_id, description, hostname, password, Json_get_int ( request, "serial" ) );
      }
     json_node_unref(request);
 
-    g_free(description);
-    g_free(hostname);
-    g_free(password);
     if (retour)
      { soup_message_set_status (msg, SOUP_STATUS_OK);
        Lib->Thread_reload = TRUE;
      }
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+
+    g_free(tech_id);
+    g_free(description);
+    g_free(hostname);
+    g_free(password);
   }
 /******************************************************************************************************************************/
 /* Admin_json_phidget_hub_start_stop: Start ou Stop un Hub Phidget                                                            */
@@ -217,21 +221,42 @@
        return;
      }
 
-/*         if (! strcasecmp( classe, "DI" ) ) target = "mnemos_DI";
-    else if (! strcasecmp( classe, "DO" ) ) target = "mnemos_DO";
-    else*/ if (! strcasecmp( classe, "AI" ) )
+    if (! strcasecmp( classe, "DI" ) )
      { if (SQL_Select_to_json_node ( RootNode, "mappings",
-                                    "SELECT m.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale, m.min, m.max, m.unite, "
+                                    "SELECT m.tech_id, m.acronyme, m.libelle, "
                                     "hub.hostname AS hub_hostname, hub.description AS hub_description, "
-                                    "ai.* FROM phidget_AI AS ai "
-                                    "INNER JOIN mnemos_AI AS m ON ai.mnemo_id=m.id "
-                                    "INNER JOIN phidget_hub AS hub ON ai.hub_id = hub.id " ) == FALSE)
+                                    "di.* FROM phidget_DI AS di "
+                                    "INNER JOIN phidget_hub AS hub ON di.hub_id = hub.id "
+                                    "INNER JOIN mnemos_DI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', di.port ) " ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref ( RootNode );
           return;
         }
      }
-/*    else if (! strcasecmp( classe, "AO" ) ) target = "mnemos_AO";*/
+    else if (! strcasecmp( classe, "DO" ) )
+     { if (SQL_Select_to_json_node ( RootNode, "mappings",
+                                    "SELECT m.tech_id, m.acronyme, m.libelle, "
+                                    "hub.hostname AS hub_hostname, hub.description AS hub_description, "
+                                    "do.* FROM phidget_DO AS do "
+                                    "INNER JOIN phidget_hub AS hub ON do.hub_id = hub.id "
+                                    "INNER JOIN mnemos_DO AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', do.port ) " ) == FALSE)
+        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+          json_node_unref ( RootNode );
+          return;
+        }
+     }
+    else if (! strcasecmp( classe, "AI" ) )
+     { if (SQL_Select_to_json_node ( RootNode, "mappings",
+                                    "SELECT m.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale, m.min, m.max, m.unite, "
+                                    "hub.hostname AS hub_hostname, hub.description AS hub_description, "
+                                    "ai.* FROM phidget_AI AS ai "
+                                    "INNER JOIN phidget_hub AS hub ON ai.hub_id = hub.id "
+                                    "INNER JOIN mnemos_AI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', ai.port ) " ) == FALSE)
+        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+          json_node_unref ( RootNode );
+          return;
+        }
+     }
     else
      {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Wrong class" );
        json_node_unref ( RootNode );
@@ -272,6 +297,8 @@
     gchar *acronyme    = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
     gchar *capteur     = Normaliser_chaine ( Json_get_string( request, "capteur" ) );
     gchar *classe      = Json_get_string( request, "classe" );
+    gint   hub_id      = Json_get_int( request, "hub_id" );
+    gint   port        = Json_get_int( request, "port" );
 
     gchar *phidget_classe;
          if (!strcasecmp ( capteur, "ADP1000-ORP" ))           phidget_classe="VoltageInput";
@@ -283,22 +310,51 @@
     else if (!strcasecmp ( capteur, "AC-CURRENT-50A" ))        phidget_classe="VoltageInput";
     else if (!strcasecmp ( capteur, "AC-CURRENT-100A" ))       phidget_classe="VoltageInput";
     else if (!strcasecmp ( capteur, "TEMP_1124_0" ))           phidget_classe="VoltageRatioInput";
+    else if (!strcasecmp ( capteur, "DIGITAL-INPUT" ))         phidget_classe="DigitalInput";
+    else if (!strcasecmp ( capteur, "REL2001_0" ))             phidget_classe="DigitalOutput";
     else phidget_classe="Unknown";
 
-/*    if (! strcasecmp( classe, "DI" ) )
-     { SQL_Write_new ( "UPDATE mnemos_DI SET map_thread=NULL, map_tech_id=NULL, map_tag=NULL "
-                       " WHERE map_tech_id='%s' AND map_tag='%d';", NOM_THREAD, io_id );
+    if (! strcasecmp( classe, "DI" ) )
+     { SQL_Write_new ( "UPDATE mnemos_DI SET map_thread='PHIDGET', map_tech_id=NULL "
+                       "WHERE map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') ",
+                       hub_id, port
+                     );
 
-       g_snprintf( requete, sizeof(requete),
-                   "UPDATE mnemos_DI SET map_thread='%s', map_tech_id='%s', map_tag='%d' "
-                   " WHERE tech_id='%s' AND acronyme='%s';", NOM_THREAD, NOM_THREAD, io_id, tech_id, acronyme );
+       SQL_Write_new ( "UPDATE mnemos_DI SET map_thread='PHIDGET', "
+                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') "
+                       "WHERE tech_id='%s' AND acronyme='%s'",
+                       hub_id, port, tech_id, acronyme
+                     );
 
-       if (SQL_Write_new ("UPDATE mnemos_DI SET map_thread='%s', map_tech_id='%s', map_tag='%d' "
-                          " WHERE tech_id='%s' AND acronyme='%s';", NOM_THREAD, NOM_THREAD, io_id, tech_id, acronyme))
+       if (SQL_Write_new ( "INSERT INTO phidget_DI SET hub_id=%d, port=%d, classe='%s', capteur='%s' "
+                           "ON DUPLICATE KEY UPDATE "
+                           "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
+                           hub_id, port, phidget_classe, capteur, tech_id, acronyme
+                         ))
           { soup_message_set_status (msg, SOUP_STATUS_OK); }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
-    else*/ if (! strcasecmp( classe, "AI" ) )
+    else if (! strcasecmp( classe, "DO" ) )
+     { SQL_Write_new ( "UPDATE mnemos_DO SET map_thread='PHIDGET', map_tech_id=NULL "
+                       "WHERE map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') ",
+                       hub_id, port
+                     );
+
+       SQL_Write_new ( "UPDATE mnemos_DO SET map_thread='PHIDGET', "
+                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') "
+                       "WHERE tech_id='%s' AND acronyme='%s'",
+                       hub_id, port, tech_id, acronyme
+                     );
+
+       if (SQL_Write_new ( "INSERT INTO phidget_DO SET hub_id=%d, port=%d, classe='%s', capteur='%s' "
+                           "ON DUPLICATE KEY UPDATE "
+                           "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
+                           hub_id, port, phidget_classe, capteur, tech_id, acronyme
+                         ))
+          { soup_message_set_status (msg, SOUP_STATUS_OK); }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+     }
+    else if (! strcasecmp( classe, "AI" ) )
      { if ( ! (Json_has_member ( request, "intervalle" ) && Json_has_member ( request, "min" ) &&
                Json_has_member ( request, "max" ) && Json_has_member ( request, "unite" ) &&
                Json_has_member ( request, "map_question_vocale" ) && Json_has_member ( request, "map_reponse_vocale" )
@@ -306,6 +362,11 @@
         { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
           goto end;
         }
+
+       SQL_Write_new ( "UPDATE mnemos_AI SET map_thread='PHIDGET', map_tech_id=NULL "
+                       "WHERE map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') ",
+                       hub_id, port
+                     );
 
        gchar *unite               = Normaliser_chaine( Json_get_string ( request, "unite" ) );
        gchar *map_question_vocale = Normaliser_chaine( Json_get_string ( request, "map_question_vocale" ) );
@@ -322,70 +383,20 @@
        g_free(map_question_vocale);
        g_free(map_reponse_vocale);
 
-       SQL_Write_new ("UPDATE phidget_AI SET mnemo_id=NULL "
-                      "WHERE mnemo_id=(SELECT id FROM mnemos_AI WHERE tech_id='%s' AND acronyme='%s')",
-                       tech_id, acronyme
+       SQL_Write_new ("UPDATE phidget_AI SET map_thread='PHIDGET', "
+                      "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') "
+                      "WHERE tech_id='%s' AND acronyme='%s'",
+                       hub_id, port, tech_id, acronyme
                      );
 
-       if (SQL_Write_new ( "INSERT INTO phidget_AI SET hub_id=%d, port=%d, intervalle=%d, classe='%s', capteur='%s',"
-                           "mnemo_id=(SELECT id FROM mnemos_AI WHERE tech_id='%s' AND acronyme='%s') "
-                           "ON DUPLICATE KEY UPDATE mnemo_id=VALUES(mnemo_id), intervalle=VALUES(intervalle),"
+       if (SQL_Write_new ( "INSERT INTO phidget_AI SET hub_id=%d, port=%d, intervalle=%d, classe='%s', capteur='%s' "
+                           "ON DUPLICATE KEY UPDATE intervalle=VALUES(intervalle),"
                            "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
-                           Json_get_int( request, "hub_id"), Json_get_int( request, "port"), Json_get_int( request, "intervalle" ),
-                           phidget_classe, capteur,
-                           tech_id, acronyme
+                           hub_id, port, Json_get_int( request, "intervalle" ), phidget_classe, capteur, tech_id, acronyme
                          ))
           { soup_message_set_status (msg, SOUP_STATUS_OK); }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
-/*
-    else if (! strcasecmp( classe, "DO" ) )
-     { g_snprintf( requete, sizeof(requete),
-                   "UPDATE mnemos_DO SET map_thread=NULL, map_tech_id=NULL, map_tag=NULL "
-                   " WHERE map_tech_id='%s' AND map_tag='%s';", map_tech_id, map_tag );
-
-       SQL_Write (requete);
-
-       g_snprintf( requete, sizeof(requete),
-                   "UPDATE mnemos_DO SET map_thread='%s', map_tech_id='%s', map_tag='%s' "
-                   " WHERE tech_id='%s' AND acronyme='%s';", thread, map_tech_id, map_tag, tech_id, acronyme );
-
-       if (SQL_Write (requete)) soup_message_set_status (msg, SOUP_STATUS_OK);
-       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-     }
-    else if (! strcasecmp( classe, "AO" ) )
-     { if ( ! (Json_has_member ( request, "type" ) && Json_has_member ( request, "min" ) &&
-               Json_has_member ( request, "max" ) && Json_has_member ( request, "unite" ) &&
-               Json_has_member ( request, "map_question_vocale" ) && Json_has_member ( request, "map_reponse_vocale" )
-          ) )
-        { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-          goto end;
-        }
-
-       g_snprintf( requete, sizeof(requete),
-                   "UPDATE mnemos_AO SET map_thread=NULL, map_tech_id=NULL, map_tag=NULL "
-                   " WHERE map_tech_id='%s' AND map_tag='%s';", map_tech_id, map_tag );
-
-       SQL_Write (requete);
-
-       gchar *unite               = Normaliser_chaine( Json_get_string ( request, "unite" ) );
-       gchar *map_question_vocale = Normaliser_chaine( Json_get_string ( request, "map_question_vocale" ) );
-       gchar *map_reponse_vocale  = Normaliser_chaine( Json_get_string ( request, "map_reponse_vocale" ) );
-       g_snprintf( requete, sizeof(requete),
-                   "UPDATE mnemos_AO SET map_thread='%s', map_tech_id='%s', map_tag='%s',"
-                   " type='%d', min='%d', max='%d', unite='%s', map_question_vocale='%s', map_reponse_vocale='%s'"
-                   " WHERE tech_id='%s' AND acronyme='%s';",
-                   thread, map_tech_id, map_tag, Json_get_int ( request, "type" ),
-                   Json_get_int ( request, "min" ), Json_get_int ( request, "max" ),
-                   unite, map_question_vocale, map_reponse_vocale,
-                   tech_id, acronyme );
-       g_free(unite);
-       g_free(map_question_vocale);
-       g_free(map_reponse_vocale);
-       if (SQL_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
-       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-     }
-*/
     else
      {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
     Dls_recalculer_arbre_comm();/* Calcul de l'arbre de communication car il peut y avoir de nouvelles dependances sur les plugins */

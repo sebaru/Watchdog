@@ -31,7 +31,6 @@
  #include <json-glib/json-glib.h>
  #include <uuid/uuid.h>
 
- #define NOM_THREAD                    "http"
  #define HTTP_DEFAUT_FILE_CERT         "https_api_cert.pem"
  #define HTTP_DEFAUT_FILE_KEY          "https_api_key.pem"
  #define HTTP_DEFAUT_TCP_PORT          5560
@@ -59,8 +58,6 @@
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;
 
-    struct ZMQUEUE *zmq_from_bus;                                                                       /* Envoi vers le msrv */
-    struct ZMQUEUE *zmq_to_master;                                                                      /* Envoi vers le msrv */
     gint tcp_port;                                           /* Port d'écoute TCP (HTTP ou HTTPS, selon le paramètre suivant) */
     gboolean ssl_enable;                                                                             /* TRUE si connexion SSL */
     gchar ssl_cert_filepath[80];

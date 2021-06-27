@@ -30,8 +30,6 @@
 
  #include <json-glib/json-glib.h>
 
- #define NOM_THREAD                 "audio"
-
  #define AUDIO_JINGLE                3000                                    /* Jingle si pas de message au bout de 5 minutes */
  #define AUDIO_DEFAUT_LANGUAGE       "fr"                                                  /* Language par défaut pour le TTS */
 

@@ -31,7 +31,6 @@
  #include <glib.h>
  #include <zmq.h>
 
- #define ZMQUEUE_LIVE_MOTIFS     "live-motifs"
  #define ZMQUEUE_LOCAL_MASTER    "local_msrv"
  #define ZMQUEUE_LOCAL_BUS       "local_bus"
 
@@ -48,10 +47,10 @@
  extern void Zmq_Close ( struct ZMQUEUE *zmq );
  extern gboolean Zmq_Send_as_raw ( struct ZMQUEUE *zmq, void *buf, gint taille );
  extern gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
- extern void Zmq_Send_DI_to_master ( void *zmq, gchar *my_tech_id, gchar *tech_id, gchar *acronyme, gboolean etat );
- extern void Zmq_Send_AI_to_master ( void *zmq, gchar *my_tech_id, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range);
- extern void Zmq_Send_CDE_to_master ( void *zmq, gchar *my_tech_id, gchar *tech_id, gchar *acronyme );
- extern void Zmq_Send_WATCHDOG_to_master ( void *zmq, gchar *my_tech_id, gchar *tech_id, gchar *acronyme, gint consigne );
+ extern void Zmq_Send_DI_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme, gboolean etat );
+ extern void Zmq_Send_AI_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range);
+ extern void Zmq_Send_CDE_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme );
+ extern void Zmq_Send_WATCHDOG_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme, gint consigne );
  extern JsonNode *Recv_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *my_tech_id, gchar *buf, gint taille_buf );
  extern gboolean Zmq_Send_json_node ( struct ZMQUEUE *zmq, const gchar *zmq_src_tech_id, const gchar *zmq_dst_tech_id,
                                       JsonNode *RootNode );

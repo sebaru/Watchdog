@@ -47,7 +47,7 @@
        return;
      }
 
-    SQL_Select_to_json_node ( RootNode, "tinfos", "SELECT instance, tech_id, description FROM %s", NOM_THREAD );
+    SQL_Select_to_json_node ( RootNode, "tinfos", "SELECT instance, tech_id, description FROM %s", Cfg_teleinfo.lib->name );
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
@@ -120,7 +120,7 @@
     gchar *port        = Normaliser_chaine ( Json_get_string( request, "port" ) );
 
     SQL_Write_new ( "UPDATE %s SET tech_id='%s', description='%s', port='%s' "
-                    "WHERE instance='%s'", NOM_THREAD, tech_id, description, port, g_get_host_name() );
+                    "WHERE instance='%s'", Cfg_teleinfo.lib->name, tech_id, description, port, g_get_host_name() );
     json_node_unref(request);
     g_free(tech_id);
     g_free(description);

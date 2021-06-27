@@ -52,7 +52,6 @@
                  "%s: Recu VISUEL %s:%s mode=%s, color=%s, cligno=%d. Reste a traiter %03d", __func__,
                  visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno, reste
                );
-       Zmq_Send_as_raw ( Partage->com_msrv.zmq_motif, visu, sizeof(struct DLS_VISUEL) );
        JsonNode *element = Json_node_create ();
        Dls_VISUEL_to_json ( element, visu );
        Json_node_add_string ( element, "zmq_tag", "DLS_VISUEL" );

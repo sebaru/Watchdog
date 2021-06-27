@@ -51,15 +51,15 @@
     struct DB *db;
 
     Cfg_dmx.lib->Thread_debug = FALSE;                                                         /* Settings default parameters */
-    Creer_configDB ( NOM_THREAD, "debug", "false" );
+    Creer_configDB ( Cfg_dmx.lib->name, "debug", "false" );
 
     g_snprintf( Cfg_dmx.tech_id, sizeof(Cfg_dmx.tech_id), "DMX01" );
-    Creer_configDB ( NOM_THREAD, "tech_id", Cfg_dmx.tech_id );
+    Creer_configDB ( Cfg_dmx.lib->name, "tech_id", Cfg_dmx.tech_id );
 
     g_snprintf( Cfg_dmx.device, sizeof(Cfg_dmx.device), "/dev/ttyUSB0" );
-    Creer_configDB ( NOM_THREAD, "device", Cfg_dmx.device );
+    Creer_configDB ( Cfg_dmx.lib->name, "device", Cfg_dmx.device );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, Cfg_dmx.lib->name ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_WARNING,
                 "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
@@ -89,7 +89,7 @@
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     cpt = 0;
     g_snprintf( critere, sizeof(critere),"%s:AO%%", Cfg_dmx.tech_id );
-    if ( ! Recuperer_mnemos_AO_by_text ( &db, NOM_THREAD, critere ) )
+    if ( ! Recuperer_mnemos_AO_by_text ( &db, Cfg_dmx.lib->name, critere ) )
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( Recuperer_mnemos_AO_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *map_text = db->row[2], *libelle = db->row[3];
@@ -149,7 +149,7 @@
        close(Cfg_dmx.fd);
        Cfg_dmx.fd = -1;
      }
-    Zmq_Send_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, Cfg_dmx.tech_id, "IO_COMM", 0 );
+    Zmq_Send_WATCHDOG_to_master ( Cfg_dmx.lib, Cfg_dmx.tech_id, "IO_COMM", 0 );
     Cfg_dmx.comm_status = FALSE;
   }
 /******************************************************************************************************************************/
@@ -182,11 +182,8 @@
 reload:
     memset( &Cfg_dmx, 0, sizeof(Cfg_dmx) );                                         /* Mise a zero de la structure de travail */
     Cfg_dmx.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-DMX", "I/O", lib, WTD_VERSION, "Manage Dmx System" );
+    Thread_init ( "dmx", "I/O", lib, WTD_VERSION, "Manage Dmx System" );
     Dmx_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
-
-    Cfg_dmx.zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    Cfg_dmx.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     if (Dls_auto_create_plugin( Cfg_dmx.tech_id, "Gestion du DMX" ) == FALSE)
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", Cfg_dmx.tech_id ); }
@@ -196,8 +193,7 @@ reload:
     Dmx_init();
     Envoyer_trame_dmx_request();
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { gchar buffer[256];
-       usleep(1000);
+     { usleep(1000);
        sched_yield();
 
        if (Cfg_dmx.comm_status == FALSE)
@@ -207,11 +203,11 @@ reload:
           break;
         }
 
-       if (!Partage->top%600) Zmq_Send_WATCHDOG_to_master ( Cfg_dmx.zmq_to_master, NOM_THREAD, Cfg_dmx.tech_id, "IO_COMM", 900 );
+       if (!Partage->top%600) Zmq_Send_WATCHDOG_to_master ( Cfg_dmx.lib, Cfg_dmx.tech_id, "IO_COMM", 900 );
 
 /********************************************************* Envoi de SMS *******************************************************/
-       JsonNode *request = Recv_zmq_with_json( Cfg_dmx.zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
-       if (request)
+       JsonNode *request;
+       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "SET_AO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
@@ -245,8 +241,6 @@ reload:
 
     Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Preparing to stop . . . TID = %p", __func__, pthread_self() );
     Dmx_close();
-    Zmq_Close ( Cfg_dmx.zmq_to_master );
-    Zmq_Close ( Cfg_dmx.zmq_from_bus );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

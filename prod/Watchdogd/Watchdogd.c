@@ -247,8 +247,8 @@
      }
     else
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
-           __func__, Json_get_string ( request, "zmq_src_tech_id" ), Json_get_string ( request, "zmq_dst_tech_id" ),
-           zmq_tag );
+                 __func__, Json_get_string ( request, "zmq_src_tech_id" ), Json_get_string ( request, "zmq_dst_tech_id" ),
+                 zmq_tag );
      }
   }
 /******************************************************************************************************************************/
@@ -264,7 +264,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
 /************************************************* Socket ZMQ interne *********************************************************/
-    Partage->com_msrv.zmq_motif  = Zmq_Bind ( ZMQ_PUB, "pub-int-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
     Partage->com_msrv.zmq_to_bus = Zmq_Bind ( ZMQ_PUB, "pub-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     zmq_from_bus                 = Zmq_Bind ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
@@ -348,7 +347,6 @@
     Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
-    Zmq_Close ( Partage->com_msrv.zmq_motif );
     Zmq_Close ( Partage->com_msrv.zmq_to_bus );
     Zmq_Close ( zmq_from_bus );
     Zmq_Close ( Partage->com_msrv.zmq_to_slave );
@@ -428,7 +426,7 @@
         }
                                                 /* Si reception depuis un thread, report vers le master et les autres threads */
        if ( (byte=Recv_zmq( zmq_from_bus, &buffer, sizeof(buffer) )) > 0 )
-        { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, byte );
+        { /*Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, byte );*/
           Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_master, buffer, byte );
         }
 
@@ -437,7 +435,15 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 900 );
+        { JsonNode *body = Json_node_create ();
+          if(body)
+           { Json_node_add_string ( body, "zmq_tag", "SET_WATCHDOG" );
+             Json_node_add_string ( body, "tech_id",  g_get_host_name() );
+             Json_node_add_string ( body, "acronyme", "IO_COMM" );
+             Json_node_add_int    ( body, "consigne", 900 );
+             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "msrv", body );
+             json_node_unref(body);
+           }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
@@ -447,7 +453,7 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
-    Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );
+    /*Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );*/
     RootNode = Json_node_create ();
     if (RootNode)
      { Json_node_add_string ( RootNode, "zmq_tag", "SLAVE_STOP" );

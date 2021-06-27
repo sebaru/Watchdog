@@ -47,24 +47,24 @@
     struct DB *db;
 
     Cfg_http.lib->Thread_debug = FALSE;
-    Creer_configDB ( NOM_THREAD, "debug", "false" );
+    Creer_configDB ( Cfg_http.lib->name, "debug", "false" );
 
     g_snprintf( Cfg_http.ssl_cert_filepath, sizeof(Cfg_http.ssl_cert_filepath), "%s", HTTP_DEFAUT_FILE_CERT );
-    Creer_configDB ( NOM_THREAD, "ssl_file_cert", Cfg_http.ssl_cert_filepath );
+    Creer_configDB ( Cfg_http.lib->name, "ssl_file_cert", Cfg_http.ssl_cert_filepath );
 
     g_snprintf( Cfg_http.ssl_private_key_filepath, sizeof(Cfg_http.ssl_private_key_filepath), "%s", HTTP_DEFAUT_FILE_KEY );
-    Creer_configDB ( NOM_THREAD, "ssl_file_key", Cfg_http.ssl_private_key_filepath );
+    Creer_configDB ( Cfg_http.lib->name, "ssl_file_key", Cfg_http.ssl_private_key_filepath );
 
     Cfg_http.ssl_enable = TRUE;
-    Creer_configDB ( NOM_THREAD, "ssl", "true" );
+    Creer_configDB ( Cfg_http.lib->name, "ssl", "true" );
 
     Cfg_http.tcp_port = 5560;
-    Creer_configDB_int ( NOM_THREAD, "tcp_port", Cfg_http.tcp_port );
+    Creer_configDB_int ( Cfg_http.lib->name, "tcp_port", Cfg_http.tcp_port );
 
     Cfg_http.wtd_session_expiry = 6000; /* En 1/10 secondes */
-    Creer_configDB_int ( NOM_THREAD, "wtd_session_expiry", Cfg_http.wtd_session_expiry );
+    Creer_configDB_int ( Cfg_http.lib->name, "wtd_session_expiry", Cfg_http.wtd_session_expiry );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, Cfg_http.lib->name ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
                 "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
@@ -580,14 +580,13 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { void *zmq_motifs, *zmq_from_bus;
-    gint last_pulse = 0;
+  { gint last_pulse = 0;
     GError *error;
 
 reload:
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-HTTP", "IHM/API", lib, WTD_VERSION, "Manage Web Services with external Devices" );
+    Thread_init ( "http", "IHM/API", lib, WTD_VERSION, "Manage Web Services with external Devices" );
     Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
     SoupServer *socket = soup_server_new("server-header", "Watchdogd HTTP Server", NULL);
@@ -708,13 +707,9 @@ reload:
     GMainContext *loop_context = g_main_loop_get_context ( loop );
 
     Http_Load_sessions ();
-    zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_motifs   = Zmq_Connect ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
-    Cfg_http.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { gchar buffer[2048];
-       usleep(1000);
+     { usleep(1000);
        sched_yield();
 
        if (Cfg_http.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
@@ -724,8 +719,8 @@ reload:
 
        Http_Envoyer_les_cadrans ();
 
-       JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
-       if (request)
+       JsonNode *request;
+       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
                if (!strcasecmp( zmq_tag, "DLS_HISTO" ))    { Http_ws_send_to_all( request ); }
           else if (!strcasecmp( zmq_tag, "DLS_VISUEL" ))   { Http_ws_send_to_all( request ); }
@@ -759,10 +754,6 @@ reload:
      }
 
     soup_server_disconnect (socket);                                                            /* Arret du serveur WebSocket */
-    /*Zmq_Close ( Cfg_http.zmq_from_bus );*/
-    Zmq_Close ( Cfg_http.zmq_to_master );
-    Zmq_Close ( zmq_motifs );
-    Zmq_Close ( zmq_from_bus );
     g_main_loop_unref(loop);
 
     Http_Save_and_close_sessions();

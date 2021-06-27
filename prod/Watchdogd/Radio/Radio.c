@@ -52,9 +52,9 @@
     struct DB *db;
 
     Cfg_radio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Creer_configDB ( NOM_THREAD, "debug", "false" );
+    Creer_configDB ( Cfg_radio.lib->name, "debug", "false" );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, Cfg_radio.lib->name ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_WARNING,
                 "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
@@ -114,21 +114,17 @@
 /* Main: Fonction principale du Thread Radio                                                                                  */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct ZMQUEUE *zmq_from_bus;
-
+  { 
 reload:
     memset( &Cfg_radio, 0, sizeof(Cfg_radio) );                                     /* Mise a zero de la structure de travail */
     Cfg_radio.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-RADIO", "USER", lib, WTD_VERSION, "Manage RADIO Module" );
+    Thread_init ( "radio", "USER", lib, WTD_VERSION, "Manage RADIO Module" );
     Radio_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
-    zmq_from_bus = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { gchar buffer[256];
-
-/********************************************************* Envoi de SMS *******************************************************/
-       JsonNode *request = Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) );
-       if (request)
+     { sleep(1);
+       JsonNode *request;
+       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "PLAY_RADIO" ) )
            { gchar *radio = Json_get_string ( request, "radio" );
@@ -141,9 +137,7 @@ reload:
            }
           json_node_unref(request);
         }
-       sleep(1);
      }
-    Zmq_Close ( zmq_from_bus );
     Stopper_radio();
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)

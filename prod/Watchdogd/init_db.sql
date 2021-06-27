@@ -422,9 +422,9 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
 CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',
+  `dls_id` int(11) NOT NULL DEFAULT '0',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "SYS",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
-  `dls_id` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
@@ -434,11 +434,10 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `seuil_nb` FLOAT NOT NULL DEFAULT '10',
   `seuil_nh` FLOAT NOT NULL DEFAULT '90',
   `seuil_nth` FLOAT NOT NULL DEFAULT '95',
-  `maximum` FLOAT NOT NULL DEFAULT '100',
   `angle` int(11) NOT NULL DEFAULT '0',
   `nb_decimal` int(11) NOT NULL DEFAULT '2',
   PRIMARY KEY (`id`),
-  UNIQUE (`tech_id`, `acronyme`, `dls_id`),
+  UNIQUE (`dls_id`, `tech_id`, `acronyme`),
   FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
@@ -470,11 +469,11 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `syns_motifs`
+-- Structure de la table `syns_visuels`
 --
 
-CREATE TABLE IF NOT EXISTS `syns_motifs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `syns_visuels` (
+  `visuel_id` int(11) NOT NULL AUTO_INCREMENT,
   `auto_create` tinyint(1) NULL DEFAULT NULL,
   `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',
   `icone` int(11) NOT NULL DEFAULT '0',
@@ -544,11 +543,11 @@ CREATE TABLE IF NOT EXISTS `syns_liens` (
   `src_posy` int(11) NOT NULL DEFAULT 0,
   `dst_posx` int(11) NOT NULL DEFAULT 0,
   `dst_posy` int(11) NOT NULL DEFAULT 0,
-  `stroke` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'black',
-  `stroke_dasharray` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `stroke` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'black',
+  `stroke_dasharray` VARCHAR(32) COLLATE utf8_unicode_ci DEFAULT NULL,
   `stroke_width` int(11) NOT NULL DEFAULT 1,
-  `stroke_linecap` varchar(32) COLLATE utf8_unicode_ci DEFAULT 'butt',
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
+  `stroke_linecap` VARCHAR(32) COLLATE utf8_unicode_ci DEFAULT 'butt',
+  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE

@@ -34,9 +34,9 @@
  #include <errno.h>
  #include <libsoup/soup.h>
 
+/*---------------------------------------------------- dépendances -----------------------------------------------------------*/
  #include "Reseaux.h"
  #include "Json.h"
- #include "Zmq.h"
  #include "Db.h"
  #include "config.h"
  #include "Dls.h"
@@ -63,20 +63,24 @@
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
     time_t start_time;
+    gchar name[32];                                                                    /* Prompt auquel va répondre le thread */
+    gchar description[64];                                                             /* Designation de l'activité du thread */
     gchar version[32];
     gchar nom_fichier[128];                                                                 /* Nom de fichier de la librairie */
-    gchar admin_prompt[32];                                                            /* Prompt auquel va répondre le thread */
-    gchar admin_help[64];                                                              /* Designation de l'activité du thread */
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
     gboolean Thread_reload;                                                           /* TRUE si le thread doit gerer le USR1 */
-    gboolean comm_status;
-    gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
+    gboolean comm_status;                                                       /* Report local du status de la communication */
+    gint     comm_next_update;  /* a virer */                         /* Date du prochain update Watchdog COMM vers le master */
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
                                                                                  /* Fonction de gestion des commandes d'admin */
     void *(*Admin_json)( struct LIBRAIRIE *lib, gpointer msg, const char *path, GHashTable *query, gint access_level );
+
+    void *zmq_from_bus;                                                                       /* handle d"ecoute du BUS local */
+    void *zmq_to_master;                                                                           /* handle d"envoiau master */
+    gchar zmq_buffer[1024];                                                     /* Buffer de reception des messages du master */
   };
 
  struct COM_DB                                                                 /* Interfaçage avec le code de gestion des BDD */
@@ -92,7 +96,6 @@
     GSList *liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
     GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Liste_AO;                                                            /* liste de A a traiter dans la distribution */
-    struct ZMQUEUE *zmq_motif;                                                           /* Message Queue des motifs Watchdog */
     struct ZMQUEUE *zmq_to_bus;                                                      /* Message Queue des evenements Watchdog */
     union
      { struct ZMQUEUE *zmq_to_slave;                                                         /* Message Queue vers les slaves */
@@ -140,8 +143,6 @@
  extern struct PARTAGE *_init ( void );                                                                         /* Dans shm.c */
  extern struct PARTAGE *Shm_init ( void );
  extern gboolean Shm_stop ( struct PARTAGE *partage );
- extern void *w_malloc0( gint size, gchar *justification );
- extern void w_free( void *ptr, gchar *justification );
 
  extern void Stopper_fils ( void );                                                                         /* Dans process.c */
  extern gboolean Demarrer_dls ( void );
@@ -155,10 +156,12 @@
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
  extern void Thread_init ( gchar *pr_name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description );
  extern void Thread_end ( struct LIBRAIRIE *lib );
+ extern JsonNode *Thread_Listen_to_master ( struct LIBRAIRIE *lib );
 
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */
+ extern void Convert_libelle_dynamique ( gchar *local_tech_id, gchar *libelle, gint taille_max );
 
  extern void Gerer_arrive_Ixxx_dls ( void );                                                           /* Dans distrib_Ixxx.c */
 
@@ -168,5 +171,9 @@
  extern JsonNode *Http_Response_Msg_to_Json ( SoupMessage *msg );
  extern gint Http_Msg_status_code ( SoupMessage *msg );
  extern gchar *Http_Msg_reason_phrase ( SoupMessage *msg );
+
+/*-------------------------------------------------- autres dépendances ------------------------------------------------------*/
+ #include "Zmq.h"
+
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

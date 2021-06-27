@@ -55,30 +55,4 @@
     g_free(Partage);
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* w_malloc0: Permet de trapper les demandes de reservation mémoire                                       */
-/* Entrée: une taille et une justification                                                                */
-/* Sortie: un pointeur                                                                                    */
-/**********************************************************************************************************/
- void *w_malloc0( gint size, gchar *justification )
-  { void *ptr;
-    Info_new( Config.log, TRUE, LOG_DEBUG,
-              "w_malloc0: %d bytes requested for %s", size, justification );
-    ptr = g_try_malloc0 ( size );
-    Info_new( Config.log, TRUE, LOG_DEBUG,
-              "w_malloc0: %d bytes given for %s, ptr = %p", size, justification, ptr );
-    return(ptr);
-  }
-/**********************************************************************************************************/
-/* w_malloc0: Permet de trapper les demandes de reservation mémoire                                       */
-/* Entrée: une taille et une justification                                                                */
-/* Sortie: un pointeur                                                                                    */
-/**********************************************************************************************************/
- void w_free( void *ptr, gchar *justification )
-  { Info_new( Config.log, TRUE, LOG_DEBUG,
-              "w_free: Released request for %s, ptr = %p", justification, ptr );
-    g_free ( ptr );
-    Info_new( Config.log, TRUE, LOG_DEBUG,
-              "w_free: Released done for %s, ptr = %p", justification, ptr );
-  }
 /*--------------------------------------------------------------------------------------------------------*/

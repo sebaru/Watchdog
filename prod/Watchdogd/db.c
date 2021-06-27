@@ -2279,48 +2279,58 @@ encore:
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans DROP `auto_create`" );
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD UNIQUE (`tech_id`, `acronyme`, `dls_id`);");
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD UNIQUE (`dls_id`, `tech_id`, `acronyme`);");
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "DELETE syns_cadrans FROM syns_cadrans INNER JOIN dls ON syns_cadrans.dls_id = dls.id WHERE dls.actif=0");
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5733;
+    if (database_version < 5771)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs RENAME syns_visuels;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_visuels CHANGE `id` `visuel_id` int(11) NOT NULL AUTO_INCREMENT;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE syns_visuels SET layer=1000*id;" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5771;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );
 
-    g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `icone` ("
+    g_snprintf( requete, sizeof(requete), "CREATE TABLE `icone` ("
                                           "`id` int(11) NOT NULL AUTO_INCREMENT,"
                                           "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
-                                          "`ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
                                           "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
+                                          "`ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
                                           "PRIMARY KEY (`id`)"
                                           ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
     Lancer_requete_SQL ( db, requete );
 
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='wago_750342', ihm_affichage='cadre', extension='webp'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='satellite', ihm_affichage='cadre', extension='svg'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='sms', ihm_affichage='cadre', extension='jpg'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='ampoule', ihm_affichage='simple', extension='png'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='chaudiere_gaz', ihm_affichage='simple', extension='png'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='auto_manu', ihm_affichage='simple', extension='svg'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='kodi', ihm_affichage='cadre', extension='svg'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='film', ihm_affichage='cadre', extension='svg'" );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete), "INSERT INTO icone SET forme='bouton_io', ihm_affichage='simple', extension='png'" );
-    Lancer_requete_SQL ( db, requete );
+    SQL_Write_new ( "INSERT INTO icone (`forme`, `extension`, `ihm_affichage`) VALUES " 
+                    "('wago_750342',      'webp', 'static'       ),"
+                    "('satellite',        'svg',  'static'       ),"
+                    "('sms',              'jpg',  'static'       ),"
+                    "('ampoule',          'png',  'by_mode'      ),"
+                    "('chaudiere_gaz',    'png',  'by_mode'      ),"
+                    "('auto_manu',        'svg',  'by_mode'      ),"
+                    "('fenetre',          'png',  'by_mode'      ),"
+                    "('porte_entree',     'png',  'by_mode'      ),"
+                    "('porte_fenetre',    'png',  'by_mode'      ),"
+                    "('soufflant',        'png',  'by_mode'      ),"
+                    "('store',            'png',  'by_mode'      ),"
+                    "('kodi',             'svg',  'static'       ),"
+                    "('film',             'svg',  'static'       ),"
+                    "('bouton_io',        'png',  'by_color'     ),"
+                    "('voyant_moteur',    'png',  'by_color'     ),"
+                    "('check',            'png',  'by_mode'      ),"
+                    "('encadre_1x1',      'none', 'complexe'     );"
+                  );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
-                                          "(SELECT COUNT(*) FROM syns_motifs) AS nbr_syns_motifs, "
+                                          "(SELECT COUNT(*) FROM syns_visuels) AS nbr_syns_visuels, "
                                           "(SELECT COUNT(*) FROM syns_liens) AS nbr_syns_liens, "
                                           "(SELECT COUNT(*) FROM dls) AS nbr_dls, "
                                           "(SELECT COUNT(*) FROM mnemos_DI) AS nbr_dls_di, "
@@ -2349,7 +2359,7 @@ fin:
        "SELECT id,'HORLOGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_HORLOGE UNION "
        "SELECT id,'TEMPO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_Tempo UNION "
        "SELECT id,'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_R UNION "
-       "SELECT id,'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM syns_motifs UNION "
+       "SELECT visuel_id,'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM syns_visuels UNION "
        "SELECT id,'WATCHDOG' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_WATCHDOG UNION "
        "SELECT id,'TABLEAU' AS classe, -1 AS classe_int, '' AS tech_id, '' AS acronyme, titre AS libelle, 'none' as unite FROM tableau UNION "
        "SELECT id,'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM msgs",
