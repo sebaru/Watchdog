@@ -757,10 +757,10 @@
     gint taille = 128;
     action->alors = New_chaine( taille );
     if ( (!barre) )
-         { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( vars, \"%s\", \"%s\", &_%s_%s, 1 );\n",
+         { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
-    else { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( vars, \"%s\", \"%s\", &_%s_%s, 0 );\n",
+    else { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
     return(action);

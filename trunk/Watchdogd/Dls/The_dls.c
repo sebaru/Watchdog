@@ -762,12 +762,11 @@ end:
      { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "%s: ligne %04d: Changing DLS_DO '%s:%s'=%d ", __func__,
                  (vars ? vars->num_ligne : -1), dout->tech_id, dout->acronyme, etat );
-       if (etat)
-        { pthread_mutex_lock( &Partage->com_msrv.synchro );
-          Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, dout );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Partage->audit_bit_interne_per_sec++;
-        }
+
+       pthread_mutex_lock( &Partage->com_msrv.synchro );
+       Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, dout );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       Partage->audit_bit_interne_per_sec++;
      }
     dout->etat = etat;
   }
