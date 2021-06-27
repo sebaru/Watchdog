@@ -30,8 +30,6 @@
 
  #include <json-glib/json-glib.h>
 
- #define NOM_THREAD                 "radio"
-
  struct RADIO_CONFIG
   { struct LIBRAIRIE *lib;
     guint nbr_diffusion;

@@ -47,13 +47,13 @@
   { gchar *result, requete[256];
     struct DB *db;
 
-    Creer_configDB ( NOM_THREAD, "debug", "false" );
-    result = Recuperer_configDB_by_nom ( NOM_THREAD, "debug" );
+    Creer_configDB ( Cfg_teleinfo.lib->name, "debug", "false" );
+    result = Recuperer_configDB_by_nom ( Cfg_teleinfo.lib->name, "debug" );
     Cfg_teleinfo.lib->Thread_debug = !g_ascii_strcasecmp(result, "true");
     g_free(result);
 
     SQL_Write_new ( "INSERT IGNORE %s SET tech_id='EDF01', description='DEFAULT', port='/dev/null', "
-                    "instance='%s'", NOM_THREAD, g_get_host_name() );
+                    "instance='%s'", Cfg_teleinfo.lib->name, g_get_host_name() );
 
     db = Init_DB_SQL();
     if (!db)
@@ -63,7 +63,7 @@
 
     g_snprintf( requete, sizeof(requete),
                "SELECT tech_id, description, port "
-               " FROM %s WHERE instance='%s' LIMIT 1", NOM_THREAD, g_get_host_name());
+               " FROM %s WHERE instance='%s' LIMIT 1", Cfg_teleinfo.lib->name, g_get_host_name());
     if (!Lancer_requete_SQL ( db, requete ))
      { Libere_DB_SQL ( &db );
        Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR, "%s: DB Requete failed", __func__ );
@@ -87,7 +87,7 @@
  static void Teleinfo_Creer_DB ( void )
   { gint database_version;
 
-    gchar *database_version_string = Recuperer_configDB_by_nom( NOM_THREAD, "database_version" );
+    gchar *database_version_string = Recuperer_configDB_by_nom( Cfg_teleinfo.lib->name, "database_version" );
     if (database_version_string)
      { database_version = atoi( database_version_string );
        g_free(database_version_string);
@@ -105,13 +105,13 @@
                        "`description` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`port` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "PRIMARY KEY (`id`)"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", NOM_THREAD );
+                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", Cfg_teleinfo.lib->name );
        goto end;
      }
 
 end:
     database_version = 1;
-    Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
+    Modifier_configDB_int ( Cfg_teleinfo.lib->name, "database_version", database_version );
   }
 /******************************************************************************************************************************/
 /* Init_teleinfo: Initialisation de la ligne TELEINFO                                                                         */
@@ -166,7 +166,7 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Send_AI_to_master ( gchar *name, gchar *chaine )                                      /* Envoi au master via ZMQ */
-  { Zmq_Send_AI_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, name, atof( chaine ), TRUE );
+  { Zmq_Send_AI_to_master ( Cfg_teleinfo.zmq_to_master, Cfg_teleinfo.lib->name, Cfg_teleinfo.tech_id, name, atof( chaine ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
@@ -209,6 +209,10 @@ reload:
      { usleep(1);
        sched_yield();
 
+       JsonNode *request;                                                                          /* Ecoute du Master Server */
+       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
+        { json_node_unref( request ); }
+        
        if (Cfg_teleinfo.mode == TINFO_WAIT_BEFORE_RETRY)
         { if ( Cfg_teleinfo.date_next_retry <= Partage->top )
            { Cfg_teleinfo.mode = TINFO_RETRING;
@@ -217,7 +221,6 @@ reload:
              Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "%s: Retrying Connexion.", __func__ );
 
            }
-          else continue;
         }
 
        if (Cfg_teleinfo.mode == TINFO_RETRING)
@@ -233,6 +236,7 @@ reload:
              Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO, "%s: Acces TELEINFO FD=%d", __func__, Cfg_teleinfo.fd );
            }
         }
+
 
 /************************************************ Reception trame TELEINFO ****************************************************/
        if (Cfg_teleinfo.mode != TINFO_CONNECTED) continue;
@@ -252,7 +256,7 @@ reload:
                 nbr_octet_lu = 0;
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
                 if ( Cfg_teleinfo.lib->comm_next_update < Partage->top )
-                 { Zmq_Send_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 400 );
+                 { Zmq_Send_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, Cfg_teleinfo.lib->name, Cfg_teleinfo.tech_id, "IO_COMM", 400 );
                    Cfg_teleinfo.lib->comm_next_update = Partage->top + 300;
                  }
               }
@@ -290,7 +294,7 @@ reload:
            { close(Cfg_teleinfo.fd);
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
-             Zmq_Send_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, NOM_THREAD, Cfg_teleinfo.tech_id, "IO_COMM", 0 );
+             Zmq_Send_DI_to_master ( Cfg_teleinfo.zmq_to_master, Cfg_teleinfo.lib->name, Cfg_teleinfo.tech_id, "IO_COMM", 0 );
              Cfg_teleinfo.comm_status = FALSE;
            }
         }

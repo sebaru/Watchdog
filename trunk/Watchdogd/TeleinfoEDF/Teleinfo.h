@@ -28,8 +28,6 @@
 #ifndef _TELEINFO_H_
  #define _TELEINFO_H_
 
- #define NOM_THREAD                       "teleinfo"
-
  #define TAILLE_BUFFER_TELEINFO           25
  #define TINFO_RETRY_DELAI                600                               /* Une minute avant de se reconnecter si probleme */
 
