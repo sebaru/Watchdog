@@ -86,19 +86,19 @@
      }
 
     gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
-    Modifier_configDB ( NOM_THREAD, "tech_id", tech_id );
+    Modifier_configDB ( Cfg_meteo.lib->name, "tech_id", tech_id );
     g_free(tech_id);
 
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
-    Modifier_configDB ( NOM_THREAD, "description", description );
+    Modifier_configDB ( Cfg_meteo.lib->name, "description", description );
     g_free(description);
 
     gchar *token       = Normaliser_chaine ( Json_get_string( request, "token" ) );
-    Modifier_configDB ( NOM_THREAD, "token", token );
+    Modifier_configDB ( Cfg_meteo.lib->name, "token", token );
     g_free(token);
 
     gchar *code_insee  = Normaliser_chaine ( Json_get_string( request, "code_insee" ) );
-    Modifier_configDB ( NOM_THREAD, "code_insee", code_insee );
+    Modifier_configDB ( Cfg_meteo.lib->name, "code_insee", code_insee );
     g_free(code_insee);
 
     json_node_unref(request);

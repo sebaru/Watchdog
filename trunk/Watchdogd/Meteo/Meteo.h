@@ -28,7 +28,6 @@
 #ifndef _METEO_H_
  #define _METEO_H_
 
- #define NOM_THREAD                    "meteo"
  #define METEO_POLLING                 36000
 
  struct METEO_CONFIG
