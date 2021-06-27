@@ -253,6 +253,8 @@ end:
  static gboolean Smsg_connect ( void )
   { GSM_Error error;
 
+    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Trying to connect", __func__ );
+
     GSM_InitLocales(NULL);
     if ( (Cfg_smsg.gammu_machine = GSM_AllocStateMachine()) == NULL )                              /* Allocates state machine */
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: AllocStateMachine Error", __func__ );
@@ -685,7 +687,11 @@ reload:
         }
 /****************************************************** Tentative de connexion ************************************************/
        if (Cfg_smsg.lib->comm_status == FALSE && Partage->top >= next_try )
-        { if (Smsg_connect ()==FALSE) { next_try = Partage->top + 300; } }
+        { if (Smsg_connect ()==FALSE)
+           { next_try = Partage->top + 300;
+             Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s : Connect failed, trying in 30s", __func__ );
+           }
+        }
 
 /****************************************************** Lecture de SMS ********************************************************/
        if (Cfg_smsg.lib->comm_status == TRUE)

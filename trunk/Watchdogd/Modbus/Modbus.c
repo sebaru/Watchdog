@@ -1151,7 +1151,7 @@ end:
 reload:
     memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );                                   /* Mise a zero de la structure de travail */
     Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-MODBUS", "I/O", lib, WTD_VERSION, "Manage Modbus System" );
+    Thread_init ( "modbus", "I/O", lib, WTD_VERSION, "Manage Modbus System" );
     Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
     if (Config.instance_is_master==FALSE)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
@@ -1169,6 +1169,10 @@ reload:
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { usleep(100000);
+
+       JsonNode *request;                                                                          /* Ecoute du Master Server */
+       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
+        { json_node_unref( request ); }
      }
     Decharger_tous_MODBUS();
 
