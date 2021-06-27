@@ -159,7 +159,7 @@
 /* Main: Fonction principale du Thread Audio                                                                                  */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { 
+  {
 reload:
     memset( &Cfg_audio, 0, sizeof(Cfg_audio) );                                     /* Mise a zero de la structure de travail */
     Cfg_audio.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
@@ -173,14 +173,14 @@ reload:
        Mnemo_auto_create_DI ( FALSE, "AUDIO", "P_NONE", "Profil audio: All Hps disabled" );
      }
 
-    Zmq_Send_WATCHDOG_to_master ( lib->zmq_to_master, Cfg_audio.lib->name, "AUDIO", "IO_COMM", 900 );
+    Zmq_Send_WATCHDOG_to_master ( lib, "AUDIO", "IO_COMM", 900 );
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { usleep(1000);
        sched_yield();
 
        if (Cfg_audio.lib->comm_next_update < Partage->top)
-        { Zmq_Send_WATCHDOG_to_master ( lib->zmq_to_master, Cfg_audio.lib->name, "AUDIO", "IO_COMM", 900 );
+        { Zmq_Send_WATCHDOG_to_master ( lib, "AUDIO", "IO_COMM", 900 );
           Cfg_audio.lib->comm_next_update = Partage->top + 600;
         }
 
@@ -236,7 +236,7 @@ reload:
           json_node_unref ( request );
         }
      }
-    Zmq_Send_WATCHDOG_to_master ( lib->zmq_to_master, Cfg_audio.lib->name, "AUDIO", "IO_COMM", 0 );
+    Zmq_Send_WATCHDOG_to_master ( lib, "AUDIO", "IO_COMM", 0 );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

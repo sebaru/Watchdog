@@ -34,9 +34,9 @@
  #include <errno.h>
  #include <libsoup/soup.h>
 
+/*---------------------------------------------------- dépendances -----------------------------------------------------------*/
  #include "Reseaux.h"
  #include "Json.h"
- #include "Zmq.h"
  #include "Db.h"
  #include "config.h"
  #include "Dls.h"
@@ -171,5 +171,9 @@
  extern JsonNode *Http_Response_Msg_to_Json ( SoupMessage *msg );
  extern gint Http_Msg_status_code ( SoupMessage *msg );
  extern gchar *Http_Msg_reason_phrase ( SoupMessage *msg );
+
+/*-------------------------------------------------- autres dépendances ------------------------------------------------------*/
+ #include "Zmq.h"
+
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

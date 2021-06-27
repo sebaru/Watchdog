@@ -231,15 +231,15 @@
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_DI_to_master ( void *zmq, gchar *my_tech_id, gchar *tech_id, gchar *acronyme, gboolean etat )
-  { if (!zmq) return;
+ void Zmq_Send_DI_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme, gboolean etat )
+  { if (!lib) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
     Json_node_add_string ( body, "zmq_tag", "SET_DI" );
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_bool   ( body, "etat", etat );
-    Zmq_Send_json_node ( zmq, my_tech_id, "msrv", body );
+    Zmq_Send_json_node ( lib->zmq_to_master, lib->name, "msrv", body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -247,8 +247,8 @@
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_AI_to_master ( void *zmq, gchar *my_tech_id, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range)
-  { if (!zmq) return;
+ void Zmq_Send_AI_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range)
+  { if (!lib) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
     Json_node_add_string ( body, "zmq_tag", "SET_AI" );
@@ -256,7 +256,7 @@
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_double ( body, "valeur", valeur );
     Json_node_add_bool   ( body, "in_range", in_range );
-    Zmq_Send_json_node ( zmq, my_tech_id, "msrv", body );
+    Zmq_Send_json_node ( lib->zmq_to_master, lib->name, "msrv", body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -264,14 +264,14 @@
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_CDE_to_master ( void *zmq, gchar *my_tech_id, gchar *tech_id, gchar *acronyme )
-  { if (!zmq) return;
+ void Zmq_Send_CDE_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme )
+  { if (!lib) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
     Json_node_add_string ( body, "zmq_tag", "SET_CDE" );
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
-    Zmq_Send_json_node ( zmq, my_tech_id, "msrv", body );
+    Zmq_Send_json_node ( lib->zmq_to_master, lib->name, "msrv", body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -279,15 +279,15 @@
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_WATCHDOG_to_master ( void *zmq, gchar *my_tech_id, gchar *tech_id, gchar *acronyme, gint consigne )
-  { if (!zmq) return;
+ void Zmq_Send_WATCHDOG_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme, gint consigne )
+  { if (!lib) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
     Json_node_add_string ( body, "zmq_tag", "SET_WATCHDOG" );
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_int    ( body, "consigne", consigne );
-    Zmq_Send_json_node ( zmq, my_tech_id, "msrv", body );
+    Zmq_Send_json_node ( lib->zmq_to_master, lib->name, "msrv", body );
     json_node_unref(body);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

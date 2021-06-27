@@ -435,7 +435,15 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 900 );
+        { JsonNode *body = Json_node_create ();
+          if(body)
+           { Json_node_add_string ( body, "zmq_tag", "SET_WATCHDOG" );
+             Json_node_add_string ( body, "tech_id",  g_get_host_name() );
+             Json_node_add_string ( body, "acronyme", "IO_COMM" );
+             Json_node_add_int    ( body, "consigne", 900 );
+             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "msrv", body );
+             json_node_unref(body);
+           }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
@@ -445,7 +453,7 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
-    Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );
+    /*Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );*/
     RootNode = Json_node_create ();
     if (RootNode)
      { Json_node_add_string ( RootNode, "zmq_tag", "SLAVE_STOP" );

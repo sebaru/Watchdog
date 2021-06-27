@@ -166,7 +166,7 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Send_AI_to_master ( gchar *name, gchar *chaine )                                      /* Envoi au master via ZMQ */
-  { Zmq_Send_AI_to_master ( Cfg_teleinfo.zmq_to_master, Cfg_teleinfo.lib->name, Cfg_teleinfo.tech_id, name, atof( chaine ), TRUE );
+  { Zmq_Send_AI_to_master ( Cfg_teleinfo.lib, Cfg_teleinfo.tech_id, name, atof( chaine ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
@@ -212,7 +212,7 @@ reload:
        JsonNode *request;                                                                          /* Ecoute du Master Server */
        while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
         { json_node_unref( request ); }
-        
+
        if (Cfg_teleinfo.mode == TINFO_WAIT_BEFORE_RETRY)
         { if ( Cfg_teleinfo.date_next_retry <= Partage->top )
            { Cfg_teleinfo.mode = TINFO_RETRING;
@@ -256,7 +256,7 @@ reload:
                 nbr_octet_lu = 0;
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
                 if ( Cfg_teleinfo.lib->comm_next_update < Partage->top )
-                 { Zmq_Send_WATCHDOG_to_master ( Cfg_teleinfo.zmq_to_master, Cfg_teleinfo.lib->name, Cfg_teleinfo.tech_id, "IO_COMM", 400 );
+                 { Zmq_Send_WATCHDOG_to_master ( Cfg_teleinfo.lib, Cfg_teleinfo.tech_id, "IO_COMM", 400 );
                    Cfg_teleinfo.lib->comm_next_update = Partage->top + 300;
                  }
               }
@@ -294,7 +294,7 @@ reload:
            { close(Cfg_teleinfo.fd);
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
-             Zmq_Send_DI_to_master ( Cfg_teleinfo.zmq_to_master, Cfg_teleinfo.lib->name, Cfg_teleinfo.tech_id, "IO_COMM", 0 );
+             Zmq_Send_WATCHDOG_to_master ( Cfg_teleinfo.lib, Cfg_teleinfo.tech_id, "IO_COMM", 0 );
              Cfg_teleinfo.comm_status = FALSE;
            }
         }

@@ -242,7 +242,7 @@ end:
     GSM_FreeStateMachine(Cfg_smsg.gammu_machine);                                                      /* Free up used memory */
     Cfg_smsg.gammu_machine = NULL;
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Disconnected", __func__ );
-    Zmq_Send_DI_to_master ( Cfg_smsg.zmq_to_master, Cfg_smsg.lib->name, Cfg_smsg.tech_id, "IO_COMM", FALSE );
+    Zmq_Send_DI_to_master ( Cfg_smsg.lib, Cfg_smsg.tech_id, "IO_COMM", FALSE );
     Cfg_smsg.lib->comm_status = FALSE;
   }
 /******************************************************************************************************************************/
@@ -302,7 +302,7 @@ end:
      }
 
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Connection OK with '%s/%s'", __func__, constructeur, model );
-    Zmq_Send_DI_to_master ( Cfg_smsg.zmq_to_master, Cfg_smsg.lib->name, Cfg_smsg.tech_id, "IO_COMM", TRUE );
+    Zmq_Send_DI_to_master ( Cfg_smsg.lib, Cfg_smsg.tech_id, "IO_COMM", TRUE );
     Cfg_smsg.lib->comm_status = TRUE;
     return(TRUE);
   }
@@ -538,7 +538,7 @@ end:
     if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
      { Envoyer_commande_dls_data ( tech_id, acro ); }
     else /* Envoi au master via thread HTTP */
-     { Zmq_Send_CDE_to_master ( Cfg_smsg.zmq_to_master, Cfg_smsg.lib->name, tech_id, acro ); }
+     { Zmq_Send_CDE_to_master ( Cfg_smsg.lib, tech_id, acro ); }
   }
 /******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
