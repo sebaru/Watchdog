@@ -426,7 +426,7 @@
         }
                                                 /* Si reception depuis un thread, report vers le master et les autres threads */
        if ( (byte=Recv_zmq( zmq_from_bus, &buffer, sizeof(buffer) )) > 0 )
-        { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, byte );
+        { /*Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, byte );*/
           Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_master, buffer, byte );
         }
 
