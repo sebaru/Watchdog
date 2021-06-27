@@ -91,7 +91,7 @@
 /* Sortie: JSonNode * sir il y a un message, sinon NULL                                                                       */
 /******************************************************************************************************************************/
  JsonNode *Thread_Listen_to_master ( struct LIBRAIRIE *lib )
-  { return ( Recv_zmq_with_json( lib->zmq_from_bus, lib->name, (gchar *)&lib->zmq_buffer, sizeof(lib->zmq_buffer) ) ); }       
+  { return ( Recv_zmq_with_json( lib->zmq_from_bus, lib->name, (gchar *)&lib->zmq_buffer, sizeof(lib->zmq_buffer) ) ); }
 /******************************************************************************************************************************/
 /* Start_librairie: Demarre le thread en paremetre                                                                            */
 /* Entrée: La structure associée au thread                                                                                    */

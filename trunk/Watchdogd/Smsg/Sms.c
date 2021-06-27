@@ -241,7 +241,7 @@ end:
      }
     GSM_FreeStateMachine(Cfg_smsg.gammu_machine);                                                      /* Free up used memory */
     Cfg_smsg.gammu_machine = NULL;
-    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Disconnected", __func__ );
+    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Disconnected", __func__ );
     Zmq_Send_DI_to_master ( Cfg_smsg.lib, Cfg_smsg.tech_id, "IO_COMM", FALSE );
     Cfg_smsg.lib->comm_status = FALSE;
   }
@@ -360,7 +360,7 @@ end:
     while ( Cfg_smsg.gammu_send_status == ERR_TIMEOUT ) { GSM_ReadDevice(Cfg_smsg.gammu_machine, TRUE); }
 
     if (Cfg_smsg.gammu_send_status == ERR_NONE)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Envoi SMS Ok to %s (%s)", __func__, telephone, libelle );
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Envoi SMS Ok to %s (%s)", __func__, telephone, libelle );
        Cfg_smsg.nbr_sms++;
        return(TRUE);
      }
@@ -445,7 +445,7 @@ end:
        Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error: %s\n", __func__, error );
        g_free(error);
      }
-    else Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: '%s' sent to '%s'", __func__, libelle, telephone );
+    else Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: '%s' sent to '%s'", __func__, libelle, telephone );
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
   }
@@ -664,7 +664,7 @@ reload:
     if (Dls_auto_create_plugin( Cfg_smsg.tech_id, "Gestion du GSM" ) == FALSE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_smsg.tech_id ); }
 
-    Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_smsg.tech_id, "IO_COMM", "Statut de la communication avec le GSM" );
+    Mnemo_auto_create_DI ( FALSE, Cfg_smsg.tech_id, "IO_COMM", "Statut de la communication avec le GSM" );
 
     /*Envoyer_smsg_gsm_text ( "SMS System is running" );*/
     Cfg_smsg.sending_is_disabled = FALSE;                                            /* A l'init, l'envoi de SMS est autorisé */
