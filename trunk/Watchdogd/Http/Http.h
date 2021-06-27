@@ -31,7 +31,6 @@
  #include <json-glib/json-glib.h>
  #include <uuid/uuid.h>
 
- #define NOM_THREAD                    "http"
  #define HTTP_DEFAUT_FILE_CERT         "https_api_cert.pem"
  #define HTTP_DEFAUT_FILE_KEY          "https_api_key.pem"
  #define HTTP_DEFAUT_TCP_PORT          5560
