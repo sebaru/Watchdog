@@ -101,7 +101,7 @@
                    "`intervalle` int(11) NOT NULL,"
                    "PRIMARY KEY (`id`),"
                    "UNIQUE (hub_id, port, classe),"
-                   "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
+                   "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
        SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_DI` ("
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -112,7 +112,7 @@
                    "`capteur` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                    "PRIMARY KEY (`id`),"
                    "UNIQUE (hub_id, port, classe),"
-                   "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
+                   "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
        SQL_Write ( "CREATE TABLE IF NOT EXISTS `phidget_DO` ("
                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -123,7 +123,7 @@
                    "`capteur` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                    "PRIMARY KEY (`id`),"
                    "UNIQUE (hub_id, port, classe),"
-                   "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
+                   "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
        goto end;
      }

@@ -150,7 +150,7 @@
                                 tech_id, description, hostname, password, Json_get_int ( request, "serial" ), Json_get_int ( request, "id" ) );
      }
     else
-     { retour = SQL_Write_new ( "INSERT INTO phidget_hub SET tech_id='%s' description='%s', hostname='%s', password='%s', serial='%d'",
+     { retour = SQL_Write_new ( "INSERT INTO phidget_hub SET tech_id='%s', description='%s', hostname='%s', password='%s', serial='%d'",
                                 tech_id, description, hostname, password, Json_get_int ( request, "serial" ) );
      }
     json_node_unref(request);
@@ -329,7 +329,7 @@
        if (SQL_Write_new ( "INSERT INTO phidget_DI SET hub_id=%d, port=%d, classe='%s', capteur='%s' "
                            "ON DUPLICATE KEY UPDATE "
                            "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
-                           hub_id, port, phidget_classe, capteur, tech_id, acronyme
+                           hub_id, port, phidget_classe, capteur
                          ))
           { soup_message_set_status (msg, SOUP_STATUS_OK); }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
@@ -349,7 +349,7 @@
        if (SQL_Write_new ( "INSERT INTO phidget_DO SET hub_id=%d, port=%d, classe='%s', capteur='%s' "
                            "ON DUPLICATE KEY UPDATE "
                            "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
-                           hub_id, port, phidget_classe, capteur, tech_id, acronyme
+                           hub_id, port, phidget_classe, capteur
                          ))
           { soup_message_set_status (msg, SOUP_STATUS_OK); }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
@@ -368,6 +368,12 @@
                        hub_id, port
                      );
 
+       SQL_Write_new ( "UPDATE mnemos_AI SET map_thread='PHIDGET', "
+                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') "
+                       "WHERE tech_id='%s' AND acronyme='%s'",
+                       hub_id, port, tech_id, acronyme
+                     );
+
        gchar *unite               = Normaliser_chaine( Json_get_string ( request, "unite" ) );
        gchar *map_question_vocale = Normaliser_chaine( Json_get_string ( request, "map_question_vocale" ) );
        gchar *map_reponse_vocale  = Normaliser_chaine( Json_get_string ( request, "map_reponse_vocale" ) );
@@ -382,12 +388,6 @@
        g_free(unite);
        g_free(map_question_vocale);
        g_free(map_reponse_vocale);
-
-       SQL_Write_new ("UPDATE phidget_AI SET map_thread='PHIDGET', "
-                      "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') "
-                      "WHERE tech_id='%s' AND acronyme='%s'",
-                       hub_id, port, tech_id, acronyme
-                     );
 
        if (SQL_Write_new ( "INSERT INTO phidget_AI SET hub_id=%d, port=%d, intervalle=%d, classe='%s', capteur='%s' "
                            "ON DUPLICATE KEY UPDATE intervalle=VALUES(intervalle),"
