@@ -789,7 +789,7 @@ reload:
                         !strcasecmp ( canal->dls_do->acronyme, acronyme ) )
                     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE, "%s: SET_DO %s:%s=%d", __func__,
                                 canal->dls_do->tech_id, canal->dls_do->acronyme, etat );
-                      if ( PhidgetDigitalOutput_setState( (PhidgetDigitalOutputHandle)&canal->handle, etat ) != EPHIDGET_OK )
+                      if ( PhidgetDigitalOutput_setState( (PhidgetDigitalOutputHandle)canal->handle, etat ) != EPHIDGET_OK )
                        { Phidget_print_error ( canal ); }
                       break;
                     }
