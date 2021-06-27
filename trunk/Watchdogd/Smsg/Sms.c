@@ -302,6 +302,7 @@ end:
      }
 
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Connection OK with '%s/%s'", __func__, constructeur, model );
+    Zmq_Send_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", TRUE );
     Cfg_smsg.lib->comm_status = TRUE;
     return(TRUE);
   }
@@ -656,22 +657,21 @@ end:
 reload:
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                       /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-SMSG", "USER", lib, WTD_VERSION, "Manage SMS system (libgammu)" );
+    Thread_init ( NOM_THREAD, "USER", lib, WTD_VERSION, "Manage SMS system (libgammu)" );
     Smsg_Creer_DB ();                                                                       /* Création de la base de données */
     Smsg_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
     if (Dls_auto_create_plugin( Cfg_smsg.tech_id, "Gestion du GSM" ) == FALSE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg_smsg.tech_id ); }
 
-    Mnemo_auto_create_DI ( FALSE, Cfg_smsg.tech_id, "IO_COMM", "Statut de la communication avec le GSM" );
+    Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_smsg.tech_id, "IO_COMM", "Statut de la communication avec le GSM" );
 
     /*Envoyer_smsg_gsm_text ( "SMS System is running" );*/
-    Cfg_smsg.sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
+    Cfg_smsg.sending_is_disabled = FALSE;                                            /* A l'init, l'envoi de SMS est autorisé */
     gint next_try = 0;
 
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { gchar buffer[1024];
-       usleep(10000);
+     { usleep(10000);
        sched_yield();
 
 /****************************************************** SMS de test ! *********************************************************/
@@ -689,15 +689,11 @@ reload:
 
 /****************************************************** Lecture de SMS ********************************************************/
        if (Cfg_smsg.lib->comm_status == TRUE)
-        { if (Cfg_smsg.lib->comm_status == TRUE && Cfg_smsg.lib->comm_next_update < Partage->top)
-           { Zmq_Send_DI_to_master ( lib->zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", SMSG_TEMPS_UPDATE_COMM+200 );
-             Cfg_smsg.lib->comm_next_update = Partage->top + SMSG_TEMPS_UPDATE_COMM;
-           }
-          if (Lire_sms_gsm()==FALSE) { Smsg_disconnect(); }
+        { if (Lire_sms_gsm()==FALSE) { Smsg_disconnect(); }
         }
 /********************************************************* Envoi de SMS *******************************************************/
        JsonNode *request;
-       while ( (request=Recv_zmq_with_json( lib->zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) )) != NULL)
+       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
