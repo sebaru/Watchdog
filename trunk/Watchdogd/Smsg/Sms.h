@@ -30,9 +30,6 @@
 
  #include <gammu.h>
 
- #define NOM_THREAD                    "smsg"
- #define SMSG_TEMPS_UPDATE_COMM        300
-
  struct SMS_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean sending_is_disabled;                                  /* Variable permettant d'interdire l'envoi de sms si panic */

@@ -45,14 +45,14 @@
   { gchar *result, requete[256];
     struct DB *db;
 
-    Creer_configDB ( NOM_THREAD, "debug", "false" );
-    result = Recuperer_configDB_by_nom ( NOM_THREAD, "debug" );
+    Creer_configDB ( Cfg_smsg.lib->name, "debug", "false" );
+    result = Recuperer_configDB_by_nom ( Cfg_smsg.lib->name, "debug" );
     Cfg_smsg.lib->Thread_debug = !g_ascii_strcasecmp(result, "true");
     g_free(result);
 
     SQL_Write_new ( "INSERT IGNORE %s SET tech_id='GSM01', description='DEFAULT', ovh_service_name='DEFAULT', "
                     "ovh_application_key='DEFAULT',ovh_application_secret='DEFAULT', ovh_consumer_key='DEFAULT', "
-                    "instance='%s'", NOM_THREAD, g_get_host_name() );
+                    "instance='%s'", Cfg_smsg.lib->name, g_get_host_name() );
 
     db = Init_DB_SQL();
     if (!db)
@@ -62,7 +62,7 @@
 
     g_snprintf( requete, sizeof(requete),
                "SELECT tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key, nbr_sms "
-               " FROM %s WHERE instance='%s' LIMIT 1", NOM_THREAD, g_get_host_name());
+               " FROM %s WHERE instance='%s' LIMIT 1", Cfg_smsg.lib->name, g_get_host_name());
     if (!Lancer_requete_SQL ( db, requete ))
      { Libere_DB_SQL ( &db );
        Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: DB Requete failed", __func__ );
@@ -90,7 +90,7 @@
  static void Smsg_Creer_DB ( void )
   { gint database_version;
 
-    gchar *database_version_string = Recuperer_configDB_by_nom( NOM_THREAD, "database_version" );
+    gchar *database_version_string = Recuperer_configDB_by_nom( Cfg_smsg.lib->name, "database_version" );
     if (database_version_string)
      { database_version = atoi( database_version_string );
        g_free(database_version_string);
@@ -112,13 +112,13 @@
                        "`ovh_consumer_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`nbr_sms` int(11) NOT NULL DEFAULT 0,"
                        "PRIMARY KEY (`id`)"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", NOM_THREAD );
+                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", Cfg_smsg.lib->name );
        goto end;
      }
 
 end:
     database_version = 1;
-    Modifier_configDB_int ( NOM_THREAD, "database_version", database_version );
+    Modifier_configDB_int ( Cfg_smsg.lib->name, "database_version", database_version );
   }
 /******************************************************************************************************************************/
 /* Recuperer_smsDB: récupère la liste des utilisateurs et de leur numéro de téléphone                                         */
@@ -242,7 +242,7 @@ end:
     GSM_FreeStateMachine(Cfg_smsg.gammu_machine);                                                      /* Free up used memory */
     Cfg_smsg.gammu_machine = NULL;
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Disconnected", __func__ );
-    Zmq_Send_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", FALSE );
+    Zmq_Send_DI_to_master ( Cfg_smsg.zmq_to_master, Cfg_smsg.lib->name, Cfg_smsg.tech_id, "IO_COMM", FALSE );
     Cfg_smsg.lib->comm_status = FALSE;
   }
 /******************************************************************************************************************************/
@@ -302,7 +302,7 @@ end:
      }
 
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Connection OK with '%s/%s'", __func__, constructeur, model );
-    Zmq_Send_DI_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, Cfg_smsg.tech_id, "IO_COMM", TRUE );
+    Zmq_Send_DI_to_master ( Cfg_smsg.zmq_to_master, Cfg_smsg.lib->name, Cfg_smsg.tech_id, "IO_COMM", TRUE );
     Cfg_smsg.lib->comm_status = TRUE;
     return(TRUE);
   }
@@ -538,7 +538,7 @@ end:
     if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
      { Envoyer_commande_dls_data ( tech_id, acro ); }
     else /* Envoi au master via thread HTTP */
-     { Zmq_Send_CDE_to_master ( Cfg_smsg.zmq_to_master, NOM_THREAD, tech_id, acro ); }
+     { Zmq_Send_CDE_to_master ( Cfg_smsg.zmq_to_master, Cfg_smsg.lib->name, tech_id, acro ); }
   }
 /******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
@@ -657,7 +657,7 @@ end:
 reload:
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                       /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( NOM_THREAD, "USER", lib, WTD_VERSION, "Manage SMS system (libgammu)" );
+    Thread_init ( Cfg_smsg.lib->name, "USER", lib, WTD_VERSION, "Manage SMS system (libgammu)" );
     Smsg_Creer_DB ();                                                                       /* Création de la base de données */
     Smsg_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
@@ -712,7 +712,7 @@ reload:
      }
     Smsg_disconnect();
 
-    SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE instance='%s'", NOM_THREAD, Cfg_smsg.nbr_sms, g_get_host_name() );
+    SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE instance='%s'", Cfg_smsg.lib->name, Cfg_smsg.nbr_sms, g_get_host_name() );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
