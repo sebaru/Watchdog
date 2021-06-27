@@ -41,18 +41,18 @@
     struct DB *db;
 
     Cfg_imsgs.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Creer_configDB ( NOM_THREAD, "debug", "false" );
+    Creer_configDB ( Cfg_imsgs.lib->name, "debug", "false" );
 
-    g_snprintf( Cfg_imsgs.tech_id,  sizeof(Cfg_imsgs.tech_id ), NOM_THREAD );
-    Creer_configDB ( NOM_THREAD, "tech_id", Cfg_imsgs.tech_id );
+    g_snprintf( Cfg_imsgs.tech_id,  sizeof(Cfg_imsgs.tech_id ), Cfg_imsgs.lib->name );
+    Creer_configDB ( Cfg_imsgs.lib->name, "tech_id", Cfg_imsgs.tech_id );
 
     g_snprintf( Cfg_imsgs.username, sizeof(Cfg_imsgs.username), IMSGS_DEFAUT_USERNAME );
-    Creer_configDB ( NOM_THREAD, "username", Cfg_imsgs.username );
+    Creer_configDB ( Cfg_imsgs.lib->name, "username", Cfg_imsgs.username );
 
     g_snprintf( Cfg_imsgs.password, sizeof(Cfg_imsgs.password), IMSGS_DEFAUT_PASSWORD );
-    Creer_configDB ( NOM_THREAD, "password", Cfg_imsgs.password );
+    Creer_configDB ( Cfg_imsgs.lib->name, "password", Cfg_imsgs.password );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, Cfg_imsgs.lib->name ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING,
                 "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
@@ -427,7 +427,7 @@ end:
 reload:
     memset( &Cfg_imsgs, 0, sizeof(Cfg_imsgs) );                                     /* Mise a zero de la structure de travail */
     Cfg_imsgs.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "W-IMSGS", "USER", lib, WTD_VERSION, "Manage Instant Messaging system (libstrophe)" );
+    Thread_init ( "imsgs", "USER", lib, WTD_VERSION, "Manage Instant Messaging system (libstrophe)" );
     Imsgs_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
     if (Config.instance_is_master==FALSE)
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE,
@@ -461,15 +461,14 @@ reconnect:
      { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Connexion to '%s' in progress.", __func__, Cfg_imsgs.username ); }
 
     while(lib->Thread_run == TRUE && Cfg_imsgs.signed_off == FALSE && lib->Thread_reload == FALSE)/* On tourne tant que necessaire */
-     { gchar buffer[1024];
-       /*g_usleep(200000);*/
+     { /*g_usleep(200000);*/
        sched_yield();
 
        xmpp_run_once ( Cfg_imsgs.ctx, 500 ); /* En milliseconde */
 
 /********************************************************* Envoi de SMS *******************************************************/
        JsonNode *request;
-       while ( (request=Recv_zmq_with_json( zmq_from_bus, NOM_THREAD, (gchar *)&buffer, sizeof(buffer) )) != NULL)
+       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE )
