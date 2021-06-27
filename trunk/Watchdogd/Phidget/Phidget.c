@@ -771,9 +771,12 @@ reload:
               { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ ); }
              else if (!Json_has_member ( request, "acronyme" ))
               { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ ); }
+             else if (!Json_has_member ( request, "etat" ))
+              { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque etat", __func__ ); }
              else
               { gchar *tech_id  = Json_get_string ( request, "tech_id" );
                 gchar *acronyme = Json_get_string ( request, "acronyme" );
+                gboolean etat   = Json_get_bool   ( request, "etat" );
 
                 Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s",
                           __func__, tech_id, acronyme );
@@ -784,13 +787,17 @@ reload:
                    if ( !strcasecmp ( canal->classe, "DigitalOutput" ) &&
                         !strcasecmp ( canal->dls_do->tech_id, tech_id ) &&
                         !strcasecmp ( canal->dls_do->acronyme, acronyme ) )
-                    { PhidgetDigitalOutput_setState( (PhidgetDigitalOutputHandle)&canal->handle,
-                                                     Json_get_bool ( request, "etat" )
-                                                   );
+                    { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE, "%s: SET_DO %s:%s=%d", __func__,
+                                canal->dls_do->tech_id, canal->dls_do->acronyme, etat );
+                      if ( PhidgetDigitalOutput_setState( (PhidgetDigitalOutputHandle)&canal->handle, etat ) != EPHIDGET_OK )
+                       { Phidget_print_error ( canal ); }
                       break;
                     }
                    liste = g_slist_next(liste);
                  }
+                if(!liste) Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_WARNING, "%s: DO %s:%s not found",
+                                     __func__, tech_id, acronyme );
+
               }
            }
           json_node_unref (request);
