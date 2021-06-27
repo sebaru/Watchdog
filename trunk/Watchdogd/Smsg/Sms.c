@@ -657,7 +657,7 @@ end:
 reload:
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                       /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( Cfg_smsg.lib->name, "USER", lib, WTD_VERSION, "Manage SMS system (libgammu)" );
+    Thread_init ( "smsg", "USER", lib, WTD_VERSION, "Manage SMS system (libgammu)" );
     Smsg_Creer_DB ();                                                                       /* Création de la base de données */
     Smsg_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
