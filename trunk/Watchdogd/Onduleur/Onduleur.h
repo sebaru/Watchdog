@@ -30,8 +30,6 @@
  #include <json-glib/json-glib.h>
  #include <upsclient.h>
 
- #define NOM_THREAD      "ups"
-
  #define UPS_PORT_TCP    3493                                                 /* Port de connexion TCP pour accès aux modules */
  #define UPS_RETRY       1800                                              /* 3 minutes entre chaque retry si pb de connexion */
  #define UPS_POLLING      100                                      /* Si tout va bien, on s'y connecte toutes les 10 secondes */
