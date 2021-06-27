@@ -31,7 +31,6 @@
  #include <glib.h>
  #include <zmq.h>
 
- #define ZMQUEUE_LIVE_MOTIFS     "live-motifs"
  #define ZMQUEUE_LOCAL_MASTER    "local_msrv"
  #define ZMQUEUE_LOCAL_BUS       "local_bus"
 

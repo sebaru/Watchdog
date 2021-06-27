@@ -2308,7 +2308,7 @@ fin:
                                           ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
     Lancer_requete_SQL ( db, requete );
 
-    SQL_Write_new ( "INSERT INTO icone (`forme`, `extension`, `ihm_affichage`) VALUES"
+    SQL_Write_new ( "INSERT INTO icone (`forme`, `extension`, `ihm_affichage`) VALUES " 
                     "('wago_750342',      'webp', 'static'       ),"
                     "('satellite',        'svg',  'static'       ),"
                     "('sms',              'jpg',  'static'       ),"

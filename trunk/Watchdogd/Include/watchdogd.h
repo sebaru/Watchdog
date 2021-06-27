@@ -94,7 +94,6 @@
     GSList *liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
     GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Liste_AO;                                                            /* liste de A a traiter dans la distribution */
-    struct ZMQUEUE *zmq_motif;                                                           /* Message Queue des motifs Watchdog */
     struct ZMQUEUE *zmq_to_bus;                                                      /* Message Queue des evenements Watchdog */
     union
      { struct ZMQUEUE *zmq_to_slave;                                                         /* Message Queue vers les slaves */

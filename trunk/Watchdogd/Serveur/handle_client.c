@@ -64,7 +64,7 @@
  void Run_handle_client ( struct CLIENT *client )
   { static gint thread_count = 0;
     gchar nom[16];
-    struct ZMQUEUE *zmq_motif;
+    /*struct ZMQUEUE *zmq_motif;*/
 
     client->ssrv_id = thread_count++;
     g_snprintf(nom, sizeof(nom), "W-SSRV-%03d", client->ssrv_id );
@@ -72,7 +72,7 @@
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
-    zmq_motif    = Zmq_Connect ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+/*    zmq_motif    = Zmq_Connect ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );*/
 
     while( Cfg_ssrv.lib->Thread_run == TRUE )                                                /* On tourne tant que necessaire */
      { usleep(10000);
@@ -116,12 +116,12 @@
            }
         }
 /********************************************** Envoi des histos et des motifs ************************************************/
-       if (client->mode == VALIDE)                                                /* Envoi au suppression des histo au client */
-        { struct DLS_VISUEL dls_visuel;
+/*       if (client->mode == VALIDE)                                                /* Envoi au suppression des histo au client */
+/*        { struct DLS_VISUEL dls_visuel;
           if ( Recv_zmq ( zmq_motif, &dls_visuel, sizeof(dls_visuel) ) == sizeof(struct DLS_VISUEL) )
            { Envoyer_new_motif_au_client ( client, &dls_visuel ); }
 
-        }
+        }*/
 /************************************************ Ecoute du client  ***********************************************************/
        if (client->mode >= WAIT_FOR_IDENT) Ecouter_client( client );
 
@@ -131,7 +131,7 @@
         }
      }
 /**************************************************** Arret du handle_client **************************************************/
-    Zmq_Close ( zmq_motif );
+    /*Zmq_Close ( zmq_motif );*/
     Deconnecter(client);
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     pthread_exit( NULL );
