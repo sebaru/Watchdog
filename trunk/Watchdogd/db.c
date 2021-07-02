@@ -2294,7 +2294,14 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5771;
+    if (database_version < 5771)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_visuels CHANGE `layer` `groupe` int(11) NOT NULL DEFAULT '0';" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans CHANGE `layer` `groupe` int(11) NOT NULL DEFAULT '0';" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5825;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );
@@ -2308,7 +2315,7 @@ fin:
                                           ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
     Lancer_requete_SQL ( db, requete );
 
-    SQL_Write_new ( "INSERT INTO icone (`forme`, `extension`, `ihm_affichage`) VALUES " 
+    SQL_Write_new ( "INSERT INTO icone (`forme`, `extension`, `ihm_affichage`) VALUES "
                     "('wago_750342',      'webp', 'static'       ),"
                     "('satellite',        'svg',  'static'       ),"
                     "('sms',              'jpg',  'static'       ),"

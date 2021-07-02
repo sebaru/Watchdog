@@ -67,7 +67,6 @@
     else if (page->type == TYPE_PAGE_ATELIER)
      { struct TYPE_INFO_ATELIER *infos=page->infos;
        trame_comment = Trame_ajout_commentaire ( TRUE, infos->Trame_atelier, comment );
-       trame_comment->layer = infos->new_layer++;
     }
 
   }

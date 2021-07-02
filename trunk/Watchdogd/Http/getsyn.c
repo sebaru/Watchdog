@@ -312,6 +312,7 @@ end:
             Json_has_member ( element, "angle" ) &&
             Json_has_member ( element, "gestion" ) &&
             Json_has_member ( element, "libelle" ) &&
+            Json_has_member ( element, "groupe" ) &&
             Json_has_member ( element, "scale" )
            ) )
      { return; }
@@ -324,12 +325,12 @@ end:
     gchar *def_color     = Normaliser_chaine( Json_get_string ( element, "def_color" ) );
 
     SQL_Write_new( "UPDATE syns_visuels AS visu INNER JOIN syns AS s ON visu.syn_id = s.id SET "
-                   "visu.posx='%d', visu.posy='%d', "
+                   "visu.posx='%d', visu.posy='%d', visu.groupe='%d',"
                    "visu.libelle='%s', visu.tech_id='%s', visu.acronyme='%s', "
                    "visu.clic_tech_id='%s', visu.clic_acronyme='%s', "
                    "visu.def_color='%s', visu.angle='%d', visu.scale='%d', visu.gestion='%d' "
                    " WHERE visu.visuel_id='%d' AND s.access_level<'%d'",
-                   Json_get_int( element, "posx" ), Json_get_int( element, "posy" ),
+                   Json_get_int( element, "posx" ), Json_get_int( element, "posy" ), Json_get_int( element, "groupe" ),
                    libelle, tech_id, acronyme, clic_tech_id, clic_acronyme, def_color,
                    Json_get_int( element, "angle" ), Json_get_int(element,"scale"), Json_get_int(element,"gestion"),
                    Json_get_int( element,"visuel_id" ), session->access_level );
@@ -351,6 +352,7 @@ end:
     if ( ! (Json_has_member ( element, "id" ) &&
             Json_has_member ( element, "posx" ) &&
             Json_has_member ( element, "posy" ) &&
+            Json_has_member ( element, "groupe" ) &&
             Json_has_member ( element, "angle" )
            ) )
      { return; }
@@ -358,9 +360,9 @@ end:
     SQL_Write_new( "UPDATE syns_cadrans "
                    "INNER JOIN dls ON syns_cadrans.dls_id=dls.id "
                    "INNER JOIN syns ON syns.id=dls.syn_id "
-                   "SET posx='%d', posy='%d', angle='%d' WHERE syns_cadrans.id='%d' AND syns.access_level<='%d'",
+                   "SET posx='%d', posy='%d', groupe='%d', angle='%d' WHERE syns_cadrans.id='%d' AND syns.access_level<='%d'",
                    Json_get_int( element, "posx" ), Json_get_int( element,"posy" ), Json_get_int( element,"angle" ),
-                   Json_get_int( element,"id" ), session->access_level );
+                   Json_get_int( element,"groupe" ), Json_get_int( element,"id" ), session->access_level );
  }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -672,9 +674,9 @@ end:
     if (full_syn)
      { if (SQL_Select_to_json_node ( synoptique, "visuels",
                                     "SELECT visu.*,i.* FROM syns_visuels AS visu "
-                                    "INNER JOIN syns AS syn ON visu.syn_id=syn.id "
                                     "LEFT JOIN icone AS i ON i.forme=visu.forme "
-                                    "WHERE syn.id='%d' AND syn.access_level<=%d ORDER BY layer",
+                                    "INNER JOIN syns AS syn ON visu.syn_id=syn.id "
+                                    "WHERE syn.id='%d' AND syn.access_level<=%d",
                                      syn_id, session->access_level) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref(synoptique);
@@ -687,7 +689,7 @@ end:
                                     "INNER JOIN dls on dls.tech_id=visu.tech_id "
                                     "INNER JOIN icone AS i ON i.forme=visu.forme "
                                     "INNER JOIN syns AS s ON dls.syn_id=s.id "
-                                    "WHERE visu.auto_create=1 AND s.id='%d' AND s.access_level<=%d",
+                                    "WHERE s.id='%d' AND s.access_level<=%d",
                                     syn_id, session->access_level) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref(synoptique);

@@ -94,7 +94,7 @@
 /* Entrée: un numero de groupe, deselect=1 si on doit deselectionner les motifs qui sont selectionnes                         */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Selectionner ( struct PAGE_NOTEBOOK *page, gint layer )
+ void Selectionner ( struct PAGE_NOTEBOOK *page, gint groupe )
   { struct TYPE_INFO_ATELIER *infos = page->infos;
     struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
@@ -102,13 +102,13 @@
     struct TRAME_ITEM_CADRAN     *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *objet;
-    printf("Selectionner : Selectionner layer %d\n", layer );
+    printf("Selectionner : Selectionner groupe %d\n", groupe );
     objet = infos->Trame_atelier->trame_items;
     while (objet)
-     { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
+     { switch ( *((gint *)objet->data) )                                                 /* Test du type de données dans data */
         { case TYPE_MOTIF:
                trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
-               if (Json_get_int ( trame_motif->visuel, "layer" ) == layer)
+               if (Json_get_int ( trame_motif->visuel, "groupe" ) == groupe)
                 { if (!trame_motif->selection)
                    { g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                      g_object_set( trame_motif->select_hd, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
@@ -119,7 +119,7 @@
                    }
                 }
                break;
-          case TYPE_PASSERELLE:
+/*          case TYPE_PASSERELLE:
                trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
                if (trame_pass->layer == layer)
                 { if (!trame_pass->selection)
@@ -138,20 +138,18 @@
                      infos->Selection = g_slist_prepend( infos->Selection, objet->data );
                    }
                  }
-                break;
+                break;*/
            case TYPE_CADRAN:
                 trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
-printf("%s: layer=%d, local=%d. selection=%d\n", __func__, layer, Json_get_int ( trame_cadran->cadran, "layer" ) , trame_cadran->selection );
-                if ( Json_get_int ( trame_cadran->cadran, "layer" ) == layer)
+                if ( Json_get_int ( trame_cadran->cadran, "groupe" ) == groupe)
                  { if (!trame_cadran->selection)
                     { g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-printf("%s: layer=%d selected\n", __func__, layer );
                       trame_cadran->selection = TRUE;
                       infos->Selection = g_slist_prepend( infos->Selection, objet->data );
                     }
                  }
                 break;
-           case TYPE_CAMERA_SUP:
+/*           case TYPE_CAMERA_SUP:
                 trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
                 if (trame_camera_sup->layer == layer)
                  { if (!trame_camera_sup->selection)
@@ -160,7 +158,7 @@ printf("%s: layer=%d selected\n", __func__, layer );
                       infos->Selection = g_slist_prepend( infos->Selection, objet->data );
                     }
                  }
-               break;
+               break;*/
           default: printf("Selectionner: type inconnu\n" );
         }
        objet=objet->next;
@@ -393,80 +391,85 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
        selection = selection->next;
      }
   }
-/**********************************************************************************************************/
-/* Fusionner_selection: Fusionne les elements selectionnés dans un meme groupe                            */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Fusionner_selection ( void )
+#endif
+/******************************************************************************************************************************/
+/* Fusionner_selection: Fusionne les elements selectionnés dans un meme groupe                                                */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Fusionner_selection ( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    GList *selection;
+    GSList *selection;
     gint new_groupe;
 
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;                                   /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;                             /* Pointeur sur les infos de la page atelier */
 
-    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
-    new_groupe = Nouveau_groupe();
+    selection = infos->Selection;                                                        /* Pour tous les objets selectionnés */
+    new_groupe = ++infos->groupe_max;
     while(selection)
      { switch ( *((gint *)selection->data) )
-        { case TYPE_PASSERELLE:
+        { /*case TYPE_PASSERELLE:
                ((struct TRAME_ITEM_PASS *)selection->data)->groupe_dpl = new_groupe;
                break;
           case TYPE_COMMENTAIRE:
                ((struct TRAME_ITEM_COMMENT *)selection->data)->groupe_dpl = new_groupe;
-               break;
+               break;*/
           case TYPE_MOTIF:
-               ((struct TRAME_ITEM_MOTIF *)selection->data)->groupe_dpl = new_groupe;
-               break;
+           { struct TRAME_ITEM_MOTIF *trame_motif = selection->data;
+             Json_node_add_int ( trame_motif->visuel, "groupe", new_groupe );
+             break;
+           }
           case TYPE_CADRAN:
-               ((struct TRAME_ITEM_CADRAN *)selection->data)->groupe_dpl = new_groupe;
-               break;
-          case TYPE_CAMERA_SUP:
+           { struct TRAME_ITEM_CADRAN *trame_cadran = selection->data;
+             Json_node_add_int ( trame_cadran->cadran, "groupe", new_groupe );
+             break;
+           }
+/*          case TYPE_CAMERA_SUP:
                ((struct TRAME_ITEM_CAMERA_SUP *)selection->data)->groupe_dpl = new_groupe;
-               break;
+               break;*/
           default: printf("Fusionner_selection: type inconnu\n" );
         }
        selection = selection->next;
      }
     printf("Fin fusionner_selection\n");
   }
-/**********************************************************************************************************/
-/* Detacher_selection: Detache les elements d'un meme groupe de election                                  */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Detacher_selection ( void )
+/******************************************************************************************************************************/
+/* Detacher_selection: Detache les elements d'un meme groupe de selection                                                     */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Detacher_selection ( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
+    GSList *selection;
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;                                   /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;                             /* Pointeur sur les infos de la page atelier */
 
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
-
-    switch ( infos->Selection.type )
-       { case TYPE_PASSERELLE:
+    selection = infos->Selection;                                                        /* Pour tous les objets selectionnés */
+    switch ( *((gint *)selection->data) )
+       { /*case TYPE_PASSERELLE:
               ((struct TRAME_ITEM_PASS *)infos->Selection.trame_pass)->groupe_dpl = Nouveau_groupe();
               break;
          case TYPE_COMMENTAIRE:
               ((struct TRAME_ITEM_COMMENT *)infos->Selection.trame_comment)->groupe_dpl = Nouveau_groupe();
-              break;
+              break;*/
          case TYPE_MOTIF:
-              ((struct TRAME_ITEM_MOTIF *)infos->Selection.trame_motif)->groupe_dpl = Nouveau_groupe();
-              break;
-         case TYPE_CADRAN:
-              ((struct TRAME_ITEM_CADRAN *)infos->Selection.trame_cadran)->groupe_dpl = Nouveau_groupe();
-              break;
-         case TYPE_CAMERA_SUP:
+           { struct TRAME_ITEM_MOTIF *trame_motif = selection->data;
+             Json_node_add_int ( trame_motif->visuel, "groupe", ++infos->groupe_max );
+             break;
+           }
+          case TYPE_CADRAN:
+           { struct TRAME_ITEM_CADRAN *trame_cadran = selection->data;
+             Json_node_add_int ( trame_cadran->cadran, "groupe", ++infos->groupe_max );
+             break;
+           }
+         /*case TYPE_CAMERA_SUP:
               ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection.trame_camera_sup)->groupe_dpl = Nouveau_groupe();
-              break;
+              break;*/
          default: printf("Detacher_selection: type inconnu\n" );
        }
     printf("Fin detacher_selection\n");
   }
-#endif
 /******************************************************************************************************************************/
 /* Rotationner_selection: Fait tourner la selection                                                                           */
 /* Entrée: rien                                                                                                               */

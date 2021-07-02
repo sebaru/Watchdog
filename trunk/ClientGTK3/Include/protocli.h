@@ -127,7 +127,7 @@
   { JsonNode *syn;                                                                       /* Id du synoptique en cours de visu */
                                                                     /* Interface de plus haut niveau: affichage du synoptique */
     struct TRAME *Trame_atelier;                                                             /* La trame de fond de l'atelier */
-    gint new_layer;                                               /* Numéro du prochain groupe "layer" pour grouper les items */
+    gint groupe_max;                                                       /* Numéro max du groupe utilisé dans le synoptique */
     GSList *Selection;                                                             /* Les de TRAME_ITEM qui sont sélectionnés */
     GtkWidget *Option_zoom;                                                                    /* Choix du zoom sur l'atelier */
     GtkWidget *Check_grid;                                                                 /* La grille est-elle magnétique ? */
