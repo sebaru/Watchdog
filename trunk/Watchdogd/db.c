@@ -2333,6 +2333,7 @@ fin:
                     "('voyant_moteur',    'png',  'by_color'      ),"
                     "('check',            'png',  'by_mode'       ),"
                     "('thermometre',      'png',  'by_mode_color' ),"
+                    "('haut_parleur',     'png',  'by_mode_color' ),"
                     "('encadre_1x1',      'none', 'complexe'      );"
                   );
 
