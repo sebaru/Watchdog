@@ -1,5 +1,8 @@
 #!/bin/sh
-            FILENAME=$(basename $1 ".svg")
-            echo Parsing $1 into ${FILENAME}.png
-            inkscape $1 -o ${FILENAME}.png
+        for SRC in $( ls *.svg );
+        do
+            FILENAME=$(basename $SRC ".svg")
+            echo Parsing $SRC into ${FILENAME}.png
+            inkscape $SRC -o ${FILENAME}.png
             svn add ${FILENAME}.png
+	done
