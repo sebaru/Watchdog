@@ -64,7 +64,6 @@
     else if (page->type == TYPE_PAGE_ATELIER)
      { struct TYPE_INFO_ATELIER *infos=page->infos;
        trame_camera_sup = Trame_ajout_camera_sup ( TRUE, infos->Trame_atelier, camera_sup );
-       trame_camera_sup->layer = infos->new_layer++;
      }
 
   }

@@ -795,9 +795,6 @@ reload:
                     }
                    liste = g_slist_next(liste);
                  }
-                if(!liste) Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_WARNING, "%s: DO %s:%s not found",
-                                     __func__, tech_id, acronyme );
-
               }
            }
           json_node_unref (request);

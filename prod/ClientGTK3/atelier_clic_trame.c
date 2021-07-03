@@ -368,11 +368,11 @@ printf("Afficher_propriete: debut\n");
 
     item = Menu ( "Détacher la sélection", "view-restore" );
     gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
-    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Detacher_selection), client );
+    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Detacher_selection), page );
 
     item = Menu ( "Fusionner la sélection", "view-fullscreen" );
     gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
-    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Fusionner_selection), client );
+    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Fusionner_selection), page );
 
     item = Menu ( "Dupliquer la sélection", "edit-copy" );
     gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);

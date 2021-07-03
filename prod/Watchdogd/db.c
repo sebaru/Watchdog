@@ -2294,7 +2294,14 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5771;
+    if (database_version < 5771)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_visuels CHANGE `layer` `groupe` int(11) NOT NULL DEFAULT '0';" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans CHANGE `layer` `groupe` int(11) NOT NULL DEFAULT '0';" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5825;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );
@@ -2308,24 +2315,26 @@ fin:
                                           ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
     Lancer_requete_SQL ( db, requete );
 
-    SQL_Write_new ( "INSERT INTO icone (`forme`, `extension`, `ihm_affichage`) VALUES " 
-                    "('wago_750342',      'webp', 'static'       ),"
-                    "('satellite',        'svg',  'static'       ),"
-                    "('sms',              'jpg',  'static'       ),"
-                    "('ampoule',          'png',  'by_mode'      ),"
-                    "('chaudiere_gaz',    'png',  'by_mode'      ),"
-                    "('auto_manu',        'svg',  'by_mode'      ),"
-                    "('fenetre',          'png',  'by_mode'      ),"
-                    "('porte_entree',     'png',  'by_mode'      ),"
-                    "('porte_fenetre',    'png',  'by_mode'      ),"
-                    "('soufflant',        'png',  'by_mode'      ),"
-                    "('store',            'png',  'by_mode'      ),"
-                    "('kodi',             'svg',  'static'       ),"
-                    "('film',             'svg',  'static'       ),"
-                    "('bouton_io',        'png',  'by_color'     ),"
-                    "('voyant_moteur',    'png',  'by_color'     ),"
-                    "('check',            'png',  'by_mode'      ),"
-                    "('encadre_1x1',      'none', 'complexe'     );"
+    SQL_Write_new ( "INSERT INTO icone (`forme`, `extension`, `ihm_affichage`) VALUES "
+                    "('wago_750342',      'webp', 'static'        ),"
+                    "('satellite',        'svg',  'static'        ),"
+                    "('sms',              'jpg',  'static'        ),"
+                    "('ampoule',          'png',  'by_mode'       ),"
+                    "('chaudiere_gaz',    'png',  'by_mode'       ),"
+                    "('auto_manu',        'svg',  'by_mode'       ),"
+                    "('fenetre',          'png',  'by_mode'       ),"
+                    "('porte_entree',     'png',  'by_mode'       ),"
+                    "('porte_fenetre',    'png',  'by_mode'       ),"
+                    "('soufflant',        'png',  'by_mode'       ),"
+                    "('store',            'png',  'by_mode'       ),"
+                    "('kodi',             'svg',  'static'        ),"
+                    "('film',             'svg',  'static'        ),"
+                    "('bouton_io',        'png',  'by_color'      ),"
+                    "('voyant_moteur',    'png',  'by_color'      ),"
+                    "('check',            'png',  'by_mode'       ),"
+                    "('thermometre',      'png',  'by_mode_color' ),"
+                    "('haut_parleur',     'png',  'by_mode_color' ),"
+                    "('encadre_1x1',      'none', 'complexe'      );"
                   );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "

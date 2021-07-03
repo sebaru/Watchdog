@@ -425,7 +425,7 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `dls_id` int(11) NOT NULL DEFAULT '0',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "SYS",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
-  `layer` int(11) NOT NULL DEFAULT '0',
+  `groupe` int(11) NOT NULL DEFAULT '0',
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
   `minimum` FLOAT NOT NULL DEFAULT '0',
@@ -438,8 +438,8 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `nb_decimal` int(11) NOT NULL DEFAULT '2',
   PRIMARY KEY (`id`),
   UNIQUE (`dls_id`, `tech_id`, `acronyme`),
-  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  /*,FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE*/
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -489,7 +489,7 @@ CREATE TABLE IF NOT EXISTS `syns_visuels` (
   `scale` float NOT NULL DEFAULT '1',
   `dialog` int(11) NOT NULL DEFAULT '0',
   `gestion` int(11) NOT NULL DEFAULT '0',
-  `layer` int(11) NOT NULL DEFAULT '0',
+  `groupe` int(11) NOT NULL DEFAULT '0',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `def_color` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT "#c0c0c0",

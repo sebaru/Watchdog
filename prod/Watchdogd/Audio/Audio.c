@@ -171,6 +171,7 @@ reload:
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR, "%s: DLS Create 'SONO' ERROR\n", __func__ ); }
        Mnemo_auto_create_DI ( FALSE, "AUDIO", "P_ALL", "Profil Audio: All Hps Enabled" );
        Mnemo_auto_create_DI ( FALSE, "AUDIO", "P_NONE", "Profil audio: All Hps disabled" );
+       Mnemo_auto_create_WATCHDOG ( FALSE, "AUDIO", "IO_COMM", "Statut de la communication Audio" );
      }
 
     Zmq_Send_WATCHDOG_to_master ( lib, "AUDIO", "IO_COMM", 900 );

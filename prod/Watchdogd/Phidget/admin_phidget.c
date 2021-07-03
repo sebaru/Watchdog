@@ -368,19 +368,15 @@
                        hub_id, port
                      );
 
-       SQL_Write_new ( "UPDATE mnemos_AI SET map_thread='PHIDGET', "
-                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') "
-                       "WHERE tech_id='%s' AND acronyme='%s'",
-                       hub_id, port, tech_id, acronyme
-                     );
-
        gchar *unite               = Normaliser_chaine( Json_get_string ( request, "unite" ) );
        gchar *map_question_vocale = Normaliser_chaine( Json_get_string ( request, "map_question_vocale" ) );
        gchar *map_reponse_vocale  = Normaliser_chaine( Json_get_string ( request, "map_reponse_vocale" ) );
 
-       SQL_Write_new ( "UPDATE mnemos_AI SET map_thread='PHIDGET', map_tech_id='PHIDGET', "
+       SQL_Write_new ( "UPDATE mnemos_AI SET map_thread='PHIDGET', "
+                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d'), "
                        "min='%d', max='%d', unite='%s', map_question_vocale='%s', map_reponse_vocale='%s' "
                        "WHERE tech_id='%s' AND acronyme='%s'",
+                       hub_id, port,
                        Json_get_int ( request, "min" ), Json_get_int ( request, "max" ), unite,
                        map_question_vocale, map_reponse_vocale,
                        tech_id, acronyme

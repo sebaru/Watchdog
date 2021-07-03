@@ -718,6 +718,11 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     trame_motif->visuel = visuel;
     trame_motif->page   = trame->page;
     trame_motif->type   = TYPE_MOTIF;
+    gint groupe = Json_get_int ( visuel, "groupe" );
+    if (flag)
+     { struct TYPE_INFO_ATELIER *infos = trame->page->infos;                     /* Pointeur sur les infos de la page atelier */
+       if (infos->groupe_max < groupe) infos->groupe_max = groupe;
+     }
 
     if ( Json_has_member ( visuel, "ihm_affichage" ) && !strcasecmp( Json_get_string ( visuel, "ihm_affichage" ), "complexe" ) )
      { Trame_ajout_visuel_complexe ( trame_motif, visuel ); }
@@ -1008,8 +1013,13 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
     trame_cadran->cadran = cadran;
     trame_cadran->page   = trame->page;
+    gint groupe = Json_get_int ( cadran, "groupe" );
+    if (flag)
+     { struct TYPE_INFO_ATELIER *infos = trame->page->infos;                     /* Pointeur sur les infos de la page atelier */
+       if (infos->groupe_max < groupe) infos->groupe_max = groupe;
+     }
     trame_cadran->item_groupe = goo_canvas_group_new ( trame->canvas_root,                                   /* Groupe cadran */
-                                                        NULL);
+                                                       NULL);
 
     if (!g_ascii_strcasecmp(Json_get_string(cadran,"classe"), "REGISTRE") )
          { couleur_bordure = "blue"; }
