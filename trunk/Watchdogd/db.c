@@ -2321,6 +2321,7 @@ fin:
                     "('sms',              'jpg',  'static'        ),"
                     "('ampoule',          'png',  'by_mode'       ),"
                     "('chaudiere_gaz',    'png',  'by_mode'       ),"
+                    "('radiateur',        'png',  'by_mode'       ),"
                     "('auto_manu',        'svg',  'by_mode'       ),"
                     "('fenetre',          'png',  'by_mode'       ),"
                     "('porte_entree',     'png',  'by_mode'       ),"
