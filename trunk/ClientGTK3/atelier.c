@@ -176,8 +176,8 @@
     texte = gtk_label_new( "Rotate" );
     gtk_box_pack_start( GTK_BOX(control_box), texte, FALSE, FALSE, 0 );
 
-    infos->Adj_angle = (GtkAdjustment *)gtk_adjustment_new( 0.0, -180.0, +180.0, 0.5, 10.0, 0.0 );
-    spin = gtk_spin_button_new(infos->Adj_angle, 1.0, 1);
+    infos->Adj_angle = (GtkAdjustment *)gtk_adjustment_new( 0.0, -180.0, +180.0, 1.0, 10.0, 0.0 );
+    spin = gtk_spin_button_new(infos->Adj_angle, 1.0, 0);
     gtk_widget_set_tooltip_text ( spin, "Angle de l'élément sélectionné" );
     gtk_box_pack_start( GTK_BOX(control_box), spin, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(infos->Adj_angle), "value_changed", G_CALLBACK(Rotationner_selection), page );

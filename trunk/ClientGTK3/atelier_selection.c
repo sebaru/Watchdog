@@ -484,9 +484,9 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
  void Rotationner_selection ( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_ATELIER *infos = page->infos;
     GSList *selection;
-    gdouble angle;
+    gint angle;
 
-    angle = gtk_adjustment_get_value ( infos->Adj_angle );
+    angle = (gint)gtk_adjustment_get_value ( infos->Adj_angle );
 
     selection = infos->Selection;                                                        /* Pour tous les objets selectionnés */
     while(selection)
@@ -511,7 +511,7 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
           }
          case TYPE_CADRAN:
           { struct TRAME_ITEM_CADRAN *trame_cadran = selection->data;
-            Json_node_add_double ( trame_cadran->cadran, "angle", angle );
+            Json_node_add_int ( trame_cadran->cadran, "angle", angle );
             Trame_rafraichir_cadran(trame_cadran);
             break;
           }

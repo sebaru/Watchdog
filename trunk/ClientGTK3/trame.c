@@ -656,13 +656,8 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- static void Trame_ajout_visuel_simple ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
+ static gboolean Trame_ajout_visuel_simple ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
   {
-    trame_motif->image  = NULL;
-    trame_motif->images = NULL;
-    trame_motif->nbr_images  = 0;
-    trame_motif->gif_largeur = 0;
-    trame_motif->gif_hauteur = 0;
     GdkPixbuf *pixbuf = NULL;
 
     gchar *forme         = Json_get_string ( visuel, "forme" );
@@ -680,7 +675,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
      { g_snprintf ( fichier, sizeof(fichier), "%s_%s_%s.%s", forme, mode, color, extension ); }
     else if ( !strcmp ( ihm_affichage, "static" ) )
      { g_snprintf ( fichier, sizeof(fichier), "%s.%s", forme, extension ); }
-    else return;
+    else return(FALSE);
 
     g_snprintf ( commande, sizeof(commande), "wget --no-check-certificate https://%s:5560/img/%s", trame_motif->page->client->hostname, fichier);
 
@@ -700,7 +695,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     else if ( strcmp ( extension, "png" ) )
      { pixbuf = gdk_pixbuf_new_from_file ( fichier, NULL );
      }
-    else return;
+    else return(FALSE);
 
     if (pixbuf)
      { trame_motif->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
@@ -710,7 +705,8 @@ printf("Charger_pixbuf_file: %s\n", fichier );
        trame_motif->nbr_images++;
        printf("%s : width = %d, height=%d\n", __func__, trame_motif->gif_largeur, trame_motif->gif_hauteur );
      }
-    else { printf("%s: Chargement visuel simple '%s' pixbuf failed\n", __func__, forme ); }
+    else { printf("%s: Chargement visuel simple '%s' pixbuf failed\n", __func__, forme ); return(FALSE); }
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
@@ -730,6 +726,8 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     if ( !strcmp ( forme, "encadre_1x1" ) )
      { RsvgHandle *handle;
        gchar encadre_1x1[512];
+       gchar *color = Json_get_string ( visuel, "color" );
+       color="white";
        g_snprintf( encadre_1x1, sizeof(encadre_1x1),
                    "<svg viewBox='0 0 150 170' >"
                    "<text text-anchor='middle' x='75' y='12' "
@@ -737,9 +735,9 @@ printf("Charger_pixbuf_file: %s\n", fichier );
                    "<rect x='5' y='20' rx='20' width='140' height='140' "
                    "      fill='none' stroke='%s' stroke-width='4'  />"
                    "</svg>",
-                   Json_get_string ( visuel, "libelle" ),
-                   Json_get_string ( visuel, "color" )
+                   Json_get_string ( visuel, "libelle" ), color
                  );
+printf("%s: New %s: %s\n", __func__, forme, encadre_1x1 );
        GError *error = NULL;
        handle = rsvg_handle_new_from_data ( encadre_1x1, strlen(encadre_1x1), &error );
        if (handle)
@@ -789,7 +787,9 @@ printf("Charger_pixbuf_file: %s\n", fichier );
      { if (!strcasecmp( Json_get_string ( visuel, "ihm_affichage" ), "complexe" ) )
         { Trame_ajout_visuel_complexe ( trame_motif, visuel ); }
        else
-        { return(NULL); Trame_ajout_visuel_simple ( trame_motif, visuel ); }
+        { if (Trame_ajout_visuel_simple ( trame_motif, visuel )==FALSE)
+           { g_free(trame_motif); return(NULL); }
+        }
      }
     else
      { Charger_pixbuf_id( trame_motif, Json_get_int ( visuel, "icone" ) );
