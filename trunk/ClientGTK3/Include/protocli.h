@@ -290,7 +290,7 @@
 #endif
                                                                                                   /* Dans atelier_selection.c */
  extern void Tout_deselectionner ( struct PAGE_NOTEBOOK *page );
- extern void Selectionner ( struct PAGE_NOTEBOOK *page, gint layer );
+ extern void Selectionner ( struct PAGE_NOTEBOOK *page, gpointer trame_item, gint groupe );
  extern void Deplacer_selection (  struct PAGE_NOTEBOOK *page, gint deltax, gint deltay );
  extern void Rotationner_selection ( struct PAGE_NOTEBOOK *page );
  extern void Effacer_selection ( struct PAGE_NOTEBOOK *page );

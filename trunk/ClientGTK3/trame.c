@@ -656,6 +656,67 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
+ static void Trame_ajout_visuel_simple ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
+  {
+    trame_motif->image  = NULL;
+    trame_motif->images = NULL;
+    trame_motif->nbr_images  = 0;
+    trame_motif->gif_largeur = 0;
+    trame_motif->gif_hauteur = 0;
+    GdkPixbuf *pixbuf = NULL;
+
+    gchar *forme         = Json_get_string ( visuel, "forme" );
+    gchar *ihm_affichage = Json_get_string ( visuel, "ihm_affichage" );
+    gchar *mode          = Json_get_string ( visuel, "mode" );
+    gchar *color         = Json_get_string ( visuel, "color" );
+    gchar *extension     = Json_get_string ( visuel, "extension" );
+
+    gchar commande[256], fichier[128];
+    if ( !strcmp ( ihm_affichage, "by_color" ) )
+     { g_snprintf ( fichier, sizeof(fichier), "%s_%s.%s", forme, color, extension ); }
+    else if ( !strcmp ( ihm_affichage, "by_mode" ) )
+     { g_snprintf ( fichier, sizeof(fichier), "%s_%s.%s",forme, mode, extension ); }
+    else if ( !strcmp ( ihm_affichage, "by_mode_color" ) )
+     { g_snprintf ( fichier, sizeof(fichier), "%s_%s_%s.%s", forme, mode, color, extension ); }
+    else if ( !strcmp ( ihm_affichage, "static" ) )
+     { g_snprintf ( fichier, sizeof(fichier), "%s.%s", forme, extension ); }
+    else return;
+
+    g_snprintf ( commande, sizeof(commande), "wget --no-check-certificate https://%s:5560/img/%s", trame_motif->page->client->hostname, fichier);
+
+    system(commande); /* Download de l'icone */
+    if ( !strcmp ( extension, "svg" ) )
+     { GError *error = NULL;
+       RsvgHandle *handle = rsvg_handle_new_from_file ( fichier, &error );
+       if (handle)
+        { pixbuf = rsvg_handle_get_pixbuf ( handle );
+          g_object_unref ( handle );
+        }
+       else
+        { printf("%s: Chargement visuel simple '%s' failed: %s\n", __func__, forme, error->message );
+          g_error_free(error);
+        }
+     }
+    else if ( strcmp ( extension, "png" ) )
+     { pixbuf = gdk_pixbuf_new_from_file ( fichier, NULL );
+     }
+    else return;
+
+    if (pixbuf)
+     { trame_motif->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
+       trame_motif->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
+       trame_motif->images = g_list_append( trame_motif->images, pixbuf );     /* Et ajout dans la liste */
+       trame_motif->image  = trame_motif->images;                          /* Synchro sur image numero 1 */
+       trame_motif->nbr_images++;
+       printf("%s : width = %d, height=%d\n", __func__, trame_motif->gif_largeur, trame_motif->gif_hauteur );
+     }
+    else { printf("%s: Chargement visuel simple '%s' pixbuf failed\n", __func__, forme ); }
+  }
+/******************************************************************************************************************************/
+/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
  static void Trame_ajout_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
   {
     trame_motif->image  = NULL;
@@ -724,8 +785,12 @@ printf("Charger_pixbuf_file: %s\n", fichier );
        if (infos->groupe_max < groupe) infos->groupe_max = groupe;
      }
 
-    if ( Json_has_member ( visuel, "ihm_affichage" ) && !strcasecmp( Json_get_string ( visuel, "ihm_affichage" ), "complexe" ) )
-     { Trame_ajout_visuel_complexe ( trame_motif, visuel ); }
+    if ( Json_has_member ( visuel, "ihm_affichage" ) )
+     { if (!strcasecmp( Json_get_string ( visuel, "ihm_affichage" ), "complexe" ) )
+        { Trame_ajout_visuel_complexe ( trame_motif, visuel ); }
+       else
+        { return(NULL); Trame_ajout_visuel_simple ( trame_motif, visuel ); }
+     }
     else
      { Charger_pixbuf_id( trame_motif, Json_get_int ( visuel, "icone" ) );
        if (!trame_motif->images)                                                                  /* En cas de probleme, on sort */

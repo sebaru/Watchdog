@@ -2294,7 +2294,7 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 5771)
+    if (database_version < 5825)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_visuels CHANGE `layer` `groupe` int(11) NOT NULL DEFAULT '0';" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans CHANGE `layer` `groupe` int(11) NOT NULL DEFAULT '0';" );

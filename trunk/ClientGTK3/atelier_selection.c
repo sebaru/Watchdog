@@ -94,21 +94,24 @@
 /* Entrée: un numero de groupe, deselect=1 si on doit deselectionner les motifs qui sont selectionnes                         */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Selectionner ( struct PAGE_NOTEBOOK *page, gint groupe )
+ void Selectionner ( struct PAGE_NOTEBOOK *page, gpointer trame_item, gint groupe )
   { struct TYPE_INFO_ATELIER *infos = page->infos;
     struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CADRAN     *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    gint local_groupe;
     GList *objet;
-    printf("Selectionner : Selectionner groupe %d\n", groupe );
+    printf("%s: Selectionner item %p, groupe %d\n", __func__, trame_item, groupe );
     objet = infos->Trame_atelier->trame_items;
     while (objet)
      { switch ( *((gint *)objet->data) )                                                 /* Test du type de données dans data */
         { case TYPE_MOTIF:
                trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
-               if (Json_get_int ( trame_motif->visuel, "groupe" ) == groupe)
+               local_groupe = Json_get_int ( trame_motif->visuel, "groupe" );
+printf("%s, Compare trame_motif %p item %p\n", __func__, trame_motif, trame_item );
+               if ( (local_groupe !=0 && local_groupe == groupe) || trame_motif == trame_item )
                 { if (!trame_motif->selection)
                    { g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                      g_object_set( trame_motif->select_hd, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
@@ -139,16 +142,19 @@
                    }
                  }
                 break;*/
-           case TYPE_CADRAN:
-                trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
-                if ( Json_get_int ( trame_cadran->cadran, "groupe" ) == groupe)
-                 { if (!trame_cadran->selection)
-                    { g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                      trame_cadran->selection = TRUE;
-                      infos->Selection = g_slist_prepend( infos->Selection, objet->data );
-                    }
-                 }
-                break;
+          case TYPE_CADRAN:
+               trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
+               local_groupe = Json_get_int ( trame_cadran->cadran, "groupe" );
+printf("%s, Compare trame_cadran %p item %p\n", __func__, trame_cadran, trame_item );
+               if ( (local_groupe !=0 && local_groupe == groupe) || trame_cadran == trame_item )
+               if ( Json_get_int ( trame_cadran->cadran, "groupe" ) == groupe || groupe==0 )
+                { if (!trame_cadran->selection)
+                   { g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     trame_cadran->selection = TRUE;
+                     infos->Selection = g_slist_prepend( infos->Selection, objet->data );
+                   }
+                }
+               break;
 /*           case TYPE_CAMERA_SUP:
                 trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
                 if (trame_camera_sup->layer == layer)
