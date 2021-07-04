@@ -13,5 +13,6 @@
             sed s/c8c8c8/000000/g $SRC > ${FILENAME}_noir.svg
             sed s/c8c8c8/ffffff/g $SRC > ${FILENAME}_blanc.svg
             sed s/c8c8c8/7b7b7b/g $SRC > ${FILENAME}_gris.svg
-            svn add ${FILENAME}_*.svg
+            sed s/c8c8c8/add8e6/g $SRC > ${FILENAME}_cyan.svg
+	    svn add ${FILENAME}_*.svg
     done
