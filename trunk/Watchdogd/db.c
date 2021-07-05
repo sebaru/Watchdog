@@ -271,7 +271,7 @@
     gchar *chaine = g_try_malloc(taille+1);
     if (chaine)
      { va_start( ap, format );
-       g_vsnprintf ( chaine, sizeof(chaine), format, ap );
+       g_vsnprintf ( chaine, taille, format, ap );
        va_end ( ap );
        retour = SQL_Write ( chaine );
        g_free(chaine);
