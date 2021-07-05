@@ -135,6 +135,7 @@
     GtkWidget *Entry_posxy;                                                /* Affichage des coordonnées X de l'objet en cours */
     GtkWidget *Entry_libelle;                                                       /* Gestion du libelle de l'objet en cours */
     GtkAdjustment *Adj_angle;                                                        /* Angle de rotation de l'objet en cours */
+    GtkAdjustment *Adj_scale;                                                                     /* Zoom de l'objet en cours */
     gdouble Clic_x, Clic_y;
     gint Appui;
   };
@@ -293,6 +294,7 @@
  extern void Selectionner ( struct PAGE_NOTEBOOK *page, gpointer trame_item, gint groupe );
  extern void Deplacer_selection (  struct PAGE_NOTEBOOK *page, gint deltax, gint deltay );
  extern void Rotationner_selection ( struct PAGE_NOTEBOOK *page );
+ extern void Zoomer_selection ( struct PAGE_NOTEBOOK *page );
  extern void Effacer_selection ( struct PAGE_NOTEBOOK *page );
  extern void Dupliquer_selection ( struct PAGE_NOTEBOOK *page );
  extern void Deselectionner ( struct TYPE_INFO_ATELIER *infos, struct TRAME_ITEM *item );

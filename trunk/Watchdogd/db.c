@@ -2301,7 +2301,12 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5825;
+    if (database_version < 5838)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans `scale` FLOAT NOT NULL DEFAULT '1.0' AFTER `angle`");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5838;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

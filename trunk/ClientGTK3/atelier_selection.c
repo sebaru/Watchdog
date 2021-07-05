@@ -484,9 +484,8 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
  void Rotationner_selection ( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_ATELIER *infos = page->infos;
     GSList *selection;
-    gint angle;
 
-    angle = (gint)gtk_adjustment_get_value ( infos->Adj_angle );
+    gint angle = (gint)gtk_adjustment_get_value ( infos->Adj_angle );
 
     selection = infos->Selection;                                                        /* Pour tous les objets selectionnés */
     while(selection)
@@ -512,6 +511,51 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
          case TYPE_CADRAN:
           { struct TRAME_ITEM_CADRAN *trame_cadran = selection->data;
             Json_node_add_int ( trame_cadran->cadran, "angle", angle );
+            Trame_rafraichir_cadran(trame_cadran);
+            break;
+          }
+         case TYPE_CAMERA_SUP: break;
+         default: printf("Rotationner_selection: type inconnu\n" );
+       }
+      selection = g_slist_next(selection);
+     }
+  }
+/******************************************************************************************************************************/
+/* Zoomer_selection: Change le zoom de la selection                                                                           */
+/* Entrée: la page                                                                                                            */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Zoomer_selection ( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_ATELIER *infos = page->infos;
+    GSList *selection;
+
+    gdouble scale = gtk_adjustment_get_value ( infos->Adj_scale );
+printf("%s: scale=%f\n", __func__, scale );
+    selection = infos->Selection;                                                        /* Pour tous les objets selectionnés */
+    while(selection)
+     { switch ( *((gint *)selection->data) )
+       { case TYPE_MOTIF:
+          { struct TRAME_ITEM_MOTIF *trame_motif = selection->data;
+            Json_node_add_double ( trame_motif->visuel, "scale", scale );
+            printf("%s: scale == %f\n", __func__, Json_get_double ( trame_motif->visuel, "scale" ) );
+            Trame_rafraichir_motif(trame_motif);
+            break;
+          }
+         case TYPE_PASSERELLE:
+          { struct TRAME_ITEM_PASS *trame_pass = selection->data;
+            trame_pass->pass->angle = scale;
+            Trame_rafraichir_passerelle(trame_pass);
+            break;
+          }
+         case TYPE_COMMENTAIRE:
+          { struct TRAME_ITEM_COMMENT *trame_comm = selection->data;
+            trame_comm->comment->angle = scale;
+            Trame_rafraichir_comment(trame_comm);
+            break;
+          }
+         case TYPE_CADRAN:
+          { struct TRAME_ITEM_CADRAN *trame_cadran = selection->data;
+            Json_node_add_double ( trame_cadran->cadran, "scale", scale );
             Trame_rafraichir_cadran(trame_cadran);
             break;
           }

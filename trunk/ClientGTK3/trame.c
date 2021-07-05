@@ -152,15 +152,23 @@
     gint largeur    = Json_get_int ( trame_motif->visuel, "larg" );
     gint hauteur    = Json_get_int ( trame_motif->visuel, "haut" );
     gint angle      = Json_get_int ( trame_motif->visuel, "angle" );
+    gdouble scale   = Json_get_double ( trame_motif->visuel, "scale" );
+    if (scale<=0.0) scale=1.0;
+    gchar *forme    = Json_get_string ( trame_motif->visuel, "forme" );
 
     cairo_matrix_init_identity ( &trame_motif->transform );
     cairo_matrix_translate ( &trame_motif->transform, (gdouble)position_x, (gdouble)position_y );
 
     cairo_matrix_rotate ( &trame_motif->transform, (gdouble)angle*FACTEUR_PI );
-    cairo_matrix_scale  ( &trame_motif->transform,
-                           (gdouble)largeur/trame_motif->gif_largeur,
-                           (gdouble)hauteur/trame_motif->gif_hauteur
-                        );
+
+    if (forme)
+     { cairo_matrix_scale  ( &trame_motif->transform, scale, scale ); }
+    else
+     { cairo_matrix_scale  ( &trame_motif->transform,
+                              (gdouble)largeur/trame_motif->gif_largeur,
+                              (gdouble)hauteur/trame_motif->gif_hauteur
+                           );
+     }
     goo_canvas_item_set_transform ( trame_motif->item_groupe, &trame_motif->transform );
 
     if (trame_motif->select_hd)
@@ -268,7 +276,10 @@
 /******************************************************************************************************************************/
  void Trame_rafraichir_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran )
   { if (!(trame_cadran && trame_cadran->cadran)) return;
-printf("%s : posx %d, posy %d\n", __func__, Json_get_int ( trame_cadran->cadran, "posx" ), Json_get_int ( trame_cadran->cadran, "posy" ) );
+
+    gdouble scale   = Json_get_double ( trame_cadran->cadran, "scale" );
+    if (scale<=0.0) scale=1.0;
+
     cairo_matrix_init_identity ( &trame_cadran->transform );
     cairo_matrix_translate ( &trame_cadran->transform,
                              (gdouble)Json_get_int ( trame_cadran->cadran, "posx" ),
@@ -276,7 +287,7 @@ printf("%s : posx %d, posy %d\n", __func__, Json_get_int ( trame_cadran->cadran,
                            );
 
     cairo_matrix_rotate ( &trame_cadran->transform, Json_get_int ( trame_cadran->cadran, "angle" )*FACTEUR_PI );
-    cairo_matrix_scale  ( &trame_cadran->transform, 1.0, 1.0 );
+    cairo_matrix_scale  ( &trame_cadran->transform, scale, scale );
     goo_canvas_item_set_transform ( trame_cadran->item_groupe, &trame_cadran->transform );
   }
 /**********************************************************************************************************/
