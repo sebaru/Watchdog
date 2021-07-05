@@ -262,13 +262,21 @@
 /* Entrée: le format de la requete, ainsi que tous les parametres associés                                                    */
 /******************************************************************************************************************************/
  gboolean SQL_Write_new( gchar *format, ... )
-  { gchar chaine[1024];
+  { gboolean retour = FALSE;
     va_list ap;
 
     va_start( ap, format );
-    g_vsnprintf ( chaine, sizeof(chaine), format, ap );
+    gsize taille = g_printf_string_upper_bound (format, ap);
     va_end ( ap );
-    return(SQL_Write ( chaine ));
+    gchar *chaine = g_try_malloc(taille+1);
+    if (chaine)
+     { va_start( ap, format );
+       g_vsnprintf ( chaine, sizeof(chaine), format, ap );
+       va_end ( ap );
+       retour = SQL_Write ( chaine );
+       g_free(chaine);
+     }
+    return(retour);
   }
 /******************************************************************************************************************************/
 /* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
@@ -2302,7 +2310,7 @@ encore:
      }
 
     if (database_version < 5838)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans `scale` FLOAT NOT NULL DEFAULT '1.0' AFTER `angle`");
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `scale` FLOAT NOT NULL DEFAULT '1.0' AFTER `angle`");
        Lancer_requete_SQL ( db, requete );
      }
 
