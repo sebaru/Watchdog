@@ -2344,6 +2344,7 @@ fin:
                     "('kodi',             'svg',  'static'        ),"
                     "('film',             'svg',  'static'        ),"
                     "('bouton_io',        'png',  'by_color'      ),"
+                    "('vmc',              'png',  'by_color'      ),"
                     "('voyant_moteur',    'png',  'by_color'      ),"
                     "('eclair',           'png',  'by_color'      ),"
                     "('check',            'png',  'by_mode'       ),"
