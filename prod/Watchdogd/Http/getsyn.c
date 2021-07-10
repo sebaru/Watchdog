@@ -328,12 +328,12 @@ end:
                    "visu.posx='%d', visu.posy='%d', visu.groupe='%d',"
                    "visu.libelle='%s', visu.tech_id='%s', visu.acronyme='%s', "
                    "visu.clic_tech_id='%s', visu.clic_acronyme='%s', "
-                   "visu.def_color='%s', visu.angle='%d', visu.scale='%d', visu.gestion='%d' "
+                   "visu.def_color='%s', visu.angle='%d', visu.scale='%f', visu.gestion='%d' "
                    " WHERE visu.visuel_id='%d' AND s.access_level<'%d'",
                    Json_get_int( element, "posx" ), Json_get_int( element, "posy" ), Json_get_int( element, "groupe" ),
                    libelle, tech_id, acronyme, clic_tech_id, clic_acronyme, def_color,
-                   Json_get_int( element, "angle" ), Json_get_int(element,"scale"), Json_get_int(element,"gestion"),
-                   Json_get_int( element,"visuel_id" ), session->access_level );
+                   Json_get_int( element, "angle" ), Json_get_double(element,"scale"), Json_get_int( element," gestion" ),
+                   Json_get_int( element, "visuel_id" ), session->access_level );
 
     g_free(libelle);
     g_free(tech_id);
@@ -360,9 +360,11 @@ end:
     SQL_Write_new( "UPDATE syns_cadrans "
                    "INNER JOIN dls ON syns_cadrans.dls_id=dls.id "
                    "INNER JOIN syns ON syns.id=dls.syn_id "
-                   "SET posx='%d', posy='%d', groupe='%d', angle='%d' WHERE syns_cadrans.id='%d' AND syns.access_level<='%d'",
-                   Json_get_int( element, "posx" ), Json_get_int( element,"posy" ), Json_get_int( element,"angle" ),
-                   Json_get_int( element,"groupe" ), Json_get_int( element,"id" ), session->access_level );
+                   "SET posx='%d', posy='%d', groupe='%d', angle='%d', scale='%f' "
+                   "WHERE syns_cadrans.id='%d' AND syns.access_level<='%d'",
+                   Json_get_int( element, "posx" ), Json_get_int( element, "posy" ), Json_get_int( element, "angle" ),
+                   Json_get_double( element, "scale" ),
+                   Json_get_int( element, "groupe" ), Json_get_int( element, "id" ), session->access_level );
  }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */

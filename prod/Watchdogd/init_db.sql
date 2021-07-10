@@ -428,6 +428,7 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `groupe` int(11) NOT NULL DEFAULT '0',
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
+  `scale` FLOAT NOT NULL DEFAULT '1.0',
   `minimum` FLOAT NOT NULL DEFAULT '0',
   `maximum` FLOAT NOT NULL DEFAULT '100',
   `seuil_ntb` FLOAT NOT NULL DEFAULT '5',
@@ -461,7 +462,7 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
   `bleu` int(11) NOT NULL DEFAULT '0',
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
-  `angle` float NOT NULL DEFAULT '0',
+  `angle` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
@@ -486,7 +487,7 @@ CREATE TABLE IF NOT EXISTS `syns_visuels` (
   `larg` int(11) NOT NULL DEFAULT '0',
   `haut` int(11) NOT NULL DEFAULT '0',
   `angle` int(11) NOT NULL DEFAULT '0',
-  `scale` float NOT NULL DEFAULT '1',
+  `scale` FLOAT NOT NULL DEFAULT '1.0',
   `dialog` int(11) NOT NULL DEFAULT '0',
   `gestion` int(11) NOT NULL DEFAULT '0',
   `groupe` int(11) NOT NULL DEFAULT '0',
@@ -528,7 +529,7 @@ CREATE TABLE IF NOT EXISTS `syns_pass` (
   `syn_cible_id` int(11) NOT NULL DEFAULT '0',
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
-  `angle` float NOT NULL DEFAULT '0',
+  `angle` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE

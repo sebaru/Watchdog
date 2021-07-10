@@ -274,7 +274,7 @@
 /******************************************************************************************************************************/
  gdouble Json_get_double ( JsonNode *query, gchar *chaine )
   { GValue valeur = G_VALUE_INIT;
-    gint retour;
+    gdouble retour;
     JsonObject *object = json_node_get_object (query);
     if (!object) printf("%s : Warning : Object unknown for '%s' unknown\n", __func__, chaine );
     JsonNode *node = json_object_get_member ( object, chaine );
@@ -282,7 +282,7 @@
     json_node_get_value ( node, &valeur );
          if ( G_VALUE_HOLDS_STRING (&valeur) ) { retour = atof(g_value_get_string (&valeur)); }
     else if ( G_VALUE_HOLDS_DOUBLE (&valeur) ) { retour = g_value_get_double(&valeur); }
-    else { printf("%s: Erreur getting '%s'\n", __func__, chaine ); retour = -1; }
+    else { printf("%s: Erreur getting '%s'\n", __func__, chaine ); retour = -1.0; }
     g_value_unset ( &valeur );
     return(retour);
   }

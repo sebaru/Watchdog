@@ -155,8 +155,8 @@ printf("Afficher_propriete: debut\n");
     if (!infos->Selection) return;
     switch ( *((gint *)(infos->Selection->data) ) )
      { case TYPE_MOTIF:
-        { struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
-          /*Changer_couleur_motif_directe ( trame_motif );*/
+        { /*struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
+          Changer_couleur_motif_directe ( trame_motif );*/
           break;
         }
        default: printf("Changer_couleur_directe: Type de selection inconnu\n");
@@ -167,7 +167,7 @@ printf("Afficher_propriete: debut\n");
 /* Entrée: la nouvelle position X et Y                                                                                        */
 /* Sortie: sans                                                                                                               */
 /******************************************************************************************************************************/
- static void Mettre_a_jour_position ( struct PAGE_NOTEBOOK *page, gint x, gint y, gint angle )
+ static void Mettre_a_jour_position ( struct PAGE_NOTEBOOK *page, gint x, gint y, gint angle, gint scale )
   { struct TYPE_INFO_ATELIER *infos = page->infos;
     gchar chaine[30];
 
@@ -177,10 +177,14 @@ printf("Afficher_propriete: debut\n");
     g_signal_handlers_block_by_func( G_OBJECT(infos->Adj_angle), G_CALLBACK(Rotationner_selection), page );
     gtk_adjustment_set_value ( infos->Adj_angle, (gdouble)angle );
     g_signal_handlers_unblock_by_func( G_OBJECT(infos->Adj_angle), G_CALLBACK(Rotationner_selection), page );
+
+    g_signal_handlers_block_by_func( G_OBJECT(infos->Adj_scale), G_CALLBACK(Zoomer_selection), page );
+    gtk_adjustment_set_value ( infos->Adj_scale, (gdouble)scale );
+    g_signal_handlers_unblock_by_func( G_OBJECT(infos->Adj_scale), G_CALLBACK(Zoomer_selection), page );
   }
 /******************************************************************************************************************************/
-/* Mettre_a_jour_position: S'occupe des rulers et des entry posxy pour affichage position souris/objet                        */
-/* Entrée: la nouvelle position X et Y                                                                                        */
+/* Mettre_a_jour_description: S'occupe d'afficher la description de l'objet                                                   */
+/* Entrée: la page et la description                                                                                          */
 /* Sortie: sans                                                                                                               */
 /******************************************************************************************************************************/
  static void Mettre_a_jour_description ( struct PAGE_NOTEBOOK *page, gint icone_id, gchar *description )
@@ -199,7 +203,7 @@ printf("Afficher_propriete: debut\n");
   { switch (event->type)
      { case GDK_LEAVE_NOTIFY:  break;
        case GDK_ENTER_NOTIFY:
-       case GDK_MOTION_NOTIFY: Mettre_a_jour_position( page, event->motion.x, event->motion.y, 0.0 );
+       case GDK_MOTION_NOTIFY: Mettre_a_jour_position( page, event->motion.x, event->motion.y, 0, 0 );
                                break;
        case GDK_BUTTON_PRESS:  if ( !(event->button.state & 0x4) )                         /* Si pas CTRL */
                                 { Tout_deselectionner( page ); }
@@ -212,7 +216,7 @@ printf("Afficher_propriete: debut\n");
 /* Entrée: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Clic_general ( struct PAGE_NOTEBOOK *page, GdkEvent *event, gint layer )
+ static void Clic_general ( struct PAGE_NOTEBOOK *page, GdkEvent *event, gpointer trame_item, gint groupe )
   { struct TYPE_INFO_ATELIER *infos = page->infos;
     gint x, y;
 
@@ -230,7 +234,7 @@ printf("Afficher_propriete: debut\n");
                                 /*if (event->button.button == 1) */             /* Bouton gauche souris ? */
                                  { if (! (event->button.state & 0x4) )                         /* CTRL ?? */
                                     { Tout_deselectionner( page ); }
-                                   Selectionner ( page, layer );
+                                   Selectionner ( page, trame_item, groupe );
                                  }
                                 break;
        case GDK_MOTION_NOTIFY:
@@ -295,13 +299,15 @@ printf("Afficher_propriete: debut\n");
 
     if ( Json_get_int ( trame_motif->visuel, "gestion" ) == TYPE_FOND)
      { Clic_sur_fond( page, event, NULL );
-       Mettre_a_jour_position( page, event->motion.x_root, event->motion.y_root, 0 );
+       Mettre_a_jour_position( page, event->motion.x_root, event->motion.y_root, 0, 0 );
      }
     else
-     { Clic_general( page, event, Json_get_int ( trame_motif->visuel, "layer") );                    /* Fonction de base clic */
+     { Clic_general( page, event, trame_motif, Json_get_int ( trame_motif->visuel, "groupe") );      /* Fonction de base clic */
        Mettre_a_jour_position( page, Json_get_int ( trame_motif->visuel, "posx" ),
                                      Json_get_int ( trame_motif->visuel, "posy" ),
-                                     Json_get_int ( trame_motif->visuel, "angle" ) );
+                                     Json_get_int ( trame_motif->visuel, "angle" ),
+                                     Json_get_int ( trame_motif->visuel, "scale" )
+                             );
      }
 
     Mettre_a_jour_description( trame_motif->page,
@@ -461,8 +467,8 @@ printf("Afficher_propriete: debut\n");
 
     struct PAGE_NOTEBOOK *page = trame_pass->page;
 
-    Clic_general( page, event, trame_pass->layer );                                                 /* Fonction de base clic */
-    Mettre_a_jour_position( trame_pass->page, trame_pass->pass->position_x, trame_pass->pass->position_y, trame_pass->pass->angle );
+    Clic_general( page, event, trame_pass, trame_pass->layer );                                      /* Fonction de base clic */
+    Mettre_a_jour_position( trame_pass->page, trame_pass->pass->position_x, trame_pass->pass->position_y, trame_pass->pass->angle, 1 );
 
     Mettre_a_jour_description( page, 0, "Gateway" );
     if (event->type == GDK_BUTTON_PRESS)
@@ -488,11 +494,13 @@ printf("Afficher_propriete: debut\n");
     if (!(trame_cadran && event)) return;
 
     struct PAGE_NOTEBOOK *page = trame_cadran->page;
+printf("%s: trame_cadran = %p\n", __func__, trame_cadran );
 
-    Clic_general( page, event, Json_get_int ( trame_cadran->cadran, "layer" ) );                     /* Fonction de base clic */
+    Clic_general( page, event, trame_cadran, Json_get_int ( trame_cadran->cadran, "groupe" ) );      /* Fonction de base clic */
     Mettre_a_jour_position( page, Json_get_int ( trame_cadran->cadran, "posx" ),
                                   Json_get_int ( trame_cadran->cadran, "posy" ),
-                                  Json_get_int ( trame_cadran->cadran, "angle" ) );
+                                  Json_get_int ( trame_cadran->cadran, "angle" ),
+                                  Json_get_int ( trame_cadran->cadran, "scale" ) );
 
     g_snprintf( chaine, sizeof(chaine), "%s:%s - %s",
                 Json_get_string ( trame_cadran->cadran, "tech_id" ),

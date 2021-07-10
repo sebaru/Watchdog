@@ -262,13 +262,21 @@
 /* Entrée: le format de la requete, ainsi que tous les parametres associés                                                    */
 /******************************************************************************************************************************/
  gboolean SQL_Write_new( gchar *format, ... )
-  { gchar chaine[1024];
+  { gboolean retour = FALSE;
     va_list ap;
 
     va_start( ap, format );
-    g_vsnprintf ( chaine, sizeof(chaine), format, ap );
+    gsize taille = g_printf_string_upper_bound (format, ap);
     va_end ( ap );
-    return(SQL_Write ( chaine ));
+    gchar *chaine = g_try_malloc(taille+1);
+    if (chaine)
+     { va_start( ap, format );
+       g_vsnprintf ( chaine, taille, format, ap );
+       va_end ( ap );
+       retour = SQL_Write ( chaine );
+       g_free(chaine);
+     }
+    return(retour);
   }
 /******************************************************************************************************************************/
 /* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
@@ -2294,14 +2302,19 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 5771)
+    if (database_version < 5825)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_visuels CHANGE `layer` `groupe` int(11) NOT NULL DEFAULT '0';" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans CHANGE `layer` `groupe` int(11) NOT NULL DEFAULT '0';" );
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5825;
+    if (database_version < 5838)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_cadrans ADD `scale` FLOAT NOT NULL DEFAULT '1.0' AFTER `angle`");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version = 5838;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );
@@ -2321,6 +2334,7 @@ fin:
                     "('sms',              'jpg',  'static'        ),"
                     "('ampoule',          'png',  'by_mode'       ),"
                     "('chaudiere_gaz',    'png',  'by_mode'       ),"
+                    "('radiateur',        'png',  'by_mode'       ),"
                     "('auto_manu',        'svg',  'by_mode'       ),"
                     "('fenetre',          'png',  'by_mode'       ),"
                     "('porte_entree',     'png',  'by_mode'       ),"
@@ -2331,6 +2345,7 @@ fin:
                     "('film',             'svg',  'static'        ),"
                     "('bouton_io',        'png',  'by_color'      ),"
                     "('voyant_moteur',    'png',  'by_color'      ),"
+                    "('eclair',           'png',  'by_color'      ),"
                     "('check',            'png',  'by_mode'       ),"
                     "('thermometre',      'png',  'by_mode_color' ),"
                     "('haut_parleur',     'png',  'by_mode_color' ),"
