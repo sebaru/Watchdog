@@ -124,7 +124,7 @@
                "syn_garage.png", "syn_jardin.png", "syn_piscine.png", "syn_luminaires.png", "syn_panneau_solaire.png",
                "syn_salle_de_bain.png", "syn_jeux.png", "syn_salon.png", "syn_volets.png", "syn_spot.png",
                "syn_maintenance.png", "syn_parametres.png", "syn_horloge.png", "syn_reseau.png", "syn_sonorisation.png",
-               "syn_vmc.png" ];
+               "syn_vmc.png", "syn_ups.png" ];
 
     liste = $("#idSynEditImageListe");
     liste.empty();
