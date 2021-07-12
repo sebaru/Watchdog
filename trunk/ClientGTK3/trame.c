@@ -703,10 +703,13 @@ printf("Charger_pixbuf_file: %s\n", fichier );
           g_error_free(error);
         }
      }
-    else if ( strcmp ( extension, "png" ) )
+    else if ( ! strcmp ( extension, "png" ) )
      { pixbuf = gdk_pixbuf_new_from_file ( fichier, NULL );
      }
-    else return(FALSE);
+    else
+      { printf("%s: extension %s non prise en charge\n", __func__, extension );
+        return(FALSE);
+      }
 
     if (pixbuf)
      { trame_motif->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
