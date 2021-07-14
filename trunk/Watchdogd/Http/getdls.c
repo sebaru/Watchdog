@@ -650,7 +650,7 @@
                               Json_get_int ( request, "syn_id" ), tech_id, shortname, name, Json_get_int ( request, "id" ) ))
            { soup_message_set_status (msg, SOUP_STATUS_OK);
              if ( strcmp ( Json_get_string ( old, "tech_id" ), tech_id ) )          /* Si modification de tech_id -> recompil */
-              { SQL_Write_new ( "UPDATE dls SET `sourcecode` = REPLACE(`sourcecode`, '%s', '%s')",
+              { SQL_Write_new ( "UPDATE dls SET `sourcecode` = REPLACE(`sourcecode`, '%s:', '%s:')",
                                 Json_get_string ( old, "tech_id" ), tech_id );
                 Partage->com_dls.Thread_reload_with_recompil = TRUE;                             /* Relance DLS avec recompil */
               }

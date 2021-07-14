@@ -2341,6 +2341,7 @@ fin:
                     "('porte_fenetre',    'png',  'by_mode'       ),"
                     "('soufflant',        'png',  'by_mode'       ),"
                     "('store',            'png',  'by_mode'       ),"
+                    "('pile',             'png',  'by_mode'       ),"
                     "('kodi',             'svg',  'static'        ),"
                     "('film',             'svg',  'static'        ),"
                     "('bouton_io',        'png',  'by_color'      ),"
