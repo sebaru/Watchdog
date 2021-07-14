@@ -1855,7 +1855,7 @@ end:
     while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
      { sleep(1); wait--; }
 
-    Dls_Charger_plugins(TRUE);                                                                  /* Chargement des modules dls */
+    Dls_Charger_plugins(TRUE);                                                 /* Chargement des modules dls avec compilation */
     Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
     Dls_recalculer_arbre_dls_syn();
 
@@ -1891,14 +1891,15 @@ end:
        gpointer dls_wait = NULL, dls_tour_per_sec = NULL, dls_bit_per_sec = NULL;
        gpointer dls_nbr_msg_queue = NULL, dls_nbr_visuel_queue = NULL;
 
-       if (Partage->com_dls.Thread_reload)
+       if (Partage->com_dls.Thread_reload || Partage->com_dls.Thread_reload_with_recompil)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
           Dls_Lire_config();
           Dls_Decharger_plugins();
-          Dls_Charger_plugins(FALSE);
+          Dls_Charger_plugins(Partage->com_dls.Thread_reload_with_recompil);
           Dls_recalculer_arbre_comm();                                                  /* Calcul de l'arbre de communication */
           Dls_recalculer_arbre_dls_syn();
-          Partage->com_dls.Thread_reload = FALSE;
+          Partage->com_dls.Thread_reload               = FALSE;
+          Partage->com_dls.Thread_reload_with_recompil = FALSE;
         }
 
        if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */

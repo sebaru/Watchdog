@@ -96,7 +96,7 @@
      { input.addClass("bg-danger");    $('#idModalDlsEditValider').attr("disabled", true);
        Popover_show ( input, 'Caractères autorisés', 'lettres, chiffres, _ et .' );
      }
-    else if ( (table.ajax.json().plugins.filter( function(item)
+    else if ( (table.ajax.json().plugins.filter( function(item)                                   /* Si tech_id deja existant */
                                                { return item.tech_id.toUpperCase()==input.val().toUpperCase() } )[0] !== undefined &&
               (tech_id_initial == null || input.val().toUpperCase() != tech_id_initial.toUpperCase()) )
        )
@@ -104,7 +104,11 @@
        Popover_show ( input, 'Erreur !', 'Ce nom est déjà pris' );
      }
     else
-     { input.removeClass("bg-danger"); $('#idModalDlsEditValider').attr("disabled", false);
+     { if (tech_id_initial !== null && input.val().toUpperCase() != tech_id_initial.toUpperCase())
+        { $('#idModalDlsEditValider').addClass("btn-danger").removeClass("btn-primary").text("Tout Recompiler"); }
+       else
+        { $('#idModalDlsEditValider').addClass("btn-primary").removeClass("btn-danger").text("Valider"); }
+       input.removeClass("bg-danger"); $('#idModalDlsEditValider').attr("disabled", false);
        Popover_hide(input);
      }
   }
