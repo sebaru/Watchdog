@@ -157,7 +157,7 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "ppage", "title":"PPage", "className": "align-middle  text-center" },
+          [ /*{ "data": "ppage", "title":"PPage", "className": "align-middle  text-center" },*/
             { "data": "page", "title":"Page", "className": "align-middle  text-center" },
             { "data": null, "title":"Started", "className": "align-middle  text-center",
               "render": function (item)
@@ -204,8 +204,13 @@
                         );
                 }
             },
-            { "data": "nbr_compil", "title":"Nbr Compil", "className": "align-middle text-center " },
-            { "data": "nbr_ligne", "title":"Nbr Lignes", "className": "align-middle text-center " },
+            { "data": null, "title":"Stats", "className": "align-middle text-center",
+              "render": function (item)
+                { return( Badge ( "primary", "Nombre de compilation", item.nbr_compil ) + "<br>" +
+                          Badge ( "secondary", "Nombre de ligne", item.nbr_ligne ) );
+                }
+            },
+            { "data": "compil_date", "title":"Date Compil", "className": "align-middle text-center " },
             { "data": null, "title":"Actions", "orderable": false, "className": "align-middle",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
