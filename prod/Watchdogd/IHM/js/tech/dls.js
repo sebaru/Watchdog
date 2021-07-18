@@ -96,7 +96,7 @@
      { input.addClass("bg-danger");    $('#idModalDlsEditValider').attr("disabled", true);
        Popover_show ( input, 'Caractères autorisés', 'lettres, chiffres, _ et .' );
      }
-    else if ( (table.ajax.json().plugins.filter( function(item)
+    else if ( (table.ajax.json().plugins.filter( function(item)                                   /* Si tech_id deja existant */
                                                { return item.tech_id.toUpperCase()==input.val().toUpperCase() } )[0] !== undefined &&
               (tech_id_initial == null || input.val().toUpperCase() != tech_id_initial.toUpperCase()) )
        )
@@ -104,7 +104,11 @@
        Popover_show ( input, 'Erreur !', 'Ce nom est déjà pris' );
      }
     else
-     { input.removeClass("bg-danger"); $('#idModalDlsEditValider').attr("disabled", false);
+     { if (tech_id_initial !== null && input.val().toUpperCase() != tech_id_initial.toUpperCase())
+        { $('#idModalDlsEditValider').addClass("btn-danger").removeClass("btn-primary").text("Tout Recompiler"); }
+       else
+        { $('#idModalDlsEditValider').addClass("btn-primary").removeClass("btn-danger").text("Valider"); }
+       input.removeClass("bg-danger"); $('#idModalDlsEditValider').attr("disabled", false);
        Popover_hide(input);
      }
   }
@@ -153,7 +157,7 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "ppage", "title":"PPage", "className": "align-middle  text-center" },
+          [ /*{ "data": "ppage", "title":"PPage", "className": "align-middle  text-center" },*/
             { "data": "page", "title":"Page", "className": "align-middle  text-center" },
             { "data": null, "title":"Started", "className": "align-middle  text-center",
               "render": function (item)
@@ -200,8 +204,13 @@
                         );
                 }
             },
-            { "data": "nbr_compil", "title":"Nbr Compil", "className": "align-middle text-center " },
-            { "data": "nbr_ligne", "title":"Nbr Lignes", "className": "align-middle text-center " },
+            { "data": null, "title":"Stats", "className": "align-middle text-center",
+              "render": function (item)
+                { return( Badge ( "primary", "Nombre de compilation", item.nbr_compil ) + "<br>" +
+                          Badge ( "secondary", "Nombre de ligne", item.nbr_ligne ) );
+                }
+            },
+            { "data": "compil_date", "title":"Date Compil", "className": "align-middle text-center " },
             { "data": null, "title":"Actions", "orderable": false, "className": "align-middle",
               "render": function (item)
                 { boutons = Bouton_actions_start ();

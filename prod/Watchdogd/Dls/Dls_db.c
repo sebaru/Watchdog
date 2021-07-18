@@ -218,12 +218,22 @@
        return(FALSE);
      }
 
-    retour = SQL_Write_new ( "UPDATE %s SET "
-                             "compil_date=NOW(), compil_status='%d', nbr_compil=nbr_compil+1, "
-                             "nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''))+1, "
-                             "errorlog='%s' "
-                             "WHERE tech_id='%s'",
-                             NOM_TABLE_DLS, status, log, tech_id );
+    if (status >= DLS_COMPIL_OK)
+     { retour = SQL_Write_new ( "UPDATE %s SET "
+                                "compil_date=NOW(), compil_status='%d', nbr_compil=nbr_compil+1, "
+                                "nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''))+1, "
+                                "errorlog='%s' "
+                                "WHERE tech_id='%s'",
+                                NOM_TABLE_DLS, status, log, tech_id );
+     }
+    else
+     { retour = SQL_Write_new ( "UPDATE %s SET "
+                                "compil_status='%d', nbr_compil=nbr_compil+1, "
+                                "nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''))+1, "
+                                "errorlog='%s' "
+                                "WHERE tech_id='%s'",
+                                NOM_TABLE_DLS, status, log, tech_id );
+     }
     g_free(log);
     g_free(tech_id);
     return(retour);

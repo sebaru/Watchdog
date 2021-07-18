@@ -618,9 +618,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { gchar requete[256];
-
-    if (msg->method != SOUP_METHOD_POST)
+  { if (msg->method != SOUP_METHOD_POST)
      { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
        return;
      }
@@ -642,26 +640,37 @@
     gchar *name      = Normaliser_chaine ( Json_get_string ( request, "name" ) );
 
     if (Json_has_member ( request, "id" ) )
-     { g_snprintf( requete, sizeof(requete),
-                  "UPDATE dls SET syn_id='%d', tech_id='%s', shortname='%s', name='%s' WHERE id='%d'",
-                   Json_get_int ( request, "syn_id" ), tech_id, shortname, name, Json_get_int ( request, "id" ) );
+     { JsonNode *old = Json_node_create();
+       if (old)
+        { SQL_Select_to_json_node ( old, NULL, "SELECT tech_id FROM dls WHERE id='%d'", Json_get_int ( request, "id" ) );
+
+          if ( !Json_has_member ( old, "tech_id" ) )
+           { soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Plugin not found" ); }
+          else if (SQL_Write_new ( "UPDATE dls SET syn_id='%d', tech_id='%s', shortname='%s', name='%s' WHERE id='%d'",
+                              Json_get_int ( request, "syn_id" ), tech_id, shortname, name, Json_get_int ( request, "id" ) ))
+           { soup_message_set_status (msg, SOUP_STATUS_OK);
+             if ( strcmp ( Json_get_string ( old, "tech_id" ), tech_id ) )          /* Si modification de tech_id -> recompil */
+              { SQL_Write_new ( "UPDATE dls SET `sourcecode` = REPLACE(`sourcecode`, '%s:', '%s:')",
+                                Json_get_string ( old, "tech_id" ), tech_id );
+                Partage->com_dls.Thread_reload_with_recompil = TRUE;                             /* Relance DLS avec recompil */
+              }
+             else Partage->com_dls.Thread_reload = TRUE;          /* Relance DLS sans recompil si les tech_id sont identiques */
+             Audit_log ( session, "DLS '%s' changed to %d, %s, %s", tech_id, Json_get_int ( request, "syn_id" ), shortname, name );
+           }
+          else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Update Error" );
+          json_node_unref( old );
+        }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
      }
     else
-     { g_snprintf( requete, sizeof(requete),
-                  "INSERT INTO dls SET syn_id='%d', tech_id='%s', shortname='%s', name='%s'",
-                   Json_get_int ( request, "syn_id" ), tech_id, shortname, name );
+     { if (SQL_Write_new ( "INSERT INTO dls SET syn_id='%d', tech_id='%s', shortname='%s', name='%s'",
+                           Json_get_int ( request, "syn_id" ), tech_id, shortname, name ) )
+        { soup_message_set_status (msg, SOUP_STATUS_OK);
+          Partage->com_dls.Thread_reload = TRUE;                                                              /* Relance DLS */
+          Audit_log ( session, "DLS '%s' created to %d, %s, %s", tech_id, Json_get_int ( request, "syn_id" ), shortname, name );
+        }
+       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Add Error" );
      }
-
-    if (SQL_Write (requete))
-     { soup_message_set_status (msg, SOUP_STATUS_OK);
-       Partage->com_dls.Thread_reload = TRUE;                                                                  /* Relance DLS */
-     }
-    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-
-    if (Json_has_member ( request, "id" ) )
-     { Audit_log ( session, "DLS '%s' changed to %d, %s, %s", tech_id, Json_get_int ( request, "syn_id" ), shortname, name ); }
-    else
-     { Audit_log ( session, "DLS '%s' created to %d, %s, %s", tech_id, Json_get_int ( request, "syn_id" ), shortname, name ); }
 
     json_node_unref(request);
     g_free(name);

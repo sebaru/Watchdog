@@ -522,7 +522,7 @@ end:
 
     if ( (reponse = Onduleur_get_var ( ups, "ups.status" )) != NULL )
      { Zmq_Send_DI_to_master ( Cfg_ups.lib, ups->tech_id, "UPS_ONLINE",       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
-       Zmq_Send_DI_to_master ( Cfg_ups.lib, ups->tech_id, "UPS_CHARGING",     (g_strrstr(reponse, "CHRG")?TRUE:FALSE) );
+       Zmq_Send_DI_to_master ( Cfg_ups.lib, ups->tech_id, "UPS_CHARGING",     (g_strrstr(reponse, "DISCHRG")?FALSE:TRUE) );
        Zmq_Send_DI_to_master ( Cfg_ups.lib, ups->tech_id, "UPS_ON_BATT",      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
        Zmq_Send_DI_to_master ( Cfg_ups.lib, ups->tech_id, "UPS_REPLACE_BATT", (g_strrstr(reponse, "RB")?TRUE:FALSE) );
        Zmq_Send_DI_to_master ( Cfg_ups.lib, ups->tech_id, "UPS_ALARM",        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
