@@ -228,7 +228,7 @@
      }
     else
      { retour = SQL_Write_new ( "UPDATE %s SET "
-                                "nbr_compil=nbr_compil+1, "
+                                "compil_status='%d', nbr_compil=nbr_compil+1, "
                                 "nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''))+1, "
                                 "errorlog='%s' "
                                 "WHERE tech_id='%s'",
